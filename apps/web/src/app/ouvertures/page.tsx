@@ -25,7 +25,7 @@ import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { useMoveStats, useOpeningStats, type StatsBand } from '@/lib/game/useOpeningStats.ts'
 import { playMoveSound } from '@/lib/sound.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
-import { useSan } from '@/lib/notation.ts'
+import { useMoveWords, useSan } from '@/lib/notation.ts'
 
 const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
@@ -34,6 +34,7 @@ export default function OpeningsPage() {
   const locale = usePreferences((state) => state.locale)
 
   const format = useSan()
+  const dire = useMoveWords()
 
   /**
    * Tranche de classement des statistiques.
@@ -303,6 +304,7 @@ export default function OpeningsPage() {
                     <button
                       type="button"
                       onClick={() => playSan(san)}
+                      title={dire(san)}
                       className="flex w-full items-center gap-2.5 px-4 py-2 text-left transition-colors hover:bg-surface-hover"
                     >
                       <span className="w-14 shrink-0 font-mono text-sm font-semibold">
@@ -455,6 +457,7 @@ function PopularMoves({
   maxPlies: number
 }) {
   const moves = useMoveStats(fen, band)
+  const dire = useMoveWords()
   const total = moves.reduce((sum, move) => sum + move.games, 0)
 
   // Demi-coups déjà joués, lus dans la FEN : numéro de coup et trait suffisent.
@@ -515,6 +518,7 @@ function PopularMoves({
                 <button
                   type="button"
                   onClick={() => onPlay(move.san)}
+                  title={`${dire(move.san)} — ${move.games.toLocaleString('fr-FR')} parties`}
                   className="flex w-full items-center gap-2.5 px-4 py-2 text-left transition-colors hover:bg-surface-hover"
                 >
                   <span className="w-12 shrink-0 font-mono text-sm font-semibold">

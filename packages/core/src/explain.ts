@@ -137,6 +137,63 @@ export function sanToSpeech(san: string, locale: Locale): string {
   return parts.join(' ')
 }
 
+/**
+ * Traduit un coup en français ordinaire.
+ *
+ * `Tg2+` devient « la tour va en g2, avec échec ». La notation algébrique est
+ * d'une concision admirable pour qui la connaît, et parfaitement opaque pour
+ * qui l'apprend : un débutant lit « TG2+ » et n'y voit rien. Or elle est
+ * partout — liste des coups, analyse, explorateur.
+ *
+ * Cette phrase n'a pas vocation à remplacer la notation, mais à l'accompagner
+ * en info-bulle : on survole, on comprend, et à force on n'a plus besoin de
+ * survoler. C'est exactement ainsi qu'on l'apprend.
+ *
+ * À distinguer de `sanToSpeech`, qui épelle pour la synthèse vocale
+ * (« tour g 2 échec ») : lisible à l'oreille, laid à l'œil.
+ */
+export function describeMoveInWords(san: string, locale: Locale): string {
+  const fr = locale === 'fr'
+  if (san.startsWith('O-O-O')) {
+    return fr
+      ? 'grand roque : le roi se met à l’abri du côté de la dame'
+      : 'queenside castling: the king tucks away on the queen’s side'
+  }
+  if (san.startsWith('O-O')) {
+    return fr
+      ? 'petit roque : le roi se met à l’abri du côté du roi'
+      : 'kingside castling: the king tucks away on the king’s side'
+  }
+
+  const found = matchPiece(san, SAN_LETTER_EN) ?? (fr ? matchPiece(san, SAN_LETTER_FR) : null)
+  const piece = found ? PIECE_NAMES[found.piece][locale] : fr ? 'pion' : 'pawn'
+  const feminine = found?.piece === 'r' || found?.piece === 'q'
+
+  let rest = found ? san.slice(found.length) : san
+  const capture = rest.includes('x')
+  rest = rest.replace('x', '')
+
+  const mate = rest.endsWith('#')
+  const check = rest.endsWith('+')
+  rest = rest.replace(/[+#]/g, '')
+
+  const promotion = /=([QRBNDTFC])/.exec(rest)
+  rest = rest.replace(/=[QRBNDTFC]/, '')
+  const target = rest.slice(-2)
+
+  if (!fr) {
+    const verb = capture ? `takes on ${target}` : `goes to ${target}`
+    const suffix = mate ? ', checkmate' : check ? ', with check' : ''
+    return `the ${piece} ${verb}${promotion ? ', promoting to a queen' : ''}${suffix}`
+  }
+
+  const article = feminine ? 'la' : 'le'
+  const verbe = capture ? `prend en ${target}` : `va en ${target}`
+  const fin = mate ? ', et c’est échec et mat' : check ? ', avec échec' : ''
+  const promu = promotion ? ', et devient une dame' : ''
+  return `${article} ${piece} ${verbe}${promu}${fin}`
+}
+
 /** Reconnaît la lettre de pièce en tête d'un coup, dans une notation donnée. */
 function matchPiece(
   san: string,

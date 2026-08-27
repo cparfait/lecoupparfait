@@ -25,7 +25,7 @@ import {
 import type { MoveQuality } from '@coupparfait/core'
 import { QUALITY_STYLES } from '@coupparfait/core'
 import { groupMoves, type PlayedMove } from '@/lib/game/useChessGame.ts'
-import { useSan } from '@/lib/notation.ts'
+import { useMoveWords, useSan } from '@/lib/notation.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
 export interface MoveListProps {
@@ -55,6 +55,7 @@ export function MoveList({
 }: MoveListProps) {
   const locale = usePreferences((state) => state.locale)
   const format = useSan()
+  const dire = useMoveWords()
   const scrollRef = useRef<HTMLDivElement>(null)
   const activeRef = useRef<HTMLButtonElement>(null)
 
@@ -126,6 +127,7 @@ export function MoveList({
                   quality={qualities?.[row.whitePly]}
                   locale={locale}
                   format={format}
+                  dire={dire}
                   onSeek={onSeek}
                   ref={cursor === row.whitePly ? activeRef : undefined}
                 />
@@ -136,6 +138,7 @@ export function MoveList({
                   quality={qualities?.[row.blackPly]}
                   locale={locale}
                   format={format}
+                  dire={dire}
                   onSeek={onSeek}
                   ref={cursor === row.blackPly ? activeRef : undefined}
                 />
@@ -189,6 +192,7 @@ const MoveCell = function MoveCell({
   quality,
   locale,
   format,
+  dire,
   onSeek,
   ref,
 }: {
@@ -199,6 +203,8 @@ const MoveCell = function MoveCell({
   locale: 'fr' | 'en'
   /** Écriture des coups, accordée aux préférences. */
   format: (san: string) => string
+  /** Le même coup en français ordinaire, pour l'info-bulle. */
+  dire: (san: string) => string
   onSeek: (ply: number) => void
   ref?: React.Ref<HTMLButtonElement>
 }) {
@@ -219,6 +225,9 @@ const MoveCell = function MoveCell({
       ref={ref}
       type="button"
       onClick={() => onSeek(ply)}
+      // « Tg2+ » ne veut rien dire tant qu'on ne l'a pas apprise, et c'est en
+      // survolant qu'on l'apprend.
+      title={dire(move.san)}
       className={clsx(
         'flex items-center gap-1 px-2 py-1.5 text-left font-medium transition-colors',
         active ? 'bg-accent/18 text-ink ring-1 ring-inset ring-accent/40' : 'hover:bg-surface-hover',

@@ -13,7 +13,7 @@
  */
 
 import { useCallback } from 'react'
-import { localiseSan } from '@coupparfait/core'
+import { describeMoveInWords, localiseSan } from '@coupparfait/core'
 import { usePreferences } from './store/preferences.ts'
 
 /**
@@ -29,6 +29,23 @@ export function useSan(): (san: string) => string {
   const notation = usePreferences((state) => state.notation)
 
   return useCallback((san: string) => localiseSan(san, locale, notation), [locale, notation])
+}
+
+/**
+ * Rend une fonction qui explique un coup en français ordinaire.
+ *
+ * À poser en `title` partout où l'on affiche de la notation : « Tg2+ » n'a
+ * aucun sens tant qu'on ne l'a pas apprise, et on l'apprend justement en
+ * survolant quelques dizaines de fois.
+ *
+ * ```tsx
+ * const dire = useMoveWords()
+ * <span title={dire(move.san)}>{san(move.san)}</span>
+ * ```
+ */
+export function useMoveWords(): (san: string) => string {
+  const locale = usePreferences((state) => state.locale)
+  return useCallback((san: string) => describeMoveInWords(san, locale), [locale])
 }
 
 /**
