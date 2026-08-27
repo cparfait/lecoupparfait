@@ -546,8 +546,44 @@ export function resumeSpeaking(): void {
  * « ?! » devient « point d'interrogation point d'exclamation », et « ** » se
  * lit « astérisque astérisque ». On les remplace ou on les supprime.
  */
+/**
+ * Corrections de prononciation.
+ *
+ * Le vocabulaire des échecs échappe aux règles usuelles du français, et le
+ * phonémiseur s'y trompe. Chaque entrée a été **vérifiée sur les phonèmes**
+ * produits, pas devinée à l'oreille :
+ *
+ * | écrit      | avant       | après        |
+ * | ---------- | ----------- | ------------ |
+ * | `pat`      | `pˈa`       | `pˈat`       |
+ * | `clouage`  | `klwˈaʒ`    | `klˈuˈaʒ`    |
+ *
+ * La colonne de droite s'écrit mal exprès : ce texte n'est jamais affiché, il
+ * n'a qu'à **sonner** juste. Pour en ajouter une, faire dire le mot à Piper
+ * avec `--debug` et comparer les phonèmes avant et après.
+ */
+const PRONUNCIATION: Array<[RegExp, string]> = [
+  // « pat » suivait la règle du t final muet, comme « plat ».
+  [new RegExp(String.raw`\bpat\b`, 'gi'), 'patte'],
+  // Le « ou » se fondait en glissante : « klwaj » au lieu de « klou-aj ».
+  [new RegExp(String.raw`\bclouage\b`, 'gi'), 'clou-age'],
+  [new RegExp(String.raw`\bclouages\b`, 'gi'), 'clou-ages'],
+]
+
+/**
+ * Un coup au milieu d'une phrase.
+ *
+ * Lettre de pièce — française ou anglaise — éventuelle prise, case d'arrivée,
+ * et le signe d'échec. Les coups de pion simples sont laissés à la règle des
+ * cases : « e4 » n'a pas besoin d'être annoncé « pion e 4 » en pleine phrase.
+ */
+const SAN_IN_PROSE = new RegExp(String.raw`\b[CFTDRNBQK]x?[a-h][1-8][+#]?\b`, 'g')
+
+/** Une case isolée : « f6 » collé se lit comme un mot, « f 6 » s'épelle. */
+const SQUARE = new RegExp(String.raw`\b([a-h])([1-8])\b`, 'g')
+
 function cleanForSpeech(text: string): string {
-  return text
+  const steps = text
     .replace(/\*\*/g, '')
     .replace(/[«»"]/g, '')
     .replace(/\bO-O-O\b/g, 'grand roque')
@@ -567,8 +603,23 @@ function cleanForSpeech(text: string): string {
     .replace(/#/g, ' échec et mat ')
     .replace(/\+/g, ' échec ')
     .replace(/−/g, 'moins ')
-    .replace(/\s+/g, ' ')
-    .trim()
+    // Un coup écrit en toutes lettres au milieu d'une phrase — « Mieux valait
+    // Cf3 » — est épelé « cé eff trois ». On le confie au traducteur des
+    // annonces, qui en fait « cavalier f 3 ».
+    .replace(SAN_IN_PROSE, (san) => sanToSpeech(san, getPreferences().locale))
+    // Une case collée est lue comme un mot ; séparée, elle est épelée.
+    .replace(SQUARE, '$1 $2')
+
+  return applyPronunciation(steps).replace(/\s+/g, ' ').trim()
+}
+
+/** Applique la table des corrections de prononciation. */
+function applyPronunciation(text: string): string {
+  let out = text
+  for (const [motif, remplacement] of PRONUNCIATION) {
+    out = out.replace(motif, remplacement)
+  }
+  return out
 }
 
 /** Phrase de test des préférences. */
