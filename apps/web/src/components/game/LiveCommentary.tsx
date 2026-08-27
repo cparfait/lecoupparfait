@@ -25,6 +25,7 @@ import {
   ChevronRight,
   Eye,
   EyeOff,
+  History,
   Lightbulb,
   Loader2,
   MessageSquareText,
@@ -354,12 +355,25 @@ export function CommentaryPanel({
   onHoverAlternative,
   showBestMove,
   onToggleBestMove,
+  stale,
+  onReview,
   className,
 }: {
   commentary: Commentary | null
   loading: boolean
   paused?: boolean
   onTogglePause?: () => void
+  /**
+   * La position affichée n'est plus celle que commente ce texte.
+   *
+   * L'ordinateur répond en une seconde, la phrase en demande cinq : on lit
+   * « Cc3 — imprécision » devant un échiquier où les Noirs ont déjà répondu.
+   * Le texte reste utile, mais tant qu'on ne dit pas de quoi il parle, il donne
+   * l'impression que le commentaire s'est trompé de coup.
+   */
+  stale?: boolean
+  /** Ramène l'échiquier sur la position commentée. */
+  onReview?: () => void
   /**
    * Signale que le coach a la parole.
    *
@@ -470,6 +484,25 @@ export function CommentaryPanel({
     <Card className={clsx('overflow-hidden', className)}>
       {style && (
         <div className="h-1" style={{ background: `var(--q-${style.token})` }} aria-hidden />
+      )}
+
+      {stale && commentary && (
+        <div className="flex items-center gap-2 border-b border-line bg-surface-strong px-3 py-1.5 text-[11px] text-faint">
+          <History size={12} className="shrink-0" aria-hidden />
+          <span className="min-w-0 flex-1 leading-snug">
+            Porte sur ton coup <strong className="font-semibold text-muted">{san(commentary.san)}</strong> — la
+            position a changé depuis.
+          </span>
+          {onReview && (
+            <button
+              type="button"
+              onClick={onReview}
+              className="shrink-0 rounded-[var(--radius-sm)] px-1.5 py-0.5 font-semibold text-accent transition-colors hover:bg-surface-hover"
+            >
+              Revoir
+            </button>
+          )}
+        </div>
       )}
 
       <div className="p-4">

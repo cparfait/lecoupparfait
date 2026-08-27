@@ -33,9 +33,35 @@ const Board3D = dynamic(() => import('./Board3D.tsx').then((m) => m.Board3D), {
 export interface ChessBoardProps extends Board2DProps {
   /** Affiche les boutons de bascule 2D / 3D et de plein écran. */
   showViewToggle?: boolean
+  /**
+   * Place réservée au reste de la page, en `rem`.
+   *
+   * Un échiquier dimensionné sur la seule largeur devient, sur un écran large
+   * et peu haut, plus grand que la fenêtre : on ne voit plus les pendules, la
+   * barre d'actions ni les boutons sous le plateau. On lui donne donc aussi
+   * une borne en hauteur, calculée sur ce que la page occupe autour de lui.
+   *
+   * Mesuré sur la page « contre l'ordinateur » : en-tête 57 px, marges 48 px,
+   * bandeau adverse 56 px, bandeau joueur et barre d'actions 100 px — soit
+   * 261 px, arrondis à 17 rem.
+   */
+  reservedHeight?: number
 }
 
-export function ChessBoard({ showViewToggle = true, ...props }: ChessBoardProps) {
+/**
+ * Taille en deçà de laquelle un échiquier ne s'utilise plus.
+ *
+ * Sur une fenêtre très basse, la borne en hauteur seule finirait par produire
+ * un plateau de quelques centimètres : mieux vaut alors laisser la page
+ * défiler que rendre les pièces incliquables.
+ */
+const MIN_BOARD_PX = 260
+
+export function ChessBoard({
+  showViewToggle = true,
+  reservedHeight = 17,
+  ...props
+}: ChessBoardProps) {
   const view = usePreferences((state) => state.view)
   const containerRef = useRef<HTMLDivElement>(null)
   const [fullscreen, setFullscreen] = useState(false)
@@ -93,7 +119,13 @@ export function ChessBoard({ showViewToggle = true, ...props }: ChessBoardProps)
                 width: 'min(100vw - 1.5rem, 100vh - 1.5rem)',
                 height: 'min(100vw - 1.5rem, 100vh - 1.5rem)',
               }
-            : { width: '100%' }
+            : // `dvh` plutôt que `vh` : sur mobile, la barre d'adresse se
+              // rétracte au défilement et `vh` reste figé sur la hauteur
+              // maximale, ce qui redonne un plateau trop grand.
+              {
+                width: `min(100%, max(${MIN_BOARD_PX}px, calc(100dvh - ${reservedHeight}rem)))`,
+                marginInline: 'auto',
+              }
         }
       >
         {view === '3d' ? <Board3D {...props} /> : <Board2D {...props} />}

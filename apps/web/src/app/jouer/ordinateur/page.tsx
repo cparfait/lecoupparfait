@@ -554,6 +554,19 @@ function GameScreen({
     ? (commentaryHistory[reviewedMove.after] ?? null)
     : null
 
+  // Le commentaire porte-t-il encore sur ce qu'on a sous les yeux ? Sans la
+  // pause d'étude, l'adversaire répond avant qu'on ait fini de lire, et le
+  // texte se retrouve à décrire la position précédente. Plutôt que de l'effacer
+  // — il reste ce qu'on avait demandé —, on dit de quel coup il parle.
+  const commentaryStale =
+    !reviewedMove && commentary != null && commentary.fenAfter !== state.currentFen
+
+  const reviewCommented = useCallback(() => {
+    if (!commentary) return
+    const index = state.moves.findIndex((move) => move.after === commentary.fenAfter)
+    if (index >= 0) goTo(index)
+  }, [commentary, state.moves, goTo])
+
   const arrows = useMemo<Arrow[]>(() => {
     if (reviewedMove) {
       const bad =
@@ -821,6 +834,8 @@ function GameScreen({
             onHoverAlternative={setHoveredAlternative}
             showBestMove={showBestMove}
             onToggleBestMove={() => setShowBestMove((value) => !value)}
+            stale={commentaryStale}
+            onReview={reviewCommented}
           />
 
           <Card className="flex min-h-[220px] flex-1 flex-col overflow-hidden">
