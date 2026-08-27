@@ -205,9 +205,17 @@ export default function OpeningsPage() {
         <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
           Explorateur d’ouvertures
         </h1>
+        {/* Il fallait le dire : sans cette phrase, on attend que l'ordinateur
+            réponde et on croit l'échiquier cassé. Ce n'est pas une partie,
+            c'est un plateau d'étude où l'on joue les deux camps. */}
         <p className="mt-1.5 text-sm text-muted">
-          {book?.size.toLocaleString('fr-FR')} ouvertures répertoriées. Joue des coups sur
-          l’échiquier : le nom s’affiche à mesure, y compris par transposition.
+          {book?.size.toLocaleString('fr-FR')} ouvertures répertoriées.{' '}
+          <strong className="font-semibold text-ink">
+            Tu joues les deux couleurs
+          </strong>{' '}
+          — personne ne répond à ta place : c’est un plateau d’étude, pas une partie. Avance
+          coup par coup, sur l’échiquier ou en cliquant dans les listes, et vois où mène
+          chaque branche.
         </p>
       </div>
 
