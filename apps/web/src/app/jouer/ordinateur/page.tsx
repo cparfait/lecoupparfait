@@ -13,6 +13,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft,
+  ChevronFirst,
+  ChevronLast,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
   Flag,
   Handshake,
   Lightbulb,
@@ -22,6 +27,7 @@ import {
   Undo2,
 } from 'lucide-react'
 import clsx from 'clsx'
+import { useSan } from '@/lib/notation.ts'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import {
   BOT_LEVELS,
@@ -383,6 +389,12 @@ function GameScreen({
   // chaque nouveau coup, sans effet ni synchronisation à tenir.
   const [reviewedFen, setReviewedFen] = useState<string | null>(null)
   const lastPlayed = state.moves[state.moves.length - 1] ?? null
+  // Le gestionnaire de touches est posé une fois pour toutes : il lit la
+  // position courante ici plutôt que de se réabonner à chaque coup.
+  const cursorRef = useRef(state.cursor)
+  cursorRef.current = state.cursor
+  const movesRef = useRef(state.moves.length)
+  movesRef.current = state.moves.length
   const studyPause = commentaryMode && prefs.commentaryPauses
   const awaitingReview =
     studyPause &&
@@ -534,6 +546,48 @@ function GameScreen({
   // consulté, et le coup que le moteur préférait si on l'a déjà calculé.
   const reviewing = !state.isLive
   const reviewedMove = reviewing ? (state.moves[state.cursor] ?? null) : null
+
+  // ── Revoir les coups sans les annuler ───────────────────────────────────
+  //
+  // « Annuler mon coup » efface ; revenir en arrière ne devrait pas. Les deux
+  // gestes étaient pourtant confondus, faute d'un moyen visible de reculer :
+  // la navigation n'existait qu'au bas de la liste des coups, hors du champ de
+  // vision de qui regarde l'échiquier.
+  const formatMove = useSan()
+  const atStart = state.cursor < 0
+  const atEnd = state.cursor >= state.moves.length - 1
+  const seek = useCallback((index: number) => goTo(index), [goTo])
+
+  // Les flèches du clavier sont le réflexe acquis partout ailleurs. On laisse
+  // les champs de saisie tranquilles, et les raccourcis système intacts.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return
+      const target = event.target as HTMLElement | null
+      if (target?.closest('input, textarea, select, [contenteditable="true"]')) return
+
+      const cursor = cursorRef.current
+      switch (event.key) {
+        case 'ArrowLeft':
+          goTo(cursor - 1)
+          break
+        case 'ArrowRight':
+          goTo(cursor + 1)
+          break
+        case 'Home':
+          goTo(-1)
+          break
+        case 'End':
+          goTo(movesRef.current - 1)
+          break
+        default:
+          return
+      }
+      event.preventDefault()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [goTo])
 
   // Un commentaire reste lisible longtemps après le coup qu'il décrit, mais ses
   // flèches, elles, deviennent fausses dès le coup suivant : elles pointeraient
@@ -726,6 +780,22 @@ function GameScreen({
                 />
               </div>
 
+              {reviewing && (
+                <div className="mb-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2 text-[13px]">
+                  <Eye size={15} className="shrink-0 text-accent" aria-hidden />
+                  <span className="min-w-0 flex-1 leading-snug text-muted">
+                    Tu revois la partie{reviewedMove ? <> — coup <strong className="font-semibold text-ink">{formatMove(reviewedMove.san)}</strong></> : null}. Rien n’est effacé.
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => goTo(state.moves.length - 1)}
+                    className="shrink-0 rounded-[var(--radius-sm)] bg-accent px-2.5 py-1 text-xs font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
+                  >
+                    Retour à la partie
+                  </button>
+                </div>
+              )}
+
               {awaitingReview && (
                 <button
                   type="button"
@@ -765,6 +835,38 @@ function GameScreen({
               gameOver={gameOver}
               className="mr-auto pl-1"
             />
+
+            <div
+              className="flex items-center gap-0.5 rounded-[var(--radius-sm)] border border-line/60 p-0.5"
+              role="group"
+              aria-label="Revoir les coups"
+            >
+              <SeekButton onClick={() => seek(-1)} disabled={atStart} label="Premier coup (Début)">
+                <ChevronFirst size={16} aria-hidden />
+              </SeekButton>
+              <SeekButton
+                onClick={() => seek(state.cursor - 1)}
+                disabled={atStart}
+                label="Coup précédent (flèche gauche)"
+              >
+                <ChevronLeft size={16} aria-hidden />
+              </SeekButton>
+              <SeekButton
+                onClick={() => seek(state.cursor + 1)}
+                disabled={atEnd}
+                label="Coup suivant (flèche droite)"
+              >
+                <ChevronRight size={16} aria-hidden />
+              </SeekButton>
+              <SeekButton
+                onClick={() => seek(state.moves.length - 1)}
+                disabled={atEnd}
+                label="Dernier coup (Fin)"
+              >
+                <ChevronLast size={16} aria-hidden />
+              </SeekButton>
+            </div>
+
             <Button
               size="sm"
               variant="ghost"
@@ -867,5 +969,37 @@ function GameScreen({
         />
       )}
     </div>
+  )
+}
+
+/**
+ * Bouton de navigation dans la partie.
+ *
+ * Volontairement discret : reculer d'un coup n'est pas une action de jeu, et
+ * ces boutons voisinent avec « Abandonner ». Ce qu'il ne faut pas confondre,
+ * c'est leur effet — d'où l'infobulle qui nomme aussi la touche.
+ */
+function SeekButton({
+  onClick,
+  disabled,
+  label,
+  children,
+}: {
+  onClick: () => void
+  disabled?: boolean
+  label: string
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={label}
+      aria-label={label}
+      className="grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink disabled:cursor-default disabled:text-faint/40 disabled:hover:bg-transparent"
+    >
+      {children}
+    </button>
   )
 }
