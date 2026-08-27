@@ -46,6 +46,20 @@ export interface ChessBoardProps extends Board2DProps {
    * 261 px, arrondis à 17 rem.
    */
   reservedHeight?: number
+  /**
+   * Prendre la place que le parent laisse, plutôt que de l'estimer.
+   *
+   * À réserver aux pages dont la colonne a une hauteur imposée : le plateau se
+   * cale alors sur ce qui reste réellement, si bien qu'un bandeau apparaissant
+   * au-dessous le rétrécit d'autant au lieu de pousser les pendules et la barre
+   * d'actions hors de l'écran.
+   *
+   * On mesure au lieu d'écrire `max-height: 100%` : un pourcentage ne se
+   * résout que contre une hauteur définie, et celle d'un élément flexible ne
+   * l'est pas — la règle était donc ignorée. Le calcul ne boucle pas : le
+   * conteneur tient sa hauteur du partage flex, pas de son contenu.
+   */
+  fitParentHeight?: boolean
 }
 
 /**
@@ -60,11 +74,34 @@ const MIN_BOARD_PX = 260
 export function ChessBoard({
   showViewToggle = true,
   reservedHeight = 17,
+  fitParentHeight = false,
   ...props
 }: ChessBoardProps) {
   const view = usePreferences((state) => state.view)
   const containerRef = useRef<HTMLDivElement>(null)
   const [fullscreen, setFullscreen] = useState(false)
+  const [fitSide, setFitSide] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!fitParentHeight) return
+    const area = containerRef.current?.parentElement
+    if (!area) return
+
+    const measure = () => {
+      const box = area.getBoundingClientRect()
+      const style = getComputedStyle(area)
+      const height =
+        box.height - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)
+      // Une hauteur nulle signifie que la colonne n'est pas encore posée : on
+      // s'abstient plutôt que de réduire le plateau à rien.
+      setFitSide(height > 0 ? Math.floor(Math.min(box.width, height)) : null)
+    }
+
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(area)
+    return () => observer.disconnect()
+  }, [fitParentHeight])
 
   // L'utilisateur peut sortir du plein écran par la touche Échap sans passer
   // par notre bouton : on suit donc l'état réel du document.
@@ -123,7 +160,11 @@ export function ChessBoard({
               // rétracte au défilement et `vh` reste figé sur la hauteur
               // maximale, ce qui redonne un plateau trop grand.
               {
-                width: `min(100%, max(${MIN_BOARD_PX}px, calc(100dvh - ${reservedHeight}rem)))`,
+                width:
+                  fitSide != null
+                    ? `${Math.max(MIN_BOARD_PX, fitSide)}px`
+                    : `min(100%, max(${MIN_BOARD_PX}px, calc(100dvh - ${reservedHeight}rem)))`,
+                aspectRatio: '1 / 1',
                 marginInline: 'auto',
               }
         }

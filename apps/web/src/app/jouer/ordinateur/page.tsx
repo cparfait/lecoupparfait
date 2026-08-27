@@ -563,8 +563,15 @@ function GameScreen({
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return
-      const target = event.target as HTMLElement | null
-      if (target?.closest('input, textarea, select, [contenteditable="true"]')) return
+      // La cible n'est pas toujours un élément — une touche pressée sans
+      // rien de focalisé vise `document`, qui n'a pas de `closest`.
+      const target = event.target
+      if (
+        target instanceof Element &&
+        target.closest('input, textarea, select, [contenteditable="true"]')
+      ) {
+        return
+      }
 
       const cursor = cursorRef.current
       switch (event.key) {
@@ -725,10 +732,18 @@ function GameScreen({
 
   return (
     <div className="mx-auto w-full max-w-[1500px] px-2 py-3 sm:px-4 lg:py-6">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_400px]">
+      <div className="grid gap-4 lg:h-[calc(100dvh-6rem)] lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_400px]">
         {/* ── Colonne échiquier ────────────────────────────────────── */}
-        <div className="min-w-0">
-          <div className="flex gap-2">
+        {/*
+          Sur grand écran, la zone de jeu tient dans la fenêtre : on lui donne
+          une hauteur, et chaque colonne se partage ce qui reste. Un bandeau qui
+          apparaît sous l'échiquier le rétrécit alors d'autant, au lieu de
+          pousser les pendules et la barre d'actions hors de l'écran. En dessous
+          de `lg`, les colonnes s'empilent et la page défile — c'est ce qu'on
+          attend d'un téléphone.
+        */}
+        <div className="flex min-h-0 min-w-0 flex-col">
+          <div className="flex min-h-0 flex-1 gap-2">
             {prefs.showEvalDuringGame && (
               <EvalBar
                 score={commentary?.scoreAfter ?? null}
@@ -738,7 +753,7 @@ function GameScreen({
               />
             )}
 
-            <div className="min-w-0 flex-1">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
               <PlayerBar
                 name={personality.name.fr}
                 rating={bot.elo}
@@ -760,8 +775,13 @@ function GameScreen({
                 }
               />
 
-              <div className="my-1.5">
+              <div className="my-1.5 flex min-h-0 flex-1 items-center justify-center">
                 <ChessBoard
+                  // La colonne a une hauteur imposée : c'est elle qui borne
+                  // le plateau. L'estimation en `dvh` ne sert plus qu'aux
+                  // petits écrans, où les colonnes s'empilent et défilent.
+                  fitParentHeight
+                  reservedHeight={9}
                   fen={state.fen}
                   orientation={orientation}
                   playable={state.isLive && !gameOver ? playerColor : null}
