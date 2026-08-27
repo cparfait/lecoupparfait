@@ -37,7 +37,8 @@ Récupérés depuis [lichess-org/lila](https://github.com/lichess-org/lila/tree/
 | --- | --- | --- |
 | Ouvertures ECO (3 810 entrées) | [lichess-org/chess-openings](https://github.com/lichess-org/chess-openings) | CC0-1.0 |
 | Base de puzzles (6 057 356 entrées) | [database.lichess.org](https://database.lichess.org/) | CC0-1.0 |
-| Base d’évaluations (394 M positions) | [database.lichess.org](https://database.lichess.org/) | CC0-1.0 |
+| Base d’évaluations (8 M positions importées) | [database.lichess.org](https://database.lichess.org/) | CC0-1.0 |
+| Statistiques d’ouvertures (1 048 440 parties) | [database.lichess.org](https://database.lichess.org/) | CC0-1.0 |
 | Tables de finales Syzygy (API) | [tablebase.lichess.ovh](https://tablebase.lichess.ovh/) | libre d’accès |
 
 ## Moteur

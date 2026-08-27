@@ -259,6 +259,50 @@ export const gameAnalyses = pgTable(
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
+//  Évaluations pré-calculées
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Positions déjà évaluées, importées du jeu de données libre de Lichess (CC0).
+ *
+ * Des centaines de millions de positions y ont été analysées à des profondeurs
+ * qu'aucune machine personnelle n'atteindra en direct — souvent quarante à
+ * soixante demi-coups, là où notre moteur tourne à dix-huit. Consulter cette
+ * table avant de lancer Stockfish rend l'analyse d'une ouverture instantanée
+ * **et** plus juste.
+ *
+ * La clé est l'EPD — la position sans les compteurs de coups — la même que
+ * celle du livre d'ouvertures. Deux parties arrivées à la même position par des
+ * chemins différents partagent donc son évaluation, ce qui est exactement ce
+ * qu'on veut.
+ *
+ * La table est facultative : sans import, l'analyse fonctionne comme avant.
+ */
+export const positionEvals = pgTable(
+  'position_evals',
+  {
+    /** Position sans compteurs : « pièces trait roques prise-en-passant ». */
+    epd: text('epd').primaryKey(),
+    /** Évaluation en centièmes de pion, du point de vue des Blancs. */
+    cp: integer('cp'),
+    /** Nombre de coups avant le mat, si mat il y a. Signé comme `cp`. */
+    mate: smallint('mate'),
+    /** Profondeur atteinte par le moteur. */
+    depth: smallint('depth').notNull(),
+    /** Meilleur coup, en notation UCI. */
+    best: text('best'),
+    /** Suite principale, en UCI séparés par des espaces. */
+    line: text('line'),
+  },
+  (table) => [
+    // On interroge toujours par EPD exact, jamais par intervalle : la clé
+    // primaire suffit. L'index sur la profondeur sert au ménage, quand on
+    // réimporte un jeu de données plus profond par-dessus l'ancien.
+    index('position_evals_depth_idx').on(table.depth),
+  ],
+)
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  Puzzles
 // ─────────────────────────────────────────────────────────────────────────────
 

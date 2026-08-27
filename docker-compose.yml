@@ -59,8 +59,8 @@ services:
       ENGINE_POOL_SIZE: ${ENGINE_POOL_SIZE:-2}
       ENGINE_THREADS: ${ENGINE_THREADS:-2}
       ENGINE_HASH_MB: ${ENGINE_HASH_MB:-256}
-      ENGINE_DEFAULT_DEPTH: ${ENGINE_DEFAULT_DEPTH:-20}
-      ENGINE_MAX_DEPTH: ${ENGINE_MAX_DEPTH:-30}
+      ENGINE_DEFAULT_DEPTH: ${ENGINE_DEFAULT_DEPTH:-24}
+      ENGINE_MAX_DEPTH: ${ENGINE_MAX_DEPTH:-34}
       LICHESS_TABLEBASE_URL: ${LICHESS_TABLEBASE_URL:-https://tablebase.lichess.ovh}
       # Voix neuronale du coach. Ces chemins existent dans l'image ; si Piper
       # n'a pas été inclus à la construction, l'application bascule d'elle-même

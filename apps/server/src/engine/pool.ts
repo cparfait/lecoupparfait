@@ -255,7 +255,7 @@ export function getPool(): EnginePool {
       size: Number(process.env.ENGINE_POOL_SIZE ?? 2),
       threadsPerProcess: Number(process.env.ENGINE_THREADS ?? 2),
       hashMb: Number(process.env.ENGINE_HASH_MB ?? 256),
-      maxDepth: Number(process.env.ENGINE_MAX_DEPTH ?? 30),
+      maxDepth: Number(process.env.ENGINE_MAX_DEPTH ?? 34),
     })
   }
   return pool

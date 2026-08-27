@@ -34,6 +34,8 @@
     "icons": "node scripts/build-icons.mjs",
     "check:lessons": "node --experimental-strip-types scripts/check-lessons.mjs",
     "data:endgames": "node scripts/build-endgames.mjs",
+    "data:opening-stats": "node scripts/build-opening-stats.mjs",
+    "data:evals": "node scripts/import-evals.mjs",
     "voice:install": "node scripts/install-piper.mjs",
     "engine:install": "node scripts/install-stockfish.mjs"
   },

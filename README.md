@@ -219,6 +219,8 @@ positions de contrôle, y compris les attaques en rayon X.
 | `npm run data:openings` | importe les ouvertures en base |
 | `npm run data:puzzles` | importe les puzzles (`PUZZLE_IMPORT_LIMIT=0` pour les 6 millions) |
 | `npm run data:endgames` | compile les 3 568 positions de finales |
+| `npm run data:opening-stats` | calcule ce que les joueurs jouent vraiment, depuis un mois de parties |
+| `npm run data:evals` | importe les évaluations pré-calculées de Lichess |
 | `npm run voice:install` | installe la voix neuronale Piper en local (facultatif) |
 | `npm run engine:install` | installe Stockfish natif en local (facultatif) |
 

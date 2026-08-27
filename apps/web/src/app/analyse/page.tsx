@@ -102,7 +102,10 @@ function ImportScreen({
   onError: () => void
 }) {
   const [input, setInput] = useState('')
-  const [depth, setDepth] = useState(18)
+  // Vingt-deux : le moteur natif l'atteint sans peine, et c'est la profondeur
+  // à partir de laquelle l'analyse départage deux bons coups au lieu de se
+  // contenter de repérer les fautes visibles.
+  const [depth, setDepth] = useState(22)
   const { book } = useOpeningBook()
   const locale = usePreferences((state) => state.locale)
 

@@ -14,7 +14,7 @@
  */
 
 import { Chess } from 'chess.js'
-import { and, eq, getDb, evaluations, gte, sql } from '@coupparfait/db'
+import { and, eq, getDb, evaluations, gte, positionEvals, sql } from '@coupparfait/db'
 import { toEpd, type EngineLine, type PositionAnalysis, type Score } from '@coupparfait/core'
 import { getPool, type Priority } from './pool.ts'
 import { probeTablebase } from './tablebase.ts'
@@ -32,7 +32,16 @@ export interface AnalyseOptions {
 /** Analyse une position en passant par le cache et les tables de finales. */
 export async function analysePosition(options: AnalyseOptions): Promise<PositionAnalysis> {
   const { fen, multiPv = 1, priority = 'interactive', fresh = false, signal } = options
-  const depth = Math.max(6, Math.min(Number(process.env.ENGINE_MAX_DEPTH ?? 30), options.depth ?? Number(process.env.ENGINE_DEFAULT_DEPTH ?? 20)))
+  // Vingt-quatre demi-coups par défaut. Le moteur natif les atteint en une
+  // fraction de seconde par position, et c'est à partir de là qu'il départage
+  // deux bons coups plutôt que de se contenter de repérer les fautes.
+  const depth = Math.max(
+    6,
+    Math.min(
+      Number(process.env.ENGINE_MAX_DEPTH ?? 34),
+      options.depth ?? Number(process.env.ENGINE_DEFAULT_DEPTH ?? 24),
+    ),
+  )
   const epd = toEpd(fen)
 
   // ── 1. Tables de finales ────────────────────────────────────────────────
@@ -48,7 +57,22 @@ export async function analysePosition(options: AnalyseOptions): Promise<Position
     if (cached) return cached
   }
 
-  // ── 3. Moteur ───────────────────────────────────────────────────────────
+  // ── 3. Évaluations pré-calculées de Lichess ─────────────────────────────
+  //
+  // Des centaines de millions de positions y sont analysées à quarante ou
+  // soixante demi-coups, là où nous tournons à vingt. Quand la position s'y
+  // trouve, la consulter est à la fois **instantané** et **plus juste** que ce
+  // que la machine produirait en plusieurs secondes.
+  //
+  // Après notre propre cache, jamais avant : celui-ci répond exactement à la
+  // profondeur demandée pour cette partie, et il a pu être écrit par une
+  // analyse plus poussée encore.
+  if (!fresh && multiPv === 1) {
+    const known = await readLichessEval(epd, depth)
+    if (known) return known
+  }
+
+  // ── 4. Moteur ───────────────────────────────────────────────────────────
   const analysis = await getPool().analyse({ fen, depth, multiPv, signal }, priority)
 
   // Le cache ne retient que la ligne principale : c'est ce qu'on relit 99 fois
@@ -73,6 +97,45 @@ function countPieces(fen: string): number {
 // ─────────────────────────────────────────────────────────────────────────────
 //  Cache
 // ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Cherche la position dans la base d'évaluations importée de Lichess.
+ *
+ * Table facultative : sans import, la requête échoue et l'on passe au moteur
+ * comme avant. C'est voulu — la plupart des installations s'en passeront.
+ */
+async function readLichessEval(epd: string, depth: number): Promise<PositionAnalysis | null> {
+  try {
+    const database = getDb()
+    const rows = await database
+      .select()
+      .from(positionEvals)
+      .where(and(eq(positionEvals.epd, epd), gte(positionEvals.depth, depth)))
+      .limit(1)
+
+    const row = rows[0]
+    if (!row) return null
+
+    const score: Score =
+      row.mate !== null && row.mate !== undefined
+        ? { type: 'mate', value: row.mate }
+        : { type: 'cp', value: row.cp ?? 0 }
+
+    const pv = (row.line ?? '').split(' ').filter(Boolean)
+
+    return {
+      fen: epd,
+      depth: row.depth,
+      lines: [{ multipv: 1, score, depth: row.depth, pv }],
+      bestMove: row.best ?? pv[0] ?? null,
+      source: 'cache',
+    }
+  } catch {
+    // Table absente ou base injoignable : on continue sans, l'analyse reste
+    // parfaitement possible.
+    return null
+  }
+}
 
 async function readCache(epd: string, depth: number): Promise<PositionAnalysis | null> {
   try {

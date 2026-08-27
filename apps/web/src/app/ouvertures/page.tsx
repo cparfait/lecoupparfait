@@ -22,6 +22,7 @@ import { ECO_VOLUMES, type OpeningMatch } from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, Card, Chip, EmptyState, Spinner } from '@/components/ui/index.tsx'
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
+import { useMoveStats, useOpeningStats, type StatsBand } from '@/lib/game/useOpeningStats.ts'
 import { playMoveSound } from '@/lib/sound.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { useSan } from '@/lib/notation.ts'
@@ -33,6 +34,15 @@ export default function OpeningsPage() {
   const locale = usePreferences((state) => state.locale)
 
   const format = useSan()
+
+  /**
+   * Tranche de classement des statistiques.
+   *
+   * Le gambit qui « marche » à 800 Elo est réfuté à 1800 : une moyenne de tous
+   * les niveaux tromperait précisément ceux qui en ont le plus besoin.
+   */
+  const [band, setBand] = useState<StatsBand>('debutant')
+  const stats = useOpeningStats()
   const [fen, setFen] = useState(START)
   const [history, setHistory] = useState<string[]>([])
   const [lastMove, setLastMove] = useState<{ from: Square; to: Square } | null>(null)
@@ -261,6 +271,9 @@ export default function OpeningsPage() {
 
         {/* ── Panneau de droite ────────────────────────────────────── */}
         <div className="flex min-w-0 flex-col gap-3">
+          {/* Ce que les joueurs jouent vraiment ici */}
+          {stats && <PopularMoves fen={fen} band={band} onBand={setBand} onPlay={playSan} format={format} />}
+
           {/* Continuations */}
           {continuations.length > 0 && (
             <Card className="overflow-hidden">
@@ -383,5 +396,138 @@ export default function OpeningsPage() {
         public (CC0).
       </p>
     </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Ce que les joueurs jouent vraiment
+// ─────────────────────────────────────────────────────────────────────────────
+
+const BANDS: Array<{ id: StatsBand; label: string }> = [
+  { id: 'debutant', label: 'Débutant' },
+  { id: 'club', label: 'Club' },
+  { id: 'fort', label: 'Fort' },
+]
+
+/**
+ * Statistiques de la position : fréquence et résultat de chaque coup.
+ *
+ * Le livre dit comment s'appelle une suite ; ceci dit si elle réussit. Pour
+ * quelqu'un qui apprend, c'est la seule des deux informations sur laquelle on
+ * peut décider — un nom n'a jamais aidé personne à choisir un coup.
+ *
+ * La barre de résultat se lit d'un coup d'œil : blanc pour les victoires des
+ * Blancs, gris pour les nulles, sombre pour les Noirs. Le chiffre à côté est le
+ * score du camp au trait, nulle comptée pour un demi-point — la convention du
+ * classement, celle que tout joueur connaît déjà.
+ */
+function PopularMoves({
+  fen,
+  band,
+  onBand,
+  onPlay,
+  format,
+}: {
+  fen: string
+  band: StatsBand
+  onBand: (band: StatsBand) => void
+  onPlay: (san: string) => void
+  format: (san: string) => string
+}) {
+  const moves = useMoveStats(fen, band)
+  const total = moves.reduce((sum, move) => sum + move.games, 0)
+
+  return (
+    <Card className="overflow-hidden">
+      <div className="flex items-center gap-2 border-b border-line/60 px-4 py-2.5">
+        <p className="min-w-0 flex-1 text-[11px] font-semibold uppercase tracking-wide text-faint">
+          Ce qu’on joue ici
+        </p>
+        <div className="flex shrink-0 gap-0.5 rounded-full bg-surface-strong p-0.5">
+          {BANDS.map((entry) => (
+            <button
+              key={entry.id}
+              type="button"
+              onClick={() => onBand(entry.id)}
+              aria-pressed={band === entry.id}
+              className={clsx(
+                'rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors',
+                band === entry.id
+                  ? 'bg-accent text-[var(--accent-contrast)]'
+                  : 'text-muted hover:text-ink',
+              )}
+            >
+              {entry.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {moves.length === 0 ? (
+        <p className="px-4 py-4 text-[13px] text-muted">
+          Trop peu de parties à ce niveau depuis cette position pour dire quoi que ce soit
+          d’honnête.
+        </p>
+      ) : (
+        <>
+          <ul>
+            {moves.map((move) => (
+              <li key={move.san}>
+                <button
+                  type="button"
+                  onClick={() => onPlay(move.san)}
+                  className="flex w-full items-center gap-2.5 px-4 py-2 text-left transition-colors hover:bg-surface-hover"
+                >
+                  <span className="w-12 shrink-0 font-mono text-sm font-semibold">
+                    {format(move.san)}
+                  </span>
+                  <span className="w-11 shrink-0 text-right text-[11px] tabular-nums text-faint">
+                    {move.share.toFixed(0)} %
+                  </span>
+
+                  {/* Répartition des résultats, à l'échelle de la barre. */}
+                  <span
+                    className="flex h-3.5 min-w-0 flex-1 overflow-hidden rounded-[3px]"
+                    title={`${move.games.toLocaleString('fr-FR')} parties`}
+                  >
+                    <span
+                      style={{ width: `${(move.white / move.games) * 100}%` }}
+                      className="bg-[var(--eval-white)]"
+                    />
+                    <span
+                      style={{ width: `${(move.draws / move.games) * 100}%` }}
+                      className="bg-[var(--surface-strong)]"
+                    />
+                    <span
+                      style={{ width: `${(move.black / move.games) * 100}%` }}
+                      className="bg-[var(--eval-black)]"
+                    />
+                  </span>
+
+                  <span
+                    className="w-11 shrink-0 text-right text-[11px] font-semibold tabular-nums"
+                    style={{
+                      color:
+                        move.score >= 53
+                          ? 'var(--q-best)'
+                          : move.score <= 47
+                            ? 'var(--q-blunder)'
+                            : 'var(--text-muted)',
+                    }}
+                  >
+                    {move.score.toFixed(0)} %
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <p className="border-t border-line/60 px-4 py-2 text-[11px] text-faint">
+            {total.toLocaleString('fr-FR')} parties · le second pourcentage est le score du
+            camp au trait, nulle comptée pour un demi-point.
+          </p>
+        </>
+      )}
+    </Card>
   )
 }
