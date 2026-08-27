@@ -42,36 +42,81 @@ le but : on s'en sert le temps d'acquérir le réflexe, puis on s'en passe.
 
 ---
 
-## Démarrage rapide
+## Installation
+
+### Prérequis
+
+| | Version | Pour quoi faire |
+|---|---|---|
+| **Node.js** | 22 ou plus | l'application ; le serveur exécute du TypeScript directement, sans compilation |
+| **Docker** | récent | PostgreSQL. Une base installée à la main convient aussi |
+| **Git** | — | récupérer le dépôt |
+| **Espace disque** | ~1,5 Go | dont 1 Go de dépendances npm et 330 Mo de jeux de données |
+
+Aucune clé d'API, aucun compte à créer nulle part : tout ce que l'application
+utilise est libre et se télécharge sans identification.
 
 ### En local
 
 ```bash
-git clone <url-du-depot> gambit && cd gambit
+git clone https://github.com/cparfait/lecoupparfait.git
+cd lecoupparfait
 npm install
-npm run setup                    # ressources, moteur, ouvertures, icônes, .env
-docker compose up -d db          # PostgreSQL
+```
+
+Puis une seule commande prépare tout le reste :
+
+```bash
+npm run setup
+```
+
+Elle crée le fichier `.env` **avec des secrets engendrés aléatoirement**, puis
+télécharge les jeux de pièces et bruitages, le moteur Stockfish WebAssembly,
+l'index des 3 810 ouvertures, les 3 568 finales, et engendre les icônes. Elle
+finit par valider les 189 étapes de leçons. Chaque étape est facultative :
+si l'une échoue, l'application démarre quand même, avec cette ressource en
+moins.
+
+Reste la base de données :
+
+```bash
+docker compose up -d db          # PostgreSQL sur le port 5432
 npm run db:push                  # crée les tables
-npm run data:openings            # importe les 3 810 ouvertures
+npm run data:openings            # importe les ouvertures
 npm run data:puzzles             # importe 200 000 puzzles (~2 min)
 ```
 
-Puis, dans un seul terminal :
+> Pour les **six millions** de puzzles plutôt que deux cent mille :
+> `PUZZLE_IMPORT_LIMIT=0 npm run data:puzzles`. Comptez une trentaine de
+> minutes et 4 Go en base.
+
+Enfin :
 
 ```bash
 npm run dev
 ```
 
 Cette commande démarre les deux serveurs côte à côte — l'application web sur le
-port 3000 et le serveur de parties et d'analyse sur le port 3001 — avec leurs
-journaux préfixés `web` et `api`. Pour n'en lancer qu'un : `npm run dev:web` ou
-`npm run dev:server`.
+port 3000, le serveur de parties et d'analyse sur le port 3001 — avec leurs
+journaux préfixés `web` et `api`. Un Ctrl+C arrête les deux.
 
 → **http://localhost:3000**
 
-> Le serveur d'analyse a besoin d'un binaire Stockfish. S'il est absent,
-> l'application le signale et bascule automatiquement sur le moteur WebAssembly
-> du navigateur : tout reste utilisable, simplement moins profond.
+### Deux ajouts facultatifs
+
+Ni l'un ni l'autre n'est nécessaire : sans eux, l'application fonctionne, en
+retombant sur le moteur du navigateur et sur sa voix de synthèse.
+
+```bash
+npm run engine:install     # Stockfish natif — analyse plusieurs fois plus rapide
+npm run voice:install      # voix neuronale Piper — le coach devient écoutable
+```
+
+Chaque script télécharge la version correspondant à ta machine, la range dans
+`data/`, vérifie qu'elle répond, et affiche les deux lignes à ajouter au `.env`
+si le chemin n'est pas détecté tout seul.
+
+En Docker, les deux sont déjà dans l'image : rien à faire.
 
 ### En production (Docker)
 
@@ -83,17 +128,28 @@ docker compose exec web node scripts/import-puzzles.mjs
 ```
 
 L'image du serveur **compile Stockfish 18 depuis les sources**, avec
-optimisation guidée par le profil et réseau NNUE complet. Comptez une dizaine
-de minutes pour la première construction.
+optimisation guidée par le profil et réseau NNUE complet, et installe la voix
+neuronale Piper. Comptez une vingtaine de minutes pour la première
+construction.
 
 Derrière **Nginx Proxy Manager**, créer deux hôtes mandataires :
 
 | Domaine | Cible | WebSocket |
 |---|---|---|
-| `gambit.mondomaine.fr` | `web:3000` | oui |
-| `gambit-api.mondomaine.fr` | `server:3001` | **indispensable** |
+| `coupparfait.mondomaine.fr` | `web:3000` | oui |
+| `coupparfait-api.mondomaine.fr` | `server:3001` | **indispensable** |
 
 Puis renseigner `NEXT_PUBLIC_APP_URL` et `NEXT_PUBLIC_SERVER_URL` dans `.env`.
+
+### Si quelque chose cloche
+
+| Symptôme | Cause probable |
+|---|---|
+| « moteur d'analyse : indisponible » au démarrage | Stockfish natif absent — normal en local. `npm run engine:install`, ou ignorer : le navigateur prend le relais |
+| L'analyse tourne sans fin | Serveur d'analyse injoignable. Il refuse désormais en quelques millisecondes ; si le symptôme revient, vérifier que le port 3001 répond |
+| La voix reste celle du navigateur | Piper absent ou serveur muet. Préférences → « Tester la voix » annonce qui a parlé |
+| Tout échoue en local après avoir copié `.env.example` | `INTERNAL_SERVER_URL` et `STOCKFISH_PATH` doivent rester **commentés** : ce sont les chemins internes à Docker, `docker compose` les fournit lui-même |
+| Le port 3000 est déjà pris | Un serveur d'une session précédente. `npm run dev` arrête proprement toute sa descendance, mais un lancement manuel peut laisser un processus |
 
 ---
 

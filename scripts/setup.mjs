@@ -95,7 +95,11 @@ if (failed.length === 0) {
   console.log('  3. Importer les ouvertures npm run data:openings')
   console.log('  4. Importer des puzzles    npm run data:puzzles')
   console.log('  5. Compiler les finales    npm run data:endgames')
-  console.log('  6. Lancer                  npm run dev:web   (et npm run dev:server)')
+  console.log('  6. Lancer                  npm run dev')
+  console.log('')
+  console.log('Facultatif, pour aller plus vite et mieux entendre :')
+  console.log('  Moteur natif               npm run engine:install')
+  console.log('  Voix neuronale             npm run voice:install')
   console.log('\n  → http://localhost:3000\n')
 } else {
   console.log(`\n⚠ ${failed.length} étape(s) en échec :`)
