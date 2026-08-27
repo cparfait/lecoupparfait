@@ -154,11 +154,6 @@ export const LEGEND = {
     title: 'Ce que le moteur aurait joué à ta place.',
   },
   hint: { color: 'orange', label: 'Indice', title: 'Le coup suggéré par l’indice.' },
-  opponent: {
-    color: 'accent',
-    label: 'Coup de l’adversaire',
-    title: 'Ce que ton adversaire vient de jouer.',
-  },
   look: { color: 'green', label: 'À observer', title: 'Ce que le coach te montre.' },
   danger: { color: 'red', label: 'Menace', title: 'Un coup adverse dont il faut se méfier.' },
   solution: { color: 'blue', label: 'La solution', title: 'Le coup attendu.' },

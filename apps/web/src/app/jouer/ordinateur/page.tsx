@@ -554,19 +554,6 @@ function GameScreen({
     ? (commentaryHistory[reviewedMove.after] ?? null)
     : null
 
-  /**
-   * Flèche du coup que l'ordinateur vient de jouer.
-   *
-   * Le surlignage des cases suppose de savoir où regarder. La flèche, elle, se
-   * voit sans chercher : c'est l'aide qui manquait le plus aux premiers
-   * niveaux, où les coups adverses paraissent surgir de nulle part.
-   */
-  const opponentArrow = useMemo<Arrow | null>(() => {
-    if (!prefs.opponentMoveArrow || reviewing) return null
-    if (!lastPlayed || lastPlayed.color !== botColor) return null
-    return { from: lastPlayed.from, to: lastPlayed.to, color: 'accent', weight: 'bold' }
-  }, [prefs.opponentMoveArrow, reviewing, lastPlayed, botColor])
-
   const arrows = useMemo<Arrow[]>(() => {
     if (reviewedMove) {
       const bad =
@@ -599,14 +586,11 @@ function GameScreen({
 
     if (hintArrow) return [hintArrow]
 
-    const commented =
-      commentaryMode && (arrowsMatchPosition || hoveredAlternative)
-        ? // Survoler une alternative dans la liste la montre même si la partie
-          // a avancé : c'est un geste délibéré, pas un reliquat à l'écran.
-          commentaryArrows(commentary, hoveredAlternative, showBestMove)
-        : []
-
-    return opponentArrow ? [...commented, opponentArrow] : commented
+    // Survoler une alternative dans la liste la montre même si la partie a
+    // avancé : c'est un geste délibéré, pas un reliquat à l'écran.
+    if (!commentaryMode) return []
+    if (!arrowsMatchPosition && !hoveredAlternative) return []
+    return commentaryArrows(commentary, hoveredAlternative, showBestMove)
   }, [
     reviewedMove,
     reviewedCommentary,
@@ -616,7 +600,6 @@ function GameScreen({
     hoveredAlternative,
     showBestMove,
     arrowsMatchPosition,
-    opponentArrow,
   ])
 
   /**
@@ -661,12 +644,8 @@ function GameScreen({
       ])
     }
     if (hintArrow) return [LEGEND.hint]
-    if (arrows.length === 0) return []
-
-    const items = commentaryMode
-      ? commentaryLegend(commentary, hoveredAlternative, showBestMove)
-      : []
-    return opponentArrow ? [...items, LEGEND.opponent] : items
+    if (!commentaryMode || arrows.length === 0) return []
+    return commentaryLegend(commentary, hoveredAlternative, showBestMove)
   }, [
     reviewedMove,
     arrows,
@@ -675,7 +654,6 @@ function GameScreen({
     commentary,
     hoveredAlternative,
     showBestMove,
-    opponentArrow,
   ])
 
   return (

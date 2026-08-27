@@ -362,12 +362,6 @@ export default function PreferencesPage() {
                 onChange={(value) => set('whiteAlwaysBottom', value)}
               />
               <Toggle
-                label="Flèche sur le coup de l’adversaire"
-                description="Montre d’où vient la pièce qu’il vient de jouer. Très utile au début, quand on ne sait pas encore où regarder."
-                checked={prefs.opponentMoveArrow}
-                onChange={(value) => set('opponentMoveArrow', value)}
-              />
-              <Toggle
                 label="Signaler l’échec"
                 description="Halo rouge autour du roi attaqué."
                 checked={prefs.highlightCheck}

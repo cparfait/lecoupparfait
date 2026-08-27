@@ -81,15 +81,6 @@ export interface Preferences {
    */
   moveSafetyHints: boolean
   highlightLastMove: boolean
-  /**
-   * Trace une flèche sur le coup que l'adversaire vient de jouer.
-   *
-   * Le surlignage des deux cases se remarque mal quand on ne sait pas encore
-   * où regarder : la flèche dit d'un coup d'œil *quelle pièce* a bougé et
-   * *d'où elle vient*. Indispensable à bas niveau, superflu ensuite — d'où
-   * l'interrupteur.
-   */
-  opponentMoveArrow: boolean
   highlightCheck: boolean
   /** Durée d'animation d'un déplacement, en millisecondes. `0` = instantané. */
   animationMs: number
@@ -175,7 +166,6 @@ const DEFAULTS: Preferences = {
   showLegalMoves: true,
   moveSafetyHints: false,
   highlightLastMove: true,
-  opponentMoveArrow: true,
   highlightCheck: true,
   animationMs: 190,
   confirmMove: false,
@@ -239,8 +229,10 @@ export const usePreferences = create<PreferencesStore>()(
         const state = (persisted ?? {}) as Partial<Preferences>
         // v2 : le mode commenté marque une pause après chaque coup.
         if (from < 2) state.commentaryPauses = true
-        // v3 : le coup de l'adversaire est fléché.
-        if (from < 3) state.opponentMoveArrow = true
+        // v3 avait ajouté une flèche sur le coup de l'adversaire, retirée
+        // depuis : les deux cases vertes du dernier coup disent la même chose
+        // sans encombrer l'échiquier. La clé reste sans effet dans les
+        // réglages déjà enregistrés.
         return state as Preferences
       },
       partialize: ({ set: _set, patch: _patch, reset: _reset, hydrated: _h, ...rest }) => rest,
