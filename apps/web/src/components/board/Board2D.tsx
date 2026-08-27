@@ -791,13 +791,23 @@ function Coordinates({
   const ranks = orientation === 'w' ? '87654321' : '12345678'
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-[15] text-[clamp(7px,1.5cqw,11px)] font-semibold">
+    /*
+      La taille suit celle du plateau — 2,2 % de sa largeur — au lieu d'être
+      plafonnée à onze pixels. Ce plafond était l'erreur : il convenait sur un
+      téléphone et rendait les repères minuscules sur un écran d'ordinateur,
+      précisément là où l'échiquier est grand et où l'on a le plus de mal à
+      situer une case citée par le coach.
+
+      Les bornes ne servent plus qu'aux extrêmes : lisible sur une miniature,
+      jamais démesuré en plein écran.
+    */
+    <div className="pointer-events-none absolute inset-0 z-[15] text-[clamp(9px,2.2cqw,22px)] font-bold leading-none">
       {[...ranks].map((rank, index) => (
         <span
           key={rank}
-          className="absolute left-[3px]"
+          className="absolute left-[0.45cqw]"
           style={{
-            top: `${index * 12.5 + 0.6}%`,
+            top: `${index * 12.5 + 0.5}%`,
             color: index % 2 === 0 ? skin.coordLight : skin.coordDark,
           }}
         >
@@ -807,9 +817,13 @@ function Coordinates({
       {[...files].map((file, index) => (
         <span
           key={file}
-          className="absolute bottom-[2px]"
+          className="absolute bottom-[0.45cqw]"
           style={{
-            left: `${index * 12.5 + 10}%`,
+            // Calé sur le bord droit de la case, comme dans les diagrammes
+            // imprimés : le chiffre en haut à gauche, la lettre en bas à droite,
+            // sans jamais se gêner l'un l'autre.
+            left: `${index * 12.5 + 12.5}%`,
+            transform: 'translateX(calc(-100% - 0.45cqw))',
             color: index % 2 === 0 ? skin.coordDark : skin.coordLight,
           }}
         >
