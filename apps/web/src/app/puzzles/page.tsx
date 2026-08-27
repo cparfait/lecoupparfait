@@ -36,6 +36,7 @@ import { Button, Card, Chip, EmptyState, Spinner } from '@/components/ui/index.t
 import { playMoveSound, playSound } from '@/lib/sound.ts'
 import { speak } from '@/lib/speech.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import { useSan } from '@/lib/notation.ts'
 
 interface Puzzle {
   id: string
@@ -67,6 +68,7 @@ const THEMES: Array<{ id: string; label: string }> = [
 
 export default function PuzzlesPage() {
   const locale = usePreferences((state) => state.locale)
+  const format = useSan()
   const voiceEnabled = usePreferences((state) => state.voiceEnabled)
 
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null)
@@ -409,7 +411,7 @@ export default function PuzzlesPage() {
                   <p className="mt-2 rounded-[var(--radius-sm)] bg-surface px-2.5 py-2 text-[13px]">
                     Solution :{' '}
                     <strong className="text-accent">
-                      {locale === 'fr' ? sanToFrench(revealedSan) : revealedSan}
+                      {format(revealedSan)}
                     </strong>
                   </p>
                 )}

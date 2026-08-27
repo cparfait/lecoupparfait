@@ -43,8 +43,46 @@ export function sanToFrench(san: string): string {
   return san.replace(/[NBRQK]/g, (letter) => map[letter] ?? letter)
 }
 
-/** Notation dans la langue demandée. */
-export function localiseSan(san: string, locale: Locale): string {
+/**
+ * Traduit une notation algébrique en **notation figurine**.
+ * `Nf3` → `♘f3`, `Qxd5+` → `♕xd5+`, `O-O` reste inchangé.
+ *
+ * C'est la notation des livres et des revues internationales : elle ne dépend
+ * d'aucune langue, et elle apprend au passage les symboles qu'on retrouve
+ * partout. Les pièces sont toujours dessinées en blanc — la couleur se déduit
+ * du tour, pas du glyphe, et les symboles noirs sont illisibles sur fond sombre.
+ */
+export function sanToFigurine(san: string): string {
+  if (san.startsWith('O-O')) return san
+  const map: Record<string, string> = {
+    N: '♘',
+    B: '♗',
+    R: '♖',
+    Q: '♕',
+    K: '♔',
+  }
+  // Seule la lettre de tête désigne la pièce déplacée ; celle d'une promotion
+  // suit un `=` et se remplace aussi. Les colonnes sont en minuscules, elles
+  // ne risquent donc rien.
+  return san.replace(/[NBRQK]/g, (letter) => map[letter] ?? letter)
+}
+
+/** Façon d'écrire les coups, choisie dans les préférences. */
+export type Notation = 'lettres' | 'figurine'
+
+/**
+ * Notation dans la langue et le style demandés.
+ *
+ * Point d'entrée unique de tout l'affichage des coups : liste des coups,
+ * commentaires, analyse, explorateur. Ajouter un style ici le rend disponible
+ * partout, sans rien oublier.
+ */
+export function localiseSan(
+  san: string,
+  locale: Locale,
+  notation: Notation = 'lettres',
+): string {
+  if (notation === 'figurine') return sanToFigurine(san)
   return locale === 'fr' ? sanToFrench(san) : san
 }
 

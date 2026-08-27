@@ -49,6 +49,8 @@ interface Profile {
     opening: string | null
     moveCount: number
     ratingDelta: number | null
+    /** Précision du joueur sur cette partie, si elle a été analysée. */
+    accuracy: number | null
     playedAt: string
   }>
   history: Array<{ category: string; rating: number; at: string }>
@@ -275,6 +277,7 @@ export default function ProfilePage() {
                   </span>
                   <span className="block truncate text-[11px] text-faint">
                     {game.opening ?? 'ouverture non répertoriée'} · {game.moveCount} demi-coups
+                    {game.accuracy != null && ` · ${Math.round(game.accuracy)} % de précision`}
                   </span>
                 </span>
                 {game.ratingDelta !== null && (

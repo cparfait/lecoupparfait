@@ -116,6 +116,61 @@ export class OpeningBook {
   }
 
   /**
+   * Coups qui, depuis cette position, mènent à une ouverture connue.
+   *
+   * C'est ce qui transforme un échiquier en **explorateur** : au lieu de
+   * chercher un nom dans une liste puis de le charger, on avance coup par coup
+   * en voyant à chaque fois où mène chaque branche. C'est ainsi qu'on retient
+   * une ouverture — en parcourant l'arbre, pas en lisant son nom.
+   *
+   * On s'arrête à la profondeur du livre : au-delà, aucun coup ne peut plus
+   * rien trouver, et essayer les trente coups légaux ne coûterait que du temps.
+   */
+  continuations(
+    fen: string,
+    locale: 'fr' | 'en' = 'fr',
+  ): Array<{ san: string; match: OpeningMatch }> {
+    const board = new Chess(fen, { skipValidation: true })
+
+    // Nombre de demi-coups déjà joués, déduit du numéro de coup et du trait.
+    const parts = fen.split(' ')
+    const fullMove = Number(parts[5] ?? '1')
+    const ply = (fullMove - 1) * 2 + (parts[1] === 'b' ? 1 : 0)
+    if (ply >= this.maxPly) return []
+
+    const out: Array<{ san: string; match: OpeningMatch }> = []
+    let moves: string[]
+    try {
+      moves = board.moves()
+    } catch {
+      return []
+    }
+
+    for (const san of moves) {
+      let epd: string
+      try {
+        board.move(san)
+        epd = toEpd(board.fen())
+        board.undo()
+      } catch {
+        continue
+      }
+
+      const match = this.byEpd.get(epd)
+      if (!match) continue
+      out.push({
+        san,
+        match: { ...match, label: locale === 'fr' ? match.nameFr : match.name },
+      })
+    }
+
+    // Les variantes les plus nommées d'abord — c'est-à-dire, en pratique, les
+    // plus jouées : le livre ECO nomme ce qui a été étudié.
+    out.sort((a, b) => a.match.label.localeCompare(b.match.label))
+    return out
+  }
+
+  /**
    * Vrai si la position est encore dans la théorie connue.
    * Sert à classer un coup comme « théorie » plutôt que de le juger.
    */

@@ -23,8 +23,9 @@ import {
   Play,
 } from 'lucide-react'
 import type { MoveQuality } from '@coupparfait/core'
-import { QUALITY_STYLES, sanToFrench } from '@coupparfait/core'
+import { QUALITY_STYLES } from '@coupparfait/core'
 import { groupMoves, type PlayedMove } from '@/lib/game/useChessGame.ts'
+import { useSan } from '@/lib/notation.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
 export interface MoveListProps {
@@ -53,6 +54,7 @@ export function MoveList({
   onToggleAutoplay,
 }: MoveListProps) {
   const locale = usePreferences((state) => state.locale)
+  const format = useSan()
   const scrollRef = useRef<HTMLDivElement>(null)
   const activeRef = useRef<HTMLButtonElement>(null)
 
@@ -123,6 +125,7 @@ export function MoveList({
                   active={cursor === row.whitePly}
                   quality={qualities?.[row.whitePly]}
                   locale={locale}
+                  format={format}
                   onSeek={onSeek}
                   ref={cursor === row.whitePly ? activeRef : undefined}
                 />
@@ -132,6 +135,7 @@ export function MoveList({
                   active={cursor === row.blackPly}
                   quality={qualities?.[row.blackPly]}
                   locale={locale}
+                  format={format}
                   onSeek={onSeek}
                   ref={cursor === row.blackPly ? activeRef : undefined}
                 />
@@ -184,6 +188,7 @@ const MoveCell = function MoveCell({
   active,
   quality,
   locale,
+  format,
   onSeek,
   ref,
 }: {
@@ -192,12 +197,14 @@ const MoveCell = function MoveCell({
   active: boolean
   quality?: MoveQuality
   locale: 'fr' | 'en'
+  /** Écriture des coups, accordée aux préférences. */
+  format: (san: string) => string
   onSeek: (ply: number) => void
   ref?: React.Ref<HTMLButtonElement>
 }) {
   if (!move) return <span className="px-2 py-1.5" />
 
-  const san = locale === 'fr' ? sanToFrench(move.san) : move.san
+  const san = format(move.san)
   const style = quality ? QUALITY_STYLES[quality] : null
   // Les coups ordinaires ne méritent pas de pastille : on ne signale que ce qui
   // sort de l'ordinaire, sinon la liste devient un sapin de Noël illisible.

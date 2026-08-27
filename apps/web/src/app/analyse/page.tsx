@@ -32,7 +32,6 @@ import {
   QUALITY_STYLES,
   formatPgnDate,
   formatScore,
-  sanToFrench,
   toPgn,
   type MoveQuality,
 } from '@coupparfait/core'
@@ -50,6 +49,7 @@ import {
 } from '@/lib/analysis/runner.ts'
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import { useSan } from '@/lib/notation.ts'
 import { speak, stopSpeaking } from '@/lib/speech.ts'
 import type { Arrow } from '@/components/board/boardKit.ts'
 import type { PlayedMove } from '@/lib/game/useChessGame.ts'
@@ -342,6 +342,7 @@ function ReviewScreen({
   const voiceEnabled = usePreferences((state) => state.voiceEnabled)
   const setPreference = usePreferences((state) => state.set)
 
+  const format = useSan()
   const [cursor, setCursor] = useState(0)
   const [orientation, setOrientation] = useState<Color>('w')
   const [autoplay, setAutoplay] = useState(false)
@@ -698,7 +699,7 @@ function ReviewScreen({
                             demo && index === demo.at && 'bg-accent/25 text-ink',
                           )}
                         >
-                          {locale === 'fr' ? sanToFrench(san) : san}
+                          {format(san)}
                         </span>
                       ))}
                     </p>

@@ -10,6 +10,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { Notation } from '@coupparfait/core'
 import type { Locale } from '../i18n/dictionary.ts'
 
 export type ThemeId = 'aurora' | 'club' | 'clair' | 'contraste'
@@ -48,6 +49,15 @@ export type PieceColourId = 'theme' | 'classique' | 'pur' | 'bois' | 'marbre' | 
 
 export interface Preferences {
   locale: Locale
+  /**
+   * Écriture des coups.
+   *
+   * `lettres` suit la langue — « Cf3 » en français, « Nf3 » en anglais.
+   * `figurine` utilise les symboles des pièces — « ♘f3 » — comme les livres et
+   * les revues internationales : aucune traduction, et on apprend au passage
+   * des symboles qu'on retrouvera partout.
+   */
+  notation: Notation
   theme: ThemeId
   pieceSet: PieceSetId
   boardStyle: BoardStyleId
@@ -88,6 +98,15 @@ export interface Preferences {
   premove: boolean
   /** Rotation automatique de l'échiquier en partie locale. */
   autoFlip: boolean
+  /**
+   * Garde les Blancs en bas, même quand on joue les Noirs.
+   *
+   * L'échiquier se lit d'habitude de son propre côté. Certains préfèrent
+   * pourtant une orientation fixe : les diagrammes des livres, des cours et des
+   * puzzles sont presque tous vus des Blancs, et alterner brouille les repères
+   * qu'on est justement en train de construire.
+   */
+  whiteAlwaysBottom: boolean
   /**
    * Affiche le nom de l'ouverture en cours de partie.
    *
@@ -139,6 +158,7 @@ export interface Preferences {
 
 const DEFAULTS: Preferences = {
   locale: 'fr',
+  notation: 'lettres',
   theme: 'aurora',
   pieceSet: 'staunton',
   boardStyle: 'aurore',
@@ -161,6 +181,7 @@ const DEFAULTS: Preferences = {
   confirmMove: false,
   premove: true,
   autoFlip: false,
+  whiteAlwaysBottom: false,
   showOpeningName: true,
   announceOpenings: false,
 

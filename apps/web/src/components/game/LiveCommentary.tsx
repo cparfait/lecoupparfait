@@ -43,7 +43,6 @@ import {
   explainMove,
   formatScore,
   motifCopy,
-  sanToFrench,
   uciLineToSan,
   winPercentFor,
   type EngineLine,
@@ -56,6 +55,7 @@ import { Card, Chip } from '@/components/ui/index.tsx'
 import { getEngine } from '@/lib/engine/client.ts'
 import { speak, stopSpeaking } from '@/lib/speech.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import { useSan } from '@/lib/notation.ts'
 import type { PlayedMove } from '@/lib/game/useChessGame.ts'
 import type { Arrow } from '@/components/board/boardKit.ts'
 import { LEGEND, legendFor, type LegendItem } from '@/components/board/ArrowLegend.tsx'
@@ -379,6 +379,7 @@ export function CommentaryPanel({
   const locale = usePreferences((state) => state.locale)
   const voiceEnabled = usePreferences((state) => state.voiceEnabled)
   const setPreference = usePreferences((state) => state.set)
+  const san = useSan()
   const spokenRef = useRef<string | null>(null)
   const [speaking, setSpeaking] = useState(false)
 
@@ -620,7 +621,7 @@ export function CommentaryPanel({
                   </span>
 
                   <span className="w-16 shrink-0 font-mono text-sm font-semibold">
-                    {locale === 'fr' ? sanToFrench(alternative.san) : alternative.san}
+                    {san(alternative.san)}
                   </span>
 
                   <span className="w-12 shrink-0 text-xs tabular-nums text-muted">
@@ -632,7 +633,7 @@ export function CommentaryPanel({
                       (alternative.line.length > 1
                         ? alternative.line
                             .slice(1, 4)
-                            .map((san) => (locale === 'fr' ? sanToFrench(san) : san))
+                            .map((move) => san(move))
                             .join(' ')
                         : '')}
                   </span>

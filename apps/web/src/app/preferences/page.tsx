@@ -333,6 +333,34 @@ export default function PreferencesPage() {
                 checked={prefs.highlightLastMove}
                 onChange={(value) => set('highlightLastMove', value)}
               />
+              <div className="py-2">
+                <label htmlFor="notation" className="mb-1.5 block text-sm font-medium">
+                  Écriture des coups
+                </label>
+                <select
+                  id="notation"
+                  value={prefs.notation}
+                  onChange={(event) =>
+                    set('notation', event.target.value as 'lettres' | 'figurine')
+                  }
+                  className="h-10 w-full rounded-[var(--radius-sm)] border border-line bg-surface px-3 text-sm focus:border-accent focus:outline-none"
+                >
+                  <option value="lettres">Lettres — Cf3, Dxd5+</option>
+                  <option value="figurine">Figurine — ♘f3, ♕xd5+</option>
+                </select>
+                <p className="mt-1.5 text-xs text-faint">
+                  La notation figurine est celle des livres et des revues : elle ne dépend
+                  d’aucune langue, et on apprend au passage des symboles qu’on retrouve
+                  partout.
+                </p>
+              </div>
+
+              <Toggle
+                label="Les Blancs toujours en bas"
+                description="Fige le sens de l’échiquier au lieu de le retourner selon ta couleur. Les diagrammes des livres et des leçons sont presque tous vus des Blancs."
+                checked={prefs.whiteAlwaysBottom}
+                onChange={(value) => set('whiteAlwaysBottom', value)}
+              />
               <Toggle
                 label="Flèche sur le coup de l’adversaire"
                 description="Montre d’où vient la pièce qu’il vient de jouer. Très utile au début, quand on ne sait pas encore où regarder."

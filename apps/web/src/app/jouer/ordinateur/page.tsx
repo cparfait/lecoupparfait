@@ -512,6 +512,16 @@ function GameScreen({
     playResultSound('loss')
   }, [playerColor])
 
+  /**
+   * Sens de lecture de l'échiquier.
+   *
+   * Par défaut on voit de son propre côté, comme sur un vrai échiquier. Le
+   * réglage « Blancs toujours en bas » fige l'orientation : les diagrammes des
+   * livres, des leçons et des puzzles sont presque tous vus des Blancs, et
+   * alterner brouille les repères qu'on est en train de construire.
+   */
+  const orientation: Color = prefs.whiteAlwaysBottom ? 'w' : playerColor
+
   const bot = botPlayer.bot
   const personality = BOT_PERSONALITIES[bot.personality]
   const gameOver = state.isGameOver || outcome !== null
@@ -677,7 +687,7 @@ function GameScreen({
             {prefs.showEvalDuringGame && (
               <EvalBar
                 score={commentary?.scoreAfter ?? null}
-                orientation={playerColor}
+                orientation={orientation}
                 loading={coachLoading}
                 className="hidden sm:block"
               />
@@ -708,7 +718,7 @@ function GameScreen({
               <div className="my-1.5">
                 <ChessBoard
                   fen={state.fen}
-                  orientation={playerColor}
+                  orientation={orientation}
                   playable={state.isLive && !gameOver ? playerColor : null}
                   legalMoves={state.legalMoves}
                   onMove={handleMove}

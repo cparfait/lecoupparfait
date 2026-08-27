@@ -10,7 +10,17 @@
  */
 
 import { NextResponse } from 'next/server'
-import { desc, eq, getDb, games, ratingHistory, ratings, sql, users } from '@coupparfait/db'
+import {
+  desc,
+  eq,
+  gameAnalyses,
+  games,
+  getDb,
+  ratingHistory,
+  ratings,
+  sql,
+  users,
+} from '@coupparfait/db'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -60,11 +70,19 @@ export async function GET(
           eco: games.eco,
           opening: games.opening,
           moves: games.moves,
+          // Deux colonnes seulement de la table d'analyse : le rapport complet
+          // pèse plusieurs centaines de kilo-octets par partie, et on n'en a
+          // besoin que dans l'écran d'analyse.
+          accuracyWhite: gameAnalyses.accuracyWhite,
+          accuracyBlack: gameAnalyses.accuracyBlack,
           whiteRatingDelta: games.whiteRatingDelta,
           blackRatingDelta: games.blackRatingDelta,
           createdAt: games.createdAt,
         })
         .from(games)
+        // Jointure externe : une partie non analysée reste dans la liste, sans
+        // précision. C'est le cas de la plupart d'entre elles.
+        .leftJoin(gameAnalyses, eq(gameAnalyses.gameId, games.id))
         .where(sql`${games.whiteId} = ${user.id} or ${games.blackId} = ${user.id}`)
         .orderBy(desc(games.createdAt))
         .limit(20),
@@ -124,6 +142,11 @@ export async function GET(
           opening: game.opening,
           moveCount: game.moves ? game.moves.split(' ').length : 0,
           ratingDelta: playedWhite ? game.whiteRatingDelta : game.blackRatingDelta,
+          // Précision du joueur consulté, si la partie a été analysée. La
+          // colonne existait depuis le début sans jamais être lue : le chiffre
+          // le plus parlant d'une partie ne se voyait que dans l'écran
+          // d'analyse, jamais dans la liste où l'on cherche sa progression.
+          accuracy: playedWhite ? game.accuracyWhite : game.accuracyBlack,
           playedAt: game.createdAt.toISOString(),
         }
       }),

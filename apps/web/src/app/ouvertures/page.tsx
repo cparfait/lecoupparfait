@@ -18,12 +18,13 @@ import { BookOpen, RotateCcw, Search, Undo2 } from 'lucide-react'
 import clsx from 'clsx'
 import { Chess } from 'chess.js'
 import type { PieceSymbol, Square } from 'chess.js'
-import { ECO_VOLUMES, sanToFrench, type OpeningMatch } from '@coupparfait/core'
+import { ECO_VOLUMES, type OpeningMatch } from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, Card, Chip, EmptyState, Spinner } from '@/components/ui/index.tsx'
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { playMoveSound } from '@/lib/sound.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import { useSan } from '@/lib/notation.ts'
 
 const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
@@ -31,6 +32,7 @@ export default function OpeningsPage() {
   const { book, ready } = useOpeningBook()
   const locale = usePreferences((state) => state.locale)
 
+  const format = useSan()
   const [fen, setFen] = useState(START)
   const [history, setHistory] = useState<string[]>([])
   const [lastMove, setLastMove] = useState<{ from: Square; to: Square } | null>(null)
@@ -39,6 +41,7 @@ export default function OpeningsPage() {
 
   // ── Ouverture de la position courante ───────────────────────────────────
   const current = useMemo(() => book?.lookup(fen, locale) ?? null, [book, fen, locale])
+
 
   const deepest = useMemo(() => {
     if (!book || history.length === 0) return null
@@ -66,27 +69,16 @@ export default function OpeningsPage() {
   /**
    * Continuations théoriques depuis la position courante.
    *
-   * On essaie tous les coups légaux et on garde ceux qui mènent à une position
-   * répertoriée. Trente à quarante essais par position : instantané, et ça
-   * évite d'avoir à indexer le livre par coup.
+   * Le calcul vit dans le livre plutôt qu'ici : il s'arrête de lui-même au-delà
+   * de la profondeur répertoriée, là où essayer les trente coups légaux ne peut
+   * plus rien trouver. On classe du coup le plus tôt nommé au plus tardif —
+   * l'ordre dans lequel on descend naturellement l'arbre.
    */
   const continuations = useMemo(() => {
     if (!book) return []
-    const board = new Chess(fen, { skipValidation: true })
-    const found: Array<{ san: string; opening: OpeningMatch }> = []
-
-    for (const move of board.moves()) {
-      const probe = new Chess(fen, { skipValidation: true })
-      try {
-        probe.move(move)
-      } catch {
-        continue
-      }
-      const match = book.lookup(probe.fen(), locale)
-      if (match) found.push({ san: move, opening: match })
-    }
-
-    return found
+    return book
+      .continuations(fen, locale)
+      .map(({ san, match }) => ({ san, opening: match }))
       .sort((a, b) => a.opening.ply - b.opening.ply || a.san.localeCompare(b.san))
       .slice(0, 14)
   }, [book, fen, locale])
@@ -229,10 +221,10 @@ export default function OpeningsPage() {
                 {history
                   .map((san, index) =>
                     index % 2 === 0
-                      ? `${index / 2 + 1}. ${locale === 'fr' ? sanToFrench(san) : san}`
+                      ? `${index / 2 + 1}. ${format(san)}`
                       : locale === 'fr'
-                        ? sanToFrench(san)
-                        : san,
+                        ? format(san)
+                        : format(san),
                   )
                   .join(' ')}
               </p>
@@ -284,7 +276,7 @@ export default function OpeningsPage() {
                       className="flex w-full items-center gap-2.5 px-4 py-2 text-left transition-colors hover:bg-surface-hover"
                     >
                       <span className="w-14 shrink-0 font-mono text-sm font-semibold">
-                        {locale === 'fr' ? sanToFrench(san) : san}
+                        {format(san)}
                       </span>
                       <span className="w-9 shrink-0 text-[11px] text-faint">{opening.eco}</span>
                       <span className="min-w-0 flex-1 truncate text-[13px] text-muted">

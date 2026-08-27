@@ -17,7 +17,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   BookOpen,
+  BookMarked,
   Crown,
+  Eye,
   Gauge,
   GraduationCap,
   Home,
@@ -48,9 +50,11 @@ const NAV: NavItem[] = [
   { href: '/jouer', labelKey: 'nav.play', icon: Swords, primary: true },
   { href: '/apprendre', labelKey: 'nav.learn', icon: GraduationCap, primary: true },
   { href: '/puzzles', labelKey: 'nav.puzzles', icon: Puzzle, primary: true },
+  { href: '/vision', labelKey: 'nav.vision', icon: Eye },
   { href: '/ouvertures', labelKey: 'nav.openings', icon: BookOpen },
   { href: '/finales', labelKey: 'nav.endgames', icon: Crown },
   { href: '/analyse', labelKey: 'nav.analysis', icon: Gauge, primary: true },
+  { href: '/glossaire', labelKey: 'nav.glossary', icon: BookMarked },
   { href: '/classement', labelKey: 'nav.leaderboard', icon: Trophy },
 ]
 
