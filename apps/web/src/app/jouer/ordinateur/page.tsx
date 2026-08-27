@@ -13,10 +13,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft,
-  ChevronFirst,
-  ChevronLast,
-  ChevronLeft,
-  ChevronRight,
   Eye,
   Flag,
   Handshake,
@@ -27,6 +23,7 @@ import {
   Undo2,
 } from 'lucide-react'
 import clsx from 'clsx'
+import { GameNav } from '@/components/game/GameNav.tsx'
 import { useSan } from '@/lib/notation.ts'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import {
@@ -546,55 +543,8 @@ function GameScreen({
   // consulté, et le coup que le moteur préférait si on l'a déjà calculé.
   const reviewing = !state.isLive
   const reviewedMove = reviewing ? (state.moves[state.cursor] ?? null) : null
-
-  // ── Revoir les coups sans les annuler ───────────────────────────────────
-  //
-  // « Annuler mon coup » efface ; revenir en arrière ne devrait pas. Les deux
-  // gestes étaient pourtant confondus, faute d'un moyen visible de reculer :
-  // la navigation n'existait qu'au bas de la liste des coups, hors du champ de
-  // vision de qui regarde l'échiquier.
   const formatMove = useSan()
-  const atStart = state.cursor < 0
-  const atEnd = state.cursor >= state.moves.length - 1
-  const seek = useCallback((index: number) => goTo(index), [goTo])
 
-  // Les flèches du clavier sont le réflexe acquis partout ailleurs. On laisse
-  // les champs de saisie tranquilles, et les raccourcis système intacts.
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey) return
-      // La cible n'est pas toujours un élément — une touche pressée sans
-      // rien de focalisé vise `document`, qui n'a pas de `closest`.
-      const target = event.target
-      if (
-        target instanceof Element &&
-        target.closest('input, textarea, select, [contenteditable="true"]')
-      ) {
-        return
-      }
-
-      const cursor = cursorRef.current
-      switch (event.key) {
-        case 'ArrowLeft':
-          goTo(cursor - 1)
-          break
-        case 'ArrowRight':
-          goTo(cursor + 1)
-          break
-        case 'Home':
-          goTo(-1)
-          break
-        case 'End':
-          goTo(movesRef.current - 1)
-          break
-        default:
-          return
-      }
-      event.preventDefault()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [goTo])
 
   // Un commentaire reste lisible longtemps après le coup qu'il décrit, mais ses
   // flèches, elles, deviennent fausses dès le coup suivant : elles pointeraient
@@ -856,36 +806,7 @@ function GameScreen({
               className="mr-auto pl-1"
             />
 
-            <div
-              className="flex items-center gap-0.5 rounded-[var(--radius-sm)] border border-line/60 p-0.5"
-              role="group"
-              aria-label="Revoir les coups"
-            >
-              <SeekButton onClick={() => seek(-1)} disabled={atStart} label="Premier coup (Début)">
-                <ChevronFirst size={16} aria-hidden />
-              </SeekButton>
-              <SeekButton
-                onClick={() => seek(state.cursor - 1)}
-                disabled={atStart}
-                label="Coup précédent (flèche gauche)"
-              >
-                <ChevronLeft size={16} aria-hidden />
-              </SeekButton>
-              <SeekButton
-                onClick={() => seek(state.cursor + 1)}
-                disabled={atEnd}
-                label="Coup suivant (flèche droite)"
-              >
-                <ChevronRight size={16} aria-hidden />
-              </SeekButton>
-              <SeekButton
-                onClick={() => seek(state.moves.length - 1)}
-                disabled={atEnd}
-                label="Dernier coup (Fin)"
-              >
-                <ChevronLast size={16} aria-hidden />
-              </SeekButton>
-            </div>
+            <GameNav cursor={state.cursor} count={state.moves.length} onSeek={goTo} />
 
             <Button
               size="sm"
@@ -992,34 +913,3 @@ function GameScreen({
   )
 }
 
-/**
- * Bouton de navigation dans la partie.
- *
- * Volontairement discret : reculer d'un coup n'est pas une action de jeu, et
- * ces boutons voisinent avec « Abandonner ». Ce qu'il ne faut pas confondre,
- * c'est leur effet — d'où l'infobulle qui nomme aussi la touche.
- */
-function SeekButton({
-  onClick,
-  disabled,
-  label,
-  children,
-}: {
-  onClick: () => void
-  disabled?: boolean
-  label: string
-  children: React.ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      title={label}
-      aria-label={label}
-      className="grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink disabled:cursor-default disabled:text-faint/40 disabled:hover:bg-transparent"
-    >
-      {children}
-    </button>
-  )
-}

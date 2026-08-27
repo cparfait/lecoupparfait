@@ -32,12 +32,14 @@ import {
   QUALITY_STYLES,
   formatPgnDate,
   formatScore,
+  type FullGameReport,
   toPgn,
   type MoveQuality,
 } from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { ArrowLegend, LEGEND, legendFor } from '@/components/board/ArrowLegend.tsx'
 import { EvalBar, EvalGraph } from '@/components/game/EvalBar.tsx'
+import { GameNav } from '@/components/game/GameNav.tsx'
 import { MoveList } from '@/components/game/MoveList.tsx'
 import { Button, Card, Chip, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
@@ -599,6 +601,21 @@ function ReviewScreen({
           />
 
           <div className="mt-2 flex items-center gap-2">
+            {/*
+              Ces boutons existaient déjà, mais au bas de la liste des coups —
+              tout en bas à droite, hors de l'écran. Le bouton lecture, qui
+              déroule la partie coup par coup, y était introuvable.
+            */}
+            <GameNav
+              cursor={cursor}
+              count={report.moves.length}
+              onSeek={(ply) => setCursor(Math.max(0, Math.min(report.moves.length - 1, ply)))}
+              autoplay={autoplay}
+              onToggleAutoplay={() => setAutoplay((value) => !value)}
+              // L'analyse commente un coup : elle n'a rien à dire avant le
+              // premier, et s'arrête donc au demi-coup 0.
+              min={0}
+            />
             <Button
               size="sm"
               variant="ghost"
@@ -634,6 +651,20 @@ function ReviewScreen({
 
         {/* ── Panneau latéral ──────────────────────────────────────── */}
         <div className="flex min-h-0 flex-col gap-3">
+          {/*
+            Le bilan détaillé est sous l'échiquier, donc hors de l'écran : on
+            ne voyait qu'une liste de coups, et l'analyse passait pour absente.
+            Ce résumé la met là où le regard se pose.
+          */}
+          <AccuracySummary report={report} />
+
+          {/*
+            Une partie ne se perd pas partout : elle se perd à deux ou trois
+            endroits. Les nommer vaut mieux que de laisser dérouler vingt coups
+            pour les retrouver.
+          */}
+          <KeyMoments report={report} format={format} onSeek={setCursor} />
+
           {/* Verdict du coup courant */}
           {move && style && explanation && (
             <Card glow className="overflow-hidden">
@@ -737,6 +768,144 @@ function ReviewScreen({
 // ─────────────────────────────────────────────────────────────────────────────
 //  Bilan par joueur
 // ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Résumé de l'analyse, en tête de colonne.
+ *
+ * La précision et le compte des fautes sont ce qu'on vient chercher ; ils
+ * n'avaient leur place que dans le bilan détaillé, sous l'échiquier — donc
+ * sous la ligne de flottaison. Ici, deux lignes suffisent à répondre à « qui a
+ * bien joué, et combien de fautes ». Le détail reste plus bas.
+ */
+function AccuracySummary({ report }: { report: FullGameReport }) {
+  return (
+    <Card className="p-3">
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
+        Précision de la partie
+      </p>
+      <div className="space-y-1.5">
+        {(['w', 'b'] as const).map((colour) => (
+          <div key={colour} className="flex items-center gap-2">
+            <span
+              className={clsx(
+                'h-2.5 w-2.5 shrink-0 rounded-full',
+                colour === 'w' ? 'bg-[var(--eval-white)]' : 'bg-[var(--eval-black)] ring-1 ring-line',
+              )}
+              aria-hidden
+            />
+            <span className="w-12 shrink-0 text-[13px] font-medium">
+              {colour === 'w' ? 'Blancs' : 'Noirs'}
+            </span>
+            <span className="w-16 shrink-0 font-display text-lg font-bold tabular-nums leading-none">
+              {report.accuracy[colour].toFixed(0)}
+              <span className="text-[11px] font-normal text-muted"> %</span>
+            </span>
+            <span className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
+              {SUMMARY_QUALITIES.filter((quality) => report.counts[colour][quality] > 0).map(
+                (quality) => {
+                  const style = QUALITY_STYLES[quality]
+                  return (
+                    <span
+                      key={quality}
+                      className="inline-flex items-center gap-0.5 rounded-[var(--radius-sm)] px-1 py-0.5 text-[11px] font-semibold"
+                      style={{
+                        background: `color-mix(in oklab, var(--q-${style.token}) 16%, transparent)`,
+                        color: `var(--q-${style.token})`,
+                      }}
+                      title={style.label.fr}
+                    >
+                      {style.glyph} {report.counts[colour][quality]}
+                    </span>
+                  )
+                },
+              )}
+            </span>
+          </div>
+        ))}
+      </div>
+    </Card>
+  )
+}
+
+/**
+ * Les coups qui ont fait basculer la partie.
+ *
+ * Le graphique d'évaluation les montre déjà, mais sous forme de creux dans une
+ * courbe : encore faut-il savoir la lire. Ici on les nomme, et un clic y mène.
+ */
+function KeyMoments({
+  report,
+  format,
+  onSeek,
+}: {
+  report: FullGameReport
+  format: (san: string) => string
+  onSeek: (ply: number) => void
+}) {
+  const moments = report.turningPoints
+    .map((ply) => report.moves.find((move) => move.ply === ply))
+    .filter((move): move is NonNullable<typeof move> => move != null)
+
+  if (moments.length === 0) {
+    return (
+      <Card className="p-3">
+        <p className="text-[13px] leading-snug text-muted">
+          Aucun coup n’a fait basculer la partie : l’avantage n’a jamais changé de camp
+          brutalement.
+        </p>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="p-3">
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
+        Moments clés
+      </p>
+      <div className="space-y-0.5">
+        {moments.map((move) => {
+          const style = QUALITY_STYLES[move.quality]
+          return (
+            <button
+              key={move.ply}
+              type="button"
+              onClick={() => onSeek(move.ply)}
+              className="flex w-full items-center gap-2 rounded-[var(--radius-sm)] px-1.5 py-1 text-left text-[13px] transition-colors hover:bg-surface-hover"
+            >
+              <span className="w-9 shrink-0 tabular-nums text-faint">
+                {move.moveNumber}
+                {move.color === 'w' ? '.' : '…'}
+              </span>
+              <span className="min-w-0 flex-1 truncate font-medium">{format(move.san)}</span>
+              <span
+                className="shrink-0 font-bold"
+                style={{ color: `var(--q-${style.token})` }}
+                title={style.label.fr}
+              >
+                {style.glyph}
+              </span>
+              {move.winLoss >= 1 && (
+                <span className="w-14 shrink-0 text-right text-[11px] tabular-nums text-faint">
+                  −{move.winLoss.toFixed(0)} pts
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </Card>
+  )
+}
+
+/** Catégories qui apportent une information — les coups corrects vont de soi. */
+const SUMMARY_QUALITIES: MoveQuality[] = [
+  'brilliant',
+  'great',
+  'inaccuracy',
+  'mistake',
+  'blunder',
+  'miss',
+]
 
 function PlayerReport({
   colour,
