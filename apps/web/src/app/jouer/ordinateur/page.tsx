@@ -724,6 +724,7 @@ function GameScreen({
                   onMove={handleMove}
                   lastMove={state.lastMove}
                   checkSquare={state.checkSquare}
+                  checkmate={state.status === 'checkmate'}
                   highlights={(commentaryMode ? commentary?.highlights : undefined) as never}
                   arrows={arrows}
                   onArrowClick={handleArrowClick}

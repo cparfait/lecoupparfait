@@ -462,12 +462,16 @@ function ReviewScreen({
     return list
   }, [move, demo])
 
-  const checkSquare = useMemo(() => {
-    if (!move) return null
+  const check = useMemo(() => {
+    if (!move) return { square: null, mate: false }
     const board = new Chess(move.fenAfter, { skipValidation: true })
-    if (!board.inCheck()) return null
-    return board.findPiece({ type: 'k', color: board.turn() })[0] ?? null
+    if (!board.inCheck()) return { square: null, mate: false }
+    return {
+      square: board.findPiece({ type: 'k', color: board.turn() })[0] ?? null,
+      mate: board.isCheckmate(),
+    }
   }, [move])
+  const checkSquare = check.square
 
   const exportPgn = useCallback(() => {
     const pgn = toPgn(report.moves, {
@@ -563,6 +567,7 @@ function ReviewScreen({
                       : null
                 }
                 checkSquare={demo ? null : checkSquare}
+                checkmate={!demo && check.mate}
                 highlights={demo ? [] : (report.explanations[cursor]?.highlights ?? [])}
                 arrows={arrows}
                 // Cliquer la flèche bleue déroule la suite recommandée : c'est

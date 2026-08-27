@@ -143,6 +143,24 @@ export default function LessonPage() {
     prefetchSpeech(upcomingSay)
   }, [upcomingSay, voiceEnabled])
 
+  /**
+   * Roi maté, s'il y en a un.
+   *
+   * Les leçons de mat se terminent sur la position gagnante, et rien ne la
+   * distinguait de la précédente : c'est précisément le moment qu'on veut voir.
+   */
+  const mate = useMemo(() => {
+    if (!fen) return null
+    try {
+      const board = new Chess(fen, { skipValidation: true })
+      if (!board.isCheckmate()) return null
+      return board.findPiece({ type: 'k', color: board.turn() })[0] ?? null
+    } catch {
+      // Position illustrative sans roi : rien à annoncer.
+      return null
+    }
+  }, [fen])
+
   // ── Coups légaux ──────────────────────────────────────────────────────────
   const legalMoves = useMemo(() => {
     const map = new Map<Square, Square[]>()
@@ -363,6 +381,8 @@ export default function LessonPage() {
             arrows={arrows}
             circles={circles}
             spotlight={step.spotlight}
+            checkSquare={mate}
+            checkmate={mate !== null}
             allowAnnotations={false}
           />
 

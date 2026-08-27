@@ -427,6 +427,7 @@ function EndgameTrainer({
             onMove={play}
             lastMove={state.lastMove}
             checkSquare={state.checkSquare}
+                  checkmate={state.status === 'checkmate'}
           />
         </div>
 

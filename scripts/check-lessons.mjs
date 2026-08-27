@@ -135,6 +135,31 @@ for (const chapter of CHAPTERS) {
         }
       }
 
+      // ── Une consigne sans possibilité d'agir ? ──────────────────────────
+      //
+      // « Place ta dame en d3 » sur une étape d'observation : l'apprenant lit
+      // un ordre, essaie, et rien ne bouge. Il en conclut que l'application est
+      // cassée. Le contenu se relit mal sur ce point — la phrase est correcte
+      // isolément, c'est sa place qui ne l'est pas — mais la détection est
+      // mécanique.
+      if (step.kind === 'show' && typeof step.say === 'string') {
+        // La signature du défaut n'est pas l'impératif seul — « prends le
+        // réflexe de regarder » est un conseil, pas une consigne — mais
+        // l'impératif **qui nomme une case**. Là, l'apprenant essaie.
+        const ordre = new RegExp(
+          String.raw`\b(joue|place|prends|mets|avance|déplace|pousse|capture)\s+(ta|ton|tes|le|la|les|un|une)\s+\S+\s+(en|sur|vers)\s+[a-h][1-8]\b`,
+          'i',
+        )
+        const trouve = ordre.exec(step.say)
+        if (trouve) {
+          warn(
+            lesson,
+            index,
+            `consigne « ${trouve[0]} » sur une étape d'observation : rien n'est jouable ici`,
+          )
+        }
+      }
+
       // ── L'étape suivante est-elle jouable ? ─────────────────────────────
       //
       // Le piège : une étape demande un coup, l'apprenant le joue, et l'étape

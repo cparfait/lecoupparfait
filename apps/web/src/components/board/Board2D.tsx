@@ -71,6 +71,14 @@ export interface Board2DProps {
   lastMove?: { from: Square; to: Square } | null
   /** Case du roi en échec. */
   checkSquare?: Square | null
+  /**
+   * Vrai si cet échec est un mat.
+   *
+   * La partie s'arrête sur ce coup, et rien ne le distinguait jusqu'ici d'un
+   * échec ordinaire — même halo, même silence visuel. Or c'est le seul moment
+   * où l'échiquier a quelque chose à annoncer.
+   */
+  checkmate?: boolean
   /** Cases mises en avant par l'analyse (motifs tactiques). */
   highlights?: Square[]
   /** Flèches permanentes (meilleur coup, menaces…). */
@@ -129,6 +137,7 @@ export const Board2D = memo(function Board2D({
   onPremove,
   lastMove,
   checkSquare,
+  checkmate = false,
   highlights = [],
   arrows = [],
   circles = [],
@@ -555,13 +564,32 @@ export const Board2D = memo(function Board2D({
 
           {prefs.highlightCheck && checkSquare && (
             <div
-              className="absolute"
+              className={clsx('absolute', checkmate && 'animate-mate-glow')}
               style={{
                 ...percentBox(checkSquare, orientation),
-                background: `radial-gradient(circle, ${skin.check} 12%, transparent 72%)`,
+                background: `radial-gradient(circle, ${skin.check} ${checkmate ? '22%' : '12%'}, transparent 72%)`,
               }}
             />
           )}
+
+          {/* Trois ondes décalées partent du roi maté. La clé les rejoue quand
+              le mat change de case — en analyse, on navigue d'une partie à
+              l'autre sans que le composant soit démonté. */}
+          {checkSquare &&
+            checkmate &&
+            prefs.effects === 'high' &&
+            [0, 1, 2].map((index) => (
+              <div
+                key={`${checkSquare}-${index}`}
+                className="animate-mate-ring absolute rounded-full"
+                style={{
+                  ...percentBox(checkSquare, orientation),
+                  border: `2px solid ${skin.check}`,
+                  animationDelay: `${index * 260}ms`,
+                }}
+                aria-hidden
+              />
+            ))}
         </div>
 
         {/* ── Coordonnées ───────────────────────────────────────────────── */}

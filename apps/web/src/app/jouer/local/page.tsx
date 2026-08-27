@@ -142,6 +142,7 @@ export default function LocalGamePage() {
               onMove={handleMove}
               lastMove={state.lastMove}
               checkSquare={state.checkSquare}
+                  checkmate={state.status === 'checkmate'}
               arrows={arrows}
               highlights={commentaryMode ? (commentary?.highlights ?? []) : []}
             />

@@ -110,19 +110,24 @@ export const matesChapter: Chapter = {
           say: "Roi et dame contre roi seul. La méthode : on rétrécit la cage autour du roi adverse avec la dame, puis on amène son propre roi pour donner le coup final.",
         },
         {
+          // Le texte disait « place ta dame » sur une étape où rien n'est
+          // jouable, et parlait d'un cavalier sur un échiquier qui n'en a
+          // aucun. On cherchait la pièce au lieu de voir la figure.
           kind: 'show',
-          say: "Le truc du cavalier : place ta dame à un saut de cavalier du roi adverse. Elle lui retire toutes ses cases sauf une poignée, sans jamais risquer le pat.",
+          say: "Une astuce de repérage, et elle porte un nom trompeur : **le saut de cavalier**. Il n'y a aucun cavalier ici — c'est de sa **forme de déplacement** qu'on parle, le L. Les huit cases marquées sont à un saut de cavalier du roi noir. Une dame posée sur l'une d'elles lui retire presque tout, sans jamais l'enfermer complètement : c'est ce qui évite le pat.",
+          highlight: ['d3', 'f3', 'c4', 'g4', 'c6', 'g6', 'd7', 'f7'],
         },
         {
           kind: 'play',
-          say: "Le roi noir est en e5. Joue ta dame en d3 : c'est un saut de cavalier depuis e5.",
+          say: "Parmi ces huit cases, ta dame en d1 n'en atteint que quatre : d3, f3, g4 et d7. Prends **d3** — deux cases droit devant elle.",
           instruction: 'Joue la dame en d3',
           answers: ['Qd3'],
-          hint: 'La dame descend d’une case sur sa colonne… non, elle va en d3, deux cases plus haut.',
+          hint: 'La dame monte de deux cases sur sa colonne : de d1 à d3.',
+          highlight: ['d3'],
         },
         {
           kind: 'show',
-          say: "Parfait. Le roi noir est maintenant confiné. Tu répètes l'opération : à chaque fois qu'il bouge, tu replaces ta dame à un saut de cavalier. La cage se referme d'elle-même.",
+          say: "Regarde le résultat : le roi noir avait huit cases, il n'en a plus que trois — e6, f6 et f4. Et il n'est pas en échec, donc pas de pat. Tu répètes l'opération à chaque fois qu'il bouge, et la cage se referme d'elle-même.",
         },
         {
           kind: 'show',
