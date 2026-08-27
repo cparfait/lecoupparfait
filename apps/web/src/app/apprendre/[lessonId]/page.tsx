@@ -19,7 +19,7 @@
  *  - la progression est enregistrée à chaque étape, pas seulement à la fin.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import {
@@ -56,6 +56,18 @@ type Feedback = { kind: 'correct' | 'wrong' | 'revealed'; text: string } | null
 /** Délai avant que l'adversaire ne joue, pour qu'on voie le coup arriver. */
 const REPLY_DELAY_MS = 650
 
+/**
+ * Temps laissé sur la position après un coup juste, avant d'enchaîner.
+ *
+ * Cliquer sur « Continuer » quand on vient de trouver le bon coup n'apprend
+ * rien et casse le rythme : on répond, on attend, on clique, on recommence.
+ * L'étape suivante s'enchaîne donc d'elle-même — mais pas instantanément : il
+ * faut voir le « Exact ! », et surtout voir arriver la réponse de l'adversaire
+ * quand il y en a une.
+ */
+const ADVANCE_DELAY_MS = 950
+const ADVANCE_WITH_REPLY_MS = REPLY_DELAY_MS + 1100
+
 export default function LessonPage() {
   const params = useParams<{ lessonId: string }>()
   const router = useRouter()
@@ -75,6 +87,8 @@ export default function LessonPage() {
   const [solved, setSolved] = useState(false)
   const [attempts, setAttempts] = useState(0)
   const [revealArrow, setRevealArrow] = useState<Arrow | null>(null)
+  /** Enchaînement en attente, annulé dès qu'on navigue à la main. */
+  const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const step: LessonStep | null = lesson?.steps[stepIndex] ?? null
   const isLast = lesson ? stepIndex >= lesson.steps.length - 1 : false
@@ -93,6 +107,12 @@ export default function LessonPage() {
     setRevealArrow(null)
 
     saveProgress(lesson.id, stepIndex + 1, false)
+
+    // Un enchaînement resté en attente sauterait l'étape qu'on vient d'ouvrir.
+    if (advanceTimer.current) {
+      clearTimeout(advanceTimer.current)
+      advanceTimer.current = null
+    }
 
     // Étape d'observation portant une réponse adverse : elle doit être jouée
     // automatiquement, sinon le coach commente une position qui n'est pas à
@@ -222,6 +242,15 @@ export default function LessonPage() {
       setSolved(true)
       setFeedback({ kind: 'correct', text: 'Exact !' })
 
+      // Enchaînement automatique, sauf sur la dernière étape : terminer une
+      // leçon et partir vers la suivante est une décision, pas une conséquence.
+      if (!isLast) {
+        advanceTimer.current = setTimeout(
+          () => setStepIndex((current) => current + 1),
+          step.reply ? ADVANCE_WITH_REPLY_MS : ADVANCE_DELAY_MS,
+        )
+      }
+
       // Réponse de l'adversaire, après une pause pour qu'on la voie arriver.
       if (step.reply) {
         const positionAfterMove = board.fen()
@@ -240,7 +269,7 @@ export default function LessonPage() {
         }, REPLY_DELAY_MS)
       }
     },
-    [step, lesson, solved, fen, stepIndex],
+    [step, lesson, solved, fen, stepIndex, isLast],
   )
 
   // ── Montrer la solution ───────────────────────────────────────────────────

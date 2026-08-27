@@ -552,11 +552,18 @@ function cleanForSpeech(text: string): string {
     .replace(/[«»"]/g, '')
     .replace(/\bO-O-O\b/g, 'grand roque')
     .replace(/\bO-O\b/g, 'petit roque')
+    // Les annotations doublées n'existent pas en français courant : on peut
+    // les traduire sans risque.
     .replace(/\?!/g, ', imprécision,')
     .replace(/!!/g, ', coup brillant,')
     .replace(/\?\?/g, ', grosse erreur,')
-    .replace(/(?<=\s)\?(?=\s|$)/g, ', erreur,')
-    .replace(/(?<=\s)!(?=\s|$)/g, ', très bon coup,')
+    // Les simples, en revanche, se confondent avec la ponctuation. Le français
+    // met une espace avant « ? » et « ! », si bien que « qu'est-ce qu'il
+    // attaque ? » était lu « qu'est-ce qu'il attaque, erreur » et « Bravo ! »
+    // devenait « Bravo, très bon coup ». On n'annote donc que ce qui suit
+    // immédiatement un coup, sans espace : « Cf3? », « e4! ».
+    .replace(/([a-h][1-8])\?(?!\?)/g, '$1, erreur,')
+    .replace(/([a-h][1-8])!(?!!)/g, '$1, très bon coup,')
     .replace(/#/g, ' échec et mat ')
     .replace(/\+/g, ' échec ')
     .replace(/−/g, 'moins ')
