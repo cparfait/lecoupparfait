@@ -272,7 +272,16 @@ export default function OpeningsPage() {
         {/* ── Panneau de droite ────────────────────────────────────── */}
         <div className="flex min-w-0 flex-col gap-3">
           {/* Ce que les joueurs jouent vraiment ici */}
-          {stats && <PopularMoves fen={fen} band={band} onBand={setBand} onPlay={playSan} format={format} />}
+          {stats && (
+            <PopularMoves
+              fen={fen}
+              band={band}
+              onBand={setBand}
+              onPlay={playSan}
+              format={format}
+              maxPlies={stats.plies}
+            />
+          )}
 
           {/* Continuations */}
           {continuations.length > 0 && (
@@ -427,15 +436,23 @@ function PopularMoves({
   onBand,
   onPlay,
   format,
+  maxPlies,
 }: {
   fen: string
   band: StatsBand
   onBand: (band: StatsBand) => void
   onPlay: (san: string) => void
   format: (san: string) => string
+  /** Profondeur couverte par les données, en demi-coups. */
+  maxPlies: number
 }) {
   const moves = useMoveStats(fen, band)
   const total = moves.reduce((sum, move) => sum + move.games, 0)
+
+  // Demi-coups déjà joués, lus dans la FEN : numéro de coup et trait suffisent.
+  const parts = fen.split(' ')
+  const ply = (Number(parts[5] ?? '1') - 1) * 2 + (parts[1] === 'b' ? 1 : 0)
+  const tropLoin = ply >= maxPlies
 
   return (
     <Card className="overflow-hidden">
@@ -464,9 +481,23 @@ function PopularMoves({
       </div>
 
       {moves.length === 0 ? (
+        // Deux raisons très différentes de n'avoir rien à dire, et il faut les
+        // distinguer : « les données s'arrêtent ici » se comprend et se prévoit,
+        // « trop peu de parties » veut dire qu'on quitte les sentiers battus.
         <p className="px-4 py-4 text-[13px] text-muted">
-          Trop peu de parties à ce niveau depuis cette position pour dire quoi que ce soit
-          d’honnête.
+          {tropLoin ? (
+            <>
+              Les statistiques couvrent les{' '}
+              <strong className="font-semibold text-ink">{maxPlies / 2} premiers coups</strong>.
+              Au-delà, chaque position devient trop rare pour qu’un pourcentage veuille dire
+              quelque chose.
+            </>
+          ) : (
+            <>
+              Moins de quarante parties à ce niveau depuis cette position : trop peu pour dire
+              quoi que ce soit d’honnête. Tu es déjà sorti des sentiers battus.
+            </>
+          )}
         </p>
       ) : (
         <>
@@ -523,8 +554,9 @@ function PopularMoves({
           </ul>
 
           <p className="border-t border-line/60 px-4 py-2 text-[11px] text-faint">
-            {total.toLocaleString('fr-FR')} parties · le second pourcentage est le score du
-            camp au trait, nulle comptée pour un demi-point.
+            {total.toLocaleString('fr-FR')} parties · coup {Math.floor(ply / 2) + 1} sur{' '}
+            {maxPlies / 2} couverts · le second pourcentage est le score du camp au trait,
+            nulle comptée pour un demi-point.
           </p>
         </>
       )}
