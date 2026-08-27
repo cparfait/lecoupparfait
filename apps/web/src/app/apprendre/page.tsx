@@ -13,9 +13,9 @@
  * barrière de progression n'apprend rien à personne, elle décourage.
  */
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Check, Clock, Play } from 'lucide-react'
+import { Check, ChevronDown, Clock, Play } from 'lucide-react'
 import clsx from 'clsx'
 import {
   CHAPTERS,
@@ -32,12 +32,58 @@ const LEVEL_LABELS = {
   advanced: { label: 'Confirmé', tone: 'danger' as const },
 }
 
+/** Chapitres repliés, conservés d'une visite à l'autre. */
+const COLLAPSED_KEY = 'coupparfait.chaptersCollapsed'
+
 export default function LearnPage() {
   const [progress, setProgress] = useState<LessonProgress>({})
 
+  /**
+   * Chapitres repliés.
+   *
+   * Sept chapitres et trente-six leçons font une page où l'on descend
+   * longtemps pour retrouver celle qu'on suivait. Le choix est conservé : on
+   * replie une fois ce qu'on a fini, et on ne le revoit plus.
+   */
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
+
   // La progression vit dans le navigateur : on ne peut la lire qu'après le
   // montage, sinon le rendu serveur et le rendu client diffèrent.
-  useEffect(() => setProgress(loadProgress()), [])
+  useEffect(() => {
+    setProgress(loadProgress())
+    try {
+      setCollapsed(JSON.parse(localStorage.getItem(COLLAPSED_KEY) ?? '{}'))
+    } catch {
+      // Stockage illisible : tous les chapitres restent ouverts.
+    }
+  }, [])
+
+  const toggle = useCallback((id: string) => {
+    setCollapsed((current) => {
+      const next = { ...current, [id]: !current[id] }
+      try {
+        localStorage.setItem(COLLAPSED_KEY, JSON.stringify(next))
+      } catch {
+        // Sans stockage, le pliage vaut pour la visite en cours.
+      }
+      return next
+    })
+  }, [])
+
+  const allCollapsed = CHAPTERS.every((chapter) => collapsed[chapter.id])
+  const toggleAll = useCallback(() => {
+    setCollapsed(() => {
+      const next = Object.fromEntries(
+        CHAPTERS.map((chapter) => [chapter.id, !allCollapsed]),
+      )
+      try {
+        localStorage.setItem(COLLAPSED_KEY, JSON.stringify(next))
+      } catch {
+        // Idem.
+      }
+      return next
+    })
+  }, [allCollapsed])
 
   const overall = overallProgress(progress)
 
@@ -72,9 +118,23 @@ export default function LearnPage() {
       )}
 
       {/* ── Chapitres ────────────────────────────────────────────────── */}
-      <div className="mt-10 space-y-14">
+      <div className="mt-10 flex items-baseline justify-between gap-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
+          {CHAPTERS.length} chapitres
+        </p>
+        <button
+          type="button"
+          onClick={toggleAll}
+          className="text-[13px] font-medium text-accent transition-colors hover:underline"
+        >
+          {allCollapsed ? 'Tout déplier' : 'Tout replier'}
+        </button>
+      </div>
+
+      <div className="mt-4 space-y-14">
         {CHAPTERS.map((chapter, chapterIndex) => {
           const done = chapter.lessons.filter((lesson) => progress[lesson.id]?.completed).length
+          const replie = Boolean(collapsed[chapter.id])
 
           return (
             <section
@@ -96,7 +156,13 @@ export default function LearnPage() {
               )}
 
               <header className="mb-5">
-                <div className="flex items-center gap-3.5">
+                <button
+                  type="button"
+                  onClick={() => toggle(chapter.id)}
+                  aria-expanded={!replie}
+                  aria-controls={`chapitre-${chapter.id}`}
+                  className="flex w-full items-center gap-3.5 rounded-[var(--radius)] text-left transition-colors hover:bg-surface-hover"
+                >
                   <span
                     className="grid h-13 w-13 shrink-0 place-items-center rounded-[var(--radius)] text-2xl"
                     style={{
@@ -129,14 +195,29 @@ export default function LearnPage() {
                   <Chip tone={LEVEL_LABELS[chapter.level].tone} className="shrink-0 self-start">
                     {LEVEL_LABELS[chapter.level].label}
                   </Chip>
-                </div>
 
+                  <ChevronDown
+                    size={20}
+                    aria-hidden
+                    className={clsx(
+                      'shrink-0 self-start text-faint transition-transform duration-200',
+                      replie && '-rotate-90',
+                    )}
+                  />
+                </button>
+
+                {/* La description reste visible replié : elle dit ce que le
+                    chapitre apprend, et c'est sur elle qu'on choisit d'ouvrir. */}
                 <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-muted">
                   {chapter.description}
                 </p>
               </header>
 
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <div
+                id={`chapitre-${chapter.id}`}
+                hidden={replie}
+                className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
+              >
                 {chapter.lessons.map((lesson) => {
                   const state = progress[lesson.id]
                   const started = (state?.steps ?? 0) > 0
