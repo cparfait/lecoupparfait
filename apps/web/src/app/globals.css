@@ -1,0 +1,644 @@
+@import 'tailwindcss';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GAMBIT — SYSTÈME DE DESIGN
+
+   Un seul jeu de variables sémantiques, quatre habillages. Aucun composant ne
+   connaît jamais une couleur littérale : il demande `--surface` ou `--accent`,
+   et le thème actif décide. Changer de thème est donc instantané et ne
+   provoque aucun re-rendu React.
+
+   Thèmes :
+     aurora    (défaut)  nuit profonde, verre dépoli, néons violet/menthe
+     club                chêne fumé, ivoire, laiton — ambiance club privé
+     clair               minimal suisse, blanc cassé et encre
+     contraste           noir et blanc purs, ratios AAA, zéro effet
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ───────────────────────────────────────────────────────────────────────────
+   1. Thème AURORA — le défaut
+   ─────────────────────────────────────────────────────────────────────────── */
+
+:root,
+[data-theme='aurora'] {
+  color-scheme: dark;
+
+  /* Fonds, du plus profond au plus proche de l'œil */
+  --bg: #07070c;
+  --bg-deep: #04040a;
+  --bg-elev: #0d0d17;
+  --surface: rgb(255 255 255 / 0.045);
+  --surface-hover: rgb(255 255 255 / 0.075);
+  --surface-strong: rgb(255 255 255 / 0.1);
+  --border: rgb(255 255 255 / 0.09);
+  --border-strong: rgb(255 255 255 / 0.17);
+
+  /* Texte */
+  --text: #f2f1f8;
+  --text-muted: #a9a7bd;
+  --text-faint: #6d6b83;
+  --text-inverse: #07070c;
+
+  /* Accents */
+  --accent: #7c5cff;
+  --accent-soft: #9b83ff;
+  --accent-deep: #5b3ce0;
+  --accent-contrast: #ffffff;
+  --accent-2: #00e5a8;
+  --accent-3: #ff7a59;
+
+  /* Halo lumineux caractéristique du thème */
+  --glow: 0 0 0 1px rgb(124 92 255 / 0.25), 0 0 32px -4px rgb(124 92 255 / 0.45);
+  --glow-2: 0 0 28px -6px rgb(0 229 168 / 0.5);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow: 0 8px 30px -8px rgb(0 0 0 / 0.7);
+  --shadow-lg: 0 30px 80px -20px rgb(0 0 0 / 0.85);
+
+  /* Dégradé d'ambiance de la page */
+  --aurora-1: rgb(124 92 255 / 0.16);
+  --aurora-2: rgb(0 229 168 / 0.1);
+  --aurora-3: rgb(255 122 89 / 0.07);
+
+  /* Échiquier */
+  --sq-light: #dfd7ea;
+  --sq-dark: #6b5f8c;
+  --sq-border: rgb(255 255 255 / 0.08);
+  --board-frame: rgb(255 255 255 / 0.06);
+  --piece-white: #fbfaff;
+  --piece-white-edge: #b9b4cc;
+  --piece-black: #1a1726;
+  --piece-black-edge: #4a4463;
+
+  /* Matériaux 3D */
+  --mat-white: #f4f1fa;
+  --mat-black: #232032;
+  --mat-board-light: #e0d8ec;
+  --mat-board-dark: #61548a;
+  --mat-metal: #7c5cff;
+  --env-intensity: 0.9;
+
+  --blur: 22px;
+  --radius: 18px;
+  --radius-sm: 10px;
+  --radius-lg: 28px;
+
+  --font-display: var(--font-space-grotesk), 'Inter', system-ui, sans-serif;
+  --font-body: var(--font-inter), system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   2. Thème CLUB — bois, ivoire, laiton
+   ─────────────────────────────────────────────────────────────────────────── */
+
+[data-theme='club'] {
+  color-scheme: dark;
+
+  --bg: #14100b;
+  --bg-deep: #0d0a07;
+  --bg-elev: #1d1710;
+  --surface: rgb(232 220 200 / 0.05);
+  --surface-hover: rgb(232 220 200 / 0.085);
+  --surface-strong: rgb(232 220 200 / 0.12);
+  --border: rgb(201 162 39 / 0.18);
+  --border-strong: rgb(201 162 39 / 0.36);
+
+  --text: #f0e7d6;
+  --text-muted: #b6a68c;
+  --text-faint: #7d7059;
+  --text-inverse: #14100b;
+
+  --accent: #c9a227;
+  --accent-soft: #e2be48;
+  --accent-deep: #9a7a15;
+  --accent-contrast: #14100b;
+  --accent-2: #7fa87c;
+  --accent-3: #a33b2a;
+
+  --glow: 0 0 0 1px rgb(201 162 39 / 0.3), 0 2px 24px -6px rgb(201 162 39 / 0.35);
+  --glow-2: 0 0 24px -8px rgb(163 59 42 / 0.5);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5);
+  --shadow: 0 10px 34px -10px rgb(0 0 0 / 0.8);
+  --shadow-lg: 0 34px 90px -24px rgb(0 0 0 / 0.9);
+
+  --aurora-1: rgb(201 162 39 / 0.1);
+  --aurora-2: rgb(163 59 42 / 0.08);
+  --aurora-3: rgb(127 168 124 / 0.05);
+
+  --sq-light: #e8dcc8;
+  --sq-dark: #8a6a45;
+  --sq-border: rgb(0 0 0 / 0.22);
+  --board-frame: #3a2b1c;
+  --piece-white: #f5ecdb;
+  --piece-white-edge: #b09a76;
+  --piece-black: #2a2018;
+  --piece-black-edge: #5c4832;
+
+  --mat-white: #f0e4cd;
+  --mat-black: #2b2119;
+  --mat-board-light: #e5d6bb;
+  --mat-board-dark: #7d5f3e;
+  --mat-metal: #c9a227;
+  --env-intensity: 0.75;
+
+  --blur: 14px;
+  --radius: 12px;
+  --radius-sm: 7px;
+  --radius-lg: 20px;
+
+  --font-display: var(--font-playfair), Georgia, serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   3. Thème CLAIR — minimal, lisible en plein soleil
+   ─────────────────────────────────────────────────────────────────────────── */
+
+[data-theme='clair'] {
+  color-scheme: light;
+
+  --bg: #f7f7f9;
+  --bg-deep: #eeeef2;
+  --bg-elev: #ffffff;
+  --surface: rgb(255 255 255 / 0.85);
+  --surface-hover: #ffffff;
+  --surface-strong: #ffffff;
+  --border: rgb(16 16 24 / 0.1);
+  --border-strong: rgb(16 16 24 / 0.2);
+
+  --text: #14141c;
+  --text-muted: #55556a;
+  --text-faint: #8a8a9c;
+  --text-inverse: #ffffff;
+
+  --accent: #5b3ce0;
+  --accent-soft: #7c5cff;
+  --accent-deep: #4429b8;
+  --accent-contrast: #ffffff;
+  --accent-2: #00926e;
+  --accent-3: #d4562f;
+
+  --glow: 0 0 0 1px rgb(91 60 224 / 0.16);
+  --glow-2: 0 0 0 1px rgb(0 146 110 / 0.2);
+  --shadow-sm: 0 1px 2px rgb(16 16 24 / 0.06);
+  --shadow: 0 6px 24px -8px rgb(16 16 24 / 0.16);
+  --shadow-lg: 0 24px 60px -20px rgb(16 16 24 / 0.22);
+
+  --aurora-1: rgb(91 60 224 / 0.07);
+  --aurora-2: rgb(0 146 110 / 0.05);
+  --aurora-3: rgb(212 86 47 / 0.04);
+
+  --sq-light: #eeeef4;
+  --sq-dark: #8e93b8;
+  --sq-border: rgb(16 16 24 / 0.07);
+  --board-frame: rgb(16 16 24 / 0.07);
+  --piece-white: #ffffff;
+  --piece-white-edge: #9a9ab0;
+  --piece-black: #24243a;
+  --piece-black-edge: #6a6a88;
+
+  --mat-white: #fbfbfe;
+  --mat-black: #2a2a40;
+  --mat-board-light: #eeeef4;
+  --mat-board-dark: #8e93b8;
+  --mat-metal: #5b3ce0;
+  --env-intensity: 1.1;
+
+  --blur: 12px;
+  --radius: 16px;
+  --radius-sm: 9px;
+  --radius-lg: 26px;
+
+  --font-display: var(--font-space-grotesk), 'Inter', system-ui, sans-serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   4. Thème CONTRASTE — accessibilité AAA, aucun effet décoratif
+   ─────────────────────────────────────────────────────────────────────────── */
+
+[data-theme='contraste'] {
+  color-scheme: dark;
+
+  --bg: #000000;
+  --bg-deep: #000000;
+  --bg-elev: #0a0a0a;
+  --surface: #101010;
+  --surface-hover: #1c1c1c;
+  --surface-strong: #262626;
+  --border: #6a6a6a;
+  --border-strong: #ffffff;
+
+  --text: #ffffff;
+  --text-muted: #d8d8d8;
+  --text-faint: #b0b0b0;
+  --text-inverse: #000000;
+
+  --accent: #ffe600;
+  --accent-soft: #fff35c;
+  --accent-deep: #c9b600;
+  --accent-contrast: #000000;
+  --accent-2: #00ff9d;
+  --accent-3: #ff6b4a;
+
+  --glow: 0 0 0 2px #ffe600;
+  --glow-2: 0 0 0 2px #00ff9d;
+  --shadow-sm: none;
+  --shadow: none;
+  --shadow-lg: none;
+
+  --aurora-1: transparent;
+  --aurora-2: transparent;
+  --aurora-3: transparent;
+
+  --sq-light: #e8e8e8;
+  --sq-dark: #3c3c3c;
+  --sq-border: #7a7a7a;
+  --board-frame: #ffffff;
+  --piece-white: #ffffff;
+  --piece-white-edge: #000000;
+  --piece-black: #000000;
+  --piece-black-edge: #ffffff;
+
+  --mat-white: #ffffff;
+  --mat-black: #0a0a0a;
+  --mat-board-light: #e8e8e8;
+  --mat-board-dark: #3c3c3c;
+  --mat-metal: #ffe600;
+  --env-intensity: 1;
+
+  --blur: 0px;
+  --radius: 6px;
+  --radius-sm: 4px;
+  --radius-lg: 8px;
+
+  --font-display: var(--font-inter), system-ui, sans-serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COULEURS DE CLASSIFICATION DES COUPS
+   Communes à tous les thèmes : un joueur doit reconnaître « gaffe rouge » où
+   qu'il soit. Seules les luminosités s'adaptent au thème clair.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --q-brilliant: #26d7c4;
+  --q-great: #4a9eff;
+  --q-best: #7ac74f;
+  --q-excellent: #86c65a;
+  --q-good: #9fbf6b;
+  --q-book: #a58a6b;
+  --q-forced: #8b8b9e;
+  --q-inaccuracy: #f0b429;
+  --q-mistake: #f07d29;
+  --q-blunder: #e5484d;
+  --q-miss: #d4386f;
+
+  --eval-white: #f2f1f8;
+  --eval-black: #16141f;
+}
+
+[data-theme='clair'] {
+  --q-brilliant: #0d9488;
+  --q-great: #2563eb;
+  --q-best: #4d8c22;
+  --q-excellent: #5b9128;
+  --q-good: #6d8f3a;
+  --q-book: #8a6d4d;
+  --q-forced: #6b6b7d;
+  --q-inaccuracy: #c07f0a;
+  --q-mistake: #d1610f;
+  --q-blunder: #c4262b;
+  --q-miss: #b01e52;
+
+  --eval-white: #ffffff;
+  --eval-black: #24243a;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PONT VERS TAILWIND
+   Rend les variables sémantiques utilisables comme classes utilitaires :
+   `bg-surface`, `text-muted`, `border-strong`, `text-blunder`…
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-deep: var(--bg-deep);
+  --color-bg-elev: var(--bg-elev);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-strong: var(--surface-strong);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+
+  --color-ink: var(--text);
+  --color-muted: var(--text-muted);
+  --color-faint: var(--text-faint);
+  --color-inverse: var(--text-inverse);
+
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-deep: var(--accent-deep);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-accent-2: var(--accent-2);
+  --color-accent-3: var(--accent-3);
+
+  --color-brilliant: var(--q-brilliant);
+  --color-great: var(--q-great);
+  --color-best: var(--q-best);
+  --color-excellent: var(--q-excellent);
+  --color-good: var(--q-good);
+  --color-book: var(--q-book);
+  --color-forced: var(--q-forced);
+  --color-inaccuracy: var(--q-inaccuracy);
+  --color-mistake: var(--q-mistake);
+  --color-blunder: var(--q-blunder);
+  --color-miss: var(--q-miss);
+
+  --radius-token: var(--radius);
+  --radius-token-sm: var(--radius-sm);
+  --radius-token-lg: var(--radius-lg);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-body);
+
+  --shadow-soft: var(--shadow);
+  --shadow-deep: var(--shadow-lg);
+
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-shimmer: shimmer 2.4s linear infinite;
+  --animate-pulse-ring: pulse-ring 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  /* Empêche le zoom involontaire au double-tap sur mobile pendant une partie. */
+  touch-action: manipulation;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'ss01';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent) 35%, transparent);
+  color: var(--text);
+}
+
+/* Focus visible cohérent partout — condition d'accessibilité au clavier. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Barres de défilement discrètes mais présentes */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOND D'AMBIANCE
+   Trois taches de couleur floutées, animées très lentement. Coût nul : ce sont
+   des dégradés radiaux, pas des éléments animés.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ambient-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(80ch 60ch at 15% -10%, var(--aurora-1), transparent 65%),
+    radial-gradient(70ch 55ch at 90% 5%, var(--aurora-2), transparent 60%),
+    radial-gradient(60ch 60ch at 50% 105%, var(--aurora-3), transparent 60%),
+    var(--bg);
+}
+
+/* Grain de film : casse les dégradés en bandes et donne de la matière. */
+.ambient-backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+[data-effects='low'] .ambient-backdrop::after {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPOSANTS RÉCURRENTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@utility glass {
+  background: var(--surface);
+  backdrop-filter: blur(var(--blur)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+@utility glass-strong {
+  background: var(--surface-strong);
+  backdrop-filter: blur(var(--blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(160%);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+}
+
+/* Bordure en dégradé : un fond dégradé masqué pour ne laisser que le contour. */
+@utility gradient-ring {
+  position: relative;
+}
+.gradient-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(140deg, var(--accent), transparent 45%, var(--accent-2));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+@utility text-gradient {
+  background: linear-gradient(120deg, var(--text) 20%, var(--accent-soft) 55%, var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 55%, transparent); }
+  70% { box-shadow: 0 0 0 14px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@keyframes piece-drop {
+  0% { transform: scale(1.22); filter: brightness(1.3); }
+  60% { transform: scale(0.97); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+@keyframes square-flash {
+  0% { opacity: 0; transform: scale(0.7); }
+  35% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0; transform: scale(1.35); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up { animation: slide-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-piece-drop { animation: piece-drop 0.24s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* Sillage du coup qui vient d'être joué.
+   Le trait apparaît sur la trajectoire puis s'efface : on voit *d'où* la pièce
+   vient, ce que deux cases colorées seules ne racontent pas. Il se dessine de
+   la case de départ vers celle d'arrivée grâce au tracé pointillé animé. */
+@keyframes move-trail {
+  0%   { opacity: 0;    stroke-dashoffset: var(--trail-length); }
+  18%  { opacity: 0.55; }
+  55%  { opacity: 0.45; stroke-dashoffset: 0; }
+  100% { opacity: 0;    stroke-dashoffset: 0; }
+}
+
+.animate-move-trail {
+  animation: move-trail 700ms cubic-bezier(0.22, 0.9, 0.25, 1) forwards;
+}
+
+/* Les personnes qui demandent moins d'animations n'ont pas à subir celle-ci. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-move-trail { animation: none; opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RÉGLAGE « PERFORMANCE »
+   Désactive tout ce qui coûte du GPU. Appliqué automatiquement sur machine
+   lente, ou manuellement depuis les préférences.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+[data-effects='low'] .glass,
+[data-effects='low'] .glass-strong {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: var(--bg-elev);
+}
+
+[data-effects='low'] .gradient-ring::before { display: none; }
+
+[data-effects='low'] * {
+  box-shadow: none !important;
+}
+
+/* Respect du réglage système : personne ne devrait subir des animations. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Zone sûre des téléphones à encoche. */
+.safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
+.safe-top { padding-top: max(env(safe-area-inset-top), 0.5rem); }
+
+/* En mode application installée, on masque tout ce qui rappelle un navigateur. */
+@media (display-mode: standalone) {
+  .browser-only { display: none; }
+}
+
+/* Empêche la sélection de texte pendant un glisser-déposer de pièce. */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LISTES DÉROULANTES NATIVES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Le menu d'un `select` est dessiné par le système, hors de la page : il ne
+   sait rien du fond translucide sur lequel le champ est posé. Avec un fond en
+   blanc à 4,5 %, la liste ouverte se retrouvait en texte clair sur clair,
+   illisible. On impose donc une couleur **opaque** au champ et à ses options. */
+select {
+  background-color: var(--bg-elev);
+  color: var(--text);
+}
+
+select option,
+select optgroup {
+  background-color: var(--bg-elev);
+  color: var(--text);
+}
+
+/* Firefox n'hérite pas toujours la couleur pour l'option survolée. */
+select option:checked,
+select option:hover {
+  background-color: var(--surface-strong);
+  color: var(--text);
+}

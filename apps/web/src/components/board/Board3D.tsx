@@ -1,0 +1,584 @@
+'use client'
+
+/**
+ * Échiquier 3D.
+ *
+ * Même contrat que la vue 2D — mêmes propriétés, mêmes rappels — pour qu'on
+ * puisse basculer de l'une à l'autre en pleine partie sans rien réinitialiser.
+ *
+ * Choix techniques :
+ *  - **Aucune ressource externe.** Pas d'environnement HDR téléchargé : la
+ *    lumière vient de trois sources placées à la main et d'un dégradé de fond.
+ *    L'application reste donc pleinement fonctionnelle hors ligne et
+ *    auto-hébergée.
+ *  - **Les pièces glissent, elles ne sautent pas.** Chaque déplacement est
+ *    interpolé, avec un léger arc pour le cavalier — qui saute vraiment.
+ *  - **La caméra reste dressée.** L'orbite est bridée : on ne peut ni passer
+ *    sous le plateau ni le regarder à plat, deux angles où l'on ne joue plus.
+ */
+
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import type { ThreeEvent } from '@react-three/fiber'
+import { ContactShadows, OrbitControls, RoundedBox } from '@react-three/drei'
+import * as THREE from 'three'
+import type { Color, PieceSymbol, Square } from 'chess.js'
+import {
+  MATERIALS,
+  PIECE_HEIGHTS,
+  pieceGeometry,
+  type Piece3DType,
+} from './pieceGeometry.ts'
+import { BOARD_SKINS, isLightSquare, orderedSquares, piecesFromFen, type BoardPiece } from './boardKit.ts'
+import { PromotionPicker } from './PromotionPicker.tsx'
+import { resolvePieceColours, usePreferences } from '@/lib/store/preferences.ts'
+import type { Board2DProps } from './Board2D.tsx'
+
+/**
+ * Demi-largeur du plateau, cadre compris.
+ *
+ * Le damier fait 8 unités, le cadre déborde de 0,7 de chaque côté : 9,4 au
+ * total, donc 4,7 de demi-largeur.
+ */
+const BOARD_HALF_WIDTH = 4.7
+
+/** Marge autour du plateau, pour qu'il ne touche pas les bords du cadre. */
+const FIT_MARGIN = 1.14
+
+/** Ouverture verticale de la caméra, en degrés. */
+const CAMERA_FOV = 42
+
+/** Élévation de la caméra au-dessus de l'horizon, en degrés. */
+const CAMERA_ELEVATION = 48
+
+/**
+ * Position de caméra qui fait tenir le plateau entier dans l'image.
+ *
+ * On calcule la distance nécessaire à partir de l'ouverture de l'objectif
+ * plutôt que de la régler à vue : `distance = demi-largeur / tan(fov / 2)`.
+ * Le canevas étant carré, l'ouverture horizontale égale la verticale, et un
+ * seul calcul suffit pour les deux axes.
+ */
+function fittedCameraPosition(): [number, number, number] {
+  const half = BOARD_HALF_WIDTH * FIT_MARGIN
+  const distance = half / Math.tan((CAMERA_FOV * Math.PI) / 360)
+  const elevation = (CAMERA_ELEVATION * Math.PI) / 180
+  return [0, distance * Math.sin(elevation), distance * Math.cos(elevation)]
+}
+
+/** Convertit une case en coordonnées monde, plateau centré sur l'origine. */
+function squareToWorld(square: Square, orientation: Color): [number, number] {
+  const file = square.charCodeAt(0) - 97
+  const rank = square.charCodeAt(1) - 49
+  const x = orientation === 'w' ? file - 3.5 : 3.5 - file
+  const z = orientation === 'w' ? 3.5 - rank : rank - 3.5
+  return [x, z]
+}
+
+export function Board3D(props: Board2DProps) {
+  const prefs = usePreferences()
+  const {
+    fen,
+    orientation = 'w',
+    playable = null,
+    legalMoves,
+    onMove,
+    lastMove,
+    checkSquare,
+    highlights = [],
+    className,
+  } = props
+
+  const [selected, setSelected] = useState<Square | null>(null)
+  const [promotion, setPromotion] = useState<{ from: Square; to: Square; color: Color } | null>(
+    null,
+  )
+
+  const pieces = useMemo(() => piecesFromFen(fen), [fen])
+  useEffect(() => setSelected(null), [fen])
+
+  const targets = selected ? (legalMoves?.get(selected) ?? []) : []
+
+  function handleSquareClick(square: Square) {
+    const piece = pieces.find((p) => p.square === square)
+
+    if (selected && targets.includes(square)) {
+      const moving = pieces.find((p) => p.square === selected)
+      const lastRank = moving?.color === 'w' ? '8' : '1'
+      if (moving?.type === 'p' && square[1] === lastRank) {
+        setPromotion({ from: selected, to: square, color: moving.color })
+      } else {
+        onMove?.(selected, square)
+      }
+      setSelected(null)
+      return
+    }
+
+    if (!piece) {
+      setSelected(null)
+      return
+    }
+    const allowed =
+      playable === 'both' || (playable !== null && piece.color === playable)
+    setSelected(allowed ? square : null)
+  }
+
+  const quality = prefs.effects === 'high' ? 'high' : 'low'
+
+  // Dimensions mesurées du conteneur, en pixels.
+  //
+  // React Three Fiber mesure normalement son parent tout seul, mais cette
+  // mesure initiale se perd quand le composant est chargé de façon différée :
+  // le canevas reste alors à sa taille par défaut de 300 × 150 jusqu'au premier
+  // redimensionnement de la fenêtre. On mesure donc nous-mêmes et on impose des
+  // dimensions en pixels — sans ambiguïté possible.
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [size, setSize] = useState(0)
+
+  useLayoutEffect(() => {
+    const element = containerRef.current
+    if (!element) return
+
+    const measure = () => {
+      // En plein écran le conteneur n'est plus forcément carré : on prend la
+      // plus petite dimension pour que le plateau tienne entier.
+      const width = element.clientWidth
+      const height = element.clientHeight
+      const side = height > 0 ? Math.min(width, height) : width
+      if (side > 0) setSize(side)
+    }
+    measure()
+
+    const observer = new ResizeObserver(measure)
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+
+  /**
+   * Réveille la mesure de React Three Fiber.
+   *
+   * R3F ne monte le contenu de la scène qu'une fois son conteneur mesuré. Quand
+   * le composant est chargé de façon différée, cette mesure initiale se perd et
+   * le canevas reste bloqué à sa taille par défaut de 300 × 150 — écran noir.
+   *
+   * Un événement `resize` le fait remesurer correctement, mais il faut que son
+   * écouteur soit déjà attaché : émettre le signal trop tôt ne sert à rien. On
+   * réessaie donc quelques fois, en s'arrêtant dès que le canevas a la bonne
+   * taille — et de toute façon au bout d'une seconde.
+   */
+  useEffect(() => {
+    if (size <= 0) return
+    const container = containerRef.current
+    if (!container) return
+
+    let attempts = 0
+    const timer = setInterval(() => {
+      const canvas = container.querySelector('canvas')
+      if (canvas && Math.abs(canvas.clientWidth - size) < 2) {
+        clearInterval(timer)
+        return
+      }
+      window.dispatchEvent(new Event('resize'))
+      if (++attempts >= 10) clearInterval(timer)
+    }, 100)
+
+    return () => clearInterval(timer)
+  }, [size])
+
+  return (
+    <div
+      ref={containerRef}
+      className={`relative aspect-square w-full overflow-hidden rounded-[var(--radius)] ${className ?? ''}`}
+    >
+      {size > 0 && (
+      <Canvas
+        style={{ width: size, height: size }}
+        shadows={prefs.effects === 'high'}
+        dpr={prefs.effects === 'high' ? [1, 2] : 1}
+        gl={{
+          antialias: prefs.effects === 'high',
+          powerPreference: 'high-performance',
+          alpha: true,
+        }}
+        camera={{ position: fittedCameraPosition(), fov: CAMERA_FOV, near: 0.1, far: 80 }}
+        // `offsetSize` mesure la boîte de disposition plutôt que le rectangle
+        // de rendu, et l'anti-rebond désactivé évite de perdre la toute
+        // première mesure — sans quoi le canevas resterait à sa taille par
+        // défaut de 300 × 150 jusqu'au premier redimensionnement de fenêtre.
+        resize={{ offsetSize: true, debounce: 0, scroll: false }}
+      >
+        <CanvasSizer size={size} />
+        <Suspense fallback={null}>
+          <Scene
+            pieces={pieces}
+            orientation={orientation}
+            selected={selected}
+            targets={targets}
+            lastMove={lastMove ?? null}
+            checkSquare={checkSquare ?? null}
+            highlights={highlights}
+            quality={quality}
+            onSquareClick={handleSquareClick}
+          />
+        </Suspense>
+
+        <OrbitControls
+          enablePan={false}
+          enableDamping
+          dampingFactor={0.08}
+          rotateSpeed={0.55}
+          // On ne peut pas s'approcher au point de perdre le plateau de vue,
+          // ni s'éloigner au point de ne plus distinguer les pièces.
+          minDistance={10}
+          maxDistance={26}
+          // Ni sous le plateau, ni complètement à plat : on doit voir pour jouer.
+          minPolarAngle={0.18}
+          maxPolarAngle={Math.PI / 2.35}
+          target={[0, 0, 0]}
+        />
+      </Canvas>
+      )}
+
+      {promotion && (
+        <PromotionPicker
+          color={promotion.color}
+          square={promotion.to}
+          orientation={orientation}
+          pieceSet={prefs.pieceSet}
+          onSelect={(type: PieceSymbol) => {
+            onMove?.(promotion.from, promotion.to, type)
+            setPromotion(null)
+          }}
+          onCancel={() => setPromotion(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+/**
+ * Impose la taille du rendu.
+ *
+ * React Three Fiber mesure normalement son conteneur tout seul, mais cette
+ * mesure ne se déclenche pas de façon fiable quand le composant est chargé de
+ * façon différée : le canevas reste alors à sa taille par défaut de 300 × 150.
+ *
+ * Plutôt que de dépendre de ce comportement, on mesure le conteneur nous-mêmes
+ * — dans le composant parent — et on transmet la taille au moteur de rendu par
+ * l'API impérative prévue à cet effet. C'est déterministe et ça ne coûte qu'un
+ * effet par redimensionnement.
+ */
+function CanvasSizer({ size }: { size: number }) {
+  const setSize = useThree((state) => state.setSize)
+  const camera = useThree((state) => state.camera)
+
+  useEffect(() => {
+    if (size <= 0) return
+    setSize(size, size)
+    // Le plateau est carré : le rapport d'aspect vaut toujours 1, mais la
+    // caméra doit être prévenue explicitement après un changement de taille.
+    if ('aspect' in camera) {
+      ;(camera as THREE.PerspectiveCamera).aspect = 1
+      camera.updateProjectionMatrix()
+    }
+  }, [size, setSize, camera])
+
+  return null
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Scène
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface SceneProps {
+  pieces: BoardPiece[]
+  orientation: Color
+  selected: Square | null
+  targets: Square[]
+  lastMove: { from: Square; to: Square } | null
+  checkSquare: Square | null
+  highlights: Square[]
+  quality: 'high' | 'low'
+  onSquareClick: (square: Square) => void
+}
+
+function Scene({
+  pieces,
+  orientation,
+  selected,
+  targets,
+  lastMove,
+  checkSquare,
+  highlights,
+  quality,
+  onSquareClick,
+}: SceneProps) {
+  const prefs = usePreferences()
+  const skin = BOARD_SKINS[prefs.boardStyle] ?? BOARD_SKINS.aurore
+  const squares = useMemo(() => orderedSquares('w'), [])
+  const { scene } = useThree()
+
+  // Fond dégradé, engendré une fois en mémoire : pas de fichier à charger.
+  useEffect(() => {
+    scene.background = makeGradientTexture(skin.dark, skin.light)
+    return () => {
+      const background = scene.background
+      if (background instanceof THREE.Texture) background.dispose()
+      scene.background = null
+    }
+  }, [scene, skin.dark, skin.light])
+
+  const targetSet = useMemo(() => new Set(targets), [targets])
+  const highlightSet = useMemo(() => new Set(highlights), [highlights])
+
+  return (
+    <group>
+      {/* ── Lumières ──────────────────────────────────────────────────────
+          Clé chaude en haut à gauche, remplissage froid à droite, contre-jour
+          derrière : le schéma classique qui fait ressortir les volumes. */}
+      <ambientLight intensity={0.55} />
+      <directionalLight
+        position={[5, 9, 4]}
+        intensity={2.1}
+        castShadow={quality === 'high'}
+        shadow-mapSize={[1024, 1024]}
+        shadow-camera-left={-7}
+        shadow-camera-right={7}
+        shadow-camera-top={7}
+        shadow-camera-bottom={-7}
+        shadow-bias={-0.0006}
+      />
+      <directionalLight position={[-6, 5, -3]} intensity={0.7} color="#9fd0ff" />
+      <pointLight position={[0, 4, -7]} intensity={18} distance={18} color="#ffd9a0" />
+
+      {/* ── Cadre du plateau ──────────────────────────────────────────── */}
+      <RoundedBox args={[9.4, 0.4, 9.4]} radius={0.12} smoothness={4} position={[0, -0.24, 0]} receiveShadow>
+        <meshPhysicalMaterial
+          color={skin.dark}
+          roughness={0.55}
+          metalness={0.15}
+          clearcoat={0.4}
+        />
+      </RoundedBox>
+
+      {/* ── Cases ─────────────────────────────────────────────────────── */}
+      {squares.map((square) => {
+        const [x, z] = squareToWorld(square, orientation)
+        const light = isLightSquare(square)
+        const isLast = lastMove?.from === square || lastMove?.to === square
+        const isTarget = targetSet.has(square)
+        const isSelected = selected === square
+        const isHighlight = highlightSet.has(square)
+        const isCheck = checkSquare === square
+
+        const emissive = isCheck
+          ? skin.check
+          : isSelected
+            ? skin.selected
+            : isHighlight
+              ? '#7c5cff'
+              : isLast
+                ? skin.lastMove
+                : null
+
+        return (
+          <group key={square}>
+            <mesh
+              position={[x, -0.02, z]}
+              receiveShadow
+              onClick={(event: ThreeEvent<MouseEvent>) => {
+                event.stopPropagation()
+                onSquareClick(square)
+              }}
+            >
+              <boxGeometry args={[1, 0.08, 1]} />
+              <meshPhysicalMaterial
+                color={light ? skin.light : skin.dark}
+                roughness={light ? 0.45 : 0.55}
+                metalness={0.05}
+                clearcoat={quality === 'high' ? 0.35 : 0}
+                emissive={emissive ?? '#000000'}
+                emissiveIntensity={emissive ? 0.55 : 0}
+              />
+            </mesh>
+
+            {/* Pastille de coup légal, flottant juste au-dessus de la case. */}
+            {isTarget && (
+              <mesh position={[x, 0.045, z]} rotation={[-Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[0.16, 0.24, 24]} />
+                <meshBasicMaterial
+                  color={skin.selected}
+                  transparent
+                  opacity={0.85}
+                  side={THREE.DoubleSide}
+                />
+              </mesh>
+            )}
+          </group>
+        )
+      })}
+
+      {/* ── Pièces ────────────────────────────────────────────────────── */}
+      {pieces.map((piece) => (
+        <Piece3D
+          key={piece.id}
+          piece={piece}
+          orientation={orientation}
+          quality={quality}
+          selected={selected === piece.square}
+          material={prefs.pieceMaterial}
+          onClick={() => onSquareClick(piece.square)}
+        />
+      ))}
+
+      {/* Ombre de contact : ce qui « pose » vraiment les pièces sur le bois. */}
+      {quality === 'high' && (
+        <ContactShadows
+          position={[0, 0.03, 0]}
+          opacity={0.42}
+          scale={11}
+          blur={2.4}
+          far={2.2}
+          resolution={512}
+        />
+      )}
+    </group>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Pièce animée
+// ─────────────────────────────────────────────────────────────────────────────
+
+function Piece3D({
+  piece,
+  orientation,
+  quality,
+  selected,
+  material,
+  onClick,
+}: {
+  piece: BoardPiece
+  orientation: Color
+  quality: 'high' | 'low'
+  selected: boolean
+  material: string
+  onClick: () => void
+}) {
+  const prefs = usePreferences()
+  const groupRef = useRef<THREE.Group>(null)
+  const [x, z] = squareToWorld(piece.square, orientation)
+  const target = useRef(new THREE.Vector3(x, 0.02, z))
+  const [hovered, setHovered] = useState(false)
+
+  const skin = BOARD_SKINS[prefs.boardStyle] ?? BOARD_SKINS.aurore
+  const recipe = MATERIALS[material] ?? MATERIALS.ivoire!
+  const geometry = useMemo(
+    () => pieceGeometry(piece.type as Piece3DType, quality),
+    [piece.type, quality],
+  )
+
+  target.current.set(x, 0.02, z)
+
+  // Interpolation vers la case cible : c'est ce qui fait glisser la pièce
+  // plutôt que de la téléporter, sans avoir à orchestrer d'animation.
+  useFrame((_, delta) => {
+    const group = groupRef.current
+    if (!group) return
+
+    const speed = prefs.animationMs === 0 ? 1 : Math.min(1, delta * 11)
+    group.position.lerp(target.current, speed)
+
+    // Lévitation discrète de la pièce sélectionnée.
+    const lift = selected ? 0.22 : hovered ? 0.06 : 0
+    group.position.y += (0.02 + lift - group.position.y) * Math.min(1, delta * 12)
+
+    if (selected && prefs.effects === 'high') {
+      group.rotation.y += delta * 0.7
+    } else {
+      group.rotation.y += (0 - group.rotation.y) * Math.min(1, delta * 6)
+    }
+  })
+
+  const isWhite = piece.color === 'w'
+  // Les couleurs de pièces sont indépendantes du damier : un thème violet ne
+  // doit pas rendre les Noirs violets.
+  const palette = resolvePieceColours(prefs, skin.light, skin.dark)
+  const colour = isWhite ? palette.white : palette.black
+
+  return (
+    <group
+      ref={groupRef}
+      position={[x, 0.02, z]}
+      onClick={(event: ThreeEvent<MouseEvent>) => {
+        event.stopPropagation()
+        onClick()
+      }}
+      onPointerOver={(event: ThreeEvent<PointerEvent>) => {
+        event.stopPropagation()
+        setHovered(true)
+        document.body.style.cursor = 'pointer'
+      }}
+      onPointerOut={() => {
+        setHovered(false)
+        document.body.style.cursor = ''
+      }}
+    >
+      {/* Les Noirs regardent dans l'autre sens — visible surtout au cavalier. */}
+      <mesh
+        geometry={geometry}
+        castShadow={quality === 'high'}
+        receiveShadow={quality === 'high'}
+        rotation={[0, isWhite ? 0 : Math.PI, 0]}
+      >
+        <meshPhysicalMaterial
+          color={colour}
+          roughness={recipe.roughness}
+          metalness={recipe.metalness}
+          clearcoat={quality === 'high' ? recipe.clearcoat : 0}
+          clearcoatRoughness={recipe.clearcoatRoughness}
+          transmission={quality === 'high' ? recipe.transmission : 0}
+          ior={recipe.ior}
+          thickness={recipe.thickness}
+          sheen={quality === 'high' ? recipe.sheen : 0}
+          sheenColor={isWhite ? '#ffe9c9' : '#7f8cff'}
+          emissive={selected ? skin.selected : '#000000'}
+          emissiveIntensity={selected ? 0.22 : 0}
+        />
+      </mesh>
+    </group>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Fond
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Dégradé vertical peint dans un canevas hors écran et transformé en texture.
+ * Deux cents octets en mémoire, aucun aller-retour réseau.
+ */
+function makeGradientTexture(top: string, bottom: string): THREE.Texture {
+  const canvas = document.createElement('canvas')
+  canvas.width = 4
+  canvas.height = 256
+  const context = canvas.getContext('2d')!
+  const gradient = context.createLinearGradient(0, 0, 0, 256)
+  gradient.addColorStop(0, shade(top, -0.55))
+  gradient.addColorStop(0.55, shade(top, -0.75))
+  gradient.addColorStop(1, shade(bottom, -0.88))
+  context.fillStyle = gradient
+  context.fillRect(0, 0, 4, 256)
+
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace
+  return texture
+}
+
+/** Éclaircit (`amount > 0`) ou assombrit (`amount < 0`) une couleur. */
+function shade(colour: string, amount: number): string {
+  const c = new THREE.Color(colour)
+  if (amount < 0) c.multiplyScalar(1 + amount)
+  else c.lerp(new THREE.Color('#ffffff'), amount)
+  return `#${c.getHexString()}`
+}

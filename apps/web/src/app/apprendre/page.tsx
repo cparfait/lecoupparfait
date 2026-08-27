@@ -1,0 +1,205 @@
+'use client'
+
+/**
+ * Sommaire du programme d'apprentissage.
+ *
+ * Les chapitres sont présentés dans l'ordre où l'on apprend réellement, pas
+ * dans l'ordre où on les imagine : les règles, savoir mater, la tactique — et
+ * seulement ensuite les ouvertures. Un débutant qui apprend dix variantes
+ * d'ouverture avant de savoir mater avec une tour perd toutes ses parties
+ * quand même.
+ *
+ * Rien n'est verrouillé : on peut sauter directement à ce qui intéresse. Une
+ * barrière de progression n'apprend rien à personne, elle décourage.
+ */
+
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { Check, Clock, Play } from 'lucide-react'
+import clsx from 'clsx'
+import {
+  CHAPTERS,
+  CURRICULUM_STATS,
+  loadProgress,
+  overallProgress,
+  type LessonProgress,
+} from '@/lib/lessons/index.ts'
+import { Card, Chip } from '@/components/ui/index.tsx'
+
+const LEVEL_LABELS = {
+  beginner: { label: 'Débutant', tone: 'success' as const },
+  intermediate: { label: 'Intermédiaire', tone: 'warning' as const },
+  advanced: { label: 'Confirmé', tone: 'danger' as const },
+}
+
+export default function LearnPage() {
+  const [progress, setProgress] = useState<LessonProgress>({})
+
+  // La progression vit dans le navigateur : on ne peut la lire qu'après le
+  // montage, sinon le rendu serveur et le rendu client diffèrent.
+  useEffect(() => setProgress(loadProgress()), [])
+
+  const overall = overallProgress(progress)
+
+  return (
+    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:py-14">
+      <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+        Apprendre les échecs
+      </h1>
+      <p className="mt-2 max-w-2xl text-muted">
+        {CURRICULUM_STATS.lessons} leçons guidées, {CURRICULUM_STATS.steps} étapes, une voix
+        qui explique chaque coup. Tu peux commencer sans rien connaître — la première leçon
+        part de l’échiquier vide.
+      </p>
+
+      {/* ── Progression globale ──────────────────────────────────────── */}
+      {overall > 0 && (
+        <Card className="mt-6 p-4">
+          <div className="mb-2 flex items-baseline justify-between">
+            <span className="text-sm font-medium">Ta progression</span>
+            <span className="text-sm tabular-nums text-muted">{overall} %</span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-surface-strong">
+            <div
+              className="h-full rounded-full transition-[width] duration-500"
+              style={{
+                width: `${overall}%`,
+                background: 'linear-gradient(90deg, var(--accent), var(--accent-2))',
+              }}
+            />
+          </div>
+        </Card>
+      )}
+
+      {/* ── Chapitres ────────────────────────────────────────────────── */}
+      <div className="mt-10 space-y-14">
+        {CHAPTERS.map((chapter, chapterIndex) => {
+          const done = chapter.lessons.filter((lesson) => progress[lesson.id]?.completed).length
+
+          return (
+            <section
+              key={chapter.id}
+              className="animate-slide-up"
+              style={{ animationDelay: `${chapterIndex * 60}ms` }}
+            >
+              {/* Filet de séparation : sans lui, les chapitres se confondent
+                  avec les cartes de leçons du chapitre précédent. */}
+              {chapterIndex > 0 && (
+                <div
+                  className="mb-10 h-px w-full"
+                  style={{
+                    background:
+                      'linear-gradient(90deg, var(--border-strong), transparent 70%)',
+                  }}
+                  aria-hidden
+                />
+              )}
+
+              <header className="mb-5">
+                <div className="flex items-center gap-3.5">
+                  <span
+                    className="grid h-13 w-13 shrink-0 place-items-center rounded-[var(--radius)] text-2xl"
+                    style={{
+                      height: '3.25rem',
+                      width: '3.25rem',
+                      background: 'color-mix(in oklab, var(--accent) 16%, transparent)',
+                      boxShadow: 'inset 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent)',
+                    }}
+                    aria-hidden
+                  >
+                    {chapter.icon}
+                  </span>
+
+                  <div className="min-w-0 flex-1">
+                    {/* Le numéro de chapitre situe la progression dans le
+                        programme, et fait respirer le titre au-dessus. */}
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
+                      Chapitre {chapterIndex + 1}
+                      {done > 0 && (
+                        <span className="ml-2 font-normal normal-case tracking-normal text-faint">
+                          {done} / {chapter.lessons.length} terminées
+                        </span>
+                      )}
+                    </p>
+                    <h2 className="mt-0.5 font-display text-[clamp(1.5rem,3.4vw,2rem)] font-bold leading-tight tracking-tight text-ink">
+                      {chapter.title}
+                    </h2>
+                  </div>
+
+                  <Chip tone={LEVEL_LABELS[chapter.level].tone} className="shrink-0 self-start">
+                    {LEVEL_LABELS[chapter.level].label}
+                  </Chip>
+                </div>
+
+                <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-muted">
+                  {chapter.description}
+                </p>
+              </header>
+
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {chapter.lessons.map((lesson) => {
+                  const state = progress[lesson.id]
+                  const started = (state?.steps ?? 0) > 0
+                  const completed = state?.completed ?? false
+
+                  return (
+                    <Link
+                      key={lesson.id}
+                      href={`/apprendre/${lesson.id}`}
+                      className={clsx(
+                        'group relative flex gap-3 rounded-[var(--radius)] border p-3.5 transition-all',
+                        'hover:-translate-y-0.5 hover:bg-surface-hover',
+                        completed
+                          ? 'border-[color-mix(in_oklab,var(--q-best)_35%,transparent)] bg-[color-mix(in_oklab,var(--q-best)_7%,transparent)]'
+                          : 'border-line bg-surface',
+                      )}
+                    >
+                      <span className="mt-0.5 text-xl" aria-hidden>
+                        {lesson.icon}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold leading-snug">{lesson.title}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-muted">
+                          {lesson.summary}
+                        </p>
+                        <p className="mt-2 flex items-center gap-2 text-[11px] text-faint">
+                          <Clock size={11} aria-hidden />
+                          {lesson.minutes} min
+                          <span aria-hidden>·</span>
+                          {lesson.steps.length} étapes
+                          {started && !completed && (
+                            <>
+                              <span aria-hidden>·</span>
+                              <span className="text-accent">reprise possible</span>
+                            </>
+                          )}
+                        </p>
+                      </div>
+
+                      <span
+                        className={clsx(
+                          'mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full transition-colors',
+                          completed
+                            ? 'bg-[var(--q-best)] text-white'
+                            : 'bg-surface-strong text-faint group-hover:bg-accent group-hover:text-[var(--accent-contrast)]',
+                        )}
+                        aria-hidden
+                      >
+                        {completed ? <Check size={13} /> : <Play size={11} />}
+                      </span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </section>
+          )
+        })}
+      </div>
+
+      <p className="mt-10 text-center text-xs text-faint">
+        Environ {Math.round(CURRICULUM_STATS.minutes / 60)} heures de contenu au total.
+        Aucune leçon n’est verrouillée : va où tu veux, dans l’ordre que tu veux.
+      </p>
+    </div>
+  )
+}

@@ -1,0 +1,367 @@
+'use client'
+
+/**
+ * Profil d'un joueur.
+ *
+ * Ce qu'on veut voir en arrivant : où j'en suis, est-ce que je progresse, et
+ * qu'est-ce que j'ai joué récemment. Dans cet ordre. Le reste — biographie,
+ * pays, date d'inscription — est secondaire et occupe donc peu de place.
+ */
+
+import { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
+import { CalendarDays, LogOut, TrendingUp } from 'lucide-react'
+import clsx from 'clsx'
+import { SPEED_LABELS, ratingTitle } from '@coupparfait/core'
+import { Button, Card, Chip, EmptyState, Skeleton } from '@/components/ui/index.tsx'
+import { toast } from '@/components/ui/Toast.tsx'
+
+interface Profile {
+  user: {
+    username: string
+    avatar: string | null
+    bio: string | null
+    countryCode: string | null
+    memberSince: string
+  }
+  ratings: Array<{
+    category: string
+    rating: number
+    deviation: number
+    provisional: boolean
+    elo: number
+    games: number
+    wins: number
+    losses: number
+    draws: number
+    peak: number
+  }>
+  games: Array<{
+    slug: string
+    speed: string
+    rated: boolean
+    colour: 'w' | 'b'
+    opponent: string
+    outcome: 'win' | 'loss' | 'draw'
+    status: string
+    eco: string | null
+    opening: string | null
+    moveCount: number
+    ratingDelta: number | null
+    playedAt: string
+  }>
+  history: Array<{ category: string; rating: number; at: string }>
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  bullet: 'Bullet',
+  blitz: 'Blitz',
+  rapid: 'Rapide',
+  classical: 'Classique',
+  correspondence: 'Correspondance',
+  puzzle: 'Puzzles',
+}
+
+export default function ProfilePage() {
+  const params = useParams<{ username: string }>()
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
+  const [me, setMe] = useState<string | null>(null)
+
+  useEffect(() => {
+    void fetch(`/api/profil/${encodeURIComponent(params.username)}`)
+      .then(async (response) => {
+        if (response.status === 404) {
+          setNotFound(true)
+          return null
+        }
+        return response.ok ? ((await response.json()) as Profile) : null
+      })
+      .then((data) => setProfile(data))
+      .catch(() => setProfile(null))
+      .finally(() => setLoading(false))
+
+    void fetch('/api/auth')
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => setMe(data?.user?.username ?? null))
+      .catch(() => setMe(null))
+  }, [params.username])
+
+  const signOut = useCallback(async () => {
+    await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'signout' }),
+    })
+    toast.success('À bientôt !')
+    window.location.assign('/')
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="mx-auto w-full max-w-3xl space-y-4 px-4 py-10">
+        <Skeleton className="h-28 w-full" />
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    )
+  }
+
+  if (notFound || !profile) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-20">
+        <Card>
+          <EmptyState
+            title={notFound ? 'Joueur introuvable' : 'Profil indisponible'}
+            description={
+              notFound
+                ? `Aucun compte au pseudo « ${params.username} ».`
+                : 'Le service de profils ne répond pas. Réessaie dans un instant.'
+            }
+            action={
+              <Link href="/classement">
+                <Button variant="secondary">Voir le classement</Button>
+              </Link>
+            }
+          />
+        </Card>
+      </div>
+    )
+  }
+
+  const isMe = me !== null && me.toLowerCase() === profile.user.username.toLowerCase()
+  const best = [...profile.ratings].sort((a, b) => b.games - a.games)[0]
+  const title = best ? ratingTitle(best.rating) : null
+
+  return (
+    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:py-12">
+      {/* ── Identité ─────────────────────────────────────────────── */}
+      <Card glow className="p-5">
+        <div className="flex items-start gap-4">
+          <span
+            className="grid h-16 w-16 shrink-0 place-items-center rounded-[var(--radius)] bg-surface-strong text-3xl"
+            aria-hidden
+          >
+            {profile.user.avatar ?? '♟️'}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-baseline gap-2">
+              <h1 className="font-display text-2xl font-bold tracking-tight">
+                {profile.user.username}
+              </h1>
+              {title && <Chip tone="accent">{title.fr}</Chip>}
+            </div>
+            {profile.user.bio && (
+              <p className="mt-1.5 text-sm leading-relaxed text-muted">{profile.user.bio}</p>
+            )}
+            <p className="mt-1.5 flex items-center gap-1.5 text-xs text-faint">
+              <CalendarDays size={12} aria-hidden />
+              Membre depuis {formatMonth(profile.user.memberSince)}
+            </p>
+          </div>
+          {isMe && (
+            <Button size="sm" variant="ghost" icon={<LogOut size={14} />} onClick={signOut}>
+              Déconnexion
+            </Button>
+          )}
+        </div>
+      </Card>
+
+      {/* ── Classements ──────────────────────────────────────────── */}
+      {profile.ratings.length > 0 ? (
+        <div className="mt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+          {profile.ratings.map((rating) => (
+            <Card key={rating.category} className="p-4">
+              <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
+                {rating.category !== 'puzzle' && (
+                  <span aria-hidden>
+                    {SPEED_LABELS[rating.category as keyof typeof SPEED_LABELS]?.icon}
+                  </span>
+                )}
+                {CATEGORY_LABELS[rating.category] ?? rating.category}
+              </p>
+              <p className="mt-1 font-display text-2xl font-bold tabular-nums">
+                {rating.rating}
+                {rating.provisional && <span className="text-faint">?</span>}
+              </p>
+              <p className="mt-0.5 text-[11px] text-muted">
+                Elo {rating.elo} · record {rating.peak}
+              </p>
+              <div className="mt-2 flex gap-1 text-[11px] font-medium">
+                <span className="text-[var(--q-best)]">{rating.wins} V</span>
+                <span className="text-faint">{rating.draws} N</span>
+                <span className="text-[var(--q-blunder)]">{rating.losses} D</span>
+              </div>
+              {/* Barre de répartition victoires / nulles / défaites */}
+              <div className="mt-2 flex h-1.5 overflow-hidden rounded-full bg-surface-strong">
+                <span
+                  className="bg-[var(--q-best)]"
+                  style={{ width: `${(rating.wins / rating.games) * 100}%` }}
+                />
+                <span
+                  className="bg-[var(--q-forced)]"
+                  style={{ width: `${(rating.draws / rating.games) * 100}%` }}
+                />
+                <span
+                  className="bg-[var(--q-blunder)]"
+                  style={{ width: `${(rating.losses / rating.games) * 100}%` }}
+                />
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card className="mt-4">
+          <EmptyState
+            icon={<TrendingUp size={26} />}
+            title="Aucune partie classée"
+            description="Les classements apparaîtront après la première partie classée contre un autre compte."
+            action={
+              <Link href="/jouer/ami">
+                <Button variant="primary">Défier un ami</Button>
+              </Link>
+            }
+          />
+        </Card>
+      )}
+
+      {/* ── Courbe de progression ────────────────────────────────── */}
+      {profile.history.length > 3 && (
+        <Card className="mt-4 p-4">
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-faint">
+            Évolution du classement
+          </p>
+          <RatingChart history={profile.history} />
+        </Card>
+      )}
+
+      {/* ── Parties récentes ─────────────────────────────────────── */}
+      <Card className="mt-4 overflow-hidden">
+        <p className="border-b border-line/60 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
+          Parties récentes
+        </p>
+        {profile.games.length === 0 ? (
+          <EmptyState title="Aucune partie enregistrée" />
+        ) : (
+          <ul>
+            {profile.games.map((game) => (
+              <li
+                key={game.slug}
+                className="flex items-center gap-3 border-b border-line/40 px-4 py-2.5 last:border-0"
+              >
+                <span
+                  className={clsx(
+                    'w-1 shrink-0 self-stretch rounded-full',
+                    game.outcome === 'win' && 'bg-[var(--q-best)]',
+                    game.outcome === 'loss' && 'bg-[var(--q-blunder)]',
+                    game.outcome === 'draw' && 'bg-[var(--q-forced)]',
+                  )}
+                  aria-hidden
+                />
+                <span
+                  className={clsx(
+                    'h-3 w-3 shrink-0 rounded-full',
+                    game.colour === 'w'
+                      ? 'bg-[var(--eval-white)]'
+                      : 'bg-[var(--eval-black)] ring-1 ring-line',
+                  )}
+                  aria-label={game.colour === 'w' ? 'Blancs' : 'Noirs'}
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm">
+                    contre <strong className="font-semibold">{game.opponent}</strong>
+                  </span>
+                  <span className="block truncate text-[11px] text-faint">
+                    {game.opening ?? 'ouverture non répertoriée'} · {game.moveCount} demi-coups
+                  </span>
+                </span>
+                {game.ratingDelta !== null && (
+                  <span
+                    className={clsx(
+                      'shrink-0 text-sm font-semibold tabular-nums',
+                      game.ratingDelta >= 0 ? 'text-[var(--q-best)]' : 'text-[var(--q-blunder)]',
+                    )}
+                  >
+                    {game.ratingDelta >= 0 ? '+' : ''}
+                    {game.ratingDelta}
+                  </span>
+                )}
+                <span className="shrink-0 text-[11px] text-faint">
+                  {formatDate(game.playedAt)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </div>
+  )
+}
+
+/**
+ * Courbe de progression.
+ *
+ * Volontairement minimaliste : pas d'axes, pas de graduations, pas de légende.
+ * Ce qui compte visuellement est la **pente**, pas les valeurs exactes — celles-ci
+ * sont déjà affichées au-dessus.
+ */
+function RatingChart({ history }: { history: Profile['history'] }) {
+  const values = history.map((entry) => entry.rating)
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  const range = Math.max(40, max - min)
+
+  const points = values
+    .map((value, index) => {
+      const x = (index / Math.max(1, values.length - 1)) * 100
+      const y = 30 - ((value - min) / range) * 28
+      return `${x.toFixed(2)},${y.toFixed(2)}`
+    })
+    .join(' L ')
+
+  return (
+    <div>
+      <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-24 w-full" role="img" aria-label="Courbe de classement">
+        <path
+          d={`M ${points} L 100,30 L 0,30 Z`}
+          fill="color-mix(in oklab, var(--accent) 18%, transparent)"
+        />
+        <path
+          d={`M ${points}`}
+          fill="none"
+          stroke="var(--accent)"
+          strokeWidth="0.7"
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+      <div className="mt-1 flex justify-between text-[11px] tabular-nums text-faint">
+        <span>{min}</span>
+        <span>{values.length} parties classées</span>
+        <span>{max}</span>
+      </div>
+    </div>
+  )
+}
+
+function formatMonth(value: string): string {
+  const [year, month] = value.split('-')
+  const names = [
+    'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+    'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre',
+  ]
+  const index = Number(month) - 1
+  return `${names[index] ?? ''} ${year}`
+}
+
+function formatDate(iso: string): string {
+  const date = new Date(iso)
+  const days = Math.floor((Date.now() - date.getTime()) / 86_400_000)
+  if (days === 0) return 'aujourd’hui'
+  if (days === 1) return 'hier'
+  if (days < 7) return `il y a ${days} j`
+  if (days < 30) return `il y a ${Math.floor(days / 7)} sem.`
+  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+}

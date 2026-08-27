@@ -1,0 +1,187 @@
+'use client'
+
+/**
+ * Pilote l'adversaire artificiel.
+ *
+ * Quand c'est au tour de l'ordinateur, on interroge le moteur en MultiPV, puis
+ * `pickBotMove` choisit parmi les lignes proposées selon le niveau et la
+ * personnalité du bot. Le coup n'est joué qu'après un délai de réflexion
+ * simulé : un adversaire qui répond en trois millisecondes casse complètement
+ * l'illusion et empêche de suivre ce qui se passe.
+ *
+ * Le crochet est volontairement passif : il observe l'état de la partie et
+ * appelle `onMove`. C'est la page qui reste maîtresse du déroulement.
+ */
+
+import { useEffect, useRef, useState } from 'react'
+import type { Color, PieceSymbol, Square } from 'chess.js'
+import { botLevel, botThinkDelayMs, pickBotMove, uciOptionsFor } from '@coupparfait/core'
+import type { BotLevel } from '@coupparfait/core'
+import { getEngine } from '@/lib/engine/client.ts'
+
+export interface UseBotPlayerOptions {
+  /** Position courante. */
+  fen: string
+  /** Couleur jouée par l'ordinateur. */
+  botColor: Color
+  /** Niveau 1 à 25. */
+  level: number
+  /** Vrai tant que la partie est en cours. */
+  active: boolean
+  /** Appelé quand le bot a choisi son coup. */
+  onMove: (from: Square, to: Square, promotion?: PieceSymbol) => void
+  /** Trait courant, pour savoir quand intervenir. */
+  turn: Color
+  /** Désactive la temporisation (mode analyse, tests). */
+  instant?: boolean
+}
+
+export interface BotPlayerState {
+  bot: BotLevel
+  thinking: boolean
+  /** Vrai pendant le chargement initial du moteur WebAssembly. */
+  loading: boolean
+  error: string | null
+  /** Perte du dernier coup choisi, en centipions : permet d'afficher son « style ». */
+  lastCost: number | null
+}
+
+export function useBotPlayer(options: UseBotPlayerOptions): BotPlayerState {
+  const { fen, botColor, level, active, onMove, turn, instant } = options
+
+  const bot = botLevel(level)
+  const [thinking, setThinking] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [lastCost, setLastCost] = useState<number | null>(null)
+
+  // Empêche de jouer deux fois pour la même position, ce qui arriverait au
+  // moindre re-rendu pendant la réflexion.
+  const handledFen = useRef<string | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (!active || turn !== botColor) return
+    if (handledFen.current === fen) return
+    handledFen.current = fen
+
+    let cancelled = false
+    let played = false
+    const controller = new AbortController()
+
+    void (async () => {
+      try {
+        setThinking(true)
+        setError(null)
+
+        const engine = getEngine()
+        if (engine.getStatus() === 'idle') setLoading(true)
+        await engine.start()
+        setLoading(false)
+        if (cancelled) return
+
+        engine.setOptions(uciOptionsFor(bot.engine))
+
+        const startedAt = Date.now()
+        const analysis = await engine.analyse({
+          fen,
+          depth: bot.engine.depth,
+          nodes: bot.engine.nodes,
+          movetimeMs: bot.engine.movetimeMs,
+          multiPv: bot.engine.multiPv,
+          signal: controller.signal,
+        })
+        if (cancelled) return
+
+        const choice = pickBotMove(fen, analysis.lines, bot.engine)
+        if (!choice) {
+          setThinking(false)
+          return
+        }
+        setLastCost(choice.cost)
+
+        // Réflexion simulée, dont on retranche le temps de calcul réel : un bot
+        // de niveau 25 réfléchit déjà longtemps, inutile d'en rajouter.
+        const legalCount = analysis.lines.length * 6
+        const wanted = instant ? 0 : botThinkDelayMs(bot.level, legalCount)
+        const elapsed = Date.now() - startedAt
+        const wait = Math.max(0, wanted - elapsed)
+
+        timerRef.current = setTimeout(() => {
+          if (cancelled) return
+          played = true
+          setThinking(false)
+          onMove(
+            choice.uci.slice(0, 2) as Square,
+            choice.uci.slice(2, 4) as Square,
+            (choice.uci.length > 4 ? choice.uci[4] : undefined) as PieceSymbol | undefined,
+          )
+        }, wait)
+      } catch (caught) {
+        if (cancelled) return
+        setLoading(false)
+        setThinking(false)
+        // Une annulation n'est pas une erreur : elle vient d'un changement de page.
+        if (caught instanceof DOMException && caught.name === 'AbortError') return
+        setError(
+          caught instanceof Error
+            ? caught.message
+            : 'Le moteur n’a pas pu jouer. Réessaie ou recharge la page.',
+        )
+      }
+    })()
+
+    return () => {
+      cancelled = true
+      controller.abort()
+      if (timerRef.current) clearTimeout(timerRef.current)
+
+      // Une réflexion abandonnée doit pouvoir reprendre.
+      //
+      // `handledFen` empêche de rejouer deux fois la même position. Mais quand
+      // c'est `active` qui retombe — le coach prend la parole, la partie se met
+      // en pause d'étude — la position reste marquée « traitée » alors qu'aucun
+      // coup n'a été joué. L'ordinateur ne repartait alors jamais : la partie
+      // se figeait dès que le coach parlait. On rend donc la position à
+      // traiter, puisqu'elle ne l'a pas été.
+      if (!played) handledFen.current = null
+    }
+    // `onMove` est volontairement hors des dépendances : la page la recrée à
+    // chaque rendu, ce qui relancerait la réflexion en boucle.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fen, turn, botColor, active, bot, instant])
+
+  // Une nouvelle partie doit repartir d'un moteur vierge : sinon la table de
+  // hachage garde des positions de la partie précédente.
+  useEffect(() => {
+    handledFen.current = null
+  }, [botColor, level])
+
+  return { bot, thinking, loading, error, lastCost }
+}
+
+/**
+ * Demande un indice au moteur : le meilleur coup dans la position courante.
+ * Utilisé par le bouton « Indice » et par les leçons.
+ */
+export async function requestHint(
+  fen: string,
+  depth = 16,
+): Promise<{ uci: string; from: Square; to: Square } | null> {
+  const engine = getEngine()
+  await engine.start()
+  // Un indice doit être bon : on retire tout bridage éventuel laissé par un bot.
+  engine.setOptions([
+    ['UCI_LimitStrength', false],
+    ['Skill Level', 20],
+    ['MultiPV', 1],
+  ])
+  const analysis = await engine.analyse({ fen, depth, multiPv: 1 })
+  const uci = analysis.bestMove
+  if (!uci) return null
+  return {
+    uci,
+    from: uci.slice(0, 2) as Square,
+    to: uci.slice(2, 4) as Square,
+  }
+}

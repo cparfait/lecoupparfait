@@ -1,0 +1,33 @@
+{
+  "name": "@coupparfait/db",
+  "version": "0.1.0",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "description": "Schéma de base de données et accès aux données du Coup Parfait (PostgreSQL + Drizzle).",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts",
+    "./auth": "./src/auth.ts",
+    "./ratings": "./src/ratings.ts"
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@coupparfait/core": "*",
+    "drizzle-orm": "0.45.2",
+    "postgres": "3.4.9"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3",
+    "drizzle-kit": "0.31.10",
+    "typescript": "5.9.3"
+  }
+}

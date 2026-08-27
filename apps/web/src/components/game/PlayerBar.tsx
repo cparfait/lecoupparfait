@@ -1,0 +1,165 @@
+'use client'
+
+/**
+ * Bandeau d'un joueur : identité, classement, pendule, matériel capturé.
+ *
+ * Placé au-dessus et au-dessous de l'échiquier, il donne en un regard les trois
+ * informations qu'on consulte sans arrêt pendant une partie : à qui est le
+ * trait, combien de temps il reste, et qui a du matériel en plus.
+ */
+
+import { memo } from 'react'
+import clsx from 'clsx'
+import type { Color, PieceSymbol } from 'chess.js'
+import { clockUrgency, formatClock, type TimeControl } from '@coupparfait/core'
+import { pieceUrl } from '@/components/board/boardKit.ts'
+import { usePreferences } from '@/lib/store/preferences.ts'
+
+export interface PlayerBarProps {
+  name: string
+  /** Classement affiché, ou `null` pour un invité. */
+  rating?: number | null
+  /** Marque le classement comme provisoire (`?` après le nombre). */
+  provisional?: boolean
+  color: Color
+  /** Emoji ou URL d'avatar. */
+  avatar?: string
+  /** Temps restant en millisecondes, ou `null` si la partie n'est pas chronométrée. */
+  timeMs?: number | null
+  timeControl?: TimeControl
+  /** Vrai si c'est à ce joueur de jouer. */
+  active?: boolean
+  /** Pièces que ce joueur a capturées. */
+  captured?: PieceSymbol[]
+  /** Différence de matériel de son point de vue (positive = il mène). */
+  materialLead?: number
+  /** Étiquette secondaire : « Niveau 12 », « en ligne », « réfléchit… ». */
+  status?: string
+  className?: string
+}
+
+export const PlayerBar = memo(function PlayerBar({
+  name,
+  rating,
+  provisional,
+  color,
+  avatar,
+  timeMs,
+  timeControl,
+  active,
+  captured = [],
+  materialLead = 0,
+  status,
+  className,
+}: PlayerBarProps) {
+  const pieceSet = usePreferences((state) => state.pieceSet)
+  const urgency =
+    timeMs != null && timeControl ? clockUrgency(timeMs, timeControl) : 'calm'
+
+  return (
+    <div
+      className={clsx(
+        'flex items-center gap-2.5 rounded-[var(--radius-sm)] px-2 py-1.5 transition-colors',
+        active && 'bg-surface',
+        className,
+      )}
+    >
+      {/* Avatar + pastille de couleur du camp */}
+      <div className="relative shrink-0">
+        <div
+          className={clsx(
+            'grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-lg',
+            'bg-surface-strong ring-1 ring-line',
+            active && 'ring-accent',
+          )}
+        >
+          {avatar && avatar.startsWith('http') ? (
+            <img src={avatar} alt="" className="h-full w-full rounded-[inherit] object-cover" />
+          ) : (
+            <span aria-hidden>{avatar ?? (color === 'w' ? '♔' : '♚')}</span>
+          )}
+        </div>
+        <span
+          className={clsx(
+            'absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-[var(--bg)]',
+            color === 'w' ? 'bg-[var(--eval-white)]' : 'bg-[var(--eval-black)]',
+          )}
+          aria-label={color === 'w' ? 'Blancs' : 'Noirs'}
+        />
+      </div>
+
+      {/* Identité et matériel */}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline gap-1.5">
+          <span className="truncate text-sm font-semibold">{name}</span>
+          {rating != null && (
+            <span className="shrink-0 text-xs tabular-nums text-muted">
+              {rating}
+              {provisional && <span className="text-faint">?</span>}
+            </span>
+          )}
+        </div>
+
+        <div className="mt-0.5 flex h-4 items-center gap-1">
+          {captured.length > 0 ? (
+            <CapturedRow pieces={captured} pieceSet={pieceSet} color={color === 'w' ? 'b' : 'w'} />
+          ) : status ? (
+            <span className="truncate text-[11px] text-faint">{status}</span>
+          ) : null}
+          {materialLead > 0 && (
+            <span className="ml-0.5 text-[11px] font-semibold tabular-nums text-muted">
+              +{materialLead}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Pendule */}
+      {timeMs != null && (
+        <div
+          className={clsx(
+            'shrink-0 rounded-[var(--radius-sm)] px-2.5 py-1 font-mono text-lg font-semibold tabular-nums leading-none transition-colors',
+            active ? 'bg-surface-strong text-ink' : 'text-muted',
+            urgency === 'critical' && active && 'bg-[var(--q-blunder)] text-white animate-pulse',
+            urgency === 'low' && active && 'text-[var(--q-inaccuracy)]',
+          )}
+          role="timer"
+          aria-label={`Temps restant de ${name}`}
+        >
+          {formatClock(timeMs)}
+        </div>
+      )}
+    </div>
+  )
+})
+
+/**
+ * Pièces capturées, groupées par type et légèrement chevauchées.
+ * Le chevauchement évite qu'une file de huit pions ne déborde de la ligne.
+ */
+function CapturedRow({
+  pieces,
+  pieceSet,
+  color,
+}: {
+  pieces: PieceSymbol[]
+  pieceSet: string
+  color: Color
+}) {
+  const order: PieceSymbol[] = ['q', 'r', 'b', 'n', 'p']
+  const sorted = [...pieces].sort((a, b) => order.indexOf(a) - order.indexOf(b))
+
+  return (
+    <span className="flex items-center" aria-label="Pièces capturées">
+      {sorted.map((type, index) => (
+        <img
+          key={`${type}-${index}`}
+          src={pieceUrl(pieceSet, color, type)}
+          alt=""
+          className="h-4 w-4 opacity-75"
+          style={{ marginLeft: index === 0 ? 0 : -5 }}
+        />
+      ))}
+    </span>
+  )
+}

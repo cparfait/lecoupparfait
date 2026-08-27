@@ -1,0 +1,145 @@
+/**
+ * Profil public d'un joueur.
+ *
+ *   GET /api/profil/<pseudo>
+ *
+ * Ne renvoie **que** ce qui est public : pseudo, classements, statistiques,
+ * parties récentes. Jamais l'adresse e-mail, jamais les sessions, jamais la
+ * date de dernière connexion à la minute près — un profil de plateforme de jeu
+ * n'a pas à révéler les habitudes de quelqu'un.
+ */
+
+import { NextResponse } from 'next/server'
+import { desc, eq, getDb, games, ratingHistory, ratings, sql, users } from '@coupparfait/db'
+
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
+export async function GET(
+  _request: Request,
+  context: { params: Promise<{ username: string }> },
+) {
+  const { username } = await context.params
+
+  try {
+    const database = getDb()
+
+    const rows = await database
+      .select({
+        id: users.id,
+        username: users.username,
+        avatar: users.avatar,
+        bio: users.bio,
+        countryCode: users.countryCode,
+        createdAt: users.createdAt,
+        disabled: users.disabled,
+      })
+      .from(users)
+      .where(eq(users.usernameLower, username.toLowerCase()))
+      .limit(1)
+
+    const user = rows[0]
+    if (!user || user.disabled) {
+      return NextResponse.json({ error: 'Joueur introuvable.' }, { status: 404 })
+    }
+
+    const [allRatings, recentGames, history] = await Promise.all([
+      database.select().from(ratings).where(eq(ratings.userId, user.id)),
+
+      database
+        .select({
+          slug: games.slug,
+          speed: games.speed,
+          rated: games.rated,
+          whiteName: games.whiteName,
+          blackName: games.blackName,
+          whiteId: games.whiteId,
+          blackId: games.blackId,
+          result: games.result,
+          status: games.status,
+          eco: games.eco,
+          opening: games.opening,
+          moves: games.moves,
+          whiteRatingDelta: games.whiteRatingDelta,
+          blackRatingDelta: games.blackRatingDelta,
+          createdAt: games.createdAt,
+        })
+        .from(games)
+        .where(sql`${games.whiteId} = ${user.id} or ${games.blackId} = ${user.id}`)
+        .orderBy(desc(games.createdAt))
+        .limit(20),
+
+      database
+        .select({
+          category: ratingHistory.category,
+          rating: ratingHistory.rating,
+          createdAt: ratingHistory.createdAt,
+        })
+        .from(ratingHistory)
+        .where(eq(ratingHistory.userId, user.id))
+        .orderBy(desc(ratingHistory.createdAt))
+        .limit(120),
+    ])
+
+    return NextResponse.json({
+      user: {
+        username: user.username,
+        avatar: user.avatar,
+        bio: user.bio,
+        countryCode: user.countryCode,
+        // Seul le mois d'inscription est exposé : la date exacte n'apporte rien.
+        memberSince: user.createdAt.toISOString().slice(0, 7),
+      },
+      ratings: allRatings
+        .filter((rating) => rating.games > 0)
+        .map((rating) => ({
+          category: rating.category,
+          rating: rating.rating,
+          deviation: rating.deviation,
+          provisional: rating.deviation > 110,
+          elo: rating.elo,
+          games: rating.games,
+          wins: rating.wins,
+          losses: rating.losses,
+          draws: rating.draws,
+          peak: rating.peak,
+        })),
+      games: recentGames.map((game) => {
+        const playedWhite = game.whiteId === user.id
+        const outcome =
+          game.result === '1/2-1/2'
+            ? 'draw'
+            : (game.result === '1-0') === playedWhite
+              ? 'win'
+              : 'loss'
+        return {
+          slug: game.slug,
+          speed: game.speed,
+          rated: game.rated,
+          colour: playedWhite ? 'w' : 'b',
+          opponent: playedWhite ? game.blackName : game.whiteName,
+          outcome,
+          status: game.status,
+          eco: game.eco,
+          opening: game.opening,
+          moveCount: game.moves ? game.moves.split(' ').length : 0,
+          ratingDelta: playedWhite ? game.whiteRatingDelta : game.blackRatingDelta,
+          playedAt: game.createdAt.toISOString(),
+        }
+      }),
+      // Renvoyée du plus ancien au plus récent : c'est le sens de lecture d'une
+      // courbe de progression.
+      history: history.reverse().map((entry) => ({
+        category: entry.category,
+        rating: entry.rating,
+        at: entry.createdAt.toISOString(),
+      })),
+    })
+  } catch (error) {
+    console.error('[profil]', error)
+    return NextResponse.json(
+      { error: 'Le service de profils est indisponible.' },
+      { status: 503 },
+    )
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "noEmit": true,
+    "paths": {
+      "@coupparfait/core": ["../../packages/core/src/index.ts"],
+      "@coupparfait/db": ["../../packages/db/src/index.ts"],
+      "@coupparfait/db/auth": ["../../packages/db/src/auth.ts"],
+      "@coupparfait/db/ratings": ["../../packages/db/src/ratings.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

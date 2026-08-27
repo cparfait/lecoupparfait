@@ -1,0 +1,43 @@
+{
+  "name": "coupparfait",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Le Coup Parfait — plateforme d'échecs libre : apprendre, jouer, progresser. 100% gratuite et auto-hébergeable.",
+  "license": "AGPL-3.0-or-later",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "dev": "node scripts/dev.mjs",
+    "dev:web": "npm run dev -w @coupparfait/web",
+    "dev:server": "npm run dev -w @coupparfait/server",
+    "build": "npm run build -w @coupparfait/web",
+    "start:web": "npm run start -w @coupparfait/web",
+    "start:server": "npm run start -w @coupparfait/server",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "node --experimental-strip-types scripts/check-lessons.mjs",
+    "test:realtime": "node scripts/smoke-realtime.mjs",
+    "db:push": "npm run db:push -w @coupparfait/db",
+    "db:generate": "npm run db:generate -w @coupparfait/db",
+    "db:migrate": "npm run db:migrate -w @coupparfait/db",
+    "db:studio": "npm run db:studio -w @coupparfait/db",
+    "data:assets": "node scripts/fetch-assets.mjs",
+    "data:engine": "node scripts/setup-engine.mjs",
+    "data:openings:build": "node scripts/build-openings.mjs",
+    "data:openings": "node scripts/import-openings.mjs",
+    "data:puzzles": "node scripts/import-puzzles.mjs",
+    "icons": "node scripts/build-icons.mjs",
+    "check:lessons": "node --experimental-strip-types scripts/check-lessons.mjs",
+    "data:endgames": "node scripts/build-endgames.mjs",
+    "voice:install": "node scripts/install-piper.mjs",
+    "engine:install": "node scripts/install-stockfish.mjs"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

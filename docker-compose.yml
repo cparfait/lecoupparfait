@@ -1,0 +1,114 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Le Coup Parfait — déploiement auto-hébergé
+#
+#  Trois services :
+#    db      PostgreSQL 17, seul service à conserver un volume
+#    server  Stockfish natif + temps réel  (port 3001)
+#    web     interface Next.js             (port 3000)
+#
+#  Derrière Nginx Proxy Manager, créer deux hôtes mandataires :
+#    coupparfait.mondomaine.fr      → web:3000     (WebSocket activé)
+#    coupparfait-api.mondomaine.fr  → server:3001  (WebSocket activé — indispensable)
+#
+#  Démarrage :
+#    cp .env.example .env      puis adapter les mots de passe
+#    docker compose up -d --build
+#    docker compose exec web node scripts/import-openings.mjs
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: coupparfait
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-coupparfait}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?le mot de passe PostgreSQL est obligatoire}
+      POSTGRES_DB: ${POSTGRES_DB:-coupparfait}
+      # Le tri « C » est nettement plus rapide et suffit : aucun classement
+      # alphabétique n'est présenté à l'utilisateur depuis la base.
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --locale=C'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      # Exposé sur la boucle locale uniquement : la base ne doit jamais être
+      # joignable depuis l'extérieur, même sur un réseau privé.
+      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-coupparfait} -d ${POSTGRES_DB:-coupparfait}']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-coupparfait}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-coupparfait}
+      SERVER_PORT: 3001
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      STOCKFISH_PATH: /usr/local/bin/stockfish
+      ENGINE_POOL_SIZE: ${ENGINE_POOL_SIZE:-2}
+      ENGINE_THREADS: ${ENGINE_THREADS:-2}
+      ENGINE_HASH_MB: ${ENGINE_HASH_MB:-256}
+      ENGINE_DEFAULT_DEPTH: ${ENGINE_DEFAULT_DEPTH:-20}
+      ENGINE_MAX_DEPTH: ${ENGINE_MAX_DEPTH:-30}
+      LICHESS_TABLEBASE_URL: ${LICHESS_TABLEBASE_URL:-https://tablebase.lichess.ovh}
+      # Voix neuronale du coach. Ces chemins existent dans l'image ; si Piper
+      # n'a pas été inclus à la construction, l'application bascule d'elle-même
+      # sur la synthèse du navigateur.
+      PIPER_BIN: ${PIPER_BIN:-/opt/piper/piper}
+      PIPER_VOICES_DIR: ${PIPER_VOICES_DIR:-/app/voices}
+    ports:
+      - '${SERVER_PORT:-3001}:3001'
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          # Stockfish consomme autant de mémoire qu'on lui en donne (table de
+          # hachage). Cette borne évite qu'il n'étouffe l'hôte.
+          memory: ${SERVER_MEMORY_LIMIT:-2g}
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-coupparfait}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-coupparfait}
+      AUTH_SECRET: ${AUTH_SECRET:?génère un secret avec node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"}
+      AUTH_SESSION_DAYS: ${AUTH_SESSION_DAYS:-30}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:-http://localhost:3001}
+      INTERNAL_SERVER_URL: http://server:3001
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    ports:
+      - '${WEB_PORT:-3000}:3000'
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  db-data:
+    driver: local

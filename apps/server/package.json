@@ -1,0 +1,25 @@
+{
+  "name": "@coupparfait/server",
+  "version": "0.1.0",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "description": "Serveur Le Coup Parfait : moteur Stockfish natif, analyse profonde et parties en temps réel.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev": "node --watch --experimental-strip-types --env-file-if-exists=../../.env src/index.ts",
+    "start": "node --experimental-strip-types src/index.ts",
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@coupparfait/core": "*",
+    "@coupparfait/db": "*",
+    "chess.js": "1.4.0",
+    "socket.io": "4.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,53 @@
+# dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# builds
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# moteur (binaires WASM copiés depuis node_modules, ~14 Mo)
+apps/web/public/engine/
+
+# jeux de données téléchargés (plusieurs centaines de Mo)
+data/downloads/
+# Voix neuronale : quelques centaines de mégaoctets de modèles, réinstallables
+# par `npm run voice:install`.
+data/piper/
+# Moteur natif, réinstallable par `npm run engine:install`.
+data/stockfish/
+data/*.csv
+data/*.zst
+data/*.pgn
+data/*.jsonl
+
+# logs & divers
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+coverage/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# docker volumes locaux
+.docker-data/
+
+# extrait de diagnostic de la voix, jetable
+/essai-voix.wav
+
+# répertoires de travail jetables
+.tmp-probe/
+scripts/.tmp/
