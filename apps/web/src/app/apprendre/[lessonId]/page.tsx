@@ -164,6 +164,24 @@ export default function LessonPage() {
   }, [upcomingSay, voiceEnabled])
 
   /**
+   * Cases citées par le coach, à montrer sur l'échiquier.
+   *
+   * Quatre-vingts étapes nomment une case — « le cavalier en f3 attaque le
+   * pion e5 » — et dix-neuf seulement la montraient. Pour les soixante autres,
+   * il fallait la chercher soi-même, ce qui est précisément ce qu'un débutant
+   * ne sait pas encore faire vite.
+   *
+   * Le surlignage explicite d'une étape reste prioritaire : quand l'auteur a
+   * désigné une case précise, il a une raison de ne pas montrer les autres.
+   */
+  const spokenSquares = useMemo<Square[]>(() => {
+    if (step?.highlight?.length) return step.highlight as Square[]
+    if (!step?.say) return []
+    const found = step.say.match(/\b[a-h][1-8]\b/g) ?? []
+    return [...new Set(found)] as Square[]
+  }, [step])
+
+  /**
    * Roi maté, s'il y en a un.
    *
    * Les leçons de mat se terminent sur la position gagnante, et rien ne la
@@ -406,7 +424,7 @@ export default function LessonPage() {
             legalMoves={legalMoves}
             onMove={handleMove}
             lastMove={lastMove}
-            highlights={step.highlight ?? []}
+            highlights={spokenSquares}
             arrows={arrows}
             circles={circles}
             spotlight={step.spotlight}
