@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 760" role="img" aria-label="Cavale, la mascotte du Coup Parfait">
+  <defs>
+    <linearGradient id="corps" x1="0.15" y1="0.05" x2="0.85" y2="0.95">
+      <stop offset="0%" stop-color="#9B83FF"/>
+      <stop offset="42%" stop-color="#6B4AF0"/>
+      <stop offset="100%" stop-color="#3A2496"/>
+    </linearGradient>
+    <linearGradient id="criniere" x1="0.3" y1="0" x2="0.9" y2="1">
+      <stop offset="0%" stop-color="#7FFFDC"/>
+      <stop offset="35%" stop-color="#00E5A8"/>
+      <stop offset="100%" stop-color="#00A67C"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#7C5CFF" stop-opacity="0.5"/>
+      <stop offset="60%" stop-color="#7C5CFF" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#7C5CFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ombre" x1="0" y1="0" x2="1" y2="0.6">
+      <stop offset="0%" stop-color="#1B0F52" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#1B0F52" stop-opacity="0.75"/>
+    </linearGradient>
+
+    <path id="silhouette" d="
+      M 330 148
+      C 300 158, 284 176, 266 200
+      C 244 230, 222 256, 198 284
+      C 180 305, 164 314, 160 328
+      C 156 342, 166 352, 180 350
+      C 194 348, 208 340, 222 332
+      C 212 350, 198 364, 194 378
+      C 190 394, 204 404, 222 402
+      C 248 399, 270 388, 286 374
+      C 292 420, 296 470, 288 516
+      C 278 570, 246 618, 196 654
+      C 148 688, 92 708, 34 714
+      C 96 726, 168 720, 232 696
+      C 312 666, 378 606, 414 530
+      C 452 452, 462 366, 452 286
+      C 444 226, 420 190, 394 172
+      L 400 108
+      L 366 140
+      L 346 82
+      L 330 148
+      Z"/>
+    <clipPath id="dansCorps"><use href="#silhouette"/></clipPath>
+  </defs>
+
+  <ellipse cx="330" cy="380" rx="330" ry="330" fill="url(#halo)"/>
+
+  <use href="#silhouette" fill="url(#corps)"/>
+
+  <g clip-path="url(#dansCorps)">
+    <!-- Face ombrée : tout le flanc droit bascule dans l'ombre. -->
+    <rect x="300" y="0" width="420" height="760" fill="url(#ombre)"/>
+
+    <!-- Crinière : la seule matière brillante de l'ensemble. -->
+    <path fill="url(#criniere)" d="
+      M 396 168
+      C 428 196, 446 244, 450 300
+      C 456 372, 448 448, 420 516
+      C 392 586, 340 644, 272 682
+      C 232 704, 190 716, 150 720
+      C 220 714, 286 690, 340 648
+      C 400 602, 440 538, 458 462
+      C 476 386, 474 268, 440 200
+      C 428 176, 412 166, 396 168
+      Z"/>
+
+    <!-- Arête de lumière sur le chanfrein, côté gauche. -->
+    <path fill="#C9BAFF" opacity="0.55" d="
+      M 330 152
+      C 302 162, 288 178, 270 202
+      C 248 232, 226 258, 202 286
+      C 186 305, 172 314, 166 326
+      C 176 322, 190 310, 206 292
+      C 232 262, 256 234, 280 204
+      C 298 180, 312 164, 336 156
+      Z"/>
+  </g>
+
+  <!-- Œil : une amande sombre, un seul point de lumière. -->
+  <ellipse cx="288" cy="228" rx="17" ry="20" fill="#140C33" transform="rotate(-24 288 228)"/>
+  <circle cx="282" cy="221" r="6" fill="#FFFFFF" opacity="0.92"/>
+
+  <!-- Naseau. -->
+  <ellipse cx="196" cy="322" rx="11" ry="8" fill="#140C33" opacity="0.6" transform="rotate(-38 196 322)"/>
+</svg>

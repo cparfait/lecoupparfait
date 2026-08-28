@@ -228,24 +228,55 @@ function SetupScreen({
           était mauvais. On montre donc où il en est, et jusqu'où il peut
           monter — sans rien interdire, la barre reste entière.
         */}
+        {/*
+          Le choix de l'adversaire, et non une case à cocher.
+          
+          « Qui vais-je affronter » est une question à deux réponses, pas une
+          option à activer : une case laisse croire à un réglage accessoire
+          alors que c'est ce qui change tout dans la partie.
+        */}
         {maiaReady && (
-          <div className="border-t border-line/60 px-5 py-3">
-            <label className="flex cursor-pointer items-start gap-2.5">
-              <input
-                type="checkbox"
-                checked={human}
-                onChange={(event) => setHuman(event.target.checked)}
-                className="mt-0.5 h-4 w-4 accent-[var(--accent)]"
-              />
-              <span>
-                <span className="block text-sm font-medium">Adversaire humain (Maia)</span>
-                <span className="mt-0.5 block text-xs leading-relaxed text-muted">
-                  Un réseau entraîné sur des millions de parties humaines. Il se trompe comme
-                  on se trompe vraiment à son niveau, au lieu de jouer parfaitement puis de
-                  bâcler un coup au hasard. Décoche pour retrouver Stockfish.
-                </span>
-              </span>
-            </label>
+          <div className="border-t border-line/60 px-5 py-4">
+            <p className="mb-2 text-sm font-medium">Adversaire</p>
+            <div className="grid gap-1.5 sm:grid-cols-2">
+              {[
+                {
+                  id: true,
+                  nom: 'Maia',
+                  resume: 'Joue comme un humain',
+                  detail:
+                    'Réseau entraîné sur des millions de parties réelles. Il se trompe comme on se trompe vraiment à ce niveau.',
+                },
+                {
+                  id: false,
+                  nom: 'Stockfish',
+                  resume: 'Le moteur classique',
+                  detail:
+                    'Le plus fort du monde, bridé au niveau voulu. Joue juste, puis lâche un coup faible d’un coup.',
+                },
+              ].map((choix) => (
+                <button
+                  key={choix.nom}
+                  type="button"
+                  onClick={() => setHuman(choix.id)}
+                  aria-pressed={human === choix.id}
+                  className={clsx(
+                    'rounded-[var(--radius-sm)] border p-3 text-left transition-colors',
+                    human === choix.id
+                      ? 'border-accent bg-accent/10'
+                      : 'border-line hover:bg-surface-hover',
+                  )}
+                >
+                  <span className="flex items-baseline gap-2">
+                    <span className="text-sm font-semibold">{choix.nom}</span>
+                    <span className="text-[11px] text-faint">{choix.resume}</span>
+                  </span>
+                  <span className="mt-1 block text-xs leading-relaxed text-muted">
+                    {choix.detail}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -820,7 +851,10 @@ function GameScreen({
                     ? 'Chargement du moteur…'
                     : botPlayer.thinking
                       ? 'réfléchit…'
-                      : `Niveau ${bot.level}`
+                      : // Le moteur reste affiché pendant toute la partie :
+                        // choisi une fois à la configuration, on l'oublie
+                        // aussitôt, et l'on ne sait plus qui l'on affronte.
+                        `${human ? 'Maia' : 'Stockfish'} · niveau ${bot.level}`
                 }
               />
 
