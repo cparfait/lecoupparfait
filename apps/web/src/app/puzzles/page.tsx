@@ -25,8 +25,10 @@ import {
   Loader2,
   RotateCcw,
   Target,
+  Timer,
   X,
 } from 'lucide-react'
+import Link from 'next/link'
 import clsx from 'clsx'
 import { Chess } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
@@ -332,6 +334,16 @@ export default function PuzzlesPage() {
       {/* ── Filtres et score ───────────────────────────────────────── */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <h1 className="font-display text-xl font-bold tracking-tight">Puzzles</h1>
+        {/* L'autre façon de travailler les mêmes puzzles : vite, et à la
+            chaîne. Elle entraîne la reconnaissance là où celle-ci entraîne la
+            recherche. */}
+        <Link
+          href="/puzzles/rush"
+          className="flex h-7 items-center gap-1.5 rounded-full bg-accent/15 px-2.5 text-[12px] font-semibold text-accent transition-colors hover:bg-accent/25"
+        >
+          <Timer size={12} aria-hidden />
+          Manche chronométrée
+        </Link>
         {playerRating !== null && (
           <Chip tone="accent">
             <Target size={11} aria-hidden />

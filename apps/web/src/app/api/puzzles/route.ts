@@ -25,6 +25,11 @@ export async function GET(request: Request) {
   const url = new URL(request.url)
   const theme = url.searchParams.get('theme')
   const requestedRating = url.searchParams.get('rating')
+  const rush = Number(url.searchParams.get('rush') ?? 0)
+
+  // Une manche chronométrée ne peut pas attendre le réseau entre deux
+  // puzzles : on la sert d'un bloc, par difficulté croissante.
+  if (rush > 0) return rushSeries(Math.min(60, Math.max(5, rush)))
 
   try {
     const database = getDb()
@@ -171,4 +176,58 @@ export async function POST(request: Request) {
     console.error('[puzzles:post]', error)
     return NextResponse.json({ error: 'Enregistrement impossible.' }, { status: 503 })
   }
+}
+
+/**
+ * Une série pour une manche chronométrée.
+ *
+ * Deux choix qui font la différence entre un exercice et un jeu :
+ *
+ *  - **La difficulté monte.** Commencer facile met en confiance et laisse
+ *    prendre le rythme ; finir difficile fait que la manche s'arrête d'elle-
+ *    même, sans qu'on ait à décider quand.
+ *  - **Rien n'est exclu.** Le mode normal évite les puzzles déjà tentés, ce
+ *    qui a du sens pour progresser ; ici on cherche la vitesse de
+ *    reconnaissance, et revoir un motif connu est précisément l'intérêt.
+ *
+ * Une requête par palier plutôt qu'un grand tri aléatoire : chaque fenêtre de
+ * difficulté ne compte que quelques milliers de lignes, là où un `random()`
+ * sur cinq millions serait catastrophique.
+ */
+async function rushSeries(count: number): Promise<Response> {
+  const database = getDb()
+  const START = 600
+  const END = 2200
+  const step = (END - START) / count
+
+  const series = await Promise.all(
+    Array.from({ length: count }, async (_, index) => {
+      const target = Math.round(START + step * index)
+      const rows = await database
+        .select()
+        .from(puzzles)
+        .where(and(gte(puzzles.rating, target - 120), lte(puzzles.rating, target + 120)))
+        .orderBy(sql`random()`)
+        .limit(1)
+      return rows[0] ?? null
+    }),
+  )
+
+  const found = series.filter((puzzle) => puzzle !== null)
+  if (found.length === 0) {
+    return NextResponse.json(
+      { error: 'Aucun puzzle en base. Lance l’import :  node scripts/import-puzzles.mjs' },
+      { status: 404 },
+    )
+  }
+
+  return NextResponse.json({
+    puzzles: found.map((puzzle) => ({
+      id: puzzle.id,
+      fen: puzzle.fen,
+      moves: puzzle.moves.split(' '),
+      rating: puzzle.rating,
+      themes: puzzle.themes,
+    })),
+  })
 }
