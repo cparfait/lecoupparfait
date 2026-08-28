@@ -241,6 +241,93 @@ export async function changePassword(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Empreinte d'un jeton de session. */
+/**
+ * Durée de validité d'un lien de confirmation d'adresse.
+ *
+ * Vingt-quatre heures : assez pour relever son courrier le lendemain, assez
+ * court pour qu'un lien qui traîne dans une boîte compromise six mois plus
+ * tard ne vaille plus rien.
+ */
+const EMAIL_TOKEN_TTL_MS = 24 * 3600 * 1000
+
+/**
+ * Ouvre une demande de confirmation d'adresse et renvoie le jeton **en
+ * clair** — la seule fois où il existe sous cette forme. La base n'en garde
+ * que l'empreinte : sa fuite ne permet donc pas de confirmer une adresse à la
+ * place de son propriétaire.
+ */
+export async function startEmailVerification(userId: string): Promise<string> {
+  const database = getDb()
+  const token = randomBytes(32).toString('base64url')
+
+  await database
+    .update(users)
+    .set({
+      emailTokenHash: hashToken(token),
+      emailTokenExpiresAt: new Date(Date.now() + EMAIL_TOKEN_TTL_MS),
+    })
+    .where(eq(users.id, userId))
+
+  return token
+}
+
+export type VerifyEmailResult =
+  | { ok: true; username: string; alreadyDone: boolean }
+  | { ok: false; reason: 'unknown' | 'expired' }
+
+/**
+ * Confirme une adresse à partir du jeton reçu par courriel.
+ *
+ * Le jeton est consommé : le même lien ne sert qu'une fois, et un second clic
+ * — sur un lien retrouvé dans sa boîte — répond que c'est déjà fait plutôt que
+ * d'annoncer une erreur qui inquiéterait pour rien.
+ */
+export async function verifyEmail(token: string): Promise<VerifyEmailResult> {
+  const database = getDb()
+  if (!token) return { ok: false, reason: 'unknown' }
+
+  const [candidate] = await database
+    .select({
+      id: users.id,
+      username: users.username,
+      expiresAt: users.emailTokenExpiresAt,
+      verifiedAt: users.emailVerifiedAt,
+    })
+    .from(users)
+    .where(eq(users.emailTokenHash, hashToken(token)))
+    .limit(1)
+
+  if (!candidate) return { ok: false, reason: 'unknown' }
+
+  if (candidate.expiresAt && candidate.expiresAt.getTime() < Date.now()) {
+    return { ok: false, reason: 'expired' }
+  }
+
+  await database
+    .update(users)
+    .set({
+      emailVerifiedAt: candidate.verifiedAt ?? new Date(),
+      emailTokenHash: null,
+      emailTokenExpiresAt: null,
+    })
+    .where(eq(users.id, candidate.id))
+
+  return { ok: true, username: candidate.username, alreadyDone: candidate.verifiedAt !== null }
+}
+
+/** Adresse et état de confirmation, pour l'afficher sur son profil. */
+export async function emailStatus(
+  userId: string,
+): Promise<{ email: string | null; verified: boolean }> {
+  const database = getDb()
+  const [row] = await database
+    .select({ email: users.email, verifiedAt: users.emailVerifiedAt })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1)
+  return { email: row?.email ?? null, verified: row?.verifiedAt != null }
+}
+
 export function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex')
 }

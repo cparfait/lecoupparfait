@@ -48,6 +48,17 @@ export const users = pgTable(
     usernameLower: varchar('username_lower', { length: 20 }).notNull(),
     /** Facultatif : sert uniquement à retrouver un mot de passe perdu. */
     email: varchar('email', { length: 254 }),
+    /**
+     * Quand l'adresse a été confirmée, `null` tant qu'elle ne l'est pas.
+     *
+     * Une adresse non confirmée ne prouve rien : elle peut être mal tapée, ou
+     * appartenir à quelqu'un d'autre. Tant qu'elle n'est pas vérifiée, elle ne
+     * doit pas pouvoir servir à reprendre la main sur le compte.
+     */
+    emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true }),
+    /** Empreinte du jeton de confirmation. Jamais le jeton lui-même. */
+    emailTokenHash: varchar('email_token_hash', { length: 64 }),
+    emailTokenExpiresAt: timestamp('email_token_expires_at', { withTimezone: true }),
     /** Empreinte scrypt du mot de passe. Jamais le mot de passe lui-même. */
     passwordHash: text('password_hash').notNull(),
 

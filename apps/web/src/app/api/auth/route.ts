@@ -11,8 +11,16 @@
 
 import { NextResponse } from 'next/server'
 import { eq, getDb, users } from '@coupparfait/db'
-import { authenticate, createUser, type ValidationError } from '@coupparfait/db/auth'
+import {
+  authenticate,
+  createUser,
+  emailStatus,
+  startEmailVerification,
+  verifyEmail,
+  type ValidationError,
+} from '@coupparfait/db/auth'
 import { isKnownAvatar } from '@/lib/avatars.ts'
+import { sendMail, verificationMail } from '@/lib/server/mailer.ts'
 import { endSession, getCurrentUser, startSession } from '@/lib/server/session.ts'
 
 export const runtime = 'nodejs'
@@ -63,7 +71,13 @@ const ERROR_MESSAGES: Record<ValidationError, string> = {
 
 export async function GET() {
   const user = await getCurrentUser()
-  return NextResponse.json({ user })
+  if (!user) return NextResponse.json({ user: null })
+
+  // L'état de l'adresse n'accompagne que sa propre identité : la fiche
+  // publique d'un joueur ne doit jamais laisser voir son adresse, ni même
+  // qu'il en a une.
+  const email = await emailStatus(user.userId)
+  return NextResponse.json({ user, email })
 }
 
 export async function POST(request: Request) {
@@ -73,6 +87,7 @@ export async function POST(request: Request) {
     password?: string
     email?: string
     avatar?: string
+    token?: string
   }
 
   try {
@@ -83,6 +98,51 @@ export async function POST(request: Request) {
 
   if (body.action === 'signout') {
     await endSession()
+    return NextResponse.json({ ok: true })
+  }
+
+  // La confirmation ne demande pas de session : on clique le lien depuis sa
+  // messagerie, souvent sur un autre appareil que celui de l'inscription.
+  if (body.action === 'verifyEmail') {
+    const result = await verifyEmail(String(body.token ?? ''))
+    if (!result.ok) {
+      return NextResponse.json(
+        {
+          error:
+            result.reason === 'expired'
+              ? 'Ce lien a expiré. Demande-en un nouveau depuis ton profil.'
+              : 'Ce lien ne correspond à rien. Il a peut-être déjà servi.',
+        },
+        { status: 400 },
+      )
+    }
+    return NextResponse.json({ ok: true, username: result.username, alreadyDone: result.alreadyDone })
+  }
+
+  if (body.action === 'resendVerification') {
+    const me = await getCurrentUser()
+    if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+
+    const status = await emailStatus(me.userId)
+    if (!status.email) {
+      return NextResponse.json({ error: 'Aucune adresse enregistrée.' }, { status: 400 })
+    }
+    if (status.verified) return NextResponse.json({ ok: true, alreadyDone: true })
+
+    // Même limitation que les tentatives de connexion : un bouton « renvoyer »
+    // sans garde-fou est une machine à expédier du courrier chez autrui.
+    const address =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+      request.headers.get('x-real-ip') ??
+      'inconnu'
+    if (rateLimited(`renvoi:${address}:${me.username.toLowerCase()}`)) {
+      return NextResponse.json(
+        { error: 'Trop de renvois. Réessaie dans quelques minutes.' },
+        { status: 429 },
+      )
+    }
+
+    await sendVerification(me.userId, me.username, status.email, request)
     return NextResponse.json({ ok: true })
   }
 
@@ -135,6 +195,19 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: ERROR_MESSAGES[result.error] }, { status: 400 })
       }
       await startSession(result.user.id)
+
+      // Le courriel ne conditionne pas l'inscription : elle est déjà faite, la
+      // session déjà ouverte. Une messagerie en panne ne doit pas empêcher
+      // quelqu'un d'entrer — l'adresse restera simplement non confirmée.
+      const address = body.email?.trim()
+      if (address) {
+        void sendVerification(result.user.id, result.user.username, address, request).catch(
+          (error: unknown) => {
+            console.error('[courriel] confirmation non envoyée :', error)
+          },
+        )
+      }
+
       return NextResponse.json({
         user: {
           userId: result.user.id,
@@ -174,4 +247,22 @@ export async function POST(request: Request) {
       { status: 503 },
     )
   }
+}
+
+/**
+ * Ouvre une demande de confirmation et expédie le lien.
+ *
+ * L'adresse publique vient de la configuration quand elle existe : derrière un
+ * proxy, l'origine de la requête est celle du conteneur, et le lien reçu par
+ * courriel mènerait à `http://web:3000` — injoignable depuis une boîte mail.
+ */
+async function sendVerification(
+  userId: string,
+  username: string,
+  address: string,
+  request: Request,
+): Promise<void> {
+  const token = await startEmailVerification(userId)
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin
+  await sendMail({ ...verificationMail(username, appUrl, token), to: address })
 }

@@ -26,6 +26,10 @@ data/downloads/
 data/piper/
 # Moteur natif, réinstallable par `npm run engine:install`.
 data/stockfish/
+# Courriels capturés en développement : ils contiennent des adresses.
+# Le motif est non ancré : le serveur Next tourne depuis `apps/web`, la
+# boîte atterrit donc là et non à la racine.
+**/data/courriels/
 data/*.csv
 data/*.zst
 data/*.pgn

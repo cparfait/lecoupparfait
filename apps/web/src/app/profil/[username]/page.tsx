@@ -11,7 +11,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { CalendarDays, LogOut, TrendingUp } from 'lucide-react'
+import { CalendarDays, LogOut, MailCheck, MailWarning, TrendingUp } from 'lucide-react'
 import clsx from 'clsx'
 import { SPEED_LABELS, ratingTitle } from '@coupparfait/core'
 import { Button, Card, Chip, EmptyState, Skeleton } from '@/components/ui/index.tsx'
@@ -72,6 +72,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [me, setMe] = useState<string | null>(null)
+  const [email, setEmail] = useState<{ email: string | null; verified: boolean } | null>(null)
 
   useEffect(() => {
     void fetch(`/api/profil/${encodeURIComponent(params.username)}`)
@@ -88,7 +89,10 @@ export default function ProfilePage() {
 
     void fetch('/api/auth')
       .then((response) => (response.ok ? response.json() : null))
-      .then((data) => setMe(data?.user?.username ?? null))
+      .then((data) => {
+        setMe(data?.user?.username ?? null)
+        setEmail(data?.email ?? null)
+      })
       .catch(() => setMe(null))
   }, [params.username])
 
@@ -171,7 +175,10 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Chez soi seulement : l'avatar des autres ne se change pas. */}
+        {/* Chez soi seulement : ni l'adresse ni l'avatar des autres ne
+            regardent qui que ce soit. */}
+        {isMe && email?.email && <EmailStatus email={email} />}
+
         {isMe && (
           <div className="mt-4 border-t border-line/60 pt-4">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
@@ -385,4 +392,61 @@ function formatDate(iso: string): string {
   if (days < 7) return `il y a ${days} j`
   if (days < 30) return `il y a ${Math.floor(days / 7)} sem.`
   return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+}
+
+/**
+ * L'état de son adresse.
+ *
+ * Une adresse non confirmée ne prouve rien : elle peut être mal tapée, ou
+ * appartenir à quelqu'un d'autre. Le dire ici, avec le moyen de renvoyer le
+ * lien, évite de le découvrir le jour où l'on a perdu son mot de passe.
+ */
+function EmailStatus({ email }: { email: { email: string | null; verified: boolean } }) {
+  const [busy, setBusy] = useState(false)
+  const [sent, setSent] = useState(false)
+
+  if (email.verified) {
+    return (
+      <p className="mt-4 flex items-center gap-1.5 border-t border-line/60 pt-4 text-xs text-faint">
+        <MailCheck size={13} className="text-[var(--accent-2)]" aria-hidden />
+        Adresse confirmée : {email.email}
+      </p>
+    )
+  }
+
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line/60 pt-4">
+      <MailWarning size={14} className="shrink-0 text-[var(--q-inaccuracy)]" aria-hidden />
+      <p className="min-w-0 flex-1 text-xs leading-relaxed text-muted">
+        <strong className="font-semibold text-ink">Adresse à confirmer</strong> — {email.email}.
+        Tant que ce n’est pas fait, elle ne pourra pas servir à retrouver ton mot de passe.
+      </p>
+      <Button
+        size="sm"
+        variant="secondary"
+        disabled={busy || sent}
+        onClick={async () => {
+          setBusy(true)
+          try {
+            const response = await fetch('/api/auth', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ action: 'resendVerification' }),
+            })
+            const data = await response.json().catch(() => ({}))
+            if (!response.ok) {
+              toast.error(data.error ?? 'Renvoi impossible.')
+              return
+            }
+            setSent(true)
+            toast.success('Lien renvoyé.', 'Regarde ta boîte de réception.')
+          } finally {
+            setBusy(false)
+          }
+        }}
+      >
+        {sent ? 'Envoyé' : 'Renvoyer le lien'}
+      </Button>
+    </div>
+  )
 }
