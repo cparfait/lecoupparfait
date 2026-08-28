@@ -269,6 +269,11 @@ async function semer(db) {
 
     for (const categorie of ['blitz', 'rapid']) {
       const note = joueur.elo + (categorie === 'blitz' ? -40 : 0)
+      // Glicko-2 et Elo sont deux calculs distincts : les poser égaux donnait
+      // un écran où le même nombre apparaissait deux fois, ce qui laissait
+      // croire à une redite. En partie réelle ils s'écartent d'une trentaine
+      // de points, l'un tenant compte de l'incertitude et l'autre non.
+      const eloClassique = note + Math.round((alea() - 0.5) * 60)
       await db
         .insert(ratings)
         .values({
@@ -276,7 +281,7 @@ async function semer(db) {
           category: categorie,
           rating: note,
           deviation: 60 + Math.floor(alea() * 40),
-          elo: note,
+          elo: eloClassique,
           games: parties,
           wins: victoires,
           losses: parties - victoires - nulles,
@@ -291,7 +296,7 @@ async function semer(db) {
           target: [ratings.userId, ratings.category],
           set: {
             rating: note,
-            elo: note,
+            elo: eloClassique,
             deviation: 60 + Math.floor(alea() * 40),
             games: parties,
             wins: victoires,

@@ -8,7 +8,8 @@
  * à rafraîchir. Celui qui ouvre le lien devient l'adversaire.
  */
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Check, Copy, Link2, Share2, Users } from 'lucide-react'
 import clsx from 'clsx'
@@ -24,6 +25,23 @@ export default function CreateFriendGamePage() {
   const [name, setName] = useState('')
   const [slug, setSlug] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+
+  /**
+   * A-t-on un compte ?
+   *
+   * La page annonçait qu'une partie classée en demandait un, sans offrir le
+   * moyen d'en avoir un — et une partie créée sans compte n'apparaît nulle
+   * part ensuite, faute de quelqu'un à qui la rattacher. `null` tant qu'on ne
+   * sait pas : on n'affiche rien plutôt que d'inviter à se connecter quelqu'un
+   * qui l'est déjà.
+   */
+  const [signedIn, setSignedIn] = useState<boolean | null>(null)
+  useEffect(() => {
+    void fetch('/api/auth')
+      .then((response) => response.json())
+      .then((data: { user: unknown }) => setSignedIn(data.user != null))
+      .catch(() => setSignedIn(false))
+  }, [])
 
   const url = slug
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/jouer/partie/${slug}?tc=${timeControlId}${rated ? '&classee=1' : ''}`
@@ -140,11 +158,17 @@ export default function CreateFriendGamePage() {
               hint="Sert uniquement à ce que ton adversaire sache qui il affronte."
             />
 
-            <label className="mt-4 flex cursor-pointer items-start gap-2.5">
+            <label
+              className={clsx(
+                'mt-4 flex items-start gap-2.5',
+                signedIn === false ? 'cursor-default opacity-60' : 'cursor-pointer',
+              )}
+            >
               <input
                 type="checkbox"
                 checked={rated}
                 onChange={(event) => setRated(event.target.checked)}
+                disabled={signedIn === false}
                 className="mt-0.5 h-4 w-4 accent-[var(--accent)]"
               />
               <span>
@@ -155,6 +179,17 @@ export default function CreateFriendGamePage() {
                 </span>
               </span>
             </label>
+
+            {signedIn === false && (
+              <p className="mt-3 border-t border-line/60 pt-3 text-xs leading-relaxed text-muted">
+                Tu joues sans compte : la partie fonctionnera, mais elle ne sera ni classée ni
+                retrouvable ensuite.{' '}
+                <Link href="/connexion" className="font-semibold text-accent hover:underline">
+                  Se connecter ou créer un compte
+                </Link>{' '}
+                — un pseudo, un mot de passe, c’est tout.
+              </p>
+            )}
           </Card>
 
           <Button
