@@ -386,7 +386,10 @@ export default function LiveGamePage() {
             <p className="-mt-1 truncate text-xs text-muted">{opening.name}</p>
           )}
 
-          <Card className="flex min-h-[180px] flex-1 flex-col overflow-hidden">
+          {/* La liste cède la place : c'est elle qui peut se réduire, pas le
+              tchat — deux lignes de coups restent lisibles, deux lignes de
+              conversation ne sont plus une conversation. */}
+          <Card className="flex min-h-[120px] flex-1 flex-col overflow-hidden">
             <MoveList
               moves={playedMoves}
               cursor={playedMoves.length - 1}
@@ -399,7 +402,15 @@ export default function LiveGamePage() {
           </Card>
 
           {/* ── Tchat ──────────────────────────────────────────── */}
-          <Card className="flex max-h-64 flex-col overflow-hidden">
+          {/*
+            Hauteur imposée plutôt que plafonnée.
+            
+            Avec un simple plafond, le tchat était le premier à céder sous la
+            liste des coups : mesuré à 92 px de haut en fin de colonne, dont la
+            moitié pour la saisie — il restait une ligne de messages, ce qui
+            n'est plus un tchat mais une fente.
+          */}
+          <Card className="flex h-56 shrink-0 flex-col overflow-hidden">
             <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3 text-[13px]">
               {chat.length === 0 ? (
                 <p className="text-xs text-faint">Dis bonjour à ton adversaire.</p>
