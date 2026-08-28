@@ -28,6 +28,16 @@ interface Challenge {
   rated: boolean
 }
 
+/** Un défi qu'on a lancé, dont on guette l'acceptation. */
+interface Outgoing {
+  id: string
+  slug: string
+  status: string
+  initialTime: number
+  increment: number
+  rated: boolean
+}
+
 /**
  * Rythme d'interrogation.
  *
@@ -58,9 +68,19 @@ export function ChallengeWatcher() {
       .catch(() => setSignedIn(false))
   }, [])
 
-  // Sur la page du carnet, c'est elle qui montre les défis : deux annonces
-  // pour la même chose se contrediraient à la première réponse.
-  const silent = pathname === '/amis' || pathname.startsWith('/jouer/partie/')
+  // On se tait pendant une partie : y annoncer une autre proposition
+  // reviendrait à inviter quelqu'un à abandonner celle qu'il joue.
+  const silent = pathname.startsWith('/jouer/partie/')
+
+  /**
+   * Emmener celui qui a proposé, dès que l'autre accepte.
+   *
+   * Cette surveillance-là vivait dans la page du carnet — donc seulement si
+   * l'on y restait. Qui lançait un défi puis allait faire un puzzle n'était
+   * jamais conduit sur l'échiquier, et l'autre attendait devant une partie
+   * vide. Elle vit ici, où elle suit partout.
+   */
+  const navigated = useRef<string | null>(null)
 
   useEffect(() => {
     if (!signedIn || silent) return
@@ -70,8 +90,17 @@ export function ChallengeWatcher() {
       try {
         const response = await fetch('/api/defis')
         if (!response.ok || !alive) return
-        const data: { incoming?: Challenge[] } = await response.json()
+        const data: { incoming?: Challenge[]; outgoing?: Outgoing[] } = await response.json()
         setChallenge(data.incoming?.[0] ?? null)
+
+        const accepted = data.outgoing?.find((entry) => entry.status === 'accepted')
+        if (accepted && navigated.current !== accepted.id) {
+          navigated.current = accepted.id
+          const tc = `${accepted.initialTime}+${accepted.increment}`
+          router.push(
+            `/jouer/partie/${accepted.slug}?tc=${tc}${accepted.rated ? '&classee=1' : ''}`,
+          )
+        }
       } catch {
         // Serveur injoignable : on réessaiera au prochain tour.
       }
@@ -83,7 +112,7 @@ export function ChallengeWatcher() {
       alive = false
       clearInterval(timer)
     }
-  }, [signedIn, silent])
+  }, [signedIn, silent, router])
 
   const respond = useCallback(
     async (accept: boolean) => {

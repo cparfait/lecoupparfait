@@ -329,6 +329,13 @@ export default function PreferencesPage() {
                 onChange={(value) => set('commentaryMode', value)}
               />
               <Toggle
+                label="Attendre que tu aies lu"
+                description="En mode commenté, l’adversaire patiente après chaque coup jusqu’à ce que tu dises « Continuer ». Sans cette pause il répond en une seconde, et le commentaire décrit une position déjà dépassée."
+                checked={prefs.commentaryPauses}
+                onChange={(value) => set('commentaryPauses', value)}
+                disabled={!prefs.commentaryMode}
+              />
+              <Toggle
                 label="Surligner le dernier coup"
                 checked={prefs.highlightLastMove}
                 onChange={(value) => set('highlightLastMove', value)}

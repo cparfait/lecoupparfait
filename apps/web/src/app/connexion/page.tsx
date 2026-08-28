@@ -12,7 +12,7 @@
  * projet, pas une concession.
  */
 
-import { Suspense, useCallback, useState } from 'react'
+import { Suspense, useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowRight, Crown, Swords } from 'lucide-react'
@@ -42,6 +42,29 @@ function AuthForm() {
    */
   const referrer = params.get('ami')
   const [mode, setMode] = useState<Mode>(referrer ? 'signup' : 'signin')
+
+  /**
+   * Une invitation reçue alors qu'on a déjà un compte.
+   *
+   * Proposer alors « joue en invité » ferait perdre son classement et son
+   * carnet à quelqu'un qui possède les deux. On le mène droit au carnet, où
+   * l'amitié se noue.
+   */
+  useEffect(() => {
+    if (!referrer) return
+    let alive = true
+    void fetch('/api/auth')
+      .then((response) => response.json())
+      .then((data: { user: unknown }) => {
+        if (alive && data.user) router.replace(`/amis?ami=${encodeURIComponent(referrer)}`)
+      })
+      .catch(() => {
+        // Service de comptes injoignable : on laisse le formulaire visible.
+      })
+    return () => {
+      alive = false
+    }
+  }, [referrer, router])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [email, setEmail] = useState('')

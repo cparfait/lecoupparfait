@@ -137,23 +137,8 @@ function FriendsBook() {
     return () => clearInterval(timer)
   }, [me, refresh])
 
-  /**
-   * Un défi accepté emmène celui qui l'a lancé sur l'échiquier.
-   *
-   * C'est la contrepartie de l'attente : celui qui propose n'a rien à
-   * surveiller, la page l'y conduit d'elle-même.
-   */
-  const navigated = useRef(false)
-  useEffect(() => {
-    if (navigated.current) return
-    const accepted = sent.find((challenge) => challenge.status === 'accepted')
-    if (!accepted) return
-    navigated.current = true
-    const tc = `${accepted.initialTime}+${accepted.increment}`
-    router.push(
-      `/jouer/partie/${accepted.slug}?tc=${tc}${accepted.rated ? '&classee=1' : ''}`,
-    )
-  }, [sent, router])
+  // L'acceptation d'un défi est guettée par `ChallengeWatcher`, qui suit
+  // partout : la surveiller ici aussi produirait deux navigations.
 
   // ── Recherche ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -448,7 +433,11 @@ function FriendsBook() {
         ) : (
           <div className="space-y-1">
             {friends.map((friend) => {
-              const waiting = sent.some(
+              // Le défi en cours vers cette personne, s'il y en a un : le
+              // bouton devient alors le moyen de le retirer. Un bouton
+              // désactivé qui dit « En attente » n'offre aucune sortie à qui
+              // s'est trompé de cadence ou d'adversaire.
+              const waiting = sent.find(
                 (entry) => entry.to === friend.id && entry.status === 'pending',
               )
               return (
@@ -463,11 +452,21 @@ function FriendsBook() {
                   <Button
                     size="sm"
                     variant={waiting ? 'ghost' : 'primary'}
-                    icon={waiting ? <Loader2 size={14} className="animate-spin" /> : <Swords size={14} />}
-                    disabled={waiting}
-                    onClick={() => void challenge(friend)}
+                    icon={
+                      waiting ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <Swords size={14} />
+                      )
+                    }
+                    title={waiting ? 'Retirer ce défi' : `Défier ${friend.username}`}
+                    onClick={() =>
+                      waiting
+                        ? void post('/api/defis', { action: 'cancel', id: waiting.id })
+                        : void challenge(friend)
+                    }
                   >
-                    {waiting ? 'En attente' : 'Jouer'}
+                    {waiting ? 'Annuler' : 'Jouer'}
                   </Button>
                   <button
                     type="button"
