@@ -162,7 +162,7 @@ export function verificationMail(username: string, appUrl: string, token: string
  * provoque un courriel de ce genre reçu sans raison.
  */
 export function resetMail(username: string, appUrl: string, token: string): Mail {
-  const lien = `${appUrl.replace(/\$/, '')}/reinitialiser?jeton=${encodeURIComponent(token)}`
+  const lien = `${appUrl.replace(/\/$/, '')}/reinitialiser?jeton=${encodeURIComponent(token)}`
   return {
     to: '',
     subject: 'Réinitialiser ton mot de passe',
