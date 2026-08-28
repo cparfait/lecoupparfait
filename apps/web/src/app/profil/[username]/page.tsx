@@ -11,7 +11,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { CalendarDays, LogOut, MailCheck, MailWarning, TrendingUp } from 'lucide-react'
+import { BarChart3, CalendarDays, LogOut, MailCheck, MailWarning, TrendingUp } from 'lucide-react'
 import clsx from 'clsx'
 import { SPEED_LABELS, ratingTitle } from '@coupparfait/core'
 import { Button, Card, Chip, EmptyState, Skeleton } from '@/components/ui/index.tsx'
@@ -169,9 +169,17 @@ export default function ProfilePage() {
             </p>
           </div>
           {isMe && (
-            <Button size="sm" variant="ghost" icon={<LogOut size={14} />} onClick={signOut}>
-              Déconnexion
-            </Button>
+            <div className="flex shrink-0 gap-1">
+              {/* Les statistiques ne concernent que soi : leur porte est ici. */}
+              <Link href="/statistiques">
+                <Button size="sm" variant="ghost" icon={<BarChart3 size={14} />}>
+                  Statistiques
+                </Button>
+              </Link>
+              <Button size="sm" variant="ghost" icon={<LogOut size={14} />} onClick={signOut}>
+                Déconnexion
+              </Button>
+            </div>
           )}
         </div>
 
