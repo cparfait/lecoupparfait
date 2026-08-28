@@ -19,6 +19,7 @@ import {
   Lightbulb,
   Play,
   RefreshCw,
+  Trophy,
   RotateCcw,
   Undo2,
 } from 'lucide-react'
@@ -147,6 +148,15 @@ function SetupScreen({
   const [color, setColor] = useState<Color | 'random'>(initial.color)
   const [timeControlId, setTimeControlId] = useState(initial.timeControlId)
 
+  /** Où en est le joueur dans l'échelle. `null` tant qu'on ne sait pas. */
+  const [progress, setProgress] = useState<Progression | null>(null)
+  useEffect(() => {
+    void fetch('/api/progression')
+      .then((response) => response.json())
+      .then(setProgress)
+      .catch(() => setProgress(null))
+  }, [])
+
   const bot = botLevel(level)
   const personality = BOT_PERSONALITIES[bot.personality]
 
@@ -190,6 +200,43 @@ function SetupScreen({
             <p className="mt-1.5 text-sm leading-relaxed text-muted">{personality.blurb.fr}</p>
           </div>
         </div>
+
+        {/*
+          Les vingt-cinq niveaux s'offraient tous d'emblée : un débutant
+          choisissait au hasard, tombait sur trop fort, et en concluait qu'il
+          était mauvais. On montre donc où il en est, et jusqu'où il peut
+          monter — sans rien interdire, la barre reste entière.
+        */}
+        {progress && progress.tracked && (
+          <div className="border-t border-line/60 px-5 py-3">
+            <div className="flex flex-wrap items-center gap-2 text-[13px]">
+              <Trophy size={15} className="shrink-0 text-accent" aria-hidden />
+              {progress.defeated === 0 ? (
+                <span className="text-muted">
+                  Aucun niveau battu pour l’instant. Commence par le premier — il apprend en
+                  même temps que toi.
+                </span>
+              ) : (
+                <span className="text-muted">
+                  Plus haut niveau battu :{' '}
+                  <strong className="font-semibold text-ink">{progress.defeated}</strong>{' '}
+                  ({botLevel(progress.defeated).elo} Elo) · {progress.wins} victoire
+                  {progress.wins > 1 ? 's' : ''} sur {progress.attempts} parties
+                </span>
+              )}
+            </div>
+            {progress.defeated < BOT_LEVELS.length && (
+              <button
+                type="button"
+                onClick={() => setLevel(Math.min(BOT_LEVELS.length, progress.defeated + 1))}
+                className="mt-1.5 text-[12px] font-semibold text-accent hover:underline"
+              >
+                Affronter le niveau {Math.min(BOT_LEVELS.length, progress.defeated + 1)} — le
+                prochain à battre
+              </button>
+            )}
+          </div>
+        )}
 
         <div className="border-t border-line/60 px-5 py-4">
           <label htmlFor="level" className="mb-2 block text-sm font-medium">
@@ -370,6 +417,7 @@ function GameScreen({
       setOutcome({ status, result })
       const won = result === (playerColor === 'w' ? '1-0' : '0-1')
       playResultSound(result === '1/2-1/2' ? 'draw' : won ? 'win' : 'loss')
+      recordBotGame(level, won)
     },
   })
 
@@ -477,6 +525,8 @@ function GameScreen({
           result: flagged === 'w' ? '0-1' : '1-0',
         })
         playResultSound(flagged === playerColor ? 'loss' : 'win')
+        // Gagner au temps compte comme une victoire : c'est une partie gagnée.
+        recordBotGame(level, flagged !== playerColor)
       }
     }, 100)
     return () => clearInterval(interval)
@@ -518,6 +568,8 @@ function GameScreen({
   const handleResign = useCallback(() => {
     setClock((current) => stopClock(current, Date.now()))
     setOutcome({ status: 'resign', result: playerColor === 'w' ? '0-1' : '1-0' })
+    // Un abandon compte comme une tentative, jamais comme une victoire.
+    recordBotGame(level, false)
     playResultSound('loss')
   }, [playerColor])
 
@@ -913,3 +965,27 @@ function GameScreen({
   )
 }
 
+/** Ce que l'API de progression renvoie. */
+interface Progression {
+  defeated: number
+  unlocked: number
+  attempts: number
+  wins: number
+  tracked: boolean
+}
+
+/**
+ * Enregistre une partie terminée contre l'ordinateur.
+ *
+ * Appelé au moment où la partie s'achève, et jamais bloquant : une progression
+ * qu'on n'a pas pu écrire ne doit pas empêcher de voir son résultat.
+ */
+export function recordBotGame(level: number, won: boolean): void {
+  void fetch('/api/progression', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ level, won }),
+  }).catch(() => {
+    // Hors ligne ou sans compte : la partie reste jouée, simplement pas comptée.
+  })
+}

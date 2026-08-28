@@ -495,6 +495,32 @@ export const challenges = pgTable(
 )
 
 /**
+ * Progression contre l'ordinateur.
+ *
+ * Une ligne par joueur, qui dit jusqu'où il est monté. Les vingt-cinq niveaux
+ * existaient déjà mais s'offraient tous d'emblée : un débutant choisissait au
+ * hasard, tombait sur trop fort, et concluait qu'il était mauvais.
+ *
+ * On ne garde que le plus haut niveau battu, et le compte des essais. Le reste
+ * — quelles parties, quels résultats — est déjà dans la table des parties : le
+ * dupliquer ici ne servirait qu'à le désynchroniser.
+ */
+export const botProgress = pgTable(
+  'bot_progress',
+  {
+    userId: uuid('user_id')
+      .primaryKey()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** Plus haut niveau battu, 0 si aucun. */
+    defeated: smallint('defeated').notNull().default(0),
+    /** Parties jouées contre l'ordinateur, toutes issues confondues. */
+    attempts: integer('attempts').notNull().default(0),
+    wins: integer('wins').notNull().default(0),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+)
+
+/**
  * Tournois.
  *
  * Format unique : l'arène. C'est le seul qui tolère qu'on arrive en retard ou
