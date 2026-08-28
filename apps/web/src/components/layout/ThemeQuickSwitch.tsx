@@ -55,7 +55,7 @@ export function ThemeQuickSwitch() {
       {open && (
         <div
           role="menu"
-          className="animate-slide-up absolute right-0 top-11 z-50 w-52 rounded-[var(--radius)] glass-strong p-1.5 shadow-[var(--shadow-lg)]"
+          className="animate-slide-up absolute right-0 top-11 z-50 w-52 popover p-1.5 shadow-[var(--shadow-lg)]"
         >
           {THEME_LIST.map((entry) => (
             <button

@@ -203,7 +203,7 @@ export function ViewToggle({
     <div
       className={clsx(
         'absolute right-2 top-2 z-50 flex gap-0.5 rounded-full p-0.5',
-        'glass-strong shadow-[var(--shadow)]',
+        'popover !rounded-full shadow-[var(--shadow)]',
         className,
       )}
       role="group"

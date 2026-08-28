@@ -479,6 +479,21 @@ h1, h2, h3, h4 {
   border-radius: var(--radius);
 }
 
+/*
+ * Surface flottante : menus, listes déroulantes, barres posées sur le plateau.
+ *
+ * Le verre translucide convient à ce qui reste dans le flux — on devine la
+ * page derrière, et c'est joli. Superposé au contenu, il ne va plus : avec un
+ * fond à 10 % d'opacité, le flou ne masque pas du texte contrasté, et l'on
+ * lisait les chiffres de la page au travers du menu des thèmes. Ces
+ * surfaces-là sont donc opaques.
+ */
+@utility popover {
+  background: var(--bg-elev);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+}
+
 /* Bordure en dégradé : un fond dégradé masqué pour ne laisser que le contour. */
 @utility gradient-ring {
   position: relative;
