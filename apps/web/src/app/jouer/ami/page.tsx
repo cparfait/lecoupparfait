@@ -118,7 +118,7 @@ export default function CreateFriendGamePage() {
       {!slug ? (
         <>
           <Card className="mt-7 p-5">
-            <SectionTitle hint="Le premier nombre est le temps de départ, le second ce que chaque coup rapporte.">
+            <SectionTitle hint="Le premier nombre est le temps de départ en minutes, le second les secondes que chaque coup te rend.">
               Cadence
             </SectionTitle>
             <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
@@ -138,13 +138,26 @@ export default function CreateFriendGamePage() {
                       : 'border-line text-muted hover:bg-surface-hover',
                   )}
                 >
-                  <span className="block text-base" aria-hidden>
-                    {SPEED_LABELS[tc.category].icon}
+                  {/* Le symbole seul ne dit rien : on le réduit et on nomme la
+                      catégorie, qui est ce qui détermine le classement mis à
+                      jour à la fin de la partie. */}
+                  <span className="block text-[10px] font-normal leading-tight text-faint">
+                    <span aria-hidden>{SPEED_LABELS[tc.category].icon}</span>{' '}
+                    {SPEED_LABELS[tc.category].fr}
                   </span>
-                  {tc.label}
+                  <span className="mt-0.5 block text-sm">{tc.label}</span>
                 </button>
               ))}
             </div>
+
+            <p className="mt-3 border-t border-line/60 pt-3 text-xs leading-relaxed text-muted">
+              La catégorie se déduit de la durée qu’aurait une partie de quarante coups :
+              moins de trois minutes c’est du <strong className="font-semibold">bullet</strong>,
+              moins de huit du <strong className="font-semibold">blitz</strong>, moins de
+              vingt-cinq du <strong className="font-semibold">rapide</strong>, au-delà du{' '}
+              <strong className="font-semibold">classique</strong>. Chacune tient son propre
+              classement : on peut voir clair en rapide et s’effondrer en blitz.
+            </p>
           </Card>
 
           <Card className="mt-4 p-5">
