@@ -15,7 +15,7 @@
 import { Suspense, useCallback, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowRight, Crown } from 'lucide-react'
+import { ArrowRight, Crown, Swords } from 'lucide-react'
 import { Button, Card, Input } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 
@@ -47,6 +47,47 @@ function AuthForm() {
   const [email, setEmail] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  /** Pseudo choisi par un invité qui préfère jouer tout de suite. */
+  const [guestName, setGuestName] = useState('')
+
+  /**
+   * Entrer dans la partie sans compte.
+   *
+   * Demander à quelqu'un de s'inscrire avant même de savoir si le jeu lui
+   * plaît, c'est le perdre. Un pseudo suffit donc : la proposition part chez
+   * celui qui a envoyé le lien, et l'invité attend sur l'échiquier.
+   */
+  const playAsGuest = useCallback(async () => {
+    const name = guestName.trim()
+    if (!referrer || name.length < 2) return
+    setBusy(true)
+    setError(null)
+    try {
+      const response = await fetch('/api/defis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'guest', to: referrer, name }),
+      })
+      const data = await response.json()
+      if (!response.ok) {
+        setError(data.error ?? 'Impossible de lancer la partie.')
+        return
+      }
+      try {
+        localStorage.setItem('coupparfait.guestName', name)
+      } catch {
+        // Stockage refusé : le pseudo sera simplement « Invité ».
+      }
+      const challenge = data.challenge
+      router.push(
+        `/jouer/partie/${challenge.slug}?tc=${challenge.initialTime}+${challenge.increment}`,
+      )
+    } catch {
+      setError('Le serveur est injoignable.')
+    } finally {
+      setBusy(false)
+    }
+  }, [guestName, referrer, router])
 
   const submit = useCallback(
     async (event: React.FormEvent) => {
@@ -95,6 +136,59 @@ function AuthForm() {
   return (
     <div className="mx-auto grid min-h-[calc(100dvh-8rem)] w-full max-w-md place-items-center px-4 py-10">
       <div className="w-full">
+        {referrer && (
+          <Card glow className="mb-5 p-4">
+            <div className="flex items-start gap-2.5">
+              <span
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-accent/15 text-accent"
+                aria-hidden
+              >
+                <Swords size={17} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold leading-snug">
+                  {referrer} t’invite à jouer
+                </p>
+                <p className="mt-0.5 text-[13px] leading-relaxed text-muted">
+                  Choisis un pseudo et entre dans la partie. Pas besoin de compte.
+                </p>
+
+                <form
+                  className="mt-2.5 flex gap-2"
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                    void playAsGuest()
+                  }}
+                >
+                  {/* `Input` s'enveloppe dans un bloc pleine largeur : la
+                      classe passée irait sur le champ, pas sur l'enveloppe. */}
+                  <div className="min-w-0 flex-1">
+                    <Input
+                      value={guestName}
+                      onChange={(event) => setGuestName(event.target.value)}
+                      placeholder="Ton pseudo"
+                      aria-label="Ton pseudo"
+                      maxLength={20}
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={busy || guestName.trim().length < 2}
+                  >
+                    Jouer
+                  </Button>
+                </form>
+
+                <p className="mt-2.5 text-[12px] leading-relaxed text-faint">
+                  Ou crée un compte ci-dessous : {referrer} entrera dans ton carnet, et tu
+                  garderas ton classement d’une partie à l’autre.
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
+
         <div className="mb-6 text-center">
           <span
             className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-[var(--radius)]"

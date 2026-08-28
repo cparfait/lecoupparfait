@@ -86,7 +86,11 @@ export function ToastHost() {
       className={clsx(
         'pointer-events-none fixed z-[100] flex flex-col gap-2',
         'inset-x-3 bottom-3 safe-bottom',
-        'sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-4 sm:w-80',
+        // Sur grand écran le message s'affiche en haut à droite — mais l'en-tête
+        // y est déjà, et il mesure 57 px : posé à 16 px du haut, le message
+        // tombait derrière le bouton de connexion et se lisait mal. On le
+        // descend juste au-dessous.
+        'sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-[4.25rem] sm:w-80',
       )}
       role="region"
       aria-label="Notifications"

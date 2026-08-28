@@ -399,6 +399,68 @@ export async function createChallenge(options: {
   }
 }
 
+/**
+ * Défi lancé par quelqu'un qui n'a pas de compte.
+ *
+ * C'est le bout du lien d'invitation : on reçoit une adresse, on tape un
+ * pseudo, on entre dans la partie. Exiger un compte à cet instant reviendrait
+ * à demander à quelqu'un de s'inscrire avant de savoir si le jeu lui plaît.
+ *
+ * Le défi n'a donc pas de `creatorId` — seulement le pseudo choisi. Il vise en
+ * revanche un compte bien identifié, retrouvé par son pseudo : c'est ce qui
+ * fait que la proposition arrive chez la bonne personne.
+ */
+export async function createGuestChallenge(options: {
+  toUsername: string
+  fromName: string
+  slug: string
+  initialTime: number
+  increment: number
+}): Promise<PendingChallenge | null> {
+  const db = getDb()
+
+  const [target] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(
+      and(eq(users.usernameLower, options.toUsername.trim().toLowerCase()), eq(users.disabled, false)),
+    )
+    .limit(1)
+
+  if (!target) return null
+
+  const expiresAt = new Date(Date.now() + CHALLENGE_TTL_MS)
+  const [row] = await db
+    .insert(challenges)
+    .values({
+      slug: options.slug,
+      creatorId: null,
+      creatorName: options.fromName,
+      creatorColor: 'random',
+      initialTime: options.initialTime,
+      increment: options.increment,
+      rated: false,
+      kind: 'direct',
+      targetId: target.id,
+      expiresAt,
+    })
+    .returning()
+
+  if (!row) return null
+
+  return {
+    id: row.id,
+    slug: row.slug,
+    from: { id: null, username: row.creatorName },
+    to: row.targetId,
+    initialTime: row.initialTime,
+    increment: row.increment,
+    rated: row.rated,
+    creatorColor: row.creatorColor,
+    expiresAt: row.expiresAt,
+  }
+}
+
 /** Défis qui m'attendent, non expirés. */
 export async function listIncomingChallenges(userId: string): Promise<PendingChallenge[]> {
   const db = getDb()

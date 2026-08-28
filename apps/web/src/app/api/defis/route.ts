@@ -16,6 +16,7 @@ import {
   areFriends,
   cancelChallenge,
   createChallenge,
+  createGuestChallenge,
   listIncomingChallenges,
   listOutgoingChallenges,
   purgeExpiredChallenges,
@@ -62,10 +63,30 @@ export async function GET() {
   return NextResponse.json({ incoming, outgoing })
 }
 
-export async function POST(request: Request) {
-  const me = await getCurrentUser()
-  if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+/**
+ * Rythme des invitations sans compte.
+ *
+ * Cette action-là est la seule ouverte aux visiteurs : sans garde-fou, une
+ * adresse d'invitation partagée publiquement permettrait de faire sonner
+ * quelqu'un en boucle. Dix par quart d'heure et par adresse IP suffisent
+ * largement à un usage honnête.
+ */
+const guestAttempts = new Map<string, { count: number; resetAt: number }>()
+const GUEST_WINDOW_MS = 15 * 60 * 1000
+const GUEST_MAX = 10
 
+function guestRateLimited(ip: string): boolean {
+  const now = Date.now()
+  const entry = guestAttempts.get(ip)
+  if (!entry || entry.resetAt < now) {
+    guestAttempts.set(ip, { count: 1, resetAt: now + GUEST_WINDOW_MS })
+    return false
+  }
+  entry.count++
+  return entry.count > GUEST_MAX
+}
+
+export async function POST(request: Request) {
   let body: {
     action?: string
     to?: string
@@ -75,12 +96,53 @@ export async function POST(request: Request) {
     increment?: number
     rated?: boolean
     color?: string
+    name?: string
   }
   try {
     body = await request.json()
   } catch {
     return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
   }
+
+  // Seule action ouverte aux visiteurs : c'est le bout du lien d'invitation.
+  if (body.action === 'guest') {
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+      request.headers.get('x-real-ip') ??
+      'inconnu'
+
+    if (guestRateLimited(ip)) {
+      return NextResponse.json(
+        { error: 'Trop d’invitations envoyées. Réessaie dans quelques minutes.' },
+        { status: 429 },
+      )
+    }
+
+    const name = String(body.name ?? '').trim().slice(0, 20)
+    if (name.length < 2) {
+      return NextResponse.json({ error: 'Choisis un pseudo.' }, { status: 400 })
+    }
+
+    const challenge = await createGuestChallenge({
+      toUsername: String(body.to ?? ''),
+      fromName: name,
+      slug: makeSlug(),
+      initialTime: Math.min(MAX_INITIAL, Math.max(MIN_INITIAL, Number(body.initialTime ?? 600))),
+      increment: Math.min(MAX_INCREMENT, Math.max(0, Number(body.increment ?? 5))),
+    })
+
+    if (!challenge) {
+      return NextResponse.json(
+        { error: 'Ce lien d’invitation ne correspond à personne.' },
+        { status: 404 },
+      )
+    }
+
+    return NextResponse.json({ ok: true, challenge })
+  }
+
+  const me = await getCurrentUser()
+  if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
 
   switch (body.action) {
     case 'create': {
