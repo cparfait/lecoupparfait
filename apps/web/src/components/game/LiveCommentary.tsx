@@ -143,6 +143,16 @@ export function useLiveCommentary({
   const [loading, setLoading] = useState(false)
   const requestId = useRef(0)
 
+  /**
+   * Dernière ouverture annoncée.
+   *
+   * Le rapport d'analyse ne la nomme qu'au moment où elle change ; le
+   * commentaire en direct, lui, la répétait à chaque coup — « Nous sommes dans
+   * la Partie du pion roi » cinq fois de suite. On retient donc ce qu'on a
+   * déjà dit.
+   */
+  const announcedOpening = useRef<string | null>(null)
+
   useEffect(() => {
     if (!enabled || !move) return
     if (onlyColor !== null && move.color !== onlyColor) return
@@ -200,6 +210,8 @@ export function useLiveCommentary({
         const bestSan = bestUci ? (uciLineToSan(move.before, [bestUci])[0] ?? null) : null
         const bestLine = topLine ? uciLineToSan(move.before, topLine.pv.slice(0, 6)) : []
         const opening = book?.lookup(move.after, prefs.locale) ?? null
+        const newOpening = opening && opening.label !== announcedOpening.current
+        if (opening) announcedOpening.current = opening.label
 
         const explanation = explainMove({
           locale: prefs.locale,
@@ -214,7 +226,7 @@ export function useLiveCommentary({
           motifs: classification.motifs,
           bestSan,
           bestLine,
-          openingName: opening?.label ?? null,
+          openingName: newOpening ? opening.label : null,
         })
 
         const built: Commentary = {

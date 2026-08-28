@@ -269,6 +269,7 @@ export default function CorrespondencePage() {
                 orientation={game.colour}
                 playable={game.yourTurn && game.result === '*' ? game.colour : null}
                 onMove={play}
+                checkmate={game.status === 'checkmate'}
                 showViewToggle={false}
                 reservedHeight={13}
               />

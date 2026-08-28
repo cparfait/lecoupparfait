@@ -787,11 +787,16 @@ export function explainMove(input: MoveExplanationInput): MoveExplanation {
   }
 
   // Ouverture reconnue.
+  //
+  // « Une ouverture connue et analysée » ne disait rien : ni ce que ça change
+  // pour celui qui joue, ni ce qu'il doit en faire. Ce qui compte, quand on
+  // débute, c'est qu'il n'y a rien à inventer à cet endroit — d'autres ont
+  // déjà cherché — et qu'un nom permet d'aller voir.
   if (input.openingName) {
     body.unshift(
       fr
-        ? `Nous sommes dans ${input.openingName} — une ouverture connue et analysée.`
-        : `This is the ${input.openingName} — a well-known opening.`,
+        ? `Ce coup appartient encore à la théorie de ${input.openingName} : d'autres l'ont analysée pour toi, il n'y a rien à inventer ici.`
+        : `This move is still in the theory of the ${input.openingName}: it has been analysed for you, there is nothing to invent here.`,
     )
   }
 

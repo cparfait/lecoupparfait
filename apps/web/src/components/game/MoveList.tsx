@@ -100,6 +100,42 @@ export function MoveList({
 
   return (
     <div className={clsx('flex min-h-0 flex-col', className)}>
+      {/* Au-dessus de la liste, et non en dessous : posés en bas, ils
+          finissaient sous la ligne de flottaison dès que la partie
+          s’allongeait — c’est-à-dire exactement quand on en a besoin. */}
+      {controls && (
+        <div className="flex items-center justify-center gap-0.5 border-b border-line/60 p-1.5">
+          <NavButton onClick={() => onSeek(-1)} disabled={cursor < 0} label="Début">
+            <ChevronFirst size={17} aria-hidden />
+          </NavButton>
+          <NavButton
+            onClick={() => onSeek(cursor - 1)}
+            disabled={cursor < 0}
+            label="Coup précédent"
+          >
+            <ChevronLeft size={17} aria-hidden />
+          </NavButton>
+          {onToggleAutoplay && (
+            <NavButton onClick={onToggleAutoplay} label={autoplay ? 'Pause' : 'Lecture'}>
+              {autoplay ? <Pause size={15} aria-hidden /> : <Play size={15} aria-hidden />}
+            </NavButton>
+          )}
+          <NavButton
+            onClick={() => onSeek(cursor + 1)}
+            disabled={cursor >= moves.length - 1}
+            label="Coup suivant"
+          >
+            <ChevronRight size={17} aria-hidden />
+          </NavButton>
+          <NavButton
+            onClick={() => onSeek(moves.length - 1)}
+            disabled={cursor >= moves.length - 1}
+            label="Fin"
+          >
+            <ChevronLast size={17} aria-hidden />
+          </NavButton>
+        </div>
+      )}
       <div
         ref={scrollRef}
         className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
@@ -148,39 +184,6 @@ export function MoveList({
         )}
       </div>
 
-      {controls && (
-        <div className="flex items-center justify-center gap-0.5 border-t border-line/60 p-1.5">
-          <NavButton onClick={() => onSeek(-1)} disabled={cursor < 0} label="Début">
-            <ChevronFirst size={17} aria-hidden />
-          </NavButton>
-          <NavButton
-            onClick={() => onSeek(cursor - 1)}
-            disabled={cursor < 0}
-            label="Coup précédent"
-          >
-            <ChevronLeft size={17} aria-hidden />
-          </NavButton>
-          {onToggleAutoplay && (
-            <NavButton onClick={onToggleAutoplay} label={autoplay ? 'Pause' : 'Lecture'}>
-              {autoplay ? <Pause size={15} aria-hidden /> : <Play size={15} aria-hidden />}
-            </NavButton>
-          )}
-          <NavButton
-            onClick={() => onSeek(cursor + 1)}
-            disabled={cursor >= moves.length - 1}
-            label="Coup suivant"
-          >
-            <ChevronRight size={17} aria-hidden />
-          </NavButton>
-          <NavButton
-            onClick={() => onSeek(moves.length - 1)}
-            disabled={cursor >= moves.length - 1}
-            label="Fin"
-          >
-            <ChevronLast size={17} aria-hidden />
-          </NavButton>
-        </div>
-      )}
     </div>
   )
 }

@@ -277,6 +277,10 @@ export default function LiveGamePage() {
               onMove={handleMove}
               lastMove={snapshot.lastMove}
               checkSquare={checkSquare}
+              // Cinq autres pages l'annonçaient, celle-ci non : le mat qu'on
+              // vient de porter à un ami passait donc inaperçu, alors que
+              // c'est le seul moment de la partie qui mérite une animation.
+              checkmate={snapshot.status === 'checkmate'}
             />
           </div>
 
