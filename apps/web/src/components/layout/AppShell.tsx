@@ -27,6 +27,7 @@ import {
   Puzzle,
   Settings,
   Swords,
+  Grid3x3,
   Trophy,
   Users,
   User,
@@ -60,6 +61,7 @@ const NAV: NavItem[] = [
   { href: '/glossaire', labelKey: 'nav.glossary', icon: BookMarked },
   { href: '/classement', labelKey: 'nav.leaderboard', icon: Trophy },
   { href: '/amis', labelKey: 'nav.friends', icon: Users },
+  { href: '/editeur', labelKey: 'nav.editor', icon: Grid3x3 },
 ]
 
 export function AppShell({ children }: { children: ReactNode }) {

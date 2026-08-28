@@ -67,6 +67,15 @@ export interface Board2DProps {
   onMove?: (from: Square, to: Square, promotion?: PieceSymbol) => void
   /** Appelé quand l'utilisateur enregistre un pré-coup. */
   onPremove?: (from: Square, to: Square) => void
+  /**
+   * Clic simple sur une case, quel qu'en soit le contenu.
+   *
+   * Sert aux usages qui ne sont pas « déplacer une pièce » — l'éditeur de
+   * position, où cliquer pose ou retire. Quand ce crochet est fourni, il
+   * remplace entièrement la sélection et le déplacement : les deux logiques ne
+   * peuvent pas cohabiter sur le même geste.
+   */
+  onSquareClick?: (square: Square) => void
   /** Dernier coup joué, pour le surlignage. */
   lastMove?: { from: Square; to: Square } | null
   /** Case du roi en échec. */
@@ -135,6 +144,7 @@ export const Board2D = memo(function Board2D({
   legalMoves,
   onMove,
   onPremove,
+  onSquareClick,
   lastMove,
   checkSquare,
   checkmate = false,
@@ -276,6 +286,13 @@ export const Board2D = memo(function Board2D({
       const square = squareAt(point.x, point.y, orientation)
       if (!square) return
 
+      // L'éditeur de position prend la main sur tout le reste : poser une
+      // pièce et en déplacer une sont deux gestes incompatibles.
+      if (onSquareClick) {
+        onSquareClick(square)
+        return
+      }
+
       // Une annotation en cours disparaît au premier clic gauche.
       if (userArrows.length > 0 || userCircles.length > 0) {
         setUserArrows([])
@@ -326,6 +343,7 @@ export const Board2D = memo(function Board2D({
       attemptMove,
       userArrows.length,
       userCircles.length,
+      onSquareClick,
     ],
   )
 

@@ -500,3 +500,102 @@ function buildFocus(input: {
     ? "Continue comme ça, et ajoute quelques puzzles tactiques quotidiens pour aiguiser la vision."
     : 'Keep it up, and add a few daily tactics puzzles to sharpen your vision.'
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Bulletin par phase
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Ce qu'on peut dire d'un joueur sur une phase de la partie. */
+export interface PhaseGrade {
+  phase: GamePhase
+  /** Nombre de coups joués dans cette phase. */
+  moves: number
+  /** Précision moyenne, 0–100. */
+  accuracy: number
+  /** Fautes sérieuses : erreurs, gaffes et occasions manquées. */
+  mistakes: number
+  /**
+   * Note lisible, de A à D.
+   *
+   * Un pourcentage ne se compare pas d'une phase à l'autre : 85 % en ouverture
+   * est banal — la théorie joue pour vous —, 85 % en finale est excellent. Les
+   * seuils tiennent compte de cette différence.
+   */
+  grade: 'A' | 'B' | 'C' | 'D'
+}
+
+/** Seuils de précision par phase, du plus exigeant au plus indulgent. */
+const GRADE_THRESHOLDS: Record<GamePhase, [number, number, number]> = {
+  // L'ouverture est la phase où l'on peut suivre sans comprendre : on attend
+  // donc plus, et une faute y coûte plus cher au bulletin.
+  opening: [92, 84, 72],
+  middlegame: [85, 72, 58],
+  // La finale est la phase la plus difficile à jouer précisément, et celle où
+  // les moteurs sont le plus sévères : on abaisse la barre.
+  endgame: [82, 68, 54],
+}
+
+function gradeOf(phase: GamePhase, accuracy: number): PhaseGrade['grade'] {
+  const [a, b, c] = GRADE_THRESHOLDS[phase]
+  if (accuracy >= a) return 'A'
+  if (accuracy >= b) return 'B'
+  if (accuracy >= c) return 'C'
+  return 'D'
+}
+
+/**
+ * Note un joueur sur chaque phase qu'il a réellement jouée.
+ *
+ * La phase de chaque coup était déjà calculée et rangée dans le rapport ; elle
+ * n'était affichée nulle part. Or « tu perds tes parties en finale » est
+ * l'information la plus actionnable qu'une analyse puisse donner : elle dit
+ * quoi travailler, là où une précision globale ne dit rien.
+ *
+ * Les phases de moins de trois coups sont écartées : noter quelqu'un sur deux
+ * coups de finale n'a pas de sens, et une note fondée sur rien décourage ou
+ * rassure à tort.
+ */
+export function gradePhases(report: FullGameReport, colour: Color): PhaseGrade[] {
+  const buckets = new Map<GamePhase, { accuracy: number[]; mistakes: number }>()
+
+  for (const [index, move] of report.moves.entries()) {
+    if (move.color !== colour) continue
+    const phase = report.phases[index]
+    if (!phase) continue
+
+    const bucket = buckets.get(phase) ?? { accuracy: [], mistakes: 0 }
+    bucket.accuracy.push(move.accuracy)
+    if (move.quality === 'mistake' || move.quality === 'blunder' || move.quality === 'miss') {
+      bucket.mistakes++
+    }
+    buckets.set(phase, bucket)
+  }
+
+  const order: GamePhase[] = ['opening', 'middlegame', 'endgame']
+  return order
+    .filter((phase) => (buckets.get(phase)?.accuracy.length ?? 0) >= 3)
+    .map((phase) => {
+      const bucket = buckets.get(phase)!
+      const accuracy =
+        bucket.accuracy.reduce((sum, value) => sum + value, 0) / bucket.accuracy.length
+      return {
+        phase,
+        moves: bucket.accuracy.length,
+        accuracy: Math.round(accuracy * 10) / 10,
+        mistakes: bucket.mistakes,
+        grade: gradeOf(phase, accuracy),
+      }
+    })
+}
+
+/** La phase qui coûte le plus cher, celle sur laquelle travailler d'abord. */
+export function weakestPhase(grades: PhaseGrade[]): PhaseGrade | null {
+  if (grades.length === 0) return null
+  return grades.reduce((worst, entry) => (entry.accuracy < worst.accuracy ? entry : worst))
+}
+
+export const PHASE_LABELS: Record<GamePhase, { fr: string; en: string }> = {
+  opening: { fr: 'Ouverture', en: 'Opening' },
+  middlegame: { fr: 'Milieu de partie', en: 'Middlegame' },
+  endgame: { fr: 'Finale', en: 'Endgame' },
+}
