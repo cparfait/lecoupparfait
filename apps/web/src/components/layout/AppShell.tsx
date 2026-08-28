@@ -62,6 +62,7 @@ const NAV: NavItem[] = [
   { href: '/classement', labelKey: 'nav.leaderboard', icon: Trophy },
   { href: '/amis', labelKey: 'nav.friends', icon: Users },
   { href: '/editeur', labelKey: 'nav.editor', icon: Grid3x3 },
+  { href: '/etudes', labelKey: 'nav.studies', icon: BookMarked },
 ]
 
 export function AppShell({ children }: { children: ReactNode }) {

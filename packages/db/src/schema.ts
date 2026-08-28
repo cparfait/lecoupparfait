@@ -495,6 +495,67 @@ export const challenges = pgTable(
 )
 
 /**
+ * Études.
+ *
+ * Un classeur : on y range des positions commentées — ses ouvertures, une
+ * partie qu'on veut comprendre, un thème de finale. C'est l'outil le plus
+ * apprécié de Lichess, et celui qui manquait le plus ici.
+ *
+ * La visibilité tient en deux états. `private`, visible du seul auteur.
+ * `unlisted`, accessible à qui a l'adresse — c'est ce qui permet d'envoyer une
+ * étude à quelqu'un sans lui demander de compte, comme pour les parties. Pas
+ * de « public » listé : une plateforme pour un cercle d'amis n'a pas besoin
+ * d'un annuaire d'études, qui appellerait une modération.
+ */
+export const studies = pgTable(
+  'studies',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    slug: varchar('slug', { length: 12 }).notNull(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    title: varchar('title', { length: 120 }).notNull(),
+    description: varchar('description', { length: 500 }),
+    /** `private` ou `unlisted`. */
+    visibility: varchar('visibility', { length: 10 }).notNull().default('private'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('studies_slug_idx').on(table.slug),
+    index('studies_owner_idx').on(table.ownerId, table.updatedAt),
+  ],
+)
+
+/**
+ * Un chapitre : une position de départ, une suite de coups, des commentaires.
+ *
+ * Les commentaires sont indexés par demi-coup plutôt que rangés dans le PGN :
+ * on veut pouvoir en écrire un sans réécrire toute la partie, et les relire
+ * sans analyser du texte.
+ */
+export const studyChapters = pgTable(
+  'study_chapters',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    studyId: uuid('study_id')
+      .notNull()
+      .references(() => studies.id, { onDelete: 'cascade' }),
+    title: varchar('title', { length: 120 }).notNull(),
+    /** Position de départ ; différente d'une partie normale si l'on part d'un diagramme. */
+    startFen: text('start_fen'),
+    /** Coups en notation algébrique, séparés par des espaces. */
+    moves: text('moves').notNull().default(''),
+    /** Commentaires, indexés par numéro de demi-coup. */
+    comments: jsonb('comments').$type<Record<string, string>>().notNull().default({}),
+    position: integer('position').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('study_chapters_study_idx').on(table.studyId, table.position)],
+)
+
+/**
  * Carnet d'adresses.
  *
  * Une seule ligne par relation, orientée du demandeur vers le destinataire :

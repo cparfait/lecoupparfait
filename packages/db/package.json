@@ -12,6 +12,7 @@
     "./schema": "./src/schema.ts",
     "./auth": "./src/auth.ts",
     "./friends": "./src/friends.ts",
+    "./studies": "./src/studies.ts",
     "./ratings": "./src/ratings.ts"
   },
   "scripts": {
