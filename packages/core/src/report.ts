@@ -202,6 +202,7 @@ export async function analyseGame(options: AnalyseGameOptions): Promise<FullGame
         locale,
         san: move.san,
         fenAfter,
+        fenBefore,
         quality: classification.quality,
         scoreBefore: analysedMove.scoreBefore,
         scoreAfter: analysedMove.scoreAfter,

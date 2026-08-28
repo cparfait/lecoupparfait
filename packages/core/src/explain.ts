@@ -17,6 +17,7 @@ import { Chess, SQUARES } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import {
   COLOR_NAMES,
+  PIECE_ARTICLE,
   PIECE_NAMES,
   opposite,
   SAN_LETTER_EN,
@@ -24,6 +25,7 @@ import {
   SIMPLE_VALUES,
 } from './board.ts'
 import { QUALITY_STYLES } from './classify.ts'
+import { detectPositionMotifs } from './motifs.ts'
 import { advantageLabel, formatScore } from './eval.ts'
 import type { DetectedMotif, MotifId, MoveQuality, Score } from './types.ts'
 
@@ -713,6 +715,15 @@ export interface MoveExplanationInput {
   bestSan?: string | null
   /** Suite recommandée, en SAN anglais. */
   bestLine?: string[]
+  /**
+   * Position avant le coup.
+   *
+   * Sert à dire *pourquoi* le coup recommandé valait mieux : sans elle on ne
+   * peut pas le jouer pour voir ce qu'il produit, et le remède se réduit à
+   * « mieux valait Cf3 » suivi d'une liste de coups — un « quoi » sans
+   * « parce que », c'est-à-dire l'inverse de ce qu'on cherche à apprendre.
+   */
+  fenBefore?: string
   /** Nom de l'ouverture si applicable. */
   openingName?: string | null
 }
@@ -784,14 +795,17 @@ export function explainMove(input: MoveExplanationInput): MoveExplanation {
     )
   }
 
-  // Le remède.
+  // Le remède : quoi jouer, pourquoi, et la suite.
   let betterMove: string | null = null
   if (input.bestSan && input.bestSan !== input.san && input.winLoss >= 3) {
     const best = localiseSan(input.bestSan, input.locale)
     const line = (input.bestLine ?? []).slice(0, 4).map((s) => localiseSan(s, input.locale))
+    const why = explainBetterMove(input, best)
+    const example =
+      line.length > 1 ? (fr ? ` Par exemple : ${line.join(' ')}.` : ` For example: ${line.join(' ')}.`) : ''
     betterMove = fr
-      ? `Mieux valait ${best}${line.length > 1 ? `, par exemple ${line.join(' ')}` : ''}.`
-      : `Better was ${best}${line.length > 1 ? `, for example ${line.join(' ')}` : ''}.`
+      ? `Mieux valait ${best}.${why ? ` ${why}` : ''}${example}`
+      : `Better was ${best}.${why ? ` ${why}` : ''}${example}`
     body.push(betterMove)
   }
 
@@ -809,6 +823,74 @@ export function explainMove(input: MoveExplanationInput): MoveExplanation {
         return copy ? { id: m.id, name: copy.name, definition: copy.definition } : null
       })
       .filter((x): x is { id: MotifId; name: string; definition: string } => x !== null),
+  }
+}
+
+/**
+ * Pourquoi le coup recommandé valait mieux.
+ *
+ * On le joue sur la position d'avant et on décrit ce qu'il produit, avec la
+ * même machinerie que pour le coup réellement joué : un motif tactique s'il y
+ * en a un, sinon la description de ce que le coup prend en main. Sans cela le
+ * remède nomme un coup sans jamais dire ce qu'il apporte.
+ */
+function explainBetterMove(input: MoveExplanationInput, localisedBest: string): string | null {
+  if (!input.fenBefore || !input.bestSan) return null
+  const fr = input.locale === 'fr'
+
+  try {
+    const probe = new Chess(input.fenBefore, { skipValidation: true })
+    probe.move(input.bestSan)
+    const ctx: ExplainContext = {
+      locale: input.locale,
+      board: probe,
+      mover: input.mover,
+      san: localisedBest,
+    }
+
+    if (probe.isCheckmate()) return fr ? 'C’était mat.' : 'That was mate.'
+
+    // Une prise se juge au matériel, pas au développement : décrire « une pièce
+    // de plus dans le jeu » là où l'on ramasse un cavalier passe à côté.
+    const done = probe.history({ verbose: true }).at(-1)
+    if (done?.captured) {
+      const taken = PIECE_NAMES[done.captured][input.locale]
+      return fr
+        ? `Ce coup prend ${PIECE_ARTICLE[done.captured]} ${taken} en ${done.to}.`
+        : `This move takes the ${taken} on ${done.to}.`
+    }
+
+    // Le motif doit être *créé* par le coup. Sans cette comparaison, on
+    // rapportait n'importe quel motif de la position — y compris ceux qui
+    // existaient déjà, sans rapport avec le coup recommandé.
+    const key = (motif: DetectedMotif) => `${motif.id}:${[...motif.squares].sort().join(',')}`
+    const already = new Set(
+      detectPositionMotifs(new Chess(input.fenBefore, { skipValidation: true }), {
+        tacticsOnly: true,
+        limit: 8,
+      })
+        .filter((motif) => motif.side === input.mover)
+        .map(key),
+    )
+    const mine = detectPositionMotifs(probe, { tacticsOnly: true, limit: 4 }).find(
+      (motif) => motif.side === input.mover && motif.weight >= 0.4 && !already.has(key(motif)),
+    )
+    if (mine) {
+      const copy = motifCopy(mine.id, input.locale)
+      if (copy) return copy.sentence(mine, ctx)
+    }
+
+    // Les motifs de la position jouée ne valent pas pour celle-ci : on repart
+    // de zéro, sinon la description emprunterait la tactique du mauvais coup.
+    const quiet = describeQuietMove(
+      { ...input, san: input.bestSan, fenAfter: probe.fen(), motifs: [] },
+      ctx,
+    )
+    return quiet.sentences[0] ?? null
+  } catch {
+    // Coup moteur incohérent avec la position : on préfère un remède sans
+    // justification à une justification inventée.
+    return null
   }
 }
 
@@ -956,9 +1038,13 @@ function describeQuietMove(
   // ── Ce que la pièce vise depuis sa nouvelle case ──────────────────────────
   const targets = attacksFrom(board, to, mover)
   const enemies = targets.filter((square) => board.get(square)?.color === opposite(mover))
-  const defended = targets.filter(
-    (square) => board.get(square)?.color === mover && board.get(square)?.type !== 'p',
-  )
+  // Le roi est exclu : on ne « protège » pas une pièce qui ne se prend jamais,
+  // et l'entendre dire brouille la notion de protection au moment où on
+  // l'apprend. Les pions le sont aussi — trop courant pour être remarquable.
+  const defended = targets.filter((square) => {
+    const piece = board.get(square)
+    return piece?.color === mover && piece.type !== 'p' && piece.type !== 'k'
+  })
   const centre = targets.filter((square) => CENTRE.includes(square) && !board.get(square))
 
   if (enemies.length > 0) {

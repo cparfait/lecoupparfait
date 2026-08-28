@@ -205,6 +205,7 @@ export function useLiveCommentary({
           locale: prefs.locale,
           san: move.san,
           fenAfter: move.after,
+          fenBefore: move.before,
           quality: classification.quality,
           scoreBefore,
           scoreAfter,
