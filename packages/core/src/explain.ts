@@ -1092,6 +1092,76 @@ function describeQuietMove(
     )
   }
 
+  // ── Coups de pion tranquilles ─────────────────────────────────────────────
+  //
+  // Un pion qui n'attaque rien, ne défend rien et ne prend aucune case
+  // centrale ne produisait aucune phrase : c'était le cas de dix-huit pour
+  // cent des remèdes, presque tous des coups comme a3, b3 ou d5. Ils veulent
+  // pourtant dire quelque chose de précis.
+  if (piece.type === 'p' && sentences.length === 0) {
+    const file = to[0]!
+    const rank = Number(to[1])
+    const forward = mover === 'w' ? 1 : -1
+
+    // Le fianchetto : b3 ou g3 quand le fou est encore chez lui.
+    const bishopHome = mover === 'w' ? (file === 'b' ? 'c1' : 'f1') : file === 'b' ? 'c8' : 'f8'
+    const fianchetto = mover === 'w' ? `${file}2` : `${file}7`
+    if (
+      (file === 'b' || file === 'g') &&
+      rank === (mover === 'w' ? 3 : 6) &&
+      board.get(bishopHome as Square)?.type === 'b'
+    ) {
+      cited.push(fianchetto as Square)
+      sentences.push(
+        fr
+          ? `Ce coup ouvre la diagonale : ton fou peut venir en ${fianchetto} et balayer le grand axe depuis l'abri.`
+          : `This opens the diagonal: your bishop can come to ${fianchetto} and rake the long diagonal from safety.`,
+      )
+    }
+
+    // Les coups de bord : ils retirent une case à l'adversaire, ou donnent de
+    // l'air au roi. C'est le sens de a3 et h3, qu'on joue sans savoir dire
+    // pourquoi.
+    if (sentences.length === 0 && (file === 'a' || file === 'h')) {
+      const denied = `${file === 'a' ? 'b' : 'g'}${rank + forward}` as Square
+      sentences.push(
+        fr
+          ? `Ce coup retire ${denied} aux pièces adverses. C'est un coup d'attente : il ne crée rien, il empêche.`
+          : `This takes ${denied} away from the enemy pieces — a waiting move: it creates nothing, it prevents.`,
+      )
+    }
+
+    // Un pion qui en protège un autre : la chaîne est ce qui tient une
+    // structure debout.
+    if (sentences.length === 0) {
+      const behind = attacksFrom(board, to, mover).filter(
+        (square) => board.get(square)?.color === mover && board.get(square)?.type === 'p',
+      )
+      if (behind.length > 0) {
+        cited.push(behind[0]!)
+        sentences.push(
+          fr
+            ? `Ton pion en ${to} en soutient un autre en ${behind[0]} : deux pions qui se tiennent valent bien plus que deux pions isolés.`
+            : `Your pawn on ${to} supports another on ${behind[0]} — two connected pawns are worth far more than two loose ones.`,
+        )
+      }
+    }
+
+    // À défaut : l'avance gagne du terrain, ce qui est déjà une raison.
+    if (sentences.length === 0) {
+      const advanced = mover === 'w' ? rank >= 4 : rank <= 5
+      sentences.push(
+        fr
+          ? advanced
+            ? `Ce pion avance en ${to} et prend du terrain : chaque case gagnée est une case de moins pour les pièces adverses.`
+            : `Ce pion prépare le terrain sans s'exposer : il ouvre une case à ses pièces sans se mettre à portée.`
+          : advanced
+            ? `This pawn advances to ${to} and claims space — every square gained is one less for the enemy pieces.`
+            : `This pawn prepares the ground without exposing itself.`,
+      )
+    }
+  }
+
   // ── Tour sur une colonne dégagée ──────────────────────────────────────────
   if (piece.type === 'r' && sentences.length < 2) {
     const file = to[0]!
