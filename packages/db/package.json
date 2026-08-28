@@ -11,6 +11,7 @@
     ".": "./src/index.ts",
     "./schema": "./src/schema.ts",
     "./auth": "./src/auth.ts",
+    "./friends": "./src/friends.ts",
     "./ratings": "./src/ratings.ts"
   },
   "scripts": {

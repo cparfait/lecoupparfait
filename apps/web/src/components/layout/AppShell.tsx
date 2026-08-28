@@ -28,10 +28,12 @@ import {
   Settings,
   Swords,
   Trophy,
+  Users,
   User,
   X,
 } from 'lucide-react'
 import clsx from 'clsx'
+import { ChallengeWatcher } from '@/components/social/ChallengeWatcher.tsx'
 import type { ReactNode } from 'react'
 import { useT } from '@/lib/i18n/index.tsx'
 import type { TranslationKey } from '@/lib/i18n/index.tsx'
@@ -56,6 +58,7 @@ const NAV: NavItem[] = [
   { href: '/analyse', labelKey: 'nav.analysis', icon: Gauge, primary: true },
   { href: '/glossaire', labelKey: 'nav.glossary', icon: BookMarked },
   { href: '/classement', labelKey: 'nav.leaderboard', icon: Trophy },
+  { href: '/amis', labelKey: 'nav.friends', icon: Users },
 ]
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -145,6 +148,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* ── Contenu ──────────────────────────────────────────────────── */}
       <main className={clsx('flex-1', !immersive && 'pb-20 md:pb-0')}>{children}</main>
+
+      {/* Un ami peut proposer une partie pendant qu'on lit une leçon : le
+          guetteur vit donc dans la coque, pas dans une page. */}
+      <ChallengeWatcher />
 
       {/* ── Barre inférieure mobile ──────────────────────────────────── */}
       {!immersive && <BottomBar pathname={pathname} />}

@@ -475,12 +475,47 @@ export const challenges = pgTable(
   ],
 )
 
+/**
+ * Carnet d'adresses.
+ *
+ * Une seule ligne par relation, orientée du demandeur vers le destinataire :
+ * c'est ce qui permet de savoir qui doit répondre. Une amitié acceptée reste
+ * dans ce sens-là, mais se lit dans les deux — d'où les deux index.
+ *
+ * On ne stocke pas de refus : refuser efface la demande, et la personne peut
+ * redemander. Garder une trace des refus supposerait de l'afficher un jour, ce
+ * qu'on ne veut pas faire.
+ */
+export const friendships = pgTable(
+  'friendships',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    requesterId: uuid('requester_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    addresseeId: uuid('addressee_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** `pending` tant que le destinataire n'a pas répondu, puis `accepted`. */
+    status: varchar('status', { length: 10 }).notNull().default('pending'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    respondedAt: timestamp('responded_at', { withTimezone: true }),
+  },
+  (table) => [
+    // Une seule demande par couple, quel que soit son état.
+    uniqueIndex('friendships_pair_idx').on(table.requesterId, table.addresseeId),
+    index('friendships_addressee_idx').on(table.addresseeId, table.status),
+    index('friendships_requester_idx').on(table.requesterId, table.status),
+  ],
+)
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  Relations
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
+  friendships: many(friendships),
   ratings: many(ratings),
   ratingHistory: many(ratingHistory),
   puzzleAttempts: many(puzzleAttempts),

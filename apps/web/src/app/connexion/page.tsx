@@ -12,18 +12,36 @@
  * projet, pas une concession.
  */
 
-import { useCallback, useState } from 'react'
+import { Suspense, useCallback, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowRight, Crown } from 'lucide-react'
 import { Button, Card, Input } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 
 type Mode = 'signin' | 'signup'
 
+/** Voir la note de `/amis` : le paramètre `?ami=` impose cette frontière. */
 export default function AuthPage() {
+  return (
+    <Suspense fallback={null}>
+      <AuthForm />
+    </Suspense>
+  )
+}
+
+function AuthForm() {
   const router = useRouter()
-  const [mode, setMode] = useState<Mode>('signin')
+  const params = useSearchParams()
+  /**
+   * Pseudo de celui qui invite, quand on arrive par son lien.
+   *
+   * On ouvre alors directement sur la création de compte — quelqu'un qui suit
+   * une invitation n'a, par définition, pas encore de compte — et l'on file au
+   * carnet une fois inscrit, où l'amitié se noue toute seule.
+   */
+  const referrer = params.get('ami')
+  const [mode, setMode] = useState<Mode>(referrer ? 'signup' : 'signin')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [email, setEmail] = useState('')
@@ -57,7 +75,11 @@ export default function AuthPage() {
         toast.success(
           mode === 'signup' ? `Bienvenue, ${data.user.username} !` : `Content de te revoir, ${data.user.username}.`,
         )
-        router.push(`/profil/${data.user.username}`)
+        router.push(
+          referrer
+            ? `/amis?ami=${encodeURIComponent(referrer)}`
+            : `/profil/${data.user.username}`,
+        )
         router.refresh()
       } catch {
         setError(
@@ -67,7 +89,7 @@ export default function AuthPage() {
         setBusy(false)
       }
     },
-    [mode, username, password, email, router],
+    [mode, username, password, email, referrer, router],
   )
 
   return (
