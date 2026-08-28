@@ -20,6 +20,18 @@ export interface Term {
 export const TERMS: Term[] = [
   // ── Règles ────────────────────────────────────────────────────────────────
   {
+    name: 'Cadence',
+    family: 'Règles',
+    definition:
+      "Le temps dont chaque joueur dispose. Elle s'écrit avec deux nombres : **« 3 | 2 » veut dire 3 minutes au départ, plus 2 secondes ajoutées à ta pendule à chaque coup joué**. Un seul nombre — « 5 min » — signifie qu'il n'y a rien à récupérer : quand la pendule tombe, la partie est perdue, même avec une dame de plus. La cadence détermine aussi la catégorie de la partie : bullet, blitz, rapide ou classique, chacune tenant son propre classement.",
+  },
+  {
+    name: 'Incrément',
+    family: 'Règles',
+    definition:
+      "Les secondes rendues à chaque coup, le second nombre d'une cadence. Elles servent à une chose précise : éviter de perdre au temps dans une position gagnante, faute des quelques secondes qu'il faut pour jouer les coups évidents de la fin. Avec 2 secondes d'incrément, une partie de trente coups te rend une minute en route.",
+  },
+  {
     name: 'Roque',
     family: 'Règles',
     definition:

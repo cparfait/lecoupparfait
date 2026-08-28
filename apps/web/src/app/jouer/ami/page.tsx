@@ -118,7 +118,10 @@ export default function CreateFriendGamePage() {
       {!slug ? (
         <>
           <Card className="mt-7 p-5">
-            <SectionTitle hint="Le premier nombre est le temps de départ en minutes, le second les secondes que chaque coup te rend.">
+            {/* Une règle abstraite ne se retient pas ; un exemple lu une fois
+                suffit. « 3 | 2 » reste incompréhensible tant qu'on ne l'a pas
+                vu déplié. */}
+            <SectionTitle hint="« 3 | 2 » se lit : 3 minutes au départ, et 2 secondes ajoutées à ta pendule à chaque coup que tu joues.">
               Cadence
             </SectionTitle>
             <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
