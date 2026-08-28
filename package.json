@@ -23,6 +23,7 @@
     "test": "node --experimental-strip-types scripts/check-lessons.mjs",
     "test:realtime": "node scripts/smoke-realtime.mjs",
     "db:push": "npm run db:push -w @coupparfait/db",
+    "install:maia": "node scripts/install-maia.mjs",
     "seed:demo": "node --experimental-strip-types scripts/seed-demo.mjs",
     "seed:demo:purge": "node --experimental-strip-types scripts/seed-demo.mjs --purge",
     "db:generate": "npm run db:generate -w @coupparfait/db",

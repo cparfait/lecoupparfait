@@ -34,6 +34,17 @@ export interface UseBotPlayerOptions {
   turn: Color
   /** Désactive la temporisation (mode analyse, tests). */
   instant?: boolean
+  /**
+   * Jouer avec Maia plutôt qu'avec Stockfish bridé.
+   *
+   * Maia est un réseau entraîné sur des parties humaines : elle fait les
+   * erreurs qu'on fait vraiment à son niveau, là où un Stockfish affaibli joue
+   * parfaitement puis bâcle un coup au hasard. Elle tourne sur le serveur, pas
+   * dans le navigateur.
+   */
+  human?: boolean
+  /** Nombre de demi-coups joués, pour savoir si l'on est encore dans le livre. */
+  ply?: number
 }
 
 export interface BotPlayerState {
@@ -47,7 +58,7 @@ export interface BotPlayerState {
 }
 
 export function useBotPlayer(options: UseBotPlayerOptions): BotPlayerState {
-  const { fen, botColor, level, active, onMove, turn, instant } = options
+  const { fen, botColor, level, active, onMove, turn, instant, human, ply } = options
 
   const bot = botLevel(level)
   const [thinking, setThinking] = useState(false)
@@ -73,6 +84,43 @@ export function useBotPlayer(options: UseBotPlayerOptions): BotPlayerState {
       try {
         setThinking(true)
         setError(null)
+
+        // ── Maia ───────────────────────────────────────────────────────────
+        //
+        // Un aller-retour réseau au lieu d'un calcul local. En cas d'échec on
+        // ne bascule pas silencieusement sur Stockfish : l'adversaire annoncé
+        // ne serait plus celui qu'on affronte, et ses erreurs cesseraient
+        // d'être humaines sans qu'on sache pourquoi.
+        if (human) {
+          const response = await fetch('/api/maia', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ fen, elo: bot.elo, ply: ply ?? 99 }),
+            signal: controller.signal,
+          })
+          const data = await response.json().catch(() => ({}))
+          if (cancelled) return
+
+          if (!response.ok || !data.uci) {
+            setError(data.error ?? 'Maia est injoignable.')
+            setThinking(false)
+            return
+          }
+
+          const uci: string = data.uci
+          const wait = instant ? 0 : botThinkDelayMs(bot.level, 30)
+          timerRef.current = setTimeout(() => {
+            if (cancelled) return
+            played = true
+            setThinking(false)
+            onMove(
+              uci.slice(0, 2) as Square,
+              uci.slice(2, 4) as Square,
+              uci.length > 4 ? (uci[4] as PieceSymbol) : undefined,
+            )
+          }, wait)
+          return
+        }
 
         const engine = getEngine()
         if (engine.getStatus() === 'idle') setLoading(true)

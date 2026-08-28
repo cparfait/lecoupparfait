@@ -26,6 +26,8 @@ data/downloads/
 data/piper/
 # Moteur natif, réinstallable par `npm run engine:install`.
 data/stockfish/
+# Lc0 et les poids Maia : téléchargés, jamais versionnés.
+data/maia/
 # Courriels capturés en développement : ils contiennent des adresses.
 # Le motif est non ancré : le serveur Next tourne depuis `apps/web`, la
 # boîte atterrit donc là et non à la racine.

@@ -84,6 +84,8 @@ interface Setup {
   level: number
   color: Color | 'random'
   timeControlId: string
+  /** Affronter Maia — un réseau humain — plutôt que Stockfish bridé. */
+  human: boolean
 }
 
 export default function PlayComputerPage() {
@@ -92,6 +94,9 @@ export default function PlayComputerPage() {
     level: 6,
     color: 'w',
     timeControlId: '600+5',
+    // Par défaut : un adversaire qui se trompe comme un humain. C'est ce
+    // qu'on veut faire affronter à quelqu'un qui débute.
+    human: true,
   })
   const [resolvedColor, setResolvedColor] = useState<Color>('w')
   const [gameKey, setGameKey] = useState(0)
@@ -116,6 +121,7 @@ export default function PlayComputerPage() {
       level={setup.level}
       playerColor={resolvedColor}
       timeControlId={setup.timeControlId}
+      human={setup.human}
       onNewGame={() => setPhase('setup')}
       onRematch={() => {
         setResolvedColor(
@@ -147,6 +153,21 @@ function SetupScreen({
   const [level, setLevel] = useState(initial.level)
   const [color, setColor] = useState<Color | 'random'>(initial.color)
   const [timeControlId, setTimeControlId] = useState(initial.timeControlId)
+  const [human, setHuman] = useState(initial.human)
+
+  /**
+   * Maia est-elle installée sur ce serveur ?
+   *
+   * On ne propose pas un adversaire qu'on ne peut pas fournir : la case
+   * n'apparaît que si le serveur a Lc0 et les poids.
+   */
+  const [maiaReady, setMaiaReady] = useState(false)
+  useEffect(() => {
+    void fetch('/api/sante')
+      .then((response) => response.json())
+      .then((data: { maia?: boolean }) => setMaiaReady(data.maia === true))
+      .catch(() => setMaiaReady(false))
+  }, [])
 
   /** Où en est le joueur dans l'échelle. `null` tant qu'on ne sait pas. */
   const [progress, setProgress] = useState<Progression | null>(null)
@@ -207,6 +228,27 @@ function SetupScreen({
           était mauvais. On montre donc où il en est, et jusqu'où il peut
           monter — sans rien interdire, la barre reste entière.
         */}
+        {maiaReady && (
+          <div className="border-t border-line/60 px-5 py-3">
+            <label className="flex cursor-pointer items-start gap-2.5">
+              <input
+                type="checkbox"
+                checked={human}
+                onChange={(event) => setHuman(event.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-[var(--accent)]"
+              />
+              <span>
+                <span className="block text-sm font-medium">Adversaire humain (Maia)</span>
+                <span className="mt-0.5 block text-xs leading-relaxed text-muted">
+                  Un réseau entraîné sur des millions de parties humaines. Il se trompe comme
+                  on se trompe vraiment à son niveau, au lieu de jouer parfaitement puis de
+                  bâcler un coup au hasard. Décoche pour retrouver Stockfish.
+                </span>
+              </span>
+            </label>
+          </div>
+        )}
+
         {progress && progress.tracked && (
           <div className="border-t border-line/60 px-5 py-3">
             <div className="flex flex-wrap items-center gap-2 text-[13px]">
@@ -337,7 +379,7 @@ function SetupScreen({
         size="lg"
         fullWidth
         className="mt-6"
-        onClick={() => onStart({ level, color, timeControlId })}
+        onClick={() => onStart({ level, color, timeControlId, human: human && maiaReady })}
       >
         Commencer la partie
       </Button>
@@ -353,12 +395,15 @@ function GameScreen({
   level,
   playerColor,
   timeControlId,
+  human,
   onNewGame,
   onRematch,
 }: {
   level: number
   playerColor: Color
   timeControlId: string
+  /** Maia plutôt que Stockfish : décidé à la configuration. */
+  human: boolean
   onNewGame: () => void
   onRematch: () => void
 }) {
@@ -494,6 +539,8 @@ function GameScreen({
     botColor,
     level,
     turn: state.turn,
+    human,
+    ply: state.moves.length,
     // En pause de lecture — ou tant que le coach a la parole — l'ordinateur
     // patiente : on veut pouvoir lire *et* entendre le commentaire avant que la
     // position ne change.

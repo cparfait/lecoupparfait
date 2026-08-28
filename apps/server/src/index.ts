@@ -16,6 +16,7 @@
 
 import { createServer } from 'node:http'
 import { Server as SocketServer } from 'socket.io'
+import { disposeMaia, maiaAvailable, maiaMove, nearestRating } from './engine/maia.ts'
 import {
   finishExpired,
   hasRunning,
@@ -119,10 +120,34 @@ const httpServer = createServer(async (request, response) => {
               : 0,
         },
         rooms: rooms.size,
+        maia: maiaAvailable(),
         engineUsable: pool.usable,
         tablebase: isTablebaseEnabled(),
         uptimeSeconds: Math.round(process.uptime()),
       })
+    }
+
+    // ── Un coup joué comme un humain ───────────────────────────────────────
+    //
+    // Maia ne tourne pas dans le navigateur : c'est un réseau de neurones qui
+    // demande Lc0. Le bot Stockfish, lui, reste côté client — les deux
+    // coexistent, et l'appelant choisit.
+    if (url.pathname === '/maia' && request.method === 'POST') {
+      if (!maiaAvailable()) {
+        return json(response, 503, {
+          error: 'Maia n’est pas installée. Lance : node scripts/install-maia.mjs',
+        })
+      }
+
+      const body = await readJson<{ fen?: string; elo?: number }>(request)
+      const fen = String(body.fen ?? '')
+      if (!fen) return json(response, 400, { error: 'Position manquante.' })
+
+      const rating = nearestRating(Number(body.elo ?? 1500))
+      const uci = await maiaMove(fen, rating)
+      if (!uci) return json(response, 503, { error: 'Maia n’a pas répondu.' })
+
+      return json(response, 200, { uci, rating })
     }
 
     // ── Parties en cours, pour les regarder ────────────────────────────────
@@ -484,6 +509,7 @@ async function shutdown(signal: string): Promise<void> {
     if (!room.isFinished) room.abort('Le serveur redémarre. La partie est mise en pause.')
     room.dispose()
   }
+  disposeMaia()
   io.close()
   httpServer.close()
   await disposePool()

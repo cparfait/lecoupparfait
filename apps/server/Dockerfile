@@ -72,6 +72,33 @@ RUN mkdir -p /opt/voices \
        done \
     && ls -lh /opt/voices
 
+# ── Étape 1 ter : Lc0 et les poids Maia ──────────────────────────────────────
+#
+# Maia fait jouer l'ordinateur comme un humain de tel niveau, au lieu d'un
+# Stockfish bridé qui joue parfaitement puis bâcle un coup au hasard.
+#
+# Lc0 ne publie aucun binaire Linux et Debian ne le paquetage pas : on le
+# compile, comme Stockfish plus haut. La variante Eigen suffit — on fait tourner
+# le réseau **sans recherche**, un seul nœud par coup, ce qui coûte moins qu'une
+# analyse et rend tout accélérateur inutile.
+
+FROM debian:bookworm-slim AS lc0
+
+ARG LC0_TAG=v0.32.1
+# Neuf paliers de cent en cent, environ 1,3 Mo chacun.
+ARG MAIA_RATINGS="1100 1200 1300 1400 1500 1600 1700 1800 1900"
+
+RUN apt-get update && apt-get install -y --no-install-recommends       ca-certificates curl git g++ meson ninja-build       libeigen3-dev zlib1g-dev python3 pkg-config     && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+RUN git clone --depth 1 --branch ${LC0_TAG} --recurse-submodules       https://github.com/LeelaChessZero/lc0.git .
+
+# `-Ddnnl=false -Dblas=true` : on s'en tient à Eigen, sans bibliothèque
+# propriétaire ni dépendance graphique.
+RUN meson setup build --buildtype=release -Ddnnl=false -Dgtest=false     && ninja -C build lc0     && strip build/lc0     && ./build/lc0 --version
+
+RUN mkdir -p /opt/maia     && for elo in ${MAIA_RATINGS}; do          curl -fsSL -o "/opt/maia/maia-${elo}.pb.gz"            "https://github.com/CSSLab/maia-chess/raw/master/maia_weights/maia-${elo}.pb.gz";        done     && ls -lh /opt/maia
+
 # ── Étape 2 : dépendances Node ───────────────────────────────────────────────
 FROM node:22-bookworm-slim AS deps
 
@@ -101,11 +128,17 @@ COPY --from=stockfish /build/Copying.txt /usr/share/doc/stockfish/COPYING.txt
 # l'arborescence telle quelle et on pointe l'éditeur de liens dessus, plutôt
 # que d'éparpiller les fichiers dans /usr/local/lib.
 COPY --from=piper /opt/piper /opt/piper
+COPY --from=lc0 /build/build/lc0 /usr/local/bin/lc0
+COPY --from=lc0 /opt/maia /opt/maia
 COPY --from=piper /opt/voices /app/voices
 ENV PIPER_BIN=/opt/piper/piper
 ENV PIPER_VOICES_DIR=/app/voices
 ENV LD_LIBRARY_PATH=/opt/piper
 ENV ESPEAK_DATA_PATH=/opt/piper/espeak-ng-data
+
+# Maia : le binaire compilé à l'étape précédente, et ses poids.
+ENV LC0_PATH=/usr/local/bin/lc0
+ENV MAIA_PATH=/opt/maia
 
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
