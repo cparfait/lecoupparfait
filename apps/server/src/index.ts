@@ -16,6 +16,14 @@
 
 import { createServer } from 'node:http'
 import { Server as SocketServer } from 'socket.io'
+import {
+  finishExpired,
+  hasRunning,
+  pairWaiting,
+  recordResult,
+  releaseStuck,
+  startDueTournaments,
+} from '@coupparfait/db/tournaments'
 import type { Square, PieceSymbol } from 'chess.js'
 import { parseTimeControl, type TimeControl } from '@coupparfait/core'
 import { getPool, disposePool } from './engine/pool.ts'
@@ -363,6 +371,12 @@ io.on('connection', (socket) => {
             void persistFinishedGame(room).catch((error: unknown) => {
               console.error('[persistance] enregistrement impossible :', error)
             })
+            // Si ce salon appartenait à une arène, les points s'attribuent
+            // ici : c'est le seul endroit qui sache qu'une partie vient de se
+            // terminer. Sans effet pour les autres parties.
+            void recordResult(slug, event.result).catch((error: unknown) => {
+              console.error('[tournoi] résultat non enregistré :', error)
+            })
           }
         })
       }
@@ -487,3 +501,62 @@ void main().catch((error: unknown) => {
   console.error('Démarrage impossible :', error)
   process.exit(1)
 })
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Arènes
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * La boucle des tournois.
+ *
+ * Tout le reste de l'application réagit à une requête ; une arène, elle, doit
+ * avancer sans que personne ne la regarde — démarrer à l'heure dite, apparier,
+ * clore. D'où cette boucle, qui vit ici parce que c'est le seul processus
+ * informé de la fin des parties.
+ *
+ * **Elle suppose une seule instance du serveur.** Deux processus créeraient
+ * deux fois les mêmes paires. Un verrou consultatif PostgreSQL autour de
+ * l'appariement serait nécessaire avant toute mise à l'échelle.
+ */
+const ARENA_TICK_MS = 3000
+
+/**
+ * Au-delà, on considère qu'une partie d'arène n'existe plus.
+ *
+ * Un salon perdu au redémarrage laisserait sinon ses deux joueurs marqués « en
+ * partie » jusqu'à la fin du tournoi. Le délai est large : une partie de trois
+ * minutes plus l'incrément ne dépasse jamais dix minutes.
+ */
+const ARENA_STUCK_MS = 15 * 60_000
+
+async function arenaTick(): Promise<void> {
+  if (!(await hasRunning())) return
+
+  for (const slug of await startDueTournaments()) {
+    console.log(`[tournoi] ${slug} commence.`)
+  }
+
+  await releaseStuck(ARENA_STUCK_MS)
+
+  for (const pairing of await pairWaiting()) {
+    // Le salon est créé d'avance avec la bonne cadence : les deux joueurs y
+    // arriveront par leur page de tournoi et s'y assoiront normalement.
+    roomFor(pairing.gameSlug, {
+      timeControl: { initial: pairing.initialTime, increment: pairing.increment },
+      rated: false,
+    })
+    io.to(`arene:${pairing.tournamentSlug}`).emit('pairing', pairing)
+  }
+
+  for (const slug of await finishExpired()) {
+    console.log(`[tournoi] ${slug} est terminé.`)
+    io.to(`arene:${slug}`).emit('tournamentEnd', { slug })
+  }
+}
+
+const arenaTimer = setInterval(() => {
+  void arenaTick().catch((error: unknown) => {
+    console.error('[tournoi] boucle en erreur :', error)
+  })
+}, ARENA_TICK_MS)
+arenaTimer.unref?.()

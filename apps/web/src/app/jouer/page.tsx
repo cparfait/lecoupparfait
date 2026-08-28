@@ -8,7 +8,7 @@
  */
 
 import Link from 'next/link'
-import { ArrowRight, Cpu, Eye, Mailbox, MonitorSmartphone, Users } from 'lucide-react'
+import { ArrowRight, Cpu, Eye, Mailbox, MonitorSmartphone, Trophy, Users } from 'lucide-react'
 import { BOT_PERSONALITIES, SPEED_LABELS, TIME_CONTROLS } from '@coupparfait/core'
 import { Card, Chip } from '@/components/ui/index.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
@@ -45,6 +45,14 @@ const MODES = [
     blurbKey: 'play.correspondenceBlurb',
     detail: 'Un coup par jour · la partie t’attend',
     accent: 'var(--accent)',
+  },
+  {
+    href: '/tournois',
+    icon: Trophy,
+    titleKey: 'play.arena',
+    blurbKey: 'play.arenaBlurb',
+    detail: 'On arrive quand on veut, on repart quand on veut',
+    accent: 'var(--accent-3)',
   },
   {
     href: '/jouer/regarder',

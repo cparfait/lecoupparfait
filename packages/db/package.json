@@ -14,6 +14,7 @@
     "./friends": "./src/friends.ts",
     "./studies": "./src/studies.ts",
     "./correspondence": "./src/correspondence.ts",
+    "./tournaments": "./src/tournaments.ts",
     "./ratings": "./src/ratings.ts"
   },
   "scripts": {

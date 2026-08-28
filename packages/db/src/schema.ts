@@ -495,6 +495,94 @@ export const challenges = pgTable(
 )
 
 /**
+ * Tournois.
+ *
+ * Format unique : l'arène. C'est le seul qui tolère qu'on arrive en retard ou
+ * qu'on parte avant la fin, ce qui est exactement l'usage d'un cercle d'amis —
+ * un tournoi à rondes fixes suppose que tout le monde soit présent à l'heure
+ * dite, et qu'un absent soit remplacé.
+ *
+ * Une arène dure un temps donné, pas un nombre de rondes : dès qu'une partie
+ * finit, on est réapparié. Le classement se fait aux points, avec un
+ * mécanisme de série qui empêche de jouer petit bras une fois en tête.
+ */
+export const tournaments = pgTable(
+  'tournaments',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    slug: varchar('slug', { length: 12 }).notNull(),
+    name: varchar('name', { length: 80 }).notNull(),
+    ownerId: uuid('owner_id').references(() => users.id, { onDelete: 'set null' }),
+    /** Cadence des parties, en secondes. */
+    initialTime: integer('initial_time').notNull().default(180),
+    increment: integer('increment').notNull().default(0),
+    /** Durée totale de l'arène, en minutes. */
+    durationMinutes: integer('duration_minutes').notNull().default(45),
+    startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+    /** `scheduled`, `running` ou `finished`. */
+    status: varchar('status', { length: 12 }).notNull().default('scheduled'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('tournaments_slug_idx').on(table.slug),
+    index('tournaments_status_idx').on(table.status, table.startsAt),
+  ],
+)
+
+/**
+ * Un inscrit, et son score.
+ *
+ * `active` dit s'il est en file d'attente. On ne retire pas sa ligne quand il
+ * fait une pause : il perdrait ses points, et le classement final serait faux.
+ */
+export const tournamentPlayers = pgTable(
+  'tournament_players',
+  {
+    tournamentId: uuid('tournament_id')
+      .notNull()
+      .references(() => tournaments.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    username: varchar('username', { length: 40 }).notNull(),
+    rating: integer('rating').notNull().default(1500),
+    score: integer('score').notNull().default(0),
+    /** Victoires consécutives : à partir de deux, les points doublent. */
+    streak: integer('streak').notNull().default(0),
+    games: integer('games').notNull().default(0),
+    active: boolean('active').notNull().default(true),
+    /** Occupé dans une partie : ne pas réapparier. */
+    playing: boolean('playing').notNull().default(false),
+    joinedAt: timestamp('joined_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.tournamentId, table.userId] }),
+    index('tournament_players_rank_idx').on(table.tournamentId, table.score),
+  ],
+)
+
+/** Une partie du tournoi : le salon est un salon temps réel ordinaire. */
+export const tournamentPairings = pgTable(
+  'tournament_pairings',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    tournamentId: uuid('tournament_id')
+      .notNull()
+      .references(() => tournaments.id, { onDelete: 'cascade' }),
+    whiteId: uuid('white_id').notNull(),
+    blackId: uuid('black_id').notNull(),
+    gameSlug: varchar('game_slug', { length: 12 }).notNull(),
+    /** `*` tant que la partie court, puis `1-0`, `0-1` ou `1/2-1/2`. */
+    result: varchar('result', { length: 8 }).notNull().default('*'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('tournament_pairings_idx').on(table.tournamentId, table.result),
+    uniqueIndex('tournament_pairings_slug_idx').on(table.gameSlug),
+  ],
+)
+
+/**
  * Études.
  *
  * Un classeur : on y range des positions commentées — ses ouvertures, une
