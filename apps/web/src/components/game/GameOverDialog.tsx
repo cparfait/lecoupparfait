@@ -133,6 +133,10 @@ export function GameOverDialog({
     )
     try {
       sessionStorage.setItem('coupparfait.pendingAnalysis', pgn)
+      // Analyser sa partie vue d'en face demande un effort de retournement
+      // permanent : on ouvre du côté où l'on jouait. En partie locale il n'y a
+      // pas de « son » camp, et l'analyse garde alors la vue des Blancs.
+      if (playerColor) sessionStorage.setItem('coupparfait.pendingAnalysisSide', playerColor)
     } catch {
       // Mode navigation privée très restrictif : l'analyse partira à vide, on
       // pourra toujours coller le PGN à la main.

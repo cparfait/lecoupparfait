@@ -60,6 +60,13 @@ export default function AnalysisPage() {
   const [outcome, setOutcome] = useState<AnalysisOutcome | null>(null)
   const [running, setRunning] = useState(false)
   const [progress, setProgress] = useState<AnalysisProgress | null>(null)
+  /**
+   * Camp du joueur, quand la partie lui appartient.
+   *
+   * Déposé par la boîte de fin de partie en même temps que le PGN ; l'écran
+   * d'import le remonte ici, puisque c'est la relecture qui s'en sert.
+   */
+  const [side, setSide] = useState<Color | null>(null)
 
   if (!outcome) {
     return (
@@ -68,6 +75,7 @@ export default function AnalysisPage() {
         progress={progress}
         onStart={() => setRunning(true)}
         onProgress={setProgress}
+        onSide={setSide}
         onDone={(result) => {
           setOutcome(result)
           setRunning(false)
@@ -81,7 +89,7 @@ export default function AnalysisPage() {
     )
   }
 
-  return <ReviewScreen outcome={outcome} onReset={() => setOutcome(null)} />
+  return <ReviewScreen outcome={outcome} side={side} onReset={() => setOutcome(null)} />
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -93,12 +101,15 @@ function ImportScreen({
   progress,
   onStart,
   onProgress,
+  onSide,
   onDone,
   onError,
 }: {
   running: boolean
   progress: AnalysisProgress | null
   onStart: () => void
+  /** Signale le camp du joueur trouvé dans la partie déposée. */
+  onSide: (side: Color) => void
   onProgress: (progress: AnalysisProgress) => void
   onDone: (outcome: AnalysisOutcome) => void
   onError: () => void
@@ -121,6 +132,11 @@ function ImportScreen({
         setInput(pending)
         setHandedOver(true)
         sessionStorage.removeItem('coupparfait.pendingAnalysis')
+      }
+      const played = sessionStorage.getItem('coupparfait.pendingAnalysisSide')
+      if (played === 'w' || played === 'b') {
+        onSide(played)
+        sessionStorage.removeItem('coupparfait.pendingAnalysisSide')
       }
     } catch {
       // Stockage de session indisponible : sans conséquence.
@@ -337,9 +353,18 @@ function buildDemoFrames(fen: string, line: string[]): DemoFrame[] {
 
 function ReviewScreen({
   outcome,
+  side,
   onReset,
 }: {
   outcome: AnalysisOutcome
+  /**
+   * Camp du joueur, quand la partie vient de lui.
+   *
+   * Relire sa partie vue d'en face oblige à retourner mentalement chaque coup.
+   * Un PGN collé, lui, n'a pas de « son » camp : on garde alors la vue des
+   * Blancs, qui est la convention.
+   */
+  side: Color | null
   onReset: () => void
 }) {
   const { report, coach, source } = outcome
@@ -349,7 +374,7 @@ function ReviewScreen({
 
   const format = useSan()
   const [cursor, setCursor] = useState(0)
-  const [orientation, setOrientation] = useState<Color>('w')
+  const [orientation, setOrientation] = useState<Color>(side ?? 'w')
   const [autoplay, setAutoplay] = useState(false)
 
   const move = report.moves[cursor] ?? null
