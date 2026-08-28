@@ -17,6 +17,7 @@ import {
   cancelChallenge,
   createChallenge,
   createGuestChallenge,
+  createOpenChallenge,
   listIncomingChallenges,
   listOutgoingChallenges,
   purgeExpiredChallenges,
@@ -97,6 +98,7 @@ export async function POST(request: Request) {
     rated?: boolean
     color?: string
     name?: string
+    slug?: string
   }
   try {
     body = await request.json()
@@ -174,6 +176,23 @@ export async function POST(request: Request) {
         color,
       })
 
+      return NextResponse.json({ ok: true, challenge })
+    }
+
+    // Partie ouverte par lien : personne n'est désigné, on l'enregistre
+    // seulement pour pouvoir la retrouver et la supprimer.
+    case 'open': {
+      const challenge = await createOpenChallenge({
+        fromId: me.userId,
+        fromName: me.username,
+        slug: String(body.slug ?? '') || makeSlug(),
+        initialTime: Math.min(MAX_INITIAL, Math.max(MIN_INITIAL, Number(body.initialTime ?? 600))),
+        increment: Math.min(MAX_INCREMENT, Math.max(0, Number(body.increment ?? 5))),
+        rated: body.rated === true,
+      })
+      if (!challenge) {
+        return NextResponse.json({ error: 'Partie non enregistrée.' }, { status: 500 })
+      }
       return NextResponse.json({ ok: true, challenge })
     }
 

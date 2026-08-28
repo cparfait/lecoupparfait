@@ -39,7 +39,26 @@ export default function CreateFriendGamePage() {
         // Stockage refusé : le pseudo sera simplement « Invité ».
       }
     }
-  }, [name])
+
+    // On enregistre la partie pour qui a un compte, afin qu'elle apparaisse
+    // dans « Parties en attente » et puisse être retrouvée ou supprimée. Sans
+    // compte, il n'y a personne à qui la rattacher : le lien seul fait foi.
+    const control = TIME_CONTROLS.find((entry) => entry.id === timeControlId)
+    void fetch('/api/defis', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        action: 'open',
+        slug: created,
+        initialTime: control?.initial ?? 600,
+        increment: control?.increment ?? 5,
+        rated,
+      }),
+    }).catch(() => {
+      // Hors ligne ou sans compte : la partie fonctionne quand même, elle ne
+      // sera simplement pas listée.
+    })
+  }, [name, timeControlId, rated])
 
   const copy = useCallback(async () => {
     if (!url) return

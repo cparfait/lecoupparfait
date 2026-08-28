@@ -36,8 +36,15 @@ export interface PendingRequest {
 /** Fenêtre au-delà de laquelle on ne se dit plus « en ligne ». */
 const ONLINE_MS = 5 * 60 * 1000
 
-/** Durée de vie d'un défi : au-delà, la proposition ne veut plus rien dire. */
-const CHALLENGE_TTL_MS = 10 * 60 * 1000
+/**
+ * Durée de vie d'un défi.
+ *
+ * Calée sur le délai au bout duquel le serveur annule une partie où personne
+ * n'a joué (`IDLE_ABORT_MS`, cinq minutes). Deux durées différentes feraient
+ * mentir le décompte affiché : on lirait « expire dans 8:00 » sur une partie
+ * que le serveur a déjà ramassée.
+ */
+const CHALLENGE_TTL_MS = 5 * 60 * 1000
 
 function toFriend(row: {
   id: string
@@ -461,6 +468,56 @@ export async function createGuestChallenge(options: {
   }
 }
 
+/**
+ * Partie ouverte par lien, sans destinataire désigné.
+ *
+ * Le lien « jouer contre un ami » créait jusqu'ici une adresse et rien de
+ * plus : rien en base, donc rien à lister, et une partie oubliée qu'on ne
+ * pouvait ni retrouver ni supprimer. On l'enregistre désormais quand celui qui
+ * la crée a un compte — sans compte, il n'y a personne à qui la rattacher.
+ */
+export async function createOpenChallenge(options: {
+  fromId: string
+  fromName: string
+  slug: string
+  initialTime: number
+  increment: number
+  rated: boolean
+}): Promise<PendingChallenge | null> {
+  const db = getDb()
+  const expiresAt = new Date(Date.now() + CHALLENGE_TTL_MS)
+
+  const [row] = await db
+    .insert(challenges)
+    .values({
+      slug: options.slug,
+      creatorId: options.fromId,
+      creatorName: options.fromName,
+      creatorColor: 'random',
+      initialTime: options.initialTime,
+      increment: options.increment,
+      rated: options.rated,
+      kind: 'open',
+      targetId: null,
+      expiresAt,
+    })
+    .returning()
+
+  if (!row) return null
+
+  return {
+    id: row.id,
+    slug: row.slug,
+    from: { id: row.creatorId, username: row.creatorName },
+    to: row.targetId,
+    initialTime: row.initialTime,
+    increment: row.increment,
+    rated: row.rated,
+    creatorColor: row.creatorColor,
+    expiresAt: row.expiresAt,
+  }
+}
+
 /** Défis qui m'attendent, non expirés. */
 export async function listIncomingChallenges(userId: string): Promise<PendingChallenge[]> {
   const db = getDb()
@@ -497,11 +554,12 @@ export async function listIncomingChallenges(userId: string): Promise<PendingCha
  */
 export async function listOutgoingChallenges(
   userId: string,
-): Promise<Array<PendingChallenge & { status: string }>> {
+): Promise<Array<PendingChallenge & { status: string; kind: string; toName: string | null }>> {
   const db = getDb()
   const rows = await db
-    .select()
+    .select({ challenge: challenges, toName: users.username })
     .from(challenges)
+    .leftJoin(users, eq(users.id, challenges.targetId))
     .where(
       and(
         eq(challenges.creatorId, userId),
@@ -511,7 +569,7 @@ export async function listOutgoingChallenges(
     )
     .orderBy(desc(challenges.createdAt))
 
-  return rows.map((row) => ({
+  return rows.map(({ challenge: row, toName }) => ({
     id: row.id,
     slug: row.slug,
     from: { id: row.creatorId, username: row.creatorName },
@@ -522,6 +580,8 @@ export async function listOutgoingChallenges(
     creatorColor: row.creatorColor,
     expiresAt: row.expiresAt,
     status: row.status,
+    kind: row.kind,
+    toName,
   }))
 }
 

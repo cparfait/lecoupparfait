@@ -22,6 +22,7 @@ import {
   Loader2,
   Search,
   Swords,
+  Trash2,
   UserMinus,
   UserPlus,
   Users,
@@ -49,10 +50,15 @@ interface OutgoingChallenge {
   id: string
   slug: string
   to: string | null
+  /** Pseudo du destinataire, ou `null` pour une partie ouverte par lien. */
+  toName: string | null
+  kind: string
   status: string
   initialTime: number
   increment: number
   rated: boolean
+  /** Instant d'expiration, en ISO. */
+  expiresAt: string
 }
 
 /** Rythme d'interrogation : assez vif pour ne pas laisser un ami attendre. */
@@ -480,12 +486,87 @@ function FriendsBook() {
 
         {outgoing.length > 0 && (
           <p className="mt-3 border-t border-line/60 pt-2.5 text-[12px] text-faint">
-            En attente de réponse : {outgoing.map((request) => request.user.username).join(', ')}.
+            Demandes d’ami en attente : {outgoing.map((request) => request.user.username).join(', ')}.
           </p>
         )}
       </Card>
+
+      {/*
+        Une partie créée puis oubliée n'était visible nulle part : ni pour y
+        retourner, ni pour l'annuler. Elle l'est ici, avec le temps qu'il lui
+        reste — passé cinq minutes sans coup joué, le serveur l'annule.
+      */}
+      {sent.length > 0 && (
+        <Card className="mt-3 p-4">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
+            Parties en attente
+          </p>
+          <div className="space-y-1">
+            {sent.map((game) => (
+              <div key={game.id} className="flex items-center gap-2.5 py-0.5">
+                <span
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-surface-strong text-faint"
+                  aria-hidden
+                >
+                  {game.kind === 'open' ? <Link2 size={15} /> : <Swords size={15} />}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[13px] font-medium">
+                    {game.toName ?? 'Partie par lien'}
+                  </span>
+                  <span className="block text-[11px] text-faint">
+                    {Math.round(game.initialTime / 60)} min
+                    {game.increment > 0 ? ` + ${game.increment} s` : ''}
+                    {game.rated ? ' · classée' : ''} · <Countdown until={game.expiresAt} />
+                  </span>
+                </span>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() =>
+                    router.push(
+                      `/jouer/partie/${game.slug}?tc=${game.initialTime}+${game.increment}${game.rated ? '&classee=1' : ''}`,
+                    )
+                  }
+                >
+                  Rejoindre
+                </Button>
+                <button
+                  type="button"
+                  title="Supprimer cette partie"
+                  aria-label="Supprimer cette partie"
+                  onClick={() => void post('/api/defis', { action: 'cancel', id: game.id })}
+                  className="grid h-7 w-7 shrink-0 place-items-center rounded-[var(--radius-sm)] text-faint transition-colors hover:bg-surface-hover hover:text-ink"
+                >
+                  <Trash2 size={14} aria-hidden />
+                </button>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
     </div>
   )
+}
+
+/**
+ * Temps restant avant expiration.
+ *
+ * Une partie en attente sans échéance affichée laisse croire qu'elle tiendra
+ * indéfiniment. Elle ne tient pas : faute de coup joué, le serveur l'annule.
+ */
+function Countdown({ until }: { until: string }) {
+  const [left, setLeft] = useState(() => Date.parse(until) - Date.now())
+
+  useEffect(() => {
+    const timer = setInterval(() => setLeft(Date.parse(until) - Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [until])
+
+  if (left <= 0) return <>expirée</>
+  const minutes = Math.floor(left / 60_000)
+  const seconds = Math.floor((left % 60_000) / 1000)
+  return <>expire dans {minutes}:{String(seconds).padStart(2, '0')}</>
 }
 
 /** Pastille de présence collée à l'avatar : savoir qui est là évite d'attendre. */

@@ -76,6 +76,13 @@ export interface GameSnapshot {
   takebackFrom: Color | null
   chat: ChatMessage[]
   startedAt: number | null
+  /**
+   * Instant où la partie s'annulera si personne n'a encore joué.
+   *
+   * `null` dès le premier coup. Sert au décompte affiché : celui qui attend
+   * doit savoir combien de temps il attend encore.
+   */
+  abandonAt: number | null
 }
 
 export type RoomEvent =
@@ -89,6 +96,20 @@ export type RoomEvent =
 
 /** Délai après lequel un joueur déconnecté perd la partie. */
 const ABANDON_DELAY_MS = 60_000
+
+/**
+ * Délai au bout duquel une partie où personne n'a joué s'annule.
+ *
+ * Une adresse de partie s'envoie et s'oublie : sans cela, chaque lien créé et
+ * jamais ouvert laisserait un salon vivant sur le serveur, et celui qui a
+ * proposé resterait devant un échiquier qui n'a jamais commencé sans savoir
+ * s'il doit attendre. Cinq minutes suffisent à ce que l'autre arrive.
+ *
+ * Réglable par `GAME_IDLE_ABORT_MS` : un cercle qui joue en correspondance
+ * voudra plus long, et c'est aussi ce qui permet d'éprouver le mécanisme sans
+ * attendre cinq minutes.
+ */
+const IDLE_ABORT_MS = Number(process.env.GAME_IDLE_ABORT_MS ?? 5 * 60 * 1000)
 
 export class GameRoom {
   readonly slug: string
@@ -108,6 +129,9 @@ export class GameRoom {
 
   private readonly listeners = new Set<(event: RoomEvent) => void>()
   private flagTimer: ReturnType<typeof setInterval> | null = null
+  /** Compte à rebours d'annulation, armé tant qu'aucun coup n'a été joué. */
+  private idleTimer: ReturnType<typeof setTimeout> | null = null
+  private readonly abandonAt: number
 
   constructor(options: { slug: string; timeControl: TimeControl; rated: boolean; startFen?: string }) {
     this.slug = options.slug
@@ -115,6 +139,23 @@ export class GameRoom {
     this.rated = options.rated
     this.chess = new Chess(options.startFen, { skipValidation: true })
     this.clock = createClock(options.timeControl, Date.now())
+
+    // Le décompte part de la création, pas de l'arrivée des joueurs : c'est le
+    // salon créé pour rien qu'il s'agit de ramasser.
+    this.abandonAt = Date.now() + IDLE_ABORT_MS
+    this.idleTimer = setTimeout(() => {
+      this.idleTimer = null
+      if (this.isFinished || this.chess.history().length > 0) return
+      this.abort('Personne n’a joué : la partie est annulée.')
+    }, IDLE_ABORT_MS)
+    this.idleTimer.unref?.()
+  }
+
+  /** Désarme le compte à rebours : la partie a commencé, ou elle est finie. */
+  private clearIdleTimer(): void {
+    if (!this.idleTimer) return
+    clearTimeout(this.idleTimer)
+    this.idleTimer = null
   }
 
   // ── Abonnements ───────────────────────────────────────────────────────────
@@ -259,6 +300,8 @@ export class GameRoom {
     this.takebackFrom = null
 
     const firstMove = this.chess.history().length === 1
+    // La partie a commencé : le compte à rebours d'annulation n'a plus lieu.
+    if (firstMove) this.clearIdleTimer()
     this.clock = applyMove(this.clock, color, now, firstMove)
 
     this.emit({
@@ -414,6 +457,7 @@ export class GameRoom {
 
   private finish(status: GameStatus, result: GameResult): void {
     if (this.isFinished) return
+    this.clearIdleTimer()
     this.status = status
     this.result = result
     this.clock = stopClock(this.clock, Date.now())
@@ -435,6 +479,7 @@ export class GameRoom {
       clearInterval(this.flagTimer)
       this.flagTimer = null
     }
+    this.clearIdleTimer()
     this.listeners.clear()
   }
 
@@ -476,6 +521,8 @@ export class GameRoom {
       takebackFrom: this.takebackFrom,
       chat: this.chat.slice(-50),
       startedAt: this.startedAt,
+      // Le compte à rebours ne concerne que la partie qui n'a pas commencé.
+      abandonAt: this.idleTimer ? this.abandonAt : null,
     }
   }
 
