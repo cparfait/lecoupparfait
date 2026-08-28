@@ -10,7 +10,9 @@
  */
 
 import { NextResponse } from 'next/server'
+import { eq, getDb, users } from '@coupparfait/db'
 import { authenticate, createUser, type ValidationError } from '@coupparfait/db/auth'
+import { isKnownAvatar } from '@/lib/avatars.ts'
 import { endSession, getCurrentUser, startSession } from '@/lib/server/session.ts'
 
 export const runtime = 'nodejs'
@@ -70,6 +72,7 @@ export async function POST(request: Request) {
     username?: string
     password?: string
     email?: string
+    avatar?: string
   }
 
   try {
@@ -81,6 +84,20 @@ export async function POST(request: Request) {
   if (body.action === 'signout') {
     await endSession()
     return NextResponse.json({ ok: true })
+  }
+
+  // Changer d'avatar ne demande pas de mot de passe : c'est un choix
+  // d'affichage, pas une opération sensible. On vérifie en revanche que la
+  // valeur fait partie du jeu proposé — la colonne accepte deux cents
+  // caractères, ce qui laisserait passer bien autre chose qu'un émoji.
+  if (body.action === 'avatar') {
+    const me = await getCurrentUser()
+    if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+    if (!isKnownAvatar(body.avatar)) {
+      return NextResponse.json({ error: 'Avatar inconnu.' }, { status: 400 })
+    }
+    await getDb().update(users).set({ avatar: body.avatar }).where(eq(users.id, me.userId))
+    return NextResponse.json({ ok: true, avatar: body.avatar })
   }
 
   const username = String(body.username ?? '').trim()

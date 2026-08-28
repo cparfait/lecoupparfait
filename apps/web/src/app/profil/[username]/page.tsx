@@ -15,6 +15,7 @@ import { CalendarDays, LogOut, TrendingUp } from 'lucide-react'
 import clsx from 'clsx'
 import { SPEED_LABELS, ratingTitle } from '@coupparfait/core'
 import { Button, Card, Chip, EmptyState, Skeleton } from '@/components/ui/index.tsx'
+import { AvatarPicker } from '@/components/profile/AvatarPicker.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 
 interface Profile {
@@ -169,6 +170,23 @@ export default function ProfilePage() {
             </Button>
           )}
         </div>
+
+        {/* Chez soi seulement : l'avatar des autres ne se change pas. */}
+        {isMe && (
+          <div className="mt-4 border-t border-line/60 pt-4">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
+              Ton avatar
+            </p>
+            <AvatarPicker
+              current={profile.user.avatar}
+              onChange={(avatar) =>
+                setProfile((current) =>
+                  current ? { ...current, user: { ...current.user, avatar } } : current,
+                )
+              }
+            />
+          </div>
+        )}
       </Card>
 
       {/* ── Classements ──────────────────────────────────────────── */}
