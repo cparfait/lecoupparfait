@@ -101,7 +101,10 @@ export function ToastHost() {
         return (
           <div
             key={item.id}
-            className="animate-slide-up pointer-events-auto flex items-start gap-3 rounded-[var(--radius)] glass-strong p-3 shadow-[var(--shadow)]"
+            // Opaque : un message posé par-dessus la page se lit d'un coup
+            // d'œil ou ne sert à rien, et le verre laissait passer le texte
+            // qu'il recouvrait.
+            className="animate-slide-up popover pointer-events-auto flex items-start gap-3 p-3 shadow-[var(--shadow)]"
           >
             <Icon size={17} className={clsx('mt-0.5 shrink-0', TONES[item.kind])} aria-hidden />
             <div className="min-w-0 flex-1">

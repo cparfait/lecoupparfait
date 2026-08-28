@@ -447,6 +447,15 @@ export class GameRoom {
         const player = this.players[color]
         if (!player || player.connected || player.disconnectedAt === null) continue
         if (now - player.disconnectedAt > ABANDON_DELAY_MS) {
+          // Une partie sans le moindre coup ne se gagne pas : elle s'annule.
+          // Autrement, quelqu'un qui ouvre un lien puis referme son onglet
+          // offrait une « Victoire ! » sur zéro demi-coup — et, en partie
+          // classée, des points de classement pour rien.
+          if (this.chess.history().length === 0) {
+            this.system(`${player.name} n’est pas resté. La partie est annulée.`)
+            this.finish('aborted', '*')
+            return
+          }
           this.system(`${player.name} ne s’est pas reconnecté.`)
           this.finish('abandoned', color === 'w' ? '0-1' : '1-0')
           return

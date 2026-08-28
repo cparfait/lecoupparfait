@@ -18,7 +18,7 @@ import { Gauge, RotateCcw, Swords, X } from 'lucide-react'
 import type { Color } from 'chess.js'
 import type { GameResult, GameStatus } from '@coupparfait/core'
 import { formatPgnDate, toPgn } from '@coupparfait/core'
-import { Button, Card } from '@/components/ui/index.tsx'
+import { Button } from '@/components/ui/index.tsx'
 import type { PlayedMove } from '@/lib/game/useChessGame.ts'
 
 const REASONS: Record<GameStatus, string> = {
@@ -159,10 +159,10 @@ export function GameOverDialog({
         aria-hidden
       />
 
-      <Card
-        glow
-        className="animate-slide-up relative w-full max-w-sm overflow-hidden p-6 text-center shadow-[var(--shadow-lg)]"
-      >
+      {/* Opaque, comme toute surface qui se superpose au contenu : à travers
+          le verre, l'échiquier passait au milieu du texte et « Victoire ! » se
+          lisait par-dessus un damier. */}
+      <div className="popover animate-slide-up relative w-full max-w-sm overflow-hidden p-6 text-center shadow-[var(--shadow-lg)]">
         <button
           type="button"
           onClick={() => setDismissed(true)}
@@ -237,7 +237,7 @@ export function GameOverDialog({
             )}
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   )
 }
