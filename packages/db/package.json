@@ -13,6 +13,7 @@
     "./auth": "./src/auth.ts",
     "./friends": "./src/friends.ts",
     "./studies": "./src/studies.ts",
+    "./correspondence": "./src/correspondence.ts",
     "./ratings": "./src/ratings.ts"
   },
   "scripts": {

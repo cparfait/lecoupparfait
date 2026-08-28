@@ -8,7 +8,7 @@
  */
 
 import Link from 'next/link'
-import { ArrowRight, Cpu, Eye, MonitorSmartphone, Users } from 'lucide-react'
+import { ArrowRight, Cpu, Eye, Mailbox, MonitorSmartphone, Users } from 'lucide-react'
 import { BOT_PERSONALITIES, SPEED_LABELS, TIME_CONTROLS } from '@coupparfait/core'
 import { Card, Chip } from '@/components/ui/index.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
@@ -37,6 +37,14 @@ const MODES = [
     blurbKey: 'play.localBlurb',
     detail: 'L’échiquier se retourne à chaque coup si tu le souhaites',
     accent: 'var(--accent-3)',
+  },
+  {
+    href: '/correspondance',
+    icon: Mailbox,
+    titleKey: 'play.correspondence',
+    blurbKey: 'play.correspondenceBlurb',
+    detail: 'Un coup par jour · la partie t’attend',
+    accent: 'var(--accent)',
   },
   {
     href: '/jouer/regarder',
