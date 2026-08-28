@@ -70,6 +70,8 @@ function AuthForm() {
   const [email, setEmail] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  /** Pseudo de remplacement proposé par le serveur, quand la saisie est refusée. */
+  const [suggestion, setSuggestion] = useState<string | null>(null)
   /** Pseudo choisi par un invité qui préfère jouer tout de suite. */
   const [guestName, setGuestName] = useState('')
 
@@ -133,8 +135,10 @@ function AuthForm() {
 
         if (!response.ok) {
           setError(data.error ?? 'Quelque chose s’est mal passé.')
+          setSuggestion(data.suggestion ?? null)
           return
         }
+        setSuggestion(null)
 
         toast.success(
           mode === 'signup' ? `Bienvenue, ${data.user.username} !` : `Content de te revoir, ${data.user.username}.`,
@@ -281,6 +285,24 @@ function AuthForm() {
                 role="alert"
               >
                 {error}
+                {/* Refuser sans proposer oblige à retâtonner : un clic applique
+                    le pseudo le plus proche qui, lui, serait accepté. */}
+                {suggestion && (
+                  <>
+                    {' '}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUsername(suggestion)
+                        setError(null)
+                        setSuggestion(null)
+                      }}
+                      className="font-semibold underline underline-offset-2"
+                    >
+                      Essayer « {suggestion} »
+                    </button>
+                  </>
+                )}
               </p>
             )}
 

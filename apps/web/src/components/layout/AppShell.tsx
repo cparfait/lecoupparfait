@@ -33,6 +33,7 @@ import {
   X,
 } from 'lucide-react'
 import clsx from 'clsx'
+import { AccountButton } from '@/components/layout/AccountButton.tsx'
 import { ChallengeWatcher } from '@/components/social/ChallengeWatcher.tsx'
 import type { ReactNode } from 'react'
 import { useT } from '@/lib/i18n/index.tsx'
@@ -125,12 +126,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <Settings size={17} aria-hidden />
             </Link>
-            <Link
-              href="/connexion"
-              className="hidden h-9 items-center rounded-[var(--radius-sm)] bg-accent px-3.5 text-[13px] font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110 sm:inline-flex"
-            >
-              {t('nav.signIn')}
-            </Link>
+            <AccountButton />
             <button
               type="button"
               onClick={() => setMenuOpen((open) => !open)}
@@ -198,13 +194,7 @@ function MobileMenu({ items, pathname }: { items: NavItem[]; pathname: string })
             </Link>
           )
         })}
-        <Link
-          href="/connexion"
-          className="col-span-2 mt-1 flex items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-accent px-3 py-2.5 text-sm font-semibold text-[var(--accent-contrast)]"
-        >
-          <User size={16} aria-hidden />
-          {t('nav.signIn')}
-        </Link>
+        <AccountButton variant="menu" />
       </nav>
     </div>
   )

@@ -100,16 +100,54 @@ const RESERVED = new Set([
 ])
 
 export type ValidationError =
-  | 'invalidUsername'
+  /** Trop court, trop long, ou caractères interdits : distingués ci-dessous. */
+  | 'usernameTooShort'
+  | 'usernameTooLong'
+  | 'usernameCharacters'
   | 'usernameTaken'
   | 'weakPassword'
   | 'emailTaken'
   | 'invalidCredentials'
 
+/**
+ * Ce qui cloche dans un pseudo, précisément.
+ *
+ * Un message unique — « 3 à 20 caractères alphanumériques » — oblige à
+ * deviner : il énonce la règle sans dire laquelle est enfreinte, et passait
+ * même sous silence le tiret et le souligné, pourtant acceptés. On distingue
+ * donc les trois cas.
+ */
 export function validateUsername(username: string): ValidationError | null {
-  if (!USERNAME_PATTERN.test(username)) return 'invalidUsername'
+  if (username.length < 3) return 'usernameTooShort'
+  if (username.length > 20) return 'usernameTooLong'
+  if (!USERNAME_PATTERN.test(username)) return 'usernameCharacters'
   if (RESERVED.has(username.toLowerCase())) return 'usernameTaken'
   return null
+}
+
+/**
+ * Le pseudo le plus proche qui, lui, serait accepté.
+ *
+ * Refuser sans proposer oblige à retâtonner. Les caractères interdits — un
+ * espace, le plus souvent — deviennent un souligné, ce qui est la convention
+ * partout ailleurs.
+ *
+ * Renvoie `null` s'il ne reste rien d'exploitable : mieux vaut ne rien
+ * proposer qu'une suggestion absurde.
+ */
+export function suggestUsername(raw: string): string | null {
+  const cleaned = raw
+    .normalize('NFD')
+    // Les accents sont retirés plutôt que remplacés : « rené » devient « rene »
+    // et reste reconnaissable, là qu'un souligné le défigurerait.
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-zA-Z0-9_-]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 20)
+
+  if (cleaned.length < 3 || cleaned === raw) return null
+  if (RESERVED.has(cleaned.toLowerCase())) return null
+  return cleaned
 }
 
 export function validatePassword(password: string): ValidationError | null {

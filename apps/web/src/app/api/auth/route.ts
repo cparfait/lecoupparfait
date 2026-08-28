@@ -16,6 +16,7 @@ import {
   createUser,
   emailStatus,
   startEmailVerification,
+  suggestUsername,
   verifyEmail,
   type ValidationError,
 } from '@coupparfait/db/auth'
@@ -62,7 +63,12 @@ setInterval(
 ).unref?.()
 
 const ERROR_MESSAGES: Record<ValidationError, string> = {
-  invalidUsername: 'Pseudo invalide : 3 à 20 caractères alphanumériques.',
+  usernameTooShort: 'Pseudo trop court : trois caractères au minimum.',
+  usernameTooLong: 'Pseudo trop long : vingt caractères au maximum.',
+  // Le pseudo sert d'adresse au profil : le dire explique la restriction au
+  // lieu de la faire subir.
+  usernameCharacters:
+    'Un pseudo n’accepte ni espace ni accent : il sert d’adresse à ton profil. Lettres, chiffres, tiret et souligné uniquement.',
   usernameTaken: 'Ce pseudo est déjà pris.',
   weakPassword: 'Mot de passe trop court (8 caractères minimum).',
   emailTaken: 'Cette adresse est déjà utilisée.',
@@ -192,7 +198,15 @@ export async function POST(request: Request) {
         email: body.email?.trim() || null,
       })
       if (!result.ok) {
-        return NextResponse.json({ error: ERROR_MESSAGES[result.error] }, { status: 400 })
+        // Refuser sans proposer oblige à retâtonner : on joint le pseudo le
+        // plus proche qui serait accepté, quand il y en a un.
+        return NextResponse.json(
+          {
+            error: ERROR_MESSAGES[result.error],
+            suggestion: result.error === 'usernameCharacters' ? suggestUsername(username) : null,
+          },
+          { status: 400 },
+        )
       }
       await startSession(result.user.id)
 

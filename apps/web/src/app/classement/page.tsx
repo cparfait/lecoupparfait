@@ -14,6 +14,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Medal, Trophy } from 'lucide-react'
 import clsx from 'clsx'
+import { PlayerSearch } from '@/components/social/PlayerSearch.tsx'
 import { SPEED_LABELS } from '@coupparfait/core'
 import { Card, Chip, EmptyState, Skeleton } from '@/components/ui/index.tsx'
 
@@ -82,6 +83,13 @@ export default function LeaderboardPage() {
         Classement Glicko-2, comme sur les grandes plateformes. Il faut au moins {minGames}{' '}
         parties pour y figurer.
       </p>
+
+      {/*
+        Le classement écarte qui n'a pas joué cinq parties classées : chercher
+        quelqu'un ne doit pas en dépendre. Cette recherche-là interroge tout
+        l'annuaire, y compris les comptes du premier jour.
+      */}
+      <PlayerSearch className="mt-4" />
 
       <div className="mt-5 flex flex-wrap gap-1.5">
         {CATEGORIES.map((entry) => (
