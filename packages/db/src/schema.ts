@@ -59,6 +59,14 @@ export const users = pgTable(
     /** Empreinte du jeton de confirmation. Jamais le jeton lui-même. */
     emailTokenHash: varchar('email_token_hash', { length: 64 }),
     emailTokenExpiresAt: timestamp('email_token_expires_at', { withTimezone: true }),
+    /**
+     * Empreinte du jeton de réinitialisation du mot de passe.
+     *
+     * Séparée de celle de confirmation : les deux demandes peuvent coexister,
+     * et un jeton de réinitialisation vit beaucoup moins longtemps.
+     */
+    resetTokenHash: varchar('reset_token_hash', { length: 64 }),
+    resetTokenExpiresAt: timestamp('reset_token_expires_at', { withTimezone: true }),
     /** Empreinte scrypt du mot de passe. Jamais le mot de passe lui-même. */
     passwordHash: text('password_hash').notNull(),
 

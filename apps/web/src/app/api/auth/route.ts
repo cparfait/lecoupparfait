@@ -15,13 +15,15 @@ import {
   authenticate,
   createUser,
   emailStatus,
+  resetPassword,
   startEmailVerification,
+  startPasswordReset,
   suggestUsername,
   verifyEmail,
   type ValidationError,
 } from '@coupparfait/db/auth'
 import { isKnownAvatar } from '@/lib/avatars.ts'
-import { sendMail, verificationMail } from '@/lib/server/mailer.ts'
+import { resetMail, sendMail, verificationMail } from '@/lib/server/mailer.ts'
 import { endSession, getCurrentUser, startSession } from '@/lib/server/session.ts'
 
 export const runtime = 'nodejs'
@@ -123,6 +125,48 @@ export async function POST(request: Request) {
       )
     }
     return NextResponse.json({ ok: true, username: result.username, alreadyDone: result.alreadyDone })
+  }
+
+  // Demande de réinitialisation. La réponse est **toujours la même**, que
+  // l'adresse existe, qu'elle soit inconnue ou non confirmée : autrement, ce
+  // formulaire devient un moyen de savoir qui est inscrit.
+  if (body.action === 'forgotPassword') {
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+      request.headers.get('x-real-ip') ??
+      'inconnu'
+    if (rateLimited(`oubli:${ip}`)) {
+      return NextResponse.json(
+        { error: 'Trop de demandes. Réessaie dans quelques minutes.' },
+        { status: 429 },
+      )
+    }
+
+    const demande = await startPasswordReset(String(body.email ?? ''))
+    if (demande) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin
+      await sendMail({
+        ...resetMail(demande.username, appUrl, demande.token),
+        to: demande.email,
+      })
+    }
+    return NextResponse.json({ ok: true })
+  }
+
+  if (body.action === 'resetPassword') {
+    const result = await resetPassword(String(body.token ?? ''), String(body.password ?? ''))
+    if (!result.ok) {
+      return NextResponse.json(
+        {
+          error:
+            result.reason === 'weakPassword'
+              ? ERROR_MESSAGES.weakPassword
+              : 'Ce lien a expiré ou ne correspond à rien. Demande-en un nouveau.',
+        },
+        { status: 400 },
+      )
+    }
+    return NextResponse.json({ ok: true, username: result.username })
   }
 
   if (body.action === 'resendVerification') {

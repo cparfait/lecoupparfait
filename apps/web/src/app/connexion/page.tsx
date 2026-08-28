@@ -267,6 +267,19 @@ function AuthForm() {
               hint={mode === 'signup' ? '8 caractères minimum. La longueur compte plus que les symboles.' : undefined}
             />
 
+            {/* À la connexion seulement : proposer « oublié » pendant qu'on
+                choisit son mot de passe n'aurait aucun sens. */}
+            {mode === 'signin' && (
+              <p className="-mt-2 text-right">
+                <Link
+                  href="/mot-de-passe-oublie"
+                  className="text-xs text-muted transition-colors hover:text-accent"
+                >
+                  Mot de passe oublié ?
+                </Link>
+              </p>
+            )}
+
             {mode === 'signup' && (
               <Input
                 label="Adresse e-mail"

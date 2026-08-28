@@ -152,3 +152,33 @@ export function verificationMail(username: string, appUrl: string, token: string
     ].join('\n'),
   }
 }
+
+/**
+ * Réinitialisation du mot de passe.
+ *
+ * Le message dit la durée de validité, et surtout quoi faire si l'on n'a rien
+ * demandé : ne rien faire. C'est la seule consigne utile, puisque tant que le
+ * lien n'est pas ouvert, rien n'a changé — et le dire évite l'inquiétude que
+ * provoque un courriel de ce genre reçu sans raison.
+ */
+export function resetMail(username: string, appUrl: string, token: string): Mail {
+  const lien = `${appUrl.replace(/\$/, '')}/reinitialiser?jeton=${encodeURIComponent(token)}`
+  return {
+    to: '',
+    subject: 'Réinitialiser ton mot de passe',
+    body: [
+      `Bonjour ${username},`,
+      '',
+      'Quelqu’un a demandé à réinitialiser le mot de passe de ce compte.',
+      'Si c’est toi, ouvre ce lien pour en choisir un nouveau :',
+      lien,
+      '',
+      'Le lien est valable une heure, et ne sert qu’une fois.',
+      '',
+      'Si tu n’as rien demandé, ignore ce message : tant que le lien n’est pas',
+      'ouvert, ton mot de passe reste inchangé.',
+      '',
+      'Le Coup Parfait — logiciel libre sous licence AGPL-3.0.',
+    ].join('\n'),
+  }
+}

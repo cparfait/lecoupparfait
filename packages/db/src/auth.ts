@@ -366,6 +366,114 @@ export async function emailStatus(
   return { email: row?.email ?? null, verified: row?.verifiedAt != null }
 }
 
+/**
+ * Durée de validité d'un lien de réinitialisation.
+ *
+ * Une heure, contre vingt-quatre pour la confirmation d'adresse : ce lien-là
+ * donne accès au compte. On le veut périmé avant qu'une boîte laissée ouverte
+ * sur un poste partagé ne devienne un problème.
+ */
+const RESET_TOKEN_TTL_MS = 3600 * 1000
+
+/**
+ * Ouvre une demande de réinitialisation, à partir de l'adresse.
+ *
+ * Deux règles qui tiennent toute la sécurité de ce parcours :
+ *
+ *  1. **Seule une adresse confirmée compte.** C'est à cela que sert la
+ *     confirmation : une adresse mal tapée à l'inscription appartient
+ *     peut-être à quelqu'un d'autre, à qui l'on offrirait le compte.
+ *
+ *  2. **Le résultat ne dit jamais si l'adresse existe.** La fonction renvoie
+ *     `null` aussi bien pour une adresse inconnue que non confirmée, et
+ *     l'appelant répond la même chose dans tous les cas. Sinon ce formulaire
+ *     devient un moyen de savoir qui est inscrit.
+ */
+export async function startPasswordReset(
+  email: string,
+): Promise<{ token: string; username: string; email: string } | null> {
+  const database = getDb()
+  const wanted = email.trim().toLowerCase()
+  if (!wanted) return null
+
+  const [user] = await database
+    .select({
+      id: users.id,
+      username: users.username,
+      email: users.email,
+      verifiedAt: users.emailVerifiedAt,
+    })
+    .from(users)
+    .where(and(eq(users.email, wanted), eq(users.disabled, false)))
+    .limit(1)
+
+  if (!user || !user.email || user.verifiedAt === null) return null
+
+  const token = randomBytes(32).toString('base64url')
+  await database
+    .update(users)
+    .set({
+      resetTokenHash: hashToken(token),
+      resetTokenExpiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
+    })
+    .where(eq(users.id, user.id))
+
+  return { token, username: user.username, email: user.email }
+}
+
+export type ResetPasswordResult =
+  | { ok: true; username: string }
+  | { ok: false; reason: 'invalid' | 'weakPassword' }
+
+/**
+ * Pose le nouveau mot de passe.
+ *
+ * Le jeton est consommé, et **toutes les sessions du compte sont fermées** :
+ * si quelqu'un a réinitialisé son mot de passe, c'est souvent qu'il craint que
+ * quelqu'un d'autre soit entré. Laisser vivre les sessions ouvertes viderait
+ * l'opération de son sens.
+ *
+ * Un lien expiré et un lien inconnu donnent la même réponse : distinguer les
+ * deux apprendrait à qui essaie qu'un jeton a existé.
+ */
+export async function resetPassword(
+  token: string,
+  password: string,
+): Promise<ResetPasswordResult> {
+  const database = getDb()
+  if (!token) return { ok: false, reason: 'invalid' }
+
+  const weak = validatePassword(password)
+  if (weak) return { ok: false, reason: 'weakPassword' }
+
+  const [user] = await database
+    .select({
+      id: users.id,
+      username: users.username,
+      expiresAt: users.resetTokenExpiresAt,
+    })
+    .from(users)
+    .where(eq(users.resetTokenHash, hashToken(token)))
+    .limit(1)
+
+  if (!user) return { ok: false, reason: 'invalid' }
+  if (!user.expiresAt || user.expiresAt.getTime() < Date.now()) {
+    return { ok: false, reason: 'invalid' }
+  }
+
+  await database
+    .update(users)
+    .set({
+      passwordHash: await hashPassword(password),
+      resetTokenHash: null,
+      resetTokenExpiresAt: null,
+    })
+    .where(eq(users.id, user.id))
+
+  await destroyAllSessions(user.id)
+  return { ok: true, username: user.username }
+}
+
 export function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex')
 }
