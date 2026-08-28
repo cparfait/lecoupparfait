@@ -51,6 +51,8 @@ export interface GameSnapshot {
   takebackFrom: Color | null
   chat: ChatMessage[]
   startedAt: number | null
+  /** Nombre de personnes qui regardent sans jouer. */
+  spectators: number
 }
 
 export type ConnectionState = 'connecting' | 'connected' | 'disconnected' | 'error'

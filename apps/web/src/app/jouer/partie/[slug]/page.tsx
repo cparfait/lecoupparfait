@@ -16,6 +16,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import {
+  Eye,
   Flag,
   Handshake,
   Loader2,
@@ -353,6 +354,24 @@ export default function LiveGamePage() {
 
         {/* ── Panneau latéral ────────────────────────────────────── */}
         <div className={clsx('flex min-h-0 flex-col gap-3', !chatOpen && 'max-lg:hidden')}>
+          {/*
+            Spectateur : les deux places étaient prises à l'arrivée. Le dire
+            évite de chercher pourquoi l'échiquier ne répond pas.
+          */}
+          {color === null && !waiting && (
+            <Card className="p-3">
+              <p className="flex items-center gap-2 text-[13px] leading-relaxed text-muted">
+                <Eye size={15} className="shrink-0 text-accent" aria-hidden />
+                <span>
+                  Tu regardes cette partie.{' '}
+                  {snapshot.spectators > 1 &&
+                    `Vous êtes ${snapshot.spectators} à la suivre. `}
+                  Tu peux écrire dans le tchat, mais pas jouer.
+                </span>
+              </p>
+            </Card>
+          )}
+
           {waiting && (
             <Card glow className="p-4 text-center">
               <Spinner size={20} className="mx-auto text-accent" />

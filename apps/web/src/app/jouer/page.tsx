@@ -3,12 +3,12 @@
 /**
  * Choix du mode de jeu.
  *
- * Trois portes d'entrée, présentées à taille égale : personne ne doit avoir
+ * Quatre portes d'entrée, présentées à taille égale : personne ne doit avoir
  * l'impression que jouer contre un ami est une fonctionnalité secondaire.
  */
 
 import Link from 'next/link'
-import { ArrowRight, Cpu, MonitorSmartphone, Users } from 'lucide-react'
+import { ArrowRight, Cpu, Eye, MonitorSmartphone, Users } from 'lucide-react'
 import { BOT_PERSONALITIES, SPEED_LABELS, TIME_CONTROLS } from '@coupparfait/core'
 import { Card, Chip } from '@/components/ui/index.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
@@ -37,6 +37,14 @@ const MODES = [
     blurbKey: 'play.localBlurb',
     detail: 'L’échiquier se retourne à chaque coup si tu le souhaites',
     accent: 'var(--accent-3)',
+  },
+  {
+    href: '/jouer/regarder',
+    icon: Eye,
+    titleKey: 'play.watchGame',
+    blurbKey: 'play.watchBlurb',
+    detail: 'Les parties commencées, suivies coup par coup',
+    accent: 'var(--accent-2)',
   },
 ] as const
 

@@ -76,6 +76,8 @@ export interface GameSnapshot {
   takebackFrom: Color | null
   chat: ChatMessage[]
   startedAt: number | null
+  /** Nombre de personnes qui regardent sans jouer. */
+  spectators: number
   /**
    * Instant où la partie s'annulera si personne n'a encore joué.
    *
@@ -126,6 +128,15 @@ export class GameRoom {
   private takebackFrom: Color | null = null
   private startedAt: number | null = null
   private lastMove: { from: Square; to: Square } | null = null
+
+  /**
+   * Ceux qui regardent sans jouer.
+   *
+   * Le salon acceptait déjà un troisième arrivant — `seat` renvoie `null`
+   * quand les deux places sont prises — mais personne ne le savait : ni les
+   * joueurs, ni lui-même. On les compte pour pouvoir le dire.
+   */
+  private readonly spectators = new Set<string>()
 
   private readonly listeners = new Set<(event: RoomEvent) => void>()
   private flagTimer: ReturnType<typeof setInterval> | null = null
@@ -202,7 +213,12 @@ export class GameRoom {
     }
 
     const free = (['w', 'b'] as const).find((color) => this.players[color] === null)
-    if (!free) return null
+    if (!free) {
+      // Les deux places sont prises : la personne regarde.
+      this.spectators.add(participant.socketId)
+      this.broadcastState()
+      return null
+    }
 
     this.players[free] = {
       userId: participant.userId,
@@ -229,6 +245,12 @@ export class GameRoom {
 
   /** Retire une connexion. Le joueur n'est perdu que s'il n'en a plus aucune. */
   disconnect(socketId: string): void {
+    // Un spectateur qui s'en va ne déclenche rien d'autre qu'un décompte.
+    if (this.spectators.delete(socketId)) {
+      this.broadcastState()
+      return
+    }
+
     for (const color of ['w', 'b'] as const) {
       const player = this.players[color]
       if (!player?.sockets.has(socketId)) continue
@@ -530,6 +552,7 @@ export class GameRoom {
       takebackFrom: this.takebackFrom,
       chat: this.chat.slice(-50),
       startedAt: this.startedAt,
+      spectators: this.spectators.size,
       // Le compte à rebours ne concerne que la partie qui n'a pas commencé.
       abandonAt: this.idleTimer ? this.abandonAt : null,
     }

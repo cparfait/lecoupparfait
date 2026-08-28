@@ -117,6 +117,35 @@ const httpServer = createServer(async (request, response) => {
       })
     }
 
+    // ── Parties en cours, pour les regarder ────────────────────────────────
+    //
+    // Le salon acceptait déjà un troisième arrivant, mais rien ne permettait
+    // d'en trouver un : il fallait connaître l'adresse. On liste donc les
+    // parties commencées — pas celles qui attendent encore un adversaire, il
+    // n'y a rien à y voir.
+    if (url.pathname === '/parties') {
+      const live = []
+      for (const room of rooms.values()) {
+        const snapshot = room.snapshot()
+        if (snapshot.status !== 'playing') continue
+        live.push({
+          slug: snapshot.slug,
+          white: snapshot.players.w?.name ?? '?',
+          black: snapshot.players.b?.name ?? '?',
+          whiteRating: snapshot.players.w?.rating ?? null,
+          blackRating: snapshot.players.b?.rating ?? null,
+          moves: snapshot.moves.length,
+          timeControl: snapshot.timeControl,
+          rated: snapshot.rated,
+          spectators: snapshot.spectators,
+        })
+      }
+      // La plus avancée d'abord : une partie de trente coups est plus
+      // intéressante à regarder qu'une qui vient de commencer.
+      live.sort((a, b) => b.moves - a.moves)
+      return json(response, 200, { games: live })
+    }
+
     // ── Analyse d'une position ─────────────────────────────────────────────
     if (url.pathname === '/analyse' && request.method === 'POST') {
       const body = await readJson<{
