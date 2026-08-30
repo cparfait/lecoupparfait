@@ -245,6 +245,9 @@ services:
       # les requêtes serveur-à-serveur n'ont aucune raison de ressortir sur
       # Internet pour revenir par le proxy.
       INTERNAL_SERVER_URL: http://server:3001
+      # Qui ouvre /admin. Vide, l'administration reste fermée et la page se
+      # comporte comme une adresse inexistante. Voir `.env.example`.
+      ADMIN_USERNAMES: ${ADMIN_USERNAMES:-}
       # Messagerie sortante. Vide tant que le profil `courriel` n'est pas
       # démarré : l'application le détecte et masque d'elle-même la
       # récupération de mot de passe, plutôt que de promettre un message qui ne
