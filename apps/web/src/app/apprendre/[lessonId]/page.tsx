@@ -39,6 +39,8 @@ import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { ArrowLegend, LEGEND, legendFor } from '@/components/board/ArrowLegend.tsx'
 import { Button, Card, Chip } from '@/components/ui/index.tsx'
 import { findLesson, nextLesson, previousLesson, saveProgress } from '@/lib/lessons/index.ts'
+import { chapitreDeLUrl, deposerGains, signaler } from '@/lib/carriere/useCarriere.ts'
+import { chapitre as chapitreCarriere } from '@coupparfait/core'
 import type { LessonStep } from '@/lib/lessons/index.ts'
 import {
   applyReply,
@@ -312,6 +314,25 @@ export default function LessonPage() {
     if (isLast) {
       saveProgress(lesson.id, lesson.steps.length, true)
       playSound('victory')
+
+      /*
+        Arrivé par la carrière, on y retourne.
+        Le paramètre `?carriere=3` distingue « je révise la fourchette parce que
+        j'en ai envie » de « je passe le chapitre 4 ». Sans lui, revoir une
+        vieille leçon validerait une étape à laquelle on n'était pas.
+        On repart vers la carte plutôt que vers la leçon suivante : la carte est
+        ce qui dit quoi faire ensuite, et c'est là que la récompense s'affiche.
+      */
+      const numero = chapitreDeLUrl(typeof window === 'undefined' ? null : window.location.search)
+      const chapitre = numero === null ? null : chapitreCarriere(numero)
+      if (chapitre && chapitre.lecon === lesson.id) {
+        void signaler({ type: 'lecon' }).then((gains) => {
+          deposerGains(gains, chapitre.titre)
+          router.push('/carriere')
+        })
+        return
+      }
+
       const next = nextLesson(lesson.id)
       router.push(next ? `/apprendre/${next.id}` : '/apprendre')
       return

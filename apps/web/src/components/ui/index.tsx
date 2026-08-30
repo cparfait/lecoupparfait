@@ -9,7 +9,7 @@
  */
 
 import { forwardRef } from 'react'
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, CSSProperties, InputHTMLAttributes, ReactNode } from 'react'
 import Link from 'next/link'
 import clsx from 'clsx'
 
@@ -20,13 +20,25 @@ import clsx from 'clsx'
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
+/**
+ * Le bouton principal est en dégradé, pas en aplat.
+ *
+ * Un aplat de couleur unie reste plat quelle que soit la couleur : c'est un
+ * rectangle teinté. Deux teintes proches — l'accent et sa variante claire —
+ * suffisent à lui donner du relief, et la lueur qui s'intensifie au survol
+ * fait le reste. C'est le seul élément de l'interface qui a le droit de
+ * briller ; s'ils brillent tous, plus rien ne se distingue.
+ */
 const VARIANTS: Record<ButtonVariant, string> = {
   primary:
-    'bg-accent text-[var(--accent-contrast)] hover:brightness-110 active:brightness-95 shadow-[var(--glow)]',
+    'bg-[linear-gradient(140deg,var(--accent-soft),var(--accent)_55%,var(--accent-deep))] ' +
+    'text-[var(--accent-contrast)] shadow-[var(--glow)] ' +
+    'hover:brightness-108 hover:shadow-[var(--glow),0_10px_30px_-10px_color-mix(in_oklab,var(--accent)_70%,transparent)] ' +
+    'active:brightness-95',
   secondary:
-    'bg-surface-strong text-ink hover:bg-surface-hover border border-line',
+    'bg-surface-strong text-ink hover:bg-surface-hover border border-line hover:border-[color-mix(in_oklab,var(--accent)_32%,var(--border))]',
   outline:
-    'border border-line-strong text-ink hover:bg-surface-hover',
+    'border border-line-strong text-ink hover:bg-surface-hover hover:border-[color-mix(in_oklab,var(--accent)_45%,var(--border-strong))]',
   ghost: 'text-muted hover:text-ink hover:bg-surface-hover',
   danger:
     'bg-[var(--q-blunder)] text-white hover:brightness-110 active:brightness-95',
@@ -176,6 +188,7 @@ export function Chip({
   children,
   tone = 'neutral',
   className,
+  style,
   onClick,
   active,
   title,
@@ -183,6 +196,14 @@ export function Chip({
   children: ReactNode
   tone?: 'neutral' | 'accent' | 'success' | 'warning' | 'danger'
   className?: string
+  /**
+   * Teinte imposée, hors des cinq tons prévus.
+   *
+   * Sert quand la couleur ne vient pas du barème mais d'ailleurs — les
+   * étiquettes « joué » et « meilleur » de la liste des alternatives reprennent
+   * celle de leur flèche sur l'échiquier, qui est définie dans `boardKit`.
+   */
+  style?: CSSProperties
   onClick?: () => void
   active?: boolean
   /** Infobulle : sert notamment à afficher la définition d'un motif tactique. */
@@ -201,6 +222,7 @@ export function Chip({
     <Tag
       onClick={onClick}
       title={title}
+      style={style}
       className={clsx(
         'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5',
         'text-[11px] font-semibold uppercase tracking-wide',

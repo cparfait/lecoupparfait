@@ -19,7 +19,7 @@
  * faudra un verrou consultatif PostgreSQL autour de `pairWaiting`.
  */
 
-import { and, asc, desc, eq, ne, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, lt, ne, sql } from 'drizzle-orm'
 import { getDb } from './index.ts'
 import { tournamentPairings, tournamentPlayers, tournaments } from './schema.ts'
 
@@ -466,20 +466,33 @@ export async function releaseStuck(maxAgeMs: number): Promise<number> {
   const db = getDb()
   const stale = new Date(Date.now() - maxAgeMs)
 
+  // `lt` et non un gabarit `sql` : interpoler une `Date` dans du SQL brut la
+  // fait voyager sans type. Drizzle ne sait plus à quelle colonne elle se
+  // compare, n'applique donc pas le convertisseur de `timestamptz`, et le
+  // pilote finit par tenter de sérialiser l'objet `Date` comme une chaîne —
+  // `ERR_INVALID_ARG_TYPE`, à chaque tour de la boucle d'arène. Passer par
+  // l'opérateur rend la colonne à Drizzle, et avec elle le bon convertisseur.
   const abandoned = await db
     .update(tournamentPairings)
     .set({ result: 'void' })
-    .where(and(eq(tournamentPairings.result, '*'), sql`${tournamentPairings.createdAt} < ${stale}`))
+    .where(and(eq(tournamentPairings.result, '*'), lt(tournamentPairings.createdAt, stale)))
     .returning({ tournamentId: tournamentPairings.tournamentId, white: tournamentPairings.whiteId, black: tournamentPairings.blackId })
 
   for (const row of abandoned) {
+    // Même raison pour le `in` : `inArray` connaît le type de la colonne.
+    // On écarte au passage les identifiants nuls — une paire peut n'avoir
+    // qu'un joueur inscrit — car `in (null)` ne correspond à rien et aurait
+    // silencieusement laissé l'autre joueur bloqué.
+    const joueurs = [row.white, row.black].filter((id): id is string => id !== null)
+    if (joueurs.length === 0) continue
+
     await db
       .update(tournamentPlayers)
       .set({ playing: false })
       .where(
         and(
           eq(tournamentPlayers.tournamentId, row.tournamentId),
-          sql`${tournamentPlayers.userId} in (${row.white}, ${row.black})`,
+          inArray(tournamentPlayers.userId, joueurs),
         ),
       )
   }

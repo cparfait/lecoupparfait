@@ -107,6 +107,16 @@ export function useLiveGame({
         name: guestName,
         token: token ?? undefined,
         clientId: getClientId(),
+        // Couleur demandée par l'hôte à la création, s'il en a demandé une.
+        //
+        // Elle transite par le stockage de session et **jamais par le lien** :
+        // le lien est fait pour être envoyé, et l'invité qui l'ouvrirait
+        // réclamerait la même couleur que celui qui le lui a envoyé.
+        //
+        // Elle est consommée au premier envoi. Une reconnexion n'en a pas
+        // besoin : le serveur reconnaît un joueur déjà assis et lui rend son
+        // siège, quelle que soit la demande.
+        souhait: souhaitPourCePartie(slug),
         timeControl,
         rated,
       })
@@ -233,6 +243,33 @@ export function getClientId(): string {
  * Volontairement sans les caractères qu'on confond en le dictant au téléphone :
  * ni « 0 » ni « O », ni « 1 » ni « l » ni « I ».
  */
+/** Clé du souhait de couleur, propre à une partie. */
+const CLE_SOUHAIT = (slug: string) => `coupparfait.souhait.${slug}`
+
+/** Enregistre la couleur demandée à la création. */
+export function retenirSouhaitDeCouleur(slug: string, couleur: 'w' | 'b' | null): void {
+  try {
+    if (couleur) sessionStorage.setItem(CLE_SOUHAIT(slug), couleur)
+    else sessionStorage.removeItem(CLE_SOUHAIT(slug))
+  } catch {
+    // Stockage refusé : la couleur sera simplement tirée au sort.
+  }
+}
+
+/** Lit et efface le souhait : il ne vaut que pour la première prise de siège. */
+function souhaitPourCePartie(slug: string): 'w' | 'b' | undefined {
+  try {
+    const valeur = sessionStorage.getItem(CLE_SOUHAIT(slug))
+    if (valeur === 'w' || valeur === 'b') {
+      sessionStorage.removeItem(CLE_SOUHAIT(slug))
+      return valeur
+    }
+  } catch {
+    // Stockage indisponible : on laisse le hasard décider.
+  }
+  return undefined
+}
+
 export function generateGameSlug(): string {
   const alphabet = '23456789abcdefghjkmnpqrstuvwxyz'
   let slug = ''

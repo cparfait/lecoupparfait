@@ -284,7 +284,7 @@ export const ECO_VOLUMES = [
     name: { fr: 'Ouvertes & française', en: 'Open games & French' },
     description: {
       fr: "1.e4 e5 — l'espagnole, l'italienne, le gambit du roi — ainsi que la défense française.",
-      en: '1.e4 e5 — Ruy Lopez, Italian, King’s Le Coup Parfait — plus the French Defence.',
+      en: '1.e4 e5 — Ruy Lopez, Italian, King’s Gambit — plus the French Defence.',
     },
   },
   {
@@ -293,7 +293,7 @@ export const ECO_VOLUMES = [
     name: { fr: 'Fermées & indiennes de dame', en: 'Closed games & Grünfeld' },
     description: {
       fr: '1.d4 d5 : le gambit dame et ses innombrables ramifications, plus la Grünfeld.',
-      en: '1.d4 d5: the Queen’s Le Coup Parfait and its countless branches, plus the Grünfeld.',
+      en: '1.d4 d5: the Queen’s Gambit and its countless branches, plus the Grünfeld.',
     },
   },
   {

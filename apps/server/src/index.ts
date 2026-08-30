@@ -356,6 +356,8 @@ io.on('connection', (socket) => {
       name?: string
       token?: string
       clientId?: string
+      /** Couleur demandée par l'hôte. Honorée si le siège est libre. */
+      souhait?: 'w' | 'b'
       timeControl?: string
       rated?: boolean
     }) => {
@@ -383,6 +385,10 @@ io.on('connection', (socket) => {
         name,
         rating: identity?.rating ?? null,
         socketId: socket.id,
+        // Le souhait n'est pas une garantie : `seat` ne l'honore que si le
+        // siège est libre. Un client qui demanderait une place déjà prise
+        // reçoit l'autre, comme n'importe quel second arrivant.
+        souhait: payload.souhait === 'w' || payload.souhait === 'b' ? payload.souhait : null,
       })
 
       socket.emit('joined', { color, snapshot: room.snapshot() })
@@ -580,9 +586,56 @@ async function arenaTick(): Promise<void> {
   }
 }
 
+/**
+ * Rapport d'erreur de la boucle : une fois, puis on se tait.
+ *
+ * La boucle bat toutes les trois secondes et sa première requête touche la base.
+ * Sans base — c'est le cas ordinaire en développement, où l'on travaille sur les
+ * pages sans lancer PostgreSQL — chaque tour recrachait une trace complète de
+ * vingt lignes. En une minute, la sortie de `npm run dev` devenait illisible :
+ * les lignes de Next, les redémarrages du serveur et les messages du moteur
+ * disparaissaient sous les mêmes vingt lignes répétées.
+ *
+ * On garde donc l'empreinte de la dernière panne et on ne réécrit que lorsqu'elle
+ * change. Une panne qui dure n'est pas une nouvelle information ; une panne
+ * *différente* en est une, et celle-là s'affiche.
+ *
+ * Le rétablissement se dit aussi, sur une ligne : sans lui, on ne saurait pas
+ * que la base est revenue, et l'on chercherait ailleurs.
+ */
+let dernierEchecArene: string | null = null
+
+function signalerEchecArene(error: unknown): void {
+  const message = error instanceof Error ? error.message : String(error)
+  // `ECONNREFUSED` arrive enveloppé dans une `DrizzleQueryError` dont le message
+  // contient la requête entière. On le reconnaît pour le dire en une ligne :
+  // « la base ne répond pas » est tout ce qu'on peut faire de cette panne-là.
+  const injoignable = /ECONNREFUSED|ENOTFOUND|ETIMEDOUT|Connection terminated/i.test(
+    message + String((error as { cause?: unknown } | null)?.cause ?? ''),
+  )
+  const empreinte = injoignable ? 'base-injoignable' : message
+
+  if (empreinte === dernierEchecArene) return
+  dernierEchecArene = empreinte
+
+  if (injoignable) {
+    console.warn(
+      '[tournoi] base de données injoignable — la boucle des arènes tourne à vide.\n' +
+        '          Lance PostgreSQL, ou ignore : le reste de l’application n’en dépend pas.',
+    )
+    return
+  }
+  console.error('[tournoi] boucle en erreur :', error)
+}
+
 const arenaTimer = setInterval(() => {
-  void arenaTick().catch((error: unknown) => {
-    console.error('[tournoi] boucle en erreur :', error)
-  })
+  void arenaTick()
+    .then(() => {
+      if (dernierEchecArene !== null) {
+        console.log('[tournoi] base de données de nouveau joignable.')
+        dernierEchecArene = null
+      }
+    })
+    .catch(signalerEchecArene)
 }, ARENA_TICK_MS)
 arenaTimer.unref?.()

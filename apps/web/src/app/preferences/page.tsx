@@ -10,9 +10,10 @@
  */
 
 import { useEffect, useState } from 'react'
-import { Palette, RotateCcw, Volume2, Zap } from 'lucide-react'
+import { BrainCircuit, Grid3x3, Palette, RotateCcw, Volume2, Zap } from 'lucide-react'
 import clsx from 'clsx'
 import { Board2D } from '@/components/board/Board2D.tsx'
+import { PanneauIA } from '@/components/ia/PanneauIA.tsx'
 import { BOARD_SKINS } from '@/components/board/boardKit.ts'
 import {
   Button,
@@ -48,6 +49,24 @@ import { playSound } from '@/lib/sound.ts'
 /** Position de démonstration : quelques pièces variées, pas l'échiquier initial. */
 const DEMO_FEN = 'r2q1rk1/pp2bppp/2n1bn2/2pp4/3P4/2N1PN2/PP2BPPP/R1BQ1RK1 w - - 0 1'
 
+/**
+ * Les réglages, par famille.
+ *
+ * Huit sections empilées faisaient six écrans de défilement : pour couper la
+ * voix du coach, il fallait passer devant les quatre thèmes, les huit damiers,
+ * les dix jeux de pièces et vingt interrupteurs d'affichage. On ne cherche pas
+ * un réglage en le lisant, on le cherche en sachant à peu près où il est —
+ * encore faut-il qu'il y ait un « où ».
+ */
+const ONGLETS = [
+  { id: 'apparence', label: 'Apparence', icon: Palette },
+  { id: 'echiquier', label: 'Échiquier', icon: Grid3x3 },
+  { id: 'son', label: 'Son et voix', icon: Volume2 },
+  { id: 'ia', label: 'Assistant IA', icon: BrainCircuit },
+] as const
+
+type OngletId = (typeof ONGLETS)[number]['id']
+
 export default function PreferencesPage() {
   const prefs = usePreferences()
   const set = usePreferences((state) => state.set)
@@ -73,6 +92,28 @@ export default function PreferencesPage() {
 
   const neuralForLocale = neural.filter((voice) => voice.language === prefs.locale)
 
+  /**
+   * Onglet affiché, reflété dans l'adresse.
+   *
+   * Le paramètre est lu dans un effet plutôt qu'avec `useSearchParams` : il ne
+   * sert qu'au premier rendu, et cette forme évite d'imposer une frontière de
+   * suspense à toute la page pour une chaîne de caractères. On écrit ensuite
+   * l'onglet dans l'historique en `replace`, pour que le bouton « précédent »
+   * ramène à la page d'où l'on vient et non à l'onglet précédent.
+   */
+  const [onglet, setOnglet] = useState<OngletId>('apparence')
+  useEffect(() => {
+    const demande = new URLSearchParams(window.location.search).get('onglet')
+    if (ONGLETS.some((entry) => entry.id === demande)) setOnglet(demande as OngletId)
+  }, [])
+
+  const choisirOnglet = (id: OngletId) => {
+    setOnglet(id)
+    const url = new URL(window.location.href)
+    url.searchParams.set('onglet', id)
+    window.history.replaceState(null, '', url)
+  }
+
   return (
     <div className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6 lg:py-12">
       <h1 className="font-display text-3xl font-bold tracking-tight">Préférences</h1>
@@ -80,10 +121,46 @@ export default function PreferencesPage() {
         Tout s’applique immédiatement et reste enregistré dans ton navigateur.
       </p>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+      {/* ── Onglets ──────────────────────────────────────────────────
+          Horizontaux et non en colonne latérale : la colonne de droite est
+          déjà prise par l'aperçu de l'échiquier, qui doit rester visible
+          pendant qu'on change de damier. Une troisième colonne aurait réduit
+          les réglages à un couloir. */}
+      <div
+        role="tablist"
+        aria-label="Familles de réglages"
+        className="mt-6 flex gap-1 overflow-x-auto border-b border-line pb-px"
+      >
+        {ONGLETS.map((entry) => {
+          const Icone = entry.icon
+          const actif = onglet === entry.id
+          return (
+            <button
+              key={entry.id}
+              type="button"
+              role="tab"
+              aria-selected={actif}
+              onClick={() => choisirOnglet(entry.id)}
+              className={clsx(
+                'relative flex shrink-0 items-center gap-1.5 px-3.5 py-2.5 text-sm font-medium transition-colors',
+                actif ? 'text-ink' : 'text-muted hover:text-ink',
+              )}
+            >
+              <Icone size={15} aria-hidden />
+              {entry.label}
+              {actif && (
+                <span className="absolute inset-x-2 -bottom-px h-[2px] rounded-full bg-accent" />
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         {/* ── Réglages ─────────────────────────────────────────────── */}
         <div className="space-y-4">
           {/* Thème */}
+          {onglet === 'apparence' && (
           <Card className="p-5">
             <SectionTitle hint="Change l’ambiance de toute l’application.">
               <span className="flex items-center gap-2">
@@ -120,8 +197,10 @@ export default function PreferencesPage() {
               ))}
             </div>
           </Card>
+          )}
 
           {/* Échiquier */}
+          {onglet === 'echiquier' && (
           <Card className="p-5">
             <SectionTitle>Damier</SectionTitle>
             <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
@@ -178,8 +257,10 @@ export default function PreferencesPage() {
               ))}
             </div>
           </Card>
+          )}
 
           {/* Affichage */}
+          {onglet === 'echiquier' && (
           <Card className="p-5">
             <SectionTitle>Affichage</SectionTitle>
 
@@ -398,8 +479,10 @@ export default function PreferencesPage() {
               format={(value) => (value === 0 ? 'instantané' : `${value} ms`)}
             />
           </Card>
+          )}
 
           {/* Effets */}
+          {onglet === 'apparence' && (
           <Card className="p-5">
             <SectionTitle hint="Réduis les effets si l’interface saccade.">
               <span className="flex items-center gap-2">
@@ -422,8 +505,10 @@ export default function PreferencesPage() {
               reste identique, simplement plus sobre et beaucoup plus légère.
             </p>
           </Card>
+          )}
 
           {/* Son et voix */}
+          {onglet === 'son' && (
           <Card className="p-5">
             <SectionTitle>
               <span className="flex items-center gap-2">
@@ -590,8 +675,15 @@ export default function PreferencesPage() {
               </>
             )}
           </Card>
+          )}
+
+          {/* Assistant IA */}
+          {onglet === 'ia' && (
+          <PanneauIA />
+          )}
 
           {/* Langue */}
+          {onglet === 'apparence' && (
           <Card className="p-5">
             <SectionTitle>Langue</SectionTitle>
             <SegmentedControl
@@ -604,6 +696,7 @@ export default function PreferencesPage() {
               }))}
             />
           </Card>
+          )}
 
           <Button
             variant="ghost"

@@ -20,8 +20,10 @@ eux — fourchette, clouage, mat du couloir — et il te le dit à voix haute.
 | **S'entraîner** | jusqu'à 6 057 356 puzzles tactiques notés et étiquetés, avec classement Glicko-2 dédié |
 | **Finales** | 3 568 positions classées en 8 familles : on donne l'objectif — gagner ou tenir la nulle — et l'ordinateur défend au mieux |
 | **Analyser** | Stockfish 18 natif côté serveur · chaque coup classé (brillant → gaffe), meilleur coup fléché, **explication rédigée** |
+| **Importer** | tes parties Chess.com et Lichess, à partir du seul pseudo : rien à installer, aucun compte à créer, et rien n'est conservé |
 | **Explorer** | 3 810 ouvertures nommées, reconnues même par transposition |
 | **Progresser** | comptes, classement Glicko-2 par cadence, Elo classique affiché en parallèle, courbe de progression |
+| **Revenir** | un défi du jour, **le même pour tout le monde**, cinq quêtes courtes et une série de jours consécutifs — sans compte, si l'on veut |
 
 Et côté forme : quatre thèmes commutables, dix jeux de pièces, huit damiers,
 un échiquier **2D et 3D** interchangeable en pleine partie avec mode plein
@@ -35,10 +37,43 @@ entièrement navigable au clavier.
 | **Coups colorés** | à la sélection d'une pièce, chaque case d'arrivée se colore : vert si la pièce y est en sécurité, rouge si elle serait perdue, doré si le coup gagne du matériel. Le verdict vient d'un échange statique complet, pas d'un simple test « case attaquée ». |
 | **Nom de l'ouverture** | affiché et mis à jour à chaque coup pendant la partie, y compris par transposition. On retient les noms parce qu'on les voit sur ses propres parties. |
 | **Mode commenté** | l'analyse après chaque coup, avec les alternatives et le coup proposé. |
+| **Pourquoi ce coup ?** | l'inverse du mode commenté : rien ne s'affiche tant qu'on ne demande pas. Même moteur, même explication — seul le déclencheur change. |
 | **Voix du coach** | narration de toutes les explications, avec réécoute. Voix neuronale Piper si elle est installée, sinon celle du navigateur. |
 
 Chacune se coupe d'un clic depuis les préférences ou depuis la partie. C'est
 le but : on s'en sert le temps d'acquérir le réflexe, puis on s'en passe.
+
+### L'assistant IA — facultatif, avec ta clé
+
+Tout ce qui précède fonctionne **sans le moindre appel à un service
+extérieur** : les explications sont écrites par l'application, pas par un
+modèle de langue. C'est un choix de fond, et il ne change pas.
+
+Reste une chose qu'un texte pré-rédigé ne saura jamais faire : répondre à *ta*
+question. « Et si j'avais joué autre chose ? », « pourquoi cette case est
+faible ? ». Pour ça, et seulement pour ça, tu peux brancher ton propre compte
+chez un fournisseur d'IA — OpenAI, Anthropic, Google, Mistral, DeepSeek,
+OpenRouter, ou **Ollama sur ta machine**. N'importe quel service compatible
+OpenAI s'ajoute avec un nom et une adresse.
+
+Ce qu'il faut savoir avant de saisir une clé :
+
+- **Elle reste dans ton navigateur.** Jamais en base, jamais attachée à ton
+  compte, jamais dans la synchronisation des préférences.
+- **Pour un fournisseur distant, la requête passe par le serveur de
+  l'instance** — les navigateurs interdisent d'appeler ces API directement. Le
+  serveur recopie l'appel sans rien en conserver, mais sur une instance que tu
+  n'héberges pas toi-même, cela suppose de faire confiance à l'hébergeur.
+- **Avec Ollama ou tout service local, rien ne passe par nos serveurs** : ton
+  navigateur lui parle directement. C'est l'option qui n'expose la clé à
+  personne, pour la bonne raison qu'elle n'en demande aucune.
+- Le modèle ne calcule rien. On lui transmet l'évaluation de Stockfish et
+  l'explication déjà rédigée ; il n'a le droit ni d'inventer une variante, ni
+  de proposer sa propre évaluation. C'est la seule façon connue d'empêcher un
+  modèle de langue de raconter des coups qui n'existent pas.
+
+Tout cela se règle dans **Préférences → Assistant IA**, et se désactive du même
+endroit. Par défaut, c'est éteint.
 
 ---
 
@@ -54,7 +89,9 @@ le but : on s'en sert le temps d'acquérir le réflexe, puis on s'en passe.
 | **Espace disque** | ~1,5 Go | dont 1 Go de dépendances npm et 330 Mo de jeux de données |
 
 Aucune clé d'API, aucun compte à créer nulle part : tout ce que l'application
-utilise est libre et se télécharge sans identification.
+utilise est libre et se télécharge sans identification. L'assistant IA est la
+seule exception, et il est facultatif — c'est l'utilisateur qui apporte sa
+propre clé, s'il en veut un.
 
 ### En local
 

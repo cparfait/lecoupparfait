@@ -187,6 +187,14 @@ export class GameRoom {
    * que regarder — une partie n'accueille que deux joueurs.
    */
   seat(participant: {
+    /**
+     * Couleur souhaitée par l'hôte, s'il en a choisi une.
+     *
+     * Honorée uniquement si le siège est libre : le souhait du premier arrivé
+     * ne peut pas déloger quelqu'un, et le second joueur prend forcément ce qui
+     * reste. `null` — ou « hasard » — laisse le tirage décider.
+     */
+    souhait?: Color | null
     userId: string | null
     clientId: string | null
     name: string
@@ -212,13 +220,40 @@ export class GameRoom {
       }
     }
 
-    const free = (['w', 'b'] as const).find((color) => this.players[color] === null)
-    if (!free) {
+    const libres = (['w', 'b'] as const).filter((color) => this.players[color] === null)
+    if (libres.length === 0) {
       // Les deux places sont prises : la personne regarde.
       this.spectators.add(participant.socketId)
       this.broadcastState()
       return null
     }
+
+    /*
+     * Le premier arrivant tire sa couleur au sort.
+     *
+     * Les sièges étaient attribués dans l'ordre `w` puis `b`, et l'ordre
+     * d'arrivée n'a rien d'anodin : celui qui crée le lien est toujours le
+     * premier à s'asseoir. Il jouait donc les Blancs à chaque partie, et son
+     * invité les Noirs — avec le demi-avantage du trait d'un côté et jamais de
+     * l'autre. Personne ne l'a choisi ; c'est une conséquence de l'ordre du
+     * tableau, ce qui est la pire raison d'avoir un avantage.
+     *
+     * Quand il ne reste qu'un siège, il n'y a rien à tirer : le second joueur
+     * prend ce qui est libre.
+     *
+     * Le tirage n'est plus qu'un défaut : l'hôte peut désormais demander une
+     * couleur depuis l'écran de création. Le hasard le corrigeait sans le lui
+     * rendre — c'était supprimer un privilège au lieu d'ouvrir un choix.
+     */
+    const souhaite = participant.souhait
+    const free =
+      souhaite && libres.includes(souhaite)
+        ? souhaite
+        : libres.length === 2
+          ? Math.random() < 0.5
+            ? 'w'
+            : 'b'
+          : libres[0]!
 
     this.players[free] = {
       userId: participant.userId,

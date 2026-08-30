@@ -36,7 +36,22 @@ export interface BotPersonality {
   id: BotPersonalityId
   name: { fr: string; en: string }
   blurb: { fr: string; en: string }
-  /** Emoji d'avatar, en attendant les illustrations. */
+  /**
+   * Portrait de l'adversaire : une déclinaison de Cavale, la mascotte, produite
+   * par `scripts/build-cavale.mjs`. Les sept partagent la même sculpture, la
+   * même lumière et le même cadrage ; seule la matière change, et elle découle
+   * du `bias` ci-dessous — Rempart a `sacrifice: -80`, il est en granit ;
+   * Brasier a `sacrifice: 45` et `quiet: -40`, il est en bronze surchauffé.
+   */
+  portrait: string
+  /**
+   * Repli de l'avatar, et texte de remplacement.
+   *
+   * On garde l'émoji après l'arrivée des portraits, pour deux usages qu'une
+   * image ne couvre pas : l'affichage quand le PNG manque — voir
+   * `PortraitAdversaire` — et tout endroit qui a besoin d'un caractère plutôt
+   * que d'un fichier.
+   */
   emoji: string
   bias: StyleBias
 }
@@ -58,6 +73,7 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonality> = {
       fr: "Apprend en même temps que toi. Il adore prendre des pièces, même quand il ne devrait pas.",
       en: 'Learning alongside you. Loves grabbing pieces, even when it should not.',
     },
+    portrait: '/brand/adversaires/novice.png',
     emoji: '🐣',
     bias: { ...NEUTRAL, capture: 90, check: 40, development: -30 },
   },
@@ -68,6 +84,7 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonality> = {
       fr: 'Solide et patient. Il roque tôt, échange volontiers et ne prend aucun risque.',
       en: 'Solid and patient. Castles early, trades happily, takes no risks.',
     },
+    portrait: '/brand/adversaires/prudent.png',
     emoji: '🛡️',
     bias: { ...NEUTRAL, quiet: 35, development: 40, sacrifice: -80, capture: -10 },
   },
@@ -78,6 +95,7 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonality> = {
       fr: "Attaque d'abord, réfléchit ensuite. Il pousse ses pions vers ton roi sans se retourner.",
       en: 'Attacks first, thinks later. Storms pawns at your king and never looks back.',
     },
+    portrait: '/brand/adversaires/fonceur.png',
     emoji: '🔥',
     bias: { ...NEUTRAL, check: 70, pawnPush: 50, sacrifice: 45, quiet: -40 },
   },
@@ -88,6 +106,7 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonality> = {
       fr: 'Voit les combinaisons partout. Laisse une pièce en prise et tu le regretteras.',
       en: 'Sees combinations everywhere. Hang a piece and you will regret it.',
     },
+    portrait: '/brand/adversaires/tacticien.png',
     emoji: '⚡',
     bias: { ...NEUTRAL, capture: 25, check: 35, sacrifice: 25 },
   },
@@ -98,6 +117,7 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonality> = {
       fr: "Joue lentement, améliore ses pièces une à une, et t'étouffe sans que tu t'en aperçoives.",
       en: 'Plays slowly, improves piece by piece, and squeezes you without you noticing.',
     },
+    portrait: '/brand/adversaires/positionnel.png',
     emoji: '🧭',
     bias: { ...NEUTRAL, quiet: 45, development: 30, capture: -20, pawnPush: -15 },
   },
@@ -108,6 +128,7 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonality> = {
       fr: "Offre du matériel dès l'ouverture pour ouvrir des lignes. Accepte à tes risques.",
       en: 'Offers material from move one to open lines. Accept at your own risk.',
     },
+    portrait: '/brand/adversaires/gambiteur.png',
     emoji: '🎭',
     bias: { ...NEUTRAL, sacrifice: 90, pawnPush: 30, development: 35, quiet: -25 },
   },
@@ -118,6 +139,7 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonality> = {
       fr: "Aucun style, aucune pitié. Le meilleur coup, à chaque fois. Bonne chance.",
       en: 'No style, no mercy. The best move, every time. Good luck.',
     },
+    portrait: '/brand/adversaires/machine.png',
     emoji: '🜛',
     bias: NEUTRAL,
   },

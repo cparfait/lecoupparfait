@@ -148,7 +148,7 @@ function FamilyList({
   )
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:py-14">
+    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:py-12">
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
         Entraînement aux finales
       </h1>
@@ -158,7 +158,12 @@ function FamilyList({
         solution à réciter.
       </p>
 
-      <div className="mt-8 space-y-2.5">
+      {/* Deux colonnes, et des cartes plus basses.
+          Huit familles empilées sur une seule colonne dans un conteneur large
+          donnaient huit blocs de cent trente pixels : la page demandait trois
+          écrans de défilement pour montrer une liste qu'on veut embrasser d'un
+          coup d'œil avant de choisir. */}
+      <div className="mt-8 grid gap-2.5 lg:grid-cols-2">
         {families.map((family, index) => {
           const stats = familyProgress(family, progress)
           const percent = stats.total > 0 ? Math.round((stats.solved / stats.total) * 100) : 0
@@ -168,11 +173,11 @@ function FamilyList({
               key={family.id}
               type="button"
               onClick={() => onPick(family)}
-              className="animate-slide-up glass gradient-ring group flex w-full items-start gap-4 p-5 text-left transition-transform hover:-translate-y-0.5"
+              className="animate-slide-up glass gradient-ring group flex w-full items-start gap-3 p-4 text-left transition-transform hover:-translate-y-0.5"
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <span
-                className="grid h-12 w-12 shrink-0 place-items-center rounded-[var(--radius)] text-2xl"
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius)] text-xl"
                 style={{ background: 'color-mix(in oklab, var(--accent) 14%, transparent)' }}
                 aria-hidden
               >
@@ -181,7 +186,7 @@ function FamilyList({
 
               <span className="min-w-0 flex-1">
                 <span className="flex flex-wrap items-baseline gap-2">
-                  <span className="font-display text-lg font-semibold">{family.nameFr}</span>
+                  <span className="font-display text-base font-semibold">{family.nameFr}</span>
                   <Chip>{family.groups.length} configurations</Chip>
                   {stats.solved > 0 && (
                     <span className="text-xs tabular-nums text-accent">
@@ -189,7 +194,7 @@ function FamilyList({
                     </span>
                   )}
                 </span>
-                <span className="mt-1.5 block text-sm leading-relaxed text-muted">
+                <span className="mt-1 line-clamp-2 block text-[13px] leading-snug text-muted">
                   {family.blurb}
                 </span>
                 {percent > 0 && (
