@@ -12,6 +12,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Notation } from '@coupparfait/core'
 import type { Locale } from '../i18n/dictionary.ts'
+import type { CustomProviderDef } from '../ia/providers/custom.ts'
 
 export type ThemeId = 'aurora' | 'club' | 'clair' | 'contraste'
 export type PieceSetId =
@@ -139,12 +140,59 @@ export interface Preferences {
    * ce serait de l'assistance moteur en direct.
    */
   commentaryMode: boolean
+  /**
+   * Relire la partie pas à pas plutôt que dans le tableau de bord.
+   *
+   * Un échiquier, une phrase, un bouton — contre la vue détaillée, qui montre
+   * la courbe, les alternatives et les moments clés. Le second suppose qu'on
+   * sait déjà lire une évaluation ; le premier est le seul qui tienne sur un
+   * téléphone.
+   */
+  relectureGuidee: boolean
   /** Met la partie en pause après chaque commentaire, le temps de le lire. */
   commentaryPauses: boolean
+  /**
+   * Commente aussi les coups de l'adversaire.
+   *
+   * Éteint par défaut, et c'est un arbitrage plutôt qu'une timidité : voir les
+   * options de l'adversaire à chaque coup aide à comprendre la partie, mais
+   * double le nombre de commentaires et donne une vision qu'on n'a pas sur un
+   * échiquier. On le propose à qui veut décortiquer, pas à qui veut jouer.
+   */
+  commentaryOpponent: boolean
   /** Profondeur de l'analyse instantanée dans le navigateur. */
   clientDepth: number
   /** Affiche la barre d'évaluation pendant les parties (déconseillé en classé). */
   showEvalDuringGame: boolean
+
+  // Assistant IA
+  /**
+   * Branche un assistant conversationnel par-dessus les explications écrites.
+   *
+   * Désactivé par défaut, et il doit le rester : tout ce que fait
+   * l'application — analyser, expliquer, commenter à voix haute — fonctionne
+   * sans le moindre appel à un service extérieur. L'assistant n'ajoute qu'une
+   * chose, mais elle compte : on peut lui poser une question de suivi.
+   *
+   * ⚠️ La clé d'API ne se range **pas** ici. Cet objet part côté serveur pour
+   * les comptes connectés (voir l'en-tête du fichier) ; la clé vit dans
+   * `lib/ia/cle.ts`, qui ne quitte jamais le navigateur.
+   */
+  iaEnabled: boolean
+  /** Identifiant du fournisseur choisi, vide tant que rien n'est configuré. */
+  iaProvider: string
+  /** Identifiant du modèle choisi chez ce fournisseur. */
+  iaModel: string
+  /** Plafond de longueur des réponses, en tokens. */
+  iaMaxTokens: number
+  /** Services compatibles OpenAI ajoutés à la main — nom et adresse, sans clé. */
+  iaCustomProviders: CustomProviderDef[]
+
+  // Comptes de jeu en ligne
+  /** Pseudo Chess.com, mémorisé pour ne pas le retaper à chaque import. */
+  chesscomUsername: string
+  /** Pseudo Lichess, même usage. */
+  lichessUsername: string
 }
 
 const DEFAULTS: Preferences = {
@@ -190,12 +238,28 @@ const DEFAULTS: Preferences = {
   announceMoves: false,
 
   commentaryMode: false,
+  // Éteinte par défaut : quelqu'un qui arrive sur l'analyse a le plus souvent
+  // déjà une idée de ce qu'il cherche, et la vue détaillée répond plus vite.
+  // Le pas à pas se choisit, et le choix se retient ensuite.
+  relectureGuidee: false,
   // Le mode commenté sert à étudier ses coups : enchaîner aussitôt sur la
   // réponse de l'adversaire ne laisse pas le temps de lire le commentaire ni de
   // regarder les flèches. On attend donc un clic.
   commentaryPauses: true,
+  commentaryOpponent: false,
   clientDepth: 14,
   showEvalDuringGame: false,
+
+  iaEnabled: false,
+  iaProvider: '',
+  iaModel: '',
+  // Assez pour trois ou quatre phrases suivies, pas assez pour une dissertation
+  // qu'on ne lirait pas — et le plafond borne aussi la dépense de l'utilisateur.
+  iaMaxTokens: 700,
+  iaCustomProviders: [],
+
+  chesscomUsername: '',
+  lichessUsername: '',
 }
 
 interface PreferencesStore extends Preferences {
@@ -217,7 +281,7 @@ export const usePreferences = create<PreferencesStore>()(
     }),
     {
       name: 'coupparfait.preferences',
-      version: 3,
+      version: 4,
       /**
        * Reprise des réglages enregistrés par une version antérieure.
        *
@@ -233,12 +297,30 @@ export const usePreferences = create<PreferencesStore>()(
         // depuis : les deux cases vertes du dernier coup disent la même chose
         // sans encombrer l'échiquier. La clé reste sans effet dans les
         // réglages déjà enregistrés.
+        // v4 : arrivée de l'assistant IA. On l'installe éteint chez ceux qui
+        // utilisent déjà l'application — une fonction qui appelle un service
+        // extérieur ne s'allume pas toute seule à la faveur d'une mise à jour.
+        if (from < 4) {
+          state.iaEnabled = false
+          state.iaCustomProviders = []
+        }
         return state as Preferences
       },
       partialize: ({ set: _set, patch: _patch, reset: _reset, hydrated: _h, ...rest }) => rest,
+      /**
+       * Marque la fin de la relecture des réglages enregistrés.
+       *
+       * On passe par `state.patch` et **non** par `usePreferences.setState` :
+       * le stockage local étant synchrone, zustand relit les réglages pendant
+       * la création du magasin, c'est-à-dire avant que la constante
+       * `usePreferences` ne soit affectée. L'appeler ici levait donc une
+       * erreur — silencieuse, parce que zustand l'intercepte pour la passer au
+       * second argument de ce même rappel. Résultat : `hydrated` restait
+       * indéfiniment `false`, ce qui n'a longtemps rien cassé de visible
+       * puisque personne n'en dépendait à l'affichage.
+       */
       onRehydrateStorage: () => (state) => {
-        state?.patch({} as Partial<Preferences>)
-        usePreferences.setState({ hydrated: true })
+        state?.patch({ hydrated: true } as unknown as Partial<Preferences>)
       },
     },
   ),

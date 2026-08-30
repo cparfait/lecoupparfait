@@ -302,13 +302,26 @@ export function arrowPath(
   }
 
   const angle = Math.atan2(b.y - a.y, b.x - a.x)
+
+  /**
+   * Retrait proportionnel à la portée du coup.
+   *
+   * Les retraits étaient constants : 2,6 au départ et 3,4 à l'arrivée, soit six
+   * unités sur les douze et demie que mesure une case. Sur un coup d'une seule
+   * case il ne restait que six unités de trait, dont la pointe en dévorait la
+   * moitié — un moignon, pas une flèche. On les proportionne donc, à taille
+   * pleine dès deux cases parcourues.
+   */
+  const portee = Math.hypot(b.x - a.x, b.y - a.y)
+  const facteur = Math.min(1, portee / 25)
+
   const start = {
-    x: a.x + Math.cos(angle) * 2.6,
-    y: a.y + Math.sin(angle) * 2.6,
+    x: a.x + Math.cos(angle) * 2.6 * facteur,
+    y: a.y + Math.sin(angle) * 2.6 * facteur,
   }
   const tip = {
-    x: b.x - Math.cos(angle) * shorten,
-    y: b.y - Math.sin(angle) * shorten,
+    x: b.x - Math.cos(angle) * shorten * facteur,
+    y: b.y - Math.sin(angle) * shorten * facteur,
   }
   return {
     path: `M ${start.x} ${start.y} L ${tip.x} ${tip.y}`,

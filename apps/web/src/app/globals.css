@@ -21,6 +21,14 @@
 
 :root,
 [data-theme='aurora'] {
+
+  /* ── Matière ──────────────────────────────────────────────────────────
+     Ce qui sépare une surface d'un rectangle gris : un reflet en haut, un
+     liseré interne, et un fond qui n'est pas parfaitement uni. */
+  --sheen: rgb(255 255 255 / 0.06);
+  --inner-edge: rgb(255 255 255 / 0.07);
+  --halo-1: rgb(124 92 255 / 0.10);
+  --halo-2: rgb(0 229 168 / 0.055);
   color-scheme: dark;
 
   /* Fonds, du plus profond au plus proche de l'œil */
@@ -91,6 +99,14 @@
    ─────────────────────────────────────────────────────────────────────────── */
 
 [data-theme='club'] {
+
+  /* ── Matière ──────────────────────────────────────────────────────────
+     Ce qui sépare une surface d'un rectangle gris : un reflet en haut, un
+     liseré interne, et un fond qui n'est pas parfaitement uni. */
+  --sheen: rgb(255 246 224 / 0.055);
+  --inner-edge: rgb(255 246 224 / 0.07);
+  --halo-1: rgb(201 162 39 / 0.10);
+  --halo-2: rgb(127 168 124 / 0.05);
   color-scheme: dark;
 
   --bg: #14100b;
@@ -154,6 +170,16 @@
    ─────────────────────────────────────────────────────────────────────────── */
 
 [data-theme='clair'] {
+
+  /* ── Matière ──────────────────────────────────────────────────────────
+     Ce qui sépare une surface d'un rectangle gris : un reflet en haut, un
+     liseré interne, et un fond qui n'est pas parfaitement uni. */
+  --sheen: rgb(255 255 255 / 0.9);
+  /* Aucun liseré clair sur un thème clair : il serait invisible sur une
+     surface déjà blanche. Ici c'est l'ombre portée qui détache la carte. */
+  --inner-edge: rgb(255 255 255 / 0);
+  --halo-1: rgb(91 60 224 / 0.05);
+  --halo-2: rgb(0 146 110 / 0.035);
   color-scheme: light;
 
   --bg: #f7f7f9;
@@ -217,6 +243,14 @@
    ─────────────────────────────────────────────────────────────────────────── */
 
 [data-theme='contraste'] {
+
+  /* ── Matière ──────────────────────────────────────────────────────────
+     Ce qui sépare une surface d'un rectangle gris : un reflet en haut, un
+     liseré interne, et un fond qui n'est pas parfaitement uni. */
+  --sheen: rgb(255 255 255 / 0.05);
+  --inner-edge: rgb(255 255 255 / 0.10);
+  --halo-1: rgb(255 230 0 / 0.05);
+  --halo-2: rgb(255 255 255 / 0.03);
   color-scheme: dark;
 
   --bg: #000000;
@@ -238,6 +272,7 @@
   --accent-deep: #c9b600;
   --accent-contrast: #000000;
   --accent-2: #00ff9d;
+
   --accent-3: #ff6b4a;
 
   --glow: 0 0 0 2px #ffe600;
@@ -277,39 +312,56 @@
 
 /* ═══════════════════════════════════════════════════════════════════════════
    COULEURS DE CLASSIFICATION DES COUPS
+
    Communes à tous les thèmes : un joueur doit reconnaître « gaffe rouge » où
    qu'il soit. Seules les luminosités s'adaptent au thème clair.
+
+   Les teintes reprennent celles de chess.com, et ce n'est pas de l'imitation.
+   Cette échelle est devenue un vocabulaire : quelqu'un qui a déjà fait analyser
+   une partie ailleurs sait qu'un point cyan est un coup brillant et qu'un rond
+   rouge est une gaffe, sans avoir rien à lire. Choisir d'autres teintes
+   reviendrait à lui demander de réapprendre ce qu'il connaît, pour le seul
+   plaisir d'être différent — et à le tromper pendant les premières parties,
+   puisqu'il lirait nos couleurs avec les significations des autres.
+
+   Lichess n'en retient que trois — imprécision, erreur, gaffe — et place
+   l'imprécision dans le bleu. On suit chess.com, dont l'échelle couvre nos onze
+   qualités et dont le jaune-orange-rouge se lit comme une gradation.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  --q-brilliant: #26d7c4;
-  --q-great: #4a9eff;
-  --q-best: #7ac74f;
-  --q-excellent: #86c65a;
-  --q-good: #9fbf6b;
-  --q-book: #a58a6b;
+  --q-brilliant: #26c2a3;
+  --q-great: #749bbf;
+  --q-best: #81b64c;
+  --q-excellent: #81b64c;
+  --q-good: #95b776;
+  --q-book: #a88865;
   --q-forced: #8b8b9e;
-  --q-inaccuracy: #f0b429;
-  --q-mistake: #f07d29;
-  --q-blunder: #e5484d;
-  --q-miss: #d4386f;
+  --q-inaccuracy: #f7c631;
+  --q-mistake: #ffa459;
+  --q-blunder: #fa412d;
+  --q-miss: #ff7769;
 
   --eval-white: #f2f1f8;
   --eval-black: #16141f;
 }
 
 [data-theme='clair'] {
-  --q-brilliant: #0d9488;
-  --q-great: #2563eb;
-  --q-best: #4d8c22;
-  --q-excellent: #5b9128;
-  --q-good: #6d8f3a;
-  --q-book: #8a6d4d;
+  /* Mêmes teintes que ci-dessus, assombries : le jaune et l'orange de
+     chess.com sont conçus pour un fond sombre et deviennent illisibles sur
+     `#f7f7f9`. On conserve la couleur, on baisse la luminosité — c'est ce qui
+     permet de reconnaître l'échelle sans perdre le contraste. */
+  --q-brilliant: #17877a;
+  --q-great: #4a6f92;
+  --q-best: #5a8a2f;
+  --q-excellent: #5a8a2f;
+  --q-good: #6b8a4a;
+  --q-book: #7d6248;
   --q-forced: #6b6b7d;
-  --q-inaccuracy: #c07f0a;
-  --q-mistake: #d1610f;
-  --q-blunder: #c4262b;
-  --q-miss: #b01e52;
+  --q-inaccuracy: #a8820a;
+  --q-mistake: #c26a1f;
+  --q-blunder: #cf2b18;
+  --q-miss: #d1493c;
 
   --eval-white: #ffffff;
   --eval-black: #24243a;
@@ -382,6 +434,26 @@ html {
   -webkit-text-size-adjust: 100%;
   /* Empêche le zoom involontaire au double-tap sur mobile pendant une partie. */
   touch-action: manipulation;
+}
+
+/*
+ * Lueur ambiante, fixe et très basse en intensité.
+ *
+ * Seule la bannière d'accueil avait ses halos ; partout ailleurs on posait des
+ * cartes sur un noir parfaitement plat, ce qui donne à l'ensemble son air de
+ * tableur. Deux taches de couleur immobiles suffisent à faire respirer le
+ * fond — `fixed` pour qu'elles ne défilent pas avec le contenu, et `-z-10`
+ * pour qu'elles restent sous tout le reste.
+ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 42% at 78% -6%, var(--halo-1), transparent 68%),
+    radial-gradient(46% 38% at 8% 104%, var(--halo-2), transparent 70%);
 }
 
 body {
@@ -464,11 +536,84 @@ h1, h2, h3, h4 {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @utility glass {
-  background: var(--surface);
+  /*
+   * Une surface éclairée par le haut, et non un aplat translucide.
+   *
+   * C'est le détail qui sépare une carte d'un rectangle gris : un dégradé très
+   * court en haut simule une source lumineuse au-dessus, et le liseré interne
+   * dessine l'arête que cette lumière accrocherait. Deux valeurs quasi
+   * invisibles prises isolément, mais l'œil lit « objet posé » au lieu de
+   * « zone remplie » — et c'est de là que vient l'impression d'austérité quand
+   * elles manquent.
+   *
+   * Les teintes viennent des jetons de thème : le thème clair pose du blanc
+   * franc là où les thèmes sombres posent un voile à 6 %.
+   */
+  background:
+    linear-gradient(180deg, var(--sheen), transparent 46%),
+    var(--surface);
   backdrop-filter: blur(var(--blur)) saturate(150%);
   -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  box-shadow:
+    inset 0 1px 0 0 var(--inner-edge),
+    var(--shadow-sm);
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+}
+
+/*
+ * Une carte cliquable réagit ; une carte informative ne bouge pas.
+ *
+ * Restreint à `a` et `button` volontairement : rien n'est plus agaçant qu'un
+ * bloc de texte qui se soulève au passage de la souris sans qu'on puisse
+ * cliquer dessus.
+ */
+a.glass:hover,
+button.glass:hover {
+  border-color: color-mix(in oklab, var(--accent) 34%, var(--border));
+  box-shadow:
+    inset 0 1px 0 0 var(--inner-edge),
+    var(--shadow),
+    0 0 26px -10px color-mix(in oklab, var(--accent) 55%, transparent);
+}
+
+/*
+ * Une carte de verre posée sur une image, et non sur la page.
+ *
+ * `glass` remplit avec `--surface`, qui vaut du blanc à 4,5 % : c'est un voile,
+ * pas un fond. Sur une page unie il suffit largement, et c'est tout son
+ * intérêt — on devine ce qu'il y a derrière. Posé au-dessus d'une photographie
+ * contrastée, il ne masque plus rien : le commentaire du coach, superposé à la
+ * sculpture de la bannière, laissait remonter le bois et la crinière au travers
+ * du texte.
+ *
+ * On glisse donc un fond de page sous le voile, plutôt que d'épaissir le voile
+ * lui-même : le dégradé de lumière et le liseré de `glass` restent identiques,
+ * seule la base change. Les couches se peignent de la dernière à la première,
+ * si bien que `--bg` est dessous, `--surface` par-dessus, et le reflet en haut.
+ *
+ * 88 % et non 100 % : à l'opacité pleine, la carte cesse d'appartenir à la
+ * bannière et se lit comme un encart rapporté.
+ *
+ * `--surface` est enveloppé dans un dégradé plat, et ce n'est pas une
+ * coquetterie. Dans le raccourci `background`, **seule la dernière couche peut
+ * être une couleur** ; les précédentes doivent être des images. Écrit
+ * naïvement — reflet, `var(--surface)`, `color-mix(...)` — le raccourci est
+ * invalide, et comme il contient des `var()`, la règle ne retombe pas sur celle
+ * de `glass` : la propriété est « invalide au calcul » et revient à sa valeur
+ * initiale. La carte se retrouvait alors sans aucun fond, exactement l'inverse
+ * de ce qu'on venait écrire. Un dégradé d'une couleur vers elle-même est une
+ * image, donc une couche légale.
+ */
+@utility glass-lisible {
+  background:
+    linear-gradient(180deg, var(--sheen), transparent 46%),
+    linear-gradient(0deg, var(--surface), var(--surface)),
+    color-mix(in oklab, var(--bg) 88%, transparent);
 }
 
 @utility glass-strong {
@@ -504,14 +649,21 @@ h1, h2, h3, h4 {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(140deg, var(--accent), transparent 45%, var(--accent-2));
+  background: linear-gradient(140deg, var(--accent), transparent 42%, var(--accent-2));
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  opacity: 0.55;
+  /* 0,55 se devinait à peine. À 0,75 le contour se voit sans crier, et c'est
+     lui qui donne aux cartes leur air d'objet fini plutôt que de div bordée. */
+  opacity: 0.75;
   pointer-events: none;
+  transition: opacity 220ms ease;
+}
+a.gradient-ring:hover::before,
+button.gradient-ring:hover::before {
+  opacity: 1;
 }
 
 @utility text-gradient {
@@ -681,4 +833,99 @@ select option:checked,
 select option:hover {
   background-color: var(--surface-strong);
   color: var(--text);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Mode carrière
+
+   La carrière est le seul écran où l'animation n'est pas un ornement : elle
+   *est* la récompense. Une étoile qui apparaît sans bouger ne récompense rien,
+   un chapitre qui se déverrouille d'un coup ne se remarque pas.
+
+   Toutes ces animations sont neutralisées sous `prefers-reduced-motion`, et
+   c'est ici plus important qu'ailleurs : rien de ce qui suit ne porte
+   d'information — l'état est toujours lisible sans mouvement.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Le chemin se trace de haut en bas au chargement de la carte. */
+@keyframes carriere-trace {
+  from { stroke-dashoffset: var(--trace-length); }
+  to   { stroke-dashoffset: 0; }
+}
+
+.animate-carriere-trace {
+  animation: carriere-trace 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* L'étape en cours respire, pour que l'œil la trouve sans la chercher. */
+@keyframes carriere-halo {
+  0%, 100% { box-shadow: 0 0 0 0 var(--halo); }
+  50%      { box-shadow: 0 0 0 12px transparent; }
+}
+
+.animate-carriere-halo {
+  animation: carriere-halo 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Une étoile décrochée arrive en dépassant sa taille, puis se pose. */
+@keyframes carriere-etoile {
+  0%   { transform: scale(0) rotate(-140deg); opacity: 0; }
+  60%  { transform: scale(1.45) rotate(12deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.animate-carriere-etoile {
+  animation: carriere-etoile 0.62s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Le déverrouillage d'un chapitre : un anneau qui s'écarte et s'efface. */
+@keyframes carriere-onde {
+  from { transform: scale(0.6); opacity: 0.75; }
+  to   { transform: scale(2.6); opacity: 0; }
+}
+
+.animate-carriere-onde {
+  animation: carriere-onde 1s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+
+/* Chute des confettis. La dérive latérale et la rotation sont passées en
+   variables pour que chaque pièce tombe différemment sans multiplier les
+   règles CSS. */
+@keyframes carriere-confetti {
+  0%   { transform: translate3d(0, -8vh, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate3d(var(--derive), 105vh, 0) rotate(var(--tour)); opacity: 0; }
+}
+
+.animate-carriere-confetti {
+  animation: carriere-confetti var(--duree) cubic-bezier(0.3, 0.4, 0.6, 1) var(--retard) forwards;
+}
+
+/* Le bandeau de récompense entre en glissant et en grossissant légèrement. */
+@keyframes carriere-tampon {
+  0%   { transform: scale(0.82) translateY(14px); opacity: 0; }
+  55%  { transform: scale(1.04) translateY(0); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.animate-carriere-tampon {
+  animation: carriere-tampon 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* La barre d'expérience se remplit avec un léger dépassement, ce qui donne au
+   gain la sensation d'un élan plutôt que d'un incrément. */
+.carriere-jauge {
+  transition: width 0.9s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-carriere-trace,
+  .animate-carriere-halo,
+  .animate-carriere-etoile,
+  .animate-carriere-onde,
+  .animate-carriere-tampon {
+    animation: none;
+  }
+  .animate-carriere-trace { stroke-dashoffset: 0; }
+  .animate-carriere-confetti { display: none; }
+  .carriere-jauge { transition: none; }
 }

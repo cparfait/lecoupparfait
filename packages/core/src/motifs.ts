@@ -836,13 +836,30 @@ export function detectMoveMotifs(context: MoveContext): DetectedMotif[] {
     }
   }
 
-  // Mat forcé annoncé (au-delà du mat en un).
+  /*
+   * Mat forcé annoncé, au-delà du mat en un — et il est pour **l'adversaire**.
+   *
+   * Le motif était attribué à `side`, celui qui vient de jouer. C'était faux, et
+   * d'une façon qui produisait exactement le contraire de la vérité :
+   * `findForcedMate` cherche un mat pour le camp *au trait* dans la position
+   * qu'on lui donne, et la position qu'on lui donne est celle d'après le coup —
+   * où c'est l'adversaire qui a le trait. Un joueur qui venait d'offrir le mat
+   * du berger lisait donc « Il y a mat en un coup, et il est pour toi » au lieu
+   * de « Attention : ton adversaire a mat en un coup ».
+   *
+   * L'erreur ne pouvait pas se voir sur les cas les plus fréquents : quand c'est
+   * le coup lui-même qui mate, la branche `after.isCheckmate()` plus haut s'en
+   * charge, et elle attribue correctement. Il fallait tomber sur un coup qui
+   * *permet* le mat pour la rencontrer — c'est-à-dire sur la gaffe qu'un
+   * débutant fait le plus souvent, et le seul moment où se tromper de camp est
+   * réellement dommageable.
+   */
   if (!after.isCheckmate()) {
     const forced = findForcedMate(after, 5)
     if (forced) {
       const plies = Math.ceil(forced.length / 2)
       const id: MotifId = plies <= 1 ? 'mateIn1' : plies === 2 ? 'mateIn2' : 'mateIn3'
-      out.push(motif(id, side, [context.to], 0.95, { line: forced }))
+      out.push(motif(id, enemy, [context.to], 0.95, { line: forced }))
     }
   }
 

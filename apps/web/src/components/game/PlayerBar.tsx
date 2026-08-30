@@ -73,8 +73,23 @@ export const PlayerBar = memo(function PlayerBar({
             active && 'ring-accent',
           )}
         >
-          {avatar && avatar.startsWith('http') ? (
-            <img src={avatar} alt="" className="h-full w-full rounded-[inherit] object-cover" />
+          {/* Le test portait sur `http` seul, ce qui suffisait tant que les
+              seuls avatars-images venaient d'ailleurs. Les portraits des
+              adversaires sont servis par l'application, sous `/brand/…` : sans
+              la barre oblique, le chemin serait tombé dans la branche « émoji »
+              et affiché tel quel, en toutes lettres, dans la pastille. */}
+          {/* `object-contain` et non `cover` : les portraits d'adversaires sont
+              des sculptures détourées, plus hautes que larges. En `cover`, la
+              pastille carrée leur couperait les oreilles.
+
+              Et `h-9 w-9` plutôt que `h-full w-full`, qui débordait de 28 px.
+              Le conteneur est une grille sans `grid-template-rows` : sa ligne
+              se dimensionne donc sur son contenu, pendant que le contenu
+              prétend faire 100 % de la ligne. Devant ce cercle, les navigateurs
+              résolvent le pourcentage en `auto` — et l'image reprenait sa
+              hauteur intrinsèque, sculpture débordant par-dessus le liseré. */}
+          {avatar && (avatar.startsWith('/') || avatar.startsWith('http')) ? (
+            <img src={avatar} alt="" className="h-9 w-9 rounded-[inherit] object-contain" />
           ) : (
             <span aria-hidden>{avatar ?? (color === 'w' ? '♔' : '♚')}</span>
           )}

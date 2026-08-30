@@ -20,8 +20,11 @@ import {
   ClipboardPaste,
   Download,
   Gauge,
+  Crown,
+  Footprints,
   Loader2,
   Sparkles,
+  Trophy,
   Volume2,
   VolumeX,
 } from 'lucide-react'
@@ -30,6 +33,8 @@ import { Chess } from 'chess.js'
 import type { Color, Square } from 'chess.js'
 import {
   QUALITY_STYLES,
+  meriteUnMeilleurCoup,
+  explainRecommendedMove,
   formatPgnDate,
   formatScore,
   gradePhases,
@@ -40,7 +45,7 @@ import {
   type MoveQuality,
 } from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
-import { ArrowLegend, LEGEND, legendFor } from '@/components/board/ArrowLegend.tsx'
+import { ANNOTATION_COLORS } from '@/components/board/boardKit.ts'
 import { EvalBar, EvalGraph } from '@/components/game/EvalBar.tsx'
 import { GameNav } from '@/components/game/GameNav.tsx'
 import { MoveList } from '@/components/game/MoveList.tsx'
@@ -48,14 +53,24 @@ import { Button, Card, Chip, SectionTitle, Spinner } from '@/components/ui/index
 import { toast } from '@/components/ui/Toast.tsx'
 import {
   parseAnalysisInput,
+  rejouerAnalyse,
   runAnalysis,
   type AnalysisOutcome,
   type AnalysisProgress,
 } from '@/lib/analysis/runner.ts'
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import { ImportEnLigne } from '@/components/import/ImportEnLigne.tsx'
+import { MesAnalyses } from '@/components/analysis/MesAnalyses.tsx'
+import { RelectureGuidee } from '@/components/analysis/RelectureGuidee.tsx'
+import { TexteAvecTermes } from '@/components/analysis/TexteAvecTermes.tsx'
+import { chargerAnalyse, enregistrerAnalyse } from '@/lib/analysis/enregistrees.ts'
+import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
+import { QuestionLibre } from '@/components/ia/QuestionLibre.tsx'
+import { contexteDuCoupAnalyse, questionApprofondir } from '@/lib/ia/contexte.ts'
 import { useSan } from '@/lib/notation.ts'
 import { speak, stopSpeaking } from '@/lib/speech.ts'
+import { playSound } from '@/lib/sound.ts'
 import type { Arrow } from '@/components/board/boardKit.ts'
 import type { PlayedMove } from '@/lib/game/useChessGame.ts'
 
@@ -118,15 +133,66 @@ function ImportScreen({
   onError: () => void
 }) {
   const [input, setInput] = useState('')
-  // Vingt-deux : le moteur natif l'atteint sans peine, et c'est la profondeur
-  // à partir de laquelle l'analyse départage deux bons coups au lieu de se
-  // contenter de repérer les fautes visibles.
-  const [depth, setDepth] = useState(22)
+  /**
+   * Dix-huit par défaut, et le curseur monte jusqu'à trente-quatre.
+   *
+   * Vingt-deux était le réglage précédent, choisi parce que c'est la profondeur
+   * à partir de laquelle l'analyse départage deux *bons* coups. C'est vrai, et
+   * ce n'est pas ce que vient chercher quelqu'un qui fait analyser sa partie :
+   * il veut savoir où il s'est trompé, et dix-huit suffit à repérer toutes les
+   * fautes d'un joueur de club — c'est d'ailleurs ce que dit l'aide affichée
+   * sous le curseur, qui contredisait donc le réglage qu'elle accompagnait.
+   *
+   * Le gain est du temps, et le temps est ici le vrai coût : le moteur est
+   * partagé, chaque niveau de profondeur supplémentaire allonge l'attente de
+   * tout le monde. Qui cherche à départager deux bons coups pousse le curseur —
+   * c'est un geste conscient, pour un besoin qui l'est aussi.
+   */
+  const [depth, setDepth] = useState(18)
   const { book } = useOpeningBook()
   const locale = usePreferences((state) => state.locale)
+  const { marquer } = useQuotidien()
 
   // Une partie qui vient de se terminer est déposée ici par la boîte de fin de
   // partie : on la reprend automatiquement, sans copier-coller.
+  // Le camp est déposé par `onSide` avant que l'analyse ne démarre ; on le lit
+  // par référence pour ne pas refabriquer `start` à chaque fois.
+  /**
+   * Qui es-tu, dans cette partie ?
+   *
+   * Détermine à qui les explications s'adressent — voir `lecteur` dans
+   * `explain.ts`. Trois provenances, par ordre de certitude :
+   *
+   *  1. **Une partie qu'on vient de jouer ici**, déposée avec son camp.
+   *  2. **Une partie récupérée chez chess.com ou Lichess** : on connaît le
+   *     pseudo cherché, donc le camp. C'était déjà transmis par `onChoisir` et
+   *     cela s'arrêtait à `onSide` — la valeur remontait au parent sans jamais
+   *     atteindre l'analyse.
+   *  3. **Un PGN collé à la main** : on ne sait pas, et on demande.
+   *
+   * `null` reste possible et légitime : une partie entre deux inconnus n'a pas
+   * de « toi », et les explications s'adressent alors à l'auteur de chaque
+   * coup, comme avant.
+   */
+  const [camp, setCamp] = useState<Color | null>(null)
+  /**
+   * De quoi renoncer à une analyse en cours.
+   *
+   * Le `signal` était câblé jusqu'au moteur depuis toujours, et personne ne
+   * l'utilisait : lancer une analyse de quarante coups engageait pour de bon,
+   * sans autre issue que fermer l'onglet. C'est précisément le service gratuit
+   * qui rend l'issue nécessaire — quand l'attente peut durer, il faut pouvoir
+   * ne pas attendre.
+   */
+  const abandonRef = useRef<AbortController | null>(null)
+  /**
+   * Résultat annoncé par la partie qu'on vient de jouer.
+   *
+   * Sert de secours à l'en-tête `Result` du PGN, et non l'inverse : un PGN
+   * collé à la main n'a que son en-tête, mais une partie jouée ici a en plus
+   * cette valeur, qui n'a traversé ni une écriture ni une relecture de texte.
+   */
+  const resultatTransmis = useRef<string | null>(null)
   const [handedOver, setHandedOver] = useState(false)
   useEffect(() => {
     try {
@@ -138,8 +204,14 @@ function ImportScreen({
       }
       const played = sessionStorage.getItem('coupparfait.pendingAnalysisSide')
       if (played === 'w' || played === 'b') {
+        setCamp(played)
         onSide(played)
         sessionStorage.removeItem('coupparfait.pendingAnalysisSide')
+      }
+      const issue = sessionStorage.getItem('coupparfait.pendingAnalysisResult')
+      if (issue && issue !== '*') {
+        resultatTransmis.current = issue
+        sessionStorage.removeItem('coupparfait.pendingAnalysisResult')
       }
     } catch {
       // Stockage de session indisponible : sans conséquence.
@@ -155,28 +227,123 @@ function ImportScreen({
     }
 
     onStart()
+    const abandon = new AbortController()
+    abandonRef.current = abandon
     try {
       const result = await runAnalysis({
+        signal: abandon.signal,
         moves: parsed.moves,
         startFen: parsed.startFen,
         depth,
         book,
         locale,
+        // Le camp du joueur, quand la partie vient de lui : les explications
+        // s'adressent alors à lui d'un bout à l'autre, y compris sur les coups
+        // de son adversaire. Un PGN collé n'a pas de « toi » — `lecteur` reste
+        // nul, et l'on parle à l'auteur de chaque coup comme avant.
+        lecteur: camp,
+        headers:
+          resultatTransmis.current && !estUnResultat(parsed.headers.Result)
+            ? { ...parsed.headers, Result: resultatTransmis.current }
+            : parsed.headers,
         onProgress,
       })
       onDone(result)
+      marquer('analyse')
       toast.success(
         `Analyse terminée (${result.source === 'server' ? 'moteur serveur' : 'moteur navigateur'}).`,
       )
+
+      /*
+        On range l'analyse sans le demander, et sans attendre.
+        Sans rien demander : personne ne coche « enregistrer » après avoir
+        attendu une minute — on veut le résultat, pas un formulaire. Un visiteur
+        anonyme n'a rien à refuser non plus, l'appel se termine chez lui sur un
+        « pas de compte » silencieux.
+        Sans attendre : l'analyse est déjà à l'écran et se lit. Faire patienter
+        devant un rapport affiché pour une écriture en base serait absurde, et
+        un échec d'écriture ne doit surtout pas ressembler à un échec d'analyse.
+      */
+      void enregistrerAnalyse(result, {
+        moves: parsed.moves,
+        startFen: parsed.startFen,
+        depth,
+        lecteur: camp,
+        jouéeIci: handedOver,
+      })
     } catch (error) {
+      // Une analyse abandonnée n'est pas une panne : on ne s'en excuse pas.
+      if (abandon.signal.aborted) {
+        onError()
+        return
+      }
       console.error(error)
       toast.error(
         'L’analyse a échoué.',
         error instanceof Error ? error.message : 'Réessaie dans un instant.',
       )
       onError()
+    } finally {
+      abandonRef.current = null
     }
-  }, [parsed, depth, book, locale, onStart, onProgress, onDone, onError])
+  }, [
+    parsed,
+    depth,
+    book,
+    locale,
+    camp,
+    handedOver,
+    marquer,
+    onStart,
+    onProgress,
+    onDone,
+    onError,
+  ])
+
+  /**
+   * Rouvre une analyse déjà faite.
+   *
+   * Rien n'est recalculé : on rapatrie les évaluations conservées et l'on
+   * refabrique le rapport localement, ce qui prend quelques millisecondes. Le
+   * texte est donc celui du code d'aujourd'hui, pas celui du jour où l'analyse
+   * a été lancée — c'est la raison pour laquelle on stocke des chiffres et non
+   * de la prose.
+   */
+  const ouvrirEnregistree = useCallback(
+    async (id: string) => {
+      onStart()
+      try {
+        const gardee = await chargerAnalyse(id)
+        if (!gardee) {
+          toast.error('Analyse introuvable.', 'Elle a peut-être été supprimée.')
+          onError()
+          return
+        }
+
+        if (gardee.lecteur) {
+          setCamp(gardee.lecteur)
+          onSide(gardee.lecteur)
+        }
+
+        onDone(
+          await rejouerAnalyse({
+            moves: gardee.moves,
+            positions: gardee.positions,
+            startFen: gardee.startFen ?? undefined,
+            headers: gardee.headers,
+            book,
+            locale,
+            lecteur: gardee.lecteur,
+          }),
+        )
+      } catch (error) {
+        console.error(error)
+        toast.error('Impossible de rouvrir cette analyse.', 'Réessaie dans un instant.')
+        onError()
+      }
+    },
+    [book, locale, onStart, onDone, onError, onSide],
+  )
 
   // Une partie arrivée depuis la fin d'une partie n'a pas à être relancée à la
   // main : on vient de la jouer, on veut la voir analysée, pas contempler un
@@ -253,6 +420,87 @@ function ImportScreen({
           </div>
         </div>
 
+        {/* Rien à importer quand la partie vient d'être jouée.
+            On arrive ici depuis la boîte de fin de partie, le PGN est déjà
+            dans le champ ci-dessus : proposer d'aller chercher des parties
+            ailleurs revient à demander « et sinon, laquelle veux-tu analyser ? »
+            à quelqu'un qui vient précisément de répondre. */}
+        {/* Avant l'import en ligne, et volontairement : la première question
+            devant cet écran est « je l'ai déjà analysée, non ? ». La liste ne
+            s'affiche que si elle a quelque chose à montrer. */}
+        {!handedOver && (
+          <div className="border-t border-line/60 px-5 py-4 empty:hidden">
+            <MesAnalyses onOuvrir={(id) => void ouvrirEnregistree(id)} />
+          </div>
+        )}
+
+        {!handedOver && (
+          <div className="border-t border-line/60 px-5 py-4">
+            <p className="mb-2 text-sm font-medium">Depuis ton compte en ligne</p>
+            <p className="mb-3 text-xs text-muted">
+              Tu joues déjà quelque part ? Récupère tes dernières parties et fais-les
+              analyser ici — aucun compte n’est nécessaire, rien n’est enregistré.
+            </p>
+            <ImportEnLigne
+              onChoisir={(pgn, campImporte) => {
+                setInput(pgn)
+                // Le camp du joueur cherché : c'est lui qui lira l'analyse.
+                setCamp(campImporte)
+                onSide(campImporte)
+              }}
+            />
+          </div>
+        )}
+
+        {/* Qui es-tu dans cette partie ?
+        
+            La question ne se pose que si le PGN nomme ses deux joueurs — sinon
+            il n'y a personne à désigner. Elle est déjà répondue quand la partie
+            vient de la liste chess.com ou Lichess : on a saisi un pseudo, donc
+            on sait de quel côté il était. Le choix reste affiché pour qu'on
+            puisse le corriger, et parce qu'un réglage qu'on ne voit pas est un
+            réglage qu'on ne soupçonne pas.
+        
+            Ce que ça change : les explications s'adressent à ce joueur d'un bout
+            à l'autre, y compris sur les coups de l'adversaire — « son cavalier
+            attaque » au lieu de « ton cavalier attaque » à propos d'une pièce
+            qui n'est pas la tienne. Sans réponse, on parle à l'auteur de chaque
+            coup, ce qui reste juste pour une partie qu'on regarde de
+            l'extérieur. */}
+        {parsed?.headers.White && parsed.headers.Black && (
+          <div className="border-t border-line/60 px-5 py-4">
+            <p className="mb-2 text-sm font-medium">Tu joues quel camp&nbsp;?</p>
+            <div className="grid grid-cols-3 gap-1.5">
+              {(
+                [
+                  { valeur: 'w' as const, label: parsed.headers.White },
+                  { valeur: 'b' as const, label: parsed.headers.Black },
+                  { valeur: null, label: 'Ni l’un ni l’autre' },
+                ]
+              ).map((choix) => (
+                <button
+                  key={choix.label}
+                  type="button"
+                  onClick={() => setCamp(choix.valeur)}
+                  aria-pressed={camp === choix.valeur}
+                  className={clsx(
+                    'truncate rounded-[var(--radius-sm)] border px-2 py-2 text-xs font-medium transition-colors',
+                    camp === choix.valeur
+                      ? 'border-accent bg-accent/15 text-ink'
+                      : 'border-line text-muted hover:bg-surface-hover',
+                  )}
+                >
+                  {choix.label}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-faint">
+              Les explications s’adresseront à ce joueur, y compris sur les coups de son
+              adversaire.
+            </p>
+          </div>
+        )}
+
         <div className="border-t border-line/60 px-5 py-4">
           <label htmlFor="depth" className="mb-2 flex items-baseline justify-between text-sm">
             <span className="font-medium">Profondeur d’analyse</span>
@@ -289,6 +537,28 @@ function ImportScreen({
             {running ? 'Analyse en cours…' : 'Lancer l’analyse'}
           </Button>
 
+          {/* Pourquoi c'est long, dit avant qu'on se le demande.
+          
+              L'analyse d'une partie de quarante coups occupe le moteur plusieurs
+              dizaines de secondes, et la barre de progression ne dit que
+              « 18 / 39 » — un chiffre qui avance sans expliquer pourquoi il
+              n'avance pas plus vite. Quelqu'un qui vient de chess.com, où la
+              relecture prend sept secondes, en conclut que quelque chose est
+              cassé.
+          
+              La vraie raison est structurelle et il n'y a pas de honte à la
+              dire : un serveur, pas de ferme de calcul, et une file partagée
+              par tout le monde. C'est le prix de la gratuité, et l'annoncer
+              transforme une lenteur inexpliquée en choix assumé. */}
+          {running && (
+            <p className="mt-3 text-xs leading-relaxed text-faint">
+              Le moteur analyse chaque position à la profondeur demandée, sur un serveur
+              partagé — comptez une trentaine de secondes pour une partie complète. C’est le
+              prix du service gratuit&nbsp;: aucune limite de nombre, aucune formule payante,
+              mais une seule machine.
+            </p>
+          )}
+
           {running && progress && (
             <div className="mt-4">
               <div className="mb-1.5 flex justify-between text-xs text-muted">
@@ -307,6 +577,14 @@ function ImportScreen({
                   style={{ width: `${(progress.done / Math.max(1, progress.total)) * 100}%` }}
                 />
               </div>
+
+              <button
+                type="button"
+                onClick={() => abandonRef.current?.abort()}
+                className="mt-2.5 text-xs font-medium text-muted transition-colors hover:text-ink hover:underline"
+              >
+                Abandonner l’analyse
+              </button>
             </div>
           )}
         </div>
@@ -354,6 +632,34 @@ function buildDemoFrames(fen: string, line: string[]): DemoFrame[] {
 //  Relecture
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Cadence du défilement automatique. Voir l'effet qui les emploie.
+ *
+ * 280 ms par mot correspond à une lecture posée — environ 215 mots à la minute.
+ * On lit plus vite que cela sur un texte courant, mais pas sur une explication
+ * d'échecs : chaque coup cité renvoie à une case qu'il faut retrouver sur le
+ * plateau, et c'est ce va-et-vient qui prend le temps, pas les mots.
+ */
+const MS_PAR_MOT = 280
+
+/** Un résultat exploitable : `*` veut dire « on ne sait pas », pas « nulle ». */
+function estUnResultat(valeur: string | undefined): boolean {
+  return valeur === '1-0' || valeur === '0-1' || valeur === '1/2-1/2'
+}
+const LECTURE_MIN = 3_500
+const LECTURE_MAX = 14_000
+/**
+ * Le temps de reposer les yeux sur la position, une fois la phrase dite.
+ *
+ * Deux secondes, et non les 900 ms d'abord retenues. La différence n'est pas de
+ * confort : la phrase se termine en nommant un coup ou une case, et c'est
+ * seulement à ce moment-là qu'on va la chercher sur l'échiquier. Enchaîner
+ * pendant ce trajet de l'oreille vers l'œil revient à ne rien montrer.
+ */
+const PAUSE_APRES_VOIX = 2_000
+/** Au-delà, on considère que la synthèse ne répondra pas et on avance. */
+const SECOURS_LECTURE = 15_000
+
 function ReviewScreen({
   outcome,
   side,
@@ -372,11 +678,80 @@ function ReviewScreen({
 }) {
   const { report, coach, source } = outcome
   const locale = usePreferences((state) => state.locale)
+  const notation = usePreferences((state) => state.notation)
   const voiceEnabled = usePreferences((state) => state.voiceEnabled)
   const setPreference = usePreferences((state) => state.set)
 
+  /**
+   * Les noms des joueurs, quand le PGN les porte.
+   *
+   * `null` pour une liste de coups collée à la main : on retombe alors sur
+   * « Blancs » et « Noirs », qui restent justes. Le repli est important — une
+   * partie sans en-tête est un cas normal, pas une anomalie.
+   */
+  const noms = useMemo(
+    () => ({
+      w: outcome.headers?.White?.trim() || null,
+      b: outcome.headers?.Black?.trim() || null,
+    }),
+    [outcome.headers],
+  )
+
+  /**
+   * Qui a gagné.
+   *
+   * L'en-tête `Result` du PGN fait foi quand il existe : il couvre l'abandon et
+   * la pendule, que la position finale ne raconte pas. Sans en-tête, on se
+   * rabat sur l'échiquier — un mat se lit tout seul. `null` quand la partie
+   * s'arrête en l'air, ce qui est le cas courant d'une liste de coups collée.
+   */
+  const issue = useMemo<'w' | 'b' | 'nulle' | null>(() => {
+    switch (outcome.headers?.Result?.trim()) {
+      case '1-0':
+        return 'w'
+      case '0-1':
+        return 'b'
+      case '1/2-1/2':
+        return 'nulle'
+    }
+    const dernier = report.moves[report.moves.length - 1]
+    if (!dernier) return null
+    const finale = new Chess(dernier.fenAfter, { skipValidation: true })
+    if (finale.isCheckmate()) return dernier.color
+    if (finale.isStalemate() || finale.isDraw()) return 'nulle'
+    return null
+  }, [outcome.headers, report.moves])
+
   const format = useSan()
   const [cursor, setCursor] = useState(0)
+  /**
+   * Deux façons de relire, et le choix se retient.
+   *
+   * `detail` est le tableau de bord : courbe, alternatives, moments clés,
+   * précision. Il suppose qu'on sait déjà lire une évaluation.
+   *
+   * `guide` ne montre qu'un échiquier, une phrase et un bouton. C'est l'écran
+   * dont a besoin quelqu'un qui débute — et le seul des deux qui tienne sur un
+   * téléphone, où notre grille à trois colonnes ne rentre pas.
+   *
+   * Le mode vit dans les préférences plutôt que dans l'état de la page : on ne
+   * le rechoisit pas à chaque partie relue.
+   */
+  const relecture = usePreferences((state) => state.relectureGuidee)
+
+  /**
+   * « À toi de trouver le coup. »
+   *
+   * Sur une faute du lecteur, on cache la réponse et on lui rend l'échiquier
+   * dans la position d'*avant* son coup. Lire une explication est passif ;
+   * retrouver le coup soi-même ne l'est pas, et c'est toute la différence entre
+   * une relecture qu'on suit et une relecture dont on se souvient.
+   *
+   * L'état est indexé par demi-coup : on ne repose pas la question à quelqu'un
+   * qui vient d'y répondre, y compris s'il revient en arrière puis repart.
+   */
+  const [enigmes, setEnigmes] = useState<Record<number, 'ouverte' | 'trouvee' | 'revelee'>>({})
+  const [essais, setEssais] = useState(0)
   const [orientation, setOrientation] = useState<Color>(side ?? 'w')
   const [autoplay, setAutoplay] = useState(false)
 
@@ -394,6 +769,31 @@ function ReviewScreen({
    * chaque image coûterait cher et risquerait de diverger.
    */
   const [demo, setDemo] = useState<{ frames: DemoFrame[]; at: number } | null>(null)
+
+  /**
+   * Explication du coup recommandé, calculée à la demande.
+   *
+   * À la demande, et non à l'affichage : elle rejoue le coup sur la position et
+   * détecte ses motifs, ce qui n'a aucune raison d'être fait pour chacun des
+   * quarante coups qu'on traverse au défilement. Elle est mémoïsée sur le coup,
+   * si bien qu'aller et revenir ne la recalcule pas.
+   */
+  const [pourquoiOuvert, setPourquoiOuvert] = useState(false)
+  const pourquoi = useMemo(() => {
+    if (!pourquoiOuvert || !move?.bestMove) return null
+    return explainRecommendedMove({
+      locale,
+      fenBefore: move.fenBefore,
+      bestSan: move.bestMove.san,
+      mover: move.color,
+      scoreBefore: move.scoreBefore,
+      scoreAfter: move.bestMove.score,
+      bestLine: move.bestLine,
+    })
+  }, [pourquoiOuvert, move, locale])
+
+  // Changer de coup referme l'explication : elle parlerait du coup précédent.
+  useEffect(() => setPourquoiOuvert(false), [cursor])
 
   const showBestLine = useCallback(() => {
     if (!move?.bestLine?.length) return
@@ -419,26 +819,88 @@ function ReviewScreen({
 
   // Lecture automatique du commentaire quand on change de coup.
   const spokenRef = useRef<number>(-1)
+  const [lectureFinie, setLectureFinie] = useState(true)
   useEffect(() => {
-    if (!voiceEnabled || !explanation || spokenRef.current === cursor) return
+    if (!explanation || spokenRef.current === cursor) return
     spokenRef.current = cursor
-    speak(explanation.speech)
+    if (!voiceEnabled) {
+      setLectureFinie(true)
+      return
+    }
+    setLectureFinie(false)
+    // Le rappel est gardé par le rang du coup, et ce n'est pas de la prudence
+    // décorative. `speak` annule la phrase en cours pour placer la sienne, et
+    // `speech.ts` notifie quand même l'appelant de cette interruption — c'est
+    // voulu, il attend sa notification. Mais l'annulation est asynchrone : elle
+    // arrive **après** que le coup suivant a demandé la parole. Sans ce test,
+    // le `onEnd` de la phrase précédente déclarerait terminée celle qui vient
+    // de commencer, et le défilement repartirait aussitôt — exactement le
+    // symptôme qu'on corrige.
+    const lu = cursor
+    speak(explanation.speech, {
+      onEnd: () => setLectureFinie((finie) => (spokenRef.current === lu ? true : finie)),
+    })
   }, [cursor, explanation, voiceEnabled])
 
-  useEffect(() => () => stopSpeaking(), [])
+  /**
+   * En partant, on se tait — et on oublie ce qu'on avait dit.
+   *
+   * Sans la remise à zéro, le premier coup n'était **jamais** prononcé en
+   * développement. Le mode strict de React monte le composant, exécute les
+   * effets, les défait, puis les rejoue : la première passe demandait la
+   * parole et notait « coup 0 déjà lu », le démontage simulé coupait le son,
+   * et la seconde passe se voyait refuser l'accès par ce même garde. Les coups
+   * suivants passaient, eux, puisque le rang changeait — d'où un défaut qui ne
+   * touchait que le tout premier commentaire.
+   */
+  useEffect(
+    () => () => {
+      stopSpeaking()
+      spokenRef.current = -1
+    },
+    [],
+  )
 
-  // Défilement automatique.
+  /**
+   * Défilement automatique : il attend l'explication.
+   *
+   * Il avançait toutes les 2 600 ms, quel que soit le coup. C'est à peu près le
+   * temps de lire « Cf3 — imprécision », et à peu près le tiers de ce qu'il
+   * faut pour lire l'explication qui suit. On passait donc au coup d'après en
+   * plein milieu du raisonnement — et si la voix était active, en plein milieu
+   * de la phrase, `speak` coupant la précédente pour annoncer la suivante.
+   * L'analyse défilait sans qu'on puisse en lire une seule ligne.
+   *
+   * Deux régimes, selon qu'on écoute ou qu'on lit :
+   *
+   *  - **Voix active** : on part deux secondes après la fin de la phrase,
+   *    `speak` nous la signale par `onEnd`. Un minuteur de secours couvre le
+   *    cas où cet événement ne vient jamais — synthèse indisponible, onglet en
+   *    arrière-plan, voix système capricieuse — sans quoi la lecture resterait
+   *    bloquée sur un coup.
+   *  - **Voix éteinte** : la durée se calcule sur le texte, à 280 ms par mot,
+   *    entre 3,5 et 14 secondes. Une explication de vingt mots a besoin de cinq
+   *    secondes ; une de trois n'en mérite pas dix.
+   */
   useEffect(() => {
     if (!autoplay) return
-    const timer = setTimeout(() => {
-      if (cursor >= report.moves.length - 1) {
-        setAutoplay(false)
-        return
-      }
-      setCursor((c) => c + 1)
-    }, 2600)
+    if (cursor >= report.moves.length - 1) {
+      setAutoplay(false)
+      return
+    }
+
+    if (voiceEnabled && !lectureFinie) {
+      const secours = setTimeout(() => setLectureFinie(true), SECOURS_LECTURE)
+      return () => clearTimeout(secours)
+    }
+
+    const mots = explanation?.speech.trim().split(/\s+/).length ?? 0
+    const attente = voiceEnabled
+      ? PAUSE_APRES_VOIX
+      : Math.min(LECTURE_MAX, Math.max(LECTURE_MIN, mots * MS_PAR_MOT))
+    const timer = setTimeout(() => setCursor((c) => c + 1), attente)
     return () => clearTimeout(timer)
-  }, [autoplay, cursor, report.moves.length])
+  }, [autoplay, cursor, lectureFinie, voiceEnabled, explanation, report.moves.length])
 
   const qualities = useMemo(() => {
     const map: Record<number, MoveQuality> = {}
@@ -467,12 +929,88 @@ function ReviewScreen({
   )
 
   // Flèches : le coup joué en vert, le meilleur coup en bleu s'il diffère.
+  /**
+   * Le coup courant mérite-t-il une question ?
+   *
+   * Trois conditions, et les trois comptent. Il faut une **faute** — on
+   * n'interroge pas sur un bon coup, la réponse serait celui qu'on a joué. Il
+   * faut un **meilleur coup connu**, sans quoi il n'y a rien à trouver. Et il
+   * faut que ce soit le coup du **lecteur** : demander à quelqu'un de rejouer
+   * les fautes de son adversaire n'apprend rien à personne.
+   *
+   * Hors du pas à pas, jamais : la vue détaillée affiche déjà la réponse à
+   * trois endroits, la cacher au quatrième serait absurde.
+   */
+  const enigme = useMemo(() => {
+    if (!relecture || !move || demo) return null
+    if (side !== null && move.color !== side) return null
+    if (!meriteUnMeilleurCoup(move.quality, move.winLoss)) return null
+    if (!move.bestMove) return null
+    return { ply: move.ply, attendu: move.bestMove }
+  }, [relecture, move, demo, side])
+
+  const etatEnigme = enigme ? (enigmes[enigme.ply] ?? 'ouverte') : null
+
+  /** Coups légaux de la position d'avant la faute, pour l'échiquier jouable. */
+  const coupsLegaux = useMemo(() => {
+    const map = new Map<Square, Square[]>()
+    if (!enigme || etatEnigme !== 'ouverte' || !move) return map
+    try {
+      const board = new Chess(move.fenBefore, { skipValidation: true })
+      for (const coup of board.moves({ verbose: true })) {
+        const liste = map.get(coup.from) ?? []
+        if (!liste.includes(coup.to)) liste.push(coup.to)
+        map.set(coup.from, liste)
+      }
+    } catch {
+      // Position illisible : aucun coup proposé, la question s'affiche sans
+      // échiquier jouable plutôt que de faire échouer l'écran.
+    }
+    return map
+  }, [enigme, etatEnigme, move])
+
+  /**
+   * Réponse du lecteur.
+   *
+   * On compare en UCI et non en SAN : deux notations peuvent désigner le même
+   * coup, l'UCI est sans ambiguïté. La promotion est ignorée dans la
+   * comparaison — trouver la bonne case en sous-promouvant reste la bonne idée,
+   * et le cas est assez rare pour ne pas justifier trois lignes de plus.
+   */
+  const repondre = useCallback(
+    (from: Square, to: Square) => {
+      if (!enigme) return
+      const joue = `${from}${to}`
+      if (enigme.attendu.uci.slice(0, 4) === joue) {
+        setEnigmes((etat) => ({ ...etat, [enigme.ply]: 'trouvee' }))
+        setEssais(0)
+        playSound('victory')
+      } else {
+        setEssais((n) => n + 1)
+      }
+    },
+    [enigme],
+  )
+
+  const reveler = useCallback(() => {
+    if (!enigme) return
+    setEnigmes((etat) => ({ ...etat, [enigme.ply]: 'revelee' }))
+    setEssais(0)
+  }, [enigme])
+
+  // Changer de coup remet le compteur d'essais à zéro : il compte les tentatives
+  // sur *cette* question, pas depuis le début de la partie.
+  useEffect(() => setEssais(0), [cursor])
+
   const arrows = useMemo<Arrow[]>(() => {
     if (demo) {
       const frame = demo.frames[demo.at]
       return frame ? [{ from: frame.from, to: frame.to, color: 'blue', weight: 'bold' }] : []
     }
     if (!move) return []
+    // Tant que la question est ouverte, aucune flèche : la verte montrerait le
+    // coup joué et la bleue donnerait la réponse.
+    if (etatEnigme === 'ouverte') return []
     const list: Arrow[] = [
       {
         from: move.uci.slice(0, 2) as never,
@@ -481,7 +1019,22 @@ function ReviewScreen({
         weight: 'bold',
       },
     ]
-    if (move.bestMove) {
+    /*
+     * La flèche du coup conseillé suit **la même règle que l'explication**.
+     *
+     * `SEUIL_MEILLEUR_COUP` vient de `explain.ts`, où il décide déjà si le texte
+     * nomme un meilleur coup. Le partager est tout l'objet : la flèche n'avait
+     * aucun seuil, si bien qu'on pouvait lire « coup conseillé » dans la légende
+     * sans qu'aucune phrase ne dise lequel ni pourquoi. Deux affichages qui ne
+     * s'accordent pas sur l'existence d'un meilleur coup valent moins que ni
+     * l'un ni l'autre.
+     *
+     * Et une flèche sur un échiquier ne se lit pas comme une note de bas de
+     * page : elle se lit comme une correction. Sous le seuil, il n'y a rien à
+     * corriger — la suite recommandée reste dans le panneau, avec son bouton
+     * « Pourquoi ? », pour qui veut aller la lire.
+     */
+    if (move.bestMove && meriteUnMeilleurCoup(move.quality, move.winLoss)) {
       list.push({
         from: move.bestMove.uci.slice(0, 2) as never,
         to: move.bestMove.uci.slice(2, 4) as never,
@@ -502,6 +1055,68 @@ function ReviewScreen({
     }
   }, [move])
   const checkSquare = check.square
+
+  /**
+   * L'échiquier, une seule fois.
+   *
+   * Deux mises en page l'affichent — la vue détaillée et la relecture guidée —
+   * et elles doivent montrer exactement la même chose : mêmes flèches, même
+   * verdict, même démonstration en cours. Le dupliquer garantirait qu'un jour
+   * l'une des deux oublie une correction apportée à l'autre.
+   */
+  const echiquier = (
+            <ChessBoard
+              fen={
+                // Pendant la question, on remonte d'un coup : c'est la position
+                // où le choix se posait, pas celle qui a suivi.
+                etatEnigme === 'ouverte' && move
+                  ? move.fenBefore
+                  : (demo?.frames[demo.at]?.fen ??
+                    move?.fenAfter ??
+                    report.moves[0]?.fenBefore ??
+                    '')
+              }
+              orientation={orientation}
+              playable={etatEnigme === 'ouverte' && move ? move.color : null}
+              legalMoves={coupsLegaux}
+              onMove={etatEnigme === 'ouverte' ? repondre : undefined}
+              lastMove={
+                demo || etatEnigme === 'ouverte'
+                  ? null
+                  : move
+                    ? {
+                        from: move.uci.slice(0, 2) as never,
+                        to: move.uci.slice(2, 4) as never,
+                      }
+                    : null
+              }
+              checkSquare={demo || etatEnigme === 'ouverte' ? null : checkSquare}
+              checkmate={!demo && etatEnigme !== 'ouverte' && check.mate}
+              highlights={
+                demo || etatEnigme === 'ouverte'
+                  ? []
+                  : (report.explanations[cursor]?.highlights ?? [])
+              }
+              /* Le verdict sur la case d'arrivée, sauf pendant la
+                 démonstration d'une suite : les coups qu'on y déroule n'ont
+                 pas été joués, les juger n'aurait aucun sens. */
+              verdict={
+                // Le verdict nomme la faute : l'afficher pendant qu'on cherche
+                // reviendrait à désigner la case où elle a été commise.
+                demo || !move || etatEnigme === 'ouverte'
+                  ? null
+                  : { square: move.uci.slice(2, 4) as Square, quality: move.quality }
+              }
+              arrows={arrows}
+              // Cliquer la flèche bleue déroule la suite recommandée : c'est
+              // la question qu'elle pose et à laquelle elle ne répondait pas.
+              onArrowClick={(arrow) => {
+                if (arrow.color === 'blue') showBestLine()
+                else if (explanation) speak(explanation.speech)
+              }}
+              instant={!demo}
+            />
+  )
 
   const exportPgn = useCallback(() => {
     const pgn = toPgn(report.moves, {
@@ -537,16 +1152,73 @@ function ReviewScreen({
     <div className="mx-auto w-full max-w-[1600px] px-2 py-3 sm:px-4 lg:py-6">
       {/* ── En-tête ────────────────────────────────────────────────── */}
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <Chip tone="accent">
-          <Sparkles size={11} aria-hidden />
-          {source === 'server' ? 'Stockfish serveur' : 'Stockfish navigateur'}
-        </Chip>
-        {report.opening && (
-          <Chip>
-            {report.opening.eco} · {report.opening.name}
+        {/*
+          Le moteur employé et l'ouverture décrivent la partie, ils ne servent
+          pas à la lire. En pas à pas sur téléphone, ils repoussaient la bulle
+          du coach de trois lignes vers le bas — on les garde, mais à partir de
+          la tablette.
+
+          Le `hidden` est porté par ce conteneur et non par les pastilles
+          elles-mêmes : `Chip` impose `inline-flex`, qui l'emportait sur
+          `hidden` — les pastilles restaient affichées, `display` calculé à
+          `flex`. Un conteneur neutre n'a pas ce conflit.
+        */}
+        <div
+          className={clsx(
+            'flex flex-wrap items-center gap-2',
+            relecture && 'hidden sm:flex',
+          )}
+        >
+          <Chip tone="accent">
+            <Sparkles size={11} aria-hidden />
+            {source === 'server' ? 'Stockfish serveur' : 'Stockfish navigateur'}
+          </Chip>
+          {report.opening && (
+            <Chip>
+              {report.opening.eco} · {report.opening.name}
+            </Chip>
+          )}
+        </div>
+        {/*
+          Le score, à côté de l'ouverture et de la profondeur — les trois
+          choses qui décrivent la partie qu'on relit. Il n'apparaît qu'ici :
+          l'annoncer aussi dans le résumé de précision et sur chacune des deux
+          cartes de bilan, c'était dire quatre fois le même fait.
+        */}
+        {issue && (
+          <Chip
+            tone={issue === 'nulle' ? 'neutral' : 'success'}
+            style={{ textTransform: 'none' }}
+            title="Résultat de la partie"
+          >
+            <Trophy size={11} aria-hidden />
+            <span className={issue === 'w' ? 'font-bold' : 'opacity-70'}>
+              {noms.w ?? 'Blancs'}
+            </span>
+            <span className="tabular-nums opacity-90">
+              {issue === 'w' ? '1–0' : issue === 'b' ? '0–1' : '½–½'}
+            </span>
+            <span className={issue === 'b' ? 'font-bold' : 'opacity-70'}>
+              {noms.b ?? 'Noirs'}
+            </span>
           </Chip>
         )}
         <div className="ml-auto flex gap-1.5">
+          {/* Le basculement en premier : c'est le réglage qui change tout
+              l'écran, les autres n'en changent qu'un détail. */}
+          <Button
+            size="sm"
+            variant={relecture ? 'primary' : 'ghost'}
+            icon={<Footprints size={14} />}
+            onClick={() => setPreference('relectureGuidee', !relecture)}
+            title={
+              relecture
+                ? 'Revenir au tableau de bord : courbe, alternatives, moments clés'
+                : 'Relire pas à pas : un échiquier, une phrase, un bouton'
+            }
+          >
+            Pas à pas
+          </Button>
           <Button
             size="sm"
             variant="ghost"
@@ -558,7 +1230,13 @@ function ReviewScreen({
           >
             {voiceEnabled ? 'Voix activée' : 'Voix coupée'}
           </Button>
-          <Button size="sm" variant="ghost" icon={<Download size={14} />} onClick={exportPgn}>
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Download size={14} />}
+            onClick={exportPgn}
+            className={relecture ? 'max-sm:hidden' : undefined}
+          >
             PGN
           </Button>
           <Button size="sm" variant="secondary" onClick={onReset}>
@@ -567,6 +1245,23 @@ function ReviewScreen({
         </div>
       </div>
 
+      {relecture ? (
+        <RelectureGuidee
+          echiquier={echiquier}
+          report={report}
+          cursor={cursor}
+          onCursor={setCursor}
+          explanation={explanation}
+          move={move}
+          onRetourner={() => setOrientation((c) => (c === 'w' ? 'b' : 'w'))}
+          onMontrer={showBestLine}
+          demo={demo !== null}
+          format={format}
+          enigme={etatEnigme}
+          essais={essais}
+          onReveler={reveler}
+        />
+      ) : (
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_380px] xl:grid-cols-[minmax(0,1fr)_440px]">
         {/* ── Échiquier ────────────────────────────────────────────── */}
         <div className="min-w-0">
@@ -577,56 +1272,10 @@ function ReviewScreen({
               className="hidden sm:block"
             />
             <div className="min-w-0 flex-1">
-              <ChessBoard
-                fen={
-                  demo?.frames[demo.at]?.fen ??
-                  move?.fenAfter ??
-                  report.moves[0]?.fenBefore ??
-                  ''
-                }
-                orientation={orientation}
-                playable={null}
-                lastMove={
-                  demo
-                    ? null
-                    : move
-                      ? {
-                          from: move.uci.slice(0, 2) as never,
-                          to: move.uci.slice(2, 4) as never,
-                        }
-                      : null
-                }
-                checkSquare={demo ? null : checkSquare}
-                checkmate={!demo && check.mate}
-                highlights={demo ? [] : (report.explanations[cursor]?.highlights ?? [])}
-                arrows={arrows}
-                // Cliquer la flèche bleue déroule la suite recommandée : c'est
-                // la question qu'elle pose et à laquelle elle ne répondait pas.
-                onArrowClick={(arrow) => {
-                  if (arrow.color === 'blue') showBestLine()
-                  else if (explanation) speak(explanation.speech)
-                }}
-                instant={!demo}
-              />
+              {echiquier}
             </div>
           </div>
 
-          <ArrowLegend
-            items={legendFor(arrows, [
-              { ...LEGEND.played, label: move ? `${move.san} — le coup joué` : LEGEND.played.label },
-              {
-                ...LEGEND.playedBad,
-                label: move ? `${move.san} — erreur` : LEGEND.playedBad.label,
-              },
-              {
-                ...LEGEND.best,
-                label: move?.bestMove
-                  ? `${move.bestMove.san} — coup conseillé`
-                  : LEGEND.best.label,
-              },
-            ])}
-            className="mt-2"
-          />
 
           <div className="mt-2 flex items-center gap-2">
             {/*
@@ -667,11 +1316,13 @@ function ReviewScreen({
               <PlayerReport
                 key={colour}
                 colour={colour}
+                nom={noms[colour]}
                 accuracy={report.accuracy[colour]}
                 acpl={report.acpl[colour]}
                 counts={report.counts[colour]}
                 estimatedElo={report.estimatedElo[colour]}
                 coach={coach[colour]}
+                issue={issue}
               />
             ))}
           </div>
@@ -684,7 +1335,7 @@ function ReviewScreen({
             ne voyait qu'une liste de coups, et l'analyse passait pour absente.
             Ce résumé la met là où le regard se pose.
           */}
-          <AccuracySummary report={report} />
+          <AccuracySummary report={report} noms={noms} issue={issue} />
 
           {/*
             Une partie ne se perd pas partout : elle se perd à deux ou trois
@@ -710,6 +1361,7 @@ function ReviewScreen({
                       color: `var(--q-${style.token})`,
                     }}
                     aria-hidden
+                    title={`${style.label.fr} — ${style.description.fr}`}
                   >
                     {style.glyph}
                   </span>
@@ -718,16 +1370,22 @@ function ReviewScreen({
                     <p className="mt-0.5 text-xs tabular-nums text-faint">
                       Coup {move.moveNumber} · {move.color === 'w' ? 'Blancs' : 'Noirs'} ·{' '}
                       {formatScore(move.scoreBefore)} → {formatScore(move.scoreAfter)}
-                      {move.winLoss >= 1 && ` · −${move.winLoss.toFixed(0)} pts de victoire`}
+                      {/* Même seuil que la flèche et que le texte : sous
+                          `SEUIL_MEILLEUR_COUP`, on ne présente pas les
+                          préférences du moteur comme une perte. */}
+                      {meriteUnMeilleurCoup(move.quality, move.winLoss) &&
+                        ` · −${move.winLoss.toFixed(0)} pts de victoire`}
                     </p>
                   </div>
                 </div>
 
                 <div className="mt-3 space-y-1.5">
                   {explanation.body.map((paragraph, index) => (
-                    <p key={index} className="text-[13px] leading-relaxed text-muted">
-                      {paragraph}
-                    </p>
+                    <TexteAvecTermes
+                      key={index}
+                      texte={paragraph}
+                      className="text-[13px] leading-relaxed text-muted"
+                    />
                   ))}
                 </div>
 
@@ -747,15 +1405,30 @@ function ReviewScreen({
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
                         Suite recommandée
                       </p>
-                      {/* Lire « Cf3 Cc6 d4 exd4 » suppose de déplacer les
-                          pièces dans sa tête. On les déplace pour de vrai. */}
-                      <button
-                        type="button"
-                        onClick={showBestLine}
-                        className="shrink-0 text-[11px] font-semibold text-accent transition-colors hover:underline"
-                      >
-                        {demo ? `${demo.at + 1} / ${demo.frames.length}` : '▶ Montrer'}
-                      </button>
+                      <span className="flex shrink-0 items-center gap-3">
+                        {/* Deux gestes, et ils ne demandent pas la même chose.
+                            « Montrer » déplace les pièces — pour qui n'arrive
+                            pas à lire une ligne en notation. « Pourquoi »
+                            explique — pour qui la lit très bien mais ne voit
+                            pas ce qu'elle apporte. */}
+                        <button
+                          type="button"
+                          onClick={() => setPourquoiOuvert((ouvert) => !ouvert)}
+                          aria-expanded={pourquoiOuvert}
+                          className="text-[11px] font-semibold text-accent transition-colors hover:underline"
+                        >
+                          {pourquoiOuvert ? 'Masquer' : 'Pourquoi ?'}
+                        </button>
+                        {/* Lire « Cf3 Cc6 d4 exd4 » suppose de déplacer les
+                            pièces dans sa tête. On les déplace pour de vrai. */}
+                        <button
+                          type="button"
+                          onClick={showBestLine}
+                          className="text-[11px] font-semibold text-accent transition-colors hover:underline"
+                        >
+                          {demo ? `${demo.at + 1} / ${demo.frames.length}` : '▶ Montrer'}
+                        </button>
+                      </span>
                     </div>
                     <p className="mt-1 font-mono text-[13px]">
                       {move.bestLine.map((san, index) => (
@@ -770,8 +1443,163 @@ function ReviewScreen({
                         </span>
                       ))}
                     </p>
+
+                    {/* L'explication du coup du moteur, écrite par la même
+                        machinerie que celle du coup joué — verdict, cause,
+                        conséquence. Le liseré à gauche dit qu'elle porte sur le
+                        coup recommandé et non sur celui de la partie : sans lui,
+                        deux explications se suivraient sans qu'on sache laquelle
+                        parle de quoi. */}
+                    {pourquoiOuvert &&
+                      (pourquoi ? (
+                        <div className="mt-2.5 border-l-2 border-accent/50 pl-3">
+                          <p className="text-[13px] font-semibold leading-snug">
+                            {pourquoi.headline}
+                          </p>
+                          <div className="mt-1 space-y-1">
+                            {pourquoi.body.map((paragraphe, index) => (
+                              <p key={index} className="text-[13px] leading-relaxed text-muted">
+                                {paragraphe}
+                              </p>
+                            ))}
+                          </div>
+                          {pourquoi.motifs.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {pourquoi.motifs.map((motif) => (
+                                <Chip key={motif.id} tone="accent" title={motif.definition}>
+                                  {motif.name}
+                                </Chip>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        // `explainRecommendedMove` rend `null` quand le coup du
+                        // moteur ne se rejoue pas sur la position. On le dit
+                        // plutôt que de laisser un bouton qui n'ouvre rien.
+                        <p className="mt-2.5 text-[13px] leading-relaxed text-faint">
+                          Ce coup ne se rejoue pas sur cette position : impossible de
+                          l’expliquer sans risquer d’inventer.
+                        </p>
+                      ))}
                   </div>
                 )}
+
+                {/* Ce qu'on avait sous la main, classé par le moteur.
+                
+                    La relecture ne montrait que la suite recommandée : un seul
+                    coup, présenté comme *le* bon. C'est insuffisant pour
+                    comprendre, et parfois trompeur — savoir qu'un coup était le
+                    meilleur n'apprend rien tant qu'on ignore ce qu'il y avait
+                    d'autre. Trois lignes à 0,05 près décrivent une position où
+                    le choix était libre ; un premier coup détaché de deux pions
+                    décrit une position où il n'y en avait qu'un. Le verdict est
+                    le même, la leçon est opposée.
+                
+                    La partie commentée le montrait déjà pendant la partie. Il
+                    n'y avait aucune raison que la relecture, qui est le moment
+                    où l'on prend le temps de comprendre, en montre moins. */}
+                {move.alternatives && move.alternatives.length > 1 && (
+                  <div className="mt-3 overflow-hidden rounded-[var(--radius-sm)] border border-line/60">
+                    <p className="border-b border-line/60 bg-surface px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
+                      Ce que tu pouvais jouer
+                    </p>
+                    <ul>
+                      {move.alternatives.map((option, rang) => {
+                        const joue = option.uci === move.uci
+                        // Mêmes teintes que les flèches de l'échiquier, et
+                        // prises dans la même table : `ANNOTATION_COLORS`. Les
+                        // recopier en dur ici les ferait diverger le jour où
+                        // l'une des deux bougerait — c'est exactement ainsi que
+                        // le rang 1 s'était retrouvé vert face à une flèche
+                        // bleue.
+                        const teinte = joue
+                          ? ANNOTATION_COLORS.green
+                          : rang === 0
+                            ? ANNOTATION_COLORS.blue
+                            : null
+                        return (
+                          <li
+                            key={option.uci}
+                            className="flex items-center gap-2.5 border-l-2 px-3 py-1.5"
+                            style={{
+                              borderLeftColor: teinte ?? 'transparent',
+                              background: teinte
+                                ? `color-mix(in oklab, ${teinte} 9%, transparent)`
+                                : undefined,
+                            }}
+                          >
+                            <span
+                              className={clsx(
+                                'grid h-5 w-5 shrink-0 place-items-center rounded text-[10px] font-bold',
+                                !teinte && 'bg-surface-strong text-faint',
+                              )}
+                              style={
+                                teinte
+                                  ? {
+                                      background: `color-mix(in oklab, ${teinte} 25%, transparent)`,
+                                      color: teinte,
+                                    }
+                                  : undefined
+                              }
+                              aria-hidden
+                              title={`Coup classé ${rang + 1} sur ${move.alternatives!.length} par le moteur`}
+                            >
+                              {rang + 1}
+                            </span>
+                            <span
+                              className="w-16 shrink-0 font-mono text-[13px] font-semibold"
+                              title="Le coup, en notation d'échecs"
+                            >
+                              {format(option.san)}
+                            </span>
+                            <span
+                              className="w-12 shrink-0 text-xs tabular-nums text-muted"
+                              title="Évaluation de la position après ce coup, en pions. Positif : les Blancs sont mieux."
+                            >
+                              {formatScore(option.score)}
+                            </span>
+                            <span
+                              className="min-w-0 flex-1 truncate text-[12px] text-faint"
+                              title={`Suite prévue par le moteur : ${option.line.slice(1, 6).map((san) => format(san)).join(' ')}`}
+                            >
+                              {option.line.slice(1, 4).map((san) => format(san)).join(' ')}
+                            </span>
+                            {joue && (
+                              <Chip
+                                className="shrink-0 border-transparent"
+                                title="Le coup que tu as joué dans la partie"
+                              >
+                                joué
+                              </Chip>
+                            )}
+                            {!joue && rang === 0 && (
+                              <Chip
+                                className="shrink-0 border-transparent"
+                                title="Le premier choix du moteur dans cette position — celui qu'il fallait jouer"
+                              >
+                                meilleur
+                              </Chip>
+                            )}
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+                )}
+
+                {/* L'explication ci-dessus est complète et vérifiée. Ce qui
+                    suit permet d'aller au-delà quand elle ne répond pas à la
+                    question qu'on se pose — et n'apparaît que si l'assistant
+                    a été configuré. */}
+                <QuestionLibre
+                  contexte={contexteDuCoupAnalyse(move, explanation, {
+                    locale,
+                    notation,
+                    ouverture: report.opening?.name ?? null,
+                  })}
+                  questionParDefaut={questionApprofondir(locale)}
+                />
               </div>
             </Card>
           )}
@@ -789,6 +1617,7 @@ function ReviewScreen({
           </Card>
         </div>
       </div>
+      )}
     </div>
   )
 }
@@ -805,7 +1634,15 @@ function ReviewScreen({
  * sous la ligne de flottaison. Ici, deux lignes suffisent à répondre à « qui a
  * bien joué, et combien de fautes ». Le détail reste plus bas.
  */
-function AccuracySummary({ report }: { report: FullGameReport }) {
+function AccuracySummary({
+  report,
+  noms,
+  issue,
+}: {
+  report: FullGameReport
+  noms: { w: string | null; b: string | null }
+  issue: 'w' | 'b' | 'nulle' | null
+}) {
   return (
     <Card className="p-3">
       <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
@@ -821,8 +1658,13 @@ function AccuracySummary({ report }: { report: FullGameReport }) {
               )}
               aria-hidden
             />
-            <span className="w-12 shrink-0 text-[13px] font-medium">
-              {colour === 'w' ? 'Blancs' : 'Noirs'}
+            {/* Le nom passe avant la couleur : dans une partie importée, on
+                cherche « comment j'ai joué », pas « comment les Blancs ont
+                joué ». La largeur fixe saute — un pseudo ne tient pas en douze
+                pixels — et le débordement est tronqué plutôt que de pousser les
+                chiffres hors du cadre. */}
+            <span className="min-w-0 flex-1 truncate text-[13px] font-medium">
+              {noms[colour] ?? (colour === 'w' ? 'Blancs' : 'Noirs')}
             </span>
             <span className="w-16 shrink-0 font-display text-lg font-bold tabular-nums leading-none">
               {report.accuracy[colour].toFixed(0)}
@@ -840,7 +1682,7 @@ function AccuracySummary({ report }: { report: FullGameReport }) {
                         background: `color-mix(in oklab, var(--q-${style.token}) 16%, transparent)`,
                         color: `var(--q-${style.token})`,
                       }}
-                      title={style.label.fr}
+                      title={`${style.label.fr} — ${style.description.fr}`}
                     >
                       {style.glyph} {report.counts[colour][quality]}
                     </span>
@@ -908,11 +1750,11 @@ function KeyMoments({
               <span
                 className="shrink-0 font-bold"
                 style={{ color: `var(--q-${style.token})` }}
-                title={style.label.fr}
+                title={`${style.label.fr} — ${style.description.fr}`}
               >
                 {style.glyph}
               </span>
-              {move.winLoss >= 1 && (
+              {meriteUnMeilleurCoup(move.quality, move.winLoss) && (
                 <span className="w-14 shrink-0 text-right text-[11px] tabular-nums text-faint">
                   −{move.winLoss.toFixed(0)} pts
                 </span>
@@ -937,13 +1779,19 @@ const SUMMARY_QUALITIES: MoveQuality[] = [
 
 function PlayerReport({
   colour,
+  nom,
   accuracy,
   acpl,
   counts,
   estimatedElo,
   coach,
+  issue,
 }: {
   colour: Color
+  /** Nom du joueur, s'il est connu. */
+  nom?: string | null
+  /** Issue de la partie, quand elle est connue. */
+  issue?: 'w' | 'b' | 'nulle' | null
   accuracy: number
   acpl: number
   counts: Record<MoveQuality, number>
@@ -973,7 +1821,22 @@ function PlayerReport({
             )}
             aria-hidden
           />
-          {colour === 'w' ? 'Blancs' : 'Noirs'}
+          <span className="truncate">{nom ?? (colour === 'w' ? 'Blancs' : 'Noirs')}</span>
+          {nom && (
+            <span className="shrink-0 text-xs font-normal text-faint">
+              {colour === 'w' ? 'Blancs' : 'Noirs'}
+            </span>
+          )}
+          {/*
+            Une couronne sur le vainqueur, et rien sur l'autre — pas de « perd »
+            écrit en toutes lettres sur la carte de quelqu'un qui vient de
+            relire sa défaite. Le score exact reste en tête de page ; ici, on
+            se contente de désigner. Rien non plus sur une nulle, où il n'y a
+            personne à désigner.
+          */}
+          {issue === colour && (
+            <Crown size={14} className="shrink-0 text-accent" aria-label="Vainqueur de la partie" />
+          )}
         </h3>
         <div className="text-right">
           <span className="font-display text-2xl font-bold tabular-nums">
@@ -984,7 +1847,18 @@ function PlayerReport({
       </div>
 
       <p className="mt-0.5 text-xs text-faint">
-        perte moyenne {acpl} centipions · niveau estimé ≈ {estimatedElo} Elo
+        perte moyenne {acpl} centipions ·{' '}
+        {/*
+          « Niveau estimé » était un mensonge poli : le chiffre ne mesure pas
+          le niveau de quelqu'un mais la qualité de ses coups dans cette
+          partie-là. On perd sur une gaffe unique en jouant proprement le
+          reste, et face à un adversaire faible personne ne vous pose de
+          problème — la mesure monte sans que rien ne l'ait mérité. Le dire
+          coûte trois mots et évite qu'on se croie classé.
+        */}
+        <span title="Ce que valent les coups joués dans cette partie, pas ton classement. Une seule gaffe suffit à perdre une partie par ailleurs bien jouée, et un adversaire faible flatte la mesure.">
+          performance sur cette partie ≈ {estimatedElo} Elo
+        </span>
       </p>
 
       <div className="mt-3 flex flex-wrap gap-1">
@@ -1000,7 +1874,7 @@ function PlayerReport({
                   background: `color-mix(in oklab, var(--q-${style.token}) 16%, transparent)`,
                   color: `var(--q-${style.token})`,
                 }}
-                title={style.label.fr}
+                title={`${style.label.fr} — ${style.description.fr}`}
               >
                 {style.glyph} {counts[quality]}
               </span>

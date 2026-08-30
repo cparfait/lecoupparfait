@@ -50,6 +50,18 @@ export interface AnalyseGameOptions {
   /** Livre d'ouvertures, pour marquer les coups de théorie. */
   book?: OpeningBook
   locale?: Locale
+  /**
+   * Camp du lecteur, quand on le connaît.
+   *
+   * Les explications sont rédigées à la deuxième personne. Sans cette
+   * indication, elles s'adressent à l'auteur de chaque coup — si bien qu'en
+   * relisant une partie entière, on se faisait tutoyer à la place de son
+   * adversaire un coup sur deux : « ta tour en d1 » à propos de la sienne.
+   *
+   * On la laisse facultative : un PGN collé n'a pas de « toi », et dans ce cas
+   * s'adresser à l'auteur du coup reste la moins mauvaise convention.
+   */
+  lecteur?: Color | null
   /** Nombre de lignes demandées au moteur (2 suffit pour classer). */
   multiPv?: number
   /** Temps de réflexion réel de chaque coup, en millisecondes. */
@@ -83,6 +95,7 @@ export async function analyseGame(options: AnalyseGameOptions): Promise<FullGame
     analyser,
     book,
     locale = 'fr',
+    lecteur = null,
     multiPv = 2,
     thinkTimes = [],
     onProgress,
@@ -167,6 +180,20 @@ export async function analyseGame(options: AnalyseGameOptions): Promise<FullGame
     const bestLine = topLine ? uciLineToSan(fenBefore, topLine.pv.slice(0, 6)) : []
     const playedLine = after.lines[0] ? uciLineToSan(fenAfter, after.lines[0].pv.slice(0, 5)) : []
 
+    // Les options classées, dans l'ordre du moteur. On s'arrête à trois : la
+    // quatrième d'une position ordinaire est déjà un coup que personne
+    // n'envisage, et chaque ligne demandée coûte du temps de calcul.
+    const alternatives = [...before.lines]
+      .sort((a, b) => a.multipv - b.multipv)
+      .slice(0, 3)
+      .flatMap((ligne) => {
+        const uci = ligne.pv[0]
+        if (!uci) return []
+        const san = uciLineToSan(fenBefore, [uci])[0]
+        if (!san) return []
+        return [{ uci, san, score: ligne.score, line: uciLineToSan(fenBefore, ligne.pv.slice(0, 5)) }]
+      })
+
     const opening = book?.lookup(fenAfter, locale) ?? null
 
     const analysedMove: AnalysedMove = {
@@ -191,6 +218,7 @@ export async function analyseGame(options: AnalyseGameOptions): Promise<FullGame
           : null,
       bestLine,
       playedLine,
+      alternatives,
       motifs: classification.motifs,
       opening: opening ? { eco: opening.eco, name: opening.label } : null,
       thinkTimeMs: thinkTimes[i],
@@ -200,6 +228,7 @@ export async function analyseGame(options: AnalyseGameOptions): Promise<FullGame
     explanations.push(
       explainMove({
         locale,
+        lecteur,
         san: move.san,
         fenAfter,
         fenBefore,

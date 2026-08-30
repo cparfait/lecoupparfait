@@ -47,6 +47,7 @@ import {
   squareCentre,
   squarePosition,
 } from './boardKit.ts'
+import { QUALITY_STYLES, type MoveQuality } from '@coupparfait/core'
 import { PromotionPicker } from './PromotionPicker.tsx'
 import {
   SAFETY_COLOURS,
@@ -55,6 +56,7 @@ import {
   type SafetyVerdict,
 } from './moveSafety.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import type { BoardStyleId } from '@/lib/store/preferences.ts'
 
 export interface Board2DProps {
   fen: string
@@ -90,12 +92,33 @@ export interface Board2DProps {
   checkmate?: boolean
   /** Cases mises en avant par l'analyse (motifs tactiques). */
   highlights?: Square[]
+  /**
+   * Verdict porté par la case d'arrivée du coup.
+   *
+   * Le jugement d'un coup s'affichait uniquement dans le panneau de commentaire,
+   * c'est-à-dire à côté de l'échiquier — parfois sous la ligne de flottaison sur
+   * un écran étroit. Or on regarde la case où la pièce vient d'arriver : c'est
+   * là que le verdict doit être, et pas ailleurs.
+   *
+   * La case prend la teinte du barème et porte une pastille. Rien d'autre :
+   * l'explication reste dans le panneau, on ne met sur le plateau que ce qui se
+   * lit d'un coup d'œil.
+   */
+  verdict?: { square: Square; quality: MoveQuality } | null
   /** Flèches permanentes (meilleur coup, menaces…). */
   arrows?: Arrow[]
   /** Cercles permanents. */
   circles?: CircleMark[]
   /** Autorise les annotations au clic droit. */
   allowAnnotations?: boolean
+  /**
+   * Impose un habillage de damier, au lieu de suivre la préférence du joueur.
+   *
+   * Réservé aux échiquiers décoratifs — la bannière d'accueil, où le damier
+   * doit s'accorder au thème affiché. Sur un échiquier jouable, écraser le
+   * choix de l'utilisateur serait un contresens.
+   */
+  skinId?: BoardStyleId
   /**
    * Appelé quand on clique une flèche permanente.
    *
@@ -149,6 +172,7 @@ export const Board2D = memo(function Board2D({
   checkSquare,
   checkmate = false,
   highlights = [],
+  verdict = null,
   arrows = [],
   circles = [],
   allowAnnotations = true,
@@ -158,10 +182,14 @@ export const Board2D = memo(function Board2D({
   className,
   instant = false,
   animationMs: animationOverride,
+  skinId,
 }: Board2DProps) {
   const boardRef = useRef<HTMLDivElement>(null)
   const prefs = usePreferences()
-  const skin = BOARD_SKINS[prefs.boardStyle] ?? BOARD_SKINS.aurore
+  // La surcharge ne sert qu'aux échiquiers de démonstration, qui illustrent
+  // l'habillage courant plutôt que d'obéir au réglage du joueur. Partout
+  // ailleurs `skinId` est absent et la préférence gagne.
+  const skin = BOARD_SKINS[skinId ?? prefs.boardStyle] ?? BOARD_SKINS.aurore
 
   const pieces = useMemo(() => piecesFromFen(fen), [fen])
   const squares = useMemo(() => orderedSquares(orientation), [orientation])
@@ -580,6 +608,8 @@ export const Board2D = memo(function Board2D({
             />
           ))}
 
+          {verdict && <VerdictDeCase verdict={verdict} orientation={orientation} />}
+
           {prefs.highlightCheck && checkSquare && (
             <div
               className={clsx('absolute', checkmate && 'animate-mate-glow')}
@@ -801,6 +831,56 @@ function MoveTrail({
   )
 }
 
+/**
+ * La qualité du coup, posée sur sa case d'arrivée.
+ *
+ * Deux éléments, et pas un de plus : la case prend la teinte du barème, et une
+ * pastille porte le symbole. La teinte reste discrète — dix-huit pour cent —
+ * parce qu'elle se superpose au sillage du dernier coup et aux motifs mis en
+ * avant ; plus opaque, elle les effacerait au lieu de s'y ajouter.
+ *
+ * La pastille déborde volontairement sur le coin haut-droit de la case, comme
+ * une pastille de notification : à l'intérieur, elle masquerait la pièce qui
+ * vient de bouger, qui est précisément ce qu'on regarde.
+ *
+ * Fond blanc et symbole coloré, et non l'inverse. Un symbole blanc sur la
+ * teinte du barème est très lisible sur la gaffe — rouge vif — et illisible sur
+ * l'imprécision, dont le jaune `#f7c631` ne fait pas 2 contre 1 avec du blanc.
+ * Plutôt que de choisir la couleur du texte selon la luminance de onze teintes,
+ * on prend le parti qui marche pour toutes, et qui est déjà celui des pastilles
+ * de qualité ailleurs dans l'application.
+ */
+function VerdictDeCase({
+  verdict,
+  orientation,
+}: {
+  verdict: { square: Square; quality: MoveQuality }
+  orientation: Color
+}) {
+  const style = QUALITY_STYLES[verdict.quality]
+  const teinte = `var(--q-${style.token})`
+  const boite = percentBox(verdict.square, orientation)
+
+  return (
+    <>
+      <div
+        className="absolute"
+        style={{ ...boite, background: `color-mix(in oklab, ${teinte} 18%, transparent)` }}
+        aria-hidden
+      />
+      <div className="pointer-events-none absolute" style={boite} aria-hidden>
+        <span
+          className="animate-piece-drop absolute -right-[14%] -top-[14%] grid h-[48%] w-[48%] place-items-center rounded-full text-[min(2.6vw,0.95rem)] font-bold leading-none shadow-[var(--shadow-md)]"
+          style={{ background: '#fff', color: teinte, boxShadow: `0 0 0 2px ${teinte}` }}
+          title={`${style.label.fr} — ${style.description.fr}`}
+        >
+          {style.glyph}
+        </span>
+      </div>
+    </>
+  )
+}
+
 function SquareOverlay({
   square,
   orientation,
@@ -833,7 +913,11 @@ function Coordinates({
   orientation: Color
   skin: (typeof BOARD_SKINS)[keyof typeof BOARD_SKINS]
 }) {
-  const files = orientation === 'w' ? 'abcdefgh' : 'hgfedcba'
+  // Capitales pour les colonnes, et seulement pour l'affichage : la notation
+  // reste en minuscules partout ailleurs — `lib/board/types.ts` engendre les
+  // cases, `chess.js` lit et écrit les coups. Ce qui change ici est le repère
+  // imprimé sur le plateau, pas le nom de la case.
+  const files = orientation === 'w' ? 'ABCDEFGH' : 'HGFEDCBA'
   const ranks = orientation === 'w' ? '87654321' : '12345678'
 
   return (

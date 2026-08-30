@@ -22,7 +22,6 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  ChevronRight,
   Eye,
   EyeOff,
   History,
@@ -42,7 +41,9 @@ import {
   classifyMove,
   detectPositionMotifs,
   explainMove,
+  explainRecommendedMove,
   formatScore,
+  meriteUnMeilleurCoup,
   motifCopy,
   uciLineToSan,
   winPercentFor,
@@ -52,14 +53,16 @@ import {
   type OpeningBook,
   type Score,
 } from '@coupparfait/core'
+import { ANNOTATION_COLORS } from '@/components/board/boardKit.ts'
 import { Card, Chip } from '@/components/ui/index.tsx'
+import { toast } from '@/components/ui/Toast.tsx'
 import { getEngine } from '@/lib/engine/client.ts'
 import { speak, stopSpeaking } from '@/lib/speech.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { useSan } from '@/lib/notation.ts'
 import type { PlayedMove } from '@/lib/game/useChessGame.ts'
 import type { Arrow } from '@/components/board/boardKit.ts'
-import { LEGEND, legendFor, type LegendItem } from '@/components/board/ArrowLegend.tsx'
+import { ArrowLegend, LEGEND, legendFor, type LegendItem } from '@/components/board/ArrowLegend.tsx'
 
 /** Une option qu'on avait, avec ce qu'elle valait. */
 export interface Alternative {
@@ -75,6 +78,14 @@ export interface Alternative {
   played: boolean
   /** Ce que ce coup crée sur l'échiquier, en une phrase. */
   reason: string | null
+  /**
+   * Le coup en notation anglaise.
+   *
+   * `san` est localisé pour l'affichage — « Cf3 » et non « Nf3 ». Rejouer le
+   * coup demande l'original : `chess.js` ne connaît que l'anglais, et lui
+   * passer la version française échoue silencieusement.
+   */
+  sanEn: string
 }
 
 export interface Commentary {
@@ -90,6 +101,15 @@ export interface Commentary {
    * texte, lui, reste intéressant à relire.
    */
   fenAfter: string
+  /**
+   * Position **avant** le coup.
+   *
+   * Elle n'était pas conservée : le commentaire n'avait besoin que de la
+   * position résultante. Elle le devient dès qu'on veut expliquer une
+   * alternative à la demande — pour la rejouer, il faut repartir de là où le
+   * choix se posait.
+   */
+  fenBefore: string
   quality: MoveQuality
   headline: string
   body: string[]
@@ -111,6 +131,21 @@ export interface UseLiveCommentaryOptions {
   enabled: boolean
   /** Ne commenter que les coups de ce camp. `null` = les deux. */
   onlyColor?: Color | null
+  /**
+   * Camp à qui l'explication s'adresse.
+   *
+   * Indispensable dès qu'on commente les coups de l'adversaire : sans lui, le
+   * texte tutoie l'auteur du coup, et l'on se retrouve à lire « ta tour » à
+   * propos de celle d'en face.
+   */
+  lecteur?: Color | null
+  /**
+   * Détailler les suites de coups — voir `SEUIL_SUITE_BREVE`.
+   *
+   * Laissé indéfini quand aucun niveau ne permet d'en juger : `explainMove`
+   * détaille alors, ce qui est le défaut prudent.
+   */
+  suiteDetaillee?: boolean
   depth?: number
   /** Nombre d'alternatives à présenter. */
   alternatives?: number
@@ -129,6 +164,8 @@ export function useLiveCommentary({
   move,
   enabled,
   onlyColor = null,
+  lecteur = null,
+  suiteDetaillee,
   depth,
   alternatives = 3,
   book,
@@ -215,6 +252,8 @@ export function useLiveCommentary({
 
         const explanation = explainMove({
           locale: prefs.locale,
+          lecteur,
+          suiteDetaillee,
           san: move.san,
           fenAfter: move.after,
           fenBefore: move.before,
@@ -234,6 +273,7 @@ export function useLiveCommentary({
           san: move.san,
           color: move.color,
           fenAfter: move.after,
+          fenBefore: move.before,
           quality: classification.quality,
           headline: explanation.headline,
           body: explanation.body,
@@ -262,7 +302,18 @@ export function useLiveCommentary({
     })()
 
     return () => controller.abort()
-  }, [move, enabled, onlyColor, depth, alternatives, book, prefs.clientDepth, prefs.locale])
+  }, [
+    move,
+    enabled,
+    onlyColor,
+    lecteur,
+    suiteDetaillee,
+    depth,
+    alternatives,
+    book,
+    prefs.clientDepth,
+    prefs.locale,
+  ])
 
   return { commentary, loading, history }
 }
@@ -317,6 +368,7 @@ function buildAlternatives(
       rank: line.multipv,
       uci,
       san,
+      sanEn: san,
       score: line.score,
       win: Math.round(winPercentFor(line.score, mover)),
       line: uciLineToSan(fenBefore, line.pv.slice(0, 5)),
@@ -333,6 +385,7 @@ function buildAlternatives(
         rank: 99,
         uci: playedUci,
         san,
+        sanEn: san,
         score: { type: 'cp', value: 0 },
         win: 0,
         line: [],
@@ -370,10 +423,32 @@ export function CommentaryPanel({
   onToggleBestMove,
   stale,
   onReview,
+  legende = [],
+  voix = true,
   className,
 }: {
   commentary: Commentary | null
   loading: boolean
+  /**
+   * Le coach a-t-il le droit de parler ?
+   *
+   * Distinct de la préférence `voiceEnabled`, qui dit si l'on *veut* une voix
+   * dans l'application. Ici on dit si cette partie-ci en comporte une : jouer
+   * sans avoir demandé de commentaire et s'entendre commenter quand même, ce
+   * n'est pas un réglage mal placé, c'est une partie qu'on n'a pas choisie.
+   */
+  voix?: boolean
+  /**
+   * Légende des flèches, à afficher en tête du panneau.
+   *
+   * Elle vivait sous l'échiquier, c'est-à-dire à côté des flèches qu'elle
+   * décrit — ce qui semble logique et ne l'est pas : on la lit une fois pour
+   * comprendre le code couleur, et ensuite elle occupe une bande sous le
+   * plateau, au milieu de ce qu'on regarde vraiment. En tête du commentaire,
+   * elle est là où l'œil arrive après le coup, et elle disparaît d'elle-même
+   * quand il n'y a aucune flèche à expliquer.
+   */
+  legende?: LegendItem[]
   paused?: boolean
   onTogglePause?: () => void
   /**
@@ -404,7 +479,11 @@ export function CommentaryPanel({
   className?: string
 }) {
   const locale = usePreferences((state) => state.locale)
-  const voiceEnabled = usePreferences((state) => state.voiceEnabled)
+  const voixPreferee = usePreferences((state) => state.voiceEnabled)
+  const voiceEnabled = voixPreferee && voix
+  // Lue par des rappels mémoïsés qui n'ont pas à se refabriquer pour ça.
+  const parole = useRef(voiceEnabled)
+  parole.current = voiceEnabled
   const setPreference = usePreferences((state) => state.set)
   const san = useSan()
   const spokenRef = useRef<string | null>(null)
@@ -416,6 +495,40 @@ export function CommentaryPanel({
   notifyRef.current = onSpeakingChange
 
   const guardRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  /**
+   * Dire pourquoi l'une des options proposées valait mieux.
+   *
+   * Calculée au clic, jamais d'avance : produire l'explication des trois lignes
+   * à chaque coup coûterait trois fois le prix pour deux qu'on n'écoutera pas.
+   *
+   * C'est `explainRecommendedMove` — le même moteur de rédaction que le bouton
+   * « Pourquoi ? » de la page d'analyse. Une seule façon d'expliquer un coup du
+   * moteur dans toute l'application, quel que soit l'écran d'où on la demande.
+   */
+  const expliquerAlternative = useCallback(
+    (alternative: Alternative) => {
+      if (!commentary) return
+      const explication = explainRecommendedMove({
+        locale,
+        fenBefore: commentary.fenBefore,
+        bestSan: alternative.sanEn,
+        mover: commentary.color,
+        scoreBefore: commentary.scoreBefore,
+        scoreAfter: alternative.score,
+        bestLine: alternative.line,
+      })
+      // Le coup du moteur ne se rejoue pas sur cette position : on le dit
+      // plutôt que de rester muet sur un bouton qu'on vient de presser.
+      if (!explication) {
+        toast.warning('Ce coup ne se rejoue pas sur cette position.', 'Impossible de l’expliquer sans risquer d’inventer.')
+        return
+      }
+      stopSpeaking()
+      if (parole.current) speak(explication.speech)
+    },
+    [commentary, locale],
+  )
 
   /**
    * Note qui a la parole, et arme un garde-fou.
@@ -455,6 +568,11 @@ export function CommentaryPanel({
       if (guardRef.current) clearTimeout(guardRef.current)
       notifyRef.current?.(false)
       stopSpeaking()
+      // Et on oublie ce qu'on venait de dire : en mode strict, React défait les
+      // effets aussitôt après les avoir montés, puis les rejoue. Le garde
+      // « déjà prononcé » bloquait alors la seconde passe, si bien que le tout
+      // premier commentaire d'une partie restait muet en développement.
+      spokenRef.current = null
     },
     [],
   )
@@ -518,6 +636,12 @@ export function CommentaryPanel({
         </div>
       )}
 
+      {legende.length > 0 && (
+        <div className="border-b border-line/60 px-4 py-2">
+          <ArrowLegend items={legende} className="!bg-transparent !px-0 !py-0" />
+        </div>
+      )}
+
       <div className="p-4">
         <div className="flex items-start gap-3">
           <span
@@ -529,6 +653,7 @@ export function CommentaryPanel({
               color: style ? `var(--q-${style.token})` : 'var(--text-muted)',
             }}
             aria-hidden
+            title={style ? `${style.label.fr} — ${style.description.fr}` : undefined}
           >
             {loading && !commentary ? (
               <Loader2 size={14} className="animate-spin" />
@@ -544,9 +669,21 @@ export function CommentaryPanel({
               commentary && (
                 <>
                   <p className="text-sm font-semibold leading-snug">{commentary.headline}</p>
+                  {/* La perte n'est chiffrée qu'au-dessus du seuil qui la rend
+                      digne d'être signalée — le même que partout ailleurs.
+                      
+                      Elle l'était dès un point, et produisait la contradiction
+                      qu'on nous a signalée : « d4 — théorie d'ouverture » suivi
+                      de « −2 pts de chances de victoire », au-dessus d'un
+                      paragraphe expliquant qu'il n'y a rien à calculer ici. Le
+                      chiffre était juste et le texte aussi ; c'est de les mettre
+                      côte à côte que naissait le reproche. Deux points de
+                      pourcentage sur un premier coup ne sont pas une faute, ce
+                      sont les préférences du moteur — et on vient de décider
+                      qu'on ne les présentait plus comme des corrections. */}
                   <p className="mt-0.5 text-[11px] tabular-nums text-faint">
                     {formatScore(commentary.scoreBefore)} → {formatScore(commentary.scoreAfter)}
-                    {commentary.winLoss >= 1 &&
+                    {meriteUnMeilleurCoup(commentary.quality, commentary.winLoss) &&
                       ` · −${commentary.winLoss.toFixed(0)} pts de chances de victoire`}
                   </p>
                 </>
@@ -554,75 +691,91 @@ export function CommentaryPanel({
             )}
           </div>
 
-          <div className="flex shrink-0 flex-col gap-0.5">
+          {/* Les commandes en ligne, et non en colonne.
+
+              Elles étaient empilées verticalement contre le bord droit :
+              quatre boutons de vingt-huit pixels le long d'un en-tête qui en
+              fait trente-quatre. La colonne imposait sa hauteur au bloc entier,
+              et ouvrait sous elle un vide de soixante-dix pixels que rien ne
+              venait remplir.
+
+              À plat, la barre fait la hauteur d'un seul bouton. Elle prend un
+              peu de largeur au titre — c'est le prix, et il est moindre : un
+              titre qui passe sur deux lignes reste lu, un vide ne se lit
+              jamais. */}
+          <div className="flex shrink-0 items-center gap-0.5">
+          {/* Rien à couper dans une partie sans commentaire : le bouton
+              proposerait d'activer une voix qui resterait muette. */}
+          {voix && (
             <button
               type="button"
               onClick={() => {
-                if (voiceEnabled) stopSpeaking()
-                setPreference('voiceEnabled', !voiceEnabled)
+                if (voixPreferee) stopSpeaking()
+                setPreference('voiceEnabled', !voixPreferee)
               }}
-              title={voiceEnabled ? 'Couper la voix' : 'Activer la voix'}
-              aria-label={voiceEnabled ? 'Couper la voix' : 'Activer la voix'}
+              title={voixPreferee ? 'Couper la voix' : 'Activer la voix'}
+              aria-label={voixPreferee ? 'Couper la voix' : 'Activer la voix'}
               className={clsx(
                 'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors',
-                voiceEnabled ? 'text-accent hover:bg-surface-hover' : 'text-faint hover:bg-surface-hover',
+                voixPreferee ? 'text-accent hover:bg-surface-hover' : 'text-faint hover:bg-surface-hover',
               )}
             >
-              {voiceEnabled ? <Volume2 size={14} aria-hidden /> : <VolumeX size={14} aria-hidden />}
+              {voixPreferee ? <Volume2 size={14} aria-hidden /> : <VolumeX size={14} aria-hidden />}
             </button>
+          )}
 
-            {commentary && voiceEnabled && (
-              <button
-                type="button"
-                onClick={replay}
-                title="Réécouter l’explication complète"
-                aria-label="Réécouter l’explication"
-                className={clsx(
-                  'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
-                  speaking ? 'text-accent' : 'text-faint hover:text-ink',
-                )}
-              >
-                <span className="text-sm font-bold leading-none" aria-hidden>
-                  ↻
-                </span>
-              </button>
-            )}
+          {commentary && voiceEnabled && (
+            <button
+              type="button"
+              onClick={replay}
+              title="Réécouter l’explication complète"
+              aria-label="Réécouter l’explication"
+              className={clsx(
+                'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
+                speaking ? 'text-accent' : 'text-faint hover:text-ink',
+              )}
+            >
+              <span className="text-sm font-bold leading-none" aria-hidden>
+                ↻
+              </span>
+            </button>
+          )}
 
-            {onToggleBestMove && (
-              <button
-                type="button"
-                onClick={onToggleBestMove}
-                aria-pressed={showBestMove}
-                title={
-                  showBestMove
-                    ? 'Masquer le coup proposé sur l’échiquier'
-                    : 'Montrer le coup proposé sur l’échiquier'
-                }
-                aria-label="Afficher le coup proposé"
-                className={clsx(
-                  'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
-                  showBestMove ? 'text-accent' : 'text-faint hover:text-ink',
-                )}
-              >
-                {showBestMove ? <Eye size={14} aria-hidden /> : <EyeOff size={14} aria-hidden />}
-              </button>
-            )}
+          {onToggleBestMove && (
+            <button
+              type="button"
+              onClick={onToggleBestMove}
+              aria-pressed={showBestMove}
+              title={
+                showBestMove
+                  ? 'Masquer le coup proposé sur l’échiquier'
+                  : 'Montrer le coup proposé sur l’échiquier'
+              }
+              aria-label="Afficher le coup proposé"
+              className={clsx(
+                'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
+                showBestMove ? 'text-accent' : 'text-faint hover:text-ink',
+              )}
+            >
+              {showBestMove ? <Eye size={14} aria-hidden /> : <EyeOff size={14} aria-hidden />}
+            </button>
+          )}
 
-            {onTogglePause && (
-              <button
-                type="button"
-                onClick={onTogglePause}
-                title={paused ? 'Reprendre la partie' : 'Mettre en pause pour lire'}
-                aria-label={paused ? 'Reprendre' : 'Pause'}
-                className={clsx(
-                  'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
-                  paused ? 'text-accent' : 'text-faint hover:text-ink',
-                )}
-              >
-                {paused ? <Play size={14} aria-hidden /> : <Pause size={14} aria-hidden />}
-              </button>
-            )}
-          </div>
+          {onTogglePause && (
+            <button
+              type="button"
+              onClick={onTogglePause}
+              title={paused ? 'Reprendre la partie' : 'Mettre en pause pour lire'}
+              aria-label={paused ? 'Reprendre' : 'Pause'}
+              className={clsx(
+                'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
+                paused ? 'text-accent' : 'text-faint hover:text-ink',
+              )}
+            >
+              {paused ? <Play size={14} aria-hidden /> : <Pause size={14} aria-hidden />}
+            </button>
+          )}
+            </div>
         </div>
 
         {commentary && commentary.body.length > 0 && (
@@ -644,23 +797,23 @@ export function CommentaryPanel({
           </p>
           <ul onMouseLeave={() => onHoverAlternative?.(null)}>
             {commentary.alternatives.map((alternative) => (
-              <li key={alternative.uci}>
+              /* La ligne et l'écoute sont **deux** boutons côte à côte, et non
+                 l'un dans l'autre : un bouton ne peut pas en contenir un autre.
+                 Le survol de la ligne montre la flèche, l'icône dit pourquoi. */
+              <li key={alternative.uci} className="flex items-stretch">
                 <button
                   type="button"
                   onMouseEnter={() => onHoverAlternative?.(alternative)}
                   onFocus={() => onHoverAlternative?.(alternative)}
-                  className={clsx(
-                    'flex w-full items-center gap-2.5 px-4 py-2 text-left transition-colors hover:bg-surface-hover',
-                    alternative.played && 'bg-surface',
-                  )}
+                  className="flex min-w-0 flex-1 items-center gap-2.5 border-l-2 py-2 pl-3.5 pr-1 text-left transition-colors hover:bg-surface-hover"
+                  style={teinteDeLigne(alternative)}
                 >
                   <span
                     className={clsx(
                       'grid h-5 w-5 shrink-0 place-items-center rounded text-[10px] font-bold',
-                      alternative.rank === 1
-                        ? 'bg-[color-mix(in_oklab,var(--q-best)_25%,transparent)] text-[var(--q-best)]'
-                        : 'bg-surface-strong text-faint',
+                      !couleurDeLigne(alternative) && 'bg-surface-strong text-faint',
                     )}
+                    style={teinteDeRang(alternative)}
                     aria-hidden
                   >
                     {alternative.rank === 99 ? '·' : alternative.rank}
@@ -684,15 +837,55 @@ export function CommentaryPanel({
                         : '')}
                   </span>
 
+                  {/* Les deux lignes remarquables portent leur nom.
+                  
+                      « Joué » existait déjà ; le premier choix du moteur, lui,
+                      n'avait qu'un chevron — un signe qui ne dit rien et qu'on
+                      prend pour un bouton. La couleur seule ne suffit pas non
+                      plus : elle demande d'avoir lu la légende et de s'en
+                      souvenir. Une étiquette se lit sans rien savoir.
+                  
+                      Elle reprend la teinte de la flèche correspondante, pour
+                      que l'étiquette, le liseré, la pastille du rang et la
+                      flèche sur l'échiquier ne fassent qu'une seule couleur. */}
                   {alternative.played && (
-                    <Chip tone="neutral" className="shrink-0">
+                    <Chip
+                      className="shrink-0 border-transparent"
+                      style={teinteDeRang(alternative)}
+                    >
                       joué
                     </Chip>
                   )}
                   {!alternative.played && alternative.rank === 1 && (
-                    <ChevronRight size={13} className="shrink-0 text-faint" aria-hidden />
+                    <Chip
+                      className="shrink-0 border-transparent"
+                      style={teinteDeRang(alternative)}
+                    >
+                      meilleur
+                    </Chip>
                   )}
                 </button>
+
+                {/* L'explication d'une alternative n'existe pas d'avance : la
+                    calculer pour les trois lignes à chaque coup coûterait trois
+                    fois le prix pour deux qu'on n'écoutera jamais. On la produit
+                    au clic, avec `explainRecommendedMove` — la même machinerie
+                    que le « Pourquoi ? » de la page d'analyse. */}
+                {!alternative.played && alternative.rank !== 99 && (
+                  <button
+                    type="button"
+                    onClick={() => expliquerAlternative(alternative)}
+                    title={`Écouter pourquoi ${san(alternative.san)}`}
+                    aria-label={`Écouter l'explication de ${san(alternative.san)}`}
+                    className={clsx(
+                      'grid w-9 shrink-0 place-items-center transition-colors hover:bg-surface-hover',
+                      'text-faint hover:text-accent',
+                    )}
+                    style={{ background: teinteDeLigne(alternative).background }}
+                  >
+                    <Volume2 size={13} aria-hidden />
+                  </button>
+                )}
               </li>
             ))}
           </ul>
@@ -711,8 +904,15 @@ export function CommentaryPanel({
 export function commentaryArrows(
   commentary: Commentary | null,
   hovered: Alternative | null,
-  /** Montre le coup proposé même quand le coup joué était bon. */
-  alwaysShowBest = true,
+  /**
+   * Autorise la flèche du coup conseillé.
+   *
+   * Le paramètre ne peut plus que **retirer** la flèche, jamais l'imposer :
+   * c'est le réglage du joueur qui a décidé de ne pas la voir. La décider
+   * présente relève d'une seule règle, `SEUIL_MEILLEUR_COUP`, et elle ne se
+   * négocie pas depuis l'appelant — sinon on retombe sur deux vérités.
+   */
+  montrerLeConseil = true,
 ): Arrow[] {
   if (!commentary) return []
 
@@ -745,10 +945,35 @@ export function commentaryArrows(
     })
   }
 
-  // Le coup proposé est fléché dès qu'il diffère de celui joué. On le montre
-  // même quand le coup joué était correct : voir l'alternative que le moteur
-  // préférait est instructif, pas seulement voir ses erreurs.
-  if (best && !best.played && (alwaysShowBest || commentary.winLoss >= 2)) {
+  /*
+   * Le coup proposé est fléché **exactement quand l'explication en nomme un**.
+   *
+   * Deux corrections successives, et la seconde annule à moitié la première.
+   *
+   * La flèche était tracée dès que le moteur avait une préférence — c'est-à-dire
+   * presque toujours. On jouait d4 au premier coup, l'un des deux meilleurs
+   * coups du jeu, et l'échiquier fléchait aussitôt e4 : deux centièmes de pion
+   * d'écart, présentés comme une correction. On a d'abord écarté les coups
+   * irréprochables par leur classement (`book`, `best`, `excellent`…).
+   *
+   * C'était traiter le symptôme. Le vrai défaut est qu'il existait **deux
+   * règles** pour une seule question : le texte ne propose un meilleur coup
+   * qu'au-delà de `SEUIL_MEILLEUR_COUP` points de chances de victoire, la
+   * flèche n'avait aucun seuil. D'où le cas qu'on nous a signalé — « Coup
+   * conseillé » écrit dans la légende, et pas une ligne dans l'explication pour
+   * dire lequel ni pourquoi.
+   *
+   * Une seule règle, donc, et c'est celle du texte. Les alternatives restent
+   * listées dans le panneau avec leur évaluation : qui veut savoir ce que le
+   * moteur préférait l'y trouve. La différence est qu'il faut aller le lire, au
+   * lieu de le recevoir comme un reproche.
+   */
+  if (
+    best &&
+    !best.played &&
+    montrerLeConseil &&
+    meriteUnMeilleurCoup(commentary.quality, commentary.winLoss)
+  ) {
     arrows.push({
       from: best.uci.slice(0, 2) as Square,
       to: best.uci.slice(2, 4) as Square,
@@ -761,18 +986,23 @@ export function commentaryArrows(
 }
 
 /**
- * Légende correspondant exactement aux flèches de `commentaryArrows`.
+ * Légende correspondant aux flèches de `commentaryArrows` — moins la bleue.
  *
  * Deux traits de couleur sur un échiquier ne veulent rien dire sans clé de
- * lecture : c'est elle qui transforme « un trait vert et un trait bleu » en
- * « voici ton coup, voici celui que le moteur préférait ».
+ * lecture. Mais la flèche du coup conseillé a désormais la sienne ailleurs : la
+ * ligne « meilleur » de la liste des alternatives porte le même bleu et le
+ * nomme. Répéter « Coup conseillé » à trois centimètres de là n'apprend rien à
+ * personne et allonge une bande qu'on lit une fois.
+ *
+ * La verte reste : le coup joué n'est étiqueté nulle part ailleurs — la liste
+ * dit « joué » sans dire que c'est cette flèche-là.
  */
 export function commentaryLegend(
   commentary: Commentary | null,
   hovered: Alternative | null,
-  alwaysShowBest = true,
+  montrerLeConseil = true,
 ): LegendItem[] {
-  const arrows = commentaryArrows(commentary, hovered, alwaysShowBest)
+  const arrows = commentaryArrows(commentary, hovered, montrerLeConseil)
   if (arrows.length === 0) return []
 
   if (hovered) {
@@ -783,7 +1013,67 @@ export function commentaryLegend(
     ]
   }
 
-  return legendFor(arrows, [LEGEND.played, LEGEND.playedBad, LEGEND.best])
+  /*
+   * La flèche verte porte le verdict, pas l'évidence.
+   *
+   * Elle était légendée « Ton coup ». C'était juste et sans intérêt : on sait
+   * qu'on vient de jouer, on a poussé la pièce soi-même. L'information utile
+   * est ailleurs — et depuis qu'on ne flèche plus le coup conseillé quand il
+   * n'y a rien à conseiller, la flèche verte se retrouve **seule** sur
+   * l'échiquier précisément dans le cas où le coup joué était le bon. Le seul
+   * cas où elle a quelque chose à annoncer, donc, et elle n'annonçait rien.
+   */
+  const irreprochable =
+    commentary?.quality === 'best' ||
+    commentary?.quality === 'brilliant' ||
+    commentary?.quality === 'great'
+
+  const joue = irreprochable
+    ? { ...LEGEND.played, label: 'Ton coup — le meilleur', title: 'Le moteur n’avait rien de mieux.' }
+    : LEGEND.played
+
+  // `LEGEND.best` n'est plus proposé : la flèche bleue existe toujours sur
+  // l'échiquier, mais c'est la liste qui la nomme.
+  return legendFor(arrows, [joue, LEGEND.playedBad])
+}
+
+/**
+ * La couleur de flèche qui correspond à une ligne, s'il y en a une.
+ *
+ * Deux lignes sur trois n'ont pas de flèche sur l'échiquier et ne portent donc
+ * aucune couleur : seuls le coup joué et le premier choix du moteur en ont une.
+ *
+ * Les teintes sont **prises dans `ANNOTATION_COLORS`**, et c'est le point. Elles
+ * étaient écrites en dur ici, et pas les mêmes qu'au tableau : le rang 1
+ * reprenait le vert du barème de qualité pendant que sa flèche était bleue. On
+ * lisait deux verts pour deux choses différentes, et la seule flèche bleue de
+ * l'écran ne renvoyait à rien. Une couleur qui a deux définitions finit
+ * toujours par en avoir deux valeurs.
+ */
+function couleurDeLigne(alternative: Alternative): string | null {
+  if (alternative.played) return ANNOTATION_COLORS.green
+  if (alternative.rank === 1) return ANNOTATION_COLORS.blue
+  return null
+}
+
+/** Liseré à gauche et fond très pâle, aux couleurs de la flèche. */
+function teinteDeLigne(alternative: Alternative): {
+  borderLeftColor: string
+  background: string | undefined
+} {
+  const couleur = couleurDeLigne(alternative)
+  if (!couleur) return { borderLeftColor: 'transparent', background: undefined }
+  return {
+    borderLeftColor: couleur,
+    background: `color-mix(in oklab, ${couleur} 9%, transparent)`,
+  }
+}
+
+/** Pastille du rang, dans la même teinte mais plus soutenue. */
+function teinteDeRang(alternative: Alternative): { background: string; color: string } | undefined {
+  const couleur = couleurDeLigne(alternative)
+  if (!couleur) return undefined
+  return { background: `color-mix(in oklab, ${couleur} 25%, transparent)`, color: couleur }
 }
 
 /** Interrupteur du mode commenté, à poser dans la barre d'actions. */

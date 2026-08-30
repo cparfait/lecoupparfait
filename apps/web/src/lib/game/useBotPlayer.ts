@@ -16,7 +16,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { botLevel, botThinkDelayMs, pickBotMove, uciOptionsFor } from '@coupparfait/core'
-import type { BotLevel } from '@coupparfait/core'
+import type { BotLevel, BotPersonalityId } from '@coupparfait/core'
 import { getEngine } from '@/lib/engine/client.ts'
 
 export interface UseBotPlayerOptions {
@@ -26,6 +26,17 @@ export interface UseBotPlayerOptions {
   botColor: Color
   /** Niveau 1 à 25. */
   level: number
+  /**
+   * Style imposé, en dépit de celui que le barème associe à ce niveau.
+   *
+   * Le barème attribue une personnalité à chaque niveau, ce qui convient tant
+   * qu'on choisit un adversaire par sa force. Le mode carrière fait l'inverse :
+   * il choisit un style parce que c'est *lui* l'exercice — on affronte Brasier
+   * au chapitre « tenir face à une attaque » parce qu'il attaque — et la force
+   * n'est que le réglage secondaire. Sans cette entorse, le chapitre 6 aurait
+   * envoyé un adversaire prudent contre une leçon de défense.
+   */
+  personality?: BotPersonalityId
   /** Vrai tant que la partie est en cours. */
   active: boolean
   /** Appelé quand le bot a choisi son coup. */
@@ -60,7 +71,10 @@ export interface BotPlayerState {
 export function useBotPlayer(options: UseBotPlayerOptions): BotPlayerState {
   const { fen, botColor, level, active, onMove, turn, instant, human, ply } = options
 
-  const bot = botLevel(level)
+  const bareme = botLevel(level)
+  const bot = options.personality
+    ? { ...bareme, personality: options.personality }
+    : bareme
   const [thinking, setThinking] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

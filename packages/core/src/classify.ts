@@ -242,6 +242,15 @@ export interface QualityStyle {
   /** Annotation d'échecs traditionnelle. */
   nag: string
   label: { fr: string; en: string }
+  /**
+   * Ce que la classification veut dire, en une phrase.
+   *
+   * L'étiquette seule ne suffit pas : « Coup unique » ou « Occasion manquée »
+   * sont des termes de métier, et une pastille « 📖 4 » n'apprend rien à qui ne
+   * connaît pas le symbole. La définition sert d'infobulle partout où le barème
+   * s'affiche — bilan de partie, résumé de précision, liste des coups.
+   */
+  description: { fr: string; en: string }
 }
 
 /**
@@ -256,66 +265,110 @@ export const QUALITY_STYLES: Record<MoveQuality, QualityStyle> = {
     token: 'brilliant',
     nag: '!!',
     label: { fr: 'Brillant', en: 'Brilliant' },
+    description: {
+      fr: "Un sacrifice sain : du matériel donné, et la position le rend au centuple.",
+      en: 'A sound sacrifice: material given up, and the position pays it back.',
+    },
   },
   great: {
     glyph: '!',
     token: 'great',
     nag: '!',
     label: { fr: 'Coup unique', en: 'Great move' },
+    description: {
+      fr: "Le seul coup qui tenait — toute autre option perdait une part de l'avantage.",
+      en: 'The only move that held — anything else gave away part of the advantage.',
+    },
   },
   best: {
     glyph: '★',
     token: 'best',
     nag: '',
     label: { fr: 'Meilleur coup', en: 'Best move' },
+    description: {
+      fr: "Le premier choix du moteur.",
+      en: 'The engine’s first choice.',
+    },
   },
   excellent: {
     glyph: '✓',
     token: 'excellent',
     nag: '',
     label: { fr: 'Excellent', en: 'Excellent' },
+    description: {
+      fr: "Aussi bon que le meilleur, à un écart imperceptible.",
+      en: 'As good as the best, by an imperceptible margin.',
+    },
   },
   good: {
     glyph: '✓',
     token: 'good',
     nag: '',
     label: { fr: 'Bon coup', en: 'Good' },
+    description: {
+      fr: "Un coup correct, qui ne coûte presque rien.",
+      en: 'A sound move that costs almost nothing.',
+    },
   },
   book: {
     glyph: '📖',
     token: 'book',
     nag: '',
     label: { fr: 'Théorie', en: 'Book' },
+    description: {
+      fr: "Un coup de la théorie d'ouverture, joué et rejoué depuis longtemps.",
+      en: 'An opening-theory move, played and replayed for a long time.',
+    },
   },
   forced: {
     glyph: '⟶',
     token: 'forced',
     nag: '□',
     label: { fr: 'Coup forcé', en: 'Forced' },
+    description: {
+      fr: "Le seul coup légal : il n'y avait pas de choix à faire.",
+      en: 'The only legal move — there was no choice to make.',
+    },
   },
   inaccuracy: {
     glyph: '?!',
     token: 'inaccuracy',
     nag: '?!',
     label: { fr: 'Imprécision', en: 'Inaccuracy' },
+    description: {
+      fr: "Jouable, mais inférieur : une part de l'avantage s'en va.",
+      en: 'Playable but inferior: part of the advantage slips away.',
+    },
   },
   mistake: {
     glyph: '?',
     token: 'mistake',
     nag: '?',
     label: { fr: 'Erreur', en: 'Mistake' },
+    description: {
+      fr: "Une faute nette : l'évaluation bascule sensiblement.",
+      en: 'A clear error: the evaluation shifts noticeably.',
+    },
   },
   blunder: {
     glyph: '??',
     token: 'blunder',
     nag: '??',
     label: { fr: 'Gaffe', en: 'Blunder' },
+    description: {
+      fr: "Une gaffe : du matériel perdu, ou la position compromise d'un coup.",
+      en: 'A blunder: material lost, or the position wrecked in one move.',
+    },
   },
   miss: {
     glyph: '×',
     token: 'miss',
     nag: '?',
     label: { fr: 'Occasion manquée', en: 'Missed win' },
+    description: {
+      fr: "Une occasion manquée : un gain ou un mat était à portée.",
+      en: 'A missed chance: a win or a mate was available.',
+    },
   },
 }
 

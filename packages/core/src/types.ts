@@ -236,6 +236,19 @@ export interface AnalysedMove {
   bestLine?: SanMove[]
   /** Suite principale après le coup joué, en SAN. */
   playedLine?: SanMove[]
+  /**
+   * Les meilleures options qu'on avait, classées par le moteur.
+   *
+   * Le rapport ne gardait que la première — « mieux valait Cf3 » — alors que le
+   * moteur en calcule plusieurs à chaque position. Or savoir qu'un coup était
+   * le meilleur n'apprend pas grand-chose sans les suivants : c'est l'écart
+   * entre le premier et le troisième qui dit si le choix était serré ou si l'on
+   * est passé à côté d'une évidence.
+   *
+   * Le coup joué n'y figure pas s'il n'est pas dans les meilleurs : c'est
+   * l'affichage qui l'ajoute, en sachant le présenter comme tel.
+   */
+  alternatives?: Array<{ uci: UciMove; san: SanMove; score: Score; line: SanMove[] }>
   /** Motifs détectés à propos de ce coup. */
   motifs: DetectedMotif[]
   /** Nom de l'ouverture si la position est encore dans la théorie. */

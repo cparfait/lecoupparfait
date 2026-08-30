@@ -242,7 +242,7 @@ const MoveCell = function MoveCell({
         <span
           className="ml-auto shrink-0 text-[11px] font-bold leading-none"
           style={{ color: `var(--q-${style.token})` }}
-          title={style.label[locale]}
+          title={`${style.label[locale]} — ${style.description[locale]}`}
         >
           {style.glyph}
         </span>

@@ -35,11 +35,41 @@ export interface LegendItem {
 export function ArrowLegend({
   items,
   className,
+  reserve = false,
 }: {
   items: LegendItem[]
   className?: string
+  /**
+   * Garde la place quand il n'y a rien à légender.
+   *
+   * En partie commentée, les flèches vont et viennent d'un coup à l'autre —
+   * d'autant plus depuis qu'on ne flèche plus le coup conseillé sur un bon
+   * coup. La légende suivait, apparaissant et disparaissant sous l'échiquier ;
+   * et comme la taille du plateau est déterminée par la hauteur de sa colonne,
+   * il rétrécissait puis regrandissait à chaque fois.
+   *
+   * On réserve donc la ligne. Le gabarit est le même `<ul>`, rendu invisible
+   * avec un caractère insécable : c'est la seule façon d'obtenir *exactement* la
+   * même hauteur, sans la recopier en dur et sans qu'elle dérive le jour où l'on
+   * touchera aux marges.
+   */
+  reserve?: boolean
 }) {
-  if (items.length === 0) return null
+  if (items.length === 0) {
+    if (!reserve) return null
+    return (
+      <ul
+        aria-hidden
+        className={clsx(
+          'invisible flex flex-wrap items-center gap-x-3.5 gap-y-1.5 rounded-[var(--radius-sm)]',
+          'bg-surface px-3 py-2 text-[11px] leading-none text-muted',
+          className,
+        )}
+      >
+        <li>&nbsp;</li>
+      </ul>
+    )
+  }
 
   return (
     <ul

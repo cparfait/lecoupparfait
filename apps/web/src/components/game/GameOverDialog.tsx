@@ -14,7 +14,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Gauge, RotateCcw, Swords, X } from 'lucide-react'
+import { Gauge, RotateCcw, Swords, Trophy, X } from 'lucide-react'
 import type { Color } from 'chess.js'
 import type { GameResult, GameStatus } from '@coupparfait/core'
 import { formatPgnDate, toPgn } from '@coupparfait/core'
@@ -45,6 +45,7 @@ export function GameOverDialog({
   ratingDelta,
   onRematch,
   onNewGame,
+  retour,
 }: {
   status: GameStatus
   result: GameResult
@@ -56,6 +57,16 @@ export function GameOverDialog({
   ratingDelta?: number | null
   onRematch?: () => void
   onNewGame?: () => void
+  /**
+   * Retour vers l'écran qui a envoyé jouer, quand il y en a un.
+   *
+   * Le duel de carrière arrive ici sans que le joueur ait choisi son
+   * adversaire : il a cliqué « Affronter l'adversaire » sur la carte, et c'est
+   * là qu'il veut revenir — pour voir ce que sa victoire a débloqué, ou ce
+   * qu'il reste à faire. Sans ce bouton, la seule issue était « Nouvelle
+   * partie », qui le renvoyait aux réglages qu'on lui avait justement épargnés.
+   */
+  retour?: { href: string; libelle: string }
 }) {
   const [dismissed, setDismissed] = useState(false)
 
@@ -137,6 +148,11 @@ export function GameOverDialog({
       // permanent : on ouvre du côté où l'on jouait. En partie locale il n'y a
       // pas de « son » camp, et l'analyse garde alors la vue des Blancs.
       if (playerColor) sessionStorage.setItem('coupparfait.pendingAnalysisSide', playerColor)
+      // Le résultat voyage à part, en plus de l'en-tête `Result` du PGN.
+      // L'application vient de l'afficher en grand — « tu as gagné », « échec
+      // et mat » — et le faire ensuite redécouvrir par la relecture en relisant
+      // du texte qu'on a soi-même écrit ajoute une occasion de le perdre.
+      sessionStorage.setItem('coupparfait.pendingAnalysisResult', result)
     } catch {
       // Mode navigation privée très restrictif : l'analyse partira à vide, on
       // pourra toujours coller le PGN à la main.
@@ -198,11 +214,24 @@ export function GameOverDialog({
         </p>
 
         <div className="mt-6 space-y-2">
+          {retour && (
+            <Link href={retour.href} className="block">
+              <Button variant="primary" size="lg" fullWidth icon={<Trophy size={16} />}>
+                {retour.libelle}
+              </Button>
+            </Link>
+          )}
+
           {/* Sans coup joué, l'analyse n'a rien à dire : proposer le bouton
               n'aboutirait qu'à un « format non reconnu » sur l'autre écran. */}
           {moves.length > 0 && (
             <Link href="/analyse" onClick={handOffForAnalysis} className="block">
-              <Button variant="primary" size="lg" fullWidth icon={<Gauge size={16} />}>
+              <Button
+                variant={retour ? 'secondary' : 'primary'}
+                size="lg"
+                fullWidth
+                icon={<Gauge size={16} />}
+              >
                 Analyser la partie
               </Button>
             </Link>
