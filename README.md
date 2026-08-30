@@ -157,9 +157,48 @@ En Docker, les deux sont déjà dans l'image : rien à faire.
 
 ### En production (Docker)
 
+**Le dépôt est privé : il faut d'abord donner au serveur le moyen de le lire.**
+Une *clé de déploiement*, c'est-à-dire une paire SSH rattachée à ce dépôt-là et
+à aucun autre, en lecture seule.
+
+Pas de jeton personnel dans l'URL de clonage : il donne accès à *tous* vos
+dépôts, apparaît en clair dans `git remote -v` et dans les journaux, et expire —
+un matin, le `git pull` du serveur échoue sans qu'on comprenne pourquoi.
+
+```bash
+ssh-keygen -t ed25519 -C "vps-coupparfait" -f ~/.ssh/coupparfait_deploy -N ""
+cat ~/.ssh/coupparfait_deploy.pub
+```
+
+Sur GitHub : dépôt → **Settings** → **Deploy keys** → *Add deploy key*, coller
+la clé publique. **Ne pas cocher « Allow write access »** : le serveur n'a jamais
+à écrire, et une clé en lecture seule qui fuite ne permet pas de pousser du code
+sur ce qui sera déployé.
+
+Dans `~/.ssh/config` :
+
+```
+Host github-coupparfait
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/coupparfait_deploy
+  IdentitiesOnly yes
+```
+
+`IdentitiesOnly yes` n'est pas décoratif : sans lui, SSH présente d'abord les
+autres clés de la machine — celle de `laeti`, celle de `monplandeclasse` —
+GitHub les refuse, et au bout de cinq essais ferme la connexion, avec un message
+qui ne dit rien du vrai problème.
+
+```bash
+ssh -T git@github-coupparfait    # « Hi cparfait/lecoupparfait! You've successfully authenticated »
+```
+
+Puis l'installation elle-même :
+
 ```bash
 cd ~/docker                              # là où vivent les applications
-git clone https://github.com/cparfait/lecoupparfait.git coupparfait
+git clone git@github-coupparfait:cparfait/lecoupparfait.git coupparfait
 cd coupparfait
 
 cp .env.example .env                     # renseigne POSTGRES_PASSWORD et AUTH_SECRET
