@@ -19,6 +19,8 @@ export const fr = {
 
   nav: {
     play: 'Jouer',
+    career: 'Carrière',
+    careerHint: 'Douze chapitres, du premier coup à la première victoire nette',
     learn: 'Apprendre',
     puzzles: 'Puzzles',
     openings: 'Ouvertures',
@@ -37,6 +39,45 @@ export const fr = {
     signOut: 'Se déconnecter',
     menu: 'Menu',
     search: 'Rechercher',
+
+    // Sections du menu principal. « Jouer », « Apprendre » et « Analyse »
+    // servent à la fois de titre de section et d'entrée, d'où leur absence ici.
+    train: 'S’entraîner',
+    community: 'Communauté',
+
+    // Entrées de section.
+    vsComputer: 'Contre l’ordinateur',
+    vsFriend: 'Contre quelqu’un',
+    localGame: 'À deux sur cet écran',
+    correspondence: 'Mes correspondances',
+    tournaments: 'Tournois',
+    watch: 'Regarder une partie',
+    lessons: 'Leçons guidées',
+    puzzleRush: 'Puzzle rush',
+    dailyChallenge: 'Défi du jour',
+    analyseGame: 'Analyser une partie',
+    importOnline: 'Depuis Chess.com / Lichess',
+    stats: 'Statistiques',
+    myProfile: 'Mon profil',
+
+    // Repères affichés sous les entrées, dans les panneaux déroulants.
+    vsComputerHint: '25 niveaux, 7 personnalités',
+    vsFriendHint: 'un lien à partager',
+    localGameHint: 'à deux, sur le même appareil',
+    correspondenceHint: 'les parties où c’est ton tour',
+    watchHint: 'les parties en cours',
+    lessonsHint: '36 leçons, de zéro au répertoire',
+    openingsHint: '3 810 ouvertures nommées',
+    endgamesHint: '3 568 positions classées',
+    visionHint: 'reconnaître les cases à vue',
+    glossaryHint: 'le vocabulaire, expliqué',
+    puzzlesHint: 'tactique, à ton niveau',
+    puzzleRushHint: 'le plus possible, en temps limité',
+    dailyChallengeHint: 'la même position pour tous',
+    analyseGameHint: 'coup par coup, avec les raisons',
+    importOnlineHint: 'ton pseudo suffit',
+    studiesHint: 'tes positions annotées',
+    editorHint: 'composer une position',
   },
 
   home: {
@@ -73,10 +114,12 @@ export const fr = {
 
   play: {
     title: 'Jouer',
+    career: 'Le mode carrière',
+    careerBlurb: 'Douze chapitres, du premier coup à la première victoire nette.',
     vsComputer: 'Contre l’ordinateur',
     vsComputerBlurb: 'Vingt-cinq niveaux, du tout premier coup au grand maître.',
-    vsFriend: 'Contre un ami',
-    vsFriendBlurb: 'Crée un lien, envoie-le, la partie commence.',
+    vsFriend: 'Contre quelqu’un',
+    vsFriendBlurb: 'De quinze secondes à quatorze jours par coup. Un lien, ou un ami.',
     localGame: 'Sur le même écran',
     localBlurb: 'Deux joueurs, un seul appareil.',
     watchGame: 'Regarder une partie',
@@ -357,6 +400,8 @@ export const en: Dictionary = {
 
   nav: {
     play: 'Play',
+    career: 'Career',
+    careerHint: 'Twelve chapters, from first move to first clean win',
     learn: 'Learn',
     puzzles: 'Puzzles',
     openings: 'Openings',
@@ -375,6 +420,41 @@ export const en: Dictionary = {
     signOut: 'Sign out',
     menu: 'Menu',
     search: 'Search',
+
+    train: 'Train',
+    community: 'Community',
+
+    vsComputer: 'Against the computer',
+    vsFriend: 'Against someone',
+    localGame: 'Two on this screen',
+    correspondence: 'My correspondence games',
+    tournaments: 'Tournaments',
+    watch: 'Watch a game',
+    lessons: 'Guided lessons',
+    puzzleRush: 'Puzzle rush',
+    dailyChallenge: 'Daily challenge',
+    analyseGame: 'Analyse a game',
+    importOnline: 'From Chess.com / Lichess',
+    stats: 'Statistics',
+    myProfile: 'My profile',
+
+    vsComputerHint: '25 levels, 7 personalities',
+    vsFriendHint: 'a link to share',
+    localGameHint: 'two players, one device',
+    correspondenceHint: 'games waiting on you',
+    watchHint: 'games in progress',
+    lessonsHint: '36 lessons, from zero to a repertoire',
+    openingsHint: '3,810 named openings',
+    endgamesHint: '3,568 sorted positions',
+    visionHint: 'name squares at a glance',
+    glossaryHint: 'the vocabulary, explained',
+    puzzlesHint: 'tactics at your level',
+    puzzleRushHint: 'as many as you can, against the clock',
+    dailyChallengeHint: 'the same position for everyone',
+    analyseGameHint: 'move by move, with reasons',
+    importOnlineHint: 'your username is enough',
+    studiesHint: 'your annotated positions',
+    editorHint: 'compose a position',
   },
 
   home: {
@@ -411,9 +491,11 @@ export const en: Dictionary = {
 
   play: {
     title: 'Play',
+    career: 'Career mode',
+    careerBlurb: 'Twelve chapters, from first move to first clean win.',
     vsComputer: 'Against the computer',
     vsComputerBlurb: 'Twenty-five levels, from first move to grandmaster.',
-    vsFriend: 'Against a friend',
+    vsFriend: 'Against someone',
     vsFriendBlurb: 'Create a link, send it, the game begins.',
     localGame: 'Same screen',
     localBlurb: 'Two players, one device.',

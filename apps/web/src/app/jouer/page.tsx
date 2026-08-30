@@ -3,17 +3,40 @@
 /**
  * Choix du mode de jeu.
  *
- * Quatre portes d'entrée, présentées à taille égale : personne ne doit avoir
+ * Des portes d'entrée présentées à taille égale : personne ne doit avoir
  * l'impression que jouer contre un ami est une fonctionnalité secondaire.
+ *
+ * La carrière ouvre la liste, et sa place ici plutôt que dans « Apprendre » est
+ * un choix : ce sont douze duels contre des adversaires choisis, avec une leçon
+ * et des puzzles autour. On y vient pour jouer.
  */
 
 import Link from 'next/link'
-import { ArrowRight, Cpu, Eye, Mailbox, MonitorSmartphone, Trophy, Users } from 'lucide-react'
-import { BOT_PERSONALITIES, SPEED_LABELS, TIME_CONTROLS } from '@coupparfait/core'
-import { Card, Chip } from '@/components/ui/index.tsx'
+import {
+  ArrowRight,
+  Cpu,
+  Eye,
+  Footprints,
+  MonitorSmartphone,
+  Trophy,
+  Users,
+} from 'lucide-react'
+import { BOT_PERSONALITIES } from '@coupparfait/core'
+import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
 
 const MODES = [
+  {
+    // En tête : la carrière est la réponse à « par quoi je commence ? », et
+    // cette question précède toutes les autres. Les cinq autres portes
+    // supposent qu'on sache déjà laquelle on veut.
+    href: '/carriere',
+    icon: Footprints,
+    titleKey: 'play.career',
+    blurbKey: 'play.careerBlurb',
+    detail: '12 chapitres · une leçon, des puzzles et un duel par chapitre',
+    accent: 'var(--accent)',
+  },
   {
     href: '/jouer/ordinateur',
     icon: Cpu,
@@ -27,7 +50,7 @@ const MODES = [
     icon: Users,
     titleKey: 'play.vsFriend',
     blurbKey: 'play.vsFriendBlurb',
-    detail: 'Temps réel · aucun compte requis pour ton invité',
+    detail: 'De 15 secondes à 14 jours par coup · un lien, ou un ami',
     accent: 'var(--accent-2)',
   },
   {
@@ -37,14 +60,6 @@ const MODES = [
     blurbKey: 'play.localBlurb',
     detail: 'L’échiquier se retourne à chaque coup si tu le souhaites',
     accent: 'var(--accent-3)',
-  },
-  {
-    href: '/correspondance',
-    icon: Mailbox,
-    titleKey: 'play.correspondence',
-    blurbKey: 'play.correspondenceBlurb',
-    detail: 'Un coup par jour · la partie t’attend',
-    accent: 'var(--accent)',
   },
   {
     href: '/tournois',
@@ -118,35 +133,20 @@ export default function PlayLobbyPage() {
           façon de choisir un coup est biaisée en faveur de ce qu’ils aiment.
         </p>
 
-        <div className="mt-5 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Sans carte, et c'est le point : sept encadrés côte à côte sous
+            trois autres encadrés font une page de tableau de bord. Ces sept-là
+            ne sont pas des boutons — on ne choisit pas son adversaire ici, on
+            fait sa connaissance. Un portrait, un nom, une phrase suffisent ;
+            le liseré ne servait qu'à occuper l'espace entre eux. */}
+        <div className="mt-5 grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
           {Object.values(BOT_PERSONALITIES).map((personality) => (
-            <Card key={personality.id} className="flex gap-3 p-4">
-              <span className="text-2xl" aria-hidden>
-                {personality.emoji}
-              </span>
+            <div key={personality.id} className="flex gap-3">
+              <PortraitAdversaire personality={personality} size={44} />
               <div className="min-w-0">
                 <p className="text-sm font-semibold">{personality.name.fr}</p>
                 <p className="mt-1 text-xs leading-relaxed text-muted">{personality.blurb.fr}</p>
               </div>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Cadences ────────────────────────────────────────────────── */}
-      <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight">Les cadences</h2>
-        <p className="mt-1.5 text-sm text-muted">
-          Le premier nombre est le temps de départ, le second ce que chaque coup te rapporte.
-          En « 5 | 3 », tu commences avec cinq minutes et tu gagnes trois secondes par coup.
-        </p>
-
-        <div className="mt-5 flex flex-wrap gap-2">
-          {TIME_CONTROLS.filter((tc) => tc.id !== '0+0').map((tc) => (
-            <Chip key={tc.id} tone="neutral">
-              <span aria-hidden>{SPEED_LABELS[tc.category].icon}</span>
-              {tc.label}
-            </Chip>
+            </div>
           ))}
         </div>
       </section>

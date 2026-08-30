@@ -12,11 +12,26 @@
  * sur un grand écran où l'on est côte à côte, c'est insupportable.
  */
 
-import { useCallback, useMemo, useState } from 'react'
+/**
+ * Le temps qu'on laisse à un coup pour être vu, avant de retourner le plateau.
+ *
+ * La rotation partait dans le même souffle que le coup : on lâchait la pièce et
+ * l'échiquier basculait, si bien qu'on ne voyait jamais son propre coup en
+ * place. C'est le seul moment de la partie où l'on regarde ce qu'on vient de
+ * faire, et c'était précisément celui qu'on supprimait.
+ *
+ * 900 ms : assez pour que l'œil se pose sur la case d'arrivée et sur le
+ * surlignage du dernier coup, trop peu pour qu'on ait le temps de s'impatienter
+ * — au-delà d'une seconde, une attente imposée cesse d'être une respiration et
+ * devient une latence.
+ */
+const PAUSE_AVANT_ROTATION = 900
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Flag, RefreshCw, RotateCcw, Undo2 } from 'lucide-react'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
-import { ArrowLegend } from '@/components/board/ArrowLegend.tsx'
+import { PhysicalBoardPanel } from '@/components/board/PhysicalBoardPanel.tsx'
 import {
   CommentaryPanel,
   CommentaryToggle,
@@ -26,9 +41,12 @@ import {
   type Alternative,
 } from '@/components/game/LiveCommentary.tsx'
 import { MoveList } from '@/components/game/MoveList.tsx'
+import { PourquoiPanel } from '@/components/game/PourquoiPanel.tsx'
+import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import { PlayerBar } from '@/components/game/PlayerBar.tsx'
 import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
 import { Button, Card, Chip, Toggle } from '@/components/ui/index.tsx'
+import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
 import { useChessGame } from '@/lib/game/useChessGame.ts'
 import { useCurrentOpening, useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { playMoveSound, playResultSound } from '@/lib/sound.ts'
@@ -40,9 +58,24 @@ export default function LocalGamePage() {
   const locale = usePreferences((state) => state.locale)
 
   const { book } = useOpeningBook()
+  const { marquer } = useQuotidien()
   const [orientation, setOrientation] = useState<Color>('w')
   const [finished, setFinished] = useState(false)
   const [gameKey, setGameKey] = useState(0)
+
+  // Rotation en attente : le coup est joué, le plateau n'a pas encore basculé.
+  const [rotationEnAttente, setRotationEnAttente] = useState(false)
+  const minuterie = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const annulerRotation = useCallback(() => {
+    if (minuterie.current) clearTimeout(minuterie.current)
+    minuterie.current = null
+    setRotationEnAttente(false)
+  }, [])
+
+  // Une partie qu'on quitte pendant la pause ne doit pas faire tourner un
+  // `setState` sur un composant démonté.
+  useEffect(() => annulerRotation, [annulerRotation])
 
   const game = useChessGame({
     onMove: (move) => {
@@ -53,11 +86,27 @@ export default function LocalGamePage() {
         isCastle: move.isCastle,
         isPromotion: !!move.promotion,
       })
-      if (autoFlip) setOrientation(move.color === 'w' ? 'b' : 'w')
+      if (!autoFlip) return
+      // Le plateau reste du côté de celui qui vient de jouer, le temps qu'il
+      // voie son coup — voir `PAUSE_AVANT_ROTATION`. Pendant cette pause,
+      // l'échiquier n'accepte plus rien : sans ce verrou, l'adversaire pourrait
+      // jouer sur un plateau encore tourné à l'envers, ce qui est la meilleure
+      // façon de déplacer une pièce qu'on ne visait pas.
+      const cible: Color = move.color === 'w' ? 'b' : 'w'
+      if (minuterie.current) clearTimeout(minuterie.current)
+      setRotationEnAttente(true)
+      minuterie.current = setTimeout(() => {
+        minuterie.current = null
+        setOrientation(cible)
+        setRotationEnAttente(false)
+      }, PAUSE_AVANT_ROTATION)
     },
     onGameOver: (_, result) => {
       setFinished(true)
       playResultSound(result === '1/2-1/2' ? 'draw' : 'win')
+      // Seulement « jouer une partie » : à deux sur le même écran, il y a bien
+      // un vainqueur, mais rien ne dit lequel des deux tient l'appareil.
+      marquer('partie')
     },
   })
 
@@ -102,18 +151,39 @@ export default function LocalGamePage() {
 
   const handleMove = useCallback(
     (from: Square, to: Square, promotion?: PieceSymbol) => {
-      if (!state.isLive) return
+      if (!state.isLive || rotationEnAttente) return
       play(from, to, promotion)
     },
-    [play, state.isLive],
+    [play, state.isLive, rotationEnAttente],
   )
 
+  // ── Échiquier électronique ──────────────────────────────────────────────
+  //
+  // C'est ici que le branchement a le plus de sens : deux joueurs autour d'un
+  // vrai plateau, l'écran servant d'arbitre et de carnet de partie.
+  const physicalBoard = usePhysicalBoard({
+    chess: game.chess,
+    fen: state.currentFen,
+    isLive: state.isLive && !state.isGameOver,
+    play: handleMove,
+    lastMove: state.lastMove,
+  })
+
   const newGame = useCallback(() => {
+    annulerRotation()
     reset()
     setOrientation('w')
     setFinished(false)
     setGameKey((key) => key + 1)
-  }, [reset])
+  }, [reset, annulerRotation])
+
+  // Annuler un coup annule aussi la rotation qu'il avait déclenchée : sinon le
+  // plateau bascule une seconde plus tard vers un joueur dont ce n'est plus le
+  // tour.
+  const annulerCoup = useCallback(() => {
+    annulerRotation()
+    undo(1)
+  }, [undo, annulerRotation])
 
   return (
     <div className="mx-auto w-full max-w-[1300px] px-2 py-3 sm:px-4 lg:py-6">
@@ -137,7 +207,7 @@ export default function LocalGamePage() {
               key={gameKey}
               fen={state.fen}
               orientation={orientation}
-              playable={state.isLive && !state.isGameOver ? 'both' : null}
+              playable={state.isLive && !state.isGameOver && !rotationEnAttente ? 'both' : null}
               legalMoves={state.legalMoves}
               onMove={handleMove}
               lastMove={state.lastMove}
@@ -148,7 +218,6 @@ export default function LocalGamePage() {
             />
           </div>
 
-          <ArrowLegend items={arrowLegend} className="mb-1.5" />
 
           <PlayerBar
             name={orientation === 'w' ? 'Blancs' : 'Noirs'}
@@ -175,14 +244,22 @@ export default function LocalGamePage() {
               />
               {state.isGameOver
                 ? 'Partie terminée'
-                : `Trait aux ${state.turn === 'w' ? 'Blancs' : 'Noirs'}`}
+                : rotationEnAttente
+                  ? 'Coup joué — l’échiquier pivote…'
+                  : `Trait aux ${state.turn === 'w' ? 'Blancs' : 'Noirs'}`}
             </span>
 
             <Button
               size="sm"
               variant="ghost"
               icon={<RotateCcw size={14} />}
-              onClick={() => setOrientation((value) => (value === 'w' ? 'b' : 'w'))}
+              onClick={() => {
+                // Retourner à la main pendant la pause doit gagner : sans cette
+                // annulation, la minuterie basculerait le plateau une seconde
+                // plus tard et défairait le geste.
+                annulerRotation()
+                setOrientation((value) => (value === 'w' ? 'b' : 'w'))
+              }}
             >
               Retourner
             </Button>
@@ -190,7 +267,7 @@ export default function LocalGamePage() {
               size="sm"
               variant="ghost"
               icon={<Undo2 size={14} />}
-              onClick={() => undo(1)}
+              onClick={annulerCoup}
               disabled={state.moves.length === 0}
             >
               Annuler
@@ -206,20 +283,27 @@ export default function LocalGamePage() {
         </div>
 
         <div className="flex min-h-0 flex-col gap-3">
-          {commentaryMode && (
+          {commentaryMode ? (
             <CommentaryPanel
+              legende={arrowLegend}
               commentary={commentary}
               loading={coachLoading}
               onHoverAlternative={setHoveredAlternative}
               showBestMove={showBestMove}
               onToggleBestMove={() => setShowBestMove((value) => !value)}
             />
+          ) : (
+            // Le mode commenté est éteint : on ne dit rien de soi-même, mais on
+            // laisse la porte ouverte à qui bloque sur un coup précis.
+            <PourquoiPanel move={lastMove} book={book} openingName={opening?.name ?? null} />
           )}
+
+          <PhysicalBoardPanel state={physicalBoard} />
 
           <Card className="p-4">
             <Toggle
               label="Rotation automatique"
-              description="L’échiquier se retourne après chaque coup, pour que chaque joueur voie de son côté. Pratique sur un téléphone posé entre vous."
+              description="L’échiquier se retourne après chaque coup, pour que chaque joueur voie de son côté. Il marque une seconde d’arrêt avant de pivoter, le temps de voir le coup qui vient d’être joué. Pratique sur un téléphone posé entre vous."
               checked={autoFlip}
               onChange={(value) => setPreference('autoFlip', value)}
             />

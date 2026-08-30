@@ -17,6 +17,7 @@ import {
   Flag,
   Handshake,
   Lightbulb,
+  MoreHorizontal,
   Play,
   RefreshCw,
   Trophy,
@@ -30,6 +31,7 @@ import type { Color, PieceSymbol, Square } from 'chess.js'
 import {
   BOT_LEVELS,
   BOT_PERSONALITIES,
+  SEUIL_SUITE_BREVE,
   SPEED_LABELS,
   TIME_CONTROLS,
   applyMove,
@@ -47,9 +49,14 @@ import {
   type GameStatus,
   type TimeControl,
 } from '@coupparfait/core'
+import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
+import { PhysicalBoardPanel } from '@/components/board/PhysicalBoardPanel.tsx'
 import { EvalBar } from '@/components/game/EvalBar.tsx'
 import { MoveList } from '@/components/game/MoveList.tsx'
+import { ApprofondirCoup } from '@/components/ia/ApprofondirCoup.tsx'
+import { Menu } from '@/components/ui/Menu.tsx'
+import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import { PlayerBar } from '@/components/game/PlayerBar.tsx'
 import { TurnIndicator } from '@/components/game/TurnIndicator.tsx'
 import { OpeningBanner } from '@/components/game/OpeningBanner.tsx'
@@ -61,17 +68,34 @@ import {
   useLiveCommentary,
   type Alternative,
 } from '@/components/game/LiveCommentary.tsx'
-import {
-  ArrowLegend,
-  LEGEND,
-  legendFor,
-  type LegendItem,
-} from '@/components/board/ArrowLegend.tsx'
+import { LEGEND, legendFor, type LegendItem } from '@/components/board/ArrowLegend.tsx'
 import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
-import { Button, Card, Chip, SegmentedControl, SectionTitle } from '@/components/ui/index.tsx'
+import { Button, Card, Chip, SegmentedControl, SectionTitle, Toggle } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
 import { useChessGame } from '@/lib/game/useChessGame.ts'
+import {
+  chargerPartieEnCours,
+  depuis,
+  archiverPartie,
+  enregistrerPartieEnCours,
+  oublierPartieEnCours,
+  type PartieEnCours,
+} from '@/lib/game/partieEnCours.ts'
 import { requestHint, useBotPlayer } from '@/lib/game/useBotPlayer.ts'
+import {
+  chapitreDeLUrl,
+  deposerGains,
+  signaler as signalerCarriere,
+} from '@/lib/carriere/useCarriere.ts'
+import { deposerResultat } from '@/lib/game/tournoiSolo.ts'
+import {
+  CHAPITRES,
+  chapitre as chapitreCarriere,
+  niveauEffectif,
+  type BotPersonalityId,
+  type Chapitre,
+} from '@coupparfait/core'
 import { useCurrentOpening, useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { playMoveSound, playResultSound, playSound } from '@/lib/sound.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
@@ -92,7 +116,13 @@ export default function PlayComputerPage() {
   const [phase, setPhase] = useState<Phase>('setup')
   const [setup, setSetup] = useState<Setup>({
     level: 6,
-    color: 'w',
+    // Le hasard par défaut, et non les Blancs.
+    //
+    // Jouer toujours du même côté fait progresser de travers : on apprend les
+    // ouvertures d'un camp, on ne voit jamais les positions de l'autre, et le
+    // demi-avantage du trait finit par se confondre avec son propre niveau.
+    // Choisir reste possible d'un clic — c'est le défaut qui change.
+    color: 'random',
     timeControlId: '600+5',
     // Par défaut : un adversaire qui se trompe comme un humain. C'est ce
     // qu'on veut faire affronter à quelqu'un qui débute.
@@ -101,27 +131,171 @@ export default function PlayComputerPage() {
   const [resolvedColor, setResolvedColor] = useState<Color>('w')
   const [gameKey, setGameKey] = useState(0)
 
+  /**
+   * Partie laissée en plan, s'il y en a une.
+   *
+   * `undefined` tant qu'on n'a pas demandé, `null` quand il n'y a rien : sans
+   * cette distinction, le bandeau de reprise apparaîtrait après coup chez tout
+   * le monde, y compris ceux qui n'ont rien à reprendre.
+   */
+  const [reprise, setReprise] = useState<PartieEnCours | null | undefined>(undefined)
+  const [coupsRepris, setCoupsRepris] = useState<string[] | undefined>(undefined)
+  const [horlogeReprise, setHorlogeReprise] = useState<{ w: number; b: number } | null>(null)
+
+  useEffect(() => {
+    void chargerPartieEnCours().then(setReprise)
+  }, [])
+
+  /**
+   * Arrivé par la carrière : on saute l'écran de réglages.
+   *
+   * Le chapitre a déjà tout choisi — l'adversaire, sa force, son style — et
+   * c'est justement ce qui fait de lui un chapitre. Redemander « quel niveau ?
+   * quelle couleur ? » à quelqu'un qui vient de cliquer « Affronter
+   * l'adversaire » lui ferait défaire ce que le mode venait de décider pour
+   * lui.
+   *
+   * `null` quand on n'y est pas, et c'est le cas ordinaire.
+   */
+  const [duel, setDuel] = useState<Chapitre | null>(null)
+  const duelLance = useRef(false)
+  /**
+   * Cette partie appartient-elle à un tournoi contre l'ordinateur ?
+   *
+   * Même principe que le duel de carrière : le tournoi a déjà choisi
+   * l'adversaire, sa force, la couleur et la cadence — les redemander
+   * reviendrait à défaire ce qu'il vient de décider. La différence est qu'ici
+   * on ne rend pas un « fait » au serveur mais un résultat au tableau, qui vit
+   * dans le navigateur.
+   */
+  const [tournoi, setTournoi] = useState(false)
+  const [styleImpose, setStyleImpose] = useState<BotPersonalityId | null>(null)
+  const tournoiLance = useRef(false)
+  useEffect(() => {
+    if (tournoiLance.current) return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('tournoi') !== '1') return
+    const niveau = Number(params.get('niveau'))
+    const couleur = params.get('couleur') === 'b' ? 'b' : 'w'
+    if (!Number.isInteger(niveau) || niveau < 1) return
+
+    tournoiLance.current = true
+    setTournoi(true)
+    const perso = params.get('perso')
+    if (perso && perso in BOT_PERSONALITIES) setStyleImpose(perso as BotPersonalityId)
+    setSetup({
+      level: niveau,
+      color: couleur,
+      timeControlId: params.get('tc') ?? '600+5',
+      // Stockfish et non Maia : le tournoi annonce une force en Elo, et c'est
+      // le barème des niveaux qui la garantit.
+      human: false,
+    })
+    setResolvedColor(couleur)
+    setCoupsRepris(undefined)
+    setHorlogeReprise(null)
+    oublierPartieEnCours()
+    setGameKey((key) => key + 1)
+    setPhase('playing')
+    playSound('start')
+  }, [])
+  useEffect(() => {
+    if (duelLance.current) return
+    const numero = chapitreDeLUrl(window.location.search)
+    if (numero === null) return
+    const chapitre = chapitreCarriere(numero)
+    if (!chapitre) return
+
+    duelLance.current = true
+    setDuel(chapitre)
+    // La force effective tient compte du coup de main : trois défaites
+    // d'affilée allègent l'adversaire, et c'est l'écran de carrière qui
+    // l'annonce. On relit la progression pour appliquer la même règle.
+    void fetch('/api/carriere', { cache: 'no-store' })
+      .then((reponse) => reponse.json())
+      .then((data: { progression: { losingStreak: number; helpUsed: number } | null }) => {
+        const niveau = data.progression
+          ? niveauEffectif(chapitre, {
+              ...data.progression,
+              chapter: chapitre.numero,
+              lessonDone: true,
+              puzzlesDone: 0,
+              winsInChapter: 0,
+              stars: {},
+              xp: 0,
+              badges: [],
+            })
+          : chapitre.niveau
+        demarrerDuel(niveau)
+      })
+      .catch(() => demarrerDuel(chapitre.niveau))
+
+    function demarrerDuel(niveau: number) {
+      setSetup({ level: niveau, color: 'random', timeControlId: '600+5', human: false })
+      setResolvedColor(Math.random() < 0.5 ? 'w' : 'b')
+      setCoupsRepris(undefined)
+      setHorlogeReprise(null)
+      oublierPartieEnCours()
+      setGameKey((key) => key + 1)
+      setPhase('playing')
+      playSound('start')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const start = useCallback((next: Setup) => {
     setSetup(next)
     setResolvedColor(
       next.color === 'random' ? (Math.random() < 0.5 ? 'w' : 'b') : next.color,
     )
+    // Commencer une partie remplace celle qu'on gardait : on ne conserve que la
+    // dernière, et la nouvelle l'écrasera de toute façon au premier coup.
+    setCoupsRepris(undefined)
+    setHorlogeReprise(null)
+    oublierPartieEnCours()
+    setGameKey((key) => key + 1)
+    setPhase('playing')
+    playSound('start')
+  }, [])
+
+  const reprendre = useCallback((partie: PartieEnCours) => {
+    setSetup({
+      level: partie.level,
+      color: partie.playerColor,
+      timeControlId: partie.timeControlId,
+      human: partie.human,
+    })
+    setResolvedColor(partie.playerColor)
+    setCoupsRepris(partie.moves)
+    setHorlogeReprise(partie.clock)
     setGameKey((key) => key + 1)
     setPhase('playing')
     playSound('start')
   }, [])
 
   if (phase === 'setup') {
-    return <SetupScreen initial={setup} onStart={start} />
+    return (
+      <SetupScreen
+        initial={setup}
+        onStart={start}
+        reprise={reprise ?? null}
+        onReprendre={reprendre}
+      />
+    )
   }
 
   return (
     <GameScreen
       key={gameKey}
+      duel={duel}
+      tournoi={tournoi}
+      styleImpose={styleImpose}
       level={setup.level}
       playerColor={resolvedColor}
       timeControlId={setup.timeControlId}
       human={setup.human}
+      initialMoves={coupsRepris}
+      initialClock={horlogeReprise}
       onNewGame={() => setPhase('setup')}
       onRematch={() => {
         setResolvedColor(
@@ -133,6 +307,8 @@ export default function PlayComputerPage() {
               ? 'b'
               : 'w',
         )
+        setCoupsRepris(undefined)
+        setHorlogeReprise(null)
         setGameKey((key) => key + 1)
       }}
     />
@@ -146,14 +322,26 @@ export default function PlayComputerPage() {
 function SetupScreen({
   initial,
   onStart,
+  reprise,
+  onReprendre,
 }: {
   initial: Setup
   onStart: (setup: Setup) => void
+  /** Partie interrompue à reprendre, `null` s'il n'y en a pas. */
+  reprise: PartieEnCours | null
+  onReprendre: (partie: PartieEnCours) => void
 }) {
   const [level, setLevel] = useState(initial.level)
   const [color, setColor] = useState<Color | 'random'>(initial.color)
   const [timeControlId, setTimeControlId] = useState(initial.timeControlId)
   const [human, setHuman] = useState(initial.human)
+
+  // Le mode commenté n'est pas un réglage de la partie mais une préférence
+  // durable : on le lit et on l'écrit là où il vit, pour que le bouton de la
+  // barre d'outils et cette case disent toujours la même chose.
+  const commentaryMode = usePreferences((state) => state.commentaryMode)
+  const commentaryOpponent = usePreferences((state) => state.commentaryOpponent)
+  const setPreference = usePreferences((state) => state.set)
 
   /**
    * Maia est-elle installée sur ce serveur ?
@@ -182,35 +370,125 @@ function SetupScreen({
   const personality = BOT_PERSONALITIES[bot.personality]
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:py-14">
+    /* `max-w-5xl` et non plus `3xl`, `py-8` et non plus `py-14` : l'écran doit
+       tenir sans défilement, et il ne tenait pas — 1 447 px de contenu. Voir le
+       commentaire de la grille plus bas. */
+    /* Et il ne tenait toujours pas : mesuré à 1280 × 720, 884 points de contenu
+       pour 720 de fenêtre, soit 164 de trop — le bouton « Commencer la partie »
+       passait sous le pli, sur l'écran dont c'est l'unique raison d'être.
+       Plutôt que de retirer un réglage, on resserre les espacements quand la
+       fenêtre est basse. La condition porte sur la *hauteur* et non sur la
+       largeur : c'est bien elle qui manque, et un portable 1280 × 720 n'est pas
+       un téléphone. */
+    <div
+      className={clsx(
+        // Plus large quand la fenêtre est basse : la place manque en hauteur,
+        // pas en largeur. Deux colonnes plus larges font tenir les descriptions
+        // des réglages sur une ligne de moins chacune, ce qui rend des points
+        // sans retirer un mot.
+        'mx-auto w-full px-4 sm:px-6',
+        'max-w-5xl [@media(max-height:820px)]:max-w-7xl',
+        'py-6 lg:py-8',
+        '[@media(max-height:820px)]:py-3 [@media(max-height:820px)]:lg:py-3',
+        '[@media(max-height:820px)]:pb-2 [@media(max-height:820px)]:lg:pb-2',
+      )}
+    >
       <Link
         href="/jouer"
-        className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
+        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink [@media(max-height:820px)]:mb-1.5"
       >
         <ArrowLeft size={15} aria-hidden />
         Retour au choix du mode
       </Link>
 
-      <h1 className="font-display text-3xl font-bold tracking-tight">
+      <h1 className="font-display text-3xl font-bold tracking-tight [@media(max-height:820px)]:text-2xl">
         Contre l’ordinateur
       </h1>
-      <p className="mt-2 text-muted">
-        Vingt-cinq niveaux et sept personnalités. Choisis un adversaire un peu au-dessus de
-        toi : c’est là qu’on progresse le plus vite.
+      {/* Une ligne, contre trois auparavant. La phrase coupée — « c'est là
+          qu'on progresse le plus vite » — était un conseil, pas une consigne :
+          elle se lit une fois et se relit jamais, alors qu'elle coûtait
+          vingt-quatre pixels à chaque visite. */}
+      {/* Masquée quand la fenêtre est basse : c'est un conseil, il se lit une
+          fois, et il coûte vingt-six points à chaque visite sur un écran où ils
+          manquent. Le choix de l'adversaire, lui, reste entièrement visible. */}
+      <p className="mt-1.5 text-sm text-muted [@media(max-height:820px)]:hidden">
+        Vingt-cinq niveaux, sept personnalités. Choisis un adversaire un peu au-dessus de toi.
       </p>
 
-      {/* ── Adversaire ─────────────────────────────────────────────── */}
-      <Card glow className="mt-7 overflow-hidden">
-        <div className="flex items-center gap-4 p-5">
+      {/* ── Reprendre ──────────────────────────────────────────────────
+          En tête, avant les réglages : quelqu'un qui a une partie en cours
+          vient presque toujours pour elle. La lui faire chercher sous le
+          formulaire reviendrait à lui demander de reconfigurer ce qu'il a
+          déjà choisi. */}
+      {reprise && (
+        <Card glow className="mt-7 flex flex-wrap items-center gap-4 p-5">
           <span
-            className="grid h-16 w-16 shrink-0 place-items-center rounded-[var(--radius)] text-3xl"
+            className="grid h-12 w-12 shrink-0 place-items-center rounded-[var(--radius)]"
+            style={{ background: 'color-mix(in oklab, var(--accent) 15%, transparent)' }}
+            aria-hidden
+          >
+            <PortraitAdversaire
+              personality={BOT_PERSONALITIES[botLevel(reprise.level).personality]}
+              size={40}
+            />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-lg font-semibold">Tu as une partie en cours</p>
+            <p className="mt-0.5 text-sm text-muted">
+              Contre {reprise.human ? 'Maia' : 'Stockfish'}, niveau {reprise.level} · avec les{' '}
+              {reprise.playerColor === 'w' ? 'Blancs' : 'Noirs'} · {reprise.moves.length}{' '}
+              demi-coups joués, {depuis(reprise.enregistreLe)}.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="primary" icon={<Play size={16} />} onClick={() => onReprendre(reprise)}>
+              Reprendre
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                oublierPartieEnCours()
+                // On ne recharge pas : la partie vient d'être effacée, et
+                // masquer le bandeau sur-le-champ est la réponse attendue.
+                location.reload()
+              }}
+            >
+              Oublier
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      {/* ── Adversaire ─────────────────────────────────────────────── */}
+      {/* ── Les deux cartes côte à côte ──────────────────────────────────
+      
+          L'écran demandait 1 447 pixels de haut : on ne voyait ni la cadence ni
+          le bouton sans faire défiler, alors qu'il s'agit de trois choix et
+          d'un clic. Empilées, les deux cartes additionnaient leurs hauteurs —
+          430 et 596. Côte à côte, elles ne coûtent plus que la plus haute.
+      
+          Les deux cartes sont **étirées à la même hauteur**, et j'avais d'abord
+          fait l'inverse. Le raisonnement était qu'elles traitent deux sujets
+          distincts et n'ont donc aucune raison de s'aligner ; à l'écran, ce
+          raisonnement ne tient pas. Deux encadrés côte à côte qui s'arrêtent à
+          des hauteurs différentes ne se lisent pas comme deux sujets
+          indépendants, ils se lisent comme un alignement raté.
+      
+          Le vide se déplace donc *à l'intérieur* de la carte la plus courte,
+          sous son dernier réglage, là où il passe pour de la marge. C'est le
+          même vide, et il ne se voit plus. */}
+      <div className="mt-5 grid gap-4 [@media(max-height:820px)]:mt-3 [@media(max-height:820px)]:gap-3 lg:grid-cols-2">
+      <Card glow className="overflow-hidden">
+        <div className="flex items-center gap-4 p-5 [@media(max-height:820px)]:p-3">
+          <span
+            className="grid h-16 w-16 shrink-0 place-items-center rounded-[var(--radius)]"
             style={{
               background: 'color-mix(in oklab, var(--accent) 15%, transparent)',
               boxShadow: 'var(--glow)',
             }}
             aria-hidden
           >
-            {personality.emoji}
+            <PortraitAdversaire personality={personality} size={56} />
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-baseline gap-2">
@@ -236,7 +514,7 @@ function SetupScreen({
           alors que c'est ce qui change tout dans la partie.
         */}
         {maiaReady && (
-          <div className="border-t border-line/60 px-5 py-4">
+          <div className="border-t border-line/60 px-5 py-4 [@media(max-height:820px)]:py-2.5">
             <p className="mb-2 text-sm font-medium">Adversaire</p>
             <div className="grid gap-1.5 sm:grid-cols-2">
               {[
@@ -311,7 +589,7 @@ function SetupScreen({
           </div>
         )}
 
-        <div className="border-t border-line/60 px-5 py-4">
+        <div className="border-t border-line/60 px-5 py-4 [@media(max-height:820px)]:py-2.5">
           <label htmlFor="level" className="mb-2 block text-sm font-medium">
             Niveau de difficulté
           </label>
@@ -359,9 +637,20 @@ function SetupScreen({
         </div>
       </Card>
 
-      {/* ── Couleur et cadence ─────────────────────────────────────── */}
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <Card className="p-5">
+      {/* ── Les réglages de la partie, dans une seule carte ──────────────
+      
+          Ils occupaient quatre cartes empilées — couleur, commentaires, cadence
+          — dans une grille à deux colonnes. Chaque carte se défendait ; leur
+          somme ne se défendait plus. La colonne de gauche montait à deux fois la
+          hauteur de la droite, ouvrant un vide sous la cadence, et l'on comptait
+          cinq encadrés sur un écran qui pose trois questions.
+      
+          Une carte, trois sections séparées d'un filet. Les bordures qui
+          disparaissent ne portaient aucune information : elles séparaient des
+          réglages que rien ne sépare, puisqu'on les remplit tous avant de
+          cliquer sur le même bouton. */}
+      <Card className="divide-y divide-line/60 p-0">
+        <div className="p-4 [@media(max-height:820px)]:p-2">
           <SectionTitle>Ta couleur</SectionTitle>
           <SegmentedControl
             value={color}
@@ -373,14 +662,23 @@ function SetupScreen({
               { value: 'random' as const, label: '🎲 Hasard' },
             ]}
           />
-          <p className="mt-3 text-xs text-faint">
-            Les Blancs jouent en premier et ont un petit avantage. Pour apprendre, alterne.
-          </p>
-        </Card>
+          <p className="mt-2 text-xs text-faint">Les Blancs commencent. Pour apprendre, alterne.</p>
+        </div>
 
-        <Card className="p-5">
+        <div className="p-4 [@media(max-height:820px)]:p-2">
           <SectionTitle>Cadence</SectionTitle>
-          <div className="grid grid-cols-3 gap-1.5">
+          {/* Récupéré de `/jouer`, où la même liste s'affichait sans être
+              cliquable : une explication sert au moment du choix, pas dans un
+              catalogue qu'on traverse. */}
+          {/* Ramenée à un exemple. La règle générale — « le premier nombre est
+              le temps de départ, le second ce que chaque coup rapporte » — se
+              déduit de l'exemple, et prenait trois lignes pour le dire. */}
+          <p className="-mt-1 mb-2 text-xs leading-relaxed text-muted">
+            « 5 | 3 » : cinq minutes au départ, trois secondes gagnées à chaque coup.
+          </p>
+          {/* Quatre colonnes plutôt que trois : les huit cadences tiennent alors
+              sur deux rangées pleines au lieu de trois dont une à moitié vide. */}
+          <div className="grid grid-cols-4 gap-1.5">
             {TIME_CONTROLS.filter((tc) =>
               ['180+0', '300+0', '300+3', '600+0', '600+5', '900+10', '1800+0', '0+0'].includes(
                 tc.id,
@@ -402,14 +700,44 @@ function SetupScreen({
               </button>
             ))}
           </div>
-        </Card>
+        </div>
+
+        <div className="p-4 [@media(max-height:820px)]:p-2">
+          <SectionTitle>Pendant la partie</SectionTitle>
+          {/* Descriptions resserrées. Elles faisaient trois lignes chacune et
+              expliquaient le mode commenté deux fois — une fois pour l'activer,
+              une fois pour l'étendre. Un réglage qu'on lit plus longtemps qu'on
+              ne met à le comprendre est mal écrit. */}
+          <Toggle
+            label="Commenter chaque coup"
+            description="Ce que vaut ton coup, les meilleures options et leur raison, lus à voix haute. Recommandé pour débuter."
+            checked={commentaryMode}
+            onChange={(valeur) => setPreference('commentaryMode', valeur)}
+          />
+
+          {/* Subordonné : il n'apparaît qu'une fois le mode commenté actif.
+              Le proposer avant reviendrait à offrir le détail d'une chose qu'on
+              n'a pas encore choisie. */}
+          {commentaryMode && (
+            <div className="mt-3.5 border-t border-line/60 pt-3.5">
+              <Toggle
+                label="Commenter aussi l’adversaire"
+                description="Deux fois plus de commentaires. Pour décortiquer une partie plutôt que la jouer."
+                checked={commentaryOpponent}
+                onChange={(valeur) => setPreference('commentaryOpponent', valeur)}
+              />
+            </div>
+          )}
+        </div>
+      </Card>
       </div>
+
 
       <Button
         variant="primary"
         size="lg"
         fullWidth
-        className="mt-6"
+        className="mt-4 [@media(max-height:820px)]:mt-2"
         onClick={() => onStart({ level, color, timeControlId, human: human && maiaReady })}
       >
         Commencer la partie
@@ -423,18 +751,33 @@ function SetupScreen({
 // ─────────────────────────────────────────────────────────────────────────────
 
 function GameScreen({
+  duel,
+  tournoi,
+  styleImpose,
   level,
   playerColor,
   timeControlId,
   human,
+  initialMoves,
+  initialClock,
   onNewGame,
   onRematch,
 }: {
+  /** Chapitre de carrière en cours, quand la partie en est le duel. */
+  duel: Chapitre | null
+  /** Vrai quand la partie est une ronde de tournoi contre l'ordinateur. */
+  tournoi: boolean
+  /** Style imposé par le tournoi, en dépit de celui du barème. */
+  styleImpose: BotPersonalityId | null
   level: number
   playerColor: Color
   timeControlId: string
   /** Maia plutôt que Stockfish : décidé à la configuration. */
   human: boolean
+  /** Coups déjà joués, quand on reprend une partie interrompue. */
+  initialMoves?: string[]
+  /** Temps restant à la reprise, en millisecondes. */
+  initialClock?: { w: number; b: number } | null
   onNewGame: () => void
   onRematch: () => void
 }) {
@@ -457,6 +800,9 @@ function GameScreen({
   // recalculé dans le corps du composant.
   const gameOverRef = useRef(false)
 
+  // Quêtes du jour : marquées à la fin de la partie, sans jamais interrompre.
+  const { marquer } = useQuotidien()
+
   // ── Mode commenté ───────────────────────────────────────────────────────
   // Déclaré ici, avant le pilote de l'adversaire artificiel : celui-ci consulte
   // l'état de pause pour savoir s'il doit patienter.
@@ -469,10 +815,18 @@ function GameScreen({
   const [coachSpeaking, setCoachSpeaking] = useState(false)
   // Le coup proposé reste fléché sur l'échiquier tant qu'on ne le masque pas.
   const [showBestMove, setShowBestMove] = useState(true)
-  const [clock, setClock] = useState<ClockState>(() => createClock(timeControl, Date.now()))
+  const [clock, setClock] = useState<ClockState>(() => {
+    const depart = createClock(timeControl, Date.now())
+    // Reprise d'une partie chronométrée : on rend à chaque camp le temps qu'il
+    // lui restait. Sans cela, reprendre offrirait une pendule neuve, ce qui
+    // transformerait l'interruption en avantage.
+    if (!initialClock) return depart
+    return { ...depart, remaining: { w: initialClock.w, b: initialClock.b } }
+  })
   const [displayClock, setDisplayClock] = useState(() => remainingAt(clock, Date.now()))
 
   const game = useChessGame({
+    initialMoves,
     onMove: (move) => {
       playMoveSound({
         isCapture: move.isCapture,
@@ -494,6 +848,12 @@ function GameScreen({
       const won = result === (playerColor === 'w' ? '1-0' : '0-1')
       playResultSound(result === '1/2-1/2' ? 'draw' : won ? 'win' : 'loss')
       recordBotGame(level, won)
+      // Une partie menée jusqu'au bout compte, gagnée ou non : la quête
+      // récompense d'avoir joué, pas d'avoir eu de la chance.
+      marquer('partie')
+      if (won) marquer('victoire')
+      // La partie est finie : il n'y a plus rien à reprendre.
+      oublierPartieEnCours()
     },
   })
 
@@ -533,18 +893,39 @@ function GameScreen({
   //
   // Déclaré avant le pilote de l'adversaire, qui a besoin de savoir si le
   // commentaire est encore en train de se calculer.
+  /**
+   * Le coup à commenter.
+   *
+   * Le sien, par défaut. Les deux si l'on a demandé l'analyse des coups
+   * adverses — auquel cas c'est simplement le dernier coup joué, quel qu'en
+   * soit l'auteur.
+   *
+   * Les explications restent adressées au joueur dans les deux cas : c'est le
+   * rôle de `lecteur`, passé plus bas. Sans lui, un coup de l'ordinateur se
+   * serait commenté en tutoyant l'ordinateur.
+   */
   const lastPlayerMove = useMemo(() => {
+    if (prefs.commentaryOpponent) return state.moves[state.moves.length - 1] ?? null
     for (let i = state.moves.length - 1; i >= 0; i--) {
       const move = state.moves[i]!
       if (move.color === playerColor) return move
     }
     return null
-  }, [state.moves, playerColor])
+  }, [state.moves, playerColor, prefs.commentaryOpponent])
 
   // Le mode commenté analyse la position **d'avant** le coup en MultiPV : c'est
   // là que se trouvent les options qu'on avait et qu'on n'a pas vues.
   const { commentary, loading: coachLoading, history: commentaryHistory } = useLiveCommentary({
     move: lastPlayerMove,
+    lecteur: playerColor,
+    // Le niveau de l'adversaire choisi sert de repère pour savoir s'il faut
+    // détailler les suites — voir `SEUIL_SUITE_BREVE`. C'est une approximation,
+    // et la seule dont on dispose pendant la partie.
+    //
+    // `botLevel(level)` et non `bot` : celui-ci est déclaré plus bas, avec le
+    // pilote de l'adversaire, et le coach doit être monté avant lui — c'est le
+    // pilote qui a besoin de savoir si le coach parle encore, pas l'inverse.
+    suiteDetaillee: botLevel(level).elo < SEUIL_SUITE_BREVE,
     enabled: state.isLive && !gameOverRef.current,
     alternatives: commentaryMode ? 3 : 1,
     book,
@@ -569,6 +950,9 @@ function GameScreen({
     fen: state.currentFen,
     botColor,
     level,
+    // Le chapitre choisit un style, pas seulement une force : c'est ce style
+    // qui *est* l'exercice. Hors carrière, on laisse le barème décider.
+    personality: duel?.adversaire ?? styleImpose ?? undefined,
     turn: state.turn,
     human,
     ply: state.moves.length,
@@ -619,6 +1003,16 @@ function GameScreen({
     [play, state.turn, state.isLive, playerColor],
   )
 
+  // Face à l'ordinateur, les LEDs prennent tout leur sens : elles montrent le
+  // coup que la machine vient de jouer, à reproduire sur le plateau.
+  const physicalBoard = usePhysicalBoard({
+    chess: game.chess,
+    fen: state.currentFen,
+    isLive: state.isLive && !state.isGameOver && state.turn === playerColor,
+    play: handleMove,
+    lastMove: state.lastMove,
+  })
+
   const handleHint = useCallback(async () => {
     if (state.turn !== playerColor) return
     try {
@@ -664,7 +1058,88 @@ function GameScreen({
   const bot = botPlayer.bot
   const personality = BOT_PERSONALITIES[bot.personality]
   const gameOver = state.isGameOver || outcome !== null
+
+  /**
+   * Sauvegarde de la partie en cours, après chaque coup.
+   *
+   * Déclenchée sur le nombre de demi-coups et non sur le tableau lui-même :
+   * `state.moves` est une nouvelle référence à chaque rendu, et l'effet
+   * partirait à chaque battement de pendule.
+   *
+   * Sans compte, l'appel n'écrit rien et ne dit rien — c'est voulu, la
+   * plateforme s'utilise sans s'inscrire.
+   */
+  const nombreDeCoups = state.moves.length
+  useEffect(() => {
+    if (gameOver || nombreDeCoups === 0) return
+    enregistrerPartieEnCours(
+      state.moves.map((coup) => coup.san),
+      {
+        level,
+        playerColor,
+        timeControlId,
+        human,
+        clock: timed ? remainingAt(clock, Date.now()) : null,
+      },
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nombreDeCoups, gameOver])
   gameOverRef.current = gameOver
+
+  /**
+   * Archivage de la partie finie.
+   *
+   * Un effet plutôt que le rappel `onGameOver` : celui-ci se déclenche au fond
+   * du moteur de jeu, avant que l'ouverture identifiée et la pendule n'aient
+   * été recalculées pour ce rendu. Ici, tout est à jour.
+   *
+   * Le garde n'est pas décoratif. Le mode strict de React rejoue les effets
+   * après les avoir défaits, et l'écran de fin peut se rendre plusieurs fois :
+   * sans lui, la même partie serait écrite deux ou trois fois dans
+   * l'historique — avec un identifiant différent à chaque fois, donc sans
+   * moyen de s'en apercevoir.
+   */
+  const archivee = useRef(false)
+  useEffect(() => {
+    if (!gameOver || archivee.current) return
+    const issue = outcome?.result ?? state.result
+    if (issue !== '1-0' && issue !== '0-1' && issue !== '1/2-1/2') return
+    if (state.moves.length === 0) return
+    archivee.current = true
+
+    /*
+      Le duel de carrière annonce son issue.
+      Gagnée ou perdue : une défaite alimente la série qui déclenche le coup de
+      main, et c'est précisément ce qu'il ne faut pas perdre. On dépose ensuite
+      les gains pour que la carte les fête au retour.
+    */
+    if (duel) {
+      void signalerCarriere({
+        type: 'partie',
+        gagnee: issue === (playerColor === 'w' ? '1-0' : '0-1'),
+        coups: state.moves.length,
+      }).then((gains) => deposerGains(gains, duel.titre))
+    }
+
+    // Le tournoi attend son résultat : on le dépose, le tableau le déroulera
+    // au retour. Le sens est celui des Blancs, comme partout ailleurs.
+    if (tournoi) deposerResultat(issue)
+
+    archiverPartie({
+      mode: 'computer',
+      moves: state.moves.map((coup) => coup.san),
+      result: issue,
+      status: outcome?.status ?? state.status,
+      playerColor,
+      opponentName: personality.name.fr,
+      botLevel: level,
+      initialTime: timeControl.initial,
+      increment: timeControl.increment,
+      eco: opening?.eco ?? null,
+      opening: opening?.name ?? null,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameOver])
 
   // ── Revue des coups joués ───────────────────────────────────────────────
   //
@@ -838,7 +1313,7 @@ function GameScreen({
                 name={personality.name.fr}
                 rating={bot.elo}
                 color={botColor}
-                avatar={personality.emoji}
+                avatar={personality.portrait}
                 timeMs={timed ? displayClock[botColor] : null}
                 timeControl={timeControl}
                 active={state.turn === botColor && !gameOver}
@@ -874,6 +1349,16 @@ function GameScreen({
                   checkSquare={state.checkSquare}
                   checkmate={state.status === 'checkmate'}
                   highlights={(commentaryMode ? commentary?.highlights : undefined) as never}
+                  /* Le verdict sur la case d'arrivée, tant que le commentaire
+                     parle bien de la position affichée. Périmé, il jugerait le
+                     coup précédent sur la case du dernier — le pire des deux
+                     mondes, puisque la pastille serait à la fois visible et
+                     fausse. */
+                  verdict={
+                    commentaryMode && commentary && !commentaryStale && state.lastMove
+                      ? { square: state.lastMove.to, quality: commentary.quality }
+                      : null
+                  }
                   arrows={arrows}
                   onArrowClick={handleArrowClick}
                   // Le coup de l'adversaire arrive sans qu'on l'ait anticipé :
@@ -899,18 +1384,21 @@ function GameScreen({
                 </div>
               )}
 
-              {awaitingReview && (
-                <button
-                  type="button"
-                  onClick={() => setReviewedFen(state.currentFen)}
-                  className="mb-1.5 flex w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-accent px-4 py-2.5 text-sm font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
-                >
-                  <Play size={15} aria-hidden />
-                  Continuer — {personality.name.fr} joue
-                </button>
+              {studyPause && (
+                <div className="mb-1.5 h-10">
+                  {awaitingReview && (
+                    <button
+                      type="button"
+                      onClick={() => setReviewedFen(state.currentFen)}
+                      className="flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-accent px-4 text-sm font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
+                    >
+                      <Play size={15} aria-hidden />
+                      Continuer — {personality.name.fr} joue
+                    </button>
+                  )}
+                </div>
               )}
 
-              <ArrowLegend items={arrowLegend} className="mb-1.5" />
 
               <PlayerBar
                 name="Toi"
@@ -950,6 +1438,12 @@ function GameScreen({
             >
               Indice
             </Button>
+            {/* « Annuler » reste à portée directe.
+                Il était parti dans le menu avec le reste, mais il ne joue pas
+                dans la même catégorie : on annule un coup en cours de partie,
+                souvent, alors qu'on abandonne une fois. Une action fréquente
+                cachée derrière un bouton supplémentaire, c'est un geste de plus
+                à chaque fois. */}
             <Button
               size="sm"
               variant="ghost"
@@ -960,37 +1454,52 @@ function GameScreen({
               // « reprendre la partie ». On dit donc ce que fait le bouton.
               title="Annule ton dernier coup et la réponse de l’ordinateur"
             >
-              Annuler mon coup
+              Annuler
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={<Flag size={14} />}
-              onClick={handleResign}
-              disabled={gameOver}
+
+            {/* Ne restent au menu que les gestes rares ou définitifs.
+                Il s'ouvre vers le haut : la barre est en bas de fenêtre, un
+                panneau déroulé vers le bas y sortirait du cadre. */}
+            <Menu
+              align="right"
+              sens="haut"
+              largeur="w-60"
+              label="Options de la partie"
+              declencheur={() => <MoreHorizontal size={16} aria-hidden />}
             >
-              Abandonner
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={<RefreshCw size={14} />}
-              onClick={onNewGame}
-            >
-              Nouvelle
-            </Button>
-            <CommentaryToggle
-              active={commentaryMode}
-              onChange={(value) => {
-                prefs.set('commentaryMode', value)
-                // Quitter le mode commenté rend la main tout de suite : ni
-                // pause ni phrase en cours ne doivent retenir l'adversaire.
-                if (!value) {
-                  setCommentaryPaused(false)
-                  setCoachSpeaking(false)
-                }
-              }}
-            />
+              <button
+                type="button"
+                onClick={onNewGame}
+                className="flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-left text-sm transition-colors hover:bg-surface-hover"
+              >
+                <RefreshCw size={15} className="shrink-0 text-accent" aria-hidden />
+                Nouvelle partie
+              </button>
+              <button
+                type="button"
+                onClick={handleResign}
+                disabled={gameOver}
+                className="flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-left text-sm text-[var(--q-blunder)] transition-colors hover:bg-surface-hover disabled:opacity-40"
+              >
+                <Flag size={15} className="shrink-0" aria-hidden />
+                Abandonner
+              </button>
+
+              <div className="mt-1 border-t border-line/60 pt-1">
+                <CommentaryToggle
+                  active={commentaryMode}
+                  onChange={(value) => {
+                    prefs.set('commentaryMode', value)
+                    // Quitter le mode commenté rend la main tout de suite : ni
+                    // pause ni phrase en cours ne doivent retenir l'adversaire.
+                    if (!value) {
+                      setCommentaryPaused(false)
+                      setCoachSpeaking(false)
+                    }
+                  }}
+                />
+              </div>
+            </Menu>
           </div>
         </div>
 
@@ -999,6 +1508,10 @@ function GameScreen({
           <OpeningBanner opening={opening} moveCount={state.moves.length} />
 
           <CommentaryPanel
+              legende={arrowLegend}
+            // Pas de commentaire demandé, pas de voix : le panneau reste
+            // consultable, mais il ne prend plus la parole tout seul.
+            voix={commentaryMode}
             // En revue, on montre le commentaire du coup consulté plutôt que
             // celui du dernier coup joué : sinon le texte et l'échiquier
             // parlent de deux positions différentes.
@@ -1013,6 +1526,13 @@ function GameScreen({
             stale={commentaryStale}
             onReview={reviewCommented}
           />
+
+          <ApprofondirCoup
+            commentary={reviewedMove ? reviewedCommentary : commentary}
+            openingName={opening?.name ?? null}
+          />
+
+          <PhysicalBoardPanel state={physicalBoard} />
 
           <Card className="flex min-h-[220px] flex-1 flex-col overflow-hidden">
             <MoveList
@@ -1035,6 +1555,13 @@ function GameScreen({
         <GameOverDialog
           status={outcome?.status ?? state.status}
           result={outcome?.result ?? state.result}
+          retour={
+            duel
+              ? { href: '/carriere', libelle: `Retour au chapitre ${duel.numero}` }
+              : tournoi
+                ? { href: '/tournois/ordinateur', libelle: 'Retour au tournoi' }
+                : undefined
+          }
           playerColor={playerColor}
           opponentName={personality.name.fr}
           moves={state.moves}

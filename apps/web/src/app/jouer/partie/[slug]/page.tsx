@@ -29,8 +29,10 @@ import {
 import clsx from 'clsx'
 import { Chess } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
-import { formatTimeControl, parseTimeControl } from '@coupparfait/core'
+import { START_FEN, formatTimeControl, parseTimeControl } from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
+import { PhysicalBoardPanel } from '@/components/board/PhysicalBoardPanel.tsx'
+import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
 import { MoveList } from '@/components/game/MoveList.tsx'
 import { PlayerBar } from '@/components/game/PlayerBar.tsx'
 import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
@@ -196,6 +198,24 @@ export default function LiveGamePage() {
     },
     [game],
   )
+
+  // ── Échiquier électronique ──────────────────────────────────────────────
+  //
+  // En direct, on ne dispose pas de l'objet chess.js de la partie — c'est le
+  // serveur qui fait foi. On en reconstruit un sur la position courante : le
+  // rapprochement n'a besoin que des coups légaux d'une position.
+  //
+  // Les crochets se déclarent avant les retours anticipés d'attente, d'où
+  // cette position dans le fichier plutôt qu'à côté de l'affichage.
+  const liveFen = snapshot?.fen ?? START_FEN
+  const liveChess = useMemo(() => new Chess(liveFen, { skipValidation: true }), [liveFen])
+  const physicalBoard = usePhysicalBoard({
+    chess: liveChess,
+    fen: liveFen,
+    isLive: color !== null && snapshot?.turn === color && snapshot?.status === 'playing',
+    play: handleMove,
+    lastMove: snapshot?.lastMove ?? null,
+  })
 
   // ── États d'attente ─────────────────────────────────────────────────────
   if (connection === 'connecting' || !snapshot) {
@@ -412,6 +432,8 @@ export default function LiveGamePage() {
           {/* La liste cède la place : c'est elle qui peut se réduire, pas le
               tchat — deux lignes de coups restent lisibles, deux lignes de
               conversation ne sont plus une conversation. */}
+          <PhysicalBoardPanel state={physicalBoard} className="p-3.5" />
+
           <Card className="flex min-h-[120px] flex-1 flex-col overflow-hidden">
             <MoveList
               moves={playedMoves}

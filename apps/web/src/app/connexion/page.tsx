@@ -18,6 +18,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowRight, Crown, Swords } from 'lucide-react'
 import { Button, Card, Input } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { useIdentite } from '@/lib/auth/useIdentite.ts'
 
 type Mode = 'signin' | 'signup'
 
@@ -44,27 +45,26 @@ function AuthForm() {
   const [mode, setMode] = useState<Mode>(referrer ? 'signup' : 'signin')
 
   /**
-   * Une invitation reçue alors qu'on a déjà un compte.
+   * Déjà connecté : on ne demande pas de se reconnecter.
    *
-   * Proposer alors « joue en invité » ferait perdre son classement et son
-   * carnet à quelqu'un qui possède les deux. On le mène droit au carnet, où
-   * l'amitié se noue.
+   * Le renvoi n'existait que pour les invitations — arriver par le lien d'un
+   * ami alors qu'on a déjà un compte menait au carnet. Le cas ordinaire, lui,
+   * ne menait nulle part : on tombait sur un formulaire de connexion en étant
+   * connecté, avec son propre pseudo affiché dans l'en-tête juste au-dessus.
+   * Proposer en plus « joue en invité » à ce moment-là revient à proposer de
+   * perdre son classement et son historique à quelqu'un qui possède les deux.
+   *
+   * `undefined` veut dire « on ne sait pas encore » : on ne renvoie personne
+   * tant que la réponse n'est pas arrivée, sinon le formulaire clignoterait
+   * pour un visiteur anonyme.
    */
+  const identite = useIdentite()
   useEffect(() => {
-    if (!referrer) return
-    let alive = true
-    void fetch('/api/auth')
-      .then((response) => response.json())
-      .then((data: { user: unknown }) => {
-        if (alive && data.user) router.replace(`/amis?ami=${encodeURIComponent(referrer)}`)
-      })
-      .catch(() => {
-        // Service de comptes injoignable : on laisse le formulaire visible.
-      })
-    return () => {
-      alive = false
-    }
-  }, [referrer, router])
+    if (!identite) return
+    router.replace(
+      referrer ? `/amis?ami=${encodeURIComponent(referrer)}` : `/profil/${identite.username}`,
+    )
+  }, [identite, referrer, router])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [email, setEmail] = useState('')
@@ -353,10 +353,19 @@ function AuthForm() {
           >
             ou continue sans compte →
           </Link>
-          <p className="mx-auto mt-2 max-w-xs text-xs leading-relaxed text-faint">
+          {/*
+            La liste doit rester juste.
+            Elle disait « le compte ne sert qu'à conserver ton classement et ton
+            historique », ce qui était vrai et ne l'est plus : le mode carrière,
+            les analyses conservées et le défi du jour en dépendent tous depuis.
+            Une promesse qui sous-estime ce qu'elle offre est un mensonge comme
+            un autre — et celui-là coûte des inscriptions.
+          */}
+          <p className="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-faint">
             Jouer, apprendre, résoudre des puzzles et analyser tes parties fonctionne
-            entièrement sans inscription. Le compte ne sert qu’à conserver ton classement et
-            ton historique.
+            entièrement sans inscription. Le compte ajoute le mode carrière, tes analyses
+            conservées, le défi du jour, ta série, ton classement par cadence et
+            l’historique de tes parties.
           </p>
         </div>
       </div>

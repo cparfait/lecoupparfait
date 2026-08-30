@@ -1,12 +1,18 @@
 'use client'
 
 /**
- * Parties par correspondance.
+ * Parties par correspondance — la boîte de réception.
  *
  * Un coup par jour ou deux : le mode qui convient à des amis qui ne sont
  * jamais connectés en même temps. Toute la page tient dans une question —
  * *où dois-je jouer ?* — d'où le tri : à toi d'abord, en attente ensuite,
  * terminées à la fin.
+ *
+ * On ne crée plus de partie ici. Cet écran n'est pas un mode de jeu mais une
+ * liste d'obligations, et il était rangé au même niveau que « Contre un ami »,
+ * ce qui obligeait à trancher « ami ou correspondance ? » avant de savoir à
+ * quel rythme on voulait jouer. La création vit désormais avec les autres
+ * cadences, dans `/jouer/ami`.
  *
  * L'échiquier est sur la même page que la liste : une correspondance se joue
  * en trente secondes, et faire naviguer pour un coup serait absurde.
@@ -36,10 +42,6 @@ interface Game {
   deadline: string | null
 }
 
-interface Friend {
-  id: string
-  username: string
-}
 
 /** Reste avant de perdre par dépassement, dit en clair. */
 function remaining(deadline: string | null): string {
@@ -53,9 +55,7 @@ function remaining(deadline: string | null): string {
 
 export default function CorrespondencePage() {
   const [games, setGames] = useState<Game[] | null | undefined>(undefined)
-  const [friends, setFriends] = useState<Friend[]>([])
   const [current, setCurrent] = useState<string | null>(null)
-  const [days, setDays] = useState(2)
 
   const refresh = useCallback(async () => {
     const response = await fetch('/api/correspondance')
@@ -68,12 +68,10 @@ export default function CorrespondencePage() {
     setCurrent((slug) => slug ?? data.games?.find((g) => g.yourTurn)?.slug ?? data.games?.[0]?.slug ?? null)
   }, [])
 
+  // Le carnet d'amis était chargé ici pour la création de partie, qui a
+  // déménagé : une requête de moins à chaque ouverture de la boîte.
   useEffect(() => {
     void refresh().catch(() => setGames(null))
-    void fetch('/api/amis')
-      .then((r) => (r.ok ? r.json() : { friends: [] }))
-      .then((d: { friends: Friend[] }) => setFriends(d.friends ?? []))
-      .catch(() => setFriends([]))
   }, [refresh])
 
   const game = games?.find((entry) => entry.slug === current) ?? null
@@ -96,24 +94,6 @@ export default function CorrespondencePage() {
     [game, refresh],
   )
 
-  const start = useCallback(
-    async (friendId: string) => {
-      const response = await fetch('/api/correspondance', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ action: 'start', to: friendId, days }),
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) {
-        toast.error(data.error ?? 'Création impossible.')
-        return
-      }
-      setCurrent(data.slug)
-      await refresh()
-      toast.success('Partie lancée.', 'Les couleurs ont été tirées au sort.')
-    },
-    [days, refresh],
-  )
 
   if (games === undefined) {
     return (
@@ -197,47 +177,28 @@ export default function CorrespondencePage() {
             )}
           </Card>
 
+          {/*
+            Créer une partie se fait ailleurs.
+            Cet écran répond à une seule question — « où dois-je jouer ? » — et
+            c'est une boîte de réception, pas un mode de jeu. Y loger aussi la
+            création obligeait à choisir « correspondance » avant de choisir un
+            rythme, alors que c'est le rythme qui distingue une correspondance
+            d'une partie en direct. Les deux se choisissent donc au même endroit.
+          */}
           <Card className="p-3">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
               Nouvelle partie
             </p>
-            <label className="mb-2 flex items-center gap-2 text-[12px] text-muted">
-              Délai par coup
-              <select
-                value={days}
-                onChange={(event) => setDays(Number(event.target.value))}
-                className="rounded-[var(--radius-sm)] border border-line px-1.5 py-1 text-[12px]"
-              >
-                {[1, 2, 3, 7, 14].map((d) => (
-                  <option key={d} value={d}>
-                    {d} jour{d > 1 ? 's' : ''}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {friends.length === 0 ? (
-              <p className="text-[12px] leading-relaxed text-faint">
-                Ton carnet est vide.{' '}
-                <Link href="/amis" className="text-accent hover:underline">
-                  Ajoute quelqu’un
-                </Link>{' '}
-                pour lancer une correspondance.
-              </p>
-            ) : (
-              <div className="space-y-0.5">
-                {friends.map((friend) => (
-                  <button
-                    key={friend.id}
-                    type="button"
-                    onClick={() => void start(friend.id)}
-                    className="flex w-full items-center gap-1.5 rounded-[var(--radius-sm)] px-2 py-1.5 text-left text-[13px] transition-colors hover:bg-surface-hover"
-                  >
-                    <Plus size={13} className="shrink-0 text-accent" aria-hidden />
-                    <span className="min-w-0 flex-1 truncate">{friend.username}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+            <p className="mb-2 text-[12px] leading-relaxed text-muted">
+              Elle se lance depuis l’écran de partie, en choisissant une cadence en jours.
+            </p>
+            <Link
+              href="/jouer/ami"
+              className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent hover:underline"
+            >
+              <Plus size={13} aria-hidden />
+              Jouer contre quelqu’un
+            </Link>
           </Card>
         </div>
 
