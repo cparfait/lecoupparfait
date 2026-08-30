@@ -85,7 +85,11 @@ export async function GET(
         .leftJoin(gameAnalyses, eq(gameAnalyses.gameId, games.id))
         .where(sql`${games.whiteId} = ${user.id} or ${games.blackId} = ${user.id}`)
         .orderBy(desc(games.createdAt))
-        .limit(20),
+        // Vingt suffisaient tant que rien n'était enregistré. Maintenant que
+        // les parties contre l'ordinateur y figurent, vingt, c'est une soirée :
+        // l'historique se serait vidé plus vite qu'il ne se remplit. La borne
+        // ne protège plus que la taille de la réponse.
+        .limit(500),
 
       database
         .select({

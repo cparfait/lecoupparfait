@@ -41,6 +41,17 @@ export interface RunAnalysisOptions {
   depth?: number
   book?: OpeningBook | null
   locale?: 'fr' | 'en'
+  /** Camp du lecteur, pour que les explications s'adressent à la bonne personne. */
+  lecteur?: 'w' | 'b' | null
+  /**
+   * En-têtes du PGN, quand il y en a.
+   *
+   * Ils étaient lus par `parseAnalysisInput`, affichés une fois sur l'écran
+   * d'import — « 7 demi-coups reconnus · Alice – Bob » — puis abandonnés. La
+   * relecture ne parlait plus que de « Blancs » et « Noirs », alors qu'on
+   * venait d'importer la partie de quelqu'un qui a un nom.
+   */
+  headers?: Record<string, string>
   onProgress?: (progress: AnalysisProgress) => void
   signal?: AbortSignal
   /** Force l'analyse locale, sans passer par le serveur. */
@@ -49,6 +60,16 @@ export interface RunAnalysisOptions {
 
 export interface AnalysisOutcome {
   report: FullGameReport
+  /** En-têtes du PGN d'origine, pour nommer les joueurs à la relecture. */
+  headers?: Record<string, string>
+  /**
+   * Sortie brute du moteur, position par position.
+   *
+   * C'est la seule partie coûteuse de l'analyse, et la seule qu'il vaille la
+   * peine de conserver : le rapport se reconstruit à partir d'elle en quelques
+   * millisecondes. Voir `savedAnalyses` dans le schéma.
+   */
+  positions: PositionAnalysis[]
   source: AnalysisSource
   /** Résumé pédagogique pour chaque camp. */
   coach: {
@@ -64,6 +85,8 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<Analysis
     depth = 18,
     book,
     locale = 'fr',
+    lecteur = null,
+    headers,
     onProgress,
     signal,
     forceClient = false,
@@ -79,22 +102,37 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<Analysis
 
   // L'analyseur reçoit soit les résultats du serveur (lecture dans un tableau),
   // soit un appel direct au moteur du navigateur.
+  //
+  // Dans le second cas les évaluations n'existaient nulle part une fois le
+  // rapport rédigé : elles étaient produites, consommées, oubliées. On les
+  // retient au passage, sans quoi une analyse faite dans le navigateur serait
+  // la seule qu'on ne saurait pas enregistrer — alors que c'est la plus lente,
+  // donc celle qu'on tient le plus à ne pas refaire.
+  const recoltees: PositionAnalysis[] = []
   const analyser = precomputed
     ? makeArrayAnalyser(precomputed)
-    : makeClientAnalyser(
-        clientDepthFor(depth, moves.length + 1),
-        onProgress,
-        moves.length + 1,
-        signal,
+    : recolter(
+        makeClientAnalyser(
+          clientDepthFor(depth, moves.length + 1),
+          onProgress,
+          moves.length + 1,
+          signal,
+        ),
+        recoltees,
       )
 
   const report = await analyseGame({
+    lecteur,
     moves,
     startFen,
     analyser,
     book: book ?? undefined,
     locale,
-    multiPv: 2,
+    // Trois lignes et non plus deux : la deuxième suffisait à classer le coup
+    // joué, il en faut une de plus pour montrer au lecteur ce qu'il avait
+    // d'autre sous la main. Le surcoût est réel mais modéré — le moteur
+    // explore le même arbre, il en rapporte seulement davantage.
+    multiPv: 3,
     signal,
     onProgress: (done, total) => {
       onProgress?.({ done, total, source, phase: 'explaining' })
@@ -103,7 +141,65 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<Analysis
 
   return {
     report,
+    headers,
+    positions: precomputed ?? recoltees,
     source,
+    coach: {
+      w: summariseForCoach(report, 'w', locale),
+      b: summariseForCoach(report, 'b', locale),
+    },
+  }
+}
+
+/** Enveloppe un analyseur pour garder une copie de ce qu'il produit. */
+function recolter(
+  analyser: (fen: string, multiPv: number) => Promise<PositionAnalysis>,
+  panier: PositionAnalysis[],
+) {
+  return async (fen: string, multiPv: number): Promise<PositionAnalysis> => {
+    const analysis = await analyser(fen, multiPv)
+    panier.push(analysis)
+    return analysis
+  }
+}
+
+/**
+ * Reconstruit une analyse à partir d'évaluations déjà connues.
+ *
+ * Aucun moteur n'est sollicité : ni le serveur, ni le navigateur. On rejoue la
+ * classification, la détection de motifs et la rédaction sur des chiffres déjà
+ * calculés, ce qui prend le temps d'un battement de cils au lieu d'une minute.
+ *
+ * C'est ce qui rend l'enregistrement utile, et c'est aussi pourquoi on stocke
+ * les évaluations plutôt que le texte : la prose est refabriquée ici, donc par
+ * la version actuelle du code.
+ */
+export async function rejouerAnalyse(options: {
+  moves: string[]
+  positions: PositionAnalysis[]
+  startFen?: string
+  headers?: Record<string, string>
+  book?: OpeningBook | null
+  locale?: 'fr' | 'en'
+  lecteur?: 'w' | 'b' | null
+}): Promise<AnalysisOutcome> {
+  const { moves, positions, startFen, headers, book, locale = 'fr', lecteur = null } = options
+
+  const report = await analyseGame({
+    lecteur,
+    moves,
+    startFen,
+    analyser: makeArrayAnalyser(positions),
+    book: book ?? undefined,
+    locale,
+    multiPv: 3,
+  })
+
+  return {
+    report,
+    headers,
+    positions,
+    source: 'server',
     coach: {
       w: summariseForCoach(report, 'w', locale),
       b: summariseForCoach(report, 'b', locale),
@@ -152,7 +248,11 @@ async function analyseOnServer(options: {
         moves: options.moves,
         startFen: options.startFen,
         depth: options.depth,
-        multiPv: 2,
+        // Trois lignes et non plus deux : la deuxième suffisait à classer le coup
+    // joué, il en faut une de plus pour montrer au lecteur ce qu'il avait
+    // d'autre sous la main. Le surcoût est réel mais modéré — le moteur
+    // explore le même arbre, il en rapporte seulement davantage.
+    multiPv: 3,
       }),
       signal: guard.signal,
     })

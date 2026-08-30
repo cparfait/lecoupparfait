@@ -11,12 +11,21 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { BarChart3, CalendarDays, LogOut, MailCheck, MailWarning, TrendingUp } from 'lucide-react'
+import {
+  BarChart3,
+  CalendarDays,
+  LogOut,
+  MailCheck,
+  MailWarning,
+  TrendingUp,
+  Trash2,
+} from 'lucide-react'
 import clsx from 'clsx'
 import { SPEED_LABELS, ratingTitle } from '@coupparfait/core'
 import { Button, Card, Chip, EmptyState, Skeleton } from '@/components/ui/index.tsx'
 import { AvatarPicker } from '@/components/profile/AvatarPicker.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { effacerPartie } from '@/lib/game/partieEnCours.ts'
 
 interface Profile {
   user: {
@@ -106,6 +115,39 @@ export default function ProfilePage() {
     window.location.assign('/')
   }, [])
 
+  /**
+   * Efface une partie, à l'écran d'abord.
+   *
+   * Attendre la réponse du serveur pour faire disparaître la ligne donne
+   * l'impression que le clic a raté. En cas de refus on la remet, avec un mot
+   * qui dit pourquoi.
+   *
+   * Déclaré **avant** les retours anticipés : le placer plus bas, à côté du
+   * code qui s'en sert, changeait le nombre de hooks entre le rendu de
+   * chargement et le suivant — « Rendered more hooks than during the previous
+   * render », et la page ne s'affichait plus du tout.
+   */
+  const oublier = useCallback(
+    async (slug: string) => {
+      // Retrait immédiat : attendre le serveur donne l'impression que le clic
+      // a raté. En cas de refus on relit le profil plutôt que de restaurer un
+      // instantané capturé au vol — un tel instantané n'est pas fiable, React
+      // n'appelant pas forcément la fonction de mise à jour tout de suite.
+      setProfile((actuel) =>
+        actuel ? { ...actuel, games: actuel.games.filter((g) => g.slug !== slug) } : actuel,
+      )
+      if (await effacerPartie(slug)) return
+      toast.error('Suppression impossible.', 'Réessaie dans un instant.')
+      try {
+        const reponse = await fetch(`/api/profil/${params.username}`, { cache: 'no-store' })
+        if (reponse.ok) setProfile(await reponse.json())
+      } catch {
+        // Serveur injoignable : la ligne réapparaîtra au prochain chargement.
+      }
+    },
+    [params.username],
+  )
+
   if (loading) {
     return (
       <div className="mx-auto w-full max-w-3xl space-y-4 px-4 py-10">
@@ -139,6 +181,7 @@ export default function ProfilePage() {
   }
 
   const isMe = me !== null && me.toLowerCase() === profile.user.username.toLowerCase()
+
   const best = [...profile.ratings].sort((a, b) => b.games - a.games)[0]
   const title = best ? ratingTitle(best.rating) : null
 
@@ -327,6 +370,23 @@ export default function ProfilePage() {
                 <span className="shrink-0 text-[11px] text-faint">
                   {formatDate(game.playedAt)}
                 </span>
+                {/*
+                  Effaçable seulement chez soi, et seulement si la partie n'est
+                  pas classée : une partie classée a bougé le classement d'un
+                  adversaire, et la faire disparaître d'un côté laisserait de
+                  l'autre des points sans partie pour les expliquer.
+                */}
+                {isMe && !game.rated && (
+                  <button
+                    type="button"
+                    onClick={() => void oublier(game.slug)}
+                    title="Effacer cette partie de ton historique"
+                    aria-label={`Effacer la partie contre ${game.opponent}`}
+                    className="shrink-0 rounded-[var(--radius-sm)] p-1 text-faint transition-colors hover:bg-surface-strong hover:text-[var(--q-blunder)]"
+                  >
+                    <Trash2 size={13} aria-hidden />
+                  </button>
+                )}
               </li>
             ))}
           </ul>
