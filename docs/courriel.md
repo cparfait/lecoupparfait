@@ -53,11 +53,24 @@ Sans eux, les messages partent et se font refuser. Ce n'est pas une
 optimisation : Gmail et Outlook rejettent ou classent en indésirable tout ce qui
 n'est pas authentifié.
 
-Relève d'abord la clé publique générée au premier démarrage :
+Relève d'abord la clé publique générée au premier démarrage. Le MTA l'écrit
+dans ses journaux au moment où il la fabrique, ce qui est le moyen le plus sûr
+de la retrouver — le chemin exact du fichier dépend de la version de l'image :
 
 ```bash
-docker compose exec mail cat /etc/opendkim/keys/coupparfait.example.txt
+docker compose logs mail | grep -A 4 -i dkim
 ```
+
+Et si l'on préfère la lire dans le volume :
+
+```bash
+docker compose exec mail sh -c 'ls -R /etc/opendkim/keys'
+```
+
+Rien dans les journaux, aucun fichier dans le volume ? C'est que
+`DKIM_AUTOGENERATE` manque : sans lui l'image démarre sans clé, ne signe rien,
+et n'échoue nulle part. C'est le pire des cas — tout paraît fonctionner, et les
+messages sont jetés à l'arrivée.
 
 | Sous-domaine | Type | Valeur |
 |---|---|---|

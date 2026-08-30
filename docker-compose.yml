@@ -146,9 +146,14 @@ services:
       # au bon endroit, c'est-à-dire seulement quand on l'a demandé.
       ALLOWED_SENDER_DOMAINS: ${MAIL_DOMAIN:-}
       HOSTNAME: ${MAIL_HOSTNAME:-mail.${MAIL_DOMAIN}}
-      # Génère la paire DKIM au premier démarrage et la conserve dans le volume.
+      # La génération de la paire DKIM n'est **pas** automatique : sans ce
+      # drapeau, l'image démarre sans clé, ne signe rien, et ne le dit que dans
+      # ses journaux. Les messages partent alors non signés, ce qui est le cas
+      # le plus difficile à diagnostiquer — tout a l'air de fonctionner, et
+      # Gmail les jette en silence.
+      DKIM_AUTOGENERATE: '1'
       # Le sélecteur entre dans le nom de l'enregistrement DNS : `mail` donne
-      # `mail._domainkey.<domaine>`.
+      # `mail._domainkey.<domaine>`. La clé est conservée dans le volume `dkim`.
       DKIM_SELECTOR: ${MAIL_DKIM_SELECTOR:-mail}
       # Personne ne s'authentifie : le seul client est `web`, sur un réseau
       # privé sans accès à Internet entrant.
