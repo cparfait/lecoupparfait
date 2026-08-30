@@ -18,30 +18,70 @@
  * à l'échiquier.
  */
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronDown, Menu as MenuIcon, Settings, X } from 'lucide-react'
+import { ChevronDown, Lock, Menu as MenuIcon, Settings, X } from 'lucide-react'
 import clsx from 'clsx'
 import { LogoMark as MarqueCavale } from '@/components/brand/LogoMark.tsx'
 import { AccountButton } from '@/components/layout/AccountButton.tsx'
 import { ChallengeWatcher } from '@/components/social/ChallengeWatcher.tsx'
 import { PastilleSerie } from '@/components/daily/PastilleSerie.tsx'
 import { Menu } from '@/components/ui/Menu.tsx'
+import { PorteDuCompte } from '@/components/compte/PorteDuCompte.tsx'
 import type { ReactNode } from 'react'
 import { useT } from '@/lib/i18n/index.tsx'
+import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { avantagePour, type AvantageCompte } from '@/lib/compte/avantages.ts'
 import { RACCOURCIS_MOBILES, SECTIONS, sectionActive } from '@/lib/navigation.ts'
 import { ThemeQuickSwitch } from './ThemeQuickSwitch.tsx'
 import { VoiceQuickToggle } from './VoiceQuickToggle.tsx'
+
+/**
+ * Ce qu'il y a à dire avant d'ouvrir cette rubrique, s'il y a quelque chose.
+ *
+ * Rend l'explication quand la destination demande un compte **et** que
+ * personne n'est connecté ; `null` sinon, et le lien fait son travail
+ * ordinaire. C'est aussi ce qui décide du cadenas affiché dans les menus : une
+ * seule source, donc jamais un cadenas sur une entrée qui laisse passer.
+ *
+ * Le cas `undefined` de l'identité — on ne sait pas encore — rend `null` lui
+ * aussi, délibérément : mieux vaut une explication manquée qu'une boîte
+ * s'ouvrant au nez de quelqu'un de connecté parce que la réponse tardait.
+ */
+type Intercepteur = (href: string) => AvantageCompte | null
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const t = useT()
   const [menuOpen, setMenuOpen] = useState(false)
+  const identite = useIdentite()
+  const [porte, setPorte] = useState<{ avantage: AvantageCompte; href: string } | null>(null)
+
+  const intercepter = useCallback<Intercepteur>(
+    (href) => (identite === null ? avantagePour(href) : null),
+    [identite],
+  )
+
+  /**
+   * Ouvrir la boîte referme le menu qui l'a déclenchée.
+   *
+   * Sur téléphone le menu occupe tout l'écran : sans cela il restait déroulé
+   * derrière la boîte, et l'on refermait la boîte pour retomber sur une liste
+   * qu'on croyait avoir quittée. Le clic est consommé par l'explication, il ne
+   * doit pas laisser le menu ouvert dans son dos.
+   */
+  const ouvrirPorte = useCallback((demande: { avantage: AvantageCompte; href: string }) => {
+    setMenuOpen(false)
+    setPorte(demande)
+  }, [])
 
   // Toute navigation referme le menu : sinon il resterait ouvert par-dessus la
   // nouvelle page.
   useEffect(() => setMenuOpen(false), [pathname])
+  // Et la boîte, pour la même raison : « Voir quand même » navigue, la boîte
+  // n'a plus rien à dire sur la page où l'on vient d'arriver.
+  useEffect(() => setPorte(null), [pathname])
 
   // Les pages de partie masquent la navigation mobile pour libérer l'écran.
   const immersive = /^\/(jouer|puzzles|apprendre)\/[^/]+/.test(pathname)
@@ -71,7 +111,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <nav className="ml-2 hidden items-center gap-0.5 md:flex" aria-label="Navigation principale">
             {SECTIONS.map((section) => (
-              <MenuSection key={section.id} section={section} pathname={pathname} />
+              <MenuSection
+                key={section.id}
+                section={section}
+                pathname={pathname}
+                intercepter={intercepter}
+                onPorte={ouvrirPorte}
+              />
             ))}
           </nav>
 
@@ -99,8 +145,21 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        {menuOpen && <MobileMenu pathname={pathname} />}
+        {menuOpen && (
+          <MobileMenu pathname={pathname} intercepter={intercepter} onPorte={ouvrirPorte} />
+        )}
       </header>
+
+      {/* Hors de l'en-tête : la boîte se superpose à toute la page, et un
+          parent en `backdrop-blur` avec un `z-index` propre la piégerait dans
+          son contexte d'empilement. */}
+      {porte && (
+        <PorteDuCompte
+          avantage={porte.avantage}
+          href={porte.href}
+          onFermer={() => setPorte(null)}
+        />
+      )}
 
       {/* ── Contenu ──────────────────────────────────────────────────── */}
       <main className={clsx('flex-1', !immersive && 'pb-20 md:pb-0')}>{children}</main>
@@ -168,9 +227,13 @@ function LogoMark() {
 function MenuSection({
   section,
   pathname,
+  intercepter,
+  onPorte,
 }: {
   section: (typeof SECTIONS)[number]
   pathname: string
+  intercepter: Intercepteur
+  onPorte: (porte: { avantage: AvantageCompte; href: string }) => void
 }) {
   const t = useT()
   const active = sectionActive(section, pathname)
@@ -208,15 +271,25 @@ function MenuSection({
 
       {section.entrees.map((entree) => {
         const Icone = entree.icon
+        // Réservée, et seulement pour un visiteur anonyme : le cadenas
+        // disparaît dès qu'il n'a plus rien à annoncer.
+        const reservee = intercepter(entree.href)
         return (
           <Link
             key={entree.href}
             href={entree.href}
             role="menuitem"
+            onClick={(event) => {
+              if (!reservee) return
+              // On explique avant d'emmener. La boîte propose « Voir quand
+              // même » : rien n'est interdit, seulement annoncé.
+              event.preventDefault()
+              onPorte({ avantage: reservee, href: entree.href })
+            }}
             className="flex items-start gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 transition-colors hover:bg-surface-hover"
           >
             <Icone size={16} className="mt-0.5 shrink-0 text-accent" aria-hidden />
-            <span className="min-w-0">
+            <span className="min-w-0 flex-1">
               <span className="block text-sm font-medium">{t(entree.labelKey)}</span>
               {entree.hintKey && (
                 <span className="block text-[11px] leading-snug text-faint">
@@ -224,6 +297,13 @@ function MenuSection({
                 </span>
               )}
             </span>
+            {reservee && (
+              <Lock
+                size={12}
+                className="mt-1 shrink-0 text-faint"
+                aria-label="demande un compte"
+              />
+            )}
           </Link>
         )
       })}
@@ -243,7 +323,15 @@ function MenuSection({
  * défilement court, alors qu'un accordéon demanderait un geste de plus pour
  * chaque rubrique.
  */
-function MobileMenu({ pathname }: { pathname: string }) {
+function MobileMenu({
+  pathname,
+  intercepter,
+  onPorte,
+}: {
+  pathname: string
+  intercepter: Intercepteur
+  onPorte: (porte: { avantage: AvantageCompte; href: string }) => void
+}) {
   const t = useT()
 
   return (
@@ -259,17 +347,30 @@ function MobileMenu({ pathname }: { pathname: string }) {
                 const Icone = entree.icon
                 const chemin = entree.href.split(/[?#]/)[0] ?? entree.href
                 const active = pathname === chemin
+                const reservee = intercepter(entree.href)
                 return (
                   <Link
                     key={entree.href}
                     href={entree.href}
+                    onClick={(event) => {
+                      if (!reservee) return
+                      event.preventDefault()
+                      onPorte({ avantage: reservee, href: entree.href })
+                    }}
                     className={clsx(
                       'flex items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2.5 text-sm font-medium',
                       active ? 'bg-surface-strong text-ink' : 'text-muted',
                     )}
                   >
                     <Icone size={16} className="shrink-0" aria-hidden />
-                    <span className="truncate">{t(entree.labelKey)}</span>
+                    <span className="min-w-0 flex-1 truncate">{t(entree.labelKey)}</span>
+                    {reservee && (
+                      <Lock
+                        size={11}
+                        className="shrink-0 text-faint"
+                        aria-label="demande un compte"
+                      />
+                    )}
                   </Link>
                 )
               })}
