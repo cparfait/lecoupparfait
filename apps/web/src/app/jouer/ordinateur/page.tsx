@@ -92,10 +92,12 @@ import {
 import { deposerResultat } from '@/lib/game/tournoiSolo.ts'
 import {
   CHAPITRES,
+  QUALITY_STYLES,
   chapitre as chapitreCarriere,
   niveauEffectif,
   type BotPersonalityId,
   type Chapitre,
+  type MoveQuality,
 } from '@coupparfait/core'
 import { useCurrentOpening, useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { playMoveSound, playResultSound, playSound } from '@/lib/sound.ts'
@@ -1343,6 +1345,22 @@ function GameScreen({
     showBestMove,
   ])
 
+  /**
+   * Le verdict du dernier coup, calculé **une fois**.
+   *
+   * Il alimente la pastille sur l'échiquier et la légende écrite juste en
+   * dessous. Les deux dérivaient de la même expression recopiée, ce qui est la
+   * meilleure façon de les voir un jour se contredire : un glyphe pour une
+   * qualité, un mot pour une autre.
+   *
+   * Périmé, il ne s'affiche pas : il jugerait le coup précédent sur la case du
+   * dernier — à la fois visible et faux.
+   */
+  const verdictDuCoup =
+    commentaryMode && commentary && !commentaryStale && state.lastMove
+      ? { square: state.lastMove.to, quality: commentary.quality }
+      : null
+
   return (
     <div className="mx-auto w-full max-w-[1500px] px-2 py-3 sm:px-4 lg:py-6">
       <div className="grid gap-4 lg:h-[calc(100dvh-6rem)] lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_400px]">
@@ -1412,11 +1430,7 @@ function GameScreen({
                      coup précédent sur la case du dernier — le pire des deux
                      mondes, puisque la pastille serait à la fois visible et
                      fausse. */
-                  verdict={
-                    commentaryMode && commentary && !commentaryStale && state.lastMove
-                      ? { square: state.lastMove.to, quality: commentary.quality }
-                      : null
-                  }
+                  verdict={verdictDuCoup}
                   arrows={arrows}
                   onArrowClick={handleArrowClick}
                   // Le coup de l'adversaire arrive sans qu'on l'ait anticipé :
@@ -1425,6 +1439,19 @@ function GameScreen({
                   animationMs={lastPlayed?.color === botColor ? 420 : undefined}
                 />
               </div>
+
+              {/* ── Le verdict, en toutes lettres ─────────────────────────
+                  La pastille posée sur la case porte un glyphe — 📖, !!, ?? —
+                  et rien n'en donnait la clé. Elle contenait bien son
+                  explication dans un attribut `title`, mais inatteignable :
+                  son conteneur est en `pointer-events-none`, donc l'élément ne
+                  reçoit jamais le survol. Et sur un téléphone il n'y a pas de
+                  survol du tout. Une légende écrite ne dépend d'aucun geste.
+
+                  Elle rend du même coup la pastille franchement décorative,
+                  ce qui justifie enfin son `aria-hidden` : le mot est lu ici,
+                  une seule fois. */}
+              {verdictDuCoup && <LegendeDuVerdict quality={verdictDuCoup.quality} />}
 
               {reviewing && (
                 <div className="mb-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2 text-[13px]">
@@ -1654,4 +1681,29 @@ export function recordBotGame(level: number, won: boolean): void {
   }).catch(() => {
     // Hors ligne ou sans compte : la partie reste jouée, simplement pas comptée.
   })
+}
+
+/**
+ * Ce que dit la pastille posée sur la case d'arrivée, écrit.
+ *
+ * Le libellé suffit à la plupart — « Théorie », « Gaffe » — et la phrase qui
+ * suit répond à la question d'après, « et alors ? ». Elle disparaît sous
+ * 640 px, où la largeur ne permet pas les deux sans repousser l'échiquier.
+ */
+function LegendeDuVerdict({ quality }: { quality: MoveQuality }) {
+  const style = QUALITY_STYLES[quality]
+  const teinte = `var(--q-${style.token})`
+
+  return (
+    <p
+      className="mb-1.5 flex items-baseline gap-1.5 text-[13px] leading-snug"
+      style={{ color: teinte }}
+    >
+      <span aria-hidden>{style.glyph}</span>
+      <span className="font-semibold">{style.label.fr}</span>
+      <span className="hidden min-w-0 flex-1 truncate font-normal text-muted sm:inline">
+        {style.description.fr}
+      </span>
+    </p>
+  )
 }
