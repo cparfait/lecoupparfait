@@ -123,7 +123,31 @@ export function Board3D(props: Board2DProps) {
     setSelected(allowed ? square : null)
   }
 
-  const quality = prefs.effects === 'high' ? 'high' : 'low'
+  /**
+   * Qualité de rendu, bridée sur les petits écrans tactiles.
+   *
+   * Le niveau d'effets se déduit du nombre de cœurs, et un téléphone récent en
+   * annonce huit : il héritait donc du rendu complet — ombres portées, ombres
+   * de contact, anti-crénelage, deux pixels par point, et surtout des matériaux
+   * à transmission sur trente-deux pièces, chacun coûtant une copie de la
+   * scène. C'est ce qui fait rendre l'âme au processus graphique au bout de
+   * quelques secondes : l'échiquier s'affiche, puis l'image se fige ou
+   * disparaît. Ces machines ont des cœurs, pas de dissipateur.
+   */
+  const petitEcranTactile = useMobileGPU()
+  const quality = prefs.effects === 'high' && !petitEcranTactile ? 'high' : 'low'
+
+  /**
+   * Le contexte WebGL peut être repris par le système.
+   *
+   * Sur téléphone, l'onglet qui passe en arrière-plan ou la mémoire qui manque
+   * suffisent : le navigateur reprend le contexte et le canevas devient un
+   * rectangle vide, définitivement. Sans rien pour le dire, on croit
+   * l'application cassée — on voyait l'échiquier, et puis plus rien.
+   */
+  const [contextePerdu, setContextePerdu] = useState(false)
+  /** Incrémenté pour remonter le canevas de zéro. */
+  const [reprise, setReprise] = useState(0)
 
   // Dimensions mesurées du conteneur, en pixels.
   //
@@ -146,12 +170,35 @@ export function Board3D(props: Board2DProps) {
       const height = element.clientHeight
       const side = height > 0 ? Math.min(width, height) : width
       if (side > 0) setSize(side)
+      return side > 0
     }
-    measure()
+
+    /*
+      On insiste, image par image, tant que la mesure est nulle.
+
+      Le canevas n'est monté qu'une fois le conteneur mesuré. Quand l'échiquier
+      apparaît après coup — le composant est chargé en différé, et sur une
+      partie en ligne il attend d'abord la connexion — cette première mesure
+      tombe avant la mise en page et rend zéro. L'observateur de taille, lui, ne
+      rappelle que si la taille *change* ensuite : elle ne change pas, donc plus
+      rien n'arrivait. On restait devant un emplacement vide jusqu'à ce qu'un
+      redimensionnement de la fenêtre réveille tout — c'est-à-dire jamais sur un
+      téléphone qu'on ne tourne pas.
+    */
+    let abandonne = false
+    let essais = 0
+    const insister = () => {
+      if (abandonne || measure() || ++essais > 60) return
+      requestAnimationFrame(insister)
+    }
+    insister()
 
     const observer = new ResizeObserver(measure)
     observer.observe(element)
-    return () => observer.disconnect()
+    return () => {
+      abandonne = true
+      observer.disconnect()
+    }
   }, [])
 
   /**
@@ -165,16 +212,26 @@ export function Board3D(props: Board2DProps) {
    * écouteur soit déjà attaché : émettre le signal trop tôt ne sert à rien. On
    * réessaie donc quelques fois, en s'arrêtant dès que le canevas a la bonne
    * taille — et de toute façon au bout d'une seconde.
+   *
+   * On juge sur la **mémoire de rendu** (`canvas.width`), pas sur la taille
+   * d'affichage (`canvas.clientWidth`). Cette dernière, c'est nous qui
+   * l'imposons en pixels : elle était donc juste dès la première vérification,
+   * la relance s'arrêtait aussitôt et n'émettait jamais le moindre signal. La
+   * mémoire de rendu, elle, n'est fixée que par le moteur — tant qu'elle est
+   * restée à ses 300 × 150 par défaut, c'est que rien n'a été rendu.
    */
   useEffect(() => {
     if (size <= 0) return
     const container = containerRef.current
     if (!container) return
 
+    const dpr = Math.min(window.devicePixelRatio || 1, quality === 'high' ? 2 : 1)
+    const attendu = Math.round(size * dpr)
+
     let attempts = 0
     const timer = setInterval(() => {
       const canvas = container.querySelector('canvas')
-      if (canvas && Math.abs(canvas.clientWidth - size) < 2) {
+      if (canvas && Math.abs(canvas.width - attendu) <= 2) {
         clearInterval(timer)
         return
       }
@@ -183,7 +240,7 @@ export function Board3D(props: Board2DProps) {
     }, 100)
 
     return () => clearInterval(timer)
-  }, [size])
+  }, [size, quality])
 
   return (
     <div
@@ -192,13 +249,27 @@ export function Board3D(props: Board2DProps) {
     >
       {size > 0 && (
       <Canvas
+        key={reprise}
         style={{ width: size, height: size }}
-        shadows={prefs.effects === 'high'}
-        dpr={prefs.effects === 'high' ? [1, 2] : 1}
+        shadows={quality === 'high'}
+        dpr={quality === 'high' ? [1, 2] : 1}
         gl={{
-          antialias: prefs.effects === 'high',
-          powerPreference: 'high-performance',
+          antialias: quality === 'high',
+          // `high-performance` réclame la carte dédiée quand il y en a une ;
+          // sur un téléphone il n'y en a qu'une, et l'exiger n'apporte rien
+          // qu'un contexte plus vite refusé quand la mémoire manque.
+          powerPreference: quality === 'high' ? 'high-performance' : 'default',
           alpha: true,
+        }}
+        onCreated={({ gl }) => {
+          const toile = gl.domElement
+          // `preventDefault` est ce qui autorise le navigateur à rendre le
+          // contexte plus tard : sans lui, la perte est définitive.
+          toile.addEventListener('webglcontextlost', (event) => {
+            event.preventDefault()
+            setContextePerdu(true)
+          })
+          toile.addEventListener('webglcontextrestored', () => setContextePerdu(false))
         }}
         camera={{ position: fittedCameraPosition(), fov: CAMERA_FOV, near: 0.1, far: 80 }}
         // `offsetSize` mesure la boîte de disposition plutôt que le rectangle
@@ -239,6 +310,40 @@ export function Board3D(props: Board2DProps) {
       </Canvas>
       )}
 
+      {/* Un canevas vide n'explique rien. On dit ce qui s'est passé et on
+          propose les deux seules sorties utiles : réessayer, ou jouer en 2D —
+          qui ne demande aucun processeur graphique. */}
+      {contextePerdu && (
+        <div className="absolute inset-0 grid place-items-center bg-[var(--bg)]/92 p-6 text-center">
+          <div>
+            <p className="text-sm font-semibold">La vue 3D s’est interrompue</p>
+            <p className="mx-auto mt-1.5 max-w-xs text-[13px] leading-relaxed text-muted">
+              Ton appareil a repris la mémoire graphique. La partie continue : rien n’est
+              perdu.
+            </p>
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setContextePerdu(false)
+                  setReprise((valeur) => valeur + 1)
+                }}
+                className="rounded-[var(--radius-sm)] bg-accent px-3 py-1.5 text-[13px] font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
+              >
+                Réessayer
+              </button>
+              <button
+                type="button"
+                onClick={() => prefs.set('view', '2d')}
+                className="rounded-[var(--radius-sm)] border border-line px-3 py-1.5 text-[13px] font-medium transition-colors hover:bg-surface-hover"
+              >
+                Revenir en 2D
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {promotion && (
         <PromotionPicker
           color={promotion.color}
@@ -254,6 +359,29 @@ export function Board3D(props: Board2DProps) {
       )}
     </div>
   )
+}
+
+/**
+ * Sommes-nous sur un appareil à écran tactile étroit ?
+ *
+ * On ne se fie pas au nombre de cœurs : un téléphone de 2024 en annonce huit et
+ * passerait pour une station de travail. La combinaison « pointeur grossier et
+ * écran étroit » désigne exactement les machines dont le processeur graphique
+ * est partagé, sans ventilation, et qui rendent la main au bout de quelques
+ * secondes de rendu soutenu.
+ */
+function useMobileGPU(): boolean {
+  const [mobile, setMobile] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(pointer: coarse) and (max-width: 900px)')
+    const sync = () => setMobile(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+
+  return mobile
 }
 
 /**
