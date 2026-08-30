@@ -51,7 +51,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* ── Barre supérieure ─────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 border-b border-line/70 backdrop-blur-xl">
         <div className="absolute inset-0 -z-10 bg-[var(--bg)]/72" aria-hidden />
-        <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center gap-2 px-3 sm:px-5">
+        {/* Le resserrement sous 360 px n'est pas cosmétique.
+            Six commandes à droite — série, voix, thème, préférences, compte,
+            menu — tiennent à 375 px et débordaient de treize pixels à 320 :
+            l'en-tête gagnait une barre de défilement horizontale sur un iPhone
+            SE. On récupère la place sur les marges et les écarts, qui ne se
+            voient pas, plutôt qu'en retirant une commande, qui se verrait. */}
+        <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center gap-2 px-3 [@media(max-width:359px)]:px-1.5 sm:px-5">
           <Link
             href="/"
             className="group flex shrink-0 items-center gap-2 rounded-[var(--radius-sm)] px-1.5 py-1"
@@ -69,7 +75,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-1.5">
+          <div className="ml-auto flex items-center gap-1.5 [@media(max-width:359px)]:gap-0.5">
             <PastilleSerie />
             <VoiceQuickToggle />
             <ThemeQuickSwitch />
