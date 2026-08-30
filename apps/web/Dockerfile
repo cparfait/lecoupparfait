@@ -57,6 +57,22 @@ COPY --from=builder --chown=coupparfait:coupparfait /app/scripts ./scripts
 COPY --from=builder --chown=coupparfait:coupparfait /app/data/openings ./data/openings
 COPY --from=builder --chown=coupparfait:coupparfait /app/packages ./packages
 
+# Les deux modules dont ces scripts ont besoin.
+#
+# La sortie « standalone » de Next ne contient que ce que l'*application* trace,
+# rangé pour être résolu depuis `apps/web/server.js`. Les scripts, eux, vivent
+# dans `/app/scripts` et n'ont donc rien à leur disposition : la première mise
+# en production s'est arrêtée sur « Cannot find package 'drizzle-orm' imported
+# from /app/scripts/migrate.mjs », c'est-à-dire avant même de créer le schéma.
+#
+# On copie les deux paquets plutôt que tout `node_modules`, ce qui ruinerait
+# l'intérêt du standalone. Ils n'ont aucune dépendance à leur tour — vérifié —
+# donc deux dossiers suffisent.
+#
+# Après la copie du standalone, jamais avant : celle-ci écrase `node_modules`.
+COPY --from=deps --chown=coupparfait:coupparfait /app/node_modules/postgres ./node_modules/postgres
+COPY --from=deps --chown=coupparfait:coupparfait /app/node_modules/drizzle-orm ./node_modules/drizzle-orm
+
 USER coupparfait
 
 ENV PORT=3000
