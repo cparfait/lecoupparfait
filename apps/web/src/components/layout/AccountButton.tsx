@@ -21,7 +21,6 @@
  */
 
 import Link from 'next/link'
-import { LogIn } from 'lucide-react'
 import clsx from 'clsx'
 import { useT } from '@/lib/i18n/index.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
@@ -45,10 +44,10 @@ export function AccountButton({ variant = 'header' }: { variant?: 'header' | 'me
       <span
         className={clsx(
           'rounded-[var(--radius-sm)] bg-surface-strong',
-          // Même encombrement que le bouton qu'il remplace, aux deux tailles :
+          // Calé sur le bouton « Se connecter », le plus large des deux issues :
           // une réserve plus étroite que son contenu ferait sauter l'en-tête au
           // moment où la réponse arrive.
-          variant === 'header' ? 'block h-9 w-9 sm:w-28' : 'col-span-2 mt-1 h-10',
+          variant === 'header' ? 'block h-9 w-20 sm:w-28' : 'col-span-2 mt-1 h-10',
         )}
         aria-hidden
       />
@@ -63,17 +62,24 @@ export function AccountButton({ variant = 'header' }: { variant?: 'header' | 'me
         className={clsx(
           'items-center justify-center rounded-[var(--radius-sm)] bg-accent font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110',
           variant === 'header'
-            ? 'inline-flex h-9 w-9 text-[13px] sm:w-auto sm:px-3.5'
+            ? 'inline-flex h-9 whitespace-nowrap px-2.5 text-[13px] sm:px-3.5'
             : 'col-span-2 mt-1 flex gap-2 px-3 py-2.5 text-sm',
         )}
       >
-        {/* Sous 640 px il n'y a pas la place d'écrire « Se connecter » à côté de
-            quatre autres commandes : l'icône dit la même chose, et le libellé
-            reste pour les lecteurs d'écran. */}
-        {variant === 'header' && <LogIn size={17} className="sm:hidden" aria-hidden />}
-        <span className={variant === 'header' ? 'sr-only sm:not-sr-only' : undefined}>
-          {t('nav.signIn')}
-        </span>
+        {/* Le mot, et pas une icône.
+
+            Il y avait ici un `LogIn` de lucide sous 640 px, faute de place
+            supposée. Deux erreurs. La place existe : la pastille de série ne
+            s'affiche jamais sans compte — `FlammeSerie` sort sur `!identite` —
+            donc l'en-tête anonyme porte une commande de moins que celui d'un
+            compte, précisément là où le bouton est le plus large.
+
+            Et le picto se lisait à l'envers. `LogIn` (une flèche qui entre dans
+            un chambranle) et `LogOut` (la même flèche qui en sort) ne se
+            distinguent pas à dix-sept pixels : on venait de se déconnecter, et
+            l'en-tête semblait proposer de se déconnecter encore. Un bouton de
+            connexion doit dire « se connecter ». */}
+        {t('nav.signIn')}
       </Link>
     )
   }

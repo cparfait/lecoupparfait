@@ -15,7 +15,8 @@
 import { Suspense, useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowRight, Crown, Swords } from 'lucide-react'
+import { ArrowRight, Swords } from 'lucide-react'
+import { LogoMark } from '@/components/brand/LogoMark.tsx'
 import { Button, Card, Input } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
@@ -217,16 +218,18 @@ function AuthForm() {
         )}
 
         <div className="mb-6 text-center">
-          <span
-            className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-[var(--radius)]"
-            style={{
-              background: 'linear-gradient(135deg, var(--accent), var(--accent-2))',
-              boxShadow: 'var(--glow)',
-            }}
-            aria-hidden
-          >
-            <Crown size={22} className="text-[var(--accent-contrast)]" />
-          </span>
+          {/* Cavale, et non une couronne sur un pavé dégradé.
+
+              C'était la dernière des trois marques concurrentes : l'en-tête a
+              été ramené au cavalier, le favicon aussi, et il restait cette
+              couronne — juste au-dessus de « Rejoins Le Coup Parfait », c'est-à-
+              dire à l'endroit exact où l'on découvre la marque. On arrivait sur
+              une couronne et l'on trouvait ensuite un cavalier partout.
+
+              Le pavé disparaît avec elle : son dégradé allait de `--accent` à
+              `--accent-2`, deux familles de teintes dans un même dégradé, ce que
+              l'en-tête de `LogoMark.tsx` interdit explicitement. */}
+          <LogoMark size={56} className="mx-auto mb-4 rounded-[var(--radius)]" />
           <h1 className="font-display text-2xl font-bold tracking-tight">
             {mode === 'signin' ? 'Content de te revoir' : 'Rejoins Le Coup Parfait'}
           </h1>
