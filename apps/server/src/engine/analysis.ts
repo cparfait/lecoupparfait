@@ -44,6 +44,24 @@ export async function analysePosition(options: AnalyseOptions): Promise<Position
   )
   const epd = toEpd(fen)
 
+  // Combien de variantes il faut réellement pour répondre sans appauvrir
+  // l'appelant. Ce n'est pas toujours `multiPv` : un moteur ne peut pas
+  // rapporter trois lignes dans une position où un seul coup est légal, et
+  // exiger trois lignes condamnerait ces positions-là à ne jamais sortir du
+  // cache. On plafonne donc au nombre de coups légaux.
+  //
+  // Calculé au plus tard et une seule fois : générer les coups légaux a un
+  // coût, et à `multiPv` 1 la réponse est connue d'avance.
+  let requiredMemo: number | null = null
+  const requiredLines = (): number => {
+    if (multiPv <= 1) return 1
+    // Jamais zéro : dans une position matée le moteur ne rend aucune ligne,
+    // rien n'a donc pu être mis en cache, et un seuil nul ferait accepter
+    // n'importe quoi.
+    if (requiredMemo === null) requiredMemo = Math.max(1, Math.min(multiPv, countLegalMoves(fen)))
+    return requiredMemo
+  }
+
   // ── 1. Tables de finales ────────────────────────────────────────────────
   const pieceCount = countPieces(fen)
   if (pieceCount <= 7) {
@@ -52,8 +70,18 @@ export async function analysePosition(options: AnalyseOptions): Promise<Position
   }
 
   // ── 2. Cache ────────────────────────────────────────────────────────────
-  if (!fresh && multiPv === 1) {
-    const cached = await readCache(epd, depth)
+  //
+  // Longtemps réservé à `multiPv === 1`, ce qui revenait à ne jamais le lire :
+  // l'analyse de partie, la seule à réanalyser en masse les mêmes positions,
+  // tourne à trois lignes. Le cache se remplissait sans jamais servir.
+  //
+  // La garde portait sur la mauvaise grandeur. Ce qui interdit de servir une
+  // entrée, ce n'est pas la valeur de `multiPv` mais le nombre de variantes
+  // qu'elle contient : rendre une seule ligne à qui en demande trois viderait
+  // la liste « ce que tu pouvais jouer » de l'écran d'analyse. C'est donc
+  // `readCache` qui vérifie, entrée par entrée, qu'il a de quoi répondre.
+  if (!fresh) {
+    const cached = await readCache(epd, depth, requiredLines)
     if (cached) return cached
   }
 
@@ -67,16 +95,19 @@ export async function analysePosition(options: AnalyseOptions): Promise<Position
   // Après notre propre cache, jamais avant : celui-ci répond exactement à la
   // profondeur demandée pour cette partie, et il a pu être écrit par une
   // analyse plus poussée encore.
-  if (!fresh && multiPv === 1) {
-    const known = await readLichessEval(epd, depth)
+  //
+  // Longtemps limitée à une seule variante, faute de place pour les autres.
+  // La colonne `alt_lines` en porte désormais deux de plus, et la table répond
+  // donc aux demandes en MultiPV — pour les positions qui en ont, environ un
+  // tiers du jeu de données. Les autres retombent sur le moteur, comme avant.
+  if (!fresh) {
+    const known = await readLichessEval(epd, depth, requiredLines)
     if (known) return known
   }
 
   // ── 4. Moteur ───────────────────────────────────────────────────────────
   const analysis = await getPool().analyse({ fen, depth, multiPv, signal }, priority)
 
-  // Le cache ne retient que la ligne principale : c'est ce qu'on relit 99 fois
-  // sur 100, et stocker douze variantes par position ferait exploser la table.
   void writeCache(epd, analysis).catch((error: unknown) => {
     console.warn('[analyse] écriture du cache impossible :', error)
   })
@@ -94,6 +125,19 @@ function countPieces(fen: string): number {
   return count
 }
 
+/**
+ * Compte les coups légaux, pour savoir combien de variantes le moteur peut au
+ * mieux produire. Une position ingérable vaut « autant qu'on en demande » :
+ * c'est le choix prudent, il fait simplement rater le cache.
+ */
+function countLegalMoves(fen: string): number {
+  try {
+    return new Chess(fen, { skipValidation: true }).moves().length
+  } catch {
+    return Number.POSITIVE_INFINITY
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  Cache
 // ─────────────────────────────────────────────────────────────────────────────
@@ -104,7 +148,11 @@ function countPieces(fen: string): number {
  * Table facultative : sans import, la requête échoue et l'on passe au moteur
  * comme avant. C'est voulu — la plupart des installations s'en passeront.
  */
-async function readLichessEval(epd: string, depth: number): Promise<PositionAnalysis | null> {
+async function readLichessEval(
+  epd: string,
+  depth: number,
+  required: () => number,
+): Promise<PositionAnalysis | null> {
   try {
     const database = getDb()
     const rows = await database
@@ -116,17 +164,46 @@ async function readLichessEval(epd: string, depth: number): Promise<PositionAnal
     const row = rows[0]
     if (!row) return null
 
-    const score: Score =
-      row.mate !== null && row.mate !== undefined
-        ? { type: 'mate', value: row.mate }
-        : { type: 'cp', value: row.cp ?? 0 }
-
     const pv = (row.line ?? '').split(' ').filter(Boolean)
+    if (pv.length === 0) return null
+
+    const principale: EngineLine = {
+      multipv: 1,
+      score:
+        row.mate !== null && row.mate !== undefined
+          ? { type: 'mate', value: row.mate }
+          : { type: 'cp', value: row.cp ?? 0 },
+      depth: row.depth,
+      pv,
+    }
+
+    // Les variantes secondaires, quand le jeu de données en fournissait. Elles
+    // sont écrites dans l'ordre de force décroissante par l'import : on les
+    // numérote donc simplement à la suite.
+    const lines: EngineLine[] = [principale]
+    for (const autre of row.altLines ?? []) {
+      const suite = String(autre?.line ?? '').split(' ').filter(Boolean)
+      if (suite.length === 0) continue
+      lines.push({
+        multipv: lines.length + 1,
+        score:
+          autre.mate !== undefined && autre.mate !== null
+            ? { type: 'mate', value: autre.mate }
+            : { type: 'cp', value: autre.cp ?? 0 },
+        depth: row.depth,
+        pv: suite,
+      })
+    }
+
+    // Servir moins de variantes que demandé viderait la liste « ce que tu
+    // pouvais jouer » sans que rien ne le signale — c'est précisément le défaut
+    // que la garde d'origine évitait, et il faut continuer de l'éviter.
+    if (lines.length < required()) return null
 
     return {
       fen: epd,
       depth: row.depth,
-      lines: [{ multipv: 1, score, depth: row.depth, pv }],
+      lines,
       bestMove: row.best ?? pv[0] ?? null,
       source: 'cache',
     }
@@ -137,64 +214,149 @@ async function readLichessEval(epd: string, depth: number): Promise<PositionAnal
   }
 }
 
-async function readCache(epd: string, depth: number): Promise<PositionAnalysis | null> {
+/**
+ * Cherche la position dans notre propre cache.
+ *
+ * `required` est appelé au plus tard : tant qu'aucune entrée n'est trop courte,
+ * on n'a pas besoin de savoir combien de lignes seraient acceptables.
+ */
+async function readCache(
+  epd: string,
+  depth: number,
+  required: () => number,
+): Promise<PositionAnalysis | null> {
   try {
     const database = getDb()
     // Une analyse plus profonde que demandée fait parfaitement l'affaire.
+    //
+    // Plusieurs candidates et non plus une seule : la plus profonde n'est pas
+    // forcément la plus fournie. Une entrée à 30 demi-coups écrite par une
+    // analyse à une ligne ne doit pas masquer celle à 24 qui en a trois.
     const rows = await database
       .select()
       .from(evaluations)
       .where(and(eq(evaluations.epd, epd), gte(evaluations.depth, depth)))
       .orderBy(sql`${evaluations.depth} desc`)
-      .limit(1)
+      .limit(4)
 
-    const row = rows[0]
-    if (!row) return null
+    let minimum: number | null = null
+    for (const row of rows) {
+      const lines = decodeLines(row)
+      if (lines.length === 0) continue
+      minimum ??= required()
+      if (lines.length < minimum) continue
 
-    const score: Score =
-      row.mate !== null && row.mate !== undefined
-        ? { type: 'mate', value: row.mate }
-        : { type: 'cp', value: row.cp ?? 0 }
-
-    const pv = row.pv.split(' ').filter(Boolean)
-    const lines: EngineLine[] = [{ multipv: 1, score, depth: row.depth, pv }]
-
-    return {
-      fen: epd,
-      depth: row.depth,
-      lines,
-      bestMove: pv[0] ?? null,
-      source: 'cache',
+      return {
+        fen: epd,
+        depth: row.depth,
+        lines,
+        bestMove: lines[0]?.pv[0] ?? null,
+        source: 'cache',
+      }
     }
+    return null
   } catch {
     // Base indisponible : on continue sans cache, l'analyse reste possible.
     return null
   }
 }
 
+/**
+ * Reconstruit les variantes d'une entrée de cache.
+ *
+ * La colonne `lines` est du JSON écrit par une version quelconque du code : on
+ * en vérifie la forme plutôt que de faire confiance au type déclaré. Quand elle
+ * est absente — analyse à une seule ligne, ou entrée écrite avant que la
+ * colonne ne serve — les colonnes `pv`/`cp`/`mate` fournissent la principale.
+ */
+function decodeLines(row: typeof evaluations.$inferSelect): EngineLine[] {
+  const stored = Array.isArray(row.lines) ? row.lines : []
+  const lines: EngineLine[] = []
+  for (const entry of stored) {
+    const line = decodeLine(entry, row.depth)
+    if (line) lines.push(line)
+  }
+  if (lines.length > 0) return lines.sort((a, b) => a.multipv - b.multipv)
+
+  const score: Score =
+    row.mate !== null && row.mate !== undefined
+      ? { type: 'mate', value: row.mate }
+      : { type: 'cp', value: row.cp ?? 0 }
+  const pv = row.pv.split(' ').filter(Boolean)
+  return pv.length > 0 ? [{ multipv: 1, score, depth: row.depth, pv }] : []
+}
+
+/** Valide une variante isolée du JSON. Retourne `null` si elle est inexploitable. */
+function decodeLine(entry: unknown, fallbackDepth: number): EngineLine | null {
+  if (typeof entry !== 'object' || entry === null) return null
+  const raw = entry as Record<string, unknown>
+
+  const pv = Array.isArray(raw.pv) ? raw.pv.filter((move): move is string => typeof move === 'string') : []
+  // Une variante sans coup ne sert à rien : c'est justement le coup qu'on vient
+  // y chercher pour la liste des alternatives.
+  if (pv.length === 0) return null
+
+  const score = raw.score as Record<string, unknown> | undefined
+  if (!score || (score.type !== 'cp' && score.type !== 'mate')) return null
+  if (typeof score.value !== 'number') return null
+
+  const multipv = typeof raw.multipv === 'number' ? raw.multipv : 1
+  return {
+    multipv,
+    score: { type: score.type, value: score.value } as Score,
+    depth: typeof raw.depth === 'number' ? raw.depth : fallbackDepth,
+    pv,
+    ...(typeof raw.seldepth === 'number' ? { seldepth: raw.seldepth } : {}),
+    ...(typeof raw.nodes === 'number' ? { nodes: raw.nodes } : {}),
+    ...(typeof raw.nps === 'number' ? { nps: raw.nps } : {}),
+  }
+}
+
+/**
+ * Range l'analyse dans le cache.
+ *
+ * Les variantes secondaires ne sont écrites qu'à partir de deux : à une seule
+ * ligne, `lines` ne ferait que recopier `pv`. Stocker les douze variantes d'un
+ * bot ferait en revanche exploser la table, mais c'est déjà borné en amont —
+ * on enregistre ce que le moteur a rendu.
+ */
 async function writeCache(epd: string, analysis: PositionAnalysis): Promise<void> {
   const top = analysis.lines.find((line) => line.multipv === 1) ?? analysis.lines[0]
   if (!top || top.pv.length === 0) return
 
   const database = getDb()
+  const columns = {
+    cp: top.score.type === 'cp' ? top.score.value : null,
+    mate: top.score.type === 'mate' ? top.score.value : null,
+    pv: top.pv.join(' '),
+    nodes: top.nodes ?? null,
+  }
+
   await database
     .insert(evaluations)
     .values({
       epd,
       depth: analysis.depth,
-      cp: top.score.type === 'cp' ? top.score.value : null,
-      mate: top.score.type === 'mate' ? top.score.value : null,
-      pv: top.pv.join(' '),
+      ...columns,
       lines: analysis.lines.length > 1 ? (analysis.lines as never) : null,
-      nodes: top.nodes ?? null,
     })
     .onConflictDoUpdate({
       target: [evaluations.epd, evaluations.depth],
       set: {
-        cp: top.score.type === 'cp' ? top.score.value : null,
-        mate: top.score.type === 'mate' ? top.score.value : null,
-        pv: top.pv.join(' '),
-        nodes: top.nodes ?? null,
+        ...columns,
+        // `lines` était absent de cette liste : une entrée écrite d'abord par
+        // une analyse à une ligne gardait `lines` vide pour toujours, même
+        // réanalysée en MultiPV. Le cache ne devenait donc jamais utilisable
+        // pour l'analyse de partie.
+        //
+        // On ne conserve que la plus fournie des deux : une analyse ponctuelle
+        // à une ligne ne doit pas effacer les trois variantes qu'une analyse de
+        // partie avait déjà payées.
+        lines: sql`case
+          when coalesce(jsonb_array_length(${evaluations.lines}), 0) < ${analysis.lines.length}
+          then excluded.lines
+          else ${evaluations.lines}
+        end`,
       },
     })
 }

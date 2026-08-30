@@ -15,9 +15,13 @@
  * Ce qu'on retient, et pourquoi :
  *  - **l'analyse la plus profonde** de chaque position, les autres n'apportent
  *    rien qu'elle ne dise mieux ;
- *  - **le premier coup et sa suite**, pas les cinq variantes : la variante
- *    numéro cinq d'une position d'ouverture n'intéresse personne et triplerait
- *    le poids en base ;
+ *  - **les trois meilleures variantes**, pas les cinq. On n'en gardait qu'une,
+ *    au motif que la variante numéro cinq d'une position d'ouverture
+ *    n'intéresse personne. C'est vrai de la cinquième et faux des deux
+ *    suivantes : l'analyse de partie en demande trois depuis qu'elle affiche
+ *    « ce que tu pouvais jouer », si bien que huit millions de positions
+ *    analysées à quarante demi-coups ne servaient à rien là où elles servaient
+ *    le plus. Trois est le compte exact de ce qu'on affiche ;
  *  - **les positions à partir de N pièces**, réglable. Le défaut privilégie
  *    l'ouverture et le milieu de partie, là où un débutant joue ses parties ;
  *    les finales à trois pièces sont déjà couvertes par les tables Syzygy.
@@ -37,6 +41,18 @@ import { fileURLToPath } from 'node:url'
 import { createZstdDecompress } from 'node:zlib'
 import postgres from 'postgres'
 import { stripPzstdMarkers } from './lib/lichess-stream.mjs'
+
+// Node ne lit pas `.env` de lui-même, et ce script tourne seul — ni Next ni
+// drizzle-kit ne s'en chargent pour lui. Sans cette ligne, il s'arrêtait sur
+// « DATABASE_URL est absente. Renseigne-la dans .env. » alors qu'elle y était :
+// un message qui désigne un fichier qu'on ne lit pas envoie chercher la panne
+// exactement là où elle n'est pas.
+try {
+  process.loadEnvFile(new URL('../.env', import.meta.url))
+} catch {
+  // Pas de fichier : la connexion viendra de l'environnement, ou l'erreur
+  // suivante le dira clairement.
+}
 
 const here = dirname(fileURLToPath(import.meta.url))
 const root = resolve(here, '..')
@@ -90,25 +106,51 @@ function countPieces(epd) {
 }
 
 /**
+ * Profondeur à partir de laquelle on préfère les variantes à la profondeur.
+ *
+ * Notre propre moteur tourne à dix-huit demi-coups. Une analyse Lichess à
+ * vingt-six est donc déjà nettement meilleure que ce qu'on produirait, et
+ * échanger les huit derniers demi-coups contre deux variantes supplémentaires
+ * est un bon marché. En dessous, l'échange n'en vaut plus la peine : on garde
+ * la profondeur.
+ */
+const PROFONDEUR_SUFFISANTE = 26
+
+/**
  * Retient la meilleure analyse d'une entrée.
  *
- * Le fichier en contient plusieurs par position, produites à des moments et
- * des profondeurs différentes. On garde la plus profonde ; à profondeur égale,
- * celle qui a exploré le plus de nœuds.
+ * Le fichier en contient plusieurs par position, produites à des moments et des
+ * profondeurs différentes — et surtout avec des nombres de variantes
+ * différents. On gardait la plus profonde, ce qui semblait évident et coûtait
+ * cher : **mesuré sur 60 000 positions, la plus profonde n'a les trois
+ * variantes que dans 31 % des cas, alors qu'une autre analyse de la même
+ * position les a dans 37 % de plus.** On jetait donc plus d'occasions qu'on
+ * n'en gardait, et l'analyse de partie — qui demande trois variantes — repartait
+ * sur le moteur pour rien.
+ *
+ * On préfère donc l'analyse qui sait répondre à une demande en MultiPV, à
+ * condition qu'elle reste assez profonde. Le coût mesuré est une médiane de
+ * sept demi-coups de profondeur en moins ; le gain est de passer de 31 % à
+ * environ 68 % des positions exploitables à trois variantes.
+ *
+ * On ne mélange pas deux analyses — la ligne principale de l'une, les variantes
+ * de l'autre. Leurs scores ne seraient plus comparables entre eux, et la liste
+ * « ce que tu pouvais jouer » afficherait un deuxième choix mieux noté que le
+ * premier.
  */
 function bestEval(evals) {
-  let best = null
-  for (const item of evals) {
-    if (!item?.pvs?.length) continue
-    if (
-      !best ||
-      item.depth > best.depth ||
-      (item.depth === best.depth && (item.knodes ?? 0) > (best.knodes ?? 0))
-    ) {
-      best = item
-    }
-  }
-  return best
+  const utilisables = evals.filter((item) => item?.pvs?.length)
+  if (utilisables.length === 0) return null
+
+  const plusProfond = (liste) =>
+    liste.reduce((a, b) =>
+      b.depth > a.depth || (b.depth === a.depth && (b.knodes ?? 0) > (a.knodes ?? 0)) ? b : a,
+    )
+
+  const riches = utilisables.filter(
+    (item) => item.pvs.length >= 3 && item.depth >= PROFONDEUR_SUFFISANTE,
+  )
+  return plusProfond(riches.length > 0 ? riches : utilisables)
 }
 
 const sql = postgres(DATABASE_URL, { max: 4, onnotice: () => {} })
@@ -135,15 +177,57 @@ async function flush() {
   const valeurs = lot
   lot = []
 
+  /*
+    Quand la nouvelle analyse remplace-t-elle celle en base ?
+
+    Deux cas, et le second est le nerf de l'affaire :
+
+     1. **elle est plus profonde** — le cas d'origine, une meilleure analyse
+        chasse la moins bonne ;
+     2. **elle porte plus de variantes et reste assez profonde** — c'est celui
+        qui compte. Une entrée à une seule variante ne sert à rien à l'analyse
+        de partie, qui en demande trois ; une entrée à trois variantes et
+        vingt-six demi-coups la sert entièrement, et vingt-six reste très
+        au-dessus des dix-huit de notre moteur.
+
+    Sans le second cas, changer la règle de sélection à la lecture du fichier
+    n'aurait rien changé en base : les entrées déjà présentes sont profondes, et
+    la clause d'origine refusait par principe toute analyse moins profonde
+    qu'elles. Mesuré : le premier passage n'a rien mis à jour du tout.
+
+    Toutes les colonnes suivent la même décision. Prendre la ligne principale
+    de l'une et les variantes de l'autre donnerait des scores non comparables
+    entre eux, et la liste « ce que tu pouvais jouer » afficherait un deuxième
+    choix mieux noté que le premier.
+  */
+  const prend = sql`(
+    position_evals.depth < excluded.depth
+    or (
+      coalesce(jsonb_array_length(position_evals.alt_lines), 0)
+        < coalesce(jsonb_array_length(excluded.alt_lines), 0)
+      and excluded.depth >= ${PROFONDEUR_SUFFISANTE}
+    )
+  )`
+
   await sql`
-    insert into position_evals ${sql(valeurs, 'epd', 'cp', 'mate', 'depth', 'best', 'line')}
+    insert into position_evals ${sql(
+      valeurs,
+      'epd',
+      'cp',
+      'mate',
+      'depth',
+      'best',
+      'line',
+      'alt_lines',
+    )}
     on conflict (epd) do update set
-      cp = excluded.cp,
-      mate = excluded.mate,
-      depth = excluded.depth,
-      best = excluded.best,
-      line = excluded.line
-    where position_evals.depth < excluded.depth
+      cp = case when ${prend} then excluded.cp else position_evals.cp end,
+      mate = case when ${prend} then excluded.mate else position_evals.mate end,
+      best = case when ${prend} then excluded.best else position_evals.best end,
+      line = case when ${prend} then excluded.line else position_evals.line end,
+      depth = case when ${prend} then excluded.depth else position_evals.depth end,
+      alt_lines = case when ${prend} then excluded.alt_lines else position_evals.alt_lines end
+    where ${prend}
   `
 }
 
@@ -170,6 +254,23 @@ try {
     const line = pv.line ?? ''
     const first = line.slice(0, line.indexOf(' ') === -1 ? line.length : line.indexOf(' '))
 
+    /*
+      Les variantes secondaires, jusqu'à deux.
+      La principale reste dans sa colonne : la répéter ici coûterait cinquante
+      octets sur huit millions de lignes sans rien apprendre. `null` plutôt
+      qu'un tableau vide quand il n'y en a pas — c'est le cas de plus de la
+      moitié des positions, et un tableau vide occuperait de la place pour dire
+      « rien ».
+    */
+    const autres = best.pvs
+      .slice(1, 3)
+      .map((autre) => ({
+        ...(autre.cp !== undefined && autre.cp !== null ? { cp: autre.cp } : {}),
+        ...(autre.mate !== undefined && autre.mate !== null ? { mate: autre.mate } : {}),
+        line: (autre.line ?? '').split(' ').slice(0, 6).join(' '),
+      }))
+      .filter((autre) => autre.line.length > 0)
+
     lot.push({
       epd,
       cp: pv.cp ?? null,
@@ -179,6 +280,11 @@ try {
       // Six demi-coups suffisent à montrer l'idée ; la ligne complète en fait
       // souvent trente et pèserait plus que tout le reste de la table.
       line: line.split(' ').slice(0, 6).join(' ') || null,
+      // `alt_lines` et non `altLines` : postgres.js prend les clés de l'objet
+      // pour noms de colonnes, sans conversion. Et `sql.json` plutôt qu'une
+      // chaîne, sinon le tableau serait rangé comme *une chaîne* JSON au lieu
+      // d'un tableau — la lecture ne verrait qu'un texte.
+      alt_lines: autres.length > 0 ? sql.json(autres) : null,
     })
     retenues++
 

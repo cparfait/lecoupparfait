@@ -277,6 +277,74 @@ export const gameAnalyses = pgTable(
   },
 )
 
+/**
+ * Analyses conservées dans un compte.
+ *
+ * Distincte de `gameAnalyses`, qui ne sait désigner qu'une partie jouée ici :
+ * sa clé pointe vers `games`. Or on analyse surtout des parties qui viennent
+ * d'ailleurs — chess.com, Lichess, un PGN collé — et ce sont précisément
+ * celles qu'on ne veut pas recalculer à chaque visite.
+ *
+ * **On ne stocke pas le rapport rédigé, mais la sortie du moteur.** Deux
+ * raisons, et la seconde compte plus que la première :
+ *
+ *  1. C'est bien plus petit : les évaluations d'une partie de quarante coups
+ *     tiennent dans quelques dizaines de kilo-octets, là où le rapport traîne
+ *     toute sa prose française.
+ *  2. Le texte est **regénéré à la relecture**, donc par le code du jour. Une
+ *     tournure améliorée, une explication corrigée, un motif tactique ajouté :
+ *     les analyses déjà enregistrées en profitent. Figer la prose reviendrait à
+ *     conserver les défauts d'hier pour toujours.
+ *
+ * Une seule entrée par partie et par compte — l'empreinte porte sur la
+ * position de départ et les coups, pas sur la profondeur. Réanalyser plus
+ * profond remplace l'entrée au lieu d'en ajouter une seconde, qui ne serait
+ * qu'une version périmée de la même partie.
+ */
+export const savedAnalyses = pgTable(
+  'saved_analyses',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** Empreinte de `startFen` + coups : identifie la partie, pas l'analyse. */
+    fingerprint: varchar('fingerprint', { length: 64 }).notNull(),
+    /** Partie jouée ici, quand c'en est une. */
+    gameId: uuid('game_id').references(() => games.id, { onDelete: 'set null' }),
+    /** Provenance : `local`, `chesscom`, `lichess`, `pgn`. */
+    source: varchar('source', { length: 16 }).notNull().default('pgn'),
+
+    whiteName: varchar('white_name', { length: 60 }),
+    blackName: varchar('black_name', { length: 60 }),
+    /** Résultat tel que le PGN l'écrit : `1-0`, `0-1`, `1/2-1/2`, `*`. */
+    result: varchar('result', { length: 8 }).notNull().default('*'),
+    playedAt: varchar('played_at', { length: 24 }),
+    eco: varchar('eco', { length: 3 }),
+    opening: varchar('opening', { length: 120 }),
+
+    /** Camp auquel les explications s'adressaient. */
+    lecteur: varchar('lecteur', { length: 1 }),
+    depth: smallint('depth').notNull(),
+    startFen: text('start_fen'),
+    /** Coups en notation algébrique, séparés par des espaces. */
+    moves: text('moves').notNull(),
+    /** Évaluations position par position — voir `PositionAnalysis`. */
+    positions: jsonb('positions').$type<unknown[]>().notNull(),
+
+    /** Recopiées du rapport pour afficher la liste sans ouvrir le JSON. */
+    accuracyWhite: real('accuracy_white'),
+    accuracyBlack: real('accuracy_black'),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('saved_analyses_owner_idx').on(table.userId, table.fingerprint),
+    index('saved_analyses_recent_idx').on(table.userId, table.updatedAt),
+  ],
+)
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  Évaluations pré-calculées
 // ─────────────────────────────────────────────────────────────────────────────
@@ -312,6 +380,26 @@ export const positionEvals = pgTable(
     best: text('best'),
     /** Suite principale, en UCI séparés par des espaces. */
     line: text('line'),
+    /**
+     * Variantes **secondaires**, quand le jeu de données en fournit.
+     *
+     * La suite principale reste dans `line` : la dupliquer ici coûterait une
+     * cinquantaine d'octets sur huit millions de lignes pour ne rien apprendre.
+     * Ce champ contient donc la deuxième variante et la troisième, et rien
+     * d'autre — `null` pour les positions où Lichess n'en donne qu'une.
+     *
+     * **Pourquoi cette colonne existe.** Sans elle, cette table ne pouvait
+     * répondre qu'aux demandes d'une seule variante. Or l'analyse de partie en
+     * demande trois depuis qu'on affiche « ce que tu pouvais jouer » : huit
+     * millions de positions analysées à quarante ou soixante demi-coups
+     * restaient donc inutilisables là où elles servaient le plus. Le jeu de
+     * données les contenait depuis le début ; l'import ne gardait que la
+     * première.
+     *
+     * Environ 35 % des positions en portent trois ou plus, 45 % au moins deux.
+     * Le reste garde `null`, et l'analyse repart sur le moteur comme avant.
+     */
+    altLines: jsonb('alt_lines').$type<Array<{ cp?: number; mate?: number; line: string }>>(),
   },
   (table) => [
     // On interroge toujours par EPD exact, jamais par intervalle : la clé
@@ -521,6 +609,59 @@ export const botProgress = pgTable(
 )
 
 /**
+ * Avancement dans le mode carrière.
+ *
+ * Une ligne par compte, et volontairement **un curseur, pas un journal** : ce
+ * qui a été joué vit déjà dans `games`, `puzzle_attempts` et `lesson_progress`.
+ * Dupliquer l'historique ici garantirait qu'un jour les deux se contredisent.
+ *
+ * Les compteurs de récompense — expérience, étoiles, hauts faits — sont en
+ * revanche bien stockés, parce qu'ils ne se déduisent d'aucune autre table :
+ * ils dépendent de *comment* on a gagné, pas seulement du fait d'avoir gagné.
+ */
+export const careerProgress = pgTable('career_progress', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+
+  /** Chapitre en cours, 1 à 12. 13 signifie carrière terminée. */
+  chapter: smallint('chapter').notNull().default(1),
+  /** La leçon d'entrée du chapitre courant a été vue. */
+  lessonDone: boolean('lesson_done').notNull().default(false),
+  /** Puzzles réussis dans le chapitre courant. */
+  puzzlesDone: smallint('puzzles_done').notNull().default(0),
+  /** Victoires obtenues dans le chapitre courant. */
+  winsInChapter: smallint('wins_in_chapter').notNull().default(0),
+  /** Défaites d'affilée, pour déclencher le coup de main. */
+  losingStreak: smallint('losing_streak').notNull().default(0),
+  /** Indices et coups de main utilisés dans le chapitre courant. */
+  helpUsed: smallint('help_used').notNull().default(0),
+
+  /**
+   * Étoiles par chapitre, une entrée par chapitre terminé.
+   *
+   * De une à trois. Trois s'obtient sans avoir eu besoin du coup de main ni
+   * d'indice ; c'est ce qui donne une raison de refaire un chapitre déjà
+   * passé, là où une simple coche n'en donne aucune.
+   */
+  stars: jsonb('stars').$type<Record<string, number>>().notNull().default({}),
+
+  /** Expérience totale. Sert au rang affiché, jamais au classement. */
+  xp: integer('xp').notNull().default(0),
+
+  /**
+   * Hauts faits débloqués, par identifiant.
+   *
+   * En JSON plutôt qu'en table : la liste est courte, elle se lit toujours en
+   * entier, et en ajouter un ne doit pas demander de migration.
+   */
+  badges: jsonb('badges').$type<string[]>().notNull().default([]),
+
+  startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+/**
  * Tournois.
  *
  * Format unique : l'arène. C'est le seul qui tolère qu'on arrive en retard ou
@@ -704,6 +845,76 @@ export const friendships = pgTable(
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
+//  Journée
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Avancement quotidien : quêtes du jour et série de jours consécutifs.
+ *
+ * Le navigateur reste la source de vérité, parce que la plateforme s'utilise
+ * sans compte : cette table n'existe que pour retrouver sa série en changeant
+ * d'appareil. Les deux états sont fusionnés au chargement, jamais écrasés
+ * l'un par l'autre — quelqu'un qui a joué hors ligne ne doit pas perdre sa
+ * journée en se connectant.
+ *
+ * Une ligne par joueur et par jour : on conserve l'historique, ce qui permet
+ * de dessiner un calendrier d'assiduité sans table supplémentaire.
+ */
+export const dailyProgress = pgTable(
+  'daily_progress',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** Jour concerné, en heure locale du joueur, au format `AAAA-MM-JJ`. */
+    day: varchar('day', { length: 10 }).notNull(),
+    /**
+     * Avancement de chaque quête, par identifiant.
+     *
+     * En JSON plutôt qu'en colonnes : la liste des quêtes est un choix
+     * éditorial qui bougera, et on ne veut pas une migration à chaque fois
+     * qu'on en ajoute ou qu'on en retire une.
+     */
+    quests: jsonb('quests').$type<Record<string, number>>().notNull().default({}),
+    xp: smallint('xp').notNull().default(0),
+    streak: integer('streak').notNull().default(0),
+    bestStreak: integer('best_streak').notNull().default(0),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.day] }),
+    index('daily_progress_user_idx').on(table.userId, table.day),
+  ],
+)
+
+/**
+ * La partie contre l'ordinateur qu'on a laissée en plan.
+ *
+ * Une ligne par joueur, remplacée à chaque coup. On ne veut pas d'historique
+ * ici : c'est un signet, pas une archive — la partie terminée part dans
+ * `games` comme les autres, et cette ligne disparaît.
+ *
+ * Table séparée plutôt qu'un `status = 'playing'` dans `games` : une partie en
+ * cours contre l'ordinateur n'est pas une partie jouée. La mêler aux autres
+ * obligerait à l'exclure de l'historique, du classement, des statistiques et
+ * de l'explorateur d'ouvertures — quatre endroits, quatre occasions d'oublier.
+ *
+ * L'état tient en JSON parce qu'il décrit une session, pas une entité : niveau,
+ * adversaire, camp, cadence, temps restant. Le figer en colonnes imposerait une
+ * migration à chaque réglage ajouté à l'écran de configuration.
+ */
+export const activeGames = pgTable('active_games', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  /** Coups joués, en notation algébrique, séparés par des espaces. */
+  moves: text('moves').notNull().default(''),
+  /** Réglages et temps restant — voir `PartieEnCours` côté web. */
+  state: jsonb('state').$type<Record<string, unknown>>().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  Relations
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -750,3 +961,5 @@ export type PuzzleAttempt = typeof puzzleAttempts.$inferSelect
 export type Opening = typeof openings.$inferSelect
 export type Challenge = typeof challenges.$inferSelect
 export type Evaluation = typeof evaluations.$inferSelect
+export type DailyProgress = typeof dailyProgress.$inferSelect
+export type ActiveGame = typeof activeGames.$inferSelect

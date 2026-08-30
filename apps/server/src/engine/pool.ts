@@ -144,7 +144,29 @@ export class EnginePool {
       return Promise.reject(new Error('La réserve moteur n’est pas démarrée.'))
     }
 
-    const maxQueue = this.options.maxQueue ?? 200
+    /**
+     * Profondeur de file tolérée.
+     *
+     * Elle valait 200, ce qui paraissait prudent et ne l'était pas — non par
+     * risque de panne (une tâche en attente ne coûte qu'une promesse et une
+     * FEN, deux cents tiennent dans deux cents kilo-octets), mais par le temps
+     * qu'on promettait sans le dire.
+     *
+     * Le calcul qui compte : chaque client n'a **qu'une** position en vol à la
+     * fois — `analyseGamePositions` les enchaîne. Une file de deux cents, c'est
+     * donc deux cents personnes qui analysent en même temps, et chacune remet
+     * sa position suivante au bout de la file quatre-vingts fois de suite. Avec
+     * deux processus à ~0,4 s la position, la deux-centième attendait quarante
+     * secondes par coup, soit plus d'une heure pour une partie de quarante
+     * coups — sans que rien à l'écran ne l'annonce.
+     *
+     * Refuser vaut mieux qu'attendre, parce que le refus n'est pas une panne :
+     * `analyseOnServer` renvoie `null`, et l'analyse repart sur le moteur du
+     * navigateur, qui est libre, local, et déjà là. Seize places gardent la
+     * dernière sous les quatre secondes par position ; au-delà, la machine de
+     * l'utilisateur fait mieux que notre file.
+     */
+    const maxQueue = this.options.maxQueue ?? Number(process.env.ENGINE_MAX_QUEUE ?? 16)
     if (this.queue.length >= maxQueue) {
       return Promise.reject(
         new Error('Le serveur d’analyse est saturé. Réessaie dans quelques secondes.'),
@@ -163,13 +185,44 @@ export class EnginePool {
     }
 
     return new Promise<PositionAnalysis>((resolve, reject) => {
-      this.queue.push({
+      const task: QueuedTask = {
         request: bounded,
         priority,
         resolve,
         reject,
         enqueuedAt: Date.now(),
-      })
+      }
+
+      /**
+       * Une demande abandonnée sort de la file.
+       *
+       * Le signal était transmis au moteur, qui sait interrompre une recherche
+       * en cours — mais rien ne surveillait la période d'attente. Une tâche
+       * dont l'auteur avait fermé l'onglet gardait donc sa place, puis
+       * mobilisait un processus pour un résultat que personne n'attendait
+       * plus. C'est précisément ce qu'il ne faut pas faire quand la file est
+       * courte : chaque place refusée à quelqu'un doit servir à quelqu'un.
+       */
+      const { signal } = bounded
+      if (signal) {
+        if (signal.aborted) {
+          reject(new Error('Analyse abandonnée.'))
+          return
+        }
+        signal.addEventListener(
+          'abort',
+          () => {
+            const rang = this.queue.indexOf(task)
+            // Déjà partie au moteur : c'est lui qui gère l'abandon.
+            if (rang === -1) return
+            this.queue.splice(rang, 1)
+            reject(new Error('Analyse abandonnée.'))
+          },
+          { once: true },
+        )
+      }
+
+      this.queue.push(task)
       this.stats.queuedPeak = Math.max(this.stats.queuedPeak, this.queue.length)
       this.drain()
     })
