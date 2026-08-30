@@ -61,9 +61,38 @@ export function MoveList({
 
   const rows = groupMoves(moves, startFen)
 
-  // Garde le coup courant dans le champ de vision, sans secousse.
+  /**
+   * Garde le coup courant visible **dans la liste**, et seulement là.
+   *
+   * C'était un `scrollIntoView({ block: 'nearest' })`, qui a un défaut qu'on
+   * ne voit pas en le lisant : il fait défiler *tous* les ancêtres scrollables
+   * jusqu'au document. Sur grand écran la liste est un panneau à hauteur fixe
+   * déjà entièrement visible, donc rien ne bougeait. Sur téléphone elle est
+   * empilée sous l'échiquier — et à chaque coup joué, la page descendait d'elle
+   * même pour la montrer. En mode commenté, où un coup succède à l'autre, on
+   * passait la partie à remonter vers son propre échiquier.
+   *
+   * On calcule donc le décalage à la main et on ne touche qu'au `scrollTop` de
+   * la boîte. Le document n'est jamais sollicité : c'est au joueur de décider
+   * s'il veut aller voir la liste.
+   *
+   * `getBoundingClientRect` plutôt qu'`offsetTop` : ce dernier se mesure depuis
+   * le premier ancêtre positionné, qui n'est pas forcément la boîte, et donnait
+   * un décalage faux dès qu'on changeait l'habillage.
+   */
   useEffect(() => {
-    activeRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    const boite = scrollRef.current
+    const actif = activeRef.current
+    if (!boite || !actif) return
+
+    const cadre = boite.getBoundingClientRect()
+    const coup = actif.getBoundingClientRect()
+
+    if (coup.top < cadre.top) {
+      boite.scrollTo({ top: boite.scrollTop - (cadre.top - coup.top), behavior: 'smooth' })
+    } else if (coup.bottom > cadre.bottom) {
+      boite.scrollTo({ top: boite.scrollTop + (coup.bottom - cadre.bottom), behavior: 'smooth' })
+    }
   }, [cursor])
 
   // Navigation au clavier, active dès que la page a le focus.
@@ -136,9 +165,21 @@ export function MoveList({
           </NavButton>
         </div>
       )}
+      {/* `overscroll-contain` seulement à partir de `lg`.
+
+          Il empêche le défilement de se propager au parent, ce qui est juste
+          sur grand écran : la liste y est un panneau à hauteur fixe dans une
+          mise en page calée sur la fenêtre, et faire glisser la page derrière
+          en arrivant au bout serait déroutant.
+
+          Sous `lg`, les colonnes s'empilent et la liste n'est qu'un bloc dans
+          une page qui défile. Contenir le débordement y piège le doigt : on
+          pose le pouce sur la liste, on atteint son extrémité, et plus rien ne
+          bouge — ni la liste, ni la page. On ne peut alors plus remonter vers
+          l'échiquier autrement qu'en visant les quelques pixels de marge. */}
       <div
         ref={scrollRef}
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-auto lg:overscroll-contain"
         role="list"
         aria-label="Liste des coups"
       >

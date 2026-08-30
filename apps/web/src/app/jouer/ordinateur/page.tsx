@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft,
+  Check,
   Eye,
   Flag,
   Handshake,
@@ -114,6 +115,23 @@ interface Setup {
 
 export default function PlayComputerPage() {
   const [phase, setPhase] = useState<Phase>('setup')
+
+  /**
+   * Passer à la partie ramène en haut de la page.
+   *
+   * Un changement de phase est une navigation : on remplace tout l'écran. Le
+   * navigateur, lui, ne voit qu'un rendu de plus et garde la position de
+   * défilement de l'écran précédent. Sur téléphone, où les colonnes s'empilent,
+   * on cliquait « Reprendre » depuis un écran de réglages déroulé et l'on
+   * arrivait au milieu de la liste des coups, l'échiquier hors champ au-dessus.
+   *
+   * `instant` et non `smooth` : ce n'est pas un déplacement dans la page, c'est
+   * son point de départ. L'animer donnerait à voir un défilement que personne
+   * n'a demandé.
+   */
+  useEffect(() => {
+    if (phase === 'playing') window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [phase])
   const [setup, setSetup] = useState<Setup>({
     level: 6,
     // Le hasard par défaut, et non les Blancs.
@@ -432,7 +450,15 @@ function SetupScreen({
               size={40}
             />
           </span>
-          <div className="min-w-0 flex-1">
+          {/* `min-w-[14rem]` et non `min-w-0`.
+
+              Le rang était déjà en `flex-wrap`, et il ne se repliait jamais :
+              une colonne autorisée à se réduire à zéro absorbe toute la
+              compression au lieu de pousser ses voisins à la ligne. Sur un
+              téléphone, l'avatar et les deux boutons prenaient environ 260 des
+              300 pixels utiles, et la phrase se pliait dans les quarante
+              restants — un mot par ligne. Le plancher rend le repli possible. */}
+          <div className="min-w-[14rem] flex-1">
             <p className="font-display text-lg font-semibold">Tu as une partie en cours</p>
             <p className="mt-0.5 text-sm text-muted">
               Contre {reprise.human ? 'Maia' : 'Stockfish'}, niveau {reprise.level} · avec les{' '}
@@ -440,7 +466,8 @@ function SetupScreen({
               demi-coups joués, {depuis(reprise.enregistreLe)}.
             </p>
           </div>
-          <div className="flex gap-2">
+          {/* Une ligne à eux sur téléphone, leur place à droite au-delà. */}
+          <div className="flex w-full gap-2 sm:w-auto">
             <Button variant="primary" icon={<Play size={16} />} onClick={() => onReprendre(reprise)}>
               Reprendre
             </Button>
@@ -532,28 +559,59 @@ function SetupScreen({
                   detail:
                     'Le plus fort du monde, bridé au niveau voulu. Joue juste, puis lâche un coup faible d’un coup.',
                 },
-              ].map((choix) => (
-                <button
-                  key={choix.nom}
-                  type="button"
-                  onClick={() => setHuman(choix.id)}
-                  aria-pressed={human === choix.id}
-                  className={clsx(
-                    'rounded-[var(--radius-sm)] border p-3 text-left transition-colors',
-                    human === choix.id
-                      ? 'border-accent bg-accent/10'
-                      : 'border-line hover:bg-surface-hover',
-                  )}
-                >
-                  <span className="flex items-baseline gap-2">
-                    <span className="text-sm font-semibold">{choix.nom}</span>
-                    <span className="text-[11px] text-faint">{choix.resume}</span>
-                  </span>
-                  <span className="mt-1 block text-xs leading-relaxed text-muted">
-                    {choix.detail}
-                  </span>
-                </button>
-              ))}
+              ].map((choix) => {
+                const actif = human === choix.id
+                return (
+                  <button
+                    key={choix.nom}
+                    type="button"
+                    onClick={() => setHuman(choix.id)}
+                    aria-pressed={actif}
+                    /*
+                      L'état choisi se voyait à peine : une bordure d'un pixel
+                      et un fond à 10 % d'accent sur une surface déjà sombre.
+                      Entre deux cartes côte à côte, l'écart tenait dans
+                      quelques pour cent de luminance — on ne savait pas qui
+                      l'on allait affronter.
+
+                      Trois marques cumulées plutôt qu'une seule renforcée :
+                      l'anneau double l'épaisseur du contour, le fond monte à
+                      20 %, et le nom passe en couleur d'accent. Aucune ne
+                      repose sur la seule teinte, ce qui laisse le choix
+                      lisible en vision daltonienne comme en plein soleil.
+                    */
+                    className={clsx(
+                      'rounded-[var(--radius-sm)] border p-3 text-left transition-colors',
+                      actif
+                        ? 'border-accent bg-accent/20 ring-1 ring-accent'
+                        : 'border-line hover:bg-surface-hover',
+                    )}
+                  >
+                    <span className="flex items-baseline gap-2">
+                      <span
+                        className={clsx(
+                          'text-sm font-semibold',
+                          actif ? 'text-accent' : 'text-ink',
+                        )}
+                      >
+                        {choix.nom}
+                      </span>
+                      <span className="text-[11px] text-faint">{choix.resume}</span>
+                      {/* La quatrième marque, et la seule qui se lise sans
+                          comparer les deux cartes entre elles. */}
+                      {actif && (
+                        <span className="ml-auto flex shrink-0 items-center gap-1 text-[11px] font-semibold text-accent">
+                          <Check size={12} aria-hidden />
+                          choisi
+                        </span>
+                      )}
+                    </span>
+                    <span className="mt-1 block text-xs leading-relaxed text-muted">
+                      {choix.detail}
+                    </span>
+                  </button>
+                )
+              })}
             </div>
           </div>
         )}
