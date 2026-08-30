@@ -228,14 +228,26 @@ export default function ProfilePage() {
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:py-12">
       {/* ── Identité ─────────────────────────────────────────────── */}
       <Card glow className="p-5">
-        <div className="flex items-start gap-4">
+        {/* Les deux boutons passent à la ligne sous 640 px.
+            Ils étaient en `shrink-0` sur la même ligne que le pseudo : à
+            375 px ils occupaient environ deux cents pixels des trois cents
+            disponibles, et le pseudo venait buter contre « Statistiques »
+            pendant que « Membre depuis » se repliait sur trois lignes. Ce
+            n'est pas le pseudo qui doit céder la place à une commande.
+
+            `flex-wrap` sur le rang, `w-full sm:w-auto` sur le groupe de
+            boutons : ils prennent une ligne à eux sur téléphone, et
+            retrouvent leur place à droite dès qu'il y en a une. */}
+        <div className="flex flex-wrap items-start gap-4">
           <span
             className="grid h-16 w-16 shrink-0 place-items-center rounded-[var(--radius)] bg-surface-strong text-3xl"
             aria-hidden
           >
             {profile.user.avatar ?? '♟️'}
           </span>
-          <div className="min-w-0 flex-1">
+          {/* `min-w-[12rem]` et non `min-w-0` : sans plancher, cette colonne se
+              laisse comprimer jusqu'à zéro et le rang ne se replie jamais. */}
+          <div className="min-w-[12rem] flex-1">
             <div className="flex flex-wrap items-baseline gap-2">
               <h1 className="font-display text-2xl font-bold tracking-tight">
                 {profile.user.username}
@@ -251,7 +263,7 @@ export default function ProfilePage() {
             </p>
           </div>
           {isMe && (
-            <div className="flex shrink-0 gap-1">
+            <div className="flex w-full shrink-0 flex-wrap gap-1 border-t border-line/60 pt-3 sm:w-auto sm:border-0 sm:pt-0">
               {/* Les statistiques ne concernent que soi : leur porte est ici. */}
               <Link href="/statistiques">
                 <Button size="sm" variant="ghost" icon={<BarChart3 size={14} />}>
