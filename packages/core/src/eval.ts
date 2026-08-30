@@ -214,16 +214,48 @@ export function averageCentipawnLoss(losses: number[]): number {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Estime l'Elo correspondant à une performance sur une partie.
+ * Repères de calibration, et **contrat de la fonction**.
  *
- * Calibration empirique sur l'ACPL, cohérente avec les fourchettes observées
- * sur les serveurs en ligne : ~110 cp ≈ 1000, ~60 cp ≈ 1500, ~35 cp ≈ 1900,
- * ~20 cp ≈ 2300, ~10 cp ≈ 2700. La précision sert d'ajustement fin.
+ * Chaque entrée associe une perte moyenne, une précision typique à ce niveau
+ * de jeu, et l'Elo que la performance vaut. Les couples ACPL/précision sont
+ * ceux qu'on observe ensemble sur les serveurs en ligne : à 60 centipions de
+ * perte moyenne on tourne autour de 72 % de précision, pas de 88 %.
+ *
+ * `scripts/check-elo.mjs` vérifie que la fonction les respecte. Ce n'est pas du
+ * zèle : la version précédente documentait exactement ces repères et n'en
+ * atteignait aucun — elle rendait 450 là où elle annonçait 1000, et une valeur
+ * **négative** pour le terme ACPL d'un débutant. Personne ne l'avait vu parce
+ * que le mélange et le plancher ramenaient le résultat dans le plausible.
+ */
+export const ELO_ANCHORS: ReadonlyArray<{ acpl: number; accuracy: number; elo: number }> = [
+  { acpl: 110, accuracy: 55, elo: 1000 },
+  { acpl: 60, accuracy: 72, elo: 1500 },
+  { acpl: 35, accuracy: 82, elo: 1900 },
+  { acpl: 20, accuracy: 90, elo: 2300 },
+  { acpl: 10, accuracy: 95, elo: 2700 },
+]
+
+/**
+ * Estime l'Elo correspondant à une performance sur **une** partie.
+ *
+ * Ce n'est pas un classement : c'est ce que vaut la qualité des coups joués ce
+ * jour-là. On peut perdre lourdement en obtenant un chiffre élevé — une seule
+ * gaffe suffit à perdre une partie dont les trente autres coups étaient
+ * propres. Et face à un adversaire faible, qui ne pose aucun problème, la
+ * mesure est flattée : les positions restent simples.
+ *
+ * Deux estimateurs, mélangés :
+ *  - **l'ACPL**, en logarithme — un centipion perdu de plus compte beaucoup à
+ *    2500 et presque rien à 900. Il pèse le plus : il est robuste sur les
+ *    parties courtes.
+ *  - **la précision**, linéaire, en ajustement. Elle apporte ce que l'ACPL
+ *    ignore : la perte moyenne traite un coup catastrophique et dix coups
+ *    tièdes de la même façon, la précision non.
  */
 export function estimateElo(acpl: number, accuracy: number, moveCount: number): number {
   if (moveCount < 6) return 1200 // trop court pour conclure quoi que ce soit
-  const fromAcpl = 3100 - 700 * Math.log(Math.max(4, acpl))
-  const fromAccuracy = 400 + 22 * accuracy
+  const fromAcpl = 4390 - 710 * Math.log(Math.max(4, acpl))
+  const fromAccuracy = 41.1 * accuracy - 1362
   // On fait davantage confiance à l'ACPL, plus robuste sur les parties courtes.
   const blended = 0.65 * fromAcpl + 0.35 * fromAccuracy
   // Une partie de 10 coups ne prouve pas grand-chose : on ramène vers 1200.

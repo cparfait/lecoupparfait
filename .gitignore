@@ -57,3 +57,16 @@ coverage/
 # répertoires de travail jetables
 .tmp-probe/
 scripts/.tmp/
+
+# Essais de la marque : `build-cavale.mjs --cible logo --style tous` y dépose
+# les pistes non retenues, pour comparaison. Rien à versionner.
+.essais/
+
+# Matériel de travail, jamais du contenu de l'application.
+# `zzsccreens` contient des captures de l'interface de chess.com, servant de
+# référence pour comparer nos écrans aux leurs. Elles n'ont rien à faire dans
+# un dépôt public : ce sont des copies d'écran d'un produit tiers, et elles ne
+# décrivent pas ce dépôt.
+zzsccreens/
+# Aperçu jetable produit par les scripts de marque, jamais référencé nulle part.
+/apercu.png
