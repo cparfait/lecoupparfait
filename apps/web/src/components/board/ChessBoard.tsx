@@ -11,6 +11,11 @@
  * Le plein écran est proposé pour les deux vues, mais il compte surtout en 3D :
  * la perspective réclame de la place, et sur un ordinateur portable l'échiquier
  * partage l'écran avec la liste des coups et le panneau du coach.
+ *
+ * Les deux boutons vivent sous le plateau, jamais dessus : posés dans le coin
+ * haut-droit, ils masquaient les cases qui s'y trouvent — h8 vu des blancs, a1
+ * vu des noirs — et, se trouvant au-dessus, captaient aussi le clic. La pièce
+ * était donc à la fois invisible et injouable.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -71,6 +76,17 @@ export interface ChessBoardProps extends Board2DProps {
  */
 const MIN_BOARD_PX = 260
 
+/**
+ * Hauteur de la rangée des boutons, sous le plateau.
+ *
+ * Elle se retranche de la place disponible : sans cela, le plateau garderait sa
+ * taille et la rangée déborderait de la colonne — ce qui repousserait hors de
+ * l'écran la barre d'actions, exactement ce que `fitParentHeight` évite.
+ *
+ * 32 px de bouton, 2 px de gouttière et 6 px de marge haute.
+ */
+const TOGGLE_ROW_PX = 40
+
 export function ChessBoard({
   showViewToggle = true,
   reservedHeight = 17,
@@ -81,6 +97,7 @@ export function ChessBoard({
   const containerRef = useRef<HTMLDivElement>(null)
   const [fullscreen, setFullscreen] = useState(false)
   const [fitSide, setFitSide] = useState<number | null>(null)
+  const toggleRow = showViewToggle ? TOGGLE_ROW_PX : 0
 
   useEffect(() => {
     if (!fitParentHeight) return
@@ -94,14 +111,16 @@ export function ChessBoard({
         box.height - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)
       // Une hauteur nulle signifie que la colonne n'est pas encore posée : on
       // s'abstient plutôt que de réduire le plateau à rien.
-      setFitSide(height > 0 ? Math.floor(Math.min(box.width, height)) : null)
+      setFitSide(
+        height > 0 ? Math.floor(Math.min(box.width, height - toggleRow)) : null,
+      )
     }
 
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(area)
     return () => observer.disconnect()
-  }, [fitParentHeight])
+  }, [fitParentHeight, toggleRow])
 
   // L'utilisateur peut sortir du plein écran par la touche Échap sans passer
   // par notre bouton : on suit donc l'état réel du document.
@@ -140,21 +159,21 @@ export function ChessBoard({
       style={fullscreen ? { width: '100vw', height: '100vh' } : undefined}
     >
       {/*
-        Le plateau est toujours carré. En affichage normal il prend toute la
-        largeur disponible ; en plein écran on lui impose explicitement le côté
-        du plus petit bord de l'écran.
+        Le plateau est toujours carré, et la rangée de boutons se cale sur sa
+        largeur. En affichage normal la colonne prend toute la largeur
+        disponible ; en plein écran on lui impose explicitement le côté du plus
+        petit bord de l'écran.
 
         C'est indispensable : `aspect-square w-full` seul donnerait, sur un
         écran large, un carré aussi haut que l'écran est large — donc un plateau
         qui déborde très largement vers le bas.
       */}
       <div
-        className="relative"
+        className="flex flex-col"
         style={
           fullscreen
             ? {
-                width: 'min(100vw - 1.5rem, 100vh - 1.5rem)',
-                height: 'min(100vw - 1.5rem, 100vh - 1.5rem)',
+                width: `min(100vw - 1.5rem, 100vh - 1.5rem - ${toggleRow}px)`,
               }
             : // `dvh` plutôt que `vh` : sur mobile, la barre d'adresse se
               // rétracte au défilement et `vh` reste figé sur la hauteur
@@ -163,16 +182,21 @@ export function ChessBoard({
                 width:
                   fitSide != null
                     ? `${Math.max(MIN_BOARD_PX, fitSide)}px`
-                    : `min(100%, max(${MIN_BOARD_PX}px, calc(100dvh - ${reservedHeight}rem)))`,
-                aspectRatio: '1 / 1',
+                    : `min(100%, max(${MIN_BOARD_PX}px, calc(100dvh - ${reservedHeight}rem - ${toggleRow}px)))`,
                 marginInline: 'auto',
               }
         }
       >
-        {view === '3d' ? <Board3D {...props} /> : <Board2D {...props} />}
+        <div className="relative w-full" style={{ aspectRatio: '1 / 1' }}>
+          {view === '3d' ? <Board3D {...props} /> : <Board2D {...props} />}
+        </div>
 
         {showViewToggle && (
-          <ViewToggle fullscreen={fullscreen} onToggleFullscreen={toggleFullscreen} />
+          <ViewToggle
+            className="mt-1.5 self-end"
+            fullscreen={fullscreen}
+            onToggleFullscreen={toggleFullscreen}
+          />
         )}
       </div>
     </div>
@@ -182,9 +206,10 @@ export function ChessBoard({
 /**
  * Bascule 2D / 3D et plein écran.
  *
- * Volontairement posée sur l'échiquier plutôt que reléguée dans les
+ * Volontairement gardée près de l'échiquier plutôt que reléguée dans les
  * préférences : c'est un choix qu'on refait souvent — la 3D pour admirer, la 2D
- * pour calculer.
+ * pour calculer. Près, mais pas dessus : un plateau n'a pas de marge, chaque
+ * pixel du carré appartient à une case.
  */
 export function ViewToggle({
   className,
@@ -202,7 +227,7 @@ export function ViewToggle({
   return (
     <div
       className={clsx(
-        'absolute right-2 top-2 z-50 flex gap-0.5 rounded-full p-0.5',
+        'flex w-fit gap-0.5 rounded-full p-0.5',
         'popover !rounded-full shadow-[var(--shadow)]',
         className,
       )}
