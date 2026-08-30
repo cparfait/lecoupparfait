@@ -6,7 +6,7 @@
  * Des portes d'entrée présentées à taille égale : personne ne doit avoir
  * l'impression que jouer contre un ami est une fonctionnalité secondaire.
  *
- * La carrière ouvre la liste, et sa place ici plutôt que dans « Apprendre » est
+ * La carrière ferme la liste, et sa place ici plutôt que dans « Apprendre » est
  * un choix : ce sont douze duels contre des adversaires choisis, avec une leçon
  * et des puzzles autour. On y vient pour jouer.
  */
@@ -26,17 +26,6 @@ import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
 
 const MODES = [
-  {
-    // En tête : la carrière est la réponse à « par quoi je commence ? », et
-    // cette question précède toutes les autres. Les cinq autres portes
-    // supposent qu'on sache déjà laquelle on veut.
-    href: '/carriere',
-    icon: Footprints,
-    titleKey: 'play.career',
-    blurbKey: 'play.careerBlurb',
-    detail: '12 chapitres · une leçon, des puzzles et un duel par chapitre',
-    accent: 'var(--accent)',
-  },
   {
     href: '/jouer/ordinateur',
     icon: Cpu,
@@ -76,6 +65,20 @@ const MODES = [
     blurbKey: 'play.watchBlurb',
     detail: 'Les parties commencées, suivies coup par coup',
     accent: 'var(--accent-2)',
+  },
+  {
+    // En dernier, et sur le même écran que les autres.
+    //
+    // La carrière ouvrait la liste : on arrive ici en voulant jouer tout de
+    // suite, et la première porte proposait un programme en douze chapitres.
+    // Elle reste à sa place, au bout de la même grille — visible sans avoir à
+    // faire défiler, mais après ce qu'on est venu chercher.
+    href: '/carriere',
+    icon: Footprints,
+    titleKey: 'play.career',
+    blurbKey: 'play.careerBlurb',
+    detail: '12 chapitres · une leçon, des puzzles et un duel par chapitre',
+    accent: 'var(--accent)',
   },
 ] as const
 
