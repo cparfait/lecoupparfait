@@ -302,7 +302,7 @@ function AuthForm() {
                 autoComplete="email"
                 hint={
                   courriel
-                    ? 'Facultatif. Uniquement pour récupérer ton mot de passe si tu l’oublies. Jamais transmis à personne.'
+                    ? 'Facultatif. Uniquement pour récupérer ton mot de passe si tu l’oublies — tu la confirmeras depuis ton profil, quand tu voudras. Jamais transmise à personne.'
                     : 'Facultatif — et pour l’instant sans usage : ce serveur n’envoie pas encore de courriel, donc un mot de passe perdu ne peut pas être récupéré. Choisis-en un dont tu te souviendras.'
                 }
               />

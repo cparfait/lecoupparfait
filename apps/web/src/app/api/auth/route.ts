@@ -189,6 +189,16 @@ export async function POST(request: Request) {
     }
     if (status.verified) return NextResponse.json({ ok: true, alreadyDone: true })
 
+    // Sans acheminement, le lien ne partirait pas et l'interface annoncerait
+    // « Envoyé ». On refuse plutôt que de mentir — même règle que pour la
+    // récupération de mot de passe.
+    if (!courrielDisponible()) {
+      return NextResponse.json(
+        { error: 'Ce serveur n’envoie pas encore de courriel.' },
+        { status: 503 },
+      )
+    }
+
     // Même limitation que les tentatives de connexion : un bouton « renvoyer »
     // sans garde-fou est une machine à expédier du courrier chez autrui.
     const address =
@@ -264,17 +274,23 @@ export async function POST(request: Request) {
       }
       await startSession(result.user.id)
 
-      // Le courriel ne conditionne pas l'inscription : elle est déjà faite, la
-      // session déjà ouverte. Une messagerie en panne ne doit pas empêcher
-      // quelqu'un d'entrer — l'adresse restera simplement non confirmée.
-      const address = body.email?.trim()
-      if (address) {
-        void sendVerification(result.user.id, result.user.username, address, request).catch(
-          (error: unknown) => {
-            console.error('[courriel] confirmation non envoyée :', error)
-          },
-        )
-      }
+      /*
+        Aucun courriel de confirmation à l'inscription.
+
+        Il partait automatiquement dès qu'une adresse était saisie. Le principe
+        était juste — l'inscription n'attendait pas le courriel, la session
+        s'ouvrait quand même — mais il supposait une messagerie qui fonctionne.
+        Sans acheminement, on promettait un message qui ne partait pas, à
+        quelqu'un qui venait de s'inscrire et qui n'avait rien demandé.
+
+        La confirmation devient donc **volontaire** : l'adresse est enregistrée,
+        et le profil propose de la confirmer quand on le souhaite — bouton déjà
+        présent, action `resendVerification`. C'est aussi plus honnête sur ce
+        qu'elle sert : rien, tant qu'on n'a pas perdu son mot de passe.
+
+        Rien à rétablir le jour où la messagerie marchera : le même bouton
+        enverra le même lien, simplement il arrivera.
+      */
 
       return NextResponse.json({
         user: {

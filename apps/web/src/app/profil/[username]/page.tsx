@@ -27,6 +27,7 @@ import { Button, Card, Chip, EmptyState, Skeleton } from '@/components/ui/index.
 import { AvatarPicker } from '@/components/profile/AvatarPicker.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { effacerPartie } from '@/lib/game/partieEnCours.ts'
+import { useCourrielDisponible } from '@/lib/auth/useIdentite.ts'
 
 interface Profile {
   user: {
@@ -542,9 +543,18 @@ function formatDate(iso: string): string {
  * appartenir à quelqu'un d'autre. Le dire ici, avec le moyen de renvoyer le
  * lien, évite de le découvrir le jour où l'on a perdu son mot de passe.
  */
+/**
+ * L'état de l'adresse, et l'invitation à la confirmer.
+ *
+ * La confirmation ne part plus toute seule à l'inscription : elle est
+ * volontaire, et c'est ici qu'on la demande. Ce bloc porte donc à lui seul tout
+ * le parcours, ce qui l'oblige à dire deux choses — à quoi sert l'adresse, et
+ * si le serveur est seulement capable d'envoyer le lien.
+ */
 function EmailStatus({ email }: { email: { email: string | null; verified: boolean } }) {
   const [busy, setBusy] = useState(false)
   const [sent, setSent] = useState(false)
+  const courriel = useCourrielDisponible()
 
   if (email.verified) {
     return (
@@ -560,12 +570,14 @@ function EmailStatus({ email }: { email: { email: string | null; verified: boole
       <MailWarning size={14} className="shrink-0 text-[var(--q-inaccuracy)]" aria-hidden />
       <p className="min-w-0 flex-1 text-xs leading-relaxed text-muted">
         <strong className="font-semibold text-ink">Adresse à confirmer</strong> — {email.email}.
-        Tant que ce n’est pas fait, elle ne pourra pas servir à retrouver ton mot de passe.
+        {courriel === false
+          ? ' Ce serveur n’envoie pas encore de courriel : la confirmation n’est pas possible pour l’instant, et l’adresse ne sert donc à rien. Rien n’est perdu, elle reste enregistrée.'
+          : ' Tant que ce n’est pas fait, elle ne pourra pas servir à retrouver ton mot de passe.'}
       </p>
       <Button
         size="sm"
         variant="secondary"
-        disabled={busy || sent}
+        disabled={busy || sent || courriel === false}
         onClick={async () => {
           setBusy(true)
           try {
@@ -586,7 +598,9 @@ function EmailStatus({ email }: { email: { email: string | null; verified: boole
           }
         }}
       >
-        {sent ? 'Envoyé' : 'Renvoyer le lien'}
+        {/* « Confirmer » et non « Renvoyer » : plus rien n'a été envoyé
+            auparavant, l'inscription n'expédiant plus de lien d'elle-même. */}
+        {sent ? 'Envoyé' : courriel === false ? 'Indisponible' : 'Confirmer'}
       </Button>
     </div>
   )
