@@ -8,6 +8,12 @@
  * serveur toutes les quelques secondes et affiche la proposition par-dessus
  * tout le reste, avec ses deux réponses.
  *
+ * Elle s'affiche **en haut**, juste sous l'en-tête, et sur toutes les pages
+ * sans exception. En bas de l'écran, elle passait inaperçue : sur téléphone la
+ * barre de navigation occupe déjà ce coin-là, et sur un écran de jeu le regard
+ * ne quitte pas l'échiquier. Une invitation dure quelques minutes, il faut la
+ * voir tout de suite ou elle expire toute seule.
+ *
  * Il se tait pour les visiteurs non connectés — pas de compte, pas d'amis,
  * donc rien à guetter et aucune requête à faire.
  */
@@ -68,9 +74,15 @@ export function ChallengeWatcher() {
       .catch(() => setSignedIn(false))
   }, [])
 
-  // On se tait pendant une partie : y annoncer une autre proposition
-  // reviendrait à inviter quelqu'un à abandonner celle qu'il joue.
-  const silent = pathname.startsWith('/jouer/partie/')
+  /**
+   * Est-on en train de jouer contre quelqu'un ?
+   *
+   * On n'en cache plus la proposition — elle était tue ici, et l'on manquait
+   * l'invitation d'un ami pour la seule raison qu'on finissait une partie
+   * contre l'ordinateur juste avant. Mais on prévient : accepter emmène sur un
+   * autre échiquier, et celui qu'on quitte continue à tourner.
+   */
+  const enPartie = pathname.startsWith('/jouer/partie/')
 
   /**
    * Emmener celui qui a proposé, dès que l'autre accepte.
@@ -83,7 +95,7 @@ export function ChallengeWatcher() {
   const navigated = useRef<string | null>(null)
 
   useEffect(() => {
-    if (!signedIn || silent) return
+    if (!signedIn) return
 
     let alive = true
     const look = async () => {
@@ -112,7 +124,7 @@ export function ChallengeWatcher() {
       alive = false
       clearInterval(timer)
     }
-  }, [signedIn, silent, router])
+  }, [signedIn, router])
 
   const respond = useCallback(
     async (accept: boolean) => {
@@ -164,8 +176,14 @@ export function ChallengeWatcher() {
   })
 
   return (
-    <div className="fixed inset-x-0 bottom-4 z-[95] flex justify-center px-4 md:bottom-6">
-      <div className="animate-slide-up popover flex w-full max-w-md items-center gap-3 p-3 shadow-[var(--shadow-lg)]">
+    // `top-[4.25rem]` : l'en-tête est collant et mesure 57 px — le bandeau se
+    // pose juste dessous, jamais derrière. Et au-dessus de lui (`z-[95]` contre
+    // `z-50`), sans quoi le menu mobile déplié le recouvrirait.
+    <div
+      className="fixed inset-x-0 top-[4.25rem] z-[95] flex justify-center px-4"
+      role="alert"
+    >
+      <div className="animate-slide-down popover flex w-full max-w-md items-center gap-3 p-3 shadow-[var(--shadow-lg)]">
         <span
           className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent/15 text-accent"
           aria-hidden
@@ -182,6 +200,13 @@ export function ChallengeWatcher() {
             {SPEED_LABELS[speed]?.fr ?? speed}
             {challenge.rated ? ' · classée' : ''}
           </p>
+          {/* Accepter quitte l'échiquier en cours — la pendule, elle, continue
+              de tourner. On le dit avant, pas après. */}
+          {enPartie && (
+            <p className="mt-0.5 text-[12px] font-medium text-[var(--q-inaccuracy)]">
+              Tu joues une partie : accepter t'emmène ailleurs.
+            </p>
+          )}
         </div>
 
         <button
