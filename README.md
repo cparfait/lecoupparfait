@@ -160,9 +160,28 @@ En Docker, les deux sont déjà dans l'image : rien à faire.
 ```bash
 cp .env.example .env             # renseigne POSTGRES_PASSWORD et AUTH_SECRET
 docker compose up -d --build
+docker compose exec web node scripts/migrate.mjs   # crée le schéma
 docker compose exec web node scripts/import-openings.mjs
 docker compose exec web node scripts/import-puzzles.mjs
 ```
+
+**Des migrations, et non `db:push`.** Les deux mènent au même schéma, par deux
+chemins qui ne se valent pas ici. `push` compare le schéma à la base et applique
+la différence : c'est commode en développement, où l'on tâtonne, et c'est
+inutilisable en production — il pose des questions auxquelles personne ne
+répondra, et il propose de supprimer ce qu'il ne comprend pas. Les migrations
+rejouent des fichiers SQL versionnés dans `packages/db/migrations`, dans l'ordre,
+sans rien demander et sans rien deviner.
+
+`scripts/migrate.mjs` et non `npm run db:migrate` : cette commande-là passe par
+`drizzle-kit`, une dépendance de développement, absente de l'image de production
+qui n'embarque que les modules réellement utilisés par l'application. Le script,
+lui, ne se sert que de `drizzle-orm` et `postgres`, présents à l'exécution. Il
+tient le même journal et se relance sans risque.
+
+Sur une base **déjà en service**, ne pas rejouer la migration initiale : elle
+crée les tables sans `IF NOT EXISTS` et échouera. Il faut d'abord la marquer
+comme appliquée — c'est le rôle de la table `__drizzle_migrations`.
 
 L'image du serveur **compile Stockfish 18 depuis les sources**, avec
 optimisation guidée par le profil et réseau NNUE complet, et installe la voix
@@ -252,7 +271,9 @@ positions de contrôle, y compris les attaques en rayon X.
 | `npm run typecheck` | vérification des types sur tout le dépôt |
 | `npm run check:lessons` | **valide les 149 étapes de leçons** : positions légales, coups jouables |
 | `npm run test:realtime` | test de bout en bout du serveur de parties |
-| `npm run db:push` | applique le schéma à PostgreSQL |
+| `npm run db:push` | applique le schéma à PostgreSQL, en développement |
+| `npm run db:generate` | fabrique un fichier de migration à partir du schéma |
+| `node scripts/migrate.mjs` | rejoue les migrations — c'est la voie de la production |
 | `npm run data:openings` | importe les ouvertures en base |
 | `npm run data:puzzles` | importe les puzzles (`PUZZLE_IMPORT_LIMIT=0` pour les 6 millions) |
 | `npm run data:endgames` | compile les 3 568 positions de finales |
