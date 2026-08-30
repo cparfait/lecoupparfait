@@ -1,0 +1,68 @@
+'use client'
+
+/**
+ * Accès à la journée depuis l'interface.
+ *
+ * Deux usages, et c'est tout : afficher où l'on en est, et signaler qu'on
+ * vient de faire quelque chose. Les pages qui marquent une quête n'ont pas à
+ * savoir comment la série se calcule ni où l'état est rangé.
+ *
+ * L'état est **partagé** entre tous les appelants (voir `quotidien.ts`) :
+ * résoudre le défi du jour met à jour la carte de l'accueil et la pastille de
+ * série de l'en-tête dans le même rendu.
+ *
+ * Les félicitations passent par un bandeau, **jamais par une fenêtre**. Une
+ * modale par-dessus l'échiquier pour annoncer « première partie jouée » coupe
+ * exactement ce qu'elle prétend récompenser.
+ */
+
+import { useCallback, useEffect, useSyncExternalStore } from 'react'
+import { toast } from '@/components/ui/Toast.tsx'
+import {
+  avancerQuete,
+  etatDuJour,
+  instantane,
+  reprendreDepuisLeServeur,
+  souscrire,
+  xpDuJour,
+  type EtatQuotidien,
+  type QueteId,
+} from './quotidien.ts'
+
+export interface JourneeCourante {
+  etat: EtatQuotidien | null
+  xp: number
+  /** Enregistre une action. Sans effet si la quête est déjà terminée. */
+  marquer: (id: QueteId, pas?: number) => void
+}
+
+/** Le rendu serveur ne connaît pas le stockage local : rien à afficher. */
+const instantaneServeur = () => null
+
+export function useQuotidien(): JourneeCourante {
+  const etat = useSyncExternalStore(souscrire, instantane, instantaneServeur)
+
+  useEffect(() => {
+    // Première lecture après l'hydratation : la faire pendant le rendu ferait
+    // diverger l'HTML envoyé par le serveur et celui que React reconstruit.
+    etatDuJour()
+    // Puis on complète avec ce que le serveur sait, s'il sait quelque chose :
+    // la série peut venir d'un autre appareil.
+    void reprendreDepuisLeServeur()
+  }, [])
+
+  const marquer = useCallback((id: QueteId, pas = 1) => {
+    const resultat = avancerQuete(id, pas)
+
+    if (resultat.queteTerminee) {
+      toast.success(
+        `${resultat.queteTerminee.label} ✓`,
+        resultat.serieAugmentee
+          ? `+${resultat.queteTerminee.xp} points · série de ${resultat.etat.serie} jour${resultat.etat.serie > 1 ? 's' : ''}`
+          : `+${resultat.queteTerminee.xp} points`,
+      )
+    }
+  }, [])
+
+  return { etat, xp: etat ? xpDuJour(etat) : 0, marquer }
+}

@@ -11,20 +11,15 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import {
-  ArrowRight,
-  BookOpen,
-  Database,
-  Gauge,
-  Heart,
-  Sparkles,
-  Users,
-  Volume2,
-} from 'lucide-react'
+import { ArrowRight, Sparkles, Volume2 } from 'lucide-react'
 import { Chess } from 'chess.js'
 import { Board2D } from '@/components/board/Board2D.tsx'
+import { CavalePortrait } from '@/components/brand/CavalePortrait.tsx'
+import { DefiDuJour } from '@/components/daily/DefiDuJour.tsx'
 import { ButtonLink, Card, Chip } from '@/components/ui/index.tsx'
 import { renderEmphasis, useI18n } from '@/lib/i18n/index.tsx'
+import { usePreferences } from '@/lib/store/preferences.ts'
+import type { BoardStyleId, ThemeId } from '@/lib/store/preferences.ts'
 
 /**
  * L'Immortelle — Anderssen contre Kieseritzky, Londres 1851.
@@ -43,6 +38,24 @@ const IMMORTAL = [
   'Nxg7+', 'Kd8', 'Qf6+', 'Nxf6', 'Be7#',
 ]
 
+/**
+ * Le damier de la bannière suit le thème, pas la préférence du joueur.
+ *
+ * Ailleurs dans l'application c'est l'inverse : le damier obéit au réglage
+ * choisi, et c'est bien ainsi. Mais la bannière est une vitrine — un damier
+ * violet sur un habillage doré donne l'impression que la page a été assemblée
+ * par deux personnes qui ne se sont pas parlé.
+ */
+const DAMIER_PAR_THEME: Record<ThemeId, BoardStyleId> = {
+  aurora: 'aurore',
+  club: 'noyer',
+  clair: 'marbre',
+  // `contraste` n'a pas d'équivalent jaune, et il n'en faut pas : ce thème
+  // existe pour la lisibilité, donc on prend l'ardoise, le damier le plus
+  // franchement contrasté de la série.
+  contraste: 'ardoise',
+}
+
 /** Commentaires affichés aux moments charnières de la démonstration. */
 const COMMENTARY: Record<number, string> = {
   0: 'Le gambit du roi : les Blancs offrent un pion pour ouvrir des lignes vers le roi adverse.',
@@ -54,15 +67,20 @@ const COMMENTARY: Record<number, string> = {
   44: 'Fou e7, mat. Trois pièces mineures suffisent quand le roi n’a plus une seule case.',
 }
 
+/** Les trois destinations que l'accueil doit pouvoir atteindre sans le menu. */
+const PORTES = [
+  { href: '/apprendre', label: 'Apprendre les échecs de zéro' },
+  { href: '/analyse', label: 'Analyser une partie' },
+  { href: '/jouer/ordinateur', label: 'Jouer contre l’ordinateur' },
+] as const
+
 export default function HomePage() {
   const { t } = useI18n()
 
   return (
     <>
       <Hero />
-      <Features />
-      <Numbers />
-      <FinalCall />
+      <Essentiel />
     </>
   )
 }
@@ -73,6 +91,10 @@ export default function HomePage() {
 
 function Hero() {
   const { t } = useI18n()
+  // Comme pour le portrait : avant hydratation, `layout.tsx` pose `aurora`.
+  const themeChoisi = usePreferences((state) => state.theme)
+  const hydrated = usePreferences((state) => state.hydrated)
+  const theme = hydrated ? themeChoisi : 'aurora'
   const [ply, setPly] = useState(0)
   const [fen, setFen] = useState(new Chess().fen())
   const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null)
@@ -104,7 +126,27 @@ function Hero() {
 
   return (
     <section className="relative overflow-hidden">
-      <div className="mx-auto grid w-full max-w-[1400px] items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:gap-16 lg:py-20">
+      {/* Halo de fond, sous tous les calques : il éclaire le coin haut-droit
+          d'où vient la lumière du portrait, pour que la photo et la page
+          semblent partager la même source. */}
+      <div
+        className="pointer-events-none absolute inset-0 -z-20"
+        style={{
+          background:
+            'radial-gradient(70% 55% at 62% 8%, var(--aurora-1), transparent 70%),' +
+            'radial-gradient(50% 50% at 20% 90%, var(--aurora-2), transparent 70%)',
+        }}
+        aria-hidden
+      />
+
+      <CavalePortrait />
+
+      {/* Marge basse réduite de moitié, et pas par goût du serrage.
+          Additionnée aux 48 px de la section suivante, elle ouvrait un vide de
+          151 px sous la carte du commentaire — une bande vide plus haute que la
+          carte elle-même, où il n'y avait rien à voir et rien à lire. Le haut
+          garde ses 80 px : c'est ce qui pose la bannière. */}
+      <div className="relative mx-auto grid w-full max-w-[1400px] items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:gap-16 lg:pb-8 lg:pt-20">
         {/* ── Texte ─────────────────────────────────────────────────── */}
         <div className="animate-slide-up">
           <Chip tone="accent" className="mb-5">
@@ -131,34 +173,76 @@ function Hero() {
             </ButtonLink>
           </div>
 
-          <p className="mt-4 text-xs text-faint">
+          {/* Ce que le compte ajoute, juste sous ce qu'il n'exige pas.
+          
+              « Aucune inscription nécessaire » est vrai et rassurant, et se
+              suffisait à lui-même tant que le compte ne servait à rien de
+              visible. Il sert maintenant à quatre choses qu'on refuse
+              explicitement à un visiteur — le défi du jour, la série, le
+              classement, l'historique — et laisser cette promesse seule
+              reviendrait à faire découvrir ces refus un par un, chacun comme
+              une mauvaise surprise.
+          
+              Les deux phrases doivent donc se suivre : la première dit qu'on
+              n'a rien à donner pour commencer, la seconde ce qu'on gagne à
+              revenir. Dans cet ordre, et pas l'inverse. */}
+          <p className="mt-4 text-xs leading-relaxed text-faint">
             Aucune inscription nécessaire pour jouer ou apprendre.
+            <br />
+            Un compte —{' '}
+            <Link href="/connexion" className="font-semibold text-muted hover:text-ink hover:underline">
+              gratuit, un pseudo et un mot de passe
+            </Link>{' '}
+            — ajoute le défi du jour, ta série, ton classement par cadence et l’historique de
+            tes parties.
           </p>
         </div>
 
         {/* ── Démonstration ─────────────────────────────────────────── */}
         <div className="animate-slide-up [animation-delay:120ms]">
           <div className="relative">
+            {/* L'échiquier passe devant le portrait : il lui faut une ombre
+                portée, pas un halo. Un halo derrière une photo se lit comme une
+                auréole ; une ombre creuse la profondeur qu'on cherche. */}
             <div
-              className="absolute -inset-6 -z-10 rounded-full opacity-60 blur-3xl"
-              style={{
-                background:
-                  'radial-gradient(circle at 30% 30%, var(--aurora-1), transparent 60%), radial-gradient(circle at 70% 70%, var(--aurora-2), transparent 60%)',
-              }}
-              aria-hidden
-            />
-            <div className="mx-auto w-full max-w-[440px]">
+              className={
+                'mx-auto w-full max-w-[440px] overflow-hidden rounded-[var(--radius)] ' +
+                'border border-line-strong shadow-[0_40px_90px_-20px_rgb(0_0_0/.65)]'
+              }
+            >
               <Board2D
                 fen={fen}
                 orientation="w"
                 playable={null}
                 lastMove={lastMove as never}
                 allowAnnotations={false}
+                skinId={DAMIER_PAR_THEME[theme]}
               />
             </div>
           </div>
 
-          <Card className="mt-4 flex items-start gap-3 p-3.5">
+          {/* Le commentaire est d'aplomb sous l'échiquier, et il a longtemps
+              débordé de 96 px vers la gauche — l'idée étant que ce décalage
+              rattache la voix à la sculpture posée derrière.
+
+              Il la rattachait surtout en se posant dessus. La carte fait 708 px
+              de large contre 438 au plateau : les 183 px d'écart tombaient
+              pile sur la tête de Cavale, et son fond translucide laissait
+              remonter le bois et la crinière derrière le texte, qui devenait
+              illisible. Un débordement qui cache le sujet qu'il devait
+              désigner n'est plus une composition, c'est une collision.
+
+              Recalé sur l'échiquier, il libère la sculpture et gagne un fond
+              propre.
+
+              `mx-auto max-w-[520px]`, et non la largeur de la colonne : celle-ci
+              fait 612 px contre 438 au plateau, et la carte y était décalée à
+              gauche, en travers de la sculpture. Centrée sur le plateau et
+              élargie de 80 px, elle déborde de 40 px de chaque côté — assez
+              pour qu'on lise un bloc posé par-dessus plutôt qu'un panneau
+              rapporté sous l'échiquier, et dix fois moins que les 183 px du
+              premier jet, qui recouvraient la tête de Cavale. */}
+          <Card className="glass-lisible mx-auto mt-4 flex w-full max-w-[520px] items-start gap-3 p-3.5 backdrop-blur-md">
             <span
               className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full"
               style={{ background: 'color-mix(in oklab, var(--accent) 20%, transparent)' }}
@@ -182,117 +266,95 @@ function Hero() {
 //  Fonctionnalités
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Features() {
-  const { t } = useI18n()
-
-  const items = [
-    { icon: Volume2, titleKey: 'home.features.coachTitle', bodyKey: 'home.features.coachBody', href: '/apprendre' },
-    { icon: Gauge, titleKey: 'home.features.analysisTitle', bodyKey: 'home.features.analysisBody', href: '/analyse' },
-    { icon: Sparkles, titleKey: 'home.features.levelsTitle', bodyKey: 'home.features.levelsBody', href: '/jouer/ordinateur' },
-    { icon: Database, titleKey: 'home.features.dataTitle', bodyKey: 'home.features.dataBody', href: '/ouvertures' },
-    { icon: Users, titleKey: 'home.features.friendsTitle', bodyKey: 'home.features.friendsBody', href: '/jouer/ami' },
-    { icon: Heart, titleKey: 'home.features.freeTitle', bodyKey: 'home.features.freeBody', href: '/a-propos' },
-  ] as const
-
-  return (
-    <section className="mx-auto w-full max-w-[1400px] px-4 py-12 sm:px-6 lg:py-20">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map(({ icon: Icon, titleKey, bodyKey, href }, index) => (
-          <Link
-            key={titleKey}
-            href={href}
-            className="group animate-slide-up glass gradient-ring relative overflow-hidden p-5 transition-transform duration-300 hover:-translate-y-1"
-            style={{ animationDelay: `${index * 55}ms` }}
-          >
-            <span
-              className="mb-4 grid h-10 w-10 place-items-center rounded-[var(--radius-sm)]"
-              style={{
-                background: 'color-mix(in oklab, var(--accent) 16%, transparent)',
-                boxShadow: 'inset 0 0 0 1px color-mix(in oklab, var(--accent) 28%, transparent)',
-              }}
-            >
-              <Icon size={18} className="text-accent" aria-hidden />
-            </span>
-            <h3 className="text-base font-semibold">{t(titleKey)}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{t(bodyKey)}</p>
-            <ArrowRight
-              size={16}
-              className="absolute right-4 top-5 text-faint opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:opacity-100"
-              aria-hidden
-            />
-          </Link>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  Chiffres
-// ─────────────────────────────────────────────────────────────────────────────
-
-function Numbers() {
+/**
+ * Ce qui reste sous la bannière : le défi du jour, et quatre chiffres.
+ *
+ * Il y avait ici trois sections et cinq cartes — le défi, trois « promesses »
+ * encadrées d'un liseré lumineux, puis un pavé de quatre chiffres cloisonnés.
+ * La page se lisait comme un tableau de bord alors qu'elle doit se lire comme
+ * une porte d'entrée.
+ *
+ * Ce qui a été retiré l'a été pour redite, pas pour faire court :
+ *
+ *  - « Un coach qui parle » et « Analyse expliquée » reformulaient le
+ *    sous-titre de la bannière — « un moteur qui explique pourquoi, une voix
+ *    qui t'accompagne » — deux cents pixels plus bas. Dire deux fois la même
+ *    chose ne la rend pas deux fois plus vraie ; ça donne l'impression qu'on
+ *    n'a pas grand-chose à dire.
+ *  - « 25 niveaux, 7 caractères » redisait le « 25 » de la ligne de chiffres
+ *    juste en dessous, avec un encadré de plus.
+ *  - La mention de licence en bas de section est déjà dans le pied de page,
+ *    avec le lien « Crédits & licences ».
+ *
+ * Les chiffres, eux, restent : ils disent quelque chose que rien d'autre ne
+ * dit. Mais ils perdent leur carte et leurs cloisons. Un nombre n'a pas besoin
+ * d'un cadre pour se faire remarquer — c'est un nombre.
+ */
+function Essentiel() {
   const { t } = useI18n()
 
   const stats = [
-    { value: '3 810', label: t('home.statsOpenings'), icon: BookOpen },
-    { value: '6 057 356', label: t('home.statsPuzzles'), icon: Database },
-    { value: '25', label: 'niveaux d’adversaires, de 250 à 3200 Elo', icon: Sparkles },
-    { value: '7', label: 'pièces : finales résolues à la perfection', icon: Gauge },
+    { value: '3 810', label: t('home.statsOpenings') },
+    { value: '6 057 356', label: t('home.statsPuzzles') },
+    { value: '25', label: 'niveaux d’adversaires, de 250 à 3200 Elo' },
+    { value: '7', label: 'pièces : finales résolues à la perfection' },
   ]
 
   return (
-    <section className="mx-auto w-full max-w-[1400px] px-4 pb-12 sm:px-6 lg:pb-20">
-      <Card className="grid gap-px overflow-hidden sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map(({ value, label, icon: Icon }) => (
-          <div key={label} className="bg-[var(--bg-elev)]/40 p-6 text-center">
-            <Icon size={16} className="mx-auto mb-2 text-accent" aria-hidden />
-            <p className="font-display text-2xl font-bold tabular-nums tracking-tight sm:text-3xl">
-              {value}
-            </p>
-            <p className="mt-1 text-xs leading-snug text-muted">{label}</p>
-          </div>
-        ))}
-      </Card>
-      <p className="mt-3 text-center text-[11px] text-faint">
-        Jeux de données publics sous licence CC0, fournis par Lichess. Moteur Stockfish 18 sous GPL.
-      </p>
-    </section>
-  )
-}
+    <section className="mx-auto w-full max-w-[1400px] px-4 pb-10 pt-6 sm:px-6 lg:pb-16 lg:pt-4">
+      {/* Le défi garde sa carte : c'est le seul bloc de la page sur lequel on
+          agit, et le seul dont le contenu change d'un jour à l'autre. Les
+          chiffres l'accompagnent sans en réclamer une — c'est ce déséquilibre
+          assumé qui dit lequel des deux appelle un geste. */}
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] lg:items-center lg:gap-14">
+        <DefiDuJour />
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Appel final
-// ─────────────────────────────────────────────────────────────────────────────
-
-function FinalCall() {
-  return (
-    <section className="mx-auto w-full max-w-[1400px] px-4 pb-20 sm:px-6">
-      <Card glow className="relative overflow-hidden px-6 py-12 text-center sm:px-12 sm:py-16">
-        <div
-          className="absolute inset-0 -z-10 opacity-70"
-          style={{
-            background:
-              'radial-gradient(60ch 30ch at 50% 0%, var(--aurora-1), transparent 70%)',
-          }}
-          aria-hidden
-        />
-        <h2 className="font-display text-[clamp(1.6rem,4vw,2.6rem)] font-bold tracking-tight">
-          Ta première partie commence maintenant.
-        </h2>
-        <p className="mx-auto mt-3 max-w-lg text-muted">
-          Choisis un adversaire à ta mesure, joue, et laisse le coach t’expliquer chaque coup.
-          Rien à installer, rien à payer, jamais.
-        </p>
-        <div className="mt-7 flex flex-wrap justify-center gap-3">
-          <ButtonLink href="/jouer/ordinateur" variant="primary" size="lg">
-            Jouer contre l’ordinateur
-          </ButtonLink>
-          <ButtonLink href="/jouer/ami" variant="outline" size="lg">
-            Défier un ami
-          </ButtonLink>
+        <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-4">
+          {stats.map(({ value, label }) => (
+            <div key={label}>
+              <p className="font-display text-3xl font-bold tabular-nums tracking-tight sm:text-4xl">
+                {value}
+              </p>
+              <p className="mt-1.5 text-xs leading-snug text-muted">{label}</p>
+            </div>
+          ))}
         </div>
-      </Card>
+      </div>
+
+      {/* Trois portes, en toutes lettres.
+          
+          L'allègement avait supprimé les trois cartes qui menaient à Apprendre,
+          Analyse et l'ordinateur — à raison : elles reformulaient le sous-titre
+          de la bannière. Mais elles emportaient avec elles les seuls liens
+          directs de la page, et il ne restait que le menu déroulant. Une page
+          d'accueil qui ne mène nulle part sans passer par un menu a été
+          simplifiée un cran trop loin.
+          
+          On garde donc les destinations et on jette l'emballage : trois liens
+          sur une ligne, sans carte, sans icône, sans liseré. Ce qui encombrait
+          n'était pas l'existence de ces chemins, c'était le mobilier autour. */}
+      <nav
+        aria-label="Aller plus loin"
+        className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line/60 pt-5 text-sm"
+      >
+        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
+          Aller plus loin
+        </span>
+        {PORTES.map(({ href, label }) => (
+          <Link
+            key={href}
+            href={href}
+            className="group flex items-center gap-1.5 font-medium text-muted transition-colors hover:text-ink"
+          >
+            {label}
+            <ArrowRight
+              size={14}
+              aria-hidden
+              className="text-faint transition-transform duration-200 group-hover:translate-x-0.5"
+            />
+          </Link>
+        ))}
+      </nav>
     </section>
   )
 }

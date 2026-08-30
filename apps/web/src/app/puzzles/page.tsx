@@ -39,6 +39,16 @@ import { playMoveSound, playSound } from '@/lib/sound.ts'
 import { speak } from '@/lib/speech.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { useSan } from '@/lib/notation.ts'
+import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
+import {
+  chapitreDeLUrl,
+  deposerGains,
+  progressionActuelle,
+  signaler,
+} from '@/lib/carriere/useCarriere.ts'
+import { chapitre as chapitreCarriereNumero } from '@coupparfait/core'
+import { useRouter } from 'next/navigation'
+import { jourLocal } from '@/lib/daily/quotidien.ts'
 
 interface Puzzle {
   id: string
@@ -91,6 +101,33 @@ export default function PuzzlesPage() {
 
   const startedAt = useRef(Date.now())
 
+  const { marquer } = useQuotidien()
+  const router = useRouter()
+
+  /**
+   * Vient-on du défi du jour ?
+   *
+   * Lu depuis l'adresse dans un effet plutôt qu'avec `useSearchParams` : le
+   * paramètre n'est utile qu'au premier chargement, et cette forme évite
+   * d'imposer une frontière de suspense à toute la page pour un booléen.
+   * `null` tant qu'on ne sait pas — voir l'effet de chargement plus bas.
+   */
+  const [modeDefi, setModeDefi] = useState<boolean | null>(null)
+  /**
+   * Chapitre de carrière en cours, s'il y en a un.
+   *
+   * Lu de la même façon et pour la même raison que `modeDefi`. Sa présence est
+   * ce qui distingue « je m'entraîne aux fourchettes » de « je passe le
+   * chapitre 4 » : sans lui, chaque puzzle résolu où que ce soit sur le site
+   * ferait avancer une carrière à laquelle on ne pensait pas.
+   */
+  const [chapitreCarriere, setChapitreCarriere] = useState<number | null>(null)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setModeDefi(params.get('defi') === '1')
+    setChapitreCarriere(chapitreDeLUrl(params))
+  }, [])
+
   // ── Chargement ──────────────────────────────────────────────────────────
   const load = useCallback(async () => {
     setStatus('loading')
@@ -100,8 +137,13 @@ export default function PuzzlesPage() {
     setWrongAttempts(0)
 
     try {
+      // Le défi du jour est servi par sa propre route : c'est un tirage
+      // déterministe partagé par tout le monde, pas un puzzle calibré sur le
+      // niveau du joueur.
       const response = await fetch(
-        `/api/puzzles?theme=${encodeURIComponent(theme)}`,
+        modeDefi
+          ? `/api/defi-du-jour?jour=${jourLocal()}`
+          : `/api/puzzles?theme=${encodeURIComponent(theme)}`,
         { cache: 'no-store' },
       )
       const data = await response.json()
@@ -150,16 +192,53 @@ export default function PuzzlesPage() {
       setErrorMessage('Le service de puzzles est injoignable.')
       setStatus('error')
     }
-  }, [theme, voiceEnabled])
+  }, [theme, voiceEnabled, modeDefi])
 
   useEffect(() => {
+    // On attend de savoir si l'on vient du défi du jour : charger d'abord un
+    // puzzle ordinaire ferait clignoter une position pour rien.
+    if (modeDefi === null) return
     void load()
-  }, [load])
+  }, [load, modeDefi])
 
   // ── Enregistrement du résultat ──────────────────────────────────────────
   const report = useCallback(
     async (solved: boolean) => {
       if (!puzzle) return
+
+      // La journée se met à jour avant l'appel réseau : elle vit dans le
+      // navigateur et ne dépend ni du compte ni de la connexion.
+      if (solved) {
+        marquer('puzzles')
+        if (modeDefi) marquer('defi')
+      }
+
+      /*
+        Un puzzle de carrière fait avancer le chapitre.
+        Avant l'appel au serveur des puzzles et sans l'attendre : les deux sont
+        indépendants, et faire dépendre la progression de carrière du classement
+        de puzzles reviendrait à la perdre chaque fois que ce dernier hoquette.
+      */
+      if (solved && chapitreCarriere !== null) {
+        void signaler({ type: 'puzzle' }).then((gains) => {
+          const chapitre = chapitreCarriereNumero(chapitreCarriere)
+          if (!chapitre) return
+          const apres = progressionActuelle()
+          // On ne ramène à la carte qu'une fois le compte atteint : enchaîner
+          // les puzzles *est* l'exercice, et interrompre après chaque réussite
+          // en ferait une formalité administrative.
+          const compteAtteint =
+            gains?.chapitreTermine === true ||
+            (apres != null &&
+              apres.chapter === chapitre.numero &&
+              apres.puzzlesDone >= chapitre.puzzles)
+          if (compteAtteint) {
+            deposerGains(gains, chapitre.titre)
+            router.push('/carriere')
+          }
+        })
+      }
+
       try {
         const response = await fetch('/api/puzzles', {
           method: 'POST',
@@ -180,7 +259,7 @@ export default function PuzzlesPage() {
         // Sans compte ou hors ligne : le puzzle reste jouable, rien n'est perdu.
       }
     },
-    [puzzle, moveIndex],
+    [puzzle, moveIndex, marquer, modeDefi, chapitreCarriere, router],
   )
 
   // ── Coup du joueur ──────────────────────────────────────────────────────

@@ -12,46 +12,24 @@
  * au profil — d'où l'on peut se déconnecter.
  */
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
 import { useT } from '@/lib/i18n/index.tsx'
-
-interface Identity {
-  username: string
-  avatar: string | null
-}
+import { useIdentite } from '@/lib/auth/useIdentite.ts'
 
 export function AccountButton({ variant = 'header' }: { variant?: 'header' | 'menu' }) {
   const t = useT()
-  const pathname = usePathname()
 
   /**
-   * `undefined` tant qu'on ne sait pas.
+   * L'identité vient de `useIdentite`, et non plus d'un `fetch` posé ici.
    *
-   * On n'affiche alors rien plutôt que « Se connecter » : proposer une
-   * connexion pendant un dixième de seconde à quelqu'un qui l'est déjà produit
-   * exactement le clignotement qu'on veut éviter.
+   * Elle était lue localement tant que ce bouton était seul à en avoir besoin.
+   * La pastille de série en a désormais besoin aussi — elle n'a de sens que
+   * pour un compte — et deux lectures indépendantes auraient fait deux requêtes
+   * identiques à chaque navigation. `undefined` garde le même sens qu'avant :
+   * on ne sait pas encore, donc on n'affiche rien.
    */
-  const [me, setMe] = useState<Identity | null | undefined>(undefined)
-
-  // La navigation relit l'identité : c'est ce qui met l'en-tête à jour après
-  // une connexion, une inscription ou une déconnexion, sans rechargement.
-  useEffect(() => {
-    let alive = true
-    void fetch('/api/auth')
-      .then((response) => response.json())
-      .then((data: { user: Identity | null }) => {
-        if (alive) setMe(data.user)
-      })
-      .catch(() => {
-        if (alive) setMe(null)
-      })
-    return () => {
-      alive = false
-    }
-  }, [pathname])
+  const me = useIdentite()
 
   if (me === undefined) {
     return (
