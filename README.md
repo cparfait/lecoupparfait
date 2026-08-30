@@ -158,7 +158,11 @@ En Docker, les deux sont déjà dans l'image : rien à faire.
 ### En production (Docker)
 
 ```bash
-cp .env.example .env                 # renseigne POSTGRES_PASSWORD et AUTH_SECRET
+cd ~/docker                              # là où vivent les applications
+git clone https://github.com/cparfait/lecoupparfait.git coupparfait
+cd coupparfait
+
+cp .env.example .env                     # renseigne POSTGRES_PASSWORD et AUTH_SECRET
 docker network create web-coupparfait    # la façade, une seule fois
 docker compose up -d --build
 docker compose exec web node scripts/migrate.mjs   # crée le schéma
