@@ -29,6 +29,16 @@ export interface Identite {
 }
 
 let identite: Identite | null | undefined = undefined
+/**
+ * Le serveur sait-il envoyer un courriel ?
+ *
+ * Rangé ici parce que la réponse voyage déjà dans `/api/auth` : la lire
+ * ailleurs voudrait dire refaire la même requête, ce que ce fichier existe
+ * précisément pour éviter. `undefined` tant qu'on ne sait pas, comme
+ * l'identité — on ne masque pas le lien de récupération avant d'avoir la
+ * réponse, sinon il clignoterait à chaque chargement.
+ */
+let courriel: boolean | undefined = undefined
 let enCours: Promise<void> | null = null
 const abonnes = new Set<() => void>()
 
@@ -51,14 +61,18 @@ export function rafraichirIdentite(): Promise<void> {
   if (enCours) return enCours
   enCours = fetch('/api/auth')
     .then((reponse) => reponse.json())
-    .then((donnees: { user: Identite | null }) => {
+    .then((donnees: { user: Identite | null; courriel?: boolean }) => {
       identite = donnees.user
+      courriel = donnees.courriel ?? false
     })
     .catch(() => {
       // Serveur injoignable : on considère qu'il n'y a pas de session plutôt
       // que de rester indéfiniment dans l'état « on ne sait pas », qui
       // masquerait le bouton de connexion pour de bon.
       identite = null
+      // Même raisonnement en sens inverse : on ne prétend pas savoir envoyer un
+      // courriel auprès d'un serveur qu'on ne joint pas.
+      courriel = false
     })
     .finally(() => {
       enCours = null
@@ -77,5 +91,27 @@ export function useIdentite(): Identite | null | undefined {
     void rafraichirIdentite()
   }, [pathname])
 
+  return valeur
+}
+
+const instantaneCourriel = () => courriel
+const instantaneCourrielServeur = () => undefined
+
+/**
+ * Le serveur peut-il envoyer un courriel ?
+ *
+ * `undefined` tant qu'on l'ignore : les écrans qui s'en servent masquent une
+ * porte de récupération, et la faire disparaître après coup est pire que de
+ * l'afficher un instant de trop.
+ */
+export function useCourrielDisponible(): boolean | undefined {
+  const valeur = useSyncExternalStore(
+    souscrire,
+    instantaneCourriel,
+    instantaneCourrielServeur,
+  )
+  useEffect(() => {
+    void rafraichirIdentite()
+  }, [])
   return valeur
 }

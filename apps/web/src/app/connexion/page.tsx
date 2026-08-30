@@ -19,7 +19,7 @@ import { ArrowRight, Swords } from 'lucide-react'
 import { LogoMark } from '@/components/brand/LogoMark.tsx'
 import { Button, Card, Input } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
-import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { useCourrielDisponible, useIdentite } from '@/lib/auth/useIdentite.ts'
 
 type Mode = 'signin' | 'signup'
 
@@ -60,6 +60,8 @@ function AuthForm() {
    * pour un visiteur anonyme.
    */
   const identite = useIdentite()
+  // Masque la récupération de mot de passe quand aucun courriel ne peut partir.
+  const courriel = useCourrielDisponible()
   useEffect(() => {
     if (!identite) return
     router.replace(
@@ -271,8 +273,15 @@ function AuthForm() {
             />
 
             {/* À la connexion seulement : proposer « oublié » pendant qu'on
-                choisit son mot de passe n'aurait aucun sens. */}
-            {mode === 'signin' && (
+                choisit son mot de passe n'aurait aucun sens.
+
+                Et seulement si le serveur sait envoyer un courriel. Le lien
+                menait sinon à un formulaire qui répondait « si cette adresse
+                est connue, un message vient de partir » alors que rien ne
+                partait : on croyait attendre un message, on l'attendait pour
+                toujours. Un lien absent est désagréable ; un lien qui ment
+                l'est davantage. */}
+            {mode === 'signin' && courriel && (
               <p className="-mt-2 text-right">
                 <Link
                   href="/mot-de-passe-oublie"
@@ -291,7 +300,11 @@ function AuthForm() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"
-                hint="Facultatif. Uniquement pour récupérer ton mot de passe si tu l’oublies. Jamais transmis à personne."
+                hint={
+                  courriel
+                    ? 'Facultatif. Uniquement pour récupérer ton mot de passe si tu l’oublies. Jamais transmis à personne.'
+                    : 'Facultatif — et pour l’instant sans usage : ce serveur n’envoie pas encore de courriel, donc un mot de passe perdu ne peut pas être récupéré. Choisis-en un dont tu te souviendras.'
+                }
               />
             )}
 

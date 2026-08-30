@@ -13,10 +13,12 @@
 
 import { useCallback, useState } from 'react'
 import Link from 'next/link'
-import { KeyRound, MailCheck } from 'lucide-react'
+import { KeyRound, MailCheck, MailX } from 'lucide-react'
 import { Button, Card, Input } from '@/components/ui/index.tsx'
+import { useCourrielDisponible } from '@/lib/auth/useIdentite.ts'
 
 export default function ForgotPasswordPage() {
+  const courriel = useCourrielDisponible()
   const [email, setEmail] = useState('')
   const [busy, setBusy] = useState(false)
   const [sent, setSent] = useState(false)
@@ -59,14 +61,46 @@ export default function ForgotPasswordPage() {
             <KeyRound size={22} />
           </span>
           <h1 className="font-display text-2xl font-bold tracking-tight">Mot de passe oublié</h1>
+          {/* Le sous-titre suit la même règle que la carte : promettre un lien
+              juste au-dessus d'un encart qui explique qu'aucun ne peut partir
+              se contredit à deux lignes d'intervalle. */}
           <p className="mt-1.5 text-sm text-muted">
-            Indique l’adresse de ton compte : nous t’enverrons un lien pour en choisir un
-            nouveau.
+            {courriel === false
+              ? 'La récupération par courriel n’est pas active sur ce serveur.'
+              : 'Indique l’adresse de ton compte : nous t’enverrons un lien pour en choisir un nouveau.'}
           </p>
         </div>
 
         <Card glow className="p-6">
-          {sent ? (
+          {/* Le lien qui mène ici est masqué quand rien ne peut partir, mais
+              l'adresse reste tapable, et elle circule : on répond donc aussi
+              ici plutôt que de laisser un formulaire qui promet un message
+              impossible. `undefined` = on ne sait pas encore, et l'on n'affiche
+              alors ni l'un ni l'autre. */}
+          {courriel === false ? (
+            <div className="text-center">
+              <span
+                className="mx-auto mb-3 grid h-11 w-11 place-items-center rounded-full bg-[color-mix(in_oklab,var(--q-blunder)_15%,transparent)] text-[var(--q-blunder)]"
+                aria-hidden
+              >
+                <MailX size={22} />
+              </span>
+              <p className="text-sm font-semibold">Pas encore possible ici</p>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+                Ce serveur n’envoie pas de courriel pour le moment : il n’y a donc aucun moyen
+                de t’envoyer un lien de réinitialisation.
+              </p>
+              <p className="mt-2 text-xs leading-relaxed text-faint">
+                Écris à la personne qui héberge cette instance — elle peut redonner la main à
+                ton compte directement. Ton mot de passe, lui, n’a pas changé.
+              </p>
+              <Link href="/connexion" className="mt-4 block">
+                <Button variant="secondary" fullWidth>
+                  Retour à la connexion
+                </Button>
+              </Link>
+            </div>
+          ) : sent ? (
             <div className="text-center">
               <span
                 className="mx-auto mb-3 grid h-11 w-11 place-items-center rounded-full bg-[var(--accent-2)]/15 text-[var(--accent-2)]"

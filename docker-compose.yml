@@ -110,6 +110,69 @@ services:
     networks:
       - internal
 
+  # ── Messagerie sortante ─────────────────────────────────────────────────────
+  #
+  # Un MTA à nous, et rien d'autre : il n'envoie que ce que `web` lui remet —
+  # confirmation d'adresse et réinitialisation de mot de passe. Il ne reçoit
+  # rien, n'expose aucun port, et n'est joignable que depuis le réseau interne.
+  #
+  # **Pourquoi un serveur plutôt qu'un fournisseur.** C'est le choix assumé du
+  # projet : pas de compte tiers, pas de quota, pas de traqueur d'ouverture
+  # glissé dans les messages. Le prix se paie en configuration DNS — voir
+  # `docs/courriel.md`, qui donne les quatre enregistrements à poser.
+  #
+  # **Ce qu'il ne résout pas.** La délivrabilité se joue d'abord sur la
+  # réputation de l'IP sortante, pas sur le conteneur. Deux applications
+  # hébergées sur la même machine partagent cette IP : un MTA distinct leur
+  # donne des identités DKIM séparées, jamais des réputations séparées. Si cette
+  # séparation compte, il faut une seconde IP et lier le service dessus.
+  #
+  # Facultatif : sans le profil, la pile démarre sans lui et l'application
+  # masque d'elle-même la récupération de mot de passe.
+  #     docker compose --profile courriel up -d
+  mail:
+    image: boky/postfix:v4.4.0
+    restart: unless-stopped
+    profiles: [courriel]
+    environment:
+      # Le domaine qui signe. Il doit correspondre à celui de MAIL_FROM, sans
+      # quoi la signature DKIM ne couvre pas l'expéditeur et le message est
+      # rejeté — c'est le premier motif de refus, très loin devant les autres.
+      #
+      # Sans « :? », bien qu'il soit obligatoire : Compose interpole **avant**
+      # de filtrer par profil, donc un « docker compose up -d » ordinaire
+      # échouerait sur une variable qui ne concerne qu'un service qu'il ne
+      # démarre même pas. Vide, le conteneur refuse de démarrer et le dit —
+      # au bon endroit, c'est-à-dire seulement quand on l'a demandé.
+      ALLOWED_SENDER_DOMAINS: ${MAIL_DOMAIN:-}
+      HOSTNAME: ${MAIL_HOSTNAME:-mail.${MAIL_DOMAIN}}
+      # Génère la paire DKIM au premier démarrage et la conserve dans le volume.
+      # Le sélecteur entre dans le nom de l'enregistrement DNS : `mail` donne
+      # `mail._domainkey.<domaine>`.
+      DKIM_SELECTOR: ${MAIL_DKIM_SELECTOR:-mail}
+      # Personne ne s'authentifie : le seul client est `web`, sur un réseau
+      # privé sans accès à Internet entrant.
+      RELAYHOST: ''
+    volumes:
+      - dkim:/etc/opendkim/keys
+    # Les deux réseaux, et il les faut tous les deux. `internal` est le seul par
+    # lequel `web` le joint ; mais il est déclaré `internal: true`, donc sans
+    # route vers Internet — un MTA branché là seul accepterait les messages et
+    # ne pourrait jamais les livrer. La façade lui donne la sortie.
+    #
+    # Aucun alias sur la façade, à la différence de `web` et `server` : Nginx
+    # Proxy Manager n'a rien à adresser ici. Et aucun port publié, surtout pas
+    # le 25 — ce service ne reçoit pas de courrier, il ne fait qu'émettre.
+    networks:
+      - internal
+      - web-coupparfait
+    healthcheck:
+      test: ['CMD-SHELL', 'nc -z 127.0.0.1 587 || exit 1']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
   server:
     build:
       context: .
@@ -182,6 +245,12 @@ services:
       # les requêtes serveur-à-serveur n'ont aucune raison de ressortir sur
       # Internet pour revenir par le proxy.
       INTERNAL_SERVER_URL: http://server:3001
+      # Messagerie sortante. Vide tant que le profil `courriel` n'est pas
+      # démarré : l'application le détecte et masque d'elle-même la
+      # récupération de mot de passe, plutôt que de promettre un message qui ne
+      # partira pas. Voir `docs/courriel.md`.
+      SMTP_URL: ${SMTP_URL:-}
+      MAIL_FROM: ${MAIL_FROM:-}
       PORT: 3000
       HOSTNAME: 0.0.0.0
     # Aucun port publié : voir la remarque du service `server`.
@@ -201,6 +270,12 @@ services:
 
 volumes:
   db-data:
+    driver: local
+
+  # La paire DKIM, fabriquée au premier démarrage du MTA. À conserver : la
+  # regénérer invalide l'enregistrement DNS publié, et tous les messages
+  # signés avec la nouvelle clé seront refusés tant que la zone n'a pas suivi.
+  dkim:
     driver: local
 
 networks:

@@ -23,7 +23,7 @@ import {
   type ValidationError,
 } from '@coupparfait/db/auth'
 import { isKnownAvatar } from '@/lib/avatars.ts'
-import { resetMail, sendMail, verificationMail } from '@/lib/server/mailer.ts'
+import { courrielDisponible, resetMail, sendMail, verificationMail } from '@/lib/server/mailer.ts'
 import { endSession, getCurrentUser, startSession } from '@/lib/server/session.ts'
 
 export const runtime = 'nodejs'
@@ -79,13 +79,23 @@ const ERROR_MESSAGES: Record<ValidationError, string> = {
 
 export async function GET() {
   const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ user: null })
+
+  // `courriel` accompagne la réponse même sans session, et c'est le cas qui
+  // compte : l'écran de connexion est anonyme par nature, et c'est lui qui
+  // porte le lien « Mot de passe oublié ? ». Sans acheminement, ce lien mène à
+  // un formulaire qui promet un message qui ne partira pas — on le masque.
+  //
+  // Ce n'est pas un renseignement sensible : que le serveur sache ou non
+  // envoyer un courriel se déduit de toute façon en essayant.
+  const courriel = courrielDisponible()
+
+  if (!user) return NextResponse.json({ user: null, courriel })
 
   // L'état de l'adresse n'accompagne que sa propre identité : la fiche
   // publique d'un joueur ne doit jamais laisser voir son adresse, ni même
   // qu'il en a une.
   const email = await emailStatus(user.userId)
-  return NextResponse.json({ user, email })
+  return NextResponse.json({ user, email, courriel })
 }
 
 export async function POST(request: Request) {

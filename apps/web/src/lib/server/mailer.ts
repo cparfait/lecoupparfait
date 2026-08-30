@@ -18,10 +18,19 @@ import 'server-only'
  *    configuré, le message est journalisé et rien ne part : mieux vaut une
  *    inscription qui aboutit sans courriel qu'une inscription qui échoue parce
  *    que la messagerie n'est pas prête.
+ *
+ * **Ce que « rien ne part » coûtait.** Le second cas était le cas réel : la
+ * production tournait sans `SMTP_URL`, et l'écran « Mot de passe oublié »
+ * répondait « si cette adresse est connue, un message vient de partir » à
+ * quelqu'un pour qui rien n'était parti. Un joueur qui perdait son mot de passe
+ * était bloqué pour de bon, sans le savoir. Deux réponses, et il fallait les
+ * deux : un acheminement qui marche (`sendMail` ci-dessous), et une interface
+ * qui dit la vérité quand il n'y en a pas (`courrielDisponible`).
  */
 
 import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { createTransport, type Transporter } from 'nodemailer'
 
 export interface Mail {
   to: string
@@ -62,6 +71,76 @@ function filename(): string {
   return `${stamp}_${suffix}.json`
 }
 
+/**
+ * L'expéditeur.
+ *
+ * Le domaine doit être celui que les enregistrements SPF et DKIM couvrent,
+ * sans quoi le message part et se fait refuser : une adresse d'expéditeur qui
+ * ne correspond pas à la clé qui l'a signée est le premier motif de rejet.
+ */
+function expediteur(): string {
+  return process.env.MAIL_FROM ?? 'Le Coup Parfait <ne-pas-repondre@localhost>'
+}
+
+/**
+ * Le transporteur, fabriqué une fois.
+ *
+ * `nodemailer` tient une réserve de connexions : en refabriquer un à chaque
+ * message rouvrirait une connexion SMTP par courriel, ce qu'un serveur de
+ * messagerie interprète volontiers comme un comportement d'expéditeur en vrac.
+ */
+let transporteur: Transporter | null = null
+
+function obtenirTransporteur(): Transporter | null {
+  const url = process.env.SMTP_URL
+  if (!url) return null
+  if (transporteur) return transporteur
+
+  let cible: URL
+  try {
+    cible = new URL(url)
+  } catch {
+    console.error(`[courriel] SMTP_URL illisible : « ${url} ». Attendu : smtp://hote:25`)
+    return null
+  }
+
+  // On compose les options plutôt que de passer l'URL telle quelle : la forme
+  // « createTransport(url, options) » n'existe plus depuis nodemailer 7, et
+  // détailler les champs rend surtout explicite le point sensible ci-dessous.
+  const chiffre = cible.protocol === 'smtps:'
+  transporteur = createTransport({
+    host: cible.hostname,
+    port: Number(cible.port) || (chiffre ? 465 : 25),
+    secure: chiffre,
+    auth: cible.username
+      ? {
+          user: decodeURIComponent(cible.username),
+          pass: decodeURIComponent(cible.password),
+        }
+      : undefined,
+    pool: true,
+    maxConnections: 2,
+    // Un relais de la pile — ou du même hôte — présente couramment un
+    // certificat auto-signé, voire aucun. Refuser la connexion pour cette
+    // raison n'apporterait rien : le trafic ne quitte pas la machine, et c'est
+    // le relais qui chiffre ensuite vers l'extérieur, là où ça compte.
+    // `SMTP_TLS_STRICT=1` rétablit la vérification pour un relais distant.
+    tls: { rejectUnauthorized: process.env.SMTP_TLS_STRICT === '1' },
+  })
+  return transporteur
+}
+
+/**
+ * Y a-t-il un acheminement ?
+ *
+ * Lu par l'interface pour ne pas promettre un message qui ne partira pas. En
+ * développement la réponse est toujours oui : la boîte sur disque *est* un
+ * acheminement, et c'est même celui qui permet d'éprouver le parcours.
+ */
+export function courrielDisponible(): boolean {
+  return capturing() || Boolean(process.env.SMTP_URL)
+}
+
 export async function sendMail(mail: Mail): Promise<void> {
   if (capturing()) {
     try {
@@ -76,20 +155,31 @@ export async function sendMail(mail: Mail): Promise<void> {
     return
   }
 
-  // Point de branchement d'un vrai envoi. Aucune dépendance n'est ajoutée tant
-  // qu'aucun serveur n'est configuré : une bibliothèque SMTP embarquée « au
-  // cas où » ne servirait qu'à alourdir l'image.
-  if (!process.env.SMTP_URL) {
+  const client = obtenirTransporteur()
+  if (!client) {
     console.warn(
-      `[courriel] SMTP_URL absente : message non envoyé à ${mail.to} — « ${mail.subject} »`,
+      `[courriel] SMTP_URL absente : message non envoyé à ${mail.to} — « ${mail.subject} ». ` +
+        'L’interface masque la récupération de mot de passe tant que c’est le cas.',
     )
     return
   }
 
-  console.warn(
-    '[courriel] SMTP_URL est renseignée mais aucun acheminement n’est implémenté. ' +
-      'Branche ici le client de ton choix.',
-  )
+  try {
+    await client.sendMail({
+      from: expediteur(),
+      to: mail.to,
+      subject: mail.subject,
+      // Texte brut uniquement : un message sans partie HTML traverse mieux les
+      // filtres qu'un message qui en a une, et il n'y a rien à mettre en forme.
+      text: mail.body,
+    })
+  } catch (error) {
+    // On journalise et l'on rend la main. L'appelant a déjà décidé de répondre
+    // la même chose dans tous les cas — c'est ce qui empêche d'utiliser le
+    // formulaire pour savoir qui a un compte — et lever ici trahirait
+    // justement l'information qu'on protège.
+    console.error(`[courriel] envoi impossible à ${mail.to} :`, error)
+  }
 }
 
 /** Les messages capturés, du plus récent au plus ancien. */
