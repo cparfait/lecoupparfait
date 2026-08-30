@@ -1,17 +1,39 @@
 #!/usr/bin/env node
 /**
- * Génère les icônes PNG de l'application à partir de l'icône vectorielle.
+ * Compose la marque, puis en tire les icônes de l'application.
  *
- * Les navigateurs et systèmes d'exploitation réclament encore des PNG à taille
- * fixe pour l'écran d'accueil, même quand un SVG est fourni. On les produit donc
- * ici plutôt que de versionner des binaires.
+ * La marque n'est pas un fichier qu'on dessine : elle est **assemblée** ici, à
+ * partir du tirage de la bannière du thème `club` — `brand/cavale-club.png`, le
+ * cavalier de bois sculpté produit par `scripts/build-cavale.mjs`. On le
+ * détoure au plus près, on le pose sur le champ violet de la marque, et le
+ * résultat est écrit dans `brand/logo-cavale.png`.
+ *
+ * Deux approches ont précédé celle-ci, et chacune a échoué à sa façon :
+ *
+ *  1. **Vectoriser.** Relever le contour alpha d'un rendu, le simplifier, le
+ *     remplir d'un dégradé. Net à toute taille et teintable par thème — et
+ *     bosselé, l'arête dorsale se lisant comme un liseré autour de la pièce.
+ *     Une sculpture éclairée ne se réduit pas à une silhouette sans perdre ce
+ *     qui la rendait belle.
+ *  2. **Retirer une image dédiée.** Demander au modèle une icône complète,
+ *     pavé compris. Six pistes, trois passes — le modèle photographiait
+ *     l'icône au lieu de la dessiner, ajoutait des cornes de licorne, dérivait
+ *     vers le profil grec. On a fini par obtenir une belle pièce, mais une
+ *     autre que celle de la bannière.
+ *
+ * Réutiliser le tirage de la bannière règle les deux problèmes d'un coup : la
+ * marque et le personnage sont la même image, au pixel près, et il n'y a plus
+ * rien à faire converger.
+ *
+ * Les coins sont arrondis ici, au masque, plutôt que dessinés dans l'image :
+ * un arrondi approximatif se voit immédiatement sur une icône.
  *
  * L'icône « maskable » réserve une marge de sécurité de 10 % sur chaque bord :
  * Android recadre les icônes en cercle, en carré arrondi ou en goutte selon le
  * lanceur, et sans cette marge le cavalier se ferait rogner.
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
@@ -21,40 +43,95 @@ const root = resolve(here, '..')
 const iconsDir = join(root, 'apps', 'web', 'public', 'icons')
 
 mkdirSync(iconsDir, { recursive: true })
-const svg = readFileSync(join(iconsDir, 'icon.svg'))
+const brandDir = join(root, 'apps', 'web', 'public', 'brand')
+const marque = join(brandDir, 'logo-cavale.png')
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  La marque : le cavalier de la bannière, posé sur le champ violet
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Le champ. Une seule famille de teintes, du violet clair au violet profond. */
+const CHAMP = Buffer.from(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024">' +
+    '<defs><linearGradient id="g" x1="0" y1="0" x2="0.85" y2="1">' +
+    '<stop offset="0%" stop-color="#7C5CFF"/><stop offset="100%" stop-color="#4429B8"/>' +
+    '</linearGradient></defs><rect width="1024" height="1024" fill="url(#g)"/></svg>',
+)
+
+/**
+ * 6 % de marge, et pas davantage.
+ *
+ * C'est le réglage qui décide de la lisibilité à seize pixels : à 14 %, la
+ * pièce flotte au milieu d'un carré violet et n'est plus qu'une tache brune ;
+ * à 6 %, elle occupe l'icône et sa silhouette reste lisible dans un onglet.
+ */
+const MARGE = 0.06
+
+// `trim` retire les bords transparents du tirage : `build-cavale.mjs` recadre
+// déjà au plus près, mais la réserve qu'il laisse s'ajouterait à la nôtre.
+const pieceNette = sharp(join(brandDir, 'cavale-club.png')).trim({
+  background: { r: 0, g: 0, b: 0, alpha: 0 },
+  threshold: 0,
+})
+
+/** La marque à 1024, avec la marge demandée autour de la pièce. */
+const composerMarque = async (marge) => {
+  const cote = Math.round(1024 * (1 - marge * 2))
+  const piece = await pieceNette
+    .clone()
+    .resize({ width: cote, height: cote, fit: 'inside' })
+    .png()
+    .toBuffer()
+  return sharp(CHAMP).composite([{ input: piece, gravity: 'centre' }])
+}
+
+await (await composerMarque(MARGE)).png({ compressionLevel: 9 }).toFile(marque)
+console.log('  ✓ brand/logo-cavale.png')
+
+/** Le masque d'arrondi, au rayon de 22 % — celui d'une icône d'application. */
+const arrondi = (taille) =>
+  Buffer.from(
+    `<svg width="${taille}" height="${taille}"><rect width="${taille}" height="${taille}" ` +
+      `rx="${Math.round(taille * 0.22)}" ry="${Math.round(taille * 0.22)}" fill="#fff"/></svg>`,
+  )
+
+/** Redimensionne la marque et lui découpe ses coins. */
+const icone = (taille) =>
+  sharp(marque)
+    .resize(taille, taille)
+    .composite([{ input: arrondi(taille), blend: 'dest-in' }])
+    .png({ compressionLevel: 9 })
 
 const SIZES = [192, 512]
 
 for (const size of SIZES) {
-  await sharp(svg, { density: 400 })
-    .resize(size, size)
-    .png({ compressionLevel: 9 })
-    .toFile(join(iconsDir, `icon-${size}.png`))
+  await icone(size).toFile(join(iconsDir, `icon-${size}.png`))
   console.log(`  ✓ icon-${size}.png`)
 }
 
-// Version « maskable » : l'illustration occupe 80 % du cadre, le reste est une
-// marge de la couleur de fond.
-const inner = Math.round(512 * 0.8)
-const padded = await sharp(svg, { density: 400 }).resize(inner, inner).png().toBuffer()
-await sharp({
-  create: {
-    width: 512,
-    height: 512,
-    channels: 4,
-    background: { r: 91, g: 60, b: 224, alpha: 1 },
-  },
-})
-  .composite([{ input: padded, gravity: 'centre' }])
+// Version « maskable » : mêmes ingrédients, plus de marge.
+//
+// On la recompose depuis la pièce plutôt que de rétrécir la marque finie sur un
+// fond ajouté. Toutes les tentatives dans ce sens ont laissé un raccord visible
+// — un violet écrit en dur ne tombe jamais sur celui du champ, une couleur
+// prélevée au coin non plus, et une copie floutée ne raccorde que si le fond
+// varie. Repartir du même dégradé est la seule façon de n'avoir aucun bord :
+// il n'y a plus deux fonds à faire coïncider, il n'y en a qu'un.
+//
+// En deux passes, et c'est imposé par `sharp` : il applique ses opérations dans
+// un ordre fixe — redimensionner d'abord, composer ensuite — quel que soit
+// l'ordre d'écriture. Enchaîner `.composite().resize(512)` réduisait donc le
+// champ à 512 px avant d'y coller une pièce de 655, et la bibliothèque
+// refusait la composition.
+const maskable = await (await composerMarque(0.18)).png().toBuffer()
+await sharp(maskable)
+  .resize(512, 512)
   .png({ compressionLevel: 9 })
   .toFile(join(iconsDir, 'icon-maskable-512.png'))
 console.log('  ✓ icon-maskable-512.png')
 
 // Favicon classique, pour les onglets et les vieux agrégateurs.
-await sharp(svg, { density: 400 })
-  .resize(32, 32)
-  .png()
-  .toFile(join(root, 'apps', 'web', 'public', 'favicon.png'))
+await icone(32).toFile(join(root, 'apps', 'web', 'public', 'favicon.png'))
 console.log('  ✓ favicon.png')
 
 // Image de partage sur les réseaux sociaux : format 1200 × 630 attendu partout.

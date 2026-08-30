@@ -25,6 +25,28 @@ Récupérés depuis [lichess-org/lila](https://github.com/lichess-org/lila/tree/
 > ont été délibérément écartés : leur clause non commerciale est incompatible
 > avec une redistribution libre du projet.
 
+## Identité visuelle
+
+Cavale — le cavalier de la marque — est dessiné pour le projet et n’emprunte
+rien : `components/brand/LogoMark.tsx` et `public/brand/logo.svg` sont du
+vectoriel écrit à la main.
+
+Les onze visuels de `public/brand/cavale-*.png` et
+`public/brand/adversaires/*.png` sont **générés localement** par
+`scripts/build-cavale.mjs`, qui pilote une installation ComfyUI. Le prompt, la
+graine, le modèle et les réglages sont versionnés dans ce script : l’image se
+rejoue à l’identique, et rien n’est téléversé nulle part.
+
+| Composant | Auteur | Licence |
+| --- | --- | --- |
+| Juggernaut XL (Ragnarök) | RunDiffusion | CreativeML Open RAIL++-M |
+| BiRefNet-General (détourage) | Peng Zheng *et al.* | MIT |
+| ComfyUI | Comfy Org | GPL-3.0-or-later |
+
+> `RMBG-2.0`, plus connu pour le détourage, a été écarté : son dépôt est fermé
+> et sa licence interdit l’usage commercial, ce qui ne se marie pas avec une
+> redistribution libre.
+
 ## Bruitages
 
 | Fichiers | Auteur | Licence |
@@ -37,8 +59,7 @@ Récupérés depuis [lichess-org/lila](https://github.com/lichess-org/lila/tree/
 | --- | --- | --- |
 | Ouvertures ECO (3 810 entrées) | [lichess-org/chess-openings](https://github.com/lichess-org/chess-openings) | CC0-1.0 |
 | Base de puzzles (6 057 356 entrées) | [database.lichess.org](https://database.lichess.org/) | CC0-1.0 |
-| Base d’évaluations (8 M positions importées) | [database.lichess.org](https://database.lichess.org/) | CC0-1.0 |
-| Statistiques d’ouvertures (1 048 440 parties) | [database.lichess.org](https://database.lichess.org/) | CC0-1.0 |
+| Base d’évaluations (394 M positions) | [database.lichess.org](https://database.lichess.org/) | CC0-1.0 |
 | Tables de finales Syzygy (API) | [tablebase.lichess.ovh](https://tablebase.lichess.ovh/) | libre d’accès |
 
 ## Moteur
