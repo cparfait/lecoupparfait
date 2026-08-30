@@ -16,8 +16,13 @@ ARG STOCKFISH_TAG=sf_18
 # pour un ARM (Raspberry Pi, Ampere), utiliser `armv8`.
 ARG STOCKFISH_ARCH=x86-64-avx2
 
+# `curl` n'est pas un confort : la cible `net` du Makefile de Stockfish
+# télécharge les réseaux NNUE, et elle refuse de démarrer sans `curl` ni `wget`
+# — « Neither wget or curl is installed », puis « Error 1 » sans autre
+# explication. `debian:bookworm-slim` ne fournit ni l'un ni l'autre, et l'oubli
+# restait invisible tant qu'on ne construisait pas sur une machine neuve.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      build-essential git ca-certificates \
+      build-essential git ca-certificates curl \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
