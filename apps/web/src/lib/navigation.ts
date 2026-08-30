@@ -68,17 +68,23 @@ export const SECTIONS: SectionNav[] = [
     icon: Swords,
     sommaire: '/jouer',
     entrees: [
-      // En tête de « Jouer », et avant « Contre l'ordinateur » : la carrière
-      // *est* une façon de jouer — douze duels contre des adversaires choisis —
-      // et elle répond à la question qui précède toutes les autres, « par quoi
-      // je commence ? ». La mettre plus bas reviendrait à la réserver à ceux
-      // qui savent déjà se repérer, c'est-à-dire à ceux qui n'en ont pas besoin.
-      { href: '/carriere', labelKey: 'nav.career', icon: Trophy, hintKey: 'nav.careerHint' },
+      // D'abord les deux façons de jouer une partie tout de suite : contre la
+      // machine, contre quelqu'un. Ce sont elles qu'on vient chercher, et elles
+      // ne demandent rien.
       { href: '/jouer/ordinateur', labelKey: 'nav.vsComputer', icon: Monitor, hintKey: 'nav.vsComputerHint' },
       // « Contre quelqu'un » couvre les deux rythmes : le lien en temps réel et
       // la correspondance sur plusieurs jours. Ils étaient séparés, ce qui
       // faisait choisir le mécanisme avant la cadence.
       { href: '/jouer/ami', labelKey: 'nav.vsFriend', icon: Handshake, hintKey: 'nav.vsFriendHint' },
+      // Puis la carrière, et non plus en tête.
+      //
+      // Elle y était au motif qu'elle répond à « par quoi je commence ? ». Ce
+      // motif tient toujours, mais il en oubliait un autre : c'est la première
+      // entrée de la rubrique qui demande un compte. Ouvrir « Jouer » et
+      // trouver un cadenas en première ligne donne le ton inverse de celui du
+      // projet, où l'essentiel s'utilise sans rien créer. Elle passe donc
+      // derrière les deux façons de jouer une partie tout de suite.
+      { href: '/carriere', labelKey: 'nav.career', icon: Trophy, hintKey: 'nav.careerHint' },
       { href: '/jouer/local', labelKey: 'nav.localGame', icon: Users, hintKey: 'nav.localGameHint' },
       { href: '/tournois', labelKey: 'nav.tournaments', icon: Trophy },
       { href: '/jouer/regarder', labelKey: 'nav.watch', icon: Eye, hintKey: 'nav.watchHint' },
