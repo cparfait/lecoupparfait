@@ -37,6 +37,12 @@ export * from './uci.ts'
 // Adversaires artificiels
 export * from './bots.ts'
 
+// Mode carrière : chapitres, expérience, rangs, hauts faits
+export * from './carriere.ts'
+
+// Tournoi contre l'ordinateur : plateau, calendrier, classement
+export * from './tournoi-solo.ts'
+
 // Pendules et cadences
 export * from './clock.ts'
 
