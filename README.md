@@ -158,12 +158,41 @@ En Docker, les deux sont déjà dans l'image : rien à faire.
 ### En production (Docker)
 
 ```bash
-cp .env.example .env             # renseigne POSTGRES_PASSWORD et AUTH_SECRET
+cp .env.example .env                 # renseigne POSTGRES_PASSWORD et AUTH_SECRET
+docker network create web-coupparfait    # la façade, une seule fois
 docker compose up -d --build
 docker compose exec web node scripts/migrate.mjs   # crée le schéma
 docker compose exec web node scripts/import-openings.mjs
 docker compose exec web node scripts/import-puzzles.mjs
 ```
+
+**La façade est un réseau à part, et c'est délibéré.** Le montage habituel
+derrière Nginx Proxy Manager consiste à créer un réseau `proxy` partagé et à y
+brancher toutes les applications du serveur. Le défaut n'est pas théorique : sur
+un réseau Docker, tout le monde se joint. N'importe quel conteneur d'une autre
+application pourrait ouvrir une connexion vers `coupparfait-web:3000` — sans
+TLS, sans journal du proxy, sans aucune des règles configurées dans NPM.
+
+Chaque application a donc sa propre façade, et Nginx Proxy Manager est le seul
+service branché sur plusieurs : c'est son rôle, et c'est le seul chemin entre
+deux applications.
+
+**Aucun port n'est publié sur l'hôte**, pas même sur la boucle locale — ni la
+base, ni les deux applications. Un port sur `127.0.0.1` reste un accès sans TLS
+et sans journal offert à quiconque obtient un shell sur la machine. Pour une
+inspection ponctuelle, `docker compose exec db psql` passe par le conteneur et
+ne laisse rien d'ouvert derrière lui.
+
+**La base n'a pas accès à Internet.** Elle et son service de sauvegarde vivent
+sur un réseau `internal: true` : ils n'ont aucune raison de sortir, et une base
+qui ne peut pas sortir ne peut rien exfiltrer. Les deux applications gardent la
+leur par la façade — elles en ont besoin pour les tables de finales de Lichess,
+l'import chess.com et Lichess, et l'assistant s'il est configuré.
+
+**Une sauvegarde par jour**, quinze jours de conservation, dans `./backups`.
+Attention : ces fichiers vivent sur la machine qu'ils sauvegardent. Tant qu'ils
+n'ont pas été recopiés ailleurs, ils protègent d'une fausse manœuvre, pas d'une
+perte du serveur.
 
 **Des migrations, et non `db:push`.** Les deux mènent au même schéma, par deux
 chemins qui ne se valent pas ici. `push` compare le schéma à la base et applique
@@ -190,10 +219,16 @@ construction.
 
 Derrière **Nginx Proxy Manager**, créer deux hôtes mandataires :
 
-| Domaine | Cible | WebSocket |
-|---|---|---|
-| `coupparfait.mondomaine.fr` | `web:3000` | oui |
-| `coupparfait-api.mondomaine.fr` | `server:3001` | **indispensable** |
+| Domaine | Forward Hostname | Port | WebSocket |
+|---|---|---|---|
+| `coupparfait.mondomaine.fr` | `coupparfait-web` | 3000 | oui |
+| `coupparfait-api.mondomaine.fr` | `coupparfait-api` | 3001 | **indispensable** |
+
+Ce sont les alias déclarés sur la façade, et non les noms de service `web` et
+`server` : NPM voit passer toutes les applications du serveur, où « web » et
+« server » ne désigneraient rien. Le conteneur NPM doit être branché sur
+`web-coupparfait` — dans son interface, onglet *Networks*, ou par
+`docker network connect web-coupparfait <conteneur-npm>`.
 
 Puis renseigner `NEXT_PUBLIC_APP_URL` et `NEXT_PUBLIC_SERVER_URL` dans `.env`.
 

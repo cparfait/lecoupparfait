@@ -50,6 +50,10 @@ coverage/
 
 # docker volumes locaux
 .docker-data/
+# Sauvegardes produites par le service `backup` de la pile Docker. Elles
+# contiennent des mots de passe hachés et des adresses e-mail : elles n'ont
+# rien à faire dans un dépôt, public ou non.
+/backups/
 
 # extrait de diagnostic de la voix, jetable
 /essai-voix.wav

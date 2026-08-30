@@ -1,21 +1,52 @@
 # ─────────────────────────────────────────────────────────────────────────────
 #  Le Coup Parfait — déploiement auto-hébergé
 #
-#  Trois services :
-#    db      PostgreSQL 17, seul service à conserver un volume
-#    server  Stockfish natif + temps réel  (port 3001)
-#    web     interface Next.js             (port 3000)
+#  Quatre services :
+#    db      PostgreSQL 17, seul service à conserver un volume de données
+#    backup  un dump par jour, quinze jours de conservation
+#    server  Stockfish natif + temps réel  (3001)
+#    web     interface Next.js             (3000)
 #
-#  Derrière Nginx Proxy Manager, créer deux hôtes mandataires :
-#    coupparfait.mondomaine.fr      → web:3000     (WebSocket activé)
-#    coupparfait-api.mondomaine.fr  → server:3001  (WebSocket activé — indispensable)
+#  ── Cloisonnement ───────────────────────────────────────────────────────────
 #
-#  Démarrage :
-#    cp .env.example .env      puis adapter les mots de passe
-#    docker compose up -d --build
-#    docker compose exec web node scripts/import-openings.mjs
+#  Cette pile ne partage AUCUN réseau avec les autres applications du serveur.
+#  Elle a sa propre façade, `web-coupparfait`, sur laquelle seul Nginx Proxy
+#  Manager se branche.
+#
+#  Le montage habituel — un réseau `proxy` commun où l'on branche tout — a un
+#  défaut qui n'est pas théorique : sur un réseau Docker, tout le monde se
+#  joint. N'importe quel conteneur d'une autre application pourrait ouvrir une
+#  connexion vers `coupparfait-web:3000`, sans TLS, sans journal du proxy, sans
+#  aucune des règles configurées dans NPM. Une image compromise ailleurs sur le
+#  serveur devient un point de départ.
+#
+#  Même doctrine que les piles `laeti` et `monplandeclasse` déjà en place —
+#  voir `Laeti/infra/RESEAU.md`. Créer la façade une fois :
+#
+#      docker network create web-coupparfait
+#
+#  ── Mise en service ─────────────────────────────────────────────────────────
+#
+#      cp .env.example .env      puis renseigner les secrets
+#      docker compose up -d --build
+#      docker compose exec web node scripts/migrate.mjs     # crée le schéma
+#      docker compose exec web node scripts/import-openings.mjs
+#      docker compose exec web node scripts/import-puzzles.mjs
+#
+#  Puis, dans Nginx Proxy Manager, deux hôtes mandataires :
+#
+#    | Domaine                        | Forward Hostname  | Port | WebSocket |
+#    |--------------------------------|-------------------|------|-----------|
+#    | coupparfait.mondomaine.fr      | coupparfait-web   | 3000 | oui       |
+#    | coupparfait-api.mondomaine.fr  | coupparfait-api   | 3001 | requis    |
+#
+#  Le second n'est pas facultatif : le temps réel passe par lui, et sans
+#  WebSocket les parties entre amis ne démarrent pas.
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Docker préfixe conteneurs et volumes avec ce nom — « coupparfait-web-1 »,
+# « coupparfait_db-data ». Sans cette ligne il prendrait celui du dossier, qui
+# ne dit rien sur un serveur qui héberge plusieurs projets.
 name: coupparfait
 
 services:
@@ -28,19 +59,56 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-coupparfait}
       # Le tri « C » est nettement plus rapide et suffit : aucun classement
       # alphabétique n'est présenté à l'utilisateur depuis la base.
-      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --locale=C'
+      # `scram-sha-256` impose le mot de passe chiffré, y compris sur le réseau
+      # interne — un réseau privé n'est pas un réseau de confiance.
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --locale=C --auth-host=scram-sha-256'
     volumes:
       - db-data:/var/lib/postgresql/data
-    ports:
-      # Exposé sur la boucle locale uniquement : la base ne doit jamais être
-      # joignable depuis l'extérieur, même sur un réseau privé.
-      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
+    # Aucun port publié. La base était exposée sur `127.0.0.1:5432` : commode
+    # pour brancher un client, et c'est un accès sans TLS ni journal offert à
+    # quiconque obtient un shell sur la machine. Pour une inspection ponctuelle,
+    # `docker compose exec db psql` passe par le conteneur et ne laisse rien
+    # d'ouvert derrière lui.
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-coupparfait} -d ${POSTGRES_DB:-coupparfait}']
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 20s
+    networks:
+      - internal
+
+  # ── Sauvegarde ──────────────────────────────────────────────────────────────
+  #
+  # Un dump par jour, quinze jours de conservation. Même montage que les deux
+  # autres piles du serveur, et le même avertissement, qui vaut d'être répété :
+  # **ces fichiers vivent sur la machine qu'ils sauvegardent**. Tant qu'ils
+  # n'ont pas été recopiés ailleurs, ils protègent d'une fausse manœuvre, pas
+  # d'une perte du serveur.
+  #
+  # Ce qu'il y a dedans : des comptes, des parties, des analyses. Rien de
+  # sensible au sens de données d'élèves — mais des mots de passe hachés et des
+  # adresses e-mail, qui suffisent à justifier qu'on ne laisse pas traîner le
+  # dossier.
+  backup:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./backups:/backups
+    entrypoint: >
+      sh -c "while true; do
+        pg_dump -h db -U ${POSTGRES_USER:-coupparfait} -d ${POSTGRES_DB:-coupparfait} -Fc
+          -f /backups/coupparfait-$$(date +%Y%m%d-%H%M%S).dump &&
+        find /backups -name 'coupparfait-*.dump' -mtime +14 -delete;
+        sleep 86400;
+      done"
+    networks:
+      - internal
 
   server:
     build:
@@ -61,14 +129,19 @@ services:
       ENGINE_HASH_MB: ${ENGINE_HASH_MB:-256}
       ENGINE_DEFAULT_DEPTH: ${ENGINE_DEFAULT_DEPTH:-24}
       ENGINE_MAX_DEPTH: ${ENGINE_MAX_DEPTH:-34}
+      ENGINE_MAX_QUEUE: ${ENGINE_MAX_QUEUE:-16}
       LICHESS_TABLEBASE_URL: ${LICHESS_TABLEBASE_URL:-https://tablebase.lichess.ovh}
       # Voix neuronale du coach. Ces chemins existent dans l'image ; si Piper
       # n'a pas été inclus à la construction, l'application bascule d'elle-même
       # sur la synthèse du navigateur.
       PIPER_BIN: ${PIPER_BIN:-/opt/piper/piper}
       PIPER_VOICES_DIR: ${PIPER_VOICES_DIR:-/app/voices}
-    ports:
-      - '${SERVER_PORT:-3001}:3001'
+    # Aucun port publié : NPM joint le conteneur par `web-coupparfait`. Publier
+    # « 3001:3001 » l'ouvrait sur toutes les interfaces de la machine, donc
+    # depuis Internet, en clair et hors du proxy.
+    # À décommenter seulement si NPM tourne sur une AUTRE machine :
+    # ports:
+    #   - '127.0.0.1:3001:3001'
     healthcheck:
       test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
@@ -79,8 +152,16 @@ services:
       resources:
         limits:
           # Stockfish consomme autant de mémoire qu'on lui en donne (table de
-          # hachage). Cette borne évite qu'il n'étouffe l'hôte.
+          # hachage). Cette borne évite qu'il n'étouffe l'hôte — et ses
+          # voisins, puisque le serveur en héberge d'autres.
           memory: ${SERVER_MEMORY_LIMIT:-2g}
+    networks:
+      internal:
+      web-coupparfait:
+        # Le nom que Nginx Proxy Manager renseigne en « Forward Hostname ».
+        # « api » et non « server » : NPM voit passer toutes les applications du
+        # serveur, et « server » n'y désignerait rien.
+        aliases: [coupparfait-api]
 
   web:
     build:
@@ -97,18 +178,46 @@ services:
       AUTH_SESSION_DAYS: ${AUTH_SESSION_DAYS:-30}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
       NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:-http://localhost:3001}
+      # Le chemin interne vers le serveur d'analyse, par le réseau de données :
+      # les requêtes serveur-à-serveur n'ont aucune raison de ressortir sur
+      # Internet pour revenir par le proxy.
       INTERNAL_SERVER_URL: http://server:3001
       PORT: 3000
       HOSTNAME: 0.0.0.0
-    ports:
-      - '${WEB_PORT:-3000}:3000'
+    # Aucun port publié : voir la remarque du service `server`.
+    # ports:
+    #   - '127.0.0.1:3000:3000'
     healthcheck:
       test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
+    networks:
+      internal:
+      web-coupparfait:
+        # Le nom que Nginx Proxy Manager renseigne en « Forward Hostname ».
+        aliases: [coupparfait-web]
 
 volumes:
   db-data:
     driver: local
+
+networks:
+  # La base, sa sauvegarde, et le chemin entre les deux applications.
+  # `internal: true` retire l'accès à Internet : ni la base ni le service de
+  # sauvegarde n'ont de raison de sortir, et une base qui ne peut pas sortir ne
+  # peut rien exfiltrer.
+  #
+  # Cela ne gêne ni `web` ni `server` : Docker leur donne leur sortie par le
+  # réseau de façade, sur lequel ils sont également branchés. Ils gardent donc
+  # leur accès aux tables de finales de Lichess, à l'import chess.com et
+  # Lichess, et à l'assistant s'il est configuré.
+  internal:
+    driver: bridge
+    internal: true
+
+  # Façade de cette application, partagée avec Nginx Proxy Manager seulement.
+  # Le créer une fois :  docker network create web-coupparfait
+  web-coupparfait:
+    external: true
