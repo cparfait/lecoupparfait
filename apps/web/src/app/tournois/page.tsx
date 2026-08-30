@@ -94,6 +94,39 @@ export default function TournamentsPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
+      {/*
+        Le tournoi solo en premier, et c'est délibéré.
+        Une arène n'a d'intérêt qu'avec du monde connecté en même temps —
+        `docs/tournois.md` le dit dès sa première ligne. Tant que ce n'est pas le
+        cas, un visiteur qui ouvre cette page ne trouve rien à faire. Le tournoi
+        contre l'ordinateur, lui, se joue seul et tout de suite.
+      */}
+      <Link href="/tournois/ordinateur" className="block">
+        <Card className="mb-5 p-4 transition-colors hover:bg-surface-hover">
+          <div className="flex items-center gap-3">
+            <span
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-xl"
+              style={{ background: 'color-mix(in oklab, var(--accent) 16%, transparent)' }}
+              aria-hidden
+            >
+              🏆
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-display text-lg font-bold leading-tight">
+                Tournoi contre l’ordinateur
+              </p>
+              <p className="text-[13px] text-muted">
+                Tu es le seul humain. Trois à sept adversaires, de force choisie ou variée,
+                et un classement aux points.
+              </p>
+            </div>
+            <span className="shrink-0 text-muted" aria-hidden>
+              →
+            </span>
+          </div>
+        </Card>
+      </Link>
+
       <SectionTitle hint="On arrive quand on veut, on part quand on veut. Dès qu’une partie finit, on est réapparié.">
         Arènes
       </SectionTitle>
