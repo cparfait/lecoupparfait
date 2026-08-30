@@ -14,6 +14,7 @@ import { useParams } from 'next/navigation'
 import {
   BarChart3,
   CalendarDays,
+  Gauge,
   LogOut,
   MailCheck,
   MailWarning,
@@ -82,6 +83,8 @@ export default function ProfilePage() {
   const [notFound, setNotFound] = useState(false)
   const [me, setMe] = useState<string | null>(null)
   const [email, setEmail] = useState<{ email: string | null; verified: boolean } | null>(null)
+  /** Partie en cours d'envoi vers l'analyse : le temps d'aller chercher son PGN. */
+  const [envoi, setEnvoi] = useState<string | null>(null)
 
   useEffect(() => {
     void fetch(`/api/profil/${encodeURIComponent(params.username)}`)
@@ -147,6 +150,42 @@ export default function ProfilePage() {
     },
     [params.username],
   )
+
+  /**
+   * Envoie une partie de l'historique vers l'écran d'analyse.
+   *
+   * Une liste de parties qu'on ne peut pas rouvrir est un mur : on voyait
+   * qu'on avait perdu contre Cavale le 12 août, et c'était tout ce qu'on
+   * pouvait en apprendre. Le PGN n'est pas dans le profil public — il ne doit
+   * pas y être — on va donc le chercher sur la route privée, qui ne rend que
+   * ses propres parties.
+   */
+  const analyser = useCallback(async (slug: string, colour: 'w' | 'b') => {
+    setEnvoi(slug)
+    try {
+      const reponse = await fetch(`/api/parties/terminee?slug=${encodeURIComponent(slug)}`, {
+        cache: 'no-store',
+      })
+      const partie = reponse.ok ? (await reponse.json()).parties?.[0] : null
+      if (!partie?.pgn) {
+        toast.error('Partie introuvable.', 'Elle a peut-être été effacée.')
+        setEnvoi(null)
+        return
+      }
+      // Même dépôt que la boîte de fin de partie : l'écran d'analyse le ramasse
+      // au chargement et démarre tout seul.
+      sessionStorage.setItem('coupparfait.pendingAnalysis', partie.pgn)
+      sessionStorage.setItem('coupparfait.pendingAnalysisSide', colour)
+      if (partie.result) sessionStorage.setItem('coupparfait.pendingAnalysisResult', partie.result)
+    } catch {
+      // Stockage refusé ou serveur muet : on n'ira nulle part, et le message
+      // ci-dessus vaut mieux qu'un écran d'analyse vide.
+      toast.error('Analyse impossible.', 'Réessaie dans un instant.')
+      setEnvoi(null)
+      return
+    }
+    window.location.assign('/analyse')
+  }, [])
 
   if (loading) {
     return (
@@ -370,6 +409,28 @@ export default function ProfilePage() {
                 <span className="shrink-0 text-[11px] text-faint">
                   {formatDate(game.playedAt)}
                 </span>
+                {/*
+                  La porte de sortie de cette liste. Sans elle, l'historique ne
+                  sert qu'à constater : on sait qu'on a perdu, jamais pourquoi.
+                  Chez soi uniquement — le PGN d'un autre ne se prend pas depuis
+                  son profil.
+                */}
+                {isMe && (
+                  <button
+                    type="button"
+                    onClick={() => void analyser(game.slug, game.colour)}
+                    disabled={envoi !== null}
+                    title="Analyser cette partie"
+                    aria-label={`Analyser la partie contre ${game.opponent}`}
+                    className="shrink-0 rounded-[var(--radius-sm)] p-1 text-faint transition-colors hover:bg-surface-strong hover:text-accent disabled:opacity-40"
+                  >
+                    <Gauge
+                      size={13}
+                      className={clsx(envoi === game.slug && 'animate-pulse text-accent')}
+                      aria-hidden
+                    />
+                  </button>
+                )}
                 {/*
                   Effaçable seulement chez soi, et seulement si la partie n'est
                   pas classée : une partie classée a bougé le classement d'un

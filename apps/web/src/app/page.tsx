@@ -17,6 +17,8 @@ import { Board2D } from '@/components/board/Board2D.tsx'
 import { CavalePortrait } from '@/components/brand/CavalePortrait.tsx'
 import { DefiDuJour } from '@/components/daily/DefiDuJour.tsx'
 import { ButtonLink, Card, Chip } from '@/components/ui/index.tsx'
+import { AccueilConnecte } from '@/components/accueil/AccueilConnecte.tsx'
+import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { renderEmphasis, useI18n } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import type { BoardStyleId, ThemeId } from '@/lib/store/preferences.ts'
@@ -74,8 +76,26 @@ const PORTES = [
   { href: '/jouer/ordinateur', label: 'Jouer contre l’ordinateur' },
 ] as const
 
+/**
+ * Deux accueils, selon qu'on a un compte ou non.
+ *
+ * Ce qui suit — la bannière, la partie immortelle qui se déroule toute seule,
+ * les chiffres du catalogue — s'adresse à quelqu'un qui découvre : ça vend le
+ * produit. Quelqu'un de connecté a déjà acheté, et le lui redire à chaque clic
+ * sur le logo l'oblige à traverser une brochure pour retrouver ses parties.
+ *
+ * Trois états d'identité, et les trois comptent :
+ *   `undefined`  on ne sait pas encore — on ne montre rien plutôt que de faire
+ *                clignoter la brochure une demi-seconde chez quelqu'un de
+ *                connecté ;
+ *   `null`       personne — la page publique ;
+ *   sinon        son tableau de bord.
+ */
 export default function HomePage() {
-  const { t } = useI18n()
+  const identite = useIdentite()
+
+  if (identite === undefined) return <div className="min-h-[60vh]" aria-hidden />
+  if (identite) return <AccueilConnecte pseudo={identite.username} />
 
   return (
     <>

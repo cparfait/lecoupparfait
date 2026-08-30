@@ -62,6 +62,7 @@ import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { ImportEnLigne } from '@/components/import/ImportEnLigne.tsx'
 import { MesAnalyses } from '@/components/analysis/MesAnalyses.tsx'
+import { MesParties } from '@/components/analysis/MesParties.tsx'
 import { RelectureGuidee } from '@/components/analysis/RelectureGuidee.tsx'
 import { TexteAvecTermes } from '@/components/analysis/TexteAvecTermes.tsx'
 import { chargerAnalyse, enregistrerAnalyse } from '@/lib/analysis/enregistrees.ts'
@@ -431,6 +432,22 @@ function ImportScreen({
         {!handedOver && (
           <div className="border-t border-line/60 px-5 py-4 empty:hidden">
             <MesAnalyses onOuvrir={(id) => void ouvrirEnregistree(id)} />
+          </div>
+        )}
+
+        {/* Les parties jouées ici, avant celles d'ailleurs.
+            Quelqu'un qui vient d'abandonner sa partie contre l'ordinateur et
+            qui ouvre cet écran cherche cette partie-là, pas son historique
+            chess.com — et jusqu'ici il ne trouvait que le second. */}
+        {!handedOver && (
+          <div className="border-t border-line/60 px-5 py-4 empty:hidden">
+            <MesParties
+              onChoisir={(pgn, campJoue) => {
+                setInput(pgn)
+                setCamp(campJoue)
+                onSide(campJoue)
+              }}
+            />
           </div>
         )}
 

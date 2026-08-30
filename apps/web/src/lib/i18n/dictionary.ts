@@ -62,7 +62,7 @@ export const fr = {
 
     // Repères affichés sous les entrées, dans les panneaux déroulants.
     vsComputerHint: '25 niveaux, 7 personnalités',
-    vsFriendHint: 'un lien à partager',
+    vsFriendHint: 'un lien, ou plusieurs jours par coup',
     localGameHint: 'à deux, sur le même appareil',
     correspondenceHint: 'les parties où c’est ton tour',
     watchHint: 'les parties en cours',
@@ -439,7 +439,7 @@ export const en: Dictionary = {
     myProfile: 'My profile',
 
     vsComputerHint: '25 levels, 7 personalities',
-    vsFriendHint: 'a link to share',
+    vsFriendHint: 'a link, or days per move',
     localGameHint: 'two players, one device',
     correspondenceHint: 'games waiting on you',
     watchHint: 'games in progress',
