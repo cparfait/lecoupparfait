@@ -86,6 +86,15 @@ export default function PuzzlesPage() {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null)
   const [status, setStatus] = useState<Status>('loading')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  /**
+   * L'échec vient-il du puzzle lui-même plutôt que du service ?
+   *
+   * Les deux s'affichent au même endroit, mais ne se réparent pas de la même
+   * façon : l'un se passe, l'autre demande un import. Proposer la commande
+   * d'import à quelqu'un qui vient de tomber sur une position bancale, c'est
+   * l'envoyer réparer ce qui n'est pas cassé.
+   */
+  const [puzzleIllisible, setPuzzleIllisible] = useState(false)
   const [theme, setTheme] = useState('all')
 
   const [fen, setFen] = useState('')
@@ -95,11 +104,34 @@ export default function PuzzlesPage() {
   const [wrongAttempts, setWrongAttempts] = useState(0)
   const [revealed, setRevealed] = useState(false)
 
+  /**
+   * L'adversaire est-il en train de répondre ?
+   *
+   * Sa réponse est différée de 420 ms pour qu'on la voie passer. Pendant ce
+   * temps l'échiquier restait jouable alors que le coup attendu était déjà
+   * celui de l'adversaire : qui enchaîne vite se voyait compter une erreur pour
+   * un coup juste, puis une seconde, et le puzzle se soldait par un échec qu'il
+   * n'avait pas commis.
+   */
+  const [repliqueEnCours, setRepliqueEnCours] = useState(false)
+
   const [playerRating, setPlayerRating] = useState<number | null>(null)
   const [ratingDelta, setRatingDelta] = useState<number | null>(null)
   const [streak, setStreak] = useState(0)
 
   const startedAt = useRef(Date.now())
+
+  /**
+   * Numéro de la position en cours.
+   *
+   * La réponse de l'adversaire est posée dans un `setTimeout` de 420 ms. Si
+   * l'on change de puzzle entre-temps — un filtre de thème suffit —, ce rappel
+   * survivait à la position qui l'avait déclenché et réécrivait l'échiquier
+   * avec l'ancienne : le nouveau puzzle s'affichait alors sur la position du
+   * précédent, plus rien ne correspondait aux coups attendus, et le joueur ne
+   * pouvait ni le résoudre ni comprendre pourquoi.
+   */
+  const generation = useRef(0)
 
   const { marquer } = useQuotidien()
   const router = useRouter()
@@ -130,11 +162,15 @@ export default function PuzzlesPage() {
 
   // ── Chargement ──────────────────────────────────────────────────────────
   const load = useCallback(async () => {
+    generation.current += 1
+    setRepliqueEnCours(false)
     setStatus('loading')
     setErrorMessage(null)
+    setPuzzleIllisible(false)
     setRatingDelta(null)
     setRevealed(false)
     setWrongAttempts(0)
+    const demande = generation.current
 
     try {
       // Le défi du jour est servi par sa propre route : c'est un tirage
@@ -147,6 +183,9 @@ export default function PuzzlesPage() {
         { cache: 'no-store' },
       )
       const data = await response.json()
+      // Un puzzle demandé entre-temps a pris la place : cette réponse-ci est
+      // périmée, l'afficher ferait reculer le joueur d'une position.
+      if (demande !== generation.current) return
 
       if (!response.ok) {
         setErrorMessage(data.error ?? 'Impossible de charger un puzzle.')
@@ -170,7 +209,24 @@ export default function PuzzlesPage() {
           })
           setLastMove({ from: move.from, to: move.to })
         } catch {
-          // Coup d'ouverture illisible : on part de la position brute.
+          /*
+            Le coup d'ouverture n'entre pas dans la position.
+
+            On partait alors de la position brute — et c'est le pire des choix :
+            le trait revient à l'adversaire, donc `orientation` désigne sa
+            couleur, donc l'échiquier n'accepte que ses pièces à lui. Le joueur
+            se retrouvait devant un plateau qui ne répond à rien, sans erreur
+            comptée, sans échec, sans bouton : rien à faire que recharger.
+
+            Un puzzle dont la position et la solution ne se recoupent pas n'est
+            pas jouable. On le dit, et on en propose un autre.
+          */
+          setPuzzleIllisible(true)
+          setErrorMessage(
+            'La position de ce puzzle ne correspond pas à sa solution — il est inutilisable. Le suivant sera bon.',
+          )
+          setStatus('error')
+          return
         }
       }
 
@@ -267,8 +323,17 @@ export default function PuzzlesPage() {
     (from: Square, to: Square, promotion?: PieceSymbol) => {
       if (!puzzle || status !== 'playing') return
 
+      if (repliqueEnCours) return
+
       const expected = puzzle.moves[moveIndex]
-      if (!expected) return
+      // Plus rien à jouer alors que le puzzle se croit en cours : la séquence
+      // est épuisée. On le déclare résolu plutôt que de laisser un échiquier
+      // qui ne répond plus, sans bouton pour en sortir — c'est la seule façon
+      // dont cet écran pouvait rester bloqué.
+      if (!expected) {
+        setStatus('solved')
+        return
+      }
 
       const played = `${from}${to}${promotion ?? ''}`
       const expectedFrom = expected.slice(0, 2)
@@ -330,8 +395,14 @@ export default function PuzzlesPage() {
       const reply = puzzle.moves[nextIndex]!
       setFen(board.fen())
       setMoveIndex(nextIndex)
+      setRepliqueEnCours(true)
 
+      const position = generation.current
       setTimeout(() => {
+        // On a changé de puzzle pendant la pause : ce coup-là n'a plus de
+        // plateau où se poser.
+        if (position !== generation.current) return
+        setRepliqueEnCours(false)
         const after = new Chess(board.fen(), { skipValidation: true })
         try {
           const replyMove = after.move({
@@ -354,7 +425,7 @@ export default function PuzzlesPage() {
         }
       }, 420)
     },
-    [puzzle, status, moveIndex, fen, wrongAttempts, revealed, report],
+    [puzzle, status, moveIndex, fen, wrongAttempts, revealed, report, repliqueEnCours],
   )
 
   const reveal = useCallback(() => {
@@ -384,23 +455,25 @@ export default function PuzzlesPage() {
         <Card>
           <EmptyState
             icon={<Target size={30} />}
-            title="Aucun puzzle disponible"
+            title={puzzleIllisible ? 'Ce puzzle est inutilisable' : 'Aucun puzzle disponible'}
             description={
               errorMessage ??
               'La base de puzzles est vide. Lance l’import depuis le serveur pour récupérer les six millions de positions de Lichess.'
             }
             action={
               <Button variant="secondary" onClick={() => void load()}>
-                Réessayer
+                {puzzleIllisible ? 'Puzzle suivant' : 'Réessayer'}
               </Button>
             }
           />
-          <div className="border-t border-line/60 px-5 py-4">
-            <p className="text-xs text-faint">Commande d’import :</p>
-            <code className="mt-1 block rounded bg-surface px-2 py-1.5 font-mono text-[12px]">
-              node scripts/import-puzzles.mjs
-            </code>
-          </div>
+          {!puzzleIllisible && (
+            <div className="border-t border-line/60 px-5 py-4">
+              <p className="text-xs text-faint">Commande d’import :</p>
+              <code className="mt-1 block rounded bg-surface px-2 py-1.5 font-mono text-[12px]">
+                node scripts/import-puzzles.mjs
+              </code>
+            </div>
+          )}
         </Card>
       </div>
     )
@@ -472,7 +545,7 @@ export default function PuzzlesPage() {
             <ChessBoard
               fen={fen}
               orientation={orientation}
-              playable={status === 'playing' ? orientation : null}
+              playable={status === 'playing' && !repliqueEnCours ? orientation : null}
               legalMoves={legalMoves}
               onMove={handleMove}
               lastMove={lastMove}
@@ -578,6 +651,22 @@ export default function PuzzlesPage() {
             {status === 'playing' && !revealed && (
               <Button variant="ghost" icon={<Eye size={14} />} onClick={reveal} fullWidth>
                 Solution
+              </Button>
+            )}
+            {/* Une sortie de secours, toujours disponible.
+                Un puzzle qui ne réagit plus — position inattendue, coup que la
+                séquence n'accepte pas — n'offrait aucun bouton : « Puzzle
+                suivant » n'apparaît qu'une fois résolu ou raté, et l'on se
+                retrouvait devant un échiquier muet, sans autre issue que de
+                recharger la page. */}
+            {status === 'playing' && (
+              <Button
+                variant="ghost"
+                icon={<ArrowRight size={14} />}
+                onClick={() => void load()}
+                fullWidth={revealed}
+              >
+                Passer
               </Button>
             )}
             {(status === 'solved' || status === 'failed') && (
