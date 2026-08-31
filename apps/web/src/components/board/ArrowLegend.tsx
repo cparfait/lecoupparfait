@@ -177,11 +177,24 @@ export const LEGEND = {
     label: 'Ton coup (erreur)',
     title: 'Le coup joué : le moteur le juge nettement inférieur.',
   },
+  /*
+    « À la place », et non « conseillé ».
+
+    Cette flèche est calculée sur la position **d'avant** le coup joué, et
+    dessinée sur celle d'après : c'est l'option qu'on avait, pas celle qu'on a.
+    Étiquetée « Coup conseillé » sur l'échiquier courant, elle se lit
+    inévitablement comme « joue ça maintenant » — et l'on se demande pourquoi
+    le coach conseille un coup qui perd une pièce dans la position affichée.
+    C'est un vrai retour d'usage, pas une hypothèse.
+
+    Le titre, lui, ne se lit qu'au survol : il n'existe pas sur un téléphone.
+    Le libellé doit donc porter l'essentiel à lui seul.
+  */
   best: {
     color: 'blue',
-    label: 'Coup conseillé',
+    label: 'À jouer à la place',
     weight: 'normal',
-    title: 'Ce que le moteur aurait joué à ta place.',
+    title: 'Ce qu’il fallait jouer au lieu de ton coup, dans la position d’avant.',
   },
   hint: { color: 'orange', label: 'Indice', title: 'Le coup suggéré par l’indice.' },
   look: { color: 'green', label: 'À observer', title: 'Ce que le coach te montre.' },

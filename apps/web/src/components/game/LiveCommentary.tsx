@@ -1009,7 +1009,7 @@ export function commentaryLegend(
     return [
       hovered.played
         ? { ...LEGEND.played, label: `${hovered.san} — ton coup` }
-        : { ...LEGEND.best, label: `${hovered.san} — coup conseillé`, weight: 'bold' as const },
+        : { ...LEGEND.best, label: `${hovered.san} — à la place de ton coup`, weight: 'bold' as const },
     ]
   }
 

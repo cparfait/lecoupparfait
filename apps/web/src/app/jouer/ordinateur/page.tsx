@@ -1407,6 +1407,32 @@ function GameScreen({
       ? { square: state.lastMove.to, quality: commentary.quality }
       : null
 
+  /**
+   * Le coup qu'il fallait jouer, écrit en toutes lettres.
+   *
+   * La flèche bleue portait cette information toute seule, et elle la portait
+   * mal : elle est calculée sur la position **d'avant** le coup joué, et
+   * dessinée sur celle d'après. On la lit donc comme « joue ça maintenant »,
+   * puis on constate que ce coup-là perd une pièce dans la position affichée —
+   * ce qui est vrai, et n'a rien à voir avec ce que le moteur voulait dire.
+   *
+   * Sa légende existait, mais dans la colonne latérale, c'est-à-dire sous la
+   * ligne de flottaison d'un téléphone. On la remonte sous l'échiquier, avec le
+   * verdict, et on nomme les deux coups : « il fallait jouer d5 au lieu de Cf6 »
+   * ne se prête à aucune autre lecture.
+   *
+   * Rien à afficher quand le coup joué était déjà le meilleur : la flèche bleue
+   * n'apparaît pas non plus dans ce cas.
+   */
+  const conseilDuCoup = useMemo(() => {
+    if (!verdictDuCoup || !commentary) return null
+    const meilleur = commentary.alternatives.find(
+      (alternative) => alternative.rank === 1 && !alternative.played,
+    )
+    if (!meilleur) return null
+    return { conseille: formatMove(meilleur.san), joue: formatMove(commentary.san) }
+  }, [verdictDuCoup, commentary, formatMove])
+
   return (
     <div className="mx-auto w-full max-w-[1500px] px-2 py-3 sm:px-4 lg:py-6">
       <div className="grid gap-4 lg:h-[calc(100dvh-6rem)] lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_400px]">
@@ -1497,7 +1523,9 @@ function GameScreen({
                   Elle rend du même coup la pastille franchement décorative,
                   ce qui justifie enfin son `aria-hidden` : le mot est lu ici,
                   une seule fois. */}
-              {verdictDuCoup && <LegendeDuVerdict quality={verdictDuCoup.quality} />}
+              {verdictDuCoup && (
+                <LegendeDuVerdict quality={verdictDuCoup.quality} conseil={conseilDuCoup} />
+              )}
 
               {reviewing && (
                 <div className="mb-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2 text-[13px]">
@@ -1742,20 +1770,41 @@ export function recordBotGame(level: number, won: boolean): void {
  * suit répond à la question d'après, « et alors ? ». Elle disparaît sous
  * 640 px, où la largeur ne permet pas les deux sans repousser l'échiquier.
  */
-function LegendeDuVerdict({ quality }: { quality: MoveQuality }) {
+function LegendeDuVerdict({
+  quality,
+  conseil,
+}: {
+  quality: MoveQuality
+  /** Le coup qu'il fallait jouer, et celui qu'on a joué. */
+  conseil?: { conseille: string; joue: string } | null
+}) {
   const style = QUALITY_STYLES[quality]
   const teinte = `var(--q-${style.token})`
 
   return (
-    <p
-      className="mb-1.5 flex items-baseline gap-1.5 text-[13px] leading-snug"
-      style={{ color: teinte }}
-    >
-      <span aria-hidden>{style.glyph}</span>
-      <span className="font-semibold">{style.label.fr}</span>
-      <span className="hidden min-w-0 flex-1 truncate font-normal text-muted sm:inline">
-        {style.description.fr}
-      </span>
-    </p>
+    <div className="mb-1.5">
+      <p
+        className="flex items-baseline gap-1.5 text-[13px] leading-snug"
+        style={{ color: teinte }}
+      >
+        <span aria-hidden>{style.glyph}</span>
+        <span className="font-semibold">{style.label.fr}</span>
+        <span className="hidden min-w-0 flex-1 truncate font-normal text-muted sm:inline">
+          {style.description.fr}
+        </span>
+      </p>
+
+      {/* Visible à toutes les tailles, contrairement à la description : c'est
+          la clé de lecture de la flèche bleue, et elle manque surtout là où
+          l'écran est petit. */}
+      {conseil && (
+        <p className="mt-0.5 text-[13px] leading-snug text-muted">
+          Il fallait jouer{' '}
+          <strong className="font-semibold text-accent">{conseil.conseille}</strong> au lieu de{' '}
+          <strong className="font-semibold text-ink">{conseil.joue}</strong> — la flèche bleue
+          montre ce coup-là dans la position d’avant, pas un coup à jouer maintenant.
+        </p>
+      )}
+    </div>
   )
 }
