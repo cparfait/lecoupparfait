@@ -551,6 +551,22 @@ function formatDate(iso: string): string {
  * le parcours, ce qui l'oblige à dire deux choses — à quoi sert l'adresse, et
  * si le serveur est seulement capable d'envoyer le lien.
  */
+
+/**
+ * La confirmation par courriel est-elle en service ?
+ *
+ * Non, et tant qu'elle ne l'est pas le bandeau reste muet. Il demandait
+ * d'ouvrir un lien que personne ne reçoit, faute d'expéditeur : une consigne
+ * qu'on ne peut pas suivre n'est pas une information, c'est un reproche
+ * permanent en haut de son propre profil, et le bouton « Confirmer »
+ * promettait un envoi qui n'a jamais lieu.
+ *
+ * L'adresse reste enregistrée, et rien n'est perdu. Le jour où la messagerie
+ * fonctionnera, ce drapeau passe à `true` : tout ce qu'il masque est écrit
+ * juste en dessous, intact.
+ */
+const CONFIRMATION_PAR_COURRIEL: boolean = false
+
 function EmailStatus({ email }: { email: { email: string | null; verified: boolean } }) {
   const [busy, setBusy] = useState(false)
   const [sent, setSent] = useState(false)
@@ -564,6 +580,9 @@ function EmailStatus({ email }: { email: { email: string | null; verified: boole
       </p>
     )
   }
+
+  // Rien à dire tant qu'aucun courriel ne part — voir CONFIRMATION_PAR_COURRIEL.
+  if (!CONFIRMATION_PAR_COURRIEL) return null
 
   return (
     <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line/60 pt-4">

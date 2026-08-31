@@ -62,11 +62,21 @@ function AuthForm() {
   const identite = useIdentite()
   // Masque la récupération de mot de passe quand aucun courriel ne peut partir.
   const courriel = useCourrielDisponible()
+  /*
+    Une fois connecté, on va à l'accueil — et non à son profil.
+
+    Le profil est une page de consultation : un avatar, une courbe, un
+    historique. On y va quand on se demande où l'on en est, ce qui n'est
+    justement pas la question qu'on se pose juste après avoir tapé son mot de
+    passe. On vient jouer, ou reprendre ce qu'on avait laissé.
+
+    L'accueil connecté est fait exactement pour ça : la partie en plan, la
+    correspondance qui attend, le chapitre en cours, le défi du jour. Le profil
+    reste à un clic, sous l'avatar de l'en-tête.
+  */
   useEffect(() => {
     if (!identite) return
-    router.replace(
-      referrer ? `/amis?ami=${encodeURIComponent(referrer)}` : `/profil/${identite.username}`,
-    )
+    router.replace(referrer ? `/amis?ami=${encodeURIComponent(referrer)}` : '/')
   }, [identite, referrer, router])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -146,11 +156,9 @@ function AuthForm() {
         toast.success(
           mode === 'signup' ? `Bienvenue, ${data.user.username} !` : `Content de te revoir, ${data.user.username}.`,
         )
-        router.push(
-          referrer
-            ? `/amis?ami=${encodeURIComponent(referrer)}`
-            : `/profil/${data.user.username}`,
-        )
+        // Même destination que ci-dessus, pour la même raison : on arrive à
+        // l'accueil, là où se trouve ce qu'on a à faire.
+        router.push(referrer ? `/amis?ami=${encodeURIComponent(referrer)}` : '/')
         router.refresh()
       } catch {
         setError(
