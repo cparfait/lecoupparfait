@@ -48,15 +48,28 @@ export async function GET(request: Request) {
     /*
       Puzzles déjà tentés, à ne pas reproposer.
 
-      Le puzzle qu'on vient de terminer s'y ajoute par son identifiant, passé
-      dans l'adresse. Sa tentative est bien enregistrée, mais par un appel
-      distinct : celui qui enchaîne aussitôt sur le suivant peut arriver ici
-      avant que l'écriture ne soit visible, et se voir resservir la position
-      qu'il vient de résoudre. La liste ne coûte rien à allonger d'un élément.
+      Les derniers puzzles vus s'y ajoutent par leurs identifiants, passés dans
+      l'adresse. Leurs tentatives sont bien enregistrées, mais par un appel
+      distinct : celui qui enchaîne aussitôt peut arriver ici avant que
+      l'écriture ne soit visible, et se voir resservir la position qu'il vient
+      de résoudre. Le navigateur, lui, sait toujours ce qu'il vient d'afficher.
+
+      Une liste et non un seul identifiant, parce qu'un chapitre de carrière
+      fait des allers-retours : on résout, on revient à la carte, on repart sur
+      un puzzle. Chaque retour repart d'un composant neuf, qui aurait tout
+      oublié de la série en cours.
     */
     let excluded: string[] = []
-    const dernier = url.searchParams.get('exclure')
-    if (dernier) excluded.push(dernier.slice(0, 40))
+    const recents = url.searchParams.get('exclure')
+    if (recents) {
+      excluded.push(
+        ...recents
+          .split(',')
+          .map((id) => id.trim().slice(0, 24))
+          .filter(Boolean)
+          .slice(0, 40),
+      )
+    }
     if (user) {
       const done = await database
         .select({ puzzleId: puzzleAttempts.puzzleId })

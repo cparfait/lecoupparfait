@@ -135,13 +135,42 @@ export default function PuzzlesPage() {
   const generation = useRef(0)
 
   /**
-   * Le puzzle affiché, hors du cycle de rendu.
+   * Les puzzles qu'on vient de voir, hors du cycle de rendu.
    *
-   * `load` est reconstruit à chaque changement de thème ; lire `puzzle` dedans
-   * l'obligerait à se reconstruire à chaque puzzle chargé, donc à relancer
-   * l'effet qui charge. Une référence dit la même chose sans cette boucle.
+   * Ils sont annoncés au serveur à chaque demande : la tentative est bien
+   * enregistrée en base, mais par un appel distinct, et qui enchaîne aussitôt
+   * peut arriver avant que l'écriture ne soit visible. Le navigateur, lui,
+   * sait toujours ce qu'il vient d'afficher.
+   *
+   * Rangés dans le stockage de session, et pas seulement en mémoire : un
+   * chapitre de carrière fait des allers-retours — on résout, on revient à la
+   * carte, on repart — et chaque retour monte un composant neuf qui aurait
+   * tout oublié de la série en cours.
+   *
+   * Une référence plutôt qu'un état : `load` est reconstruit à chaque
+   * changement de thème, et lire une valeur d'état dedans l'obligerait à se
+   * reconstruire à chaque puzzle chargé, donc à relancer l'effet qui charge.
    */
-  const puzzleRef = useRef<string | null>(null)
+  const VUS_CLE = 'coupparfait.puzzlesVus'
+  const VUS_MAX = 30
+  const vusRef = useRef<string[]>([])
+  useEffect(() => {
+    try {
+      const brut = sessionStorage.getItem(VUS_CLE)
+      if (brut) vusRef.current = (JSON.parse(brut) as string[]).slice(-VUS_MAX)
+    } catch {
+      // Stockage refusé : on se contente de la mémoire de la page.
+    }
+  }, [])
+
+  const retenirPuzzle = useCallback((id: string) => {
+    vusRef.current = [...vusRef.current.filter((autre) => autre !== id), id].slice(-VUS_MAX)
+    try {
+      sessionStorage.setItem(VUS_CLE, JSON.stringify(vusRef.current))
+    } catch {
+      // Idem : la liste vaut alors pour la page en cours.
+    }
+  }, [])
 
   const { marquer } = useQuotidien()
   const router = useRouter()
@@ -204,11 +233,11 @@ export default function PuzzlesPage() {
       // On dit au serveur ce qu'on vient de faire : l'enregistrement de la
       // tentative part par un autre appel, et enchaîner sans attendre pouvait
       // ramener la position qu'on vient de résoudre.
-      const precedent = puzzleRef.current
+      const precedents = vusRef.current.join(',')
       const response = await fetch(
         modeDefi
           ? `/api/defi-du-jour?jour=${jourLocal()}`
-          : `/api/puzzles?theme=${encodeURIComponent(theme)}${precedent ? `&exclure=${encodeURIComponent(precedent)}` : ''}`,
+          : `/api/puzzles?theme=${encodeURIComponent(theme)}${precedents ? `&exclure=${encodeURIComponent(precedents)}` : ''}`,
         { cache: 'no-store' },
       )
       const data = await response.json()
@@ -260,7 +289,7 @@ export default function PuzzlesPage() {
       }
 
       setPuzzle(loaded)
-      puzzleRef.current = loaded.id
+      retenirPuzzle(loaded.id)
       setFen(board.fen())
       setOrientation(board.turn())
       setMoveIndex(1)
@@ -278,7 +307,7 @@ export default function PuzzlesPage() {
       setErrorMessage('Le service de puzzles est injoignable.')
       setStatus('error')
     }
-  }, [theme, voiceEnabled, modeDefi])
+  }, [theme, voiceEnabled, modeDefi, retenirPuzzle])
 
   useEffect(() => {
     // On attend de savoir si l'on vient du défi du jour : charger d'abord un
