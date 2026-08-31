@@ -428,6 +428,54 @@ export default function PuzzlesPage() {
     [puzzle, status, moveIndex, fen, wrongAttempts, revealed, report, repliqueEnCours],
   )
 
+  /**
+   * Refaire *ce* puzzle, depuis le début.
+   *
+   * Deux essais manqués et l'écran se fermait : l'échiquier cesse d'accepter
+   * les pièces, le panneau conseille de « rejouer la position mentalement », et
+   * les deux boutons proposés — « Puzzle suivant » et « Autre » — font la même
+   * chose, passer à autre chose. On restait donc devant une position figée
+   * qu'on n'avait pas comprise, sans aucun moyen d'y revenir : c'est le
+   * sentiment de blocage.
+   *
+   * Rien à recharger, tout est déjà là : on rejoue le coup d'ouverture de
+   * l'adversaire et l'on remet les compteurs à zéro. Le résultat a déjà été
+   * envoyé au classement — un puzzle raté reste raté, le refaire s'adresse à
+   * celui qui apprend, pas à son score.
+   */
+  const recommencer = useCallback(() => {
+    if (!puzzle) return
+
+    const board = new Chess(puzzle.fen, { skipValidation: true })
+    const opening = puzzle.moves[0]
+    if (opening) {
+      try {
+        const move = board.move({
+          from: opening.slice(0, 2) as Square,
+          to: opening.slice(2, 4) as Square,
+          promotion: (opening[4] as PieceSymbol) ?? undefined,
+        })
+        setLastMove({ from: move.from, to: move.to })
+      } catch {
+        // La position s'est chargée une première fois, ce coup passait alors :
+        // s'il ne passe plus, mieux vaut un autre puzzle qu'un plateau muet.
+        void load()
+        return
+      }
+    }
+
+    // La réplique différée du puzzle précédent ne doit pas se poser ici.
+    generation.current += 1
+    setRepliqueEnCours(false)
+    setFen(board.fen())
+    setOrientation(board.turn())
+    setMoveIndex(1)
+    setWrongAttempts(0)
+    setRevealed(false)
+    setStatus('playing')
+    startedAt.current = Date.now()
+  }, [puzzle, load])
+
   const reveal = useCallback(() => {
     if (!puzzle) return
     setRevealed(true)
@@ -480,6 +528,8 @@ export default function PuzzlesPage() {
   }
 
   const revealedSan = revealed && puzzle ? sanOf(fen, puzzle.moves[moveIndex]) : null
+  /** Le coup qu'il fallait trouver, une fois le puzzle manqué. */
+  const solutionRatee = status === 'failed' && puzzle ? sanOf(fen, puzzle.moves[moveIndex]) : null
 
   return (
     <div className="mx-auto w-full max-w-[1100px] px-3 py-4 sm:px-5 lg:py-8">
@@ -609,11 +659,23 @@ export default function PuzzlesPage() {
                 >
                   <X size={14} className="text-[var(--q-blunder)]" />
                 </span>
-                <div>
+                <div className="min-w-0">
                   <p className="text-sm font-semibold text-[var(--q-blunder)]">Raté</p>
-                  <p className="mt-1 text-[13px] leading-relaxed text-muted">
-                    Regarde la solution, puis rejoue la position mentalement. C’est en
-                    revoyant le motif qu’on finit par le reconnaître d’instinct.
+                  {/* La solution, écrite.
+                      Le texte disait « regarde la solution » sans jamais la
+                      montrer : elle n'apparaissait qu'à qui avait cliqué sur
+                      « Solution » *avant* de se tromper deux fois, c'est-à-dire
+                      à peu près personne. On la donne donc ici, où elle est la
+                      seule chose qui reste à apprendre. */}
+                  {solutionRatee && (
+                    <p className="mt-1.5 rounded-[var(--radius-sm)] bg-surface px-2.5 py-2 text-[13px]">
+                      Il fallait jouer{' '}
+                      <strong className="text-accent">{format(solutionRatee)}</strong>
+                    </p>
+                  )}
+                  <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+                    Rejoue la position : c’est en refaisant le coup soi-même qu’on finit par
+                    reconnaître le motif d’instinct.
                   </p>
                 </div>
               </div>
@@ -669,19 +731,28 @@ export default function PuzzlesPage() {
                 Passer
               </Button>
             )}
+            {/* « Recommencer » d'abord, et il ne recharge rien : c'est la même
+                position, remise à son début. Il remplace un bouton « Autre »
+                qui était le jumeau de « Puzzle suivant » — deux libellés
+                différents pour la même action, aucun pour celle qui manquait. */}
+            {status === 'failed' && (
+              <Button
+                variant="secondary"
+                icon={<RotateCcw size={14} />}
+                onClick={recommencer}
+                fullWidth
+              >
+                Recommencer
+              </Button>
+            )}
             {(status === 'solved' || status === 'failed') && (
               <Button
-                variant="primary"
+                variant={status === 'failed' ? 'ghost' : 'primary'}
                 icon={<ArrowRight size={15} />}
                 onClick={() => void load()}
                 fullWidth
               >
                 Puzzle suivant
-              </Button>
-            )}
-            {status === 'failed' && (
-              <Button variant="ghost" icon={<RotateCcw size={14} />} onClick={() => void load()}>
-                Autre
               </Button>
             )}
           </div>
