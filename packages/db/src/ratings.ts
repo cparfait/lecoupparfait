@@ -13,6 +13,7 @@
 
 import { and, eq } from 'drizzle-orm'
 import {
+  CLASSEMENT_DEPART,
   decayGlicko,
   updateElo,
   updateGlicko,
@@ -42,9 +43,18 @@ export async function getRating(userId: string, category: RatingCategory): Promi
   const existing = rows[0]
   if (existing) return existing
 
+  // Les trois classements sont écrits en clair plutôt que laissés au défaut de
+  // la colonne : une base créée avant le changement de valeur de départ
+  // continuerait sinon d'inscrire les nouveaux venus à 1500.
   const inserted = await database
     .insert(ratings)
-    .values({ userId, category })
+    .values({
+      userId,
+      category,
+      rating: CLASSEMENT_DEPART,
+      elo: CLASSEMENT_DEPART,
+      peak: CLASSEMENT_DEPART,
+    })
     .onConflictDoNothing()
     .returning()
 
@@ -52,15 +62,15 @@ export async function getRating(userId: string, category: RatingCategory): Promi
     inserted[0] ?? {
       userId,
       category,
-      rating: 1500,
+      rating: CLASSEMENT_DEPART,
       deviation: 350,
       volatility: 0.09,
-      elo: 1500,
+      elo: CLASSEMENT_DEPART,
       games: 0,
       wins: 0,
       losses: 0,
       draws: 0,
-      peak: 1500,
+      peak: CLASSEMENT_DEPART,
       peakAt: null,
       updatedAt: new Date(),
     }

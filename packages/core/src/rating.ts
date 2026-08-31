@@ -90,8 +90,33 @@ export function performanceRating(
 /** Facteur de conversion entre l'échelle Elo et l'échelle interne de Glicko-2. */
 const GLICKO_SCALE = 173.7178
 
-/** Centre de l'échelle. */
+/**
+ * Centre de l'échelle.
+ *
+ * Ce n'est **pas** le classement d'un nouveau joueur — voir `CLASSEMENT_DEPART`
+ * juste en dessous. C'est le point de référence des formules de Glicko-2 : les
+ * classements y sont ramenés avant calcul, et le résultat en repart. Il ne
+ * change pas, sous peine de déplacer tous les classements existants.
+ */
 export const GLICKO_DEFAULT_RATING = 1500
+
+/**
+ * Le classement d'un joueur qui n'a encore rien joué.
+ *
+ * 450, et non le centre de l'échelle. Glicko-2 place traditionnellement les
+ * nouveaux venus au milieu, ce qui suppose une population dont ils sont la
+ * moyenne. Ici c'est faux : on s'inscrit sur cette plateforme parce qu'on
+ * débute. Annoncer 1500 à quelqu'un qui apprend le déplacement du cavalier lui
+ * donne un chiffre qu'il ne comprend pas, puis le fait *descendre* pendant ses
+ * vingt premières parties — sa progression réelle s'affichait en chute libre.
+ *
+ * En partant bas, la courbe raconte enfin ce qui se passe : elle monte. Et
+ * l'incertitude initiale, elle, ne change pas — `GLICKO_DEFAULT_RD` vaut
+ * toujours 350, ce qui laisse le classement bondir dès les premières parties
+ * si le niveau est en fait bien supérieur. Quelqu'un qui joue à 1600 rejoint
+ * son niveau en une poignée de parties, sans avoir eu à le déclarer.
+ */
+export const CLASSEMENT_DEPART = 450
 
 /** Écart-type initial : un nouveau joueur est très incertain. */
 export const GLICKO_DEFAULT_RD = 350
@@ -128,7 +153,7 @@ export interface GlickoOpponent {
 
 export function defaultGlicko(): GlickoRating {
   return {
-    rating: GLICKO_DEFAULT_RATING,
+    rating: CLASSEMENT_DEPART,
     rd: GLICKO_DEFAULT_RD,
     volatility: GLICKO_DEFAULT_VOLATILITY,
   }
