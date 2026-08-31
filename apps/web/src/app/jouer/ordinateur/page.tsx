@@ -126,6 +126,16 @@ interface Setup {
   timeControlId: string
   /** Affronter Maia — un réseau humain — plutôt que Stockfish bridé. */
   human: boolean
+  /**
+   * Partie classée : le résultat met à jour le classement de la cadence.
+   *
+   * Elle se demande **avant** de commencer, et elle a un prix : ni annulation,
+   * ni indice, ni mode commenté. Ces trois aides sont ce qui rend une partie
+   * contre l'ordinateur ininterprétable — on ne peut pas mesurer quelqu'un qui
+   * reprend ses coups et à qui l'on montre le meilleur. On les retire donc au
+   * lieu d'essayer de les comptabiliser après coup.
+   */
+  classee: boolean
 }
 
 export default function PlayComputerPage() {
@@ -160,6 +170,9 @@ export default function PlayComputerPage() {
     // Par défaut : un adversaire qui se trompe comme un humain. C'est ce
     // qu'on veut faire affronter à quelqu'un qui débute.
     human: true,
+    // Non par défaut : on vient d'abord s'entraîner, et s'entraîner suppose de
+    // pouvoir revenir en arrière.
+    classee: false,
   })
   const [resolvedColor, setResolvedColor] = useState<Color>('w')
   const [gameKey, setGameKey] = useState(0)
@@ -223,6 +236,8 @@ export default function PlayComputerPage() {
       // Stockfish et non Maia : le tournoi annonce une force en Elo, et c'est
       // le barème des niveaux qui la garantit.
       human: false,
+      // Un tournoi tient son propre tableau : il n'alimente pas le classement.
+      classee: false,
     })
     setResolvedColor(couleur)
     setCoupsRepris(undefined)
@@ -264,7 +279,7 @@ export default function PlayComputerPage() {
       .catch(() => demarrerDuel(chapitre.niveau))
 
     function demarrerDuel(niveau: number) {
-      setSetup({ level: niveau, color: 'random', timeControlId: '600+5', human: false })
+      setSetup({ level: niveau, color: 'random', timeControlId: '600+5', human: false, classee: false })
       setResolvedColor(Math.random() < 0.5 ? 'w' : 'b')
       setCoupsRepris(undefined)
       setHorlogeReprise(null)
@@ -300,6 +315,9 @@ export default function PlayComputerPage() {
       // pouvait demander un niveau qu'elle ne sait pas jouer : elle reprend
       // alors avec Stockfish, à la force annoncée.
       human: partie.human && maiaCouvre(botLevel(partie.level).elo),
+      // Une partie reprise n'est pas classée : rien ne dit ce qui s'est passé
+      // pendant la séance précédente, ni quelles aides on y a utilisées.
+      classee: false,
     })
     setResolvedColor(partie.playerColor)
     setCoupsRepris(partie.moves)
@@ -330,6 +348,7 @@ export default function PlayComputerPage() {
       playerColor={resolvedColor}
       timeControlId={setup.timeControlId}
       human={setup.human}
+      classee={setup.classee}
       initialMoves={coupsRepris}
       initialClock={horlogeReprise}
       onNewGame={() => setPhase('setup')}
@@ -371,6 +390,22 @@ function SetupScreen({
   const [color, setColor] = useState<Color | 'random'>(initial.color)
   const [timeControlId, setTimeControlId] = useState(initial.timeControlId)
   const [human, setHuman] = useState(initial.human)
+  const [classee, setClassee] = useState(initial.classee)
+
+  /**
+   * A-t-on un compte ?
+   *
+   * Une partie classée met à jour un classement, et un classement se range
+   * quelque part. `null` tant qu'on ne sait pas : on n'affiche pas une case
+   * grisée à quelqu'un qui est peut-être connecté.
+   */
+  const [connecte, setConnecte] = useState<boolean | null>(null)
+  useEffect(() => {
+    void fetch('/api/auth')
+      .then((reponse) => reponse.json())
+      .then((data: { user: unknown }) => setConnecte(data.user != null))
+      .catch(() => setConnecte(false))
+  }, [])
 
   // Le mode commenté n'est pas un réglage de la partie mais une préférence
   // durable : on le lit et on l'écrit là où il vit, pour que le bouton de la
@@ -874,21 +909,49 @@ function SetupScreen({
 
         <div className="p-4 [@media(max-height:820px)]:p-2">
           <SectionTitle>Pendant la partie</SectionTitle>
+
+          {/* ── Partie classée ────────────────────────────────────────────
+              En tête des réglages de partie, parce qu'elle commande les deux
+              autres : cochée, elle retire le mode commenté, l'indice et
+              l'annulation. Ce n'est pas une punition, c'est ce qui rend le
+              résultat interprétable — on ne mesure pas quelqu'un qui reprend
+              ses coups et à qui l'on montre le meilleur.
+
+              Elle est éteinte par défaut : on vient d'abord s'entraîner, et
+              s'entraîner suppose de pouvoir revenir en arrière. */}
+          <Toggle
+            label="Partie classée"
+            description={
+              connecte === false
+                ? 'Demande un compte : c’est lui qui porte le classement.'
+                : 'Le résultat met à jour ton classement dans cette cadence. En échange, pas d’annulation, pas d’indice, pas de commentaires.'
+            }
+            checked={classee && connecte !== false}
+            disabled={connecte === false}
+            onChange={setClassee}
+          />
+
+          <div className="mt-3.5 border-t border-line/60 pt-3.5">
           {/* Descriptions resserrées. Elles faisaient trois lignes chacune et
               expliquaient le mode commenté deux fois — une fois pour l'activer,
               une fois pour l'étendre. Un réglage qu'on lit plus longtemps qu'on
               ne met à le comprendre est mal écrit. */}
-          <Toggle
-            label="Commenter chaque coup"
-            description="Ce que vaut ton coup, les meilleures options et leur raison, lus à voix haute. Recommandé pour débuter."
-            checked={commentaryMode}
-            onChange={(valeur) => setPreference('commentaryMode', valeur)}
-          />
+            <Toggle
+              label="Commenter chaque coup"
+              description={
+                classee
+                  ? 'Indisponible en partie classée : le commentaire montre le meilleur coup.'
+                  : 'Ce que vaut ton coup, les meilleures options et leur raison, lus à voix haute. Recommandé pour débuter.'
+              }
+              checked={commentaryMode && !classee}
+              disabled={classee}
+              onChange={(valeur) => setPreference('commentaryMode', valeur)}
+            />
 
           {/* Subordonné : il n'apparaît qu'une fois le mode commenté actif.
               Le proposer avant reviendrait à offrir le détail d'une chose qu'on
               n'a pas encore choisie. */}
-          {commentaryMode && (
+          {commentaryMode && !classee && (
             <div className="mt-3.5 border-t border-line/60 pt-3.5">
               <Toggle
                 label="Commenter aussi l’adversaire"
@@ -898,6 +961,7 @@ function SetupScreen({
               />
             </div>
           )}
+          </div>
         </div>
       </Card>
       </div>
@@ -908,7 +972,15 @@ function SetupScreen({
         size="lg"
         fullWidth
         className="mt-4 [@media(max-height:820px)]:mt-2"
-        onClick={() => onStart({ level, color, timeControlId, human: humainRetenu })}
+        onClick={() =>
+          onStart({
+            level,
+            color,
+            timeControlId,
+            human: humainRetenu,
+            classee: classee && connecte === true,
+          })
+        }
       >
         Commencer la partie
       </Button>
@@ -928,6 +1000,7 @@ function GameScreen({
   playerColor,
   timeControlId,
   human,
+  classee,
   initialMoves,
   initialClock,
   onNewGame,
@@ -944,6 +1017,8 @@ function GameScreen({
   timeControlId: string
   /** Maia plutôt que Stockfish : décidé à la configuration. */
   human: boolean
+  /** Partie classée : aides retirées, résultat porté au classement. */
+  classee: boolean
   /** Coups déjà joués, quand on reprend une partie interrompue. */
   initialMoves?: string[]
   /** Temps restant à la reprise, en millisecondes. */
@@ -966,6 +1041,8 @@ function GameScreen({
     result: GameResult
   } | null>(null)
   const [hintArrow, setHintArrow] = useState<Arrow | null>(null)
+  /** Variation de classement d'une partie classée, une fois le serveur consulté. */
+  const [variationClassement, setVariationClassement] = useState<number | null>(null)
   // Lue par les effets d'analyse, qui s'exécutent avant que `gameOver` ne soit
   // recalculé dans le corps du composant.
   const gameOverRef = useRef(false)
@@ -976,7 +1053,16 @@ function GameScreen({
   // ── Mode commenté ───────────────────────────────────────────────────────
   // Déclaré ici, avant le pilote de l'adversaire artificiel : celui-ci consulte
   // l'état de pause pour savoir s'il doit patienter.
-  const commentaryMode = prefs.commentaryMode
+  /*
+    Le mode commenté n'existe pas dans une partie classée.
+
+    On lit la préférence, puis on l'annule : le réglage du joueur est conservé
+    pour ses parties d'entraînement, mais il ne s'applique pas ici. Tout ce qui
+    en découle — les flèches sur l'échiquier, la pastille de verdict, le
+    panneau du coach, la voix — s'éteint du même coup, puisque tout part de
+    cette valeur.
+  */
+  const commentaryMode = prefs.commentaryMode && !classee
   const [hoveredAlternative, setHoveredAlternative] = useState<Alternative | null>(null)
   const [commentaryPaused, setCommentaryPaused] = useState(false)
   // Vrai tant que le coach prononce son commentaire. L'adversaire s'y range :
@@ -1116,7 +1202,9 @@ function GameScreen({
       joueur et la réponse — pour un texte que personne ne verra.
     */
     enabled:
-      (commentaryMode || prefs.showEvalDuringGame) && state.isLive && !gameOverRef.current,
+      (commentaryMode || (prefs.showEvalDuringGame && !classee)) &&
+      state.isLive &&
+      !gameOverRef.current,
     alternatives: commentaryMode ? 3 : 1,
     book,
   })
@@ -1315,8 +1403,9 @@ function GameScreen({
     // au retour. Le sens est celui des Blancs, comme partout ailleurs.
     if (tournoi) deposerResultat(issue)
 
-    archiverPartie({
+    void archiverPartie({
       mode: 'computer',
+      classee,
       moves: state.moves.map((coup) => coup.san),
       result: issue,
       status: outcome?.status ?? state.status,
@@ -1327,6 +1416,10 @@ function GameScreen({
       increment: timeControl.increment,
       eco: opening?.eco ?? null,
       opening: opening?.name ?? null,
+    }).then((classement) => {
+      // Rien à annoncer sur une partie d'entraînement : le serveur ne renvoie
+      // de variation que pour une partie classée.
+      if (classement) setVariationClassement(classement.variation)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameOver])
@@ -1538,7 +1631,10 @@ function GameScreen({
         */}
         <div className="flex min-h-0 min-w-0 flex-col">
           <div className="flex min-h-0 flex-1 gap-2">
-            {prefs.showEvalDuringGame && (
+            {/* La barre d'évaluation dit, à chaque coup, si l'on vient de se
+                tromper. C'est une aide au même titre que l'indice : elle
+                disparaît en partie classée. */}
+            {prefs.showEvalDuringGame && !classee && (
               <EvalBar
                 score={commentary?.scoreAfter ?? null}
                 orientation={orientation}
@@ -1674,8 +1770,21 @@ function GameScreen({
               yourColor={playerColor}
               thinking={botPlayer.thinking}
               gameOver={gameOver}
-              className="mr-auto pl-1"
+              className={classee ? 'pl-1' : 'mr-auto pl-1'}
             />
+
+            {/* Le rappel qu'elle compte.
+
+                Sans lui, une partie classée ressemble à une partie ordinaire
+                dont on aurait perdu trois boutons : on cherche « Annuler », on
+                ne le trouve pas, et l'on croit à une panne. La pastille répond
+                à la question avant qu'elle ne se pose. */}
+            {classee && (
+              <Chip tone="accent" className="mr-auto">
+                <Trophy size={11} aria-hidden />
+                Classée
+              </Chip>
+            )}
 
             <GameNav cursor={state.cursor} count={state.moves.length} onSeek={goTo} />
 
@@ -1709,7 +1818,7 @@ function GameScreen({
                   <span className="max-sm:hidden">Menu</span>
                 </ButtonLink>
               </>
-            ) : (
+            ) : classee ? null : (
               <Button
                 size="sm"
                 variant="ghost"
@@ -1730,6 +1839,11 @@ function GameScreen({
                 souvent, alors qu'on abandonne une fois. Une action fréquente
                 cachée derrière un bouton supplémentaire, c'est un geste de plus
                 à chaque fois. */}
+            {/* « Annuler » et « Indice » disparaissent en partie classée : ce
+                sont les deux aides qui rendraient le résultat ininterprétable,
+                et une case cochée avant la partie vaut mieux qu'un bouton
+                grisé qu'on regarde pendant toute la partie. */}
+            {!classee && (
             <Button
               size="sm"
               variant="ghost"
@@ -1742,6 +1856,7 @@ function GameScreen({
             >
               <span className="max-sm:hidden">Annuler</span>
             </Button>
+            )}
 
             {/* Ne restent au menu que les gestes rares ou définitifs.
                 Il s'ouvre vers le haut : la barre est en bas de fenêtre, un
@@ -1857,6 +1972,7 @@ function GameScreen({
           playerColor={playerColor}
           opponentName={personality.name.fr}
           moves={state.moves}
+          ratingDelta={variationClassement}
           onRematch={onRematch}
           onNewGame={onNewGame}
         />

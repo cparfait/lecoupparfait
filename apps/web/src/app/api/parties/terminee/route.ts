@@ -10,19 +10,30 @@
  * qui avait joué toute la soirée. La table `games` prévoyait pourtant `mode` et
  * `botLevel` depuis le début.
  *
- * **Jamais classé.** `rated` est forcé à faux et aucun classement n'est
- * touché : sinon il suffirait de battre le bot le plus faible en boucle. C'est
- * la même règle que côté serveur, appliquée ici parce que c'est ici qu'on écrit.
+ * **Classé seulement si on l'a demandé avant.** Une partie contre l'ordinateur
+ * ne compte pas par défaut, et c'est justifié : on y dispose d'« Annuler »,
+ * d'« Indice » et du mode commenté, qui montre le meilleur coup par une
+ * flèche. Un classement gagné avec ces outils ne mesurerait rien.
  *
- * On fait confiance au client sur les coups, et il n'y a pas de moyen de faire
- * autrement — la partie s'est jouée chez lui. Le risque se limite à un
- * historique fantaisiste dans son propre profil, puisque rien de tout cela
- * n'alimente le classement.
+ * Le joueur peut donc cocher « partie classée » **avant** de commencer, et
+ * l'écran de jeu lui retire alors les trois aides. L'adversaire a un
+ * classement annoncé — c'est tout l'objet du barème des vingt-cinq niveaux —,
+ * il fait donc un adversaire valable, avec un écart-type large : ce barème
+ * reste une approximation, et l'incertitude doit se voir dans le calcul plutôt
+ * que d'être passée sous silence.
+ *
+ * On fait confiance au client, et il n'y a pas de moyen de faire autrement —
+ * la partie s'est jouée chez lui, coups compris. Quelqu'un qui veut se
+ * fabriquer un classement y arrivera ; il aura triché contre lui-même, sur une
+ * plateforme qu'il héberge lui-même. Ce qui est protégé, en revanche, c'est le
+ * joueur honnête : sans le drapeau, rien n'est classé.
  */
 
 import { NextResponse } from 'next/server'
 import { Chess } from 'chess.js'
+import { botLevel } from '@coupparfait/core'
 import { and, desc, eq, games, getDb, sql } from '@coupparfait/db'
+import { applyGameResult, type RatingCategory } from '@coupparfait/db/ratings'
 import { getCurrentUser } from '@/lib/server/session.ts'
 
 export const runtime = 'nodejs'
@@ -59,6 +70,8 @@ export async function POST(request: Request) {
     eco?: string | null
     opening?: string | null
     startedAt?: string
+    /** Le joueur a demandé une partie classée avant de commencer. */
+    classee?: boolean
   }
   try {
     body = await request.json()
@@ -97,6 +110,15 @@ export async function POST(request: Request) {
   const adversaire = (body.opponentName ?? 'Ordinateur').slice(0, 40)
   const debut = body.startedAt ? new Date(body.startedAt) : new Date()
 
+  /*
+    Classée ? Seulement contre l'ordinateur, seulement si on l'a demandé, et
+    seulement avec un niveau d'adversaire connu — c'est lui qui fournit le
+    classement d'en face.
+  */
+  const niveau = typeof body.botLevel === 'number' ? Math.round(body.botLevel) : null
+  const classee =
+    body.classee === true && body.mode === 'computer' && niveau !== null && niveau >= 1
+
   try {
     await getDb()
       .insert(games)
@@ -104,8 +126,7 @@ export async function POST(request: Request) {
         slug: slug(),
         mode: String(body.mode),
         speed: cadence(body.initialTime ?? 0),
-        // Jamais, sous aucune condition : voir l'en-tête du fichier.
-        rated: false,
+        rated: classee,
         whiteId: camp === 'w' ? user.userId : null,
         blackId: camp === 'b' ? user.userId : null,
         whiteName: camp === 'w' ? user.username : adversaire,
@@ -125,7 +146,35 @@ export async function POST(request: Request) {
         endedAt: new Date(),
       })
 
-    return NextResponse.json({ ok: true })
+    if (!classee) return NextResponse.json({ ok: true })
+
+    /*
+      Le classement, une fois la partie rangée.
+
+      L'écart-type de l'adversaire vaut 100 — le double de celui d'un puzzle.
+      Un puzzle a une cote établie par des milliers de tentatives ; le niveau
+      d'un bot est une déclaration de notre part, appuyée sur des mesures mais
+      pas sur une population. Une incertitude plus large fait moins bouger le
+      classement du joueur, ce qui est exactement ce qu'on veut d'un adversaire
+      dont on n'est pas tout à fait sûr.
+    */
+    const score = result === '1/2-1/2' ? 0.5 : (result === '1-0') === (camp === 'w') ? 1 : 0
+    const variation = await applyGameResult({
+      userId: user.userId,
+      category: cadence(body.initialTime ?? 0) as RatingCategory,
+      opponentRating: botLevel(niveau!).elo,
+      opponentDeviation: 100,
+      score,
+    })
+
+    return NextResponse.json({
+      ok: true,
+      classement: {
+        avant: variation.before,
+        apres: variation.after,
+        variation: variation.delta,
+      },
+    })
   } catch (error) {
     console.error('[parties/terminee]', error)
     // La partie a été jouée et son résultat affiché : ne pas savoir la ranger

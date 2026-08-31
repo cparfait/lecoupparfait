@@ -106,6 +106,15 @@ export interface PartieTerminee {
   eco?: string | null
   opening?: string | null
   startedAt?: string
+  /** Partie annoncée classée avant de commencer — voir l'écran de réglages. */
+  classee?: boolean
+}
+
+/** Ce que le serveur renvoie d'une partie classée. */
+export interface VariationClassement {
+  avant: number
+  apres: number
+  variation: number
 }
 
 /**
@@ -120,15 +129,25 @@ export interface PartieTerminee {
  * Silencieux et sans blocage, pour la même raison qu'au-dessus : le résultat
  * est déjà affiché, l'archivage n'a pas à s'inviter dans ce moment-là.
  */
-export function archiverPartie(partie: PartieTerminee): void {
-  if (partie.moves.length === 0) return
-  void fetch('/api/parties/terminee', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(partie),
-  }).catch(() => {
+export async function archiverPartie(
+  partie: PartieTerminee,
+): Promise<VariationClassement | null> {
+  if (partie.moves.length === 0) return null
+  try {
+    const reponse = await fetch('/api/parties/terminee', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(partie),
+    })
+    // La variation de classement n'existe que pour une partie classée ; pour
+    // toutes les autres, l'appel reste ce qu'il était — silencieux et sans
+    // conséquence à l'écran.
+    const data = (await reponse.json()) as { classement?: VariationClassement }
+    return data.classement ?? null
+  } catch {
     // Silence volontaire : voir l'en-tête du fichier.
-  })
+    return null
+  }
 }
 
 /** Efface une partie de l'historique. Retourne `false` si le serveur refuse. */
