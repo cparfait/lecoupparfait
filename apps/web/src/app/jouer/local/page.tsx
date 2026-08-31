@@ -47,6 +47,7 @@ import { PlayerBar } from '@/components/game/PlayerBar.tsx'
 import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
 import { Button, Card, Chip, Toggle } from '@/components/ui/index.tsx'
 import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
+import { useEcranAllume } from '@/lib/ecranAllume.ts'
 import { useChessGame } from '@/lib/game/useChessGame.ts'
 import { useCurrentOpening, useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { playMoveSound, playResultSound } from '@/lib/sound.ts'
@@ -111,6 +112,11 @@ export default function LocalGamePage() {
   })
 
   const { state, play, undo, reset, goTo } = game
+
+  // Un téléphone posé entre deux joueurs est le cas où l'écran s'éteint le plus
+  // vite : c'est l'autre qui réfléchit, et personne ne touche l'appareil.
+  useEcranAllume(!state.isGameOver)
+
   const opening = useCurrentOpening(
     state.moves.map((move) => move.san),
     locale,
@@ -316,7 +322,9 @@ export default function LocalGamePage() {
             </Card>
           )}
 
-          <Card className="flex min-h-[220px] flex-1 flex-col overflow-hidden">
+          {/* Même règle qu'en partie contre l'ordinateur : la liste prend la
+              hauteur de ses coups sur téléphone, la place restante au-delà. */}
+          <Card className="flex max-h-[45vh] flex-col overflow-hidden lg:max-h-none lg:min-h-[220px] lg:flex-1">
             <MoveList
               moves={state.moves}
               cursor={state.cursor}
