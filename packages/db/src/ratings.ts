@@ -14,6 +14,7 @@
 import { and, eq } from 'drizzle-orm'
 import {
   CLASSEMENT_DEPART,
+  CLASSEMENT_PLANCHER,
   decayGlicko,
   updateElo,
   updateGlicko,
@@ -130,26 +131,38 @@ export async function applyGameResult(options: {
 
   const elo = updateElo(current.elo, options.opponentRating, options.score, current.games)
 
+  /*
+    Les deux classements sont bornés par le bas.
+
+    Ni Glicko-2 ni l'Elo n'ont de plancher : une série de défaites depuis la
+    valeur de départ descend à zéro, puis en négatif. On borne donc la valeur
+    enregistrée — le calcul de la partie suivante repartira de là, et un joueur
+    posé sur le plancher remonte dès sa première victoire, son écart-type étant
+    resté grand.
+  */
+  const classement = Math.max(CLASSEMENT_PLANCHER, next.rating)
+  const eloBorne = Math.max(CLASSEMENT_PLANCHER, elo.rating)
+
   const wins = current.wins + (options.score === 1 ? 1 : 0)
   const losses = current.losses + (options.score === 0 ? 1 : 0)
   const draws = current.draws + (options.score === 0.5 ? 1 : 0)
   const games = current.games + 1
 
-  const isPeak = next.rating > current.peak
+  const isPeak = classement > current.peak
   const now = new Date()
 
   await database
     .update(ratings)
     .set({
-      rating: next.rating,
+      rating: classement,
       deviation: next.rd,
       volatility: next.volatility,
-      elo: elo.rating,
+      elo: eloBorne,
       games,
       wins,
       losses,
       draws,
-      peak: isPeak ? next.rating : current.peak,
+      peak: isPeak ? classement : current.peak,
       peakAt: isPeak ? now : current.peakAt,
       updatedAt: now,
     })
@@ -158,20 +171,22 @@ export async function applyGameResult(options: {
   await database.insert(ratingHistory).values({
     userId: options.userId,
     category: options.category,
-    rating: next.rating,
+    rating: classement,
     deviation: next.rd,
-    delta: next.rating - current.rating,
+    delta: classement - current.rating,
     gameId: options.gameId ?? null,
   })
 
   return {
     before: current.rating,
-    after: next.rating,
-    delta: next.rating - current.rating,
+    after: classement,
+    delta: classement - current.rating,
     deviation: next.rd,
     eloBefore: current.elo,
-    eloAfter: elo.rating,
-    eloDelta: elo.delta,
+    // La valeur rendue est celle qu'on a écrite : annoncer « −20 » après avoir
+    // enregistré un classement inchangé au plancher serait mentir à l'écran.
+    eloAfter: eloBorne,
+    eloDelta: eloBorne - current.elo,
   }
 }
 

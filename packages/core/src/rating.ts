@@ -123,6 +123,25 @@ export const GLICKO_DEFAULT_RATING = 1500
  */
 export const CLASSEMENT_DEPART = 100
 
+/**
+ * En dessous, un classement ne descend pas.
+ *
+ * Un plancher n'est pas une décoration : sans lui, Glicko-2 et l'Elo classique
+ * n'ont aucune borne inférieure. Quelqu'un qui commence à 100 et perd ses
+ * premières parties passe à 80, puis 60, puis zéro, puis en négatif — et l'on
+ * affiche à un débutant un nombre qui n'existe dans aucun classement au monde,
+ * au moment précis où il a le plus besoin qu'on ne l'enfonce pas.
+ *
+ * C'est aussi ce qui rend la valeur de départ honnête : annoncer « on commence
+ * à 100 » suppose que 100 soit un plancher, pas un point de passage. Les
+ * plateformes en ligne procèdent ainsi.
+ *
+ * Le calcul, lui, n'est pas faussé : on borne la valeur *enregistrée*, et la
+ * partie suivante repart de là. Un joueur bloqué au plancher remonte dès sa
+ * première victoire, l'écart-type étant resté grand.
+ */
+export const CLASSEMENT_PLANCHER = 100
+
 /** Écart-type initial : un nouveau joueur est très incertain. */
 export const GLICKO_DEFAULT_RD = 350
 
