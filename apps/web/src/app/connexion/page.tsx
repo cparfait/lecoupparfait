@@ -16,7 +16,6 @@ import { Suspense, useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowRight, Swords } from 'lucide-react'
-import { LogoMark } from '@/components/brand/LogoMark.tsx'
 import { Button, Card, Input } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useCourrielDisponible, useIdentite } from '@/lib/auth/useIdentite.ts'
@@ -228,18 +227,19 @@ function AuthForm() {
         )}
 
         <div className="mb-6 text-center">
-          {/* Cavale, et non une couronne sur un pavé dégradé.
+          {/* Sans logo, et c'est un retrait.
 
-              C'était la dernière des trois marques concurrentes : l'en-tête a
-              été ramené au cavalier, le favicon aussi, et il restait cette
-              couronne — juste au-dessus de « Rejoins Le Coup Parfait », c'est-à-
-              dire à l'endroit exact où l'on découvre la marque. On arrivait sur
-              une couronne et l'on trouvait ensuite un cavalier partout.
+              Cavale avait remplacé ici une couronne qui ne ressemblait à rien
+              d'autre dans l'application — la bonne correction à l'époque, mais
+              une correction de moitié : le même cavalier se tient déjà en haut
+              à gauche, à trois centimètres, dans la barre de navigation. Deux
+              fois la même marque sur un écran qui tient en un formulaire, ce
+              n'est pas deux fois plus de marque, c'est un doublon qui repousse
+              le champ « Pseudo » vers le bas.
 
-              Le pavé disparaît avec elle : son dégradé allait de `--accent` à
-              `--accent-2`, deux familles de teintes dans un même dégradé, ce que
-              l'en-tête de `LogoMark.tsx` interdit explicitement. */}
-          <LogoMark size={56} className="mx-auto mb-4 rounded-[var(--radius)]" />
+              La page s'ouvre donc sur sa phrase, qui est ce qu'on est venu
+              lire. `LogoMark` reste utilisé par l'en-tête, où il a un sens :
+              y revenir d'un clic. */}
           <h1 className="font-display text-2xl font-bold tracking-tight">
             {mode === 'signin' ? 'Content de te revoir' : 'Rejoins Le Coup Parfait'}
           </h1>
