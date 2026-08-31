@@ -711,9 +711,29 @@ function SetupScreen({
         )}
 
         <div className="border-t border-line/60 px-5 py-4 [@media(max-height:820px)]:py-2.5">
-          <label htmlFor="level" className="mb-2 block text-sm font-medium">
-            Niveau de difficulté
-          </label>
+          {/* ── Qui l'on choisit, à côté du curseur ──────────────────────
+              Le portrait, le nom et l'Elo sont en tête de cette carte ; le
+              curseur, lui, est tout en bas, après le choix de l'adversaire et
+              le rappel de progression. Sur un téléphone, les deux ne tiennent
+              pas ensemble à l'écran : on fait glisser le curseur en regardant
+              un chiffre qui a disparu vers le haut, et l'on ne sait donc pas
+              qui l'on est en train de choisir — ce qui est la seule question
+              que pose ce réglage.
+
+              On répète donc l'identité ici, en petit. Masqué à partir de `lg`,
+              où la carte tient entière dans l'écran et où répéter reviendrait
+              à dire deux fois la même chose à dix centimètres d'intervalle. */}
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <label htmlFor="level" className="block text-sm font-medium">
+              Niveau de difficulté
+            </label>
+            <span className="flex items-center gap-1.5 lg:hidden">
+              <PortraitAdversaire personality={personality} size={22} />
+              <span className="text-[12px] font-semibold text-ink">{personality.name.fr}</span>
+              <span className="text-[12px] tabular-nums text-accent">≈ {bot.elo} Elo</span>
+              <span className="text-[12px] text-faint">n°{bot.level}</span>
+            </span>
+          </div>
           <input
             id="level"
             type="range"
@@ -722,9 +742,20 @@ function SetupScreen({
             step={1}
             value={level}
             onChange={(event) => setLevel(Number(event.target.value))}
-            className="h-2 w-full cursor-pointer appearance-none rounded-full"
+            /* La barre reste fine, la zone touchable ne l'est plus.
+
+               Le champ faisait huit points de haut : c'est la hauteur du rail,
+               et c'était aussi toute la surface qu'on pouvait viser du pouce.
+               On lui donne trente-deux points et l'on repeint le rail au
+               centre, sans le grossir — `background-size` borne le dégradé à
+               huit points de haut, `center` le pose au milieu. */
+            className="h-8 w-full cursor-pointer appearance-none bg-transparent"
             style={{
-              background: `linear-gradient(to right, var(--accent) ${((level - 1) / (BOT_LEVELS.length - 1)) * 100}%, var(--surface-strong) ${((level - 1) / (BOT_LEVELS.length - 1)) * 100}%)`,
+              backgroundImage: `linear-gradient(to right, var(--accent) ${((level - 1) / (BOT_LEVELS.length - 1)) * 100}%, var(--surface-strong) ${((level - 1) / (BOT_LEVELS.length - 1)) * 100}%)`,
+              backgroundSize: '100% 8px',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              borderRadius: '9999px',
             }}
           />
           <div className="mt-1.5 flex justify-between text-[11px] text-faint">

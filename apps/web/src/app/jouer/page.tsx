@@ -117,7 +117,11 @@ export default function PlayLobbyPage() {
           <Link
             key={href}
             href={href}
-            className="group animate-slide-up glass gradient-ring relative flex flex-row items-center gap-3.5 overflow-hidden p-3.5 transition-transform duration-300 hover:-translate-y-1 md:flex-col md:items-stretch md:gap-0 md:p-6"
+            /* `pr-11` sous `md` : la flèche est posée en absolu contre le bord
+               droit, et la phrase lui passait dessous — « au grand maître »
+               finissait sous le chevron. Le titre avait son `pr-6`, pas le
+               reste du texte. */
+            className="group animate-slide-up glass gradient-ring relative flex flex-row items-center gap-3.5 overflow-hidden p-3.5 pr-11 transition-transform duration-300 hover:-translate-y-1 md:flex-col md:items-stretch md:gap-0 md:p-6"
             style={{ animationDelay: `${index * 70}ms` }}
           >
             <span

@@ -572,8 +572,12 @@ export default function PuzzlesPage() {
             key={entry.id}
             type="button"
             onClick={() => setTheme(entry.id)}
+            /* `min-h-9` : les pastilles mesuraient 26 points de haut, soit
+               presque moitié moins que le pouce qui les vise. On ne les
+               agrandit pas en typographie — elles resteraient discrètes, ce
+               qui est leur rôle — mais en zone touchable. */
             className={clsx(
-              'rounded-full border px-2.5 py-1 text-xs font-medium transition-colors',
+              'inline-flex min-h-9 items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors',
               theme === entry.id
                 ? 'border-accent bg-accent/15 text-ink'
                 : 'border-line text-muted hover:bg-surface-hover',

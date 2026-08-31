@@ -491,6 +491,11 @@ const ADVERSAIRES = {
     // Le seul adversaire en laiton gravé : lui interdire la dorure et la
     // gravure ornementale reviendrait à lui retirer sa matière.
     dorure: true,
+    // Tous les cavaliers regardent vers la gauche — voir la note de `miroir`.
+    // Boussole et Mirage étaient les deux seuls à regarder à droite, et sept
+    // portraits alignés dont deux à contresens ne se lisent plus comme une
+    // série : le regard s'arrête sur l'intrus au lieu de parcourir la galerie.
+    miroir: true,
   },
   gambiteur: {
     nom: 'Mirage',
@@ -499,6 +504,8 @@ const ADVERSAIRES = {
       'slight chromatic offset, the rear of the neck almost dissolved into air',
     criniere: 'a shimmering iridescent ridge',
     posture: 'caught mid-movement, blurred at the trailing edge, elusive',
+    // Même raison que Boussole : la série regarde toute vers la gauche.
+    miroir: true,
   },
   machine: {
     nom: 'Oracle',

@@ -444,17 +444,40 @@ function BottomBar({
           const Icone = entree.icon
           const active = pathname.startsWith(entree.href)
           return (
+            /* ── La barre du bas, enfin visible ─────────────────────────
+               Elle était en `text-faint` — la couleur des mentions
+               secondaires — sur un fond translucide : cinq pictogrammes gris
+               pâle qu'on ne distinguait ni du fond ni les uns des autres, et
+               dont on ne savait pas lequel était actif sans les comparer.
+               C'est pourtant la navigation principale sur téléphone.
+
+               L'entrée courante porte maintenant une pastille d'accent sous
+               son icône, un libellé en gras et l'icône en trait épais ; les
+               autres passent en `text-muted`, lisible sans crier. La pastille
+               fait aussi office de cible : elle épaissit la zone touchable. */
             <Link
               key={entree.href}
               href={entree.href}
               aria-current={active ? 'page' : undefined}
               className={clsx(
-                'flex min-w-0 flex-1 flex-col items-center gap-1 rounded-[var(--radius-sm)] px-1 py-1.5 transition-colors',
-                active ? 'text-accent' : 'text-faint',
+                'flex min-w-0 flex-1 flex-col items-center gap-1 rounded-[var(--radius-sm)] px-1 pb-1.5 pt-1 transition-colors',
+                active ? 'text-accent' : 'text-muted',
               )}
             >
-              <Icone size={19} strokeWidth={active ? 2.4 : 1.9} aria-hidden />
-              <span className="truncate text-[10px] font-medium leading-none">
+              <span
+                className={clsx(
+                  'grid h-7 w-12 place-items-center rounded-full transition-all',
+                  active && 'bg-accent/20 shadow-[0_0_16px_-4px_var(--accent)]',
+                )}
+              >
+                <Icone size={20} strokeWidth={active ? 2.5 : 2} aria-hidden />
+              </span>
+              <span
+                className={clsx(
+                  'truncate text-[10px] leading-none',
+                  active ? 'font-bold' : 'font-medium',
+                )}
+              >
                 {t(entree.labelKey)}
               </span>
             </Link>
@@ -471,16 +494,32 @@ function BottomBar({
           onClick={onToggleMenu}
           aria-expanded={menuOpen}
           className={clsx(
-            'flex min-w-0 flex-1 flex-col items-center gap-1 rounded-[var(--radius-sm)] px-1 py-1.5 transition-colors',
-            menuOpen ? 'text-accent' : 'text-faint',
+            'flex min-w-0 flex-1 flex-col items-center gap-1 rounded-[var(--radius-sm)] px-1 pb-1.5 pt-1 transition-colors',
+            menuOpen ? 'text-accent' : 'text-muted',
           )}
         >
-          {menuOpen ? (
-            <X size={19} strokeWidth={2.4} aria-hidden />
-          ) : (
-            <MenuIcon size={19} strokeWidth={1.9} aria-hidden />
-          )}
-          <span className="truncate text-[10px] font-medium leading-none">{t('nav.menu')}</span>
+          {/* Même traitement que les quatre autres : le menu ouvert est un
+              état, il doit se voir comme tel. */}
+          <span
+            className={clsx(
+              'grid h-7 w-12 place-items-center rounded-full transition-all',
+              menuOpen && 'bg-accent/20 shadow-[0_0_16px_-4px_var(--accent)]',
+            )}
+          >
+            {menuOpen ? (
+              <X size={20} strokeWidth={2.5} aria-hidden />
+            ) : (
+              <MenuIcon size={20} strokeWidth={2} aria-hidden />
+            )}
+          </span>
+          <span
+            className={clsx(
+              'truncate text-[10px] leading-none',
+              menuOpen ? 'font-bold' : 'font-medium',
+            )}
+          >
+            {t('nav.menu')}
+          </span>
         </button>
       </div>
     </nav>

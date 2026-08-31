@@ -938,3 +938,45 @@ select option:hover {
   .animate-carriere-confetti { display: none; }
   .carriere-jauge { transition: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Curseurs
+   ═══════════════════════════════════════════════════════════════════════════
+
+   Les champs `range` de l'application portent tous `appearance-none`, qui
+   retire le rail *et* le pouce du navigateur : le rail est repeint à la main
+   — un dégradé qui montre la portion parcourue —, mais le pouce, lui, n'était
+   redessiné nulle part. Selon le moteur, on obtenait donc un curseur sans
+   poignée visible : une barre qu'on peut faire glisser sans voir ce qu'on
+   attrape, et sur un téléphone sans savoir où poser le doigt.
+
+   Vingt-deux points de diamètre : c'est la taille d'un pouce posé, et elle
+   dépasse volontairement du rail de huit points — la poignée doit se voir
+   comme une pièce à part, pas comme un renflement. */
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: var(--accent);
+  border: 2px solid var(--bg-elev);
+  box-shadow: 0 1px 5px rgb(0 0 0 / 0.4);
+  cursor: pointer;
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: var(--accent);
+  border: 2px solid var(--bg-elev);
+  box-shadow: 0 1px 5px rgb(0 0 0 / 0.4);
+  cursor: pointer;
+}
+
+/* Firefox dessine son propre rail par-dessus le fond du champ : on l'efface,
+   le dégradé du champ fait déjà le travail. */
+input[type='range']::-moz-range-track {
+  background: transparent;
+}

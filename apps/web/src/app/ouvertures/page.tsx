@@ -352,7 +352,9 @@ export default function OpeningsPage() {
                   }}
                   title={entry.description.fr}
                   className={clsx(
-                    'rounded-full border px-2.5 py-1 text-xs font-medium transition-colors',
+                    // 26 points de haut ne se visent pas au pouce : la zone
+                    // touchable monte à 36 sans changer la typographie.
+                    'inline-flex min-h-9 items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors',
                     volume === entry.id
                       ? 'border-accent bg-accent/15 text-ink'
                       : 'border-line text-muted hover:bg-surface-hover',
