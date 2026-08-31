@@ -45,15 +45,27 @@ export async function GET(request: Request) {
       target = rating.rating + 50
     }
 
-    // Puzzles déjà tentés, à ne pas reproposer.
+    /*
+      Puzzles déjà tentés, à ne pas reproposer.
+
+      Le puzzle qu'on vient de terminer s'y ajoute par son identifiant, passé
+      dans l'adresse. Sa tentative est bien enregistrée, mais par un appel
+      distinct : celui qui enchaîne aussitôt sur le suivant peut arriver ici
+      avant que l'écriture ne soit visible, et se voir resservir la position
+      qu'il vient de résoudre. La liste ne coûte rien à allonger d'un élément.
+    */
     let excluded: string[] = []
+    const dernier = url.searchParams.get('exclure')
+    if (dernier) excluded.push(dernier.slice(0, 40))
     if (user) {
       const done = await database
         .select({ puzzleId: puzzleAttempts.puzzleId })
         .from(puzzleAttempts)
         .where(eq(puzzleAttempts.userId, user.userId))
         .limit(2000)
-      excluded = done.map((row) => row.puzzleId)
+      // Concaténation, et non affectation : celle-ci écrasait le puzzle
+      // qu'on vient de terminer, ajouté juste au-dessus.
+      excluded = [...excluded, ...done.map((row) => row.puzzleId)]
     }
 
     const conditions = [
@@ -75,18 +87,47 @@ export async function GET(request: Request) {
 
     let puzzle = rows[0]
 
-    // Aucun puzzle dans la fenêtre : on élargit plutôt que de renvoyer une
-    // erreur, ce qui arrive sur une base partiellement importée.
+    /*
+      Aucun puzzle dans la fenêtre : on élargit plutôt que de renvoyer une
+      erreur, ce qui arrive sur une base partiellement importée.
+
+      Le repli laissait tomber la liste des puzzles déjà tentés en même temps
+      que la fenêtre de difficulté — et il ne s'agit pas du même genre de
+      contrainte. Élargir la difficulté, c'est accepter un puzzle un peu trop
+      facile ou un peu trop dur ; oublier l'exclusion, c'est resservir celui
+      qu'on vient de résoudre. Dans un chapitre de carrière, dont le thème
+      restreint fortement le catalogue, on retombait sur le même à chaque fois
+      et le chapitre devenait infranchissable.
+
+      L'exclusion ne saute qu'en tout dernier ressort : quand un joueur a
+      épuisé tout ce que la base contient sur ce thème, mieux vaut un puzzle
+      déjà vu qu'un écran d'erreur.
+    */
     if (!puzzle) {
+      const filtreTheme =
+        theme && theme !== 'all' ? arrayOverlaps(puzzles.themes, [theme]) : sql`true`
+
       const fallback = await database
         .select()
         .from(puzzles)
         .where(
-          theme && theme !== 'all' ? arrayOverlaps(puzzles.themes, [theme]) : sql`true`,
+          excluded.length > 0
+            ? and(filtreTheme, notInArray(puzzles.id, excluded))
+            : filtreTheme,
         )
         .orderBy(sql`random()`)
         .limit(1)
       puzzle = fallback[0]
+
+      if (!puzzle && excluded.length > 0) {
+        const dernierRecours = await database
+          .select()
+          .from(puzzles)
+          .where(filtreTheme)
+          .orderBy(sql`random()`)
+          .limit(1)
+        puzzle = dernierRecours[0]
+      }
     }
 
     if (!puzzle) {

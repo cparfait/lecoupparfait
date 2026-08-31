@@ -133,6 +133,15 @@ export default function PuzzlesPage() {
    */
   const generation = useRef(0)
 
+  /**
+   * Le puzzle affiché, hors du cycle de rendu.
+   *
+   * `load` est reconstruit à chaque changement de thème ; lire `puzzle` dedans
+   * l'obligerait à se reconstruire à chaque puzzle chargé, donc à relancer
+   * l'effet qui charge. Une référence dit la même chose sans cette boucle.
+   */
+  const puzzleRef = useRef<string | null>(null)
+
   const { marquer } = useQuotidien()
   const router = useRouter()
 
@@ -158,6 +167,21 @@ export default function PuzzlesPage() {
     const params = new URLSearchParams(window.location.search)
     setModeDefi(params.get('defi') === '1')
     setChapitreCarriere(chapitreDeLUrl(params))
+
+    /*
+      Le thème demandé par l'adresse.
+
+      Un chapitre de carrière envoie ici sur `?theme=fork&carriere=4` : le
+      thème *est* l'exercice du chapitre — on y travaille les fourchettes,
+      puis les clouages, puis les mats du couloir. La page l'ignorait
+      complètement et repartait sur « Tous », si bien que les puzzles d'un
+      chapitre n'avaient aucun rapport avec la leçon qui les précède.
+
+      On ne retient qu'un thème de la liste proposée : une valeur inventée
+      dans l'adresse laisserait un filtre actif que rien n'affiche.
+    */
+    const demande = params.get('theme')
+    if (demande && THEMES.some((entree) => entree.id === demande)) setTheme(demande)
   }, [])
 
   // ── Chargement ──────────────────────────────────────────────────────────
@@ -176,10 +200,14 @@ export default function PuzzlesPage() {
       // Le défi du jour est servi par sa propre route : c'est un tirage
       // déterministe partagé par tout le monde, pas un puzzle calibré sur le
       // niveau du joueur.
+      // On dit au serveur ce qu'on vient de faire : l'enregistrement de la
+      // tentative part par un autre appel, et enchaîner sans attendre pouvait
+      // ramener la position qu'on vient de résoudre.
+      const precedent = puzzleRef.current
       const response = await fetch(
         modeDefi
           ? `/api/defi-du-jour?jour=${jourLocal()}`
-          : `/api/puzzles?theme=${encodeURIComponent(theme)}`,
+          : `/api/puzzles?theme=${encodeURIComponent(theme)}${precedent ? `&exclure=${encodeURIComponent(precedent)}` : ''}`,
         { cache: 'no-store' },
       )
       const data = await response.json()
@@ -231,6 +259,7 @@ export default function PuzzlesPage() {
       }
 
       setPuzzle(loaded)
+      puzzleRef.current = loaded.id
       setFen(board.fen())
       setOrientation(board.turn())
       setMoveIndex(1)
