@@ -601,7 +601,17 @@ export default function PuzzlesPage() {
         <VoiceQuickToggle className="ml-auto" />
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-1.5">
+      {/* ── Les thèmes, sur une seule rangée ─────────────────────────────
+          Douze pastilles qui se replient, cela fait quatre rangées sur un
+          téléphone : trois cent quarante points, soit 42 % de l'écran, avant
+          d'apercevoir l'échiquier. On vient pourtant ici pour la position, et
+          l'on change de thème une fois sur vingt.
+
+          Elles défilent donc latéralement sous `sm` — le débordement est ici
+          voulu et se manipule au doigt, ce qui n'est pas la même chose qu'une
+          page qui déborde. Les marges négatives font courir la bande d'un bord
+          à l'autre, pour qu'on voie qu'elle continue. */}
+      <div className="-mx-3 mb-4 flex gap-1.5 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
         {THEMES.map((entry) => (
           <button
             key={entry.id}
@@ -612,7 +622,7 @@ export default function PuzzlesPage() {
                agrandit pas en typographie — elles resteraient discrètes, ce
                qui est leur rôle — mais en zone touchable. */
             className={clsx(
-              'inline-flex min-h-9 items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+              'inline-flex min-h-9 shrink-0 items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors',
               theme === entry.id
                 ? 'border-accent bg-accent/15 text-ink'
                 : 'border-line text-muted hover:bg-surface-hover',
@@ -626,6 +636,31 @@ export default function PuzzlesPage() {
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         {/* ── Échiquier ──────────────────────────────────────────── */}
         <div className="min-w-0">
+          {/* Qui joue, au-dessus du plateau et non en dessous.
+
+              C'est la première chose à savoir devant une position — avant même
+              de chercher —, et elle vivait dans le panneau de droite, c'est-à-
+              dire sous l'échiquier une fois les colonnes empilées, donc hors de
+              l'écran. Sur grand écran le panneau est à côté et dit déjà tout :
+              la ligne n'apparaît qu'en dessous de `lg`. */}
+          {status === 'playing' && (
+            <p className="mb-1.5 flex items-center gap-2 text-[13px] font-medium lg:hidden">
+              <span
+                className={clsx(
+                  'h-2.5 w-2.5 rounded-full',
+                  orientation === 'w'
+                    ? 'bg-[var(--eval-white)]'
+                    : 'bg-[var(--eval-black)] ring-1 ring-line',
+                )}
+                aria-hidden
+              />
+              {orientation === 'w' ? 'Les Blancs jouent' : 'Les Noirs jouent'}
+              <span className="truncate font-normal text-muted">
+                — trouve le meilleur coup
+              </span>
+            </p>
+          )}
+
           {status === 'loading' ? (
             <div className="grid aspect-square w-full place-items-center rounded-[var(--radius)] glass">
               <Spinner size={26} />

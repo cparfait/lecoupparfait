@@ -50,12 +50,42 @@ export default function LearnPage() {
   // La progression vit dans le navigateur : on ne peut la lire qu'après le
   // montage, sinon le rendu serveur et le rendu client diffèrent.
   useEffect(() => {
-    setProgress(loadProgress())
+    const suivi = loadProgress()
+    setProgress(suivi)
+
     try {
-      setCollapsed(JSON.parse(localStorage.getItem(COLLAPSED_KEY) ?? '{}'))
+      const enregistre = localStorage.getItem(COLLAPSED_KEY)
+      if (enregistre) {
+        setCollapsed(JSON.parse(enregistre) as Record<string, boolean>)
+        return
+      }
     } catch {
-      // Stockage illisible : tous les chapitres restent ouverts.
+      // Stockage illisible : on retombe sur le pliage par défaut ci-dessous.
     }
+
+    /*
+      Premier passage : tout replié sauf le chapitre en cours.
+
+      Les sept chapitres s'ouvraient tous, et trente-six cartes de leçon
+      s'empilaient à la suite. Sur un téléphone, il fallait faire défiler cinq
+      écrans pour apercevoir le chapitre 2 : la page annonçait « 7 chapitres »
+      et n'en montrait jamais qu'un. Or c'est la liste qu'on vient voir — on
+      choisit un chapitre, puis une leçon, dans cet ordre.
+
+      Le chapitre en cours est le premier dont toutes les leçons ne sont pas
+      terminées : c'est là qu'on reprend. Tout fini, tout reste replié — il n'y
+      a plus rien à reprendre, et la liste seule répond mieux à « qu'est-ce que
+      j'ai fait ? ».
+
+      Ce n'est qu'un défaut : le choix de chacun est conservé dès qu'il en fait
+      un, et prime sur celui-ci.
+    */
+    const enCours = CHAPTERS.find((chapitre) =>
+      chapitre.lessons.some((lecon) => !suivi[lecon.id]?.completed),
+    )
+    setCollapsed(
+      Object.fromEntries(CHAPTERS.map((chapitre) => [chapitre.id, chapitre.id !== enCours?.id])),
+    )
   }, [])
 
   const toggle = useCallback((id: string) => {
@@ -131,7 +161,11 @@ export default function LearnPage() {
         </button>
       </div>
 
-      <div className="mt-4 space-y-14">
+      {/* `space-y-8` et non plus 14 : l'écart était calculé pour des chapitres
+          tous dépliés, où il sépare une grille de cartes de la suivante.
+          Repliés, les sept en-têtes flottaient à cinquante-six pixels les uns
+          des autres — une liste ne se lit pas comme ça. */}
+      <div className="mt-4 space-y-8">
         {CHAPTERS.map((chapter, chapterIndex) => {
           const done = chapter.lessons.filter((lesson) => progress[lesson.id]?.completed).length
           const replie = Boolean(collapsed[chapter.id])
@@ -146,7 +180,7 @@ export default function LearnPage() {
                   avec les cartes de leçons du chapitre précédent. */}
               {chapterIndex > 0 && (
                 <div
-                  className="mb-10 h-px w-full"
+                  className="mb-6 h-px w-full"
                   style={{
                     background:
                       'linear-gradient(90deg, var(--border-strong), transparent 70%)',
