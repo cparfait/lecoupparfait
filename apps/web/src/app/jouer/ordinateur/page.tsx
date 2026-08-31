@@ -17,6 +17,7 @@ import {
   Eye,
   Flag,
   Handshake,
+  LayoutGrid,
   Lightbulb,
   MoreHorizontal,
   Play,
@@ -73,7 +74,15 @@ import {
 } from '@/components/game/LiveCommentary.tsx'
 import { LEGEND, legendFor, type LegendItem } from '@/components/board/ArrowLegend.tsx'
 import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
-import { Button, Card, Chip, SegmentedControl, SectionTitle, Toggle } from '@/components/ui/index.tsx'
+import {
+  Button,
+  ButtonLink,
+  Card,
+  Chip,
+  SegmentedControl,
+  SectionTitle,
+  Toggle,
+} from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
 import { getEngine } from '@/lib/engine/client.ts'
@@ -1670,15 +1679,39 @@ function GameScreen({
 
             <GameNav cursor={state.cursor} count={state.moves.length} onSeek={goTo} />
 
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={<Lightbulb size={14} />}
-              onClick={handleHint}
-              disabled={gameOver || state.turn !== playerColor}
-            >
-              Indice
-            </Button>
+            {/* ── La sortie, une fois la partie finie ───────────────────
+                Elle existait, cachée derrière les trois petits points, à côté
+                de l'abandon et du mode commenté. Or c'est le moment où l'on a
+                le plus besoin d'elle : la boîte de résultat refermée, tous les
+                boutons de la barre se sont désactivés d'un coup, et rien ne
+                dit qu'un menu contient encore quelque chose d'utile. Elles
+                prennent la place de l'indice, qui n'a plus rien à conseiller
+                sur une partie terminée. */}
+            {gameOver ? (
+              <>
+                <Button
+                  size="sm"
+                  variant="primary"
+                  icon={<RefreshCw size={14} />}
+                  onClick={onNewGame}
+                >
+                  Nouvelle partie
+                </Button>
+                <ButtonLink href="/jouer" size="sm" variant="ghost" icon={<LayoutGrid size={14} />}>
+                  Menu
+                </ButtonLink>
+              </>
+            ) : (
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={<Lightbulb size={14} />}
+                onClick={handleHint}
+                disabled={state.turn !== playerColor}
+              >
+                Indice
+              </Button>
+            )}
             {/* « Annuler » reste à portée directe.
                 Il était parti dans le menu avec le reste, mais il ne joue pas
                 dans la même catégorie : on annule un coup en cours de partie,

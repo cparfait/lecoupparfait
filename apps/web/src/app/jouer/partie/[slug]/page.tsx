@@ -19,10 +19,12 @@ import {
   Eye,
   Flag,
   Handshake,
+  LayoutGrid,
   Loader2,
   MessageSquare,
   RotateCcw,
   Send,
+  Swords,
   Undo2,
   WifiOff,
 } from 'lucide-react'
@@ -37,7 +39,7 @@ import { useEcranAllume } from '@/lib/ecranAllume.ts'
 import { MoveList } from '@/components/game/MoveList.tsx'
 import { PlayerBar } from '@/components/game/PlayerBar.tsx'
 import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
-import { Button, Card, Chip, Spinner } from '@/components/ui/index.tsx'
+import { Button, ButtonLink, Card, Chip, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useLiveGame } from '@/lib/game/useLiveGame.ts'
 import { playMoveSound, playResultSound, playSound } from '@/lib/sound.ts'
@@ -528,7 +530,21 @@ export default function LiveGamePage() {
 
           {/* ── Actions ────────────────────────────────────────── */}
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {drawOfferedToMe ? (
+            {/* Une partie finie n'a plus rien à proposer : « Proposer nulle »,
+                « Reprendre » et « Abandonner » se désactivent tous les trois
+                en même temps, et il ne reste qu'une barre grise. La boîte de
+                résultat refermée, on est devant un échiquier mort sans aucune
+                porte — celles-ci prennent la place des trois autres. */}
+            {over ? (
+              <>
+                <ButtonLink href="/jouer/ami" size="sm" variant="primary" icon={<Swords size={14} />}>
+                  Nouvelle partie
+                </ButtonLink>
+                <ButtonLink href="/jouer" size="sm" variant="ghost" icon={<LayoutGrid size={14} />}>
+                  Menu
+                </ButtonLink>
+              </>
+            ) : drawOfferedToMe ? (
               <>
                 <Button size="sm" variant="primary" onClick={game.offerDraw}>
                   Accepter la nulle

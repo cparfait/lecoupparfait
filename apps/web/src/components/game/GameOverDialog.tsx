@@ -14,7 +14,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Gauge, RotateCcw, Swords, Trophy, X } from 'lucide-react'
+import { Gauge, LayoutGrid, RotateCcw, Swords, Trophy, X } from 'lucide-react'
 import type { Color } from 'chess.js'
 import type { GameResult, GameStatus } from '@coupparfait/core'
 import { formatPgnDate, toPgn } from '@coupparfait/core'
@@ -265,6 +265,25 @@ export function GameOverDialog({
               </Button>
             )}
           </div>
+
+          {/* La sortie, et il n'y en avait aucune.
+
+              Les trois actions proposées mènent toutes à un échiquier :
+              analyser, rejouer, recommencer. Qui ne veut aucune des trois
+              referme la boîte — et se retrouve devant une partie terminée, sur
+              un écran dont les boutons se sont désactivés en même temps
+              qu'elle. Il ne restait plus qu'à revenir en arrière dans le
+              navigateur, ce qui n'existe pas franchement sur un téléphone.
+
+              En lien plutôt qu'en bouton : c'est la porte de service, pas
+              l'issue qu'on recommande. */}
+          <Link
+            href="/jouer"
+            className="mt-4 inline-flex items-center justify-center gap-1.5 text-[13px] font-medium text-muted transition-colors hover:text-ink"
+          >
+            <LayoutGrid size={13} aria-hidden />
+            Retour au menu
+          </Link>
         </div>
       </div>
     </div>

@@ -286,6 +286,20 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
             </Card>
           )}
 
+          {/* ── Le défi du jour ──────────────────────────────────────
+              Dans la colonne principale, au-dessus des parties jouées.
+
+              Il vivait dans la colonne de droite. Sur grand écran cela se
+              défendait ; sur téléphone, les colonnes s'empilent dans l'ordre du
+              document, et il se retrouvait donc *sous* la liste des parties —
+              c'est-à-dire après ce qu'on a déjà fait, alors qu'il expire à
+              minuit. Ce qui a une échéance passe avant ce qui n'en a plus.
+
+              Un seul exemplaire, déplacé plutôt que dupliqué : le composant
+              interroge le serveur au montage, et deux copies masquées l'une
+              après l'autre feraient deux appels pour un seul défi. */}
+          <DefiDuJour />
+
           {/* ── Tes dernières parties ────────────────────────────── */}
           <Card className="overflow-hidden">
             <div className="flex items-baseline justify-between border-b border-line/60 px-4 py-2.5">
@@ -350,7 +364,6 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
 
         {/* ── Colonne latérale ───────────────────────────────────── */}
         <div className="space-y-4">
-          <DefiDuJour />
 
           {/* Les analyses conservées ne s'affichent que s'il y en a : une carte
               vide de plus sur un écran qui en compte déjà cinq n'apprend rien. */}
