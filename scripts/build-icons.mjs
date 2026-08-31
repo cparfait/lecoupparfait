@@ -50,12 +50,27 @@ const marque = join(brandDir, 'logo-cavale.png')
 //  La marque : le cavalier de la bannière, posé sur le champ violet
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Le champ. Une seule famille de teintes, du violet clair au violet profond. */
+/**
+ * Le champ : noir, et cerné d'accent.
+ *
+ * C'était un dégradé violet. Une icône violette sur l'écran d'accueil d'un
+ * téléphone se noie dans la moitié des autres, et dans l'application elle
+ * donnait une pastille violette dans un en-tête violet — la marque disparaissait
+ * dans son propre habillage. Le noir, lui, ne ressemble à rien d'autre et fait
+ * ressortir le buis, qui est ce qu'on veut voir.
+ *
+ * L'anneau porte la couleur d'accent du thème par défaut. Il n'est pas
+ * décoratif : sur un fond sombre, une icône à fond noir sans contour n'a plus
+ * de bord du tout et se confond avec l'écran.
+ */
+const NOIR = '#08070d'
+const ACCENT = '#7C5CFF'
+
 const CHAMP = Buffer.from(
   '<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024">' +
-    '<defs><linearGradient id="g" x1="0" y1="0" x2="0.85" y2="1">' +
-    '<stop offset="0%" stop-color="#7C5CFF"/><stop offset="100%" stop-color="#4429B8"/>' +
-    '</linearGradient></defs><rect width="1024" height="1024" fill="url(#g)"/></svg>',
+    `<rect width="1024" height="1024" fill="${NOIR}"/>` +
+    `<rect x="8" y="8" width="1008" height="1008" rx="216" ry="216" fill="none" ` +
+    `stroke="${ACCENT}" stroke-opacity="0.75" stroke-width="16"/></svg>`,
 )
 
 /**
@@ -82,7 +97,17 @@ const composerMarque = async (marge) => {
     .resize({ width: cote, height: cote, fit: 'inside' })
     .png()
     .toBuffer()
-  return sharp(CHAMP).composite([{ input: piece, gravity: 'centre' }])
+  // Ancrée en bas, et centrée horizontalement : un cavalier d'échecs repose sur
+  // sa base. Le faire flotter au milieu du carré lui retire son socle, et c'est
+  // le socle qui dit qu'il s'agit d'une pièce de jeu.
+  const { width, height } = await sharp(piece).metadata()
+  return sharp(CHAMP).composite([
+    {
+      input: piece,
+      left: Math.round((1024 - width) / 2),
+      top: Math.max(0, 1024 - Math.round(1024 * marge) - height),
+    },
+  ])
 }
 
 await (await composerMarque(MARGE)).png({ compressionLevel: 9 }).toFile(marque)

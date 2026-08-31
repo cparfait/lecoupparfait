@@ -17,14 +17,12 @@
  * l'aplat de couleur qui remplit tout ça ne dit plus rien de la matière.
  *
  * Une sculpture éclairée ne se réduit pas à sa silhouette sans perdre ce qui la
- * rendait belle. On garde donc le tirage tel quel : `public/brand/logo-cavale.png`,
- * produit par `scripts/build-cavale.mjs --cible logo` — une pièce de buis
- * sculptée sur champ violet, prompt et graine versionnés dans le script.
+ * rendait belle. On garde donc le tirage : la pièce de buis produite par
+ * `scripts/build-cavale.mjs`, prompt et graine versionnés dans le script.
  *
- * Ce qu'on perd, et qu'il faut assumer : la marque ne suit plus les quatre
- * thèmes. Elle reste violette sur `club` comme sur `contraste`. C'est le sort
- * ordinaire d'un logo — celui de tout le monde ne change pas de couleur selon
- * la page — et c'est le prix d'une marque qu'on a envie de regarder.
+ * La sculpture ne change pas d'un thème à l'autre — c'est le sort ordinaire
+ * d'un logo, celui de tout le monde ne change pas de couleur selon la page.
+ * Seule sa monture suit l'habillage : voir juste en dessous.
  */
 
 import Image from 'next/image'
@@ -45,10 +43,17 @@ import clsx from 'clsx'
  * et l'anneau rend enfin à la marque ce que le tirage lui refusait — suivre
  * l'habillage choisi.
  *
- * La sculpture vient de `cavale-aurora.png`, la seule déclinaison au fond
- * transparent qui soit cadrée en pied. Elle est ancrée en bas : un cavalier
- * d'échecs repose sur sa base, le faire flotter au centre d'un carré lui
- * retire son socle.
+ * La sculpture reste **celle du logo** — la pièce de buis, pas la résine
+ * violette de la bannière `aurora`. C'est la marque, on ne la remplace pas
+ * parce qu'elle serait plus commode à détourer.
+ *
+ * On prend `cavale-club.png`, qui **est** cette pièce, au fond transparent :
+ * c'est déjà la source dont `build-icons.mjs` compose le tirage carré. Le
+ * champ violet n'était donc jamais dans la sculpture, seulement dans son
+ * assemblage — il suffit de ne plus l'assembler.
+ *
+ * Elle est ancrée en bas : un cavalier d'échecs repose sur sa base, le faire
+ * flotter au centre d'un carré lui retire son socle.
  */
 export function LogoMark({ size = 32, className }: { size?: number; className?: string }) {
   return (
@@ -66,7 +71,7 @@ export function LogoMark({ size = 32, className }: { size?: number; className?: 
       aria-hidden
     >
       <Image
-        src="/brand/cavale-aurora.png"
+        src="/brand/cavale-club.png"
         alt=""
         width={size * 2}
         height={size * 2}
