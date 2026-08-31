@@ -768,7 +768,7 @@ function SetupScreen({
             }}
           />
           <div className="mt-1.5 flex justify-between text-[11px] text-faint">
-            <span>1 · débutant complet (250)</span>
+            <span>1 · débutant complet (100)</span>
             <span>25 · surhumain (3200)</span>
           </div>
 
@@ -776,7 +776,7 @@ function SetupScreen({
             {/* « Je débute » vaut 1, et non 3.
 
                 Il valait 3, c'est-à-dire 550 Elo, sur une échelle qui annonce
-                250 tout en bas. Quelqu'un qui se déclare débutant appuie sur ce
+                100 tout en bas. Quelqu'un qui se déclare débutant appuie sur ce
                 bouton et se retrouve deux crans au-dessus du plus faible
                 adversaire disponible, sans savoir qu'il existe : le bouton dit
                 « je débute », donc on le croit sur parole et l'on ne touche

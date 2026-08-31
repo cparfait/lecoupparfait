@@ -31,7 +31,7 @@ const MODES = [
     icon: Cpu,
     titleKey: 'play.vsComputer',
     blurbKey: 'play.vsComputerBlurb',
-    detail: '25 niveaux · 7 personnalités · de 250 à 3200 Elo',
+    detail: '25 niveaux · 7 personnalités · de 100 à 3200 Elo',
     accent: 'var(--accent)',
   },
   {

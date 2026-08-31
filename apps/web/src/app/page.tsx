@@ -316,7 +316,7 @@ function Essentiel() {
   const stats = [
     { value: '3 810', label: t('home.statsOpenings') },
     { value: '6 057 356', label: t('home.statsPuzzles') },
-    { value: '25', label: 'niveaux d’adversaires, de 250 à 3200 Elo' },
+    { value: '25', label: 'niveaux d’adversaires, de 100 à 3200 Elo' },
     { value: '7', label: 'pièces : finales résolues à la perfection' },
   ]
 

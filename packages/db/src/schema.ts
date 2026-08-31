@@ -146,19 +146,19 @@ export const ratings = pgTable(
      * Classement Glicko-2, celui qui fait foi.
      *
      * Le défaut vaut `CLASSEMENT_DEPART` (voir `packages/core/src/rating.ts`,
-     * qui explique pourquoi 450 et non le centre de l'échelle). Recopié en
+     * qui explique pourquoi 100 et non le centre de l'échelle). Recopié en
      * clair plutôt qu'importé : ce fichier est relu par drizzle-kit, qui n'a
      * pas à résoudre les paquets de l'espace de travail pour générer une
      * migration. `getRating` écrit de toute façon la valeur explicitement.
      */
-    rating: integer('rating').notNull().default(450),
+    rating: integer('rating').notNull().default(100),
     /** Écart-type : l'incertitude sur le niveau réel. */
     deviation: integer('deviation').notNull().default(350),
     /** Volatilité σ de Glicko-2. */
     volatility: real('volatility').notNull().default(0.09),
 
     /** Elo classique, calculé en parallèle et affiché à titre pédagogique. */
-    elo: integer('elo').notNull().default(450),
+    elo: integer('elo').notNull().default(100),
 
     games: integer('games').notNull().default(0),
     wins: integer('wins').notNull().default(0),
@@ -166,7 +166,7 @@ export const ratings = pgTable(
     draws: integer('draws').notNull().default(0),
 
     /** Plus haut classement atteint, et quand. */
-    peak: integer('peak').notNull().default(450),
+    peak: integer('peak').notNull().default(100),
     peakAt: timestamp('peak_at', { withTimezone: true }),
 
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

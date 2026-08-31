@@ -15,6 +15,13 @@
       "when": 1788155062875,
       "tag": "0001_rich_silver_centurion",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788180805850,
+      "tag": "0002_confused_hydra",
+      "breakpoints": true
     }
   ]
 }

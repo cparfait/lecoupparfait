@@ -77,7 +77,7 @@ export interface Chapitre {
 }
 
 /**
- * Douze chapitres, de 250 à 1900 Elo.
+ * Douze chapitres, de 100 à 1850 Elo.
  *
  * Douze et non vingt-cinq comme le barème des bots : un chapitre doit durer
  * plusieurs séances pour qu'on sente la progression, et vingt-cinq paliers

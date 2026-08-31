@@ -191,6 +191,12 @@ interface LevelSpec {
 /**
  * Table des niveaux.
  *
+ * Le bas de l'échelle s'arrête à 100 Elo, plancher retenu par les plateformes
+ * en ligne — Chess.com ne descend pas plus bas, et la FIDE, qui ne publie rien
+ * sous 1 000, ne dit rien de ce qui se joue en dessous. C'est le niveau de
+ * quelqu'un qui connaît le déplacement des pièces et rien d'autre, et il faut
+ * bien que ce joueur-là ait un adversaire.
+ *
  * Sous 1150 Elo, `UCI_Elo` n'existe pas : on brise volontairement le moteur
  * avec un `Skill Level` bas, une profondeur d'une poignée de coups et une forte
  * température. Au-dessus, on laisse Stockfish faire son travail de simulation.
@@ -211,13 +217,13 @@ interface LevelSpec {
   l'occasion — dix ne suffisaient pas à contenir une vraie faute de débutant.
 */
 const LEVEL_TABLE: LevelSpec[] = [
-  { elo: 250, personality: 'novice', skill: 0, depth: 1, movetimeMs: 120, temperature: 1.0, multiPv: 18, nodes: 500 },
-  { elo: 400, personality: 'novice', skill: 0, depth: 1, movetimeMs: 150, temperature: 0.92, multiPv: 16, nodes: 900 },
-  { elo: 550, personality: 'novice', skill: 1, depth: 2, movetimeMs: 180, temperature: 0.84, multiPv: 14, nodes: 1800 },
-  { elo: 700, personality: 'fonceur', skill: 1, depth: 2, movetimeMs: 220, temperature: 0.74, multiPv: 12, nodes: 3500 },
-  { elo: 850, personality: 'prudent', skill: 2, depth: 3, movetimeMs: 260, temperature: 0.64, multiPv: 10, nodes: 7000 },
-  { elo: 1000, personality: 'novice', skill: 3, depth: 4, movetimeMs: 300, temperature: 0.55, multiPv: 8, nodes: 14000 },
-  { elo: 1150, personality: 'fonceur', skill: 4, depth: 5, movetimeMs: 350, temperature: 0.46, multiPv: 6, nodes: 28000 },
+  { elo: 100, personality: 'novice', skill: 0, depth: 1, movetimeMs: 120, temperature: 1.0, multiPv: 18, nodes: 500 },
+  { elo: 250, personality: 'novice', skill: 0, depth: 1, movetimeMs: 150, temperature: 0.92, multiPv: 16, nodes: 900 },
+  { elo: 400, personality: 'novice', skill: 1, depth: 2, movetimeMs: 180, temperature: 0.84, multiPv: 14, nodes: 1800 },
+  { elo: 550, personality: 'fonceur', skill: 1, depth: 2, movetimeMs: 220, temperature: 0.74, multiPv: 12, nodes: 3500 },
+  { elo: 700, personality: 'prudent', skill: 2, depth: 3, movetimeMs: 260, temperature: 0.64, multiPv: 10, nodes: 7000 },
+  { elo: 850, personality: 'novice', skill: 3, depth: 4, movetimeMs: 300, temperature: 0.55, multiPv: 8, nodes: 14000 },
+  { elo: 1000, personality: 'fonceur', skill: 4, depth: 5, movetimeMs: 350, temperature: 0.46, multiPv: 6, nodes: 28000 },
   { elo: 1320, personality: 'prudent', skill: 5, depth: 6, movetimeMs: 400, temperature: 0.38, multiPv: 4 },
   { elo: 1450, personality: 'tacticien', skill: 6, depth: 7, movetimeMs: 450, temperature: 0.32, multiPv: 4 },
   { elo: 1550, personality: 'positionnel', skill: 7, depth: 8, movetimeMs: 500, temperature: 0.28, multiPv: 3 },

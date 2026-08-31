@@ -35,14 +35,24 @@ export async function GET(request: Request) {
     const database = getDb()
     const user = await getCurrentUser()
 
-    // Niveau visé : celui du joueur plus un cran, ou la valeur demandée.
+    /*
+      Niveau visé : celui du joueur plus un cran, ou la valeur demandée.
+
+      Planché à 500, et c'est une contrainte du catalogue et non un choix
+      pédagogique : la base de Lichess ne contient pratiquement rien sous 450.
+      Un classement de puzzles peut valoir 100 — c'est là que commencent les
+      nouveaux venus — mais demander une position à 150 reviendrait à n'en
+      trouver aucune, donc à passer par la recherche élargie, qui rend
+      n'importe quelle difficulté. Mieux vaut demander ce qui existe.
+    */
+    const PLANCHER_PUZZLE = 500
     let target = 1200
     if (requestedRating) {
-      target = Math.max(400, Math.min(3000, Number(requestedRating)))
+      target = Math.max(PLANCHER_PUZZLE, Math.min(3000, Number(requestedRating)))
     } else if (user) {
       const rating = await getRating(user.userId, 'puzzle')
       // +50 : on cherche à faire progresser, pas à conforter.
-      target = rating.rating + 50
+      target = Math.max(PLANCHER_PUZZLE, rating.rating + 50)
     }
 
     /*

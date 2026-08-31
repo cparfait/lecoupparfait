@@ -96,7 +96,7 @@ export const fr = {
         'Stockfish 18 tourne sur le serveur en pleine puissance. Chaque erreur est classée, le meilleur coup est montré, et surtout : la raison est écrite en toutes lettres.',
       levelsTitle: '25 niveaux, 7 caractères',
       levelsBody:
-        'De 250 à 3200 Elo. Des adversaires qui ont un style — l’un fonce, l’autre étouffe, un troisième sacrifie tout. Choisis ton sparring-partner.',
+        'De 100 à 3200 Elo. Des adversaires qui ont un style — l’un fonce, l’autre étouffe, un troisième sacrifie tout. Choisis ton sparring-partner.',
       dataTitle: 'Des millions de positions',
       dataBody:
         '3 810 ouvertures nommées, six millions de puzzles notés et étiquetés, les finales parfaites jusqu’à sept pièces. Tout est libre de droits.',
@@ -473,7 +473,7 @@ export const en: Dictionary = {
         'Stockfish 18 runs server-side at full strength. Every error is classified, the best move is shown, and the reason is spelled out.',
       levelsTitle: '25 levels, 7 personalities',
       levelsBody:
-        'From 250 to 3200 Elo. Opponents with a style — one charges, one squeezes, one sacrifices everything. Pick your sparring partner.',
+        'From 100 to 3200 Elo. Opponents with a style — one charges, one squeezes, one sacrifices everything. Pick your sparring partner.',
       dataTitle: 'Millions of positions',
       dataBody:
         '3,810 named openings, six million rated and tagged puzzles, perfect endgames up to seven pieces. All public domain.',
