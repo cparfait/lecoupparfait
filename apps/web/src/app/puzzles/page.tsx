@@ -713,7 +713,18 @@ export default function PuzzlesPage() {
             </Card>
           )}
 
-          <div className="flex gap-2">
+          {/* ── Les actions, collées en bas sur téléphone ──────────────
+              Elles vivent sous l'échiquier, après le panneau de verdict et la
+              carte des thèmes : sur un mobile, « Puzzle suivant » se trouvait
+              donc à un écran de défilement du moment où l'on vient de
+              résoudre. On enchaîne les puzzles par dizaines — un geste de
+              défilement entre chacun, c'est la moitié du temps passé à
+              chercher le bouton plutôt qu'à chercher le coup.
+
+              `bottom-16` dégage la barre de navigation basse. À partir de
+              `lg`, la colonne est à côté de l'échiquier et tient dans l'écran :
+              la barre redevient un élément ordinaire du flux. */}
+          <div className="sticky bottom-16 z-10 -mx-1 flex gap-2 rounded-[var(--radius)] bg-bg/85 px-1 py-2 backdrop-blur-sm lg:static lg:mx-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
             {status === 'playing' && !revealed && (
               <Button variant="ghost" icon={<Eye size={14} />} onClick={reveal} fullWidth>
                 Solution

@@ -516,7 +516,12 @@ export default function LessonPage() {
             <p className="text-[15px] leading-relaxed">{renderBold(step.say)}</p>
           </Card>
 
-          <div className="flex gap-2">
+          {/* Collées en bas sur téléphone, comme dans les puzzles et la
+              relecture guidée : « Continuer » est le geste qu'on répète à
+              chaque étape, et il se trouvait sous la ligne de flottaison dès
+              que la consigne dépassait trois lignes. `bottom-16` dégage la
+              barre de navigation basse. */}
+          <div className="sticky bottom-16 z-10 -mx-1 flex gap-2 rounded-[var(--radius)] bg-bg/85 px-1 py-2 backdrop-blur-sm lg:static lg:mx-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
             <Button
               variant="ghost"
               onClick={goPrevious}
