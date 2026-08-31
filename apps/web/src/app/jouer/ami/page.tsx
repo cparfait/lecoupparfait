@@ -3,21 +3,27 @@
 /**
  * Jouer contre quelqu'un.
  *
- * Un seul écran pour les deux façons de le faire, parce que la seule chose qui
- * les distingue est la **cadence**. C'étaient deux entrées de menu — « Contre
- * un ami » et « Par correspondance » — ce qui demandait de choisir le mécanisme
- * avant de choisir le rythme, soit exactement l'inverse de l'ordre dans lequel
- * la question se pose.
+ * Un seul écran pour toutes les façons de trouver un adversaire humain, parce
+ * qu'elles répondent à la même intention et se distinguent seulement par
+ * *qui* est en face :
  *
- * Les deux mécanismes restent différents, et il faut savoir pourquoi :
+ *  - **n'importe qui** : on fabrique un lien et on l'envoie. Aucun compte, ni
+ *    pour soi ni pour l'invité ; celui qui ouvre le lien devient l'adversaire.
+ *  - **quelqu'un du carnet** : on le désigne, il reçoit le défi là où il se
+ *    trouve dans l'application.
+ *  - **quelqu'un qui n'est pas encore là** : on lui envoie une invitation à
+ *    s'inscrire, et l'amitié se noue toute seule à son arrivée.
  *
- *  - **En temps réel**, on obtient un lien. Aucun compte, ni pour soi ni pour
- *    l'invité : celui qui ouvre le lien devient l'adversaire. Le geste tient en
- *    dix secondes.
- *  - **Sur plusieurs jours**, on désigne quelqu'un de son carnet. Ce n'est pas
- *    une lourdeur gratuite : une partie étalée sur deux semaines a besoin
- *    d'une identité persistante des deux côtés pour attribuer les coups et
- *    prévenir celui dont c'est le tour.
+ * Ces trois chemins vivaient sur deux écrans — « Contre un ami » d'un côté, le
+ * carnet de l'autre —, si bien qu'on choisissait le mécanisme avant de savoir
+ * contre qui l'on voulait jouer. Ils sont ici, l'un sous l'autre, sous la seule
+ * question qui les précède vraiment : **à quelle cadence ?**
+ *
+ * La cadence commande tout le reste. En minutes, la partie se joue maintenant ;
+ * en jours, elle se joue par correspondance et demande un compte des deux
+ * côtés — une partie étalée sur deux semaines a besoin d'une identité
+ * persistante pour attribuer les coups et prévenir celui dont c'est le tour.
+ * Le même bouton « Jouer », en face d'un ami, lance donc l'une ou l'autre.
  *
  * Les parties par correspondance **en cours** ne sont pas ici : ce n'est pas un
  * mode de jeu mais une boîte de réception, et elle vit à `/correspondance`.
@@ -26,12 +32,38 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Check, Copy, Link2, Share2, Users } from 'lucide-react'
+import {
+  Check,
+  Copy,
+  Link2,
+  Loader2,
+  Mailbox,
+  Share2,
+  Swords,
+  UserPlus,
+  Users,
+} from 'lucide-react'
 import clsx from 'clsx'
 import { SPEED_LABELS, TIME_CONTROLS } from '@coupparfait/core'
-import { Button, Card, Chip, Input, SectionTitle } from '@/components/ui/index.tsx'
+import { Button, Card, Chip, Input, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { generateGameSlug, retenirSouhaitDeCouleur } from '@/lib/game/useLiveGame.ts'
+
+/** Ce que le carnet renvoie d'une personne. */
+interface Ami {
+  id: string
+  username: string
+  avatar: string | null
+  rating: number | null
+  online: boolean
+}
+
+/** Un défi déjà envoyé, pour pouvoir le retirer. */
+interface DefiEnvoye {
+  id: string
+  to: string | null
+  status: string
+}
 
 export default function CreateFriendGamePage() {
   const router = useRouter()
@@ -44,8 +76,9 @@ export default function CreateFriendGamePage() {
    * un délai en jours et un adversaire à désigner.
    */
   const [jours, setJours] = useState<number | null>(null)
-  const [amis, setAmis] = useState<Array<{ id: string; username: string }> | null>(null)
-  const [envoi, setEnvoi] = useState(false)
+  const [amis, setAmis] = useState<Ami[] | null>(null)
+  const [defis, setDefis] = useState<DefiEnvoye[]>([])
+  const [envoi, setEnvoi] = useState<string | null>(null)
   const [rated, setRated] = useState(false)
   /**
    * Couleur demandée par l'hôte.
@@ -57,46 +90,48 @@ export default function CreateFriendGamePage() {
   const [name, setName] = useState('')
   const [slug, setSlug] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [inviteCopie, setInviteCopie] = useState(false)
 
   /**
-   * A-t-on un compte ?
+   * Qui est connecté ?
    *
-   * La page annonçait qu'une partie classée en demandait un, sans offrir le
-   * moyen d'en avoir un — et une partie créée sans compte n'apparaît nulle
-   * part ensuite, faute de quelqu'un à qui la rattacher. `null` tant qu'on ne
-   * sait pas : on n'affiche rien plutôt que d'inviter à se connecter quelqu'un
-   * qui l'est déjà.
+   * `null` tant qu'on ne sait pas : on n'affiche ni le carnet ni l'invitation
+   * avant la réponse, plutôt que de les faire apparaître puis disparaître.
    */
-  const [signedIn, setSignedIn] = useState<boolean | null>(null)
+  const [moi, setMoi] = useState<{ username: string } | null | undefined>(undefined)
   useEffect(() => {
     void fetch('/api/auth')
       .then((response) => response.json())
-      .then((data: { user: unknown }) => setSignedIn(data.user != null))
-      .catch(() => setSignedIn(false))
+      .then((data: { user?: { username: string } | null }) => setMoi(data.user ?? null))
+      .catch(() => setMoi(null))
   }, [])
 
-  // Le carnet n'est chargé qu'à partir du moment où il sert, c'est-à-dire quand
-  // on choisit une cadence en jours. Le demander au chargement ferait une
-  // requête à chaque visite pour une liste que la plupart n'ouvriront jamais.
-  useEffect(() => {
-    if (jours === null || amis !== null) return
-    void fetch('/api/amis')
+  // Le carnet, dès qu'on sait qu'il y a un compte pour le porter.
+  const chargerAmis = useCallback(() => {
+    void fetch('/api/amis', { cache: 'no-store' })
       .then((reponse) => (reponse.ok ? reponse.json() : { friends: [] }))
-      .then((data: { friends?: Array<{ id: string; username: string }> }) =>
-        setAmis(data.friends ?? []),
-      )
+      .then((data: { friends?: Ami[]; outgoing?: DefiEnvoye[] }) => setAmis(data.friends ?? []))
       .catch(() => setAmis([]))
-  }, [jours, amis])
+    void fetch('/api/defis', { cache: 'no-store' })
+      .then((reponse) => (reponse.ok ? reponse.json() : { outgoing: [] }))
+      .then((data: { outgoing?: DefiEnvoye[] }) => setDefis(data.outgoing ?? []))
+      .catch(() => undefined)
+  }, [])
+
+  useEffect(() => {
+    if (!moi) return
+    chargerAmis()
+  }, [moi, chargerAmis])
 
   /** Lance une correspondance contre quelqu'un du carnet. */
   const lancerCorrespondance = useCallback(
-    async (amiId: string) => {
-      setEnvoi(true)
+    async (ami: Ami) => {
+      setEnvoi(ami.id)
       try {
         const reponse = await fetch('/api/correspondance', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ action: 'start', to: amiId, days: jours ?? 2 }),
+          body: JSON.stringify({ action: 'start', to: ami.id, days: jours ?? 2 }),
         })
         const data = await reponse.json().catch(() => ({}))
         if (!reponse.ok) {
@@ -108,10 +143,63 @@ export default function CreateFriendGamePage() {
       } catch {
         toast.error('Le serveur est injoignable.')
       } finally {
-        setEnvoi(false)
+        setEnvoi(null)
       }
     },
     [jours, router],
+  )
+
+  /**
+   * Défie quelqu'un du carnet, en temps réel.
+   *
+   * Le défi part vers lui où qu'il soit dans l'application : un guetteur veille
+   * sur chaque page et lui présente l'invitation. C'est pour cela qu'on ne
+   * l'envoie qu'à un compte — un lien, lui, s'envoie à n'importe qui.
+   */
+  const defier = useCallback(
+    async (ami: Ami) => {
+      const control = TIME_CONTROLS.find((entry) => entry.id === timeControlId)
+      setEnvoi(ami.id)
+      try {
+        const reponse = await fetch('/api/defis', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            action: 'create',
+            to: ami.id,
+            initialTime: control?.initial ?? 600,
+            increment: control?.increment ?? 5,
+            rated,
+            color: couleur === 'random' ? undefined : couleur,
+          }),
+        })
+        const data = await reponse.json().catch(() => ({}))
+        if (!reponse.ok) {
+          toast.error(data.error ?? 'Défi impossible.')
+          return
+        }
+        toast.info(`Défi envoyé à ${ami.username}.`, 'On attend sa réponse.')
+        chargerAmis()
+      } catch {
+        toast.error('Le serveur est injoignable.')
+      } finally {
+        setEnvoi(null)
+      }
+    },
+    [timeControlId, rated, couleur, chargerAmis],
+  )
+
+  /** Retire un défi qu'on a envoyé : se tromper de cadence doit se rattraper. */
+  const annulerDefi = useCallback(
+    async (id: string) => {
+      await fetch('/api/defis', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ action: 'cancel', id }),
+      }).catch(() => undefined)
+      chargerAmis()
+    },
+    [chargerAmis],
   )
 
   const url = slug
@@ -181,21 +269,64 @@ export default function CreateFriendGamePage() {
     void copy()
   }, [url, copy])
 
+  /** Le lien de parrainage : il s'inscrit, et vous êtes amis. */
+  const inviteUrl =
+    moi && typeof window !== 'undefined'
+      ? `${window.location.origin}/connexion?ami=${encodeURIComponent(moi.username)}`
+      : null
+
+  const inviter = useCallback(async () => {
+    if (!inviteUrl) return
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Rejoins-moi sur Le Coup Parfait',
+          text: 'Viens jouer aux échecs avec moi.',
+          url: inviteUrl,
+        })
+        return
+      } catch {
+        // Partage annulé : on retombe sur la copie.
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(inviteUrl)
+      setInviteCopie(true)
+      toast.success('Lien d’invitation copié')
+      setTimeout(() => setInviteCopie(false), 2500)
+    } catch {
+      toast.warning('Copie impossible', 'Sélectionne le lien et copie-le à la main.')
+    }
+  }, [inviteUrl])
+
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6 lg:py-14">
+    <div className="mx-auto w-full max-w-2xl px-4 py-6 sm:px-6 lg:py-10">
       <h1 className="font-display text-3xl font-bold tracking-tight">Jouer contre quelqu’un</h1>
       {/* La phrase suit la cadence choisie : les deux mécanismes n'ont ni les
           mêmes gestes ni les mêmes exigences, et annoncer « ton ami n'a besoin
           d'aucun compte » sur une correspondance serait faux. */}
-      <p className="mt-2 text-muted">
+      <p className="mt-1.5 text-sm text-muted">
         {jours === null
-          ? 'Choisis une cadence, crée le lien, envoie-le. Ton adversaire n’a besoin d’aucun compte : il clique, il joue.'
+          ? 'Choisis une cadence, puis envoie un lien ou défie quelqu’un de ton carnet.'
           : `Un coup tous les ${jours} jour${jours > 1 ? 's' : ''}. Il faut un compte des deux côtés — la partie doit pouvoir t’attendre.`}
       </p>
 
-      {!slug ? (
+      {slug ? (
+        <PartiePrete
+          url={url}
+          copied={copied}
+          onCopy={copy}
+          onShare={share}
+          onEntrer={() =>
+            router.push(`/jouer/partie/${slug}?tc=${timeControlId}${rated ? '&classee=1' : ''}`)
+          }
+          timeControlId={timeControlId}
+          rated={rated}
+        />
+      ) : (
         <>
-          <Card className="mt-7 p-5">
+          {/* ── La cadence, qui commande tout le reste ─────────────── */}
+          <Card className="mt-5 p-4 sm:p-5">
             {/* Une règle abstraite ne se retient pas ; un exemple lu une fois
                 suffit. « 3 | 2 » reste incompréhensible tant qu'on ne l'a pas
                 vu déplié. */}
@@ -252,48 +383,175 @@ export default function CreateFriendGamePage() {
                   onClick={() => setJours(n)}
                   aria-pressed={jours === n}
                   className={clsx(
-                    'rounded-[var(--radius-sm)] border px-2 py-2.5 text-xs font-medium transition-colors',
+                    'rounded-[var(--radius-sm)] border px-1.5 py-2.5 text-xs font-medium transition-colors',
                     jours === n
                       ? 'border-accent bg-accent/15 text-ink'
                       : 'border-line text-muted hover:bg-surface-hover',
                   )}
                 >
                   <span className="block text-[10px] font-normal leading-tight text-faint">
-                    <span aria-hidden>📬</span> correspondance
+                    <span aria-hidden>📬</span> corresp.
                   </span>
                   <span className="mt-0.5 block text-sm">
-                    {n} jour{n > 1 ? 's' : ''}
+                    {n} j{n > 1 ? '' : ''}
                   </span>
                 </button>
               ))}
             </div>
-
-            <p className="mt-3 border-t border-line/60 pt-3 text-xs leading-relaxed text-muted">
-              La catégorie se déduit de la durée qu’aurait une partie de quarante coups :
-              moins de trois minutes c’est du <strong className="font-semibold">bullet</strong>,
-              moins de huit du <strong className="font-semibold">blitz</strong>, moins de
-              vingt-cinq du <strong className="font-semibold">rapide</strong>, au-delà du{' '}
-              <strong className="font-semibold">classique</strong>. Chacune tient son propre
-              classement : on peut voir clair en rapide et s’effondrer en blitz.
-            </p>
           </Card>
 
-          {/* Le choix de la couleur n'existe qu'en temps réel : une
-              correspondance tire les couleurs au sort côté serveur, et
-              proposer un choix qui ne serait pas honoré vaut moins que ne rien
-              proposer. */}
-          <Card className={clsx('mt-4 p-5', jours !== null && 'hidden')}>
-            {/* Le choix de la couleur, qui n'existait pas.
-            
-                Les sièges étaient attribués dans l'ordre d'arrivée, et celui
-                qui crée le lien est toujours le premier à s'asseoir : il jouait
-                donc les Blancs à chaque partie. On a d'abord tiré au sort, ce
-                qui supprimait le privilège sans rendre le choix — l'hôte
-                subissait alors sa couleur au lieu de la prendre.
-            
-                Le hasard reste le défaut, parce que c'est le plus équitable
-                quand on n'a pas d'avis. Mais on peut désormais dire le sien, et
-                l'invité prend l'autre couleur. */}
+          {/* ── Les trois façons de trouver un adversaire ──────────── */}
+          {/*
+            Des rangées, et non des cartes empilées.
+
+            Chacune tient sur une ligne haute : une icône, ce qu'on obtient, et
+            à qui cela s'adresse. On les balaie du regard au lieu de les lire,
+            et sur un téléphone les trois tiennent dans un écran — ce qui était
+            le but de les réunir ici.
+          */}
+          <div className="mt-4 space-y-2">
+            <RangeeAction
+              icone={<Link2 size={18} />}
+              titre="Envoyer un lien de partie"
+              detail="Une partie avec n’importe qui. Ton adversaire n’a besoin d’aucun compte : il clique, il joue."
+              onClick={create}
+              // Une correspondance ne se joue pas par lien anonyme : il faut
+              // quelqu'un à qui attribuer les coups pendant deux semaines.
+              desactive={jours !== null}
+              raison={
+                jours !== null
+                  ? 'Sur plusieurs jours, il faut désigner quelqu’un du carnet.'
+                  : undefined
+              }
+              principal
+            />
+
+            {moi && (
+              <RangeeAction
+                icone={<UserPlus size={18} />}
+                titre="Inviter quelqu’un à te rejoindre"
+                detail="Envoie ton lien de parrainage : il s’inscrit, et vous êtes amis sans rien de plus à faire."
+                onClick={() => void inviter()}
+                marque={inviteCopie ? 'Copié' : undefined}
+              />
+            )}
+
+            {/* Un bouton, et non un lien enveloppant un bouton : imbriquer
+                deux éléments interactifs donne un balisage que les lecteurs
+                d'écran annoncent deux fois. */}
+            {moi === null && (
+              <RangeeAction
+                icone={<Users size={18} />}
+                titre="Se connecter pour défier un ami"
+                detail="Sans compte, la partie par lien fonctionne très bien — mais il n’y a pas de carnet où ranger quelqu’un."
+                onClick={() => router.push('/connexion')}
+              />
+            )}
+          </div>
+
+          {/* ── Le carnet ──────────────────────────────────────────── */}
+          {moi && (
+            <section className="mt-6">
+              <div className="mb-2 flex items-baseline gap-2 px-1">
+                <h2 className="text-sm font-semibold">Tes amis</h2>
+                {amis && (
+                  <span className="text-[12px] text-faint">
+                    {amis.length === 0 ? 'personne pour l’instant' : amis.length}
+                  </span>
+                )}
+                <Link
+                  href="/amis"
+                  className="ml-auto text-[12px] font-medium text-accent hover:underline"
+                >
+                  Gérer le carnet
+                </Link>
+              </div>
+
+              {amis === null ? (
+                <div className="grid place-items-center py-6">
+                  <Spinner size={20} />
+                </div>
+              ) : amis.length === 0 ? (
+                <Card className="p-4">
+                  <p className="text-[13px] leading-relaxed text-muted">
+                    Ton carnet est vide. Envoie le lien d’invitation ci-dessus, ou{' '}
+                    <Link href="/amis" className="font-semibold text-accent hover:underline">
+                      cherche quelqu’un par son pseudo
+                    </Link>{' '}
+                    s’il est déjà inscrit.
+                  </p>
+                </Card>
+              ) : (
+                <Card className="divide-y divide-line/50 p-0">
+                  {amis.map((ami) => {
+                    const attente = defis.find(
+                      (defi) => defi.to === ami.id && defi.status === 'pending',
+                    )
+                    return (
+                      <div key={ami.id} className="flex items-center gap-2.5 p-2.5">
+                        <span className="relative shrink-0">
+                          <span className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] bg-surface-strong text-lg">
+                            <span aria-hidden>{ami.avatar ?? '♟'}</span>
+                          </span>
+                          {/* La pastille verte dit s'il est là *maintenant*,
+                              seule chose qui décide entre un défi en temps réel
+                              et une correspondance. */}
+                          {ami.online && (
+                            <span
+                              className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[var(--q-best)] ring-2 ring-[var(--bg-elev)]"
+                              aria-label="en ligne"
+                            />
+                          )}
+                        </span>
+
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium">
+                            {ami.username}
+                          </span>
+                          <span className="block text-[11px] text-faint">
+                            {ami.rating != null && `${ami.rating} · `}
+                            {ami.online ? 'en ligne' : 'hors ligne'}
+                          </span>
+                        </span>
+
+                        <Button
+                          size="sm"
+                          variant={attente ? 'ghost' : 'primary'}
+                          disabled={envoi === ami.id}
+                          icon={
+                            envoi === ami.id ? (
+                              <Loader2 size={14} className="animate-spin" />
+                            ) : attente ? undefined : jours === null ? (
+                              <Swords size={14} />
+                            ) : (
+                              <Mailbox size={14} />
+                            )
+                          }
+                          onClick={() =>
+                            attente
+                              ? void annulerDefi(attente.id)
+                              : jours === null
+                                ? void defier(ami)
+                                : void lancerCorrespondance(ami)
+                          }
+                        >
+                          {attente ? 'Annuler' : jours === null ? 'Défier' : `${jours} j`}
+                        </Button>
+                      </div>
+                    )
+                  })}
+                </Card>
+              )}
+            </section>
+          )}
+
+          {/* ── Les réglages du lien ───────────────────────────────── */}
+          {/* Sous les adversaires, et non au-dessus : ce sont des détails de la
+              partie qu'on va créer, et leurs valeurs par défaut conviennent
+              presque toujours. Les poser avant la question « contre qui ? »
+              revenait à faire remplir un formulaire pour un geste qui tient en
+              un clic. */}
+          <Card className={clsx('mt-4 p-4 sm:p-5', jours !== null && 'hidden')}>
             <SectionTitle>Ta couleur</SectionTitle>
             <div className="grid grid-cols-3 gap-1.5">
               {(
@@ -322,33 +580,34 @@ export default function CreateFriendGamePage() {
             <p className="mt-2 text-xs text-faint">
               Ton adversaire prendra l’autre couleur. Une fois la partie ouverte, elle est fixée.
             </p>
-          </Card>
 
-          {/* Le pseudo et le classement ne concernent que la partie par lien :
-              une correspondance se joue entre deux comptes, qui ont déjà un
-              nom, et son classement se règle côté serveur. */}
-          <Card className={clsx('mt-4 p-5', jours !== null && 'hidden')}>
-            <Input
-              label="Ton pseudo (facultatif)"
-              name="guestName"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="Invité"
-              maxLength={20}
-              hint="Sert uniquement à ce que ton adversaire sache qui il affronte."
-            />
+            {/* Le pseudo ne concerne que la partie par lien : une personne du
+                carnet a déjà un nom. */}
+            {moi === null && (
+              <div className="mt-4 border-t border-line/60 pt-4">
+                <Input
+                  label="Ton pseudo (facultatif)"
+                  name="guestName"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="Invité"
+                  maxLength={20}
+                  hint="Sert uniquement à ce que ton adversaire sache qui il affronte."
+                />
+              </div>
+            )}
 
             <label
               className={clsx(
-                'mt-4 flex items-start gap-2.5',
-                signedIn === false ? 'cursor-default opacity-60' : 'cursor-pointer',
+                'mt-4 flex items-start gap-2.5 border-t border-line/60 pt-4',
+                moi === null ? 'cursor-default opacity-60' : 'cursor-pointer',
               )}
             >
               <input
                 type="checkbox"
                 checked={rated}
                 onChange={(event) => setRated(event.target.checked)}
-                disabled={signedIn === false}
+                disabled={moi === null}
                 className="mt-0.5 h-4 w-4 accent-[var(--accent)]"
               />
               <span>
@@ -360,7 +619,7 @@ export default function CreateFriendGamePage() {
               </span>
             </label>
 
-            {signedIn === false && (
+            {moi === null && (
               <p className="mt-3 border-t border-line/60 pt-3 text-xs leading-relaxed text-muted">
                 Tu joues sans compte : la partie fonctionnera, mais elle ne sera ni classée ni
                 retrouvable ensuite.{' '}
@@ -372,122 +631,154 @@ export default function CreateFriendGamePage() {
             )}
           </Card>
 
-          {jours === null ? (
-            <Button
-              variant="primary"
-              size="lg"
-              fullWidth
-              className="mt-5"
-              icon={<Link2 size={17} />}
-              onClick={create}
-            >
-              Créer le lien de partie
-            </Button>
-          ) : (
-            /*
-              Sur plusieurs jours, il faut désigner quelqu'un.
-              Pas par formalisme : la partie durera deux semaines, il faut une
-              identité des deux côtés pour attribuer les coups et prévenir celui
-              dont c'est le tour. Un lien anonyme ne le permet pas.
-            */
-            <Card className="mt-5 p-5">
-              <SectionTitle hint="La partie durera plusieurs jours : il faut quelqu’un à qui l’attribuer, des deux côtés.">
-                Contre qui ?
-              </SectionTitle>
-
-              {amis === null ? (
-                <p className="text-sm text-muted">Chargement du carnet…</p>
-              ) : amis.length === 0 ? (
-                <p className="text-[13px] leading-relaxed text-muted">
-                  Ton carnet est vide.{' '}
-                  <Link href="/amis" className="font-semibold text-accent hover:underline">
-                    Ajoute quelqu’un
-                  </Link>{' '}
-                  pour lancer une correspondance — ou choisis une cadence en minutes, qui
-                  se joue par simple lien, sans compte.
-                </p>
-              ) : (
-                <div className="space-y-1">
-                  {amis.map((ami) => (
-                    <button
-                      key={ami.id}
-                      type="button"
-                      disabled={envoi}
-                      onClick={() => void lancerCorrespondance(ami.id)}
-                      className="flex w-full items-center gap-2 rounded-[var(--radius-sm)] border border-line px-3 py-2.5 text-left text-sm transition-colors hover:bg-surface-hover disabled:opacity-50"
-                    >
-                      <Users size={15} className="shrink-0 text-accent" aria-hidden />
-                      <span className="min-w-0 flex-1 truncate font-medium">{ami.username}</span>
-                      <span className="shrink-0 text-[11px] text-faint">
-                        {jours} jour{jours > 1 ? 's' : ''} par coup
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </Card>
-          )}
+          <p className="mt-4 px-1 text-xs leading-relaxed text-muted">
+            La catégorie se déduit de la durée qu’aurait une partie de quarante coups : moins de
+            trois minutes c’est du <strong className="font-semibold">bullet</strong>, moins de
+            huit du <strong className="font-semibold">blitz</strong>, moins de vingt-cinq du{' '}
+            <strong className="font-semibold">rapide</strong>, au-delà du{' '}
+            <strong className="font-semibold">classique</strong>. Chacune tient son propre
+            classement : on peut voir clair en rapide et s’effondrer en blitz.
+          </p>
         </>
-      ) : (
-        <Card glow className="mt-7 overflow-hidden">
-          <div className="p-6 text-center">
-            <span
-              className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full"
-              style={{ background: 'color-mix(in oklab, var(--accent) 16%, transparent)' }}
-              aria-hidden
-            >
-              <Users size={24} className="text-accent" />
-            </span>
-            <h2 className="font-display text-xl font-semibold">La partie est prête</h2>
-            <p className="mt-1.5 text-sm text-muted">
-              Envoie ce lien à ton adversaire. La partie commencera dès qu’il l’ouvrira.
-            </p>
-
-            <div className="mt-5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-line bg-surface p-2">
-              <code className="min-w-0 flex-1 truncate px-1 text-left font-mono text-[12px]">
-                {url}
-              </code>
-              <Button
-                size="sm"
-                variant={copied ? 'primary' : 'secondary'}
-                icon={copied ? <Check size={14} /> : <Copy size={14} />}
-                onClick={copy}
-              >
-                {copied ? 'Copié' : 'Copier'}
-              </Button>
-            </div>
-
-            <div className="mt-4 flex gap-2">
-              <Button variant="ghost" icon={<Share2 size={15} />} onClick={share} fullWidth>
-                Partager
-              </Button>
-              <Button
-                variant="primary"
-                fullWidth
-                onClick={() =>
-                  router.push(
-                    `/jouer/partie/${slug}?tc=${timeControlId}${rated ? '&classee=1' : ''}`,
-                  )
-                }
-              >
-                Entrer dans la partie
-              </Button>
-            </div>
-
-            <div className="mt-5 flex justify-center gap-2">
-              <Chip>
-                {SPEED_LABELS[
-                  TIME_CONTROLS.find((tc) => tc.id === timeControlId)?.category ?? 'rapid'
-                ].icon}{' '}
-                {TIME_CONTROLS.find((tc) => tc.id === timeControlId)?.label}
-              </Chip>
-              <Chip tone={rated ? 'accent' : 'neutral'}>
-                {rated ? 'Classée' : 'Amicale'}
-              </Chip>
-            </div>
-          </div>
-        </Card>
       )}
     </div>
+  )
+}
+
+/**
+ * Une façon de trouver un adversaire, sur une ligne.
+ *
+ * Icône, ce qu'on obtient, à qui cela s'adresse. Le format vient d'un constat
+ * simple : trois cartes empilées demandent trois lectures, trois rangées se
+ * balaient d'un regard.
+ */
+function RangeeAction({
+  icone,
+  titre,
+  detail,
+  onClick,
+  principal,
+  desactive,
+  raison,
+  marque,
+}: {
+  icone: React.ReactNode
+  titre: string
+  detail: string
+  onClick: () => void
+  /** Mise en avant : c'est le geste le plus fréquent de l'écran. */
+  principal?: boolean
+  desactive?: boolean
+  /** Pourquoi la rangée est éteinte, dit à l'endroit où on le constate. */
+  raison?: string
+  /** Retour immédiat après l'action — « Copié ». */
+  marque?: string
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={desactive}
+      className={clsx(
+        'flex w-full items-center gap-3 rounded-[var(--radius)] border p-3.5 text-left transition-colors',
+        desactive
+          ? 'cursor-not-allowed border-line opacity-50'
+          : principal
+            ? 'border-accent/60 bg-accent/10 hover:bg-accent/15'
+            : 'border-line bg-surface/60 hover:bg-surface-hover',
+      )}
+    >
+      <span
+        className={clsx(
+          'grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius-sm)]',
+          principal ? 'bg-accent/20 text-accent' : 'bg-surface-strong text-muted',
+        )}
+        aria-hidden
+      >
+        {icone}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-2">
+          <span className="text-[15px] font-semibold">{titre}</span>
+          {marque && (
+            <span className="flex items-center gap-1 text-[11px] font-semibold text-accent">
+              <Check size={12} aria-hidden />
+              {marque}
+            </span>
+          )}
+        </span>
+        <span className="mt-0.5 block text-[12px] leading-snug text-muted">
+          {raison ?? detail}
+        </span>
+      </span>
+    </button>
+  )
+}
+
+/** L'écran d'après : le lien est fabriqué, il n'y a plus qu'à l'envoyer. */
+function PartiePrete({
+  url,
+  copied,
+  onCopy,
+  onShare,
+  onEntrer,
+  timeControlId,
+  rated,
+}: {
+  url: string | null
+  copied: boolean
+  onCopy: () => void
+  onShare: () => void
+  onEntrer: () => void
+  timeControlId: string
+  rated: boolean
+}) {
+  return (
+    <Card glow className="mt-6 overflow-hidden">
+      <div className="p-5 text-center sm:p-6">
+        <span
+          className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full"
+          style={{ background: 'color-mix(in oklab, var(--accent) 16%, transparent)' }}
+          aria-hidden
+        >
+          <Users size={24} className="text-accent" />
+        </span>
+        <h2 className="font-display text-xl font-semibold">La partie est prête</h2>
+        <p className="mt-1.5 text-sm text-muted">
+          Envoie ce lien à ton adversaire. La partie commencera dès qu’il l’ouvrira.
+        </p>
+
+        <div className="mt-5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-line bg-surface p-2">
+          <code className="min-w-0 flex-1 truncate px-1 text-left font-mono text-[12px]">
+            {url}
+          </code>
+          <Button
+            size="sm"
+            variant={copied ? 'primary' : 'secondary'}
+            icon={copied ? <Check size={14} /> : <Copy size={14} />}
+            onClick={onCopy}
+          >
+            {copied ? 'Copié' : 'Copier'}
+          </Button>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button variant="ghost" icon={<Share2 size={15} />} onClick={onShare} fullWidth>
+            Partager
+          </Button>
+          <Button variant="primary" fullWidth onClick={onEntrer}>
+            Entrer dans la partie
+          </Button>
+        </div>
+
+        <div className="mt-5 flex flex-wrap justify-center gap-2">
+          <Chip>
+            {SPEED_LABELS[TIME_CONTROLS.find((tc) => tc.id === timeControlId)?.category ?? 'rapid'].icon}{' '}
+            {TIME_CONTROLS.find((tc) => tc.id === timeControlId)?.label}
+          </Chip>
+          <Chip tone={rated ? 'accent' : 'neutral'}>{rated ? 'Classée' : 'Amicale'}</Chip>
+        </div>
+      </div>
+    </Card>
   )
 }
