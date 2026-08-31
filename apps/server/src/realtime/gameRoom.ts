@@ -306,6 +306,27 @@ export class GameRoom {
     return null
   }
 
+  /**
+   * Couleur occupée par un compte, connecté ou non.
+   *
+   * `colorOf` demande une connexion ouverte, ce qui ne convient pas à qui a
+   * changé de page : sa place est gardée, mais il n'a plus de socket. C'est
+   * pourtant exactement celui qu'on veut reconnaître — pour lui proposer de
+   * revenir, ou pour le laisser abandonner sans avoir à rouvrir l'échiquier.
+   */
+  colorOfUser(userId: string): Color | null {
+    for (const color of ['w', 'b'] as const) {
+      if (this.players[color]?.userId === userId) return color
+    }
+    return null
+  }
+
+  /** Le joueur assis d'une couleur, pour ce que l'extérieur a besoin d'en dire. */
+  playerAt(color: Color): { name: string; connected: boolean } | null {
+    const player = this.players[color]
+    return player ? { name: player.name, connected: player.connected } : null
+  }
+
   get isEmpty(): boolean {
     return (
       (this.players.w?.sockets.size ?? 0) === 0 && (this.players.b?.sockets.size ?? 0) === 0
@@ -394,6 +415,34 @@ export class GameRoom {
     const color = this.colorOf(socketId)
     if (!color || this.status !== 'playing') return
     this.finish('resign', color === 'w' ? '0-1' : '1-0')
+  }
+
+  /**
+   * Quitter la partie sans être devant elle.
+   *
+   * On peut lancer une partie, changer d'écran, et ne plus jamais y revenir :
+   * le salon reste alors ouvert, l'adversaire attend son coup, et la seule
+   * façon d'en sortir était de rouvrir l'échiquier pour cliquer « Abandonner ».
+   * L'accueil propose donc de le faire depuis la liste des parties en plan.
+   *
+   * Une partie où personne n'a joué s'**annule** au lieu de se perdre : il n'y
+   * a pas de vainqueur d'une partie qui n'a pas commencé, et c'est déjà la
+   * règle appliquée aux déconnexions prolongées.
+   */
+  quitter(color: Color): boolean {
+    if (this.isFinished) return false
+    const player = this.players[color]
+    if (!player) return false
+
+    if (this.chess.history().length === 0) {
+      this.system(`${player.name} ne jouera pas. La partie est annulée.`)
+      this.finish('aborted', '*')
+      return true
+    }
+
+    this.system(`${player.name} a quitté la partie.`)
+    this.finish('resign', color === 'w' ? '0-1' : '1-0')
+    return true
   }
 
   offerDraw(socketId: string): void {

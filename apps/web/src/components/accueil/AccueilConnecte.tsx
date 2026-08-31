@@ -45,8 +45,32 @@ import {
 import { Button, ButtonLink, Card, Chip, SectionTitle, Skeleton } from '@/components/ui/index.tsx'
 import { useCarriere } from '@/lib/carriere/useCarriere.ts'
 import { listerAnalyses, type AnalyseEnregistree } from '@/lib/analysis/enregistrees.ts'
-import { chargerPartieEnCours, depuis, type PartieEnCours } from '@/lib/game/partieEnCours.ts'
+import {
+  chargerPartieEnCours,
+  depuis,
+  oublierPartieEnCours,
+  type PartieEnCours,
+} from '@/lib/game/partieEnCours.ts'
 import { DefiDuJour } from '@/components/daily/DefiDuJour.tsx'
+import { toast } from '@/components/ui/Toast.tsx'
+
+/**
+ * Une partie contre quelqu'un, encore ouverte quelque part.
+ *
+ * Elle ne vit qu'en mémoire du serveur temps réel : on ne la retrouve donc pas
+ * en base, mais en le lui demandant.
+ */
+interface PartieEnDirect {
+  slug: string
+  color: 'w' | 'b'
+  status: string
+  opponent: string | null
+  opponentConnected: boolean
+  moves: number
+  yourTurn: boolean
+  timeControl: { initial: number; increment: number }
+  rated: boolean
+}
 
 /**
  * On lit `/api/parties/terminee` et non le profil public.
@@ -96,6 +120,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
   const progression = useCarriere()
 
   const [reprise, setReprise] = useState<PartieEnCours | null | undefined>(undefined)
+  const [enDirect, setEnDirect] = useState<PartieEnDirect[]>([])
   const [parties, setParties] = useState<PartieJouee[] | null>(null)
   const [analyses, setAnalyses] = useState<AnalyseEnregistree[] | null>(null)
   const [aToiDeJouer, setAToiDeJouer] = useState(0)
@@ -104,6 +129,12 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
     let vivant = true
 
     void chargerPartieEnCours().then((p) => vivant && setReprise(p))
+
+    // Les parties contre quelqu'un, laissées ouvertes en changeant d'écran.
+    void fetch('/api/parties/miennes', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : { games: [] }))
+      .then((d: { games?: PartieEnDirect[] }) => vivant && setEnDirect(d.games ?? []))
+      .catch(() => undefined)
 
     void fetch('/api/parties/terminee?limite=5', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : { parties: [] }))
@@ -144,25 +175,55 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
       </header>
 
       {/* ── Ce qui attend ────────────────────────────────────────── */}
-      {(reprise || aToiDeJouer > 0) && (
+      {(reprise || enDirect.length > 0 || aToiDeJouer > 0) && (
         <div className="mb-4 grid gap-3 sm:grid-cols-2">
+          {/* ── Les parties contre quelqu'un, restées ouvertes ────────
+              On lance une partie, on va voir autre chose, et l'échiquier
+              disparaît : son adresse n'était que dans l'historique du
+              navigateur. L'adversaire, lui, attend toujours son coup.
+
+              Elles passent avant la partie contre l'ordinateur : celle-ci
+              patiente indéfiniment, une personne non. */}
+          {enDirect.map((partie) => (
+            <PartieEnDirectCarte
+              key={partie.slug}
+              partie={partie}
+              onQuittee={() =>
+                setEnDirect((liste) => liste.filter((autre) => autre.slug !== partie.slug))
+              }
+            />
+          ))}
+
           {reprise && (
             <Card className="border-accent/50 p-4">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-accent">
                 Partie en plan
               </p>
               <p className="mt-1 text-sm font-medium">
-                Contre l’ordinateur, {reprise.moves.length} demi-coups joués
+                Contre l’ordinateur, {reprise.moves.length} demi-coup
+                {reprise.moves.length > 1 ? 's joués' : ' joué'}
               </p>
               <p className="text-[12px] text-faint">{depuis(reprise.enregistreLe)}</p>
-              <ButtonLink
-                href="/jouer/ordinateur"
-                variant="primary"
-                size="sm"
-                className="mt-3"
-              >
-                Reprendre
-              </ButtonLink>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <ButtonLink href="/jouer/ordinateur" variant="primary" size="sm">
+                  Reprendre
+                </ButtonLink>
+                {/* La partie proposée à la reprise ne s'effaçait que depuis
+                    l'écran de configuration, où il fallait aller la chercher.
+                    Une proposition dont on ne peut pas dire non revient tous
+                    les jours. */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    oublierPartieEnCours()
+                    setReprise(null)
+                    toast.info('Partie abandonnée.', 'Elle ne te sera plus proposée.')
+                  }}
+                >
+                  Abandonner
+                </Button>
+              </div>
             </Card>
           )}
 
@@ -347,5 +408,89 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
         </div>
       </div>
     </div>
+  )
+}
+
+/**
+ * Une partie contre quelqu'un, restée ouverte.
+ *
+ * Deux issues, et l'écran doit rendre les deux faciles : **y retourner**, ce
+ * qu'on veut presque toujours quand l'adversaire est encore là, ou **la
+ * quitter**, ce qui n'était possible que depuis l'échiquier lui-même. Quitter
+ * une partie sans un coup joué l'annule, et n'inscrit donc aucune défaite ;
+ * après le premier coup, c'est un abandon — le mot change avec la chose.
+ *
+ * Le lien emporte la cadence : sans elle, la page de partie afficherait la
+ * pendule de repli au-dessus de l'horloge réelle du salon.
+ */
+function PartieEnDirectCarte({
+  partie,
+  onQuittee,
+}: {
+  partie: PartieEnDirect
+  onQuittee: () => void
+}) {
+  const [envoi, setEnvoi] = useState(false)
+  const commencee = partie.moves > 0
+  const tc = `${partie.timeControl.initial}+${partie.timeControl.increment}`
+
+  const quitter = async () => {
+    const mot = commencee ? 'Abandonner cette partie ?' : 'Annuler cette partie ?'
+    if (!confirm(mot)) return
+    setEnvoi(true)
+    try {
+      const reponse = await fetch('/api/parties/miennes', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ slug: partie.slug }),
+      })
+      if (!reponse.ok) {
+        toast.error('La partie n’a pas pu être quittée.')
+        return
+      }
+      toast.info(commencee ? 'Partie abandonnée.' : 'Partie annulée.')
+      onQuittee()
+    } catch {
+      toast.error('Le serveur de parties est injoignable.')
+    } finally {
+      setEnvoi(false)
+    }
+  }
+
+  return (
+    <Card className="border-accent/50 p-4">
+      <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-accent">
+        <Swords size={12} aria-hidden />
+        Partie en cours
+      </p>
+      <p className="mt-1 text-sm font-medium">
+        {partie.opponent ? `Contre ${partie.opponent}` : 'En attente d’un adversaire'}
+        {commencee && `, ${partie.moves} demi-coup${partie.moves > 1 ? 's joués' : ' joué'}`}
+      </p>
+      <p className="text-[12px] text-faint">
+        {/* Ce qu'on veut savoir avant de décider : est-ce qu'il est toujours
+            là ? Une partie dont l'adversaire est parti ne se reprend pas, elle
+            se quitte. */}
+        {!partie.opponent
+          ? 'Personne n’a encore ouvert ton lien.'
+          : partie.opponentConnected
+            ? partie.yourTurn
+              ? 'En ligne — c’est à toi de jouer.'
+              : 'En ligne — il réfléchit.'
+            : 'Déconnecté pour le moment.'}
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <ButtonLink
+          href={`/jouer/partie/${partie.slug}?tc=${tc}${partie.rated ? '&classee=1' : ''}`}
+          variant="primary"
+          size="sm"
+        >
+          Reprendre
+        </ButtonLink>
+        <Button variant="ghost" size="sm" disabled={envoi} onClick={() => void quitter()}>
+          {commencee ? 'Abandonner' : 'Annuler'}
+        </Button>
+      </div>
+    </Card>
   )
 }

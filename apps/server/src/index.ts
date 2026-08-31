@@ -179,6 +179,62 @@ const httpServer = createServer(async (request, response) => {
       return json(response, 200, { games: live })
     }
 
+    // ── Mes parties en cours ───────────────────────────────────────────────
+    //
+    // On lance une partie contre quelqu'un, on va voir un puzzle, et on ne
+    // retrouve plus l'échiquier : l'adresse du salon était dans l'historique du
+    // navigateur, nulle part ailleurs. Pendant ce temps l'adversaire attend un
+    // coup qui ne vient pas.
+    //
+    // Les salons ne vivent qu'en mémoire ici — une partie n'est écrite en base
+    // qu'une fois finie —, c'est donc à ce serveur de dire dans lesquels on est
+    // assis. La réponse est un POST parce qu'elle prend un jeton de session :
+    // un jeton n'a rien à faire dans une adresse, qui se journalise.
+    if (url.pathname === '/parties/miennes' && request.method === 'POST') {
+      const body = await readJson<{ token?: string }>(request)
+      const identity = await verifySessionToken(body.token)
+      if (!identity) return json(response, 200, { games: [] })
+
+      const mine = []
+      for (const room of rooms.values()) {
+        if (room.isFinished) continue
+        const color = room.colorOfUser(identity.userId)
+        if (!color) continue
+
+        const snapshot = room.snapshot()
+        const adversaire = room.playerAt(color === 'w' ? 'b' : 'w')
+        mine.push({
+          slug: snapshot.slug,
+          color,
+          status: snapshot.status,
+          opponent: adversaire?.name ?? null,
+          // « S'il est toujours en ligne » : c'est ce qui décide si la partie
+          // vaut encore la peine d'être reprise, ou s'il faut la quitter.
+          opponentConnected: adversaire?.connected ?? false,
+          moves: snapshot.moves.length,
+          yourTurn: snapshot.turn === color && snapshot.status === 'playing',
+          timeControl: snapshot.timeControl,
+          rated: snapshot.rated,
+        })
+      }
+      return json(response, 200, { games: mine })
+    }
+
+    // ── Quitter une partie sans y retourner ────────────────────────────────
+    if (url.pathname === '/parties/quitter' && request.method === 'POST') {
+      const body = await readJson<{ token?: string; slug?: string }>(request)
+      const identity = await verifySessionToken(body.token)
+      if (!identity) return json(response, 401, { error: 'Connexion requise.' })
+
+      const room = rooms.get(String(body.slug ?? ''))
+      if (!room) return json(response, 404, { error: 'Partie introuvable.' })
+
+      const color = room.colorOfUser(identity.userId)
+      if (!color) return json(response, 403, { error: 'Tu ne joues pas cette partie.' })
+
+      return json(response, 200, { ok: room.quitter(color) })
+    }
+
     // ── Analyse d'une position ─────────────────────────────────────────────
     if (url.pathname === '/analyse' && request.method === 'POST') {
       const body = await readJson<{
