@@ -25,6 +25,7 @@ import { FlammeSerie } from './FlammeSerie.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { toast } from '@/components/ui/Toast.tsx'
 import { QUETES, XP_TOTAL } from '@/lib/daily/quetes.ts'
+import { tranchesAuDessus } from '@coupparfait/core'
 
 interface DefiPuzzle {
   id: string
@@ -32,9 +33,18 @@ interface DefiPuzzle {
   themes: string[]
 }
 
+/** La tranche de niveau servie, et celles qu'on peut aller voir au-dessus. */
+interface Tranche {
+  id: string
+  nom: string
+  min: number
+  max: number
+}
+
 export function DefiDuJour({ className }: { className?: string }) {
   const { etat, xp, marquer: _marquer } = useQuotidien()
   const [defi, setDefi] = useState<DefiPuzzle | null>(null)
+  const [tranche, setTranche] = useState<Tranche | null>(null)
   const [chargement, setChargement] = useState(true)
 
   useEffect(() => {
@@ -46,6 +56,7 @@ export function DefiDuJour({ className }: { className?: string }) {
       .then((donnees) => {
         if (!vivant) return
         setDefi(donnees?.puzzle ?? null)
+        setTranche(donnees?.tranche ?? null)
         setChargement(false)
       })
       .catch(() => {
@@ -63,7 +74,7 @@ export function DefiDuJour({ className }: { className?: string }) {
     // et un `absolute inset-0` cherche le premier ancêtre positionné.
     <Card className={clsx('relative p-5', className)}>
       <SectionTitle
-        hint="La même position pour tout le monde, jusqu’à minuit."
+        hint="La même position pour tout le monde de ton niveau, jusqu’à minuit."
         // La même flamme que dans la barre du haut, et volontairement le même
         // composant : `FlammeSerie` décide seul quand se montrer — il faut une
         // série, et il faut un compte.
@@ -83,7 +94,10 @@ export function DefiDuJour({ className }: { className?: string }) {
           <Spinner size={13} /> Tirage du jour…
         </p>
       ) : defi ? (
-        <DefiCliquable defi={defi} defiFait={defiFait} />
+        <>
+          <DefiCliquable defi={defi} defiFait={defiFait} tranche={tranche} />
+          {tranche && <PlusDur tranche={tranche} />}
+        </>
       ) : (
         <p className="py-2 text-sm text-muted">
           Le défi du jour n’est pas disponible — la base de puzzles n’est peut-être pas
@@ -173,7 +187,15 @@ export function DefiDuJour({ className }: { className?: string }) {
  * Le message part **avant** la navigation — arriver sur un formulaire de
  * connexion sans savoir pourquoi est la manière la plus sûre de le quitter.
  */
-function DefiCliquable({ defi, defiFait }: { defi: DefiPuzzle; defiFait: boolean }) {
+function DefiCliquable({
+  defi,
+  defiFait,
+  tranche,
+}: {
+  defi: DefiPuzzle
+  defiFait: boolean
+  tranche: Tranche | null
+}) {
   const identite = useIdentite()
   const router = useRouter()
 
@@ -208,7 +230,7 @@ function DefiCliquable({ defi, defiFait }: { defi: DefiPuzzle; defiFait: boolean
           {defiFait ? 'Défi relevé' : 'Trouve le coup gagnant'}
         </span>
         <span className="block text-xs text-muted">
-          Niveau {defi.rating}
+          {tranche ? `${tranche.nom} · niveau ${defi.rating}` : `Niveau ${defi.rating}`}
           {defiFait ? ' · reviens demain' : ' · une seule position'}
         </span>
       </span>
@@ -242,8 +264,43 @@ function DefiCliquable({ defi, defiFait }: { defi: DefiPuzzle; defiFait: boolean
   }
 
   return (
-    <Link href="/puzzles?defi=1" className={apparence}>
+    <Link
+      href={tranche ? `/puzzles?defi=1&tranche=${tranche.id}` : '/puzzles?defi=1'}
+      className={apparence}
+    >
       {contenu}
     </Link>
+  )
+}
+
+/**
+ * « Plus dur ? » — les deux tranches au-dessus de la sienne.
+ *
+ * Le défi du jour vise le niveau du joueur, pour qu'il le réussisse la plupart
+ * du temps : c'est ce qui fait revenir. Mais un défi qu'on gagne toujours cesse
+ * d'en être un, et certains jours on veut se mesurer plus haut. Les deux
+ * tranches suivantes sont donc proposées, jamais imposées — et elles restent
+ * partagées, elles aussi : le « Club » du jour est le même pour tous les
+ * joueurs de club.
+ *
+ * Deux et pas six : au-delà, un défi quotidien devient un catalogue.
+ */
+function PlusDur({ tranche }: { tranche: Tranche }) {
+  const superieures = tranchesAuDessus(tranche)
+  if (superieures.length === 0) return null
+
+  return (
+    <p className="relative z-10 mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-faint">
+      <span>Plus dur&nbsp;:</span>
+      {superieures.map((autre) => (
+        <Link
+          key={autre.id}
+          href={`/puzzles?defi=1&tranche=${autre.id}`}
+          className="rounded-full border border-line px-2 py-0.5 font-medium text-muted transition-colors hover:border-accent hover:text-accent"
+        >
+          {autre.nom}
+        </Link>
+      ))}
+    </p>
   )
 }

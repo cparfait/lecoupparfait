@@ -142,6 +142,77 @@ export const CLASSEMENT_DEPART = 100
  */
 export const CLASSEMENT_PLANCHER = 100
 
+/**
+ * Les tranches du défi du jour.
+ *
+ * Le défi était unique et calibré « joueur de club » — 1100 à 1800 Elo. Le
+ * raisonnement se défendait : une position partagée par tout le monde est la
+ * seule chose dont on puisse parler à quelqu'un, et elle doit donc être
+ * franchissable par la majorité. Mais la majorité, ici, débute : un compte
+ * neuf part de 100 et le premier chapitre de la carrière sert des mats en un.
+ * Ces gens-là échouaient tous les jours, sur la seule chose de l'application
+ * censée créer une habitude.
+ *
+ * Une tranche par niveau, donc, et le partage reste entier à l'intérieur de
+ * chacune : deux débutants ont le même défi, deux joueurs de club aussi, et
+ * chacun peut aller voir celui du dessus. C'est même mieux qu'avant — on peut
+ * comparer sa tranche, ce qui donne un but.
+ *
+ * Le plancher est à 500 parce que la base de puzzles ne descend pas plus bas,
+ * et le plafond ouvert : au-delà de 2100, il n'y a plus grand monde et une
+ * borne supérieure priverait les plus forts de ce qui les intéresse.
+ */
+export interface TrancheDefi {
+  id: string
+  nom: string
+  min: number
+  max: number
+}
+
+export const TRANCHES_DEFI: readonly TrancheDefi[] = [
+  { id: 'debutant', nom: 'Débutant', min: 500, max: 800 },
+  { id: 'apprenti', nom: 'Apprenti', min: 800, max: 1100 },
+  { id: 'club', nom: 'Club', min: 1100, max: 1400 },
+  { id: 'confirme', nom: 'Confirmé', min: 1400, max: 1700 },
+  { id: 'fort', nom: 'Fort', min: 1700, max: 2100 },
+  { id: 'expert', nom: 'Expert', min: 2100, max: 3000 },
+]
+
+/**
+ * La tranche d'un joueur, d'après son classement de puzzles.
+ *
+ * Celle où il se trouve, et non celle du dessus : le défi du jour doit être
+ * gagné la plupart du temps, c'est ce qui fait revenir. Les tranches
+ * supérieures sont *proposées* à côté — voir `tranchesAuDessus` — pour qui
+ * veut se mesurer plus haut. Une proposition qu'on accepte vaut mieux qu'une
+ * difficulté qu'on subit.
+ *
+ * Sous le plancher du catalogue, la première tranche est déjà au-dessus : on
+ * ne peut pas servir plus facile que ce que la base contient.
+ */
+export function trancheDefiPour(cote: number): TrancheDefi {
+  const premiere = TRANCHES_DEFI[0]!
+  if (cote < premiere.min) return premiere
+  const rang = TRANCHES_DEFI.findIndex((tranche) => cote < tranche.max)
+  return TRANCHES_DEFI[rang === -1 ? TRANCHES_DEFI.length - 1 : rang]!
+}
+
+/**
+ * Les deux tranches au-dessus d'une tranche donnée.
+ *
+ * Deux, et pas toutes : proposer six niveaux transforme un défi quotidien en
+ * catalogue, et personne ne va chercher trois crans au-dessus du sien.
+ */
+export function tranchesAuDessus(tranche: TrancheDefi): TrancheDefi[] {
+  const rang = TRANCHES_DEFI.findIndex((autre) => autre.id === tranche.id)
+  return rang === -1 ? [] : TRANCHES_DEFI.slice(rang + 1, rang + 3)
+}
+
+/** Retrouve une tranche par son identifiant. */
+export function trancheDefi(id: string | null | undefined): TrancheDefi | null {
+  return TRANCHES_DEFI.find((tranche) => tranche.id === id) ?? null
+}
+
 /** Écart-type initial : un nouveau joueur est très incertain. */
 export const GLICKO_DEFAULT_RD = 350
 

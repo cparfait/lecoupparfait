@@ -184,6 +184,8 @@ export default function PuzzlesPage() {
    * `null` tant qu'on ne sait pas — voir l'effet de chargement plus bas.
    */
   const [modeDefi, setModeDefi] = useState<boolean | null>(null)
+  /** Tranche du défi du jour, quand on arrive par un lien qui en désigne une. */
+  const [trancheDefi, setTrancheDefi] = useState<string | null>(null)
   /**
    * Chapitre de carrière en cours, s'il y en a un.
    *
@@ -198,6 +200,7 @@ export default function PuzzlesPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     setModeDefi(params.get('defi') === '1')
+    setTrancheDefi(params.get('tranche'))
     setChapitreCarriere(chapitreDeLUrl(params))
 
     /*
@@ -250,7 +253,7 @@ export default function PuzzlesPage() {
       const precedents = vusRef.current.join(',')
       const response = await fetch(
         modeDefi
-          ? `/api/defi-du-jour?jour=${jourLocal()}`
+          ? `/api/defi-du-jour?jour=${jourLocal()}${trancheDefi ? `&tranche=${encodeURIComponent(trancheDefi)}` : ''}`
           : `/api/puzzles?theme=${encodeURIComponent(theme)}${coteDemandee ? `&rating=${coteDemandee}` : ''}${precedents ? `&exclure=${encodeURIComponent(precedents)}` : ''}`,
         { cache: 'no-store' },
       )
@@ -321,7 +324,7 @@ export default function PuzzlesPage() {
       setErrorMessage('Le service de puzzles est injoignable.')
       setStatus('error')
     }
-  }, [theme, voiceEnabled, modeDefi, retenirPuzzle, coteDemandee])
+  }, [theme, voiceEnabled, modeDefi, retenirPuzzle, coteDemandee, trancheDefi])
 
   useEffect(() => {
     // On attend de savoir si l'on vient du défi du jour : charger d'abord un
