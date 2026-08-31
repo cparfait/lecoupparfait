@@ -154,6 +154,29 @@ const STOCKFISH_MIN_ELO = 1320
 /** Elo maximum accepté par `UCI_Elo`. */
 const STOCKFISH_MAX_ELO = 3190
 
+/**
+ * Ce que Maia sait faire, et ce qu'elle ne sait pas faire.
+ *
+ * Les réseaux publiés vont de 1100 à 1900, de cent en cent — voir
+ * `apps/server/src/engine/maia.ts`. En dehors de cette plage il n'y a rien :
+ * le serveur choisit alors le palier *le plus proche*, ce qui est la bonne
+ * réponse à une demande de 1150 et une réponse trompeuse à une demande de 250.
+ *
+ * Le niveau demandé était pourtant transmis tel quel. Résultat : les niveaux 1
+ * à 6 affrontaient tous le même réseau de 1100, les niveaux 14 à 25 le même de
+ * 1900, et le curseur ne changeait rien à ce qu'on avait en face — on
+ * choisissait « débutant complet, 250 Elo » pour se faire battre par un joueur
+ * de club. C'est ici qu'on le dit, pour que l'écran de choix puisse le dire à
+ * son tour.
+ */
+export const MAIA_MIN_ELO = 1100
+export const MAIA_MAX_ELO = 1900
+
+/** Maia peut-elle honnêtement incarner cette force ? */
+export function maiaCouvre(elo: number): boolean {
+  return elo >= MAIA_MIN_ELO && elo <= MAIA_MAX_ELO
+}
+
 interface LevelSpec {
   elo: number
   personality: BotPersonalityId
@@ -173,14 +196,27 @@ interface LevelSpec {
  * température. Au-dessus, on laisse Stockfish faire son travail de simulation.
  * Les cinq derniers niveaux retirent tout bridage et augmentent la profondeur.
  */
+/*
+  Les niveaux faibles regardent **plus** de coups, pas moins.
+
+  C'est contre-intuitif et c'est pourtant la seule façon de jouer faiblement :
+  le moteur ne rend que ses `multiPv` meilleurs coups, et ses six meilleurs
+  sont tous raisonnables. Avec une liste de six, un bot de 250 Elo tirait au
+  sort parmi six bons coups — d'où un joueur de club, quelle que soit la
+  température. Élargir la liste est ce qui met de vraies fautes à sa portée ;
+  la fenêtre de tolérance, elle, continue d'écarter les catastrophes.
+
+  Dix est le maximum accepté par le client de moteur, et le calcul reste
+  gratuit : à ces niveaux la recherche s'arrête à un ou deux demi-coups.
+*/
 const LEVEL_TABLE: LevelSpec[] = [
-  { elo: 250, personality: 'novice', skill: 0, depth: 1, movetimeMs: 120, temperature: 1.0, multiPv: 6, nodes: 500 },
-  { elo: 400, personality: 'novice', skill: 0, depth: 1, movetimeMs: 150, temperature: 0.92, multiPv: 6, nodes: 900 },
-  { elo: 550, personality: 'novice', skill: 1, depth: 2, movetimeMs: 180, temperature: 0.84, multiPv: 5, nodes: 1800 },
-  { elo: 700, personality: 'fonceur', skill: 1, depth: 2, movetimeMs: 220, temperature: 0.74, multiPv: 5, nodes: 3500 },
-  { elo: 850, personality: 'prudent', skill: 2, depth: 3, movetimeMs: 260, temperature: 0.64, multiPv: 5, nodes: 7000 },
-  { elo: 1000, personality: 'novice', skill: 3, depth: 4, movetimeMs: 300, temperature: 0.55, multiPv: 4, nodes: 14000 },
-  { elo: 1150, personality: 'fonceur', skill: 4, depth: 5, movetimeMs: 350, temperature: 0.46, multiPv: 4, nodes: 28000 },
+  { elo: 250, personality: 'novice', skill: 0, depth: 1, movetimeMs: 120, temperature: 1.0, multiPv: 10, nodes: 500 },
+  { elo: 400, personality: 'novice', skill: 0, depth: 1, movetimeMs: 150, temperature: 0.92, multiPv: 10, nodes: 900 },
+  { elo: 550, personality: 'novice', skill: 1, depth: 2, movetimeMs: 180, temperature: 0.84, multiPv: 9, nodes: 1800 },
+  { elo: 700, personality: 'fonceur', skill: 1, depth: 2, movetimeMs: 220, temperature: 0.74, multiPv: 8, nodes: 3500 },
+  { elo: 850, personality: 'prudent', skill: 2, depth: 3, movetimeMs: 260, temperature: 0.64, multiPv: 7, nodes: 7000 },
+  { elo: 1000, personality: 'novice', skill: 3, depth: 4, movetimeMs: 300, temperature: 0.55, multiPv: 6, nodes: 14000 },
+  { elo: 1150, personality: 'fonceur', skill: 4, depth: 5, movetimeMs: 350, temperature: 0.46, multiPv: 5, nodes: 28000 },
   { elo: 1320, personality: 'prudent', skill: 5, depth: 6, movetimeMs: 400, temperature: 0.38, multiPv: 4 },
   { elo: 1450, personality: 'tacticien', skill: 6, depth: 7, movetimeMs: 450, temperature: 0.32, multiPv: 4 },
   { elo: 1550, personality: 'positionnel', skill: 7, depth: 8, movetimeMs: 500, temperature: 0.28, multiPv: 3 },
@@ -334,9 +370,30 @@ export function pickBotMove(
     }
   }
 
-  // Softmax : plus la température est haute, plus les coups moyens ont leur chance.
-  // L'échelle de 120 centipions correspond à peu près à « un coup un peu moins bon ».
-  const scale = 120 / Math.max(0.05, config.temperature)
+  /*
+    Softmax : plus la température est haute, plus les coups moyens ont leur
+    chance.
+
+    L'échelle était divisée par la température au lieu d'être multipliée, et
+    cela renversait tout le barème. Une grande échelle aplatit la distribution
+    — tous les coups deviennent également probables ; une petite la resserre
+    sur le meilleur. En divisant, le bot de niveau 1 (température 1) recevait
+    l'échelle la plus *serrée* et jouait donc presque toujours le meilleur coup
+    de sa liste, pendant que le niveau 25 (température 0,02) recevait une
+    échelle de 6 000 centipions et tirait au hasard parmi ses candidats.
+
+    Mesuré avant correction, sur un éventail d'évaluations réaliste : perte
+    moyenne de 50 centipions par coup au niveau 1, 41 au niveau 8, 12 au niveau
+    18. Les huit premiers niveaux — 250 à 1320 Elo annoncés — jouaient tous à
+    la même force, celle d'un joueur de club. Le curseur ne servait à rien, ce
+    qui est exactement ce qu'on nous rapportait.
+
+    L'échelle vaut désormais la largeur de la fenêtre de tolérance : le pire
+    coup encore admis garde à peu près une chance sur trois chez un bot faible,
+    et pratiquement aucune chez un bot fort — dont la fenêtre se réduit de
+    toute façon à quelques dizaines de centipions.
+  */
+  const scale = Math.max(20, 460 * config.temperature)
   const bestAdjusted = Math.max(...pool.map((s) => s.adjusted))
   const weights = pool.map((s) => Math.exp((s.adjusted - bestAdjusted) / scale))
   const total = weights.reduce((a, b) => a + b, 0)
