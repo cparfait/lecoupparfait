@@ -24,6 +24,7 @@
  */
 
 import type { BotPersonalityId } from './types.ts'
+import { botLevel } from './bots.ts'
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Les chapitres
@@ -477,7 +478,23 @@ export function prochaineEtape(
     return {
       cle: 'puzzles',
       libelle: reste === chapitre.puzzles ? 'Passer aux puzzles' : `Encore ${reste} puzzle${reste > 1 ? 's' : ''}`,
-      lien: `/puzzles?theme=${chapitre.theme}&carriere=${chapitre.numero}`,
+      /*
+        La cote du chapitre voyage avec le thème.
+
+        Sans elle, le service de puzzles vise le classement du joueur plus
+        cinquante points — ce qui est juste pour l'entraînement libre, et faux
+        pour un parcours. Le chapitre 1 apprend à déplacer les pièces ; il
+        servait des positions à 1 150 Elo à qui n'a encore rien appris, parce
+        que c'est là qu'un classement de puzzles se trouve après quelques
+        réussites ailleurs. Un chapitre a sa propre difficulté, annoncée sur sa
+        carte : c'est elle qui doit commander.
+
+        `botLevel` traduit le palier du chapitre — de 1 à 25 — en Elo, la même
+        échelle que celle des adversaires qu'on y affronte. Le chapitre 1
+        demande donc les puzzles les plus faciles de la base, et non ceux du
+        niveau où l'on croit être.
+      */
+      lien: `/puzzles?theme=${chapitre.theme}&carriere=${chapitre.numero}&cote=${botLevel(chapitre.niveau).elo}`,
     }
   }
   if (progression.winsInChapter < chapitre.victoires) {

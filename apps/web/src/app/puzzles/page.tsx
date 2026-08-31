@@ -193,6 +193,8 @@ export default function PuzzlesPage() {
    * ferait avancer une carrière à laquelle on ne pensait pas.
    */
   const [chapitreCarriere, setChapitreCarriere] = useState<number | null>(null)
+  /** Difficulté imposée par le chapitre, en Elo. `null` en entraînement libre. */
+  const [coteDemandee, setCoteDemandee] = useState<number | null>(null)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     setModeDefi(params.get('defi') === '1')
@@ -212,6 +214,18 @@ export default function PuzzlesPage() {
     */
     const demande = params.get('theme')
     if (demande && THEMES.some((entree) => entree.id === demande)) setTheme(demande)
+
+    /*
+      La difficulté imposée par un chapitre de carrière.
+
+      Sans elle, le service vise le classement de puzzles du joueur plus
+      cinquante points. C'est juste pour l'entraînement libre — on cherche à
+      progresser — et faux pour un parcours : le chapitre 1 apprend à déplacer
+      les pièces, et servait des mats en un à 1 150 Elo parce que c'est là que
+      se trouve un classement après quelques réussites ailleurs.
+    */
+    const cote = Number(params.get('cote'))
+    if (Number.isFinite(cote) && cote > 0) setCoteDemandee(Math.round(cote))
   }, [])
 
   // ── Chargement ──────────────────────────────────────────────────────────
@@ -237,7 +251,7 @@ export default function PuzzlesPage() {
       const response = await fetch(
         modeDefi
           ? `/api/defi-du-jour?jour=${jourLocal()}`
-          : `/api/puzzles?theme=${encodeURIComponent(theme)}${precedents ? `&exclure=${encodeURIComponent(precedents)}` : ''}`,
+          : `/api/puzzles?theme=${encodeURIComponent(theme)}${coteDemandee ? `&rating=${coteDemandee}` : ''}${precedents ? `&exclure=${encodeURIComponent(precedents)}` : ''}`,
         { cache: 'no-store' },
       )
       const data = await response.json()
@@ -307,7 +321,7 @@ export default function PuzzlesPage() {
       setErrorMessage('Le service de puzzles est injoignable.')
       setStatus('error')
     }
-  }, [theme, voiceEnabled, modeDefi, retenirPuzzle])
+  }, [theme, voiceEnabled, modeDefi, retenirPuzzle, coteDemandee])
 
   useEffect(() => {
     // On attend de savoir si l'on vient du défi du jour : charger d'abord un
