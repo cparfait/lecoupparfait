@@ -95,16 +95,33 @@ export default function PlayLobbyPage() {
         deux sur le même écran.
       </p>
 
-      <div className="mt-8 grid gap-3 md:grid-cols-3">
+      {/* ── Les six portes ───────────────────────────────────────────────
+
+          Deux mises en page pour la même liste, et le partage se fait à `md`,
+          là où la grille passe à trois colonnes.
+
+          Au-delà, une carte par colonne : icône posée en haut, titre, phrase,
+          et la ligne de détail en capitales. C'est une vitrine, on la parcourt
+          du regard.
+
+          En dessous, les six cartes s'empilent — et une vitrine empilée
+          devient un couloir. Chacune faisait près de deux cents points de
+          haut : la carrière, en sixième position, se trouvait à trois écrans
+          de défilement de « Contre l'ordinateur ». On les remet donc en
+          rangées : icône à gauche, texte à droite, sans la ligne de détail.
+          Six rangées tiennent alors dans un écran et demi, et l'on voit qu'il
+          y a six façons de jouer — ce qui est la première chose que cet écran
+          a à dire. */}
+      <div className="mt-6 grid gap-2 md:mt-8 md:gap-3 md:grid-cols-3">
         {MODES.map(({ href, icon: Icon, titleKey, blurbKey, detail, accent }, index) => (
           <Link
             key={href}
             href={href}
-            className="group animate-slide-up glass gradient-ring relative flex flex-col overflow-hidden p-6 transition-transform duration-300 hover:-translate-y-1"
+            className="group animate-slide-up glass gradient-ring relative flex flex-row items-center gap-3.5 overflow-hidden p-3.5 transition-transform duration-300 hover:-translate-y-1 md:flex-col md:items-stretch md:gap-0 md:p-6"
             style={{ animationDelay: `${index * 70}ms` }}
           >
             <span
-              className="mb-5 grid h-12 w-12 place-items-center rounded-[var(--radius)]"
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius)] md:mb-5 md:h-12 md:w-12"
               style={{
                 background: `color-mix(in oklab, ${accent} 16%, transparent)`,
                 boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${accent} 30%, transparent)`,
@@ -113,13 +130,27 @@ export default function PlayLobbyPage() {
               <Icon size={22} style={{ color: accent }} aria-hidden />
             </span>
 
-            <h2 className="text-lg font-semibold">{t(titleKey)}</h2>
-            <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted">{t(blurbKey)}</p>
-            <p className="mt-4 text-[11px] uppercase tracking-wide text-faint">{detail}</p>
+            {/* `md:contents` : au-delà de `md` cette boîte disparaît de la mise
+                en page et ses trois enfants redeviennent ceux de la carte,
+                ce qui rend au `flex-1` de la phrase son effet d'origine —
+                pousser la ligne de détail contre le bas. */}
+            <div className="min-w-0 flex-1 md:contents">
+              <h2 className="pr-6 text-[15px] font-semibold md:pr-0 md:text-lg">{t(titleKey)}</h2>
+              <p className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-muted md:mt-1.5 md:line-clamp-none md:flex-1 md:text-sm md:leading-relaxed">
+                {t(blurbKey)}
+              </p>
+              {/* Le détail — « 25 niveaux · 7 personnalités » — est ce qu'on
+                  lit une fois, et il coûte deux lignes sur un téléphone. Il
+                  reste sur l'écran de réglages, où il sert au moment de
+                  choisir. */}
+              <p className="mt-4 hidden text-[11px] uppercase tracking-wide text-faint md:block">
+                {detail}
+              </p>
+            </div>
 
             <ArrowRight
               size={17}
-              className="absolute right-5 top-6 text-faint transition-all duration-300 group-hover:translate-x-1 group-hover:text-ink"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-faint transition-all duration-300 group-hover:text-ink md:right-5 md:top-6 md:translate-y-0 md:group-hover:translate-x-1"
               aria-hidden
             />
           </Link>
