@@ -45,6 +45,7 @@ import {
   formatScore,
   meriteUnMeilleurCoup,
   motifCopy,
+  pourquoiCeCoup,
   uciLineToSan,
   winPercentFor,
   type EngineLine,
@@ -351,14 +352,35 @@ function buildAlternatives(
         to: uci.slice(2, 4) as Square,
         promotion: uci.length > 4 ? (uci[4] as never) : undefined,
       })
-      const motifs = detectPositionMotifs(probe, { tacticsOnly: true, limit: 4 })
-      const mine = motifs.find((motif) => motif.side === mover && motif.weight >= 0.4)
-      if (mine) {
-        const copy = motifCopy(mine.id as MotifId, locale)
-        reason = copy ? copy.name : null
+
+      if (probe.isCheckmate()) {
+        reason = locale === 'fr' ? 'Mat' : 'Mate'
+      } else {
+        /*
+          La phrase avant le mot.
+
+          On donnait le nom du motif — « Fourchette » — et rien d'autre. C'est
+          pourtant le mot qui manque le moins : on voit bien qu'il se passe
+          quelque chose, ce qu'on ne voit pas c'est *quoi*. Devant un pion
+          conseillé, la question qui vient est « pourquoi ne se fait-il pas
+          simplement prendre ? », et la réponse — il attaque deux pièces, la
+          dame le couvre — n'était écrite nulle part.
+
+          Le nom du motif reste, en second recours : il vaut mieux que rien
+          quand la relation n'est pas descriptible en une phrase.
+        */
+        reason = pourquoiCeCoup(fenBefore, uci, locale)
+
+        if (!reason) {
+          const motifs = detectPositionMotifs(probe, { tacticsOnly: true, limit: 4 })
+          const mine = motifs.find((motif) => motif.side === mover && motif.weight >= 0.4)
+          if (mine) {
+            const copy = motifCopy(mine.id as MotifId, locale)
+            reason = copy ? copy.name : null
+          }
+        }
+        if (!reason && probe.inCheck()) reason = locale === 'fr' ? 'Échec' : 'Check'
       }
-      if (!reason && probe.isCheckmate()) reason = locale === 'fr' ? 'Mat' : 'Mate'
-      else if (!reason && probe.inCheck()) reason = locale === 'fr' ? 'Échec' : 'Check'
     } catch {
       // Ligne moteur incohérente : on l'affiche sans justification plutôt que
       // d'inventer une raison.

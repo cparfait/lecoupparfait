@@ -62,6 +62,21 @@ export function MoveList({
   const rows = groupMoves(moves, startFen)
 
   /**
+   * Le coup courant, écrit en français ordinaire.
+   *
+   * « ♕xd5+ » ne se lit pas : il faut savoir que le `x` est une prise et que le
+   * `+` est un échec. L'application le savait déjà — chaque coup porte sa
+   * traduction en attribut `title` —, mais un attribut `title` ne s'ouvre qu'au
+   * survol, geste qui n'existe pas sur un téléphone. La notation restait donc
+   * illisible précisément pour qui ne la connaît pas encore.
+   *
+   * Une ligne sous les commandes, qui suit le coup sélectionné : on lit
+   * « la dame prend en d5, avec échec » en même temps qu'on voit « ♕xd5+ », et
+   * la notation s'apprend toute seule, sans leçon.
+   */
+  const coupCourant = cursor >= 0 ? (moves[cursor] ?? null) : null
+
+  /**
    * Garde le coup courant visible **dans la liste**, et seulement là.
    *
    * C'était un `scrollIntoView({ block: 'nearest' })`, qui a un défaut qu'on
@@ -164,6 +179,13 @@ export function MoveList({
             <ChevronLast size={17} aria-hidden />
           </NavButton>
         </div>
+      )}
+
+      {controls && coupCourant && (
+        <p className="border-b border-line/60 px-3 py-1.5 text-[12px] leading-snug text-muted">
+          <strong className="font-semibold text-ink">{format(coupCourant.san)}</strong>{' '}
+          <span className="text-faint">·</span> {dire(coupCourant.san)}
+        </p>
       )}
       {/* `overscroll-contain` seulement à partir de `lg`.
 

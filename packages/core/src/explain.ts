@@ -89,6 +89,106 @@ export function localiseSan(
 }
 
 /**
+ * Pourquoi un coup marche : ce qu'il attaque, et ce qui le protège.
+ *
+ * Le coach nommait le motif — « Fourchette » — et s'arrêtait là. C'est le mot
+ * qui manque le moins : on voit bien qu'il se passe quelque chose, ce qu'on ne
+ * voit pas, c'est *quoi*. Un joueur à qui l'on conseille d5 se demande d'abord
+ * pourquoi ce pion ne serait pas simplement perdu ; la réponse tient en deux
+ * faits — il attaque deux pièces à la fois, et la dame le couvre — dont aucun
+ * n'était écrit nulle part.
+ *
+ * On ne détecte donc pas des figures de tactique, on énonce deux relations que
+ * n'importe qui peut vérifier sur l'échiquier :
+ *
+ *  1. les pièces adverses que la pièce déplacée attaque depuis sa case
+ *     d'arrivée — les rois et les pions sont écartés, c'est le matériel qui
+ *     parle ;
+ *  2. ce qui défend cette case d'arrivée, qui est la question qu'on se pose
+ *     juste après.
+ *
+ * `null` quand il n'y a rien à dire : mieux vaut se taire qu'énoncer une
+ * évidence à chaque coup.
+ */
+export function pourquoiCeCoup(fenBefore: string, uci: string, locale: Locale): string | null {
+  const fr = locale === 'fr'
+
+  let board: Chess
+  let move
+  try {
+    board = new Chess(fenBefore, { skipValidation: true })
+    move = board.move({
+      from: uci.slice(0, 2),
+      to: uci.slice(2, 4),
+      promotion: uci.length > 4 ? uci[4] : undefined,
+    })
+  } catch {
+    // Coup impossible dans cette position : on n'invente pas d'explication.
+    return null
+  }
+
+  const mover = move.color
+  const arrivee = move.to as Square
+
+  // Ce que la pièce déplacée vise depuis sa nouvelle case. On ne compte que ce
+  // qui vaut plus qu'un pion : « ton pion attaque un pion » n'apprend rien.
+  const vises: Array<{ type: PieceSymbol; square: Square }> = []
+  for (const square of SQUARES) {
+    const piece = board.get(square)
+    if (!piece || piece.color === mover || piece.type === 'k' || piece.type === 'p') continue
+    if (board.attackers(square, mover).includes(arrivee)) {
+      vises.push({ type: piece.type, square })
+    }
+  }
+  if (vises.length === 0) return null
+  // La plus grosse prise d'abord : c'est celle qu'on regarde.
+  vises.sort((a, b) => SIMPLE_VALUES[b.type] - SIMPLE_VALUES[a.type])
+
+  const nomme = (type: PieceSymbol, square: Square) =>
+    fr
+      ? `${PIECE_ARTICLE[type]} ${PIECE_NAMES[type].fr} en ${square}`
+      : `the ${PIECE_NAMES[type].en} on ${square}`
+
+  const piece = fr ? PIECE_NAMES[move.piece].fr : PIECE_NAMES[move.piece].en
+  const sujet = fr
+    ? `${PIECE_ARTICLE[move.piece]} ${piece} en ${arrivee}`
+    : `the ${piece} on ${arrivee}`
+
+  let phrase: string
+  if (vises.length >= 2) {
+    const deux = vises.slice(0, 2).map(({ type, square }) => nomme(type, square))
+    phrase = fr
+      ? `${majuscule(sujet)} attaque en même temps ${deux[0]} et ${deux[1]} : l’un des deux tombe.`
+      : `${majuscule(sujet)} attacks ${deux[0]} and ${deux[1]} at once: one of them falls.`
+  } else {
+    const seul = nomme(vises[0]!.type, vises[0]!.square)
+    phrase = fr
+      ? `${majuscule(sujet)} attaque ${seul}.`
+      : `${majuscule(sujet)} attacks ${seul}.`
+  }
+
+  // Ce qui couvre la case d'arrivée. C'est la question suivante — « et il ne se
+  // fait pas prendre ? » — et elle vient toujours.
+  const defenseurs = board
+    .attackers(arrivee, mover)
+    .map((square) => ({ square, piece: board.get(square) }))
+    .filter((entree) => entree.piece)
+  const defenseur = defenseurs[0]
+  if (defenseur?.piece) {
+    phrase += fr
+      ? ` Il est défendu par ${nomme(defenseur.piece.type, defenseur.square)}.`
+      : ` It is defended by ${nomme(defenseur.piece.type, defenseur.square)}.`
+  }
+
+  return phrase
+}
+
+/** Première lettre en capitale, pour commencer une phrase. */
+function majuscule(texte: string): string {
+  return texte.charAt(0).toUpperCase() + texte.slice(1)
+}
+
+/**
  * Notation épelée pour la synthèse vocale.
  * `Cf3` devient « cavalier f 3 », `O-O` devient « petit roque ».
  */

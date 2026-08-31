@@ -1430,7 +1430,14 @@ function GameScreen({
       (alternative) => alternative.rank === 1 && !alternative.played,
     )
     if (!meilleur) return null
-    return { conseille: formatMove(meilleur.san), joue: formatMove(commentary.san) }
+    return {
+      conseille: formatMove(meilleur.san),
+      joue: formatMove(commentary.san),
+      // « Le pion en d5 attaque en même temps le fou en c4 et le cavalier en
+      // e4. Il est défendu par la dame en d8. » C'est ce qui manquait : on
+      // montrait un coup sans jamais dire ce qu'il fait.
+      pourquoi: meilleur.reason,
+    }
   }, [verdictDuCoup, commentary, formatMove])
 
   return (
@@ -1775,8 +1782,8 @@ function LegendeDuVerdict({
   conseil,
 }: {
   quality: MoveQuality
-  /** Le coup qu'il fallait jouer, et celui qu'on a joué. */
-  conseil?: { conseille: string; joue: string } | null
+  /** Le coup qu'il fallait jouer, celui qu'on a joué, et ce que le premier fait. */
+  conseil?: { conseille: string; joue: string; pourquoi?: string | null } | null
 }) {
   const style = QUALITY_STYLES[quality]
   const teinte = `var(--q-${style.token})`
@@ -1803,6 +1810,10 @@ function LegendeDuVerdict({
           <strong className="font-semibold text-accent">{conseil.conseille}</strong> au lieu de{' '}
           <strong className="font-semibold text-ink">{conseil.joue}</strong> — la flèche bleue
           montre ce coup-là dans la position d’avant, pas un coup à jouer maintenant.
+          {/* Et ce qu'il faisait. Sans cette phrase, on regarde un coup dont on
+              ne comprend pas l'intérêt, et l'on n'apprend rien — la
+              justification vaut mieux que le verdict. */}
+          {conseil.pourquoi && <span className="text-ink"> {conseil.pourquoi}</span>}
         </p>
       )}
     </div>
