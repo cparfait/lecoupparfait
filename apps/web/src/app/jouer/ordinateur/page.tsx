@@ -714,8 +714,17 @@ function SetupScreen({
           </div>
 
           <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
+            {/* « Je débute » vaut 1, et non 3.
+
+                Il valait 3, c'est-à-dire 550 Elo, sur une échelle qui annonce
+                250 tout en bas. Quelqu'un qui se déclare débutant appuie sur ce
+                bouton et se retrouve deux crans au-dessus du plus faible
+                adversaire disponible, sans savoir qu'il existe : le bouton dit
+                « je débute », donc on le croit sur parole et l'on ne touche
+                plus au curseur. Un préréglage nommé d'après le joueur doit
+                désigner le bout de l'échelle qui lui correspond. */}
             {[
-              { label: 'Je débute', level: 3 },
+              { label: 'Je débute', level: 1 },
               { label: 'Occasionnel', level: 7 },
               { label: 'Club', level: 12 },
               { label: 'Fort', level: 18 },

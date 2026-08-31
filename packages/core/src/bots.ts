@@ -206,17 +206,18 @@ interface LevelSpec {
   température. Élargir la liste est ce qui met de vraies fautes à sa portée ;
   la fenêtre de tolérance, elle, continue d'écarter les catastrophes.
 
-  Dix est le maximum accepté par le client de moteur, et le calcul reste
-  gratuit : à ces niveaux la recherche s'arrête à un ou deux demi-coups.
+  Le calcul reste gratuit : à ces niveaux la recherche s'arrête à un ou deux
+  demi-coups. Vingt lignes est le plafond du client de moteur, relevé pour
+  l'occasion — dix ne suffisaient pas à contenir une vraie faute de débutant.
 */
 const LEVEL_TABLE: LevelSpec[] = [
-  { elo: 250, personality: 'novice', skill: 0, depth: 1, movetimeMs: 120, temperature: 1.0, multiPv: 10, nodes: 500 },
-  { elo: 400, personality: 'novice', skill: 0, depth: 1, movetimeMs: 150, temperature: 0.92, multiPv: 10, nodes: 900 },
-  { elo: 550, personality: 'novice', skill: 1, depth: 2, movetimeMs: 180, temperature: 0.84, multiPv: 9, nodes: 1800 },
-  { elo: 700, personality: 'fonceur', skill: 1, depth: 2, movetimeMs: 220, temperature: 0.74, multiPv: 8, nodes: 3500 },
-  { elo: 850, personality: 'prudent', skill: 2, depth: 3, movetimeMs: 260, temperature: 0.64, multiPv: 7, nodes: 7000 },
-  { elo: 1000, personality: 'novice', skill: 3, depth: 4, movetimeMs: 300, temperature: 0.55, multiPv: 6, nodes: 14000 },
-  { elo: 1150, personality: 'fonceur', skill: 4, depth: 5, movetimeMs: 350, temperature: 0.46, multiPv: 5, nodes: 28000 },
+  { elo: 250, personality: 'novice', skill: 0, depth: 1, movetimeMs: 120, temperature: 1.0, multiPv: 18, nodes: 500 },
+  { elo: 400, personality: 'novice', skill: 0, depth: 1, movetimeMs: 150, temperature: 0.92, multiPv: 16, nodes: 900 },
+  { elo: 550, personality: 'novice', skill: 1, depth: 2, movetimeMs: 180, temperature: 0.84, multiPv: 14, nodes: 1800 },
+  { elo: 700, personality: 'fonceur', skill: 1, depth: 2, movetimeMs: 220, temperature: 0.74, multiPv: 12, nodes: 3500 },
+  { elo: 850, personality: 'prudent', skill: 2, depth: 3, movetimeMs: 260, temperature: 0.64, multiPv: 10, nodes: 7000 },
+  { elo: 1000, personality: 'novice', skill: 3, depth: 4, movetimeMs: 300, temperature: 0.55, multiPv: 8, nodes: 14000 },
+  { elo: 1150, personality: 'fonceur', skill: 4, depth: 5, movetimeMs: 350, temperature: 0.46, multiPv: 6, nodes: 28000 },
   { elo: 1320, personality: 'prudent', skill: 5, depth: 6, movetimeMs: 400, temperature: 0.38, multiPv: 4 },
   { elo: 1450, personality: 'tacticien', skill: 6, depth: 7, movetimeMs: 450, temperature: 0.32, multiPv: 4 },
   { elo: 1550, personality: 'positionnel', skill: 7, depth: 8, movetimeMs: 500, temperature: 0.28, multiPv: 3 },
@@ -353,9 +354,23 @@ export function pickBotMove(
 
   const bestRaw = Math.max(...scored.map((s) => s.raw))
 
-  // Un bot ne joue jamais un coup catastrophique par pur hasard : le plafond de
-  // perte tolérée grandit avec la température, donc avec la faiblesse du bot.
-  const tolerance = 40 + config.temperature * 460
+  /*
+    Ce qu'un bot s'autorise à perdre sur un coup.
+
+    Le plafond grandit avec la température, donc avec la faiblesse du bot. Il
+    grandissait trop lentement en bas de l'échelle : entre le niveau 1 et le
+    niveau 3, il passait de 500 à 426 centipions — trois quarts de pion d'écart
+    pour deux crans annoncés à 250 et 550 Elo. Les trois premiers niveaux
+    jouaient donc la même partie, et descendre le curseur ne se voyait pas.
+
+    Le terme cubique ne se réveille qu'aux températures élevées, c'est-à-dire
+    aux tout premiers niveaux : 1 000 centipions au niveau 1, 722 au niveau 3,
+    240 au niveau 8, et rien de changé au-delà. Mille centipions, c'est une
+    dame en l'air — ce qui arrive à un joueur de 250 Elo, et n'arrive jamais à
+    un joueur de 1 320.
+  */
+  const tolerance =
+    40 + config.temperature * 460 + config.temperature ** 3 * 500
   const candidates = scored.filter((s) => bestRaw - s.raw <= tolerance)
   const pool = candidates.length > 0 ? candidates : [scored[0]!]
 

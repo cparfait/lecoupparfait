@@ -272,7 +272,13 @@ export class EngineClient {
         return
       }
 
-      const multiPv = Math.max(1, Math.min(10, options.multiPv ?? 1))
+      // Vingt lignes, et non plus dix. Le plafond servait à borner un coût, et
+      // il bornait surtout la faiblesse des premiers niveaux : un adversaire de
+      // 250 Elo doit pouvoir choisir un coup que le moteur classe quinzième,
+      // sans quoi il tire au sort parmi dix coups raisonnables et joue comme un
+      // joueur de club. Le coût, lui, est nul là où ça compte — ces niveaux
+      // cherchent à un demi-coup de profondeur.
+      const multiPv = Math.max(1, Math.min(20, options.multiPv ?? 1))
       this.setOption('MultiPV', multiPv)
       // `Threads` n'a de sens que sur la variante multi-fils ; l'envoyer à la
       // version mono-fil provoque une erreur du moteur.
