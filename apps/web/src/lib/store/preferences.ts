@@ -197,7 +197,18 @@ export interface Preferences {
 
 const DEFAULTS: Preferences = {
   locale: 'fr',
-  notation: 'lettres',
+  /*
+    Les coups s'écrivent avec la pièce dessinée, pas avec son initiale.
+
+    « Cf3 », « Dxd5 », « Fb5 » : trois lettres à apprendre avant de pouvoir
+    lire une liste de coups, et rien dans « C » ne ressemble à un cavalier.
+    La figurine se lit sans rien savoir — on reconnaît le dessin de la pièce
+    qu'on a sous les yeux sur l'échiquier —, elle ne dépend d'aucune langue,
+    et c'est celle des livres et des revues.
+
+    Le réglage reste dans Préférences pour qui préfère les lettres.
+  */
+  notation: 'figurine',
   theme: 'aurora',
   pieceSet: 'staunton',
   boardStyle: 'aurore',
@@ -281,7 +292,7 @@ export const usePreferences = create<PreferencesStore>()(
     }),
     {
       name: 'coupparfait.preferences',
-      version: 4,
+      version: 5,
       /**
        * Reprise des réglages enregistrés par une version antérieure.
        *
@@ -304,6 +315,11 @@ export const usePreferences = create<PreferencesStore>()(
           state.iaEnabled = false
           state.iaCustomProviders = []
         }
+        // v5 : les coups s'écrivent en figurine. Le changement de défaut
+        // n'aurait touché que les nouveaux venus, et ce sont justement ceux
+        // qui utilisent déjà l'application qui butent sur « Cf3 » à longueur
+        // de partie. Le réglage reste ouvert dans Préférences.
+        if (from < 5) state.notation = 'figurine'
         return state as Preferences
       },
       partialize: ({ set: _set, patch: _patch, reset: _reset, hydrated: _h, ...rest }) => rest,
