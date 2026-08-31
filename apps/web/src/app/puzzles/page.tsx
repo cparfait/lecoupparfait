@@ -39,6 +39,7 @@ import { playMoveSound, playSound } from '@/lib/sound.ts'
 import { speak } from '@/lib/speech.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { useSan } from '@/lib/notation.ts'
+import { VoiceQuickToggle } from '@/components/layout/VoiceQuickToggle.tsx'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import {
   chapitreDeLUrl,
@@ -593,6 +594,11 @@ export default function PuzzlesPage() {
             série de {streak}
           </Chip>
         )}
+
+        {/* La voix annonce la position et lit la solution. Le bouton est ici,
+            à côté de ce qu'il fait taire, et non dans la barre de navigation
+            où un haut-parleur ne dit pas ce qu'il coupe. */}
+        <VoiceQuickToggle className="ml-auto" />
       </div>
 
       <div className="mb-4 flex flex-wrap gap-1.5">

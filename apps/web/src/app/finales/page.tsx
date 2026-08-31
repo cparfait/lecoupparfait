@@ -46,6 +46,7 @@ import { useBotPlayer } from '@/lib/game/useBotPlayer.ts'
 import { playResultSound, playSound } from '@/lib/sound.ts'
 import { speak } from '@/lib/speech.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import { VoiceQuickToggle } from '@/components/layout/VoiceQuickToggle.tsx'
 
 type Screen =
   | { kind: 'families' }
@@ -420,6 +421,9 @@ function EndgameTrainer({
         <Chip className="ml-auto">
           {index + 1} / {group.positions.length}
         </Chip>
+        {/* La consigne de l'exercice est lue à voix haute : le bouton qui la
+            coupe se tient ici, à côté d'elle. */}
+        <VoiceQuickToggle />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">

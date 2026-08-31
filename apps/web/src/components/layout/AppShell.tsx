@@ -35,7 +35,6 @@ import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { avantagePour, type AvantageCompte } from '@/lib/compte/avantages.ts'
 import { RACCOURCIS_MOBILES, SECTIONS, sectionActive } from '@/lib/navigation.ts'
 import { ThemeQuickSwitch } from './ThemeQuickSwitch.tsx'
-import { VoiceQuickToggle } from './VoiceQuickToggle.tsx'
 
 /**
  * Ce qu'il y a à dire avant d'ouvrir cette rubrique, s'il y a quelque chose.
@@ -92,8 +91,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-50 border-b border-line/70 backdrop-blur-xl">
         <div className="absolute inset-0 -z-10 bg-[var(--bg)]/72" aria-hidden />
         {/* Le resserrement sous 360 px n'est pas cosmétique.
-            Six commandes à droite — série, voix, thème, préférences, compte,
-            menu — tiennent à 375 px et débordaient de treize pixels à 320 :
+            Cinq commandes à droite — série, thème, préférences, compte,
+            menu — tiennent à 375 px, et débordaient à 320 du temps où la voix
+            en faisait partie :
             l'en-tête gagnait une barre de défilement horizontale sur un iPhone
             SE. On récupère la place sur les marges et les écarts, qui ne se
             voient pas, plutôt qu'en retirant une commande, qui se verrait. */}
@@ -123,7 +123,14 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <div className="ml-auto flex items-center gap-1.5 [@media(max-width:359px)]:gap-0.5">
             <PastilleSerie />
-            <VoiceQuickToggle />
+            {/* La voix du coach n'est plus ici.
+
+                Un haut-parleur dans la barre de navigation ne dit pas ce
+                qu'il coupe : il pouvait aussi bien désigner les bruits de
+                pièces, les sons de fin de partie ou une musique. Il est
+                désormais posé dans chaque écran qui parle — puzzles, leçons,
+                finales, panneau du coach, analyse —, à côté de ce qu'il fait
+                taire. Le réglage durable reste dans les préférences. */}
             <ThemeQuickSwitch />
             <Link
               href="/preferences"
