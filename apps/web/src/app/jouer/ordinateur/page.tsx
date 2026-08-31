@@ -28,6 +28,7 @@ import {
 } from 'lucide-react'
 import clsx from 'clsx'
 import { GameNav } from '@/components/game/GameNav.tsx'
+import { RubanCoups, rubanDepuisLesCoups } from '@/components/game/RubanCoups.tsx'
 import { useSan } from '@/lib/notation.ts'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import {
@@ -1429,6 +1430,9 @@ function GameScreen({
   // Naviguer dans la liste des coups replace la position sur l'échiquier, mais
   // une position seule ne dit pas *quel* coup y a mené : on flèche donc le coup
   // consulté, et le coup que le moteur préférait si on l'a déjà calculé.
+  // Les coups tels que le ruban les attend : le numéro se déduit du rang.
+  const rubanCoups = useMemo(() => rubanDepuisLesCoups(state.moves), [state.moves])
+
   const reviewing = !state.isLive
   const reviewedMove = reviewing ? (state.moves[state.cursor] ?? null) : null
   const formatMove = useSan()
@@ -1763,8 +1767,11 @@ function GameScreen({
             </div>
           </div>
 
-          {/* Barre d'actions */}
-          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          {/* ── Barre d'actions, grands écrans ───────────────────────
+              Sous `sm`, elle cède la place au ruban et à la barre du bas, plus
+              bas dans ce fichier : les mêmes actions, disposées pour un pouce
+              plutôt que pour une souris. */}
+          <div className="mt-3 hidden flex-wrap items-center gap-1.5 sm:flex">
             <TurnIndicator
               turn={state.turn}
               yourColor={playerColor}
@@ -1902,6 +1909,133 @@ function GameScreen({
               </div>
             </Menu>
           </div>
+
+          {/* ── Téléphone : le ruban, puis la barre du pouce ──────────
+              Deux emprunts assumés aux applications d'échecs mobiles, parce
+              qu'ils répondent mieux que ce qu'on avait.
+
+              Le **ruban** remplace les cinq flèches de navigation : il montre
+              où l'on en est plutôt que de proposer d'y aller. La liste
+              complète reste plus bas dans la page, pour l'autre usage — la
+              parcourir.
+
+              La **barre du bas** aligne les mêmes actions que la version
+              grand écran, mais en colonnes égales, icône au-dessus du mot.
+              C'est ce qui permet de viser sans regarder : chaque cible fait un
+              quart de la largeur au lieu d'un bouton de texte serré contre son
+              voisin. Elle suit l'état de la partie — les aides disparaissent
+              en partie classée, les sorties remplacent tout une fois la partie
+              finie. */}
+          <div className="mt-2 sm:hidden">
+            <div className="flex items-center gap-2 px-1">
+              <TurnIndicator
+                turn={state.turn}
+                yourColor={playerColor}
+                thinking={botPlayer.thinking}
+                gameOver={gameOver}
+              />
+              {classee && (
+                <Chip tone="accent">
+                  <Trophy size={11} aria-hidden />
+                  Classée
+                </Chip>
+              )}
+              <ViewToggle className="ml-auto" />
+            </div>
+
+            <RubanCoups
+              coups={rubanCoups}
+              cursor={state.cursor}
+              onSeek={goTo}
+              className="mt-1"
+            />
+
+            <div className="mt-1 flex items-stretch justify-around gap-1 border-t border-line/60 pt-1">
+              <Menu
+                align="right"
+                sens="haut"
+                largeur="w-60"
+                label="Options de la partie"
+                className="flex-1"
+                declencheur={() => (
+                  <span className="flex w-full flex-col items-center gap-0.5">
+                    <MoreHorizontal size={19} aria-hidden />
+                    <span className="text-[10px] font-medium leading-none">Options</span>
+                  </span>
+                )}
+              >
+                <button
+                  type="button"
+                  onClick={onNewGame}
+                  className="flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-left text-sm transition-colors hover:bg-surface-hover"
+                >
+                  <RefreshCw size={15} className="shrink-0 text-accent" aria-hidden />
+                  Nouvelle partie
+                </button>
+                <Link
+                  href="/jouer"
+                  className="flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-left text-sm transition-colors hover:bg-surface-hover"
+                >
+                  <LayoutGrid size={15} className="shrink-0 text-accent" aria-hidden />
+                  Retour au menu
+                </Link>
+                {!classee && (
+                  <div className="mt-1 border-t border-line/60 pt-1">
+                    <CommentaryToggle
+                      active={commentaryMode}
+                      onChange={(value) => {
+                        prefs.set('commentaryMode', value)
+                        if (!value) {
+                          setCommentaryPaused(false)
+                          setCoachSpeaking(false)
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+              </Menu>
+
+              {gameOver ? (
+                <>
+                  <ActionDuPouce
+                    icone={<RefreshCw size={19} aria-hidden />}
+                    libelle="Rejouer"
+                    onClick={onRematch}
+                  />
+                  <ActionDuPouce
+                    icone={<LayoutGrid size={19} aria-hidden />}
+                    libelle="Menu"
+                    href="/jouer"
+                  />
+                </>
+              ) : (
+                <>
+                  <ActionDuPouce
+                    icone={<Flag size={19} aria-hidden />}
+                    libelle="Abandonner"
+                    onClick={handleResign}
+                    danger
+                  />
+                  {!classee && (
+                    <>
+                      <ActionDuPouce
+                        icone={<Lightbulb size={19} aria-hidden />}
+                        libelle="Indice"
+                        onClick={handleHint}
+                        disabled={state.turn !== playerColor}
+                      />
+                      <ActionDuPouce
+                        icone={<Undo2 size={19} aria-hidden />}
+                        libelle="Annuler"
+                        onClick={handleUndo}
+                        disabled={state.moves.length === 0}
+                      />
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* ── Colonne latérale ─────────────────────────────────────── */}
@@ -2004,6 +2138,60 @@ export function recordBotGame(level: number, won: boolean): void {
   }).catch(() => {
     // Hors ligne ou sans compte : la partie reste jouée, simplement pas comptée.
   })
+}
+
+/**
+ * Une case de la barre du pouce.
+ *
+ * Icône au-dessus, mot en dessous, largeur égale : c'est ce qui permet de
+ * viser sans regarder. Un bouton de texte, même bien espacé, demande de lire
+ * avant de toucher — et pendant une partie on regarde l'échiquier.
+ *
+ * Elle rend un lien quand on lui donne une adresse, un bouton sinon : les deux
+ * se ressemblent à l'écran et n'ont rien à voir pour le navigateur, qui doit
+ * pouvoir ouvrir une destination dans un nouvel onglet.
+ */
+function ActionDuPouce({
+  icone,
+  libelle,
+  onClick,
+  href,
+  disabled,
+  danger,
+}: {
+  icone: React.ReactNode
+  libelle: string
+  onClick?: () => void
+  href?: string
+  disabled?: boolean
+  /** Une action qu'on ne défait pas : l'abandon. */
+  danger?: boolean
+}) {
+  const classe = clsx(
+    'flex flex-1 flex-col items-center gap-0.5 rounded-[var(--radius-sm)] px-1 py-1.5',
+    'text-[10px] font-medium transition-colors',
+    disabled
+      ? 'pointer-events-none text-faint opacity-40'
+      : danger
+        ? 'text-[var(--q-blunder)] hover:bg-surface-hover'
+        : 'text-muted hover:bg-surface-hover hover:text-ink',
+  )
+
+  if (href) {
+    return (
+      <Link href={href} className={classe}>
+        {icone}
+        <span className="leading-none">{libelle}</span>
+      </Link>
+    )
+  }
+
+  return (
+    <button type="button" onClick={onClick} disabled={disabled} className={classe}>
+      {icone}
+      <span className="leading-none">{libelle}</span>
+    </button>
+  )
 }
 
 /**
