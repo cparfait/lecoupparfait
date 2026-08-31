@@ -79,6 +79,62 @@ export function Menu({
   const conteneur = useFermetureExterieure(ouvert, fermer)
   const panneauId = useId()
   const boutonRef = useRef<HTMLButtonElement>(null)
+  const panneauRef = useRef<HTMLDivElement>(null)
+
+  /**
+   * Ramène le panneau dans l'écran.
+   *
+   * Le panneau s'accroche à son bouton — `left-0` ou `right-0` — et prend une
+   * largeur fixe. Tant que le bouton est près du bord correspondant, tout va
+   * bien ; ailleurs, le compte n'y est pas. La barre d'actions d'une partie se
+   * replie sur téléphone, et son bouton « … » se retrouve n'importe où : un
+   * panneau de 240 points aligné à droite d'un bouton posé à 150 points du bord
+   * gauche commence à moins 90 — la moitié du texte hors de l'écran, et la page
+   * qui se met à défiler latéralement.
+   *
+   * On mesure donc après ouverture et on décale de ce qu'il faut, jamais plus.
+   * Un vrai positionnement d'ancrage CSS ferait cela sans mesure, mais il n'est
+   * pas encore là où sont nos utilisateurs.
+   *
+   * `translate` et non `transform` : l'animation d'entrée anime `transform` en
+   * `fill-mode: both`, donc sa valeur finale l'emporterait sur tout ce qu'on
+   * écrirait en style en ligne. Les deux propriétés se composent.
+   */
+  const [decalage, setDecalage] = useState(0)
+  /** Ce qui est effectivement appliqué au panneau, pour repartir de l'ancrage. */
+  const decalageApplique = useRef(0)
+
+  useEffect(() => {
+    if (!ouvert) {
+      decalageApplique.current = 0
+      setDecalage(0)
+      return
+    }
+    const recadrer = () => {
+      const panneau = panneauRef.current
+      if (!panneau) return
+
+      const marge = 8
+      const cadre = panneau.getBoundingClientRect()
+      // Le cadre mesuré inclut le décalage déjà appliqué : on repart de la
+      // position ancrée pour ne pas empiler deux corrections.
+      const gauche = cadre.left - decalageApplique.current
+      const droite = cadre.right - decalageApplique.current
+
+      let ecart = 0
+      if (droite > window.innerWidth - marge) ecart = window.innerWidth - marge - droite
+      if (gauche + ecart < marge) ecart = marge - gauche
+
+      decalageApplique.current = ecart
+      setDecalage(ecart)
+    }
+
+    recadrer()
+    // Un téléphone qu'on tourne pendant que le menu est ouvert : la fenêtre
+    // change de largeur, le panneau doit resuivre.
+    window.addEventListener('resize', recadrer)
+    return () => window.removeEventListener('resize', recadrer)
+  }, [ouvert])
 
   /**
    * Navigation au clavier dans le panneau.
@@ -129,17 +185,23 @@ export function Menu({
 
       {ouvert && (
         <div
+          ref={panneauRef}
           id={panneauId}
           role="menu"
           aria-label={label}
           onKeyDown={surToucheDuPanneau}
           onClick={fermer}
+          style={decalage === 0 ? undefined : { translate: `${decalage}px` }}
           className={clsx(
             'animate-slide-up popover absolute z-50 p-1.5 shadow-[var(--shadow-lg)]',
             // Un plafond de hauteur avec défilement : même dans le bon sens,
             // un panneau plus grand que la fenêtre reste inaccessible par le
             // bas. Là, on peut au moins l'atteindre.
             'max-h-[70dvh] overflow-y-auto',
+            // Et un plafond de largeur, pour la même raison : sur un téléphone
+            // étroit, `w-64` dépasse à lui seul la fenêtre, et aucun décalage
+            // ne rattrape un panneau plus large que l'écran.
+            'max-w-[calc(100vw-1rem)]',
             largeur,
             align === 'right' ? 'right-0' : 'left-0',
             sens === 'haut' ? 'bottom-11' : 'top-11',
