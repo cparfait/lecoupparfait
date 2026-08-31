@@ -32,6 +32,9 @@ import type { Color, PieceSymbol, Square } from 'chess.js'
 import {
   BOT_LEVELS,
   BOT_PERSONALITIES,
+  MAIA_MAX_ELO,
+  MAIA_MIN_ELO,
+  maiaCouvre,
   SEUIL_SUITE_BREVE,
   SPEED_LABELS,
   TIME_CONTROLS,
@@ -74,6 +77,7 @@ import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
 import { Button, Card, Chip, SegmentedControl, SectionTitle, Toggle } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
+import { useEcranAllume } from '@/lib/ecranAllume.ts'
 import { useChessGame } from '@/lib/game/useChessGame.ts'
 import {
   chargerPartieEnCours,
@@ -283,7 +287,10 @@ export default function PlayComputerPage() {
       level: partie.level,
       color: partie.playerColor,
       timeControlId: partie.timeControlId,
-      human: partie.human,
+      // Une partie enregistrée avant que la plage de Maia ne soit respectée
+      // pouvait demander un niveau qu'elle ne sait pas jouer : elle reprend
+      // alors avec Stockfish, à la force annoncée.
+      human: partie.human && maiaCouvre(botLevel(partie.level).elo),
     })
     setResolvedColor(partie.playerColor)
     setCoupsRepris(partie.moves)
@@ -388,6 +395,23 @@ function SetupScreen({
 
   const bot = botLevel(level)
   const personality = BOT_PERSONALITIES[bot.personality]
+
+  /**
+   * Maia peut-elle jouer *ce* niveau-là ?
+   *
+   * Ses réseaux s'arrêtent à 1100 en bas et à 1900 en haut. En dehors, le
+   * serveur retombait sur le palier le plus proche sans rien dire : le curseur
+   * de niveau ne changeait plus rien, et l'on se faisait battre par un joueur
+   * de 1100 après avoir demandé un débutant complet. C'est Stockfish qui joue
+   * dans ce cas — lui sait descendre — et l'écran l'annonce plutôt que de
+   * laisser croire à un choix qui n'existe pas.
+   */
+  const maiaPossible = maiaReady && maiaCouvre(bot.elo)
+  const niveauxMaia = BOT_LEVELS.filter((entree) => maiaCouvre(entree.elo))
+  const premierNiveauMaia = niveauxMaia[0]?.level ?? 1
+  const dernierNiveauMaia = niveauxMaia[niveauxMaia.length - 1]?.level ?? BOT_LEVELS.length
+  /** L'adversaire réellement retenu, une fois Maia écartée si elle ne peut pas. */
+  const humainRetenu = human && maiaPossible
 
   return (
     /* `max-w-5xl` et non plus `3xl`, `py-8` et non plus `py-14` : l'écran doit
@@ -562,12 +586,18 @@ function SetupScreen({
                     'Le plus fort du monde, bridé au niveau voulu. Joue juste, puis lâche un coup faible d’un coup.',
                 },
               ].map((choix) => {
-                const actif = human === choix.id
+                // Maia écartée par le niveau reste affichée, mais éteinte et
+                // non cochée : la faire disparaître laisserait croire que le
+                // choix n'a jamais existé, et cocher un adversaire qui ne
+                // jouera pas serait un mensonge de plus.
+                const indisponible = choix.id === true && !maiaPossible
+                const actif = humainRetenu === choix.id && !indisponible
                 return (
                   <button
                     key={choix.nom}
                     type="button"
                     onClick={() => setHuman(choix.id)}
+                    disabled={indisponible}
                     aria-pressed={actif}
                     /*
                       L'état choisi se voyait à peine : une bordure d'un pixel
@@ -587,6 +617,7 @@ function SetupScreen({
                       actif
                         ? 'border-accent bg-accent/20 ring-1 ring-accent'
                         : 'border-line hover:bg-surface-hover',
+                      indisponible && 'cursor-not-allowed opacity-45 hover:bg-transparent',
                     )}
                   >
                     <span className="flex items-baseline gap-2">
@@ -615,6 +646,17 @@ function SetupScreen({
                 )
               })}
             </div>
+
+            {/* Pourquoi Maia est éteinte, dit au moment où on le constate. */}
+            {!maiaPossible && (
+              <p className="mt-2 text-xs leading-relaxed text-muted">
+                Maia a appris sur des parties humaines de {MAIA_MIN_ELO} à {MAIA_MAX_ELO} Elo,
+                et ne sait rien jouer en dehors. Au niveau {bot.level} ({bot.elo} Elo), c’est
+                donc <strong className="font-semibold text-ink">Stockfish</strong> qui joue —
+                lui se règle sur n’importe quelle force. Pour affronter Maia, choisis un niveau
+                entre {premierNiveauMaia} et {dernierNiveauMaia}.
+              </p>
+            )}
           </div>
         )}
 
@@ -798,7 +840,7 @@ function SetupScreen({
         size="lg"
         fullWidth
         className="mt-4 [@media(max-height:820px)]:mt-2"
-        onClick={() => onStart({ level, color, timeControlId, human: human && maiaReady })}
+        onClick={() => onStart({ level, color, timeControlId, human: humainRetenu })}
       >
         Commencer la partie
       </Button>
@@ -918,6 +960,10 @@ function GameScreen({
   })
 
   const { state, play, undo, goTo } = game
+
+  // Pendant que l'ordinateur réfléchit, personne ne touche l'écran : sur
+  // téléphone il s'éteignait au beau milieu de la partie, pendule comprise.
+  useEcranAllume(!state.isGameOver && outcome === null)
 
   // ── Pause d'étude du mode commenté ──────────────────────────────────────
   //
@@ -1619,7 +1665,13 @@ function GameScreen({
 
           <PhysicalBoardPanel state={physicalBoard} />
 
-          <Card className="flex min-h-[220px] flex-1 flex-col overflow-hidden">
+          {/* Sur téléphone, la liste se règle sur ce qu'elle contient, sans
+              descendre plus bas que 45 % de la fenêtre. Elle réservait 220 px
+              dès le premier coup : sous l'échiquier, cela faisait un cadre
+              presque vide qui repoussait tout le reste hors de l'écran. Sur
+              grand écran, la colonne est calée sur la fenêtre et c'est elle qui
+              occupe la place restante — d'où le `flex-1` à partir de `lg`. */}
+          <Card className="flex max-h-[45vh] flex-col overflow-hidden lg:max-h-none lg:min-h-[220px] lg:flex-1">
             <MoveList
               moves={state.moves}
               cursor={state.cursor}
