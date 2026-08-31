@@ -503,9 +503,6 @@ export function CommentaryPanel({
   const locale = usePreferences((state) => state.locale)
   const voixPreferee = usePreferences((state) => state.voiceEnabled)
   const voiceEnabled = voixPreferee && voix
-  // Lue par des rappels mémoïsés qui n'ont pas à se refabriquer pour ça.
-  const parole = useRef(voiceEnabled)
-  parole.current = voiceEnabled
   const setPreference = usePreferences((state) => state.set)
   const san = useSan()
   const spokenRef = useRef<string | null>(null)
@@ -546,10 +543,25 @@ export function CommentaryPanel({
         toast.warning('Ce coup ne se rejoue pas sur cette position.', 'Impossible de l’expliquer sans risquer d’inventer.')
         return
       }
+      /*
+        Le bouton parle, même quand la voix automatique est coupée.
+
+        Il consultait `voiceEnabled` avant d'ouvrir la bouche : presser le
+        haut-parleur d'un coup ne produisait alors strictement rien — ni son,
+        ni texte, ni message. Or ce réglage gouverne ce qui se dit *tout
+        seul* ; appuyer sur un haut-parleur est une demande explicite, et une
+        demande explicite ne se fait pas arbitrer par une préférence d'ambiance.
+
+        L'explication s'affiche aussi en clair. La synthèse vocale n'est pas
+        garantie — navigateur sans voix installée, onglet muet, appareil en
+        mode silencieux —, et un bouton qui ne rend rien de visible dans ces
+        cas-là reste un bouton cassé.
+      */
       stopSpeaking()
-      if (parole.current) speak(explication.speech)
+      toast.info(`${san(alternative.san)} — à jouer à la place`, explication.speech)
+      speak(explication.speech)
     },
-    [commentary, locale],
+    [commentary, locale, san],
   )
 
   /**
