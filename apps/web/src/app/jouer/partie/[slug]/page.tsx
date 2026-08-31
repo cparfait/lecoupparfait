@@ -33,6 +33,7 @@ import { START_FEN, formatTimeControl, parseTimeControl } from '@coupparfait/cor
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { PhysicalBoardPanel } from '@/components/board/PhysicalBoardPanel.tsx'
 import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
+import { useEcranAllume } from '@/lib/ecranAllume.ts'
 import { MoveList } from '@/components/game/MoveList.tsx'
 import { PlayerBar } from '@/components/game/PlayerBar.tsx'
 import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
@@ -56,13 +57,32 @@ function cleDuMessage(message: ChatMessage): string {
   return `${message.at}·${message.from}·${message.text}`
 }
 
+/** Un paramètre de l'adresse, lu directement du navigateur. `null` côté serveur. */
+function parametreDeLAdresse(nom: string): string | null {
+  if (typeof window === 'undefined') return null
+  return new URLSearchParams(window.location.search).get(nom)
+}
+
 export default function LiveGamePage() {
   const params = useParams<{ slug: string }>()
   const search = useSearchParams()
   const locale = usePreferences((state) => state.locale)
 
-  const timeControlId = search.get('tc') ?? '600+5'
-  const rated = search.get('classee') === '1'
+  /**
+   * La cadence demandée, lue sans jamais se contenter du défaut.
+   *
+   * C'est ce paramètre qui *crée* le salon : le premier arrivant l'annonce au
+   * serveur, qui règle les pendules dessus une fois pour toutes. Un salon né
+   * sur la valeur de repli ne se rattrape donc plus — la partie se jouait en
+   * 10|5 quelle que soit la cadence choisie à l'écran d'avant.
+   *
+   * `useSearchParams` peut rendre une collection vide au tout premier rendu
+   * d'une page pré-rendue ; l'adresse du navigateur, elle, est toujours juste.
+   * On la relit donc en second recours, avant de tomber sur le défaut.
+   */
+  const timeControlId =
+    search.get('tc') ?? parametreDeLAdresse('tc') ?? '600+5'
+  const rated = (search.get('classee') ?? parametreDeLAdresse('classee')) === '1'
 
   const [guestName, setGuestName] = useState<string | undefined>()
   const [token, setToken] = useState<string | null>(null)
@@ -366,6 +386,11 @@ export default function LiveGamePage() {
     lastMove: snapshot?.lastMove ?? null,
   })
 
+  // L'adversaire réfléchit, on ne touche à rien, et l'écran du téléphone
+  // s'éteint : au retour, la pendule a tourné. Le crochet se déclare avant les
+  // retours anticipés, comme tous les autres.
+  useEcranAllume(snapshot?.status === 'playing' || snapshot?.status === 'waiting')
+
   // ── États d'attente ─────────────────────────────────────────────────────
   if (connection === 'connecting' || !snapshot) {
     return (
@@ -407,7 +432,19 @@ export default function LiveGamePage() {
   const opponent = snapshot.players[opponentColor]
   const waiting = snapshot.status === 'waiting'
   const over = snapshot.status !== 'playing' && snapshot.status !== 'waiting'
-  const timeControl = parseTimeControl(timeControlId) ?? { initial: 600, increment: 5 }
+  /*
+    La cadence affichée est celle du salon, pas celle de l'adresse.
+
+    Les deux se ressemblent tant qu'on arrive par le lien qui a créé la partie.
+    Elles divergent dès qu'on arrive autrement — depuis « Regarder », depuis
+    l'accueil, depuis un lien recopié à la main sans son paramètre —, et
+    l'écran affichait alors une pendule de 10 minutes au-dessus d'une partie de
+    trois, avec l'alerte de temps réglée sur le mauvais seuil.
+
+    Le serveur, lui, sait : c'est lui qui tient les pendules.
+  */
+  const timeControl =
+    snapshot.timeControl ?? parseTimeControl(timeControlId) ?? { initial: 600, increment: 5 }
   const drawOfferedToMe =
     snapshot.drawOfferFrom !== null && color !== null && snapshot.drawOfferFrom !== color
 
@@ -463,7 +500,12 @@ export default function LiveGamePage() {
             <div className="mb-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2 text-[13px]">
               <Eye size={15} className="shrink-0 text-accent" aria-hidden />
               <span className="min-w-0 flex-1 leading-snug text-muted">
-                Tu revois un coup passé. La pendule, elle, continue.
+                {/* La pendule ne tourne plus quand la partie est finie :
+                    l'écrire quand même ferait courir un temps qui n'existe
+                    pas, et presserait quelqu'un qui a tout le sien. */}
+                {over
+                  ? 'Tu revois un coup passé. La partie est terminée, rien ne presse.'
+                  : 'Tu revois un coup passé. La pendule, elle, continue.'}
               </span>
               <button
                 type="button"
@@ -559,7 +601,23 @@ export default function LiveGamePage() {
         </div>
 
         {/* ── Panneau latéral ────────────────────────────────────── */}
-        <div className={clsx('flex min-h-0 flex-col gap-3', !chatOpen && 'max-lg:hidden')}>
+        {/*
+          Visible sur téléphone, et c'est un changement.
+
+          Toute la colonne était masquée sous `lg` et n'apparaissait qu'en
+          appuyant sur « Tchat ». La liste des coups vit dedans : sur téléphone,
+          elle n'existait donc pas — sauf à deviner qu'elle se cache derrière un
+          bouton qui annonce une conversation.
+
+          On s'en aperçoit surtout à la fin. La partie perdue, les trois boutons
+          d'action se désactivent d'un coup et il ne reste rien à toucher :
+          impossible de revoir le coup qui a tout fait basculer, au moment
+          précis où c'est la seule chose qu'on veuille faire.
+
+          Seul le tchat garde son bouton : une conversation qu'on n'a pas
+          ouverte n'a pas à pousser la liste des coups hors de l'écran.
+        */}
+        <div className="flex min-h-0 flex-col gap-3">
           {/*
             Spectateur : les deux places étaient prises à l'arrivée. Le dire
             évite de chercher pourquoi l'échiquier ne répond pas.
@@ -616,7 +674,13 @@ export default function LiveGamePage() {
               conversation ne sont plus une conversation. */}
           <PhysicalBoardPanel state={physicalBoard} className="p-3.5" />
 
-          <Card className="flex min-h-[120px] flex-1 flex-col overflow-hidden">
+          {/* Sur téléphone, la liste prend la hauteur de ce qu'elle contient,
+              plafonnée à 40 % de la fenêtre. Elle réservait 120 px et poussait
+              — trois coups joués, une boîte aux trois quarts vide, et le reste
+              du panneau repoussé d'autant. Sur grand écran elle occupe au
+              contraire la place qui reste, la colonne étant calée sur la
+              fenêtre. */}
+          <Card className="flex max-h-[40vh] flex-col overflow-hidden lg:max-h-none lg:min-h-[120px] lg:flex-1">
             <MoveList
               moves={playedMoves}
               cursor={revu ?? dernierDemiCoup}
@@ -634,7 +698,14 @@ export default function LiveGamePage() {
             moitié pour la saisie — il restait une ligne de messages, ce qui
             n'est plus un tchat mais une fente.
           */}
-          <Card className="flex h-56 shrink-0 flex-col overflow-hidden">
+          <Card
+            className={clsx(
+              'flex h-56 shrink-0 flex-col overflow-hidden',
+              // Le bouton « Tchat » ne commande plus que le tchat : c'est ce
+              // qu'il annonce, et la liste des coups n'a plus à en dépendre.
+              !chatOpen && 'max-lg:hidden',
+            )}
+          >
             <div
               ref={filDuChat}
               className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3 text-[13px]"
