@@ -1220,7 +1220,15 @@ function ReviewScreen({
             </span>
           </Chip>
         )}
-        <div className="ml-auto flex gap-1.5">
+        {/* `flex-wrap`, et il manquait.
+
+            Quatre boutons dans une rangée qui ne se replie pas : « Pas à
+            pas », « Voix activée », « PGN », « Autre partie », soit environ
+            370 points sur un téléphone qui en fait 360. Le dernier sortait du
+            cadre — celui qui permet de changer de partie, donc de sortir de
+            l'écran. Repliés, ils tiennent sur deux lignes et restent tous
+            atteignables. */}
+        <div className="ml-auto flex flex-wrap justify-end gap-1.5">
           {/* Le basculement en premier : c'est le réglage qui change tout
               l'écran, les autres n'en changent qu'un détail. */}
           <Button
@@ -1294,7 +1302,15 @@ function ReviewScreen({
           </div>
 
 
-          <div className="mt-2 flex items-center gap-2">
+          {/* La courbe passe à la ligne sur téléphone.
+
+              Les cinq flèches de navigation, le bouton « Retourner » et la
+              courbe d'évaluation partageaient une rangée qui ne se replie pas :
+              la courbe, dernière servie, débordait de l'écran par la droite et
+              faisait défiler la page latéralement. Elle prend maintenant toute
+              la largeur sous les commandes, ce qui la rend au passage lisible —
+              c'est un graphique, il vit de sa largeur. */}
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             {/*
               Ces boutons existaient déjà, mais au bas de la liste des coups —
               tout en bas à droite, hors de l'écran. Le bouton lecture, qui
@@ -1317,7 +1333,7 @@ function ReviewScreen({
             >
               Retourner
             </Button>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 basis-full sm:basis-auto sm:flex-1">
               <EvalGraph
                 values={report.evalCurve}
                 cursor={cursor}

@@ -209,7 +209,15 @@ export function RelectureGuidee({
         il devait servir le plus.
         `bottom-16` dégage la hauteur de la barre de navigation basse.
       */}
-      <div className="sticky bottom-16 z-10 -mx-1 mt-3 flex items-center gap-2 rounded-[var(--radius)] bg-bg/85 px-1 py-2 backdrop-blur-sm sm:static sm:bg-transparent sm:backdrop-blur-none">
+      {/* La rangée se replie, et le bouton d'avancement prend sa ligne.
+
+          « Retourner », « Voir la réponse » et « Suivant » — ce dernier avec un
+          plancher de 9 rem — demandent près de 390 points de large. Sur un
+          téléphone de 360, le dernier sortait du cadre : c'est celui qui fait
+          avancer la relecture, donc le seul qui compte ici. Sur petit écran il
+          prend toute la largeur sous les deux autres, ce qui le rend en prime
+          atteignable au pouce. */}
+      <div className="sticky bottom-16 z-10 -mx-1 mt-3 flex flex-wrap items-center gap-2 rounded-[var(--radius)] bg-bg/85 px-1 py-2 backdrop-blur-sm sm:static sm:bg-transparent sm:backdrop-blur-none">
         <Button
           variant="ghost"
           size="sm"
@@ -244,7 +252,7 @@ export function RelectureGuidee({
         <Button
           variant="primary"
           size="lg"
-          className="ml-auto min-w-[9rem]"
+          className="ml-auto min-w-[9rem] max-sm:w-full"
           onClick={() => onCursor(Math.min(report.moves.length - 1, cursor + 1))}
           disabled={dernier}
         >
