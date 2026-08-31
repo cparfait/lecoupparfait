@@ -47,7 +47,6 @@ import {
   remainingAt,
   speedCategory,
   stopClock,
-  suggestedLevel,
   type ClockState,
   type GameResult,
   type GameStatus,
@@ -77,6 +76,7 @@ import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
 import { Button, Card, Chip, SegmentedControl, SectionTitle, Toggle } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
+import { getEngine } from '@/lib/engine/client.ts'
 import { useEcranAllume } from '@/lib/ecranAllume.ts'
 import { useChessGame } from '@/lib/game/useChessGame.ts'
 import {
@@ -369,6 +369,25 @@ function SetupScreen({
   const commentaryMode = usePreferences((state) => state.commentaryMode)
   const commentaryOpponent = usePreferences((state) => state.commentaryOpponent)
   const setPreference = usePreferences((state) => state.set)
+
+  /**
+   * Le moteur se télécharge pendant qu'on choisit son adversaire.
+   *
+   * Sept mégaoctets de WebAssembly, chargés à la première demande — c'est-à-dire
+   * au moment exact où l'ordinateur doit jouer son premier coup. Sur une
+   * connexion moyenne, l'échiquier restait donc figé plusieurs secondes après
+   * le coup d'ouverture, sans autre signe qu'un « Chargement du moteur… » en
+   * petit sous le nom de l'adversaire.
+   *
+   * Cet écran-ci dure, lui : on y règle un niveau, une couleur, une cadence.
+   * Autant s'en servir. Si le chargement échoue, on ne dit rien — la partie le
+   * retentera d'elle-même, et c'est là que le message a un sens.
+   */
+  useEffect(() => {
+    void getEngine()
+      .start()
+      .catch(() => undefined)
+  }, [])
 
   /**
    * Maia est-elle installée sur ce serveur ?
@@ -1041,7 +1060,23 @@ function GameScreen({
     // pilote de l'adversaire, et le coach doit être monté avant lui — c'est le
     // pilote qui a besoin de savoir si le coach parle encore, pas l'inverse.
     suiteDetaillee: botLevel(level).elo < SEUIL_SUITE_BREVE,
-    enabled: state.isLive && !gameOverRef.current,
+    /*
+      Le coach ne travaille que si quelqu'un lit ce qu'il écrit.
+
+      Il analysait deux positions — celle d'avant le coup en MultiPV, celle
+      d'après — à chaque coup du joueur, quel que soit l'état des réglages. Or
+      les deux réglages qui affichent son travail, le mode commenté et la barre
+      d'évaluation, sont éteints par défaut : dans une partie ordinaire, ces
+      deux recherches ne servaient à rien.
+
+      Elles coûtaient pourtant le tour de l'adversaire. Le moteur est unique et
+      ses recherches sont sérialisées : la demande de l'ordinateur attendait la
+      fin des deux analyses avant même de commencer. Sur un téléphone, à
+      profondeur 14, cela fait plusieurs secondes d'attente entre le coup du
+      joueur et la réponse — pour un texte que personne ne verra.
+    */
+    enabled:
+      (commentaryMode || prefs.showEvalDuringGame) && state.isLive && !gameOverRef.current,
     alternatives: commentaryMode ? 3 : 1,
     book,
   })

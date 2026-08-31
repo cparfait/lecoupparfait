@@ -336,13 +336,43 @@ function MobileMenu({
 
   return (
     <div className="animate-slide-up max-h-[70dvh] overflow-y-auto border-t border-line bg-[var(--bg-elev)] md:hidden">
+      {/*
+        ── Lisibilité du menu déroulé ──────────────────────────────────────
+
+        Trente entrées grises, séparées par des titres gris plus petits, sur un
+        fond gris : tout y était, et l'on ne distinguait rien. Le regard n'a
+        aucun point d'accroche pour savoir où finit « Jouer » et où commence
+        « Apprendre », ce qui oblige à *lire* la liste entière au lieu de la
+        balayer.
+
+        Trois changements, aucun décoratif :
+
+         - **le titre prend la couleur de sa section** et tire un filet jusqu'au
+           bord. C'est le repère qui survit à un défilement rapide au pouce, et
+           c'est aussi la couleur qu'on retrouve sur l'icône de chaque entrée ;
+         - **les entrées passent en `text-ink` sur une surface** au lieu de
+           flotter en gris sur le fond. Une ligne qu'on peut toucher doit
+           ressembler à une chose qu'on peut toucher ;
+         - **l'entrée courante porte un anneau d'accent** plutôt qu'un simple
+           fond légèrement plus clair, indistinguable des autres sur un écran
+           de téléphone en plein jour.
+      */}
       <nav className="space-y-4 p-3" aria-label="Navigation">
         {SECTIONS.map((section) => (
           <div key={section.id}>
-            <p className="mb-1 px-1 text-[11px] font-semibold uppercase tracking-wide text-faint">
+            <p
+              className="mb-1.5 flex items-center gap-2 px-1 text-[11px] font-semibold uppercase tracking-wide"
+              style={{ color: section.teinte }}
+            >
+              <section.icon size={12} aria-hidden />
               {t(section.labelKey)}
+              <span
+                aria-hidden
+                className="h-px flex-1 rounded-full"
+                style={{ background: `color-mix(in oklab, ${section.teinte} 30%, transparent)` }}
+              />
             </p>
-            <div className="grid grid-cols-2 gap-1">
+            <div className="grid grid-cols-2 gap-1.5">
               {section.entrees.map((entree) => {
                 const Icone = entree.icon
                 const chemin = entree.href.split(/[?#]/)[0] ?? entree.href
@@ -358,11 +388,18 @@ function MobileMenu({
                       onPorte({ avantage: reservee, href: entree.href })
                     }}
                     className={clsx(
-                      'flex items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2.5 text-sm font-medium',
-                      active ? 'bg-surface-strong text-ink' : 'text-muted',
+                      'flex items-center gap-2 rounded-[var(--radius-sm)] px-2.5 py-2.5 text-sm font-medium transition-colors',
+                      active
+                        ? 'bg-surface-strong text-ink ring-1 ring-inset ring-accent/50'
+                        : 'bg-surface/70 text-ink',
                     )}
                   >
-                    <Icone size={16} className="shrink-0" aria-hidden />
+                    <Icone
+                      size={16}
+                      className="shrink-0"
+                      style={{ color: section.teinte }}
+                      aria-hidden
+                    />
                     <span className="min-w-0 flex-1 truncate">{t(entree.labelKey)}</span>
                     {reservee && (
                       <Lock

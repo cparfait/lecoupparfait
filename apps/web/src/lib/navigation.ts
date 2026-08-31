@@ -58,12 +58,27 @@ export interface SectionNav {
    * suite.
    */
   sommaire?: string
+  /**
+   * Teinte de la section.
+   *
+   * Cinq sections, une trentaine d'entrées, et une seule couleur pour le tout :
+   * le menu mobile déroulait quatre listes grises séparées par des titres gris
+   * plus petits, et l'on ne voyait plus où commençait « Apprendre ». La couleur
+   * n'est pas un ornement ici, c'est le seul repère qui survit à un balayage du
+   * pouce.
+   *
+   * Elles viennent de la palette du thème — jamais une valeur en dur : chaque
+   * thème redéfinit `--accent`, et une couleur écrite ici jurerait dans la
+   * moitié d'entre eux.
+   */
+  teinte: string
   entrees: EntreeNav[]
 }
 
 export const SECTIONS: SectionNav[] = [
   {
     id: 'jouer',
+    teinte: 'var(--accent)',
     labelKey: 'nav.play',
     icon: Swords,
     sommaire: '/jouer',
@@ -92,6 +107,7 @@ export const SECTIONS: SectionNav[] = [
   },
   {
     id: 'apprendre',
+    teinte: 'var(--accent-2)',
     labelKey: 'nav.learn',
     icon: GraduationCap,
     sommaire: '/apprendre',
@@ -105,6 +121,7 @@ export const SECTIONS: SectionNav[] = [
   },
   {
     id: 'entrainer',
+    teinte: 'var(--accent-3)',
     labelKey: 'nav.train',
     icon: Target,
     sommaire: '/puzzles',
@@ -116,6 +133,7 @@ export const SECTIONS: SectionNav[] = [
   },
   {
     id: 'analyser',
+    teinte: 'var(--accent)',
     labelKey: 'nav.analysis',
     icon: Gauge,
     sommaire: '/analyse',
@@ -128,6 +146,7 @@ export const SECTIONS: SectionNav[] = [
   },
   {
     id: 'communaute',
+    teinte: 'var(--accent-2)',
     labelKey: 'nav.community',
     icon: Users,
     entrees: [
