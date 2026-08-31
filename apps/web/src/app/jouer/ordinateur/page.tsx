@@ -54,7 +54,7 @@ import {
   type TimeControl,
 } from '@coupparfait/core'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
-import { ChessBoard } from '@/components/board/ChessBoard.tsx'
+import { ChessBoard, ViewToggle } from '@/components/board/ChessBoard.tsx'
 import { PhysicalBoardPanel } from '@/components/board/PhysicalBoardPanel.tsx'
 import { EvalBar } from '@/components/game/EvalBar.tsx'
 import { MoveList } from '@/components/game/MoveList.tsx'
@@ -1679,6 +1679,14 @@ function GameScreen({
 
             <GameNav cursor={state.cursor} count={state.moves.length} onSeek={goTo} />
 
+            {/* La bascule 2D / 3D, reprise ici sous `sm`.
+                Sous l'échiquier, elle occupait une rangée entière pour trois
+                boutons alignés à droite — quarante points de haut dont neuf
+                dixièmes de vide, pris sur le plateau. Ici elle voisine avec
+                des boutons. Le plein écran n'y figure pas : c'est le seul des
+                trois que les navigateurs mobiles refusent le plus souvent. */}
+            <ViewToggle className="sm:hidden" />
+
             {/* ── La sortie, une fois la partie finie ───────────────────
                 Elle existait, cachée derrière les trois petits points, à côté
                 de l'abandon et du mode commenté. Or c'est le moment où l'on a
@@ -1695,10 +1703,10 @@ function GameScreen({
                   icon={<RefreshCw size={14} />}
                   onClick={onNewGame}
                 >
-                  Nouvelle partie
+                  <span className="max-sm:hidden">Nouvelle partie</span>
                 </Button>
                 <ButtonLink href="/jouer" size="sm" variant="ghost" icon={<LayoutGrid size={14} />}>
-                  Menu
+                  <span className="max-sm:hidden">Menu</span>
                 </ButtonLink>
               </>
             ) : (
@@ -1708,8 +1716,12 @@ function GameScreen({
                 icon={<Lightbulb size={14} />}
                 onClick={handleHint}
                 disabled={state.turn !== playerColor}
+                title="Demander le meilleur coup au moteur"
               >
-                Indice
+                {/* Le libellé disparaît sous `sm` : l'icône est parlante, le
+                    titre reste, et la barre tient sur une ligne au lieu de
+                    trois. */}
+                <span className="max-sm:hidden">Indice</span>
               </Button>
             )}
             {/* « Annuler » reste à portée directe.
@@ -1728,7 +1740,7 @@ function GameScreen({
               // « reprendre la partie ». On dit donc ce que fait le bouton.
               title="Annule ton dernier coup et la réponse de l’ordinateur"
             >
-              Annuler
+              <span className="max-sm:hidden">Annuler</span>
             </Button>
 
             {/* Ne restent au menu que les gestes rares ou définitifs.

@@ -30,7 +30,7 @@ const PAUSE_AVANT_ROTATION = 900
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Flag, RefreshCw, RotateCcw, Undo2 } from 'lucide-react'
 import type { Color, PieceSymbol, Square } from 'chess.js'
-import { ChessBoard } from '@/components/board/ChessBoard.tsx'
+import { ChessBoard, ViewToggle } from '@/components/board/ChessBoard.tsx'
 import { PhysicalBoardPanel } from '@/components/board/PhysicalBoardPanel.tsx'
 import {
   CommentaryPanel,
@@ -239,6 +239,9 @@ export default function LocalGamePage() {
           />
 
           <div className="mt-3 flex flex-wrap gap-1.5">
+            {/* La bascule 2D / 3D sous `sm` : elle occupait sinon une rangée
+                entière sous l'échiquier pour trois boutons alignés à droite. */}
+            <ViewToggle className="sm:hidden" />
             <span className="mr-auto flex items-center gap-2 pl-1 text-sm">
               <span
                 className={

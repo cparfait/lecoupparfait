@@ -32,7 +32,7 @@ import clsx from 'clsx'
 import { Chess } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { START_FEN, formatTimeControl, parseTimeControl } from '@coupparfait/core'
-import { ChessBoard } from '@/components/board/ChessBoard.tsx'
+import { ChessBoard, ViewToggle } from '@/components/board/ChessBoard.tsx'
 import { PhysicalBoardPanel } from '@/components/board/PhysicalBoardPanel.tsx'
 import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
 import { useEcranAllume } from '@/lib/ecranAllume.ts'
@@ -530,6 +530,9 @@ export default function LiveGamePage() {
 
           {/* ── Actions ────────────────────────────────────────── */}
           <div className="mt-3 flex flex-wrap gap-1.5">
+            {/* La bascule 2D / 3D sous `sm` : elle occupait sinon une rangée
+                entière sous l'échiquier pour trois boutons alignés à droite. */}
+            <ViewToggle className="sm:hidden" />
             {/* Une partie finie n'a plus rien à proposer : « Proposer nulle »,
                 « Reprendre » et « Abandonner » se désactivent tous les trois
                 en même temps, et il ne reste qu'une barre grise. La boîte de

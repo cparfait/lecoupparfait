@@ -97,7 +97,32 @@ export function ChessBoard({
   const containerRef = useRef<HTMLDivElement>(null)
   const [fullscreen, setFullscreen] = useState(false)
   const [fitSide, setFitSide] = useState<number | null>(null)
-  const toggleRow = showViewToggle ? TOGGLE_ROW_PX : 0
+
+  /**
+   * Sur téléphone, la bascule ne prend pas de ligne à elle.
+   *
+   * Trois boutons de trente-deux pixels, alignés à droite, occupaient une
+   * rangée entière sous l'échiquier : quarante points de haut dont neuf
+   * dixièmes de vide, et autant retiré au plateau, qui est la seule chose
+   * qu'on regarde. Sur un grand écran la place ne manque pas et la bascule
+   * reste où elle est ; en dessous de `sm`, les écrans de partie la reprennent
+   * dans leur barre d'actions, où elle voisine avec des boutons plutôt qu'avec
+   * du vide.
+   *
+   * L'état est mesuré ici en JavaScript et non en CSS : la hauteur réservée
+   * entre dans le calcul de la taille du plateau, qui est un style en ligne.
+   */
+  const [compact, setCompact] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)')
+    const sync = () => setCompact(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+
+  const barreVisible = showViewToggle && !compact
+  const toggleRow = barreVisible ? TOGGLE_ROW_PX : 0
 
   useEffect(() => {
     if (!fitParentHeight) return
@@ -191,7 +216,7 @@ export function ChessBoard({
           {view === '3d' ? <Board3D {...props} /> : <Board2D {...props} />}
         </div>
 
-        {showViewToggle && (
+        {barreVisible && (
           <ViewToggle
             className="mt-1.5 self-end"
             fullscreen={fullscreen}
