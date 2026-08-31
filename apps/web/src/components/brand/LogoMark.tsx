@@ -30,26 +30,57 @@
 import Image from 'next/image'
 import clsx from 'clsx'
 
+/**
+ * ── Le champ violet, et pourquoi il disparaît ────────────────────────────
+ *
+ * Le tirage `logo-cavale.png` est un carré **plein** : la sculpture est posée
+ * sur un aplat violet cuit dans le fichier. Cela donnait une pastille violette
+ * dans un en-tête qui l'est déjà, sur un fond qui l'est encore — la marque se
+ * dissolvait dans son propre habillage, et se retrouvait franchement fausse
+ * sur les thèmes qui ne sont pas violets.
+ *
+ * On compose donc la vignette ici plutôt que de la subir : un fond noir, la
+ * sculpture détourée posée dessus, et un anneau à la couleur d'accent du
+ * thème. Le noir fait ressortir le bois et la résine bien mieux que le violet,
+ * et l'anneau rend enfin à la marque ce que le tirage lui refusait — suivre
+ * l'habillage choisi.
+ *
+ * La sculpture vient de `cavale-aurora.png`, la seule déclinaison au fond
+ * transparent qui soit cadrée en pied. Elle est ancrée en bas : un cavalier
+ * d'échecs repose sur sa base, le faire flotter au centre d'un carré lui
+ * retire son socle.
+ */
 export function LogoMark({ size = 32, className }: { size?: number; className?: string }) {
   return (
-    <Image
-      src="/brand/logo-cavale.png"
-      alt=""
-      // Décoratif : le lien qui l'entoure porte déjà « Le Coup Parfait —
-      // accueil », et le nom est écrit à côté dès que la place le permet.
-      aria-hidden
-      width={size}
-      height={size}
-      // Au-dessus de la ligne de flottaison sur toutes les pages, et minuscule :
-      // la charger tout de suite coûte quelques kilo-octets et évite que
-      // l'en-tête se compose sans sa marque.
-      preload
-      // Les coins arrondis sont ici et non dans le fichier : le tirage est un
-      // carré plein, et le même fichier sert aux icônes système, que
-      // `build-icons.mjs` arrondit de son côté au rayon qui leur convient.
-      className={clsx('rounded-[22%] object-cover', className)}
+    <span
+      className={clsx(
+        // `items-end` puis `justify-items-center` séparément : un
+        // `place-items` suivi d'un `justify-items` fait dépendre le résultat de
+        // l'ordre des règles dans la feuille produite, ce qui n'est pas une
+        // garantie.
+        'relative grid shrink-0 items-end justify-items-center overflow-hidden',
+        'rounded-[22%] bg-[#08070d] ring-1 ring-inset ring-accent/70',
+        className,
+      )}
       style={{ width: size, height: size }}
-    />
+      aria-hidden
+    >
+      <Image
+        src="/brand/cavale-aurora.png"
+        alt=""
+        width={size * 2}
+        height={size * 2}
+        // Au-dessus de la ligne de flottaison sur toutes les pages, et
+        // minuscule : la charger tout de suite coûte quelques kilo-octets et
+        // évite que l'en-tête se compose sans sa marque.
+        //
+        // `priority` et non `preload` : ce dernier n'existe pas côté `Image`,
+        // il partait tel quel dans le HTML comme attribut inconnu et ne
+        // préchargeait donc rien du tout.
+        priority
+        className="h-[86%] w-auto object-contain object-bottom"
+      />
+    </span>
   )
 }
 
