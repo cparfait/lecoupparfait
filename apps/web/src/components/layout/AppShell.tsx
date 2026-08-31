@@ -23,7 +23,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ChevronDown, Lock, Menu as MenuIcon, Settings, X } from 'lucide-react'
 import clsx from 'clsx'
-import { LogoMark as MarqueCavale } from '@/components/brand/LogoMark.tsx'
 import { AccountButton } from '@/components/layout/AccountButton.tsx'
 import { ChallengeWatcher } from '@/components/social/ChallengeWatcher.tsx'
 import { PastilleSerie } from '@/components/daily/PastilleSerie.tsx'
@@ -98,13 +97,25 @@ export function AppShell({ children }: { children: ReactNode }) {
             SE. On récupère la place sur les marges et les écarts, qui ne se
             voient pas, plutôt qu'en retirant une commande, qui se verrait. */}
         <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center gap-2 px-3 [@media(max-width:359px)]:px-1.5 sm:px-5">
+          {/* Le nom seul, sans vignette.
+
+              La marque a été une couronne, puis un cavalier sur champ violet,
+              puis le même sur champ noir cerné d'accent. Aucune de ces
+              vignettes ne tenait à trente-deux pixels dans une barre déjà
+              chargée : une sculpture photographique réduite à la taille d'une
+              favicon perd sa matière, qui est précisément ce qui la rendait
+              belle, et il ne reste qu'une tache sombre à côté d'un mot.
+
+              Le nom, lui, se lit. Il est écrit dans la police d'affichage du
+              site, et suffit à identifier la page comme à ramener à l'accueil.
+              Le cavalier reste où il vaut quelque chose : sur l'icône de
+              l'application, où il est seul et grand. */}
           <Link
             href="/"
-            className="group flex shrink-0 items-center gap-2 rounded-[var(--radius-sm)] px-1.5 py-1"
+            className="group flex shrink-0 items-center rounded-[var(--radius-sm)] px-1.5 py-1"
             aria-label="Le Coup Parfait — accueil"
           >
-            <LogoMark />
-            <span className="hidden font-display text-[17px] font-semibold tracking-tight sm:block">
+            <span className="font-display text-[15px] font-semibold tracking-tight transition-colors group-hover:text-accent sm:text-[17px]">
               Le Coup Parfait
             </span>
           </Link>
@@ -194,36 +205,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           d'actions sous le bord de la fenêtre. */}
       {!immersive && <SiteFooter />}
     </div>
-  )
-}
-
-/**
- * La marque, dans l'en-tête.
- *
- * Il y avait ici une seconde marque, écrite sur place : une icône `Crown` de
- * lucide posée sur un pavé dégradé. Elle avait deux défauts, et le premier
- * explique le second.
- *
- * D'abord, ce n'était pas la marque. `components/brand/LogoMark.tsx` dessine un
- * cavalier depuis toujours, et personne ne le voyait : l'en-tête affichait une
- * couronne, le favicon une autre couronne, et le cavalier restait dans un
- * fichier que rien n'importait. Trois marques pour une application, dont la
- * seule vraie était invisible.
- *
- * Ensuite, son pavé dégradait du violet vers la menthe — `--accent` vers
- * `--accent-2`. C'est précisément ce que la charte interdit en tête de
- * `LogoMark.tsx` : deux familles de teintes dans un même dégradé, et l'on
- * retombe sur le gabarit gratuit. Un fichier qui ne connaît pas la règle ne
- * peut pas la suivre — c'est le sort de toute copie.
- *
- * Il ne reste donc que l'enveloppe, qui porte l'agrandissement au survol.
- */
-function LogoMark() {
-  return (
-    <MarqueCavale
-      size={32}
-      className="rounded-[10px] transition-transform duration-300 group-hover:scale-105"
-    />
   )
 }
 

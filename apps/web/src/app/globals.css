@@ -927,6 +927,17 @@ select option:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Une entrée en fondu ne doit jamais être ce qui rend un contenu visible.
+     `slide-up` et `slide-down` partent d'une opacité nulle et la remontent en
+     `fill-mode: both` : tant que l'animation n'a pas joué, la page est vide.
+     Pour qui demande moins d'animation, on saute donc l'effet — et l'on
+     obtient au passage un filet de sécurité contre tout ce qui pourrait
+     empêcher une animation de démarrer. */
+  .animate-slide-up,
+  .animate-slide-down {
+    animation: none;
+  }
+
   .animate-carriere-trace,
   .animate-carriere-halo,
   .animate-carriere-etoile,

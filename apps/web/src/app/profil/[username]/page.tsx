@@ -271,9 +271,6 @@ export default function ProfilePage() {
                   Statistiques
                 </Button>
               </Link>
-              <Button size="sm" variant="ghost" icon={<LogOut size={14} />} onClick={signOut}>
-                Déconnexion
-              </Button>
             </div>
           )}
         </div>
@@ -295,6 +292,28 @@ export default function ProfilePage() {
                 )
               }
             />
+          </div>
+        )}
+
+        {/* ── Se déconnecter ────────────────────────────────────────
+            Elle était en haut, en bouton fantôme, coincée entre le pseudo et
+            « Statistiques » : trois mots gris dans une rangée d'actions, qu'on
+            ne trouvait pas en la cherchant. C'est pourtant la seule action de
+            cette page qu'on vienne y faire exprès — le reste s'y consulte.
+
+            En bas, à sa place : on descend la fiche, et elle ferme la visite.
+            Pleine largeur sur téléphone, où viser un bouton de trois mots dans
+            un coin n'a rien d'évident. */}
+        {isMe && (
+          <div className="mt-4 flex justify-end border-t border-line/60 pt-4">
+            <Button
+              variant="secondary"
+              icon={<LogOut size={15} />}
+              onClick={signOut}
+              className="max-sm:w-full"
+            >
+              Se déconnecter
+            </Button>
           </div>
         )}
       </Card>

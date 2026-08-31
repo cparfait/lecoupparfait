@@ -269,6 +269,22 @@ export default function OpeningsPage() {
                   Nom anglais : {(current ?? deepest)!.name}
                 </p>
               </>
+            ) : history.length === 0 ? (
+              /*
+                La position de départ n'est pas « non répertoriée ».
+
+                On arrivait sur cet écran et le premier message reçu était un
+                constat d'échec — « cette position n'est pas répertoriée » —
+                affiché sur la position initiale, celle dont *toutes* les
+                ouvertures partent. C'est faux au sens strict, et c'est surtout
+                un mauvais accueil : on ne sait pas ce qu'on est censé faire,
+                on croit avoir cassé quelque chose avant d'avoir joué un coup.
+              */
+              <p className="text-sm leading-relaxed text-muted">
+                Joue un premier coup sur l’échiquier, ou choisis une ouverture dans la liste.
+                Chaque branche porte son nom et son code&nbsp;: tu verras l’ouverture se
+                préciser à mesure que tu avances.
+              </p>
             ) : (
               <p className="text-sm text-muted">
                 Cette position n’est pas répertoriée. Joue un coup connu, ou choisis une
