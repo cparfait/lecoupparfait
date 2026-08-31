@@ -24,7 +24,6 @@
  */
 
 import type { BotPersonalityId } from './types.ts'
-import { botLevel } from './bots.ts'
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Les chapitres
@@ -52,6 +51,24 @@ export interface Chapitre {
   adversaire: BotPersonalityId
   /** Niveau du barème des bots, 1 à 25. */
   niveau: number
+  /**
+   * Difficulté des puzzles du chapitre, en Elo, la même pour tout le monde.
+   *
+   * Elle ne se déduit ni du classement du joueur ni du palier de l'adversaire.
+   * Un parcours qui s'adapte à celui qui le suit n'est plus un parcours : deux
+   * personnes au chapitre 1 doivent y rencontrer la même difficulté, sinon la
+   * progression annoncée sur la carte ne veut rien dire et l'on ne peut plus
+   * dire à quelqu'un « j'en suis au chapitre 4 ».
+   *
+   * Le service de puzzles vise autrement le classement du joueur plus
+   * cinquante points, ce qui convient à l'entraînement libre — on y cherche à
+   * progresser — et pas ici.
+   *
+   * L'échelle commence à 500 : en dessous, la base de puzzles est
+   * pratiquement vide, et demander 250 revient à demander 500 en obtenant en
+   * prime une recherche élargie.
+   */
+  cotePuzzles: number
   /** Victoires nécessaires pour passer. */
   victoires: number
   /** Couleur d'accent du chapitre, pour la carte. */
@@ -77,6 +94,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     puzzles: 3,
     adversaire: 'novice',
     niveau: 1,
+    cotePuzzles: 500,
     victoires: 1,
     teinte: '#7c5cff',
     emoji: '♟',
@@ -90,6 +108,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     puzzles: 5,
     adversaire: 'novice',
     niveau: 2,
+    cotePuzzles: 600,
     victoires: 2,
     teinte: '#22b8cf',
     emoji: '👀',
@@ -103,6 +122,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     puzzles: 5,
     adversaire: 'prudent',
     niveau: 3,
+    cotePuzzles: 700,
     victoires: 2,
     teinte: '#51cf66',
     emoji: '🏇',
@@ -116,6 +136,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     puzzles: 5,
     adversaire: 'tacticien',
     niveau: 4,
+    cotePuzzles: 800,
     victoires: 2,
     teinte: '#fcc419',
     emoji: '🍴',
@@ -129,6 +150,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     puzzles: 5,
     adversaire: 'prudent',
     niveau: 5,
+    cotePuzzles: 900,
     victoires: 2,
     teinte: '#ff922b',
     emoji: '👑',
@@ -142,6 +164,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     puzzles: 5,
     adversaire: 'fonceur',
     niveau: 6,
+    cotePuzzles: 1000,
     victoires: 2,
     teinte: '#ff6b6b',
     emoji: '🛡️',
@@ -155,6 +178,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     puzzles: 5,
     adversaire: 'tacticien',
     niveau: 7,
+    cotePuzzles: 1100,
     victoires: 2,
     teinte: '#845ef7',
     emoji: '⚖️',
@@ -168,6 +192,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     puzzles: 5,
     adversaire: 'positionnel',
     niveau: 8,
+    cotePuzzles: 1250,
     victoires: 2,
     teinte: '#20c997',
     emoji: '📖',
@@ -181,6 +206,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     puzzles: 5,
     adversaire: 'gambiteur',
     niveau: 9,
+    cotePuzzles: 1400,
     victoires: 2,
     teinte: '#e64980',
     emoji: '🎭',
@@ -194,6 +220,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     puzzles: 5,
     adversaire: 'positionnel',
     niveau: 10,
+    cotePuzzles: 1550,
     victoires: 2,
     teinte: '#4dabf7',
     emoji: '🏁',
@@ -207,6 +234,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     puzzles: 5,
     adversaire: 'positionnel',
     niveau: 11,
+    cotePuzzles: 1700,
     victoires: 2,
     teinte: '#00b894',
     emoji: '🧭',
@@ -220,6 +248,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     puzzles: 5,
     adversaire: 'machine',
     niveau: 13,
+    cotePuzzles: 1850,
     victoires: 1,
     teinte: '#f03e3e',
     emoji: '🜛',
@@ -489,12 +518,11 @@ export function prochaineEtape(
         réussites ailleurs. Un chapitre a sa propre difficulté, annoncée sur sa
         carte : c'est elle qui doit commander.
 
-        `botLevel` traduit le palier du chapitre — de 1 à 25 — en Elo, la même
-        échelle que celle des adversaires qu'on y affronte. Le chapitre 1
-        demande donc les puzzles les plus faciles de la base, et non ceux du
-        niveau où l'on croit être.
+        Elle est propre au chapitre — voir `cotePuzzles` — et non empruntée au
+        palier de l'adversaire qu'on y affronte : rien ne dit qu'une position à
+        résoudre et un adversaire à battre se calibrent de la même façon.
       */
-      lien: `/puzzles?theme=${chapitre.theme}&carriere=${chapitre.numero}&cote=${botLevel(chapitre.niveau).elo}`,
+      lien: `/puzzles?theme=${chapitre.theme}&carriere=${chapitre.numero}&cote=${chapitre.cotePuzzles}`,
     }
   }
   if (progression.winsInChapter < chapitre.victoires) {
