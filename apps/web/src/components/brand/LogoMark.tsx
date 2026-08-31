@@ -47,13 +47,16 @@ import clsx from 'clsx'
  * violette de la bannière `aurora`. C'est la marque, on ne la remplace pas
  * parce qu'elle serait plus commode à détourer.
  *
- * On prend `cavale-club.png`, qui **est** cette pièce, au fond transparent :
- * c'est déjà la source dont `build-icons.mjs` compose le tirage carré. Le
- * champ violet n'était donc jamais dans la sculpture, seulement dans son
- * assemblage — il suffit de ne plus l'assembler.
+ * On prend `cavale-piece.png`, produit par `build-icons.mjs` depuis le tirage
+ * de la sculpture : le champ violet n'était jamais dans le bois, seulement
+ * dans son assemblage — il suffit de ne plus l'assembler.
  *
- * Elle est ancrée en bas : un cavalier d'échecs repose sur sa base, le faire
- * flotter au centre d'un carré lui retire son socle.
+ * Le socle de studio a sauté avec lui. Réduit à trente-deux pixels, ce
+ * cylindre vert ne se lit plus comme un socle mais comme une tour : le logo
+ * d'un jeu d'échecs annonçait deux pièces, dont une qu'on n'avait pas voulue.
+ *
+ * Elle est ancrée en bas : une pièce d'échecs repose sur sa base, la faire
+ * flotter au milieu d'un carré la met en apesanteur.
  */
 export function LogoMark({ size = 32, className }: { size?: number; className?: string }) {
   return (
@@ -71,7 +74,7 @@ export function LogoMark({ size = 32, className }: { size?: number; className?: 
       aria-hidden
     >
       <Image
-        src="/brand/cavale-club.png"
+        src="/brand/cavale-piece.png"
         alt=""
         width={size * 2}
         height={size * 2}

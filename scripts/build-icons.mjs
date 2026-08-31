@@ -82,12 +82,66 @@ const CHAMP = Buffer.from(
  */
 const MARGE = 0.06
 
-// `trim` retire les bords transparents du tirage : `build-cavale.mjs` recadre
-// déjà au plus près, mais la réserve qu'il laisse s'ajouterait à la nôtre.
-const pieceNette = sharp(join(brandDir, 'cavale-club.png')).trim({
-  background: { r: 0, g: 0, b: 0, alpha: 0 },
-  threshold: 0,
-})
+/**
+ * La pièce seule, sans son socle de présentation.
+ *
+ * Le tirage montre le cavalier posé sur un cylindre vert — un socle de studio,
+ * qui fait très bien son travail sur une photographie de sculpture et très mal
+ * le sien dans une icône de trente-deux pixels : réduit à cette taille, il ne
+ * se lit plus comme un socle mais comme une tour. Le logo d'un jeu d'échecs
+ * annonçait donc deux pièces, dont une qu'on n'avait pas voulue.
+ *
+ * On coupe donc au-dessus. La frontière n'est pas écrite en dur : on remonte
+ * depuis le bas tant que la ligne est majoritairement verdâtre — le bois ne
+ * l'est jamais, sa teinte est franchement rouge. Un nouveau tirage de la
+ * sculpture, avec un socle plus haut ou plus bas, sera coupé au bon endroit
+ * sans qu'on ait à revenir ici.
+ */
+const sansSocle = async () => {
+  const source = join(brandDir, 'cavale-club.png')
+  const { width, height } = await sharp(source).metadata()
+  const { data } = await sharp(source).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
+
+  /** Part de pixels verdâtres parmi les pixels opaques d'une ligne. */
+  const verdeur = (y) => {
+    let opaques = 0
+    let verts = 0
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4
+      if (data[i + 3] < 128) continue
+      opaques++
+      if (data[i + 1] > data[i] + 8 && data[i + 1] > data[i + 2] + 8) verts++
+    }
+    return opaques === 0 ? 0 : verts / opaques
+  }
+
+  // On s'arrête à la première ligne franchement boisée en remontant : le socle
+  // est d'un seul tenant, et sa jonction avec la pièce est floue sur quelques
+  // pixels — 5 % de vert suffisent à la reconnaître.
+  let coupe = height
+  while (coupe > height / 2 && verdeur(coupe - 1) > 0.05) coupe--
+
+  const piece = await sharp(source)
+    .extract({ left: 0, top: 0, width, height: coupe })
+    .png()
+    .toBuffer()
+
+  // `trim` retire les bords transparents : `build-cavale.mjs` recadre déjà au
+  // plus près, mais la réserve qu'il laisse s'ajouterait à la nôtre.
+  const nette = await sharp(piece)
+    .trim({ background: { r: 0, g: 0, b: 0, alpha: 0 }, threshold: 0 })
+    .png({ compressionLevel: 9 })
+    .toBuffer()
+
+  // Écrite aussi comme ressource : c'est elle que la marque affiche dans
+  // l'application, sur un fond composé en CSS pour suivre le thème.
+  await sharp(nette).toFile(join(brandDir, 'cavale-piece.png'))
+  console.log('  ✓ brand/cavale-piece.png')
+  return nette
+}
+
+const pieceSansSocle = await sansSocle()
+const pieceNette = sharp(pieceSansSocle)
 
 /** La marque à 1024, avec la marge demandée autour de la pièce. */
 const composerMarque = async (marge) => {
