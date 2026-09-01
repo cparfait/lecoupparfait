@@ -64,9 +64,31 @@ export const AVATARS = AVATAR_FAMILIES.flatMap((family) => family.emojis)
 /**
  * Avatar par défaut.
  *
- * Le pion : celui par lequel tout le monde commence, au jeu comme ici.
+ * Le pion : celui par lequel tout le monde commence, au jeu comme ici. Il reste
+ * le repli d'affichage — un compte ancien, une ligne sans avatar — mais il n'est
+ * plus ce qu'on reçoit en s'inscrivant : voir `avatarAuHasard`.
  */
 export const DEFAULT_AVATAR = '♟️'
+
+/**
+ * Un avatar tiré au sort, pour un compte qui vient d'être créé.
+ *
+ * Tout le monde héritait du même pion noir, et presque personne n'en changeait :
+ * le choix existait, en bas d'une page de profil qu'on ne visite pas le jour de
+ * son inscription. Résultat, une liste d'amis de vingt lignes portant vingt fois
+ * le même symbole — soit exactement ce que l'avatar est censé éviter.
+ *
+ * Le tirage règle les deux moitiés du problème d'un coup : les listes sont
+ * lisibles dès le premier jour, et recevoir un avatar qu'on n'a pas demandé est
+ * la meilleure invitation qui soit à le changer.
+ *
+ * Le pion en est exclu : il reste le signe du compte sans avatar, et le tirer au
+ * sort le rendrait indistinct de ce qu'il signale.
+ */
+export function avatarAuHasard(): string {
+  const pool = AVATARS.filter((emoji) => emoji !== DEFAULT_AVATAR)
+  return pool[Math.floor(Math.random() * pool.length)] ?? DEFAULT_AVATAR
+}
 
 /**
  * Cet avatar fait-il partie du jeu proposé ?

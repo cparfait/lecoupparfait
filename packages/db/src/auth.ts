@@ -165,6 +165,16 @@ export interface CreateUserInput {
   username: string
   password: string
   email?: string | null
+  /**
+   * Avatar de départ.
+   *
+   * Omis, le schéma retombe sur le pion noir — et l'on obtenait alors ce qu'on
+   * a longtemps eu : un carnet d'adresses, un classement et une liste d'amis
+   * où chaque ligne porte le même symbole, c'est-à-dire aucune. La liste des
+   * avatars vit dans l'application web, qui la valide déjà ; c'est donc elle
+   * qui en tire un au sort, et cette couche-ci se contente de l'écrire.
+   */
+  avatar?: string | null
 }
 
 export async function createUser(
@@ -199,7 +209,13 @@ export async function createUser(
   const passwordHash = await hashPassword(input.password)
   const inserted = await database
     .insert(users)
-    .values({ username: input.username, usernameLower, email, passwordHash })
+    .values({
+      username: input.username,
+      usernameLower,
+      email,
+      passwordHash,
+      ...(input.avatar ? { avatar: input.avatar } : {}),
+    })
     .returning()
 
   const user = inserted[0]!

@@ -240,12 +240,25 @@ export default function ProfilePage() {
             boutons : ils prennent une ligne à eux sur téléphone, et
             retrouvent leur place à droite dès qu'il y en a une. */}
         <div className="flex flex-wrap items-start gap-4">
-          <span
-            className="grid h-16 w-16 shrink-0 place-items-center rounded-[var(--radius)] bg-surface-strong text-3xl"
-            aria-hidden
-          >
-            {profile.user.avatar ?? '♟️'}
-          </span>
+          {/* Chez soi, la vignette *est* le bouton de changement — voir
+              `AvatarPicker`. Ailleurs, c'est une image, et rien de plus. */}
+          {isMe ? (
+            <AvatarPicker
+              current={profile.user.avatar}
+              onChange={(avatar) =>
+                setProfile((current) =>
+                  current ? { ...current, user: { ...current.user, avatar } } : current,
+                )
+              }
+            />
+          ) : (
+            <span
+              className="grid h-16 w-16 shrink-0 place-items-center rounded-[var(--radius)] bg-surface-strong text-3xl"
+              aria-hidden
+            >
+              {profile.user.avatar ?? '♟️'}
+            </span>
+          )}
           {/* `min-w-[12rem]` et non `min-w-0` : sans plancher, cette colonne se
               laisse comprimer jusqu'à zéro et le rang ne se replie jamais. */}
           <div className="min-w-[12rem] flex-1">
@@ -278,22 +291,6 @@ export default function ProfilePage() {
         {/* Chez soi seulement : ni l'adresse ni l'avatar des autres ne
             regardent qui que ce soit. */}
         {isMe && email?.email && <EmailStatus email={email} />}
-
-        {isMe && (
-          <div className="mt-4 border-t border-line/60 pt-4">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
-              Ton avatar
-            </p>
-            <AvatarPicker
-              current={profile.user.avatar}
-              onChange={(avatar) =>
-                setProfile((current) =>
-                  current ? { ...current, user: { ...current.user, avatar } } : current,
-                )
-              }
-            />
-          </div>
-        )}
 
         {/* ── Se déconnecter ────────────────────────────────────────
             Elle était en haut, en bouton fantôme, coincée entre le pseudo et

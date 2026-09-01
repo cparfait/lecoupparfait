@@ -22,7 +22,7 @@ import {
   verifyEmail,
   type ValidationError,
 } from '@coupparfait/db/auth'
-import { isKnownAvatar } from '@/lib/avatars.ts'
+import { avatarAuHasard, isKnownAvatar } from '@/lib/avatars.ts'
 import { courrielDisponible, resetMail, sendMail, verificationMail } from '@/lib/server/mailer.ts'
 import { endSession, getCurrentUser, startSession } from '@/lib/server/session.ts'
 
@@ -260,6 +260,9 @@ export async function POST(request: Request) {
         username,
         password,
         email: body.email?.trim() || null,
+        // Un avatar tiré au sort plutôt que le pion de tout le monde : voir
+        // `avatarAuHasard`. Il reste changeable d'un clic depuis le profil.
+        avatar: avatarAuHasard(),
       })
       if (!result.ok) {
         // Refuser sans proposer oblige à retâtonner : on joint le pseudo le
