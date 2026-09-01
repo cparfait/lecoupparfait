@@ -64,9 +64,27 @@ export const SPEED_LABELS: Record<SpeedCategory, { fr: string; en: string; icon:
   correspondence: { fr: 'Correspondance', en: 'Correspondence', icon: '✉️' },
 }
 
-/** `300+3` → `{ initial: 300, increment: 3 }`. */
+/**
+ * Rétablir le « + » qu'une adresse a mangé.
+ *
+ * Les cadences voyagent dans l'adresse — `?tc=1800+20` — et c'est là qu'elles
+ * se perdent : dans une chaîne de requête, `+` est l'écriture historique de
+ * l'espace, et `URLSearchParams` le décode comme tel. Le lien envoyé annonçait
+ * bien « 30 | 20 » ; à l'ouverture, `1800 20` ne ressemblait plus à aucune
+ * cadence connue, et la partie se réglait sur le repli — 10 | 5, quelle que
+ * soit la cadence choisie à l'écran d'avant.
+ *
+ * On répare à la lecture plutôt qu'à l'écriture : les liens déjà envoyés, eux,
+ * ne se réécrivent pas. Un identifiant de cadence n'a jamais d'espace, la
+ * substitution est donc sans ambiguïté.
+ */
+export function normalizeTimeControlId(id: string): string {
+  return id.replace(/ /g, '+')
+}
+
+/** `300+3` → `{ initial: 300, increment: 3 }`. Tolère l'espace ; voir ci-dessus. */
 export function parseTimeControl(id: string): TimeControl | null {
-  const match = id.match(/^(\d+)\+(\d+)$/)
+  const match = normalizeTimeControlId(id).match(/^(\d+)\+(\d+)$/)
   if (!match) return null
   return { initial: Number(match[1]), increment: Number(match[2]) }
 }

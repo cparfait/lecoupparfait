@@ -46,6 +46,7 @@ import {
   createClock,
   flaggedColor,
   formatScore,
+  normalizeTimeControlId,
   sanToFrench,
   remainingAt,
   speedCategory,
@@ -236,7 +237,8 @@ export default function PlayComputerPage() {
     setSetup({
       level: niveau,
       color: couleur,
-      timeControlId: params.get('tc') ?? '600+5',
+      // Même piège que pour la partie en direct : `+` se décode en espace.
+      timeControlId: normalizeTimeControlId(params.get('tc') ?? '600+5'),
       // Stockfish et non Maia : le tournoi annonce une force en Elo, et c'est
       // le barème des niveaux qui la garantit.
       human: false,

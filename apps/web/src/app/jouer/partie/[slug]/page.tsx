@@ -31,7 +31,12 @@ import {
 import clsx from 'clsx'
 import { Chess } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
-import { START_FEN, formatTimeControl, parseTimeControl } from '@coupparfait/core'
+import {
+  START_FEN,
+  formatTimeControl,
+  normalizeTimeControlId,
+  parseTimeControl,
+} from '@coupparfait/core'
 import { ChessBoard, ViewToggle } from '@/components/board/ChessBoard.tsx'
 import { PhysicalBoardPanel } from '@/components/board/PhysicalBoardPanel.tsx'
 import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
@@ -84,8 +89,9 @@ export default function LiveGamePage() {
    * d'une page pré-rendue ; l'adresse du navigateur, elle, est toujours juste.
    * On la relit donc en second recours, avant de tomber sur le défaut.
    */
-  const timeControlId =
-    search.get('tc') ?? parametreDeLAdresse('tc') ?? '600+5'
+  const timeControlId = normalizeTimeControlId(
+    search.get('tc') ?? parametreDeLAdresse('tc') ?? '600+5',
+  )
   const rated = (search.get('classee') ?? parametreDeLAdresse('classee')) === '1'
 
   const [guestName, setGuestName] = useState<string | undefined>()
