@@ -54,11 +54,51 @@ export async function POST(request: Request) {
   const me = await getCurrentUser()
   if (!me) return NextResponse.json({ ok: true, tracked: false })
 
-  let body: { level?: number; won?: boolean }
+  let body: { level?: number; won?: boolean; action?: string }
   try {
     body = await request.json()
   } catch {
     return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+  }
+
+  /*
+    Le niveau déclaré à l'inscription.
+
+    Quelqu'un qui joue depuis vingt ans n'a aucune envie d'affronter le palier
+    le plus faible, et rien ne permettait de le dire : l'échelle démarrait à 100
+    Elo pour tout le monde, et il fallait battre les paliers un par un — ou
+    déplacer le curseur à la main avant chaque partie — pour arriver là où l'on
+    joue vraiment.
+
+    On enregistre donc la déclaration comme un point de départ, **une seule
+    fois** : `greatest` empêche de faire reculer quelqu'un qui aurait déjà
+    gagné plus haut, et l'absence de `attempts` marque que rien n'a été joué.
+    C'est une déclaration, pas une victoire — et elle ne touche à aucun
+    classement, précisément parce qu'elle n'est vérifiée par personne.
+  */
+  if (body.action === 'declarer') {
+    const declare = Math.min(25, Math.max(1, Math.round(Number(body.level ?? 0))))
+    if (!declare) return NextResponse.json({ error: 'Niveau manquant.' }, { status: 400 })
+
+    const [ligne] = await getDb()
+      .insert(botProgress)
+      .values({ userId: me.userId, defeated: declare, attempts: 0, wins: 0 })
+      .onConflictDoUpdate({
+        target: botProgress.userId,
+        set: {
+          defeated: sql`greatest(${botProgress.defeated}, ${declare})`,
+          updatedAt: new Date(),
+        },
+      })
+      .returning()
+
+    const acquis = ligne?.defeated ?? declare
+    return NextResponse.json({
+      ok: true,
+      tracked: true,
+      defeated: acquis,
+      unlocked: Math.max(FLOOR, acquis + LOOKAHEAD),
+    })
   }
 
   const level = Math.min(25, Math.max(1, Math.round(Number(body.level ?? 0))))

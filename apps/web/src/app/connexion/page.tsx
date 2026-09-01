@@ -17,6 +17,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowRight, Swords } from 'lucide-react'
 import { Button, Card, Input } from '@/components/ui/index.tsx'
+import { BienvenueCompte } from '@/components/compte/BienvenueCompte.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useCourrielDisponible, useIdentite } from '@/lib/auth/useIdentite.ts'
 
@@ -61,6 +62,21 @@ function AuthForm() {
   const identite = useIdentite()
   // Masque la récupération de mot de passe quand aucun courriel ne peut partir.
   const courriel = useCourrielDisponible()
+
+  /**
+   * Le compte vient d'être créé : on déroule la mise en route.
+   *
+   * `null` dans tous les autres cas, y compris à la connexion — on ne demande
+   * rien à quelqu'un qui revient, il a déjà répondu ou déjà refusé. Voir
+   * `BienvenueCompte` pour ce qui s'y règle et pourquoi c'est ici.
+   *
+   * L'avatar voyage avec le pseudo : il vient d'être tiré au sort par le
+   * serveur, et la première étape le montre plutôt que de le redemander.
+   */
+  const [bienvenue, setBienvenue] = useState<{ pseudo: string; avatar: string | null } | null>(
+    null,
+  )
+
   /*
     Une fois connecté, on va à l'accueil — et non à son profil.
 
@@ -73,10 +89,15 @@ function AuthForm() {
     correspondance qui attend, le chapitre en cours, le défi du jour. Le profil
     reste à un clic, sous l'avatar de l'en-tête.
   */
+  const destination = referrer ? `/amis?ami=${encodeURIComponent(referrer)}` : '/'
+
   useEffect(() => {
     if (!identite) return
-    router.replace(referrer ? `/amis?ami=${encodeURIComponent(referrer)}` : '/')
-  }, [identite, referrer, router])
+    // L'écran de bienvenue retient la page : sans ce garde, la relecture de
+    // l'identité renverrait à l'accueil avant qu'on ait pu répondre.
+    if (bienvenue) return
+    router.replace(destination)
+  }, [identite, bienvenue, destination, router])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [email, setEmail] = useState('')
@@ -152,12 +173,30 @@ function AuthForm() {
         }
         setSuggestion(null)
 
-        toast.success(
-          mode === 'signup' ? `Bienvenue, ${data.user.username} !` : `Content de te revoir, ${data.user.username}.`,
-        )
+        /*
+          Après une inscription, on ne file pas tout de suite.
+
+          L'avatar, le niveau, le thème, le coach, les notifications et
+          l'installation se proposent ici, et nulle part mieux : c'est le seul
+          instant où l'on s'attend encore à répondre à des questions, et le seul
+          où l'on n'a pas commencé à faire autre chose. Chacun de ces réglages
+          existait déjà, dispersé là où on ne le cherche pas — d'où des comptes
+          neufs tous identiques.
+
+          À la connexion, en revanche, on file : quelqu'un qui revient a déjà
+          répondu, ou déjà refusé.
+        */
+        if (mode === 'signup') {
+          toast.success(`Bienvenue, ${data.user.username} !`)
+          setBienvenue({ pseudo: data.user.username, avatar: data.user.avatar ?? null })
+          router.refresh()
+          return
+        }
+
+        toast.success(`Content de te revoir, ${data.user.username}.`)
         // Même destination que ci-dessus, pour la même raison : on arrive à
         // l'accueil, là où se trouve ce qu'on a à faire.
-        router.push(referrer ? `/amis?ami=${encodeURIComponent(referrer)}` : '/')
+        router.push(destination)
         router.refresh()
       } catch {
         setError(
@@ -167,8 +206,33 @@ function AuthForm() {
         setBusy(false)
       }
     },
-    [mode, username, password, email, referrer, router],
+    [mode, username, password, email, destination, router],
   )
+
+  /*
+    L'écran de bienvenue remplace le formulaire, il ne s'ajoute pas dessous.
+
+    Laisser les champs derrière donnerait à croire qu'il reste quelque chose à
+    y faire, et sur téléphone les deux questions passeraient sous le pli — ce
+    qui reviendrait à ne pas les poser.
+  */
+  if (bienvenue) {
+    return (
+      <div className="mx-auto grid min-h-[calc(100dvh-8rem)] w-full max-w-md place-items-center px-4 py-10">
+        <div className="w-full">
+          <BienvenueCompte
+            pseudo={bienvenue.pseudo}
+            avatar={bienvenue.avatar}
+            onTermine={() => {
+              setBienvenue(null)
+              router.push(destination)
+              router.refresh()
+            }}
+          />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="mx-auto grid min-h-[calc(100dvh-8rem)] w-full max-w-md place-items-center px-4 py-10">

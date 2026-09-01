@@ -14,6 +14,7 @@ import { Bell, BrainCircuit, Grid3x3, Palette, RotateCcw, Volume2, Zap } from 'l
 import clsx from 'clsx'
 import { Board2D } from '@/components/board/Board2D.tsx'
 import { PanneauIA } from '@/components/ia/PanneauIA.tsx'
+import { ReglageInstallation } from '@/components/settings/ReglageInstallation.tsx'
 import { ReglageNotifications } from '@/components/settings/ReglageNotifications.tsx'
 import { BOARD_SKINS } from '@/components/board/boardKit.ts'
 import {
@@ -697,7 +698,15 @@ export default function PreferencesPage() {
           )}
 
           {/* Notifications */}
-          {onglet === 'notifications' && <ReglageNotifications />}
+          {onglet === 'notifications' && (
+            <>
+              <ReglageNotifications />
+              {/* Sous les notifications, et pas ailleurs : sur iPhone, c'est
+                  l'installation qui les rend possibles, et lire l'un juste
+                  après l'autre suffit à faire le lien. */}
+              <ReglageInstallation />
+            </>
+          )}
 
           {/* Langue */}
           {onglet === 'apparence' && (

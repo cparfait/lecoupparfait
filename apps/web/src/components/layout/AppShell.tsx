@@ -26,6 +26,7 @@ import clsx from 'clsx'
 import { AccountButton } from '@/components/layout/AccountButton.tsx'
 import { ChallengeWatcher } from '@/components/social/ChallengeWatcher.tsx'
 import { PastilleSerie } from '@/components/daily/PastilleSerie.tsx'
+import { MiseEnRoute } from '@/components/layout/MiseEnRoute.tsx'
 import { RepriseEnLigne } from '@/components/social/RepriseEnLigne.tsx'
 import { Menu } from '@/components/ui/Menu.tsx'
 import { PorteDuCompte } from '@/components/compte/PorteDuCompte.tsx'
@@ -192,6 +193,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           qu'une minute, et le bandeau s'efface de lui-même sur celui de la
           partie en question. */}
       <RepriseEnLigne />
+
+      {/* Notifications et installation, proposées une fois — mais proposées.
+          Jamais sur un écran de partie : voir `MiseEnRoute`. */}
+      {!immersive && <MiseEnRoute />}
 
       {/* ── Barre inférieure mobile ──────────────────────────────────── */}
       {!immersive && (
