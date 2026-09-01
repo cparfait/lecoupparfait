@@ -13,7 +13,7 @@
  * appelle `onMove`. C'est la page qui reste maîtresse du déroulement.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { botLevel, botThinkDelayMs, pickBotMove, uciOptionsFor } from '@coupparfait/core'
 import type { BotLevel, BotPersonalityId } from '@coupparfait/core'
@@ -71,10 +71,21 @@ export interface BotPlayerState {
 export function useBotPlayer(options: UseBotPlayerOptions): BotPlayerState {
   const { fen, botColor, level, active, onMove, turn, instant, human, ply } = options
 
-  const bareme = botLevel(level)
-  const bot = options.personality
-    ? { ...bareme, personality: options.personality }
-    : bareme
+  /**
+   * Le barème, éventuellement repeint aux couleurs d'un style imposé.
+   *
+   * Mémoïsé, et ce n'est pas de l'optimisation : `bot` figure dans les
+   * dépendances de l'effet qui fait jouer l'ordinateur. Reconstruit à chaque
+   * rendu — ce que faisait l'étalement quand une personnalité était fournie —
+   * il relançait l'effet en boucle, chaque relance annulant la réflexion
+   * précédente avant qu'elle n'aboutisse. L'adversaire ne jouait donc jamais,
+   * et seulement là où un style est imposé : carrière et tournoi.
+   */
+  const personality = options.personality
+  const bot = useMemo(() => {
+    const bareme = botLevel(level)
+    return personality ? { ...bareme, personality } : bareme
+  }, [level, personality])
   const [thinking, setThinking] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
