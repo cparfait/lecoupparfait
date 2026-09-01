@@ -34,6 +34,7 @@ import { disposeVoices, isPiperAvailable, listPiperVoices, synthesise } from './
 import { GameRoom } from './realtime/gameRoom.ts'
 import { persistFinishedGame } from './persistence.ts'
 import { verifySessionToken } from './auth.ts'
+import { rappelDuDefi, rappelsPossibles } from './rappels.ts'
 
 const PORT = Number(process.env.SERVER_PORT ?? 3001)
 const ORIGINS = (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000')
@@ -561,6 +562,9 @@ async function main(): Promise<void> {
     console.log(`  origines autorisées : ${ORIGINS.join(', ')}`)
     console.log(`  moteur d’analyse : ${engineReady ? 'prêt' : 'indisponible'}`)
     console.log(`  tables de finales : ${isTablebaseEnabled() ? 'activées' : 'désactivées'}`)
+    console.log(
+      `  rappel du défi du jour : ${rappelsPossibles() ? `à ${process.env.DEFI_RAPPEL_HEURE ?? 18} h locales` : 'désactivé'}`,
+    )
   })
 }
 
@@ -695,3 +699,37 @@ const arenaTimer = setInterval(() => {
     .catch(signalerEchecArene)
 }, ARENA_TICK_MS)
 arenaTimer.unref?.()
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Rappel du défi du jour
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Un quart d'heure entre deux passages.
+ *
+ * L'heure du rappel est donnée à l'heure près, pas à la minute : battre plus
+ * vite ne rendrait le rappel ni plus juste ni plus utile, et la boucle
+ * interroge la base à chaque tour. Un quart d'heure suffit aussi à rattraper
+ * un redémarrage sans que personne ne s'en aperçoive.
+ */
+const RAPPEL_TICK_MS = 15 * 60_000
+
+/** Même discrétion que la boucle des arènes : on ne répète pas la même panne. */
+let dernierEchecRappel: string | null = null
+
+if (rappelsPossibles()) {
+  const rappelTimer = setInterval(() => {
+    void rappelDuDefi()
+      .then((envoyes) => {
+        dernierEchecRappel = null
+        if (envoyes > 0) console.log(`[défi] ${envoyes} rappel(s) envoyé(s).`)
+      })
+      .catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : String(error)
+        if (message === dernierEchecRappel) return
+        dernierEchecRappel = message
+        console.error('[défi] rappel en erreur :', message)
+      })
+  }, RAPPEL_TICK_MS)
+  rappelTimer.unref?.()
+}

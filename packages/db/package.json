@@ -15,7 +15,8 @@
     "./studies": "./src/studies.ts",
     "./correspondence": "./src/correspondence.ts",
     "./tournaments": "./src/tournaments.ts",
-    "./ratings": "./src/ratings.ts"
+    "./ratings": "./src/ratings.ts",
+    "./push": "./src/push.ts"
   },
   "scripts": {
     "db:generate": "drizzle-kit generate",

@@ -896,6 +896,56 @@ export const dailyProgress = pgTable(
 )
 
 /**
+ * Les navigateurs abonnés aux notifications.
+ *
+ * Une notification poussée ne s'adresse pas à un joueur mais à une
+ * **installation** : le téléphone et l'ordinateur portable de la même personne
+ * sont deux abonnements distincts, chacun avec sa propre adresse chez le
+ * service de messagerie du navigateur. D'où une ligne par appareil et non par
+ * compte.
+ *
+ * L'`endpoint` est la clé naturelle : c'est le navigateur qui la fabrique, et
+ * il rend la même à chaque réabonnement tant qu'il n'a pas révoqué le droit.
+ * L'unicité évite d'envoyer deux fois la même chose à quelqu'un qui a rouvert
+ * l'application.
+ *
+ * `p256dh` et `auth` sont les clés de chiffrement : le contenu de la
+ * notification est chiffré pour ce navigateur-là, le service de messagerie qui
+ * la relaie ne peut pas le lire. On les stocke telles quelles, en base64url.
+ */
+export const pushSubscriptions = pgTable(
+  'push_subscriptions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    endpoint: text('endpoint').notNull(),
+    p256dh: text('p256dh').notNull(),
+    auth: text('auth').notNull(),
+    /**
+     * Ce à quoi cet appareil est abonné.
+     *
+     * Séparé parce que les deux usages n'ont pas le même poids : être prévenu
+     * qu'un ami vous attend est utile tout de suite, le rappel du défi du jour
+     * est un agrément. Quelqu'un doit pouvoir garder le premier et couper le
+     * second sans tout désactiver.
+     */
+    invitations: boolean('invitations').notNull().default(true),
+    defiDuJour: boolean('defi_du_jour').notNull().default(true),
+    /** Fuseau du navigateur — sert à envoyer le rappel du jour au bon moment. */
+    timezone: varchar('timezone', { length: 60 }).notNull().default('Europe/Paris'),
+    /** Dernier jour où le rappel du défi a été envoyé, au format `AAAA-MM-JJ`. */
+    dernierDefiEnvoye: varchar('dernier_defi_envoye', { length: 10 }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('push_subscriptions_endpoint_idx').on(table.endpoint),
+    index('push_subscriptions_user_idx').on(table.userId),
+  ],
+)
+
+/**
  * La partie contre l'ordinateur qu'on a laissée en plan.
  *
  * Une ligne par joueur, remplacée à chaque coup. On ne veut pas d'historique
@@ -971,3 +1021,4 @@ export type Challenge = typeof challenges.$inferSelect
 export type Evaluation = typeof evaluations.$inferSelect
 export type DailyProgress = typeof dailyProgress.$inferSelect
 export type ActiveGame = typeof activeGames.$inferSelect
+export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect

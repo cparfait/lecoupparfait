@@ -24,6 +24,7 @@ eux — fourchette, clouage, mat du couloir — et il te le dit à voix haute.
 | **Explorer** | 3 810 ouvertures nommées, reconnues même par transposition |
 | **Progresser** | comptes, classement Glicko-2 par cadence, Elo classique affiché en parallèle, courbe de progression |
 | **Revenir** | un défi du jour, **le même pour tout le monde**, cinq quêtes courtes et une série de jours consécutifs — sans compte, si l'on veut |
+| **Être prévenu** | une notification quand un ami t'invite — un défi expire en cinq minutes — et un rappel du défi du jour, à ton heure. Rien d'autre, et les deux se coupent séparément. Voir [`docs/notifications.md`](docs/notifications.md) |
 
 Et côté forme : quatre thèmes commutables, dix jeux de pièces, huit damiers,
 un échiquier **2D et 3D** interchangeable en pleine partie avec mode plein
@@ -359,6 +360,7 @@ positions de contrôle, y compris les attaques en rayon X.
 | `npm run data:evals` | importe les évaluations pré-calculées de Lichess |
 | `npm run voice:install` | installe la voix neuronale Piper en local (facultatif) |
 | `npm run engine:install` | installe Stockfish natif en local (facultatif) |
+| `npm run vapid` | fabrique la paire de clés des notifications (facultatif) |
 
 ---
 
@@ -376,6 +378,7 @@ comptent :
 | `ENGINE_POOL_SIZE` / `ENGINE_THREADS` | processus moteur et fils par processus |
 | `ENGINE_MAX_DEPTH` | profondeur maximale autorisée (protège le processeur) |
 | `PUZZLE_IMPORT_LIMIT` | nombre de puzzles à importer (`0` = tous) |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | notifications — sans elles, le réglage n'apparaît pas |
 
 ---
 
@@ -388,6 +391,10 @@ comptent :
   une empreinte de mot de passe (scrypt), des classements et des parties.
 - L'adresse e-mail est facultative et ne sert qu'à la récupération de mot de
   passe.
+- Les notifications sont **chiffrées pour ton navigateur** : le service qui les
+  relaie — Google, Mozilla, Apple — ne peut pas les lire. Un abonnement se
+  révoque d'un bouton, et ne conserve que l'adresse de l'appareil, deux clés de
+  chiffrement et ton fuseau horaire.
 - La synthèse vocale tourne **sur ta machine** : soit celle du système
   d'exploitation, soit Piper installé sur ton propre serveur. Aucun texte ne
   part vers un service de synthèse, et aucune clé d'API n'est nécessaire.

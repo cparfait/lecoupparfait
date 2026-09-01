@@ -97,6 +97,18 @@ const nextConfig: NextConfig = {
         source: '/data/:path*',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=86400, must-revalidate' }],
       },
+      {
+        // Le travailleur de service ne se met jamais en cache. C'est le seul
+        // fichier de l'application dont une version périmée ne se rattrape pas
+        // par un rechargement : c'est lui qui décide quoi servir. Un correctif
+        // resterait coincé le temps du cache — jusqu'à vingt-quatre heures.
+        source: '/sw.js',
+        headers: [
+          { key: 'Content-Type', value: 'application/javascript; charset=utf-8' },
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+          { key: 'Service-Worker-Allowed', value: '/' },
+        ],
+      },
     ]
   },
 }

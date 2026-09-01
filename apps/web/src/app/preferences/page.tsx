@@ -10,10 +10,11 @@
  */
 
 import { useEffect, useState } from 'react'
-import { BrainCircuit, Grid3x3, Palette, RotateCcw, Volume2, Zap } from 'lucide-react'
+import { Bell, BrainCircuit, Grid3x3, Palette, RotateCcw, Volume2, Zap } from 'lucide-react'
 import clsx from 'clsx'
 import { Board2D } from '@/components/board/Board2D.tsx'
 import { PanneauIA } from '@/components/ia/PanneauIA.tsx'
+import { ReglageNotifications } from '@/components/settings/ReglageNotifications.tsx'
 import { BOARD_SKINS } from '@/components/board/boardKit.ts'
 import {
   Button,
@@ -63,6 +64,7 @@ const ONGLETS = [
   { id: 'echiquier', label: 'Échiquier', icon: Grid3x3 },
   { id: 'son', label: 'Son et voix', icon: Volume2 },
   { id: 'ia', label: 'Assistant IA', icon: BrainCircuit },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
 ] as const
 
 type OngletId = (typeof ONGLETS)[number]['id']
@@ -140,6 +142,18 @@ export default function PreferencesPage() {
               type="button"
               role="tab"
               aria-selected={actif}
+              /* L'onglet actif se met de lui-même dans le champ de vision.
+                 La bande déborde sur téléphone : arriver par un lien qui
+                 désigne le dernier onglet affichait son contenu sous une bande
+                 restée au début, où c'était le *premier* onglet qui semblait
+                 choisi. On voyait donc les notifications sous le titre
+                 « Apparence ». */
+              ref={
+                actif
+                  ? (element) =>
+                      element?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+                  : undefined
+              }
               onClick={() => choisirOnglet(entry.id)}
               className={clsx(
                 'relative flex shrink-0 items-center gap-1.5 px-3.5 py-2.5 text-sm font-medium transition-colors',
@@ -681,6 +695,9 @@ export default function PreferencesPage() {
           {onglet === 'ia' && (
           <PanneauIA />
           )}
+
+          {/* Notifications */}
+          {onglet === 'notifications' && <ReglageNotifications />}
 
           {/* Langue */}
           {onglet === 'apparence' && (

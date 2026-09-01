@@ -24,9 +24,39 @@ import {
   respondToChallenge,
 } from '@coupparfait/db/friends'
 import { getCurrentUser } from '@/lib/server/session.ts'
+import { prevenir } from '@/lib/server/push.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+
+/**
+ * Prévient le destinataire d'un défi, s'il a un appareil abonné.
+ *
+ * C'est la raison d'être des notifications sur cette plateforme : un défi
+ * expire en cinq minutes, et l'interrogation régulière décrite plus haut ne
+ * sert qu'à ceux qui ont l'application ouverte. Une invitation lancée à
+ * quelqu'un qui a le téléphone dans sa poche mourait sans que personne ne
+ * l'ait vue.
+ *
+ * L'appel ne bloque pas : voir `lib/server/push.ts`.
+ */
+function prevenirDuDefi(
+  cible: string | null,
+  auteur: string,
+  initialTime: number,
+  increment: number,
+): void {
+  if (!cible) return
+  const minutes = Math.round(initialTime / 60)
+  prevenir(cible, 'invitations', {
+    titre: `${auteur} te propose une partie`,
+    corps: `${minutes} min${increment > 0 ? ` + ${increment} s` : ''} — l’invitation expire dans cinq minutes.`,
+    // La bannière du guetteur s'affiche sur toutes les pages : l'accueil suffit,
+    // et c'est la page la moins coûteuse à ouvrir sur un téléphone.
+    url: '/',
+    fil: 'invitation',
+  })
+}
 
 /** Cadences acceptées, en secondes. Bornées pour ne pas créer d'aberration. */
 const MIN_INITIAL = 60
@@ -140,6 +170,8 @@ export async function POST(request: Request) {
       )
     }
 
+    prevenirDuDefi(challenge.to, name, challenge.initialTime, challenge.increment)
+
     return NextResponse.json({ ok: true, challenge })
   }
 
@@ -175,6 +207,8 @@ export async function POST(request: Request) {
         rated: body.rated === true,
         color,
       })
+
+      prevenirDuDefi(challenge.to, me.username, initialTime, increment)
 
       return NextResponse.json({ ok: true, challenge })
     }

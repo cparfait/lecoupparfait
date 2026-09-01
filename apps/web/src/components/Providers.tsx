@@ -16,6 +16,7 @@ import { I18nProvider } from '@/lib/i18n/index.tsx'
 import { detectEffectsCapability, usePreferences } from '@/lib/store/preferences.ts'
 import { unlockAudio } from '@/lib/sound.ts'
 import { loadNeuralVoices, loadVoices } from '@/lib/speech.ts'
+import { enregistrerTravailleur } from '@/lib/notifications.ts'
 import { ToastHost } from '@/components/ui/Toast.tsx'
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -42,6 +43,22 @@ export function Providers({ children }: { children: ReactNode }) {
     const hasChoice = stored ? 'effects' in (JSON.parse(stored).state ?? {}) : false
     if (!hasChoice) patch({ effects: detectEffectsCapability() })
   }, [hydrated, patch])
+
+  /*
+    Le travailleur de service, dès la première visite.
+
+    Il ne fait rien tant que personne ne s'abonne, mais il doit être *déjà là*
+    au moment où l'on s'abonne : sans lui, `pushManager.subscribe` échoue, et
+    l'enregistrer dans le même clic ferait attendre une seconde entre le
+    « oui » du navigateur et la confirmation à l'écran.
+
+    C'est aussi ce qui rend l'application installable sur Android — le
+    navigateur refuse la proposition « ajouter à l'écran d'accueil » à un site
+    qui n'en a pas.
+  */
+  useEffect(() => {
+    void enregistrerTravailleur()
+  }, [])
 
   // Le catalogue des voix neuronales est interrogé une seule fois, sans
   // attendre d'interaction : il ne fait pas de bruit, et le savoir tôt évite

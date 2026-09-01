@@ -204,6 +204,13 @@ services:
       # sur la synthèse du navigateur.
       PIPER_BIN: ${PIPER_BIN:-/opt/piper/piper}
       PIPER_VOICES_DIR: ${PIPER_VOICES_DIR:-/app/voices}
+      # Notifications poussées. C'est ce conteneur, et lui seul, qui envoie le
+      # rappel du défi du jour : il est le seul à tourner en permanence. Sans
+      # clés — `npm run vapid` —, la boucle ne démarre pas. Voir `.env.example`.
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
+      DEFI_RAPPEL_HEURE: ${DEFI_RAPPEL_HEURE:-18}
     # Aucun port publié : NPM joint le conteneur par `web-coupparfait`. Publier
     # « 3001:3001 » l'ouvrait sur toutes les interfaces de la machine, donc
     # depuis Internet, en clair et hors du proxy.
@@ -259,6 +266,11 @@ services:
       # partira pas. Voir `docs/courriel.md`.
       SMTP_URL: ${SMTP_URL:-}
       MAIL_FROM: ${MAIL_FROM:-}
+      # Notifications poussées : ici pour l'abonnement et pour prévenir d'une
+      # invitation. Vides, le réglage disparaît de la page des préférences.
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
       PORT: 3000
       HOSTNAME: 0.0.0.0
     # Aucun port publié : voir la remarque du service `server`.

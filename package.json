@@ -35,6 +35,7 @@
     "data:openings": "node scripts/import-openings.mjs",
     "data:puzzles": "node scripts/import-puzzles.mjs",
     "icons": "node scripts/build-icons.mjs",
+    "vapid": "node scripts/vapid.mjs",
     "brand:cavale": "node scripts/build-cavale.mjs",
     "check:lessons": "node --experimental-strip-types scripts/check-lessons.mjs",
     "check:eboards": "node --experimental-strip-types scripts/check-eboards.mjs",

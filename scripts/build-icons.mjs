@@ -213,6 +213,37 @@ console.log('  ✓ icon-maskable-512.png')
 await icone(32).toFile(join(root, 'apps', 'web', 'public', 'favicon.png'))
 console.log('  ✓ favicon.png')
 
+/*
+  L'insigne des notifications : une silhouette blanche, et rien d'autre.
+
+  Android n'affiche pas cette image, il n'en garde que le canal alpha et la
+  peint de la couleur du système dans la barre d'état. Une icône en couleurs y
+  devient donc une tache uniforme. On aplatit la pièce en blanc pur, on ne
+  conserve que son contour, et on la pose au centre d'un carré transparent avec
+  un peu de marge — la barre d'état recadre serré.
+*/
+const insigne = await pieceNette
+  .clone()
+  .resize({ width: 76, height: 76, fit: 'inside' })
+  .ensureAlpha()
+  // `tint` multiplie les couleurs : sur une pièce brune il donnerait du brun.
+  // On désature d'abord à fond, puis on force la luminosité au maximum.
+  .greyscale()
+  .linear(0, 255)
+  .png()
+  .toBuffer()
+
+const { width: li, height: hi } = await sharp(insigne).metadata()
+await sharp({
+  create: { width: 96, height: 96, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+})
+  .composite([
+    { input: insigne, left: Math.round((96 - li) / 2), top: Math.round((96 - hi) / 2) },
+  ])
+  .png({ compressionLevel: 9 })
+  .toFile(join(iconsDir, 'badge-96.png'))
+console.log('  ✓ badge-96.png')
+
 // Image de partage sur les réseaux sociaux : format 1200 × 630 attendu partout.
 const card = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
