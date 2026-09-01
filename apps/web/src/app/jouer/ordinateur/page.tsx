@@ -349,7 +349,19 @@ export default function PlayComputerPage() {
     playSound('start')
   }, [])
 
+  /**
+   * Le curseur a-t-il déjà été arbitré par le joueur ?
+   *
+   * Tant que non, l'écran de réglages le pose sur le dernier niveau battu :
+   * c'est la seule valeur de départ qui veuille dire quelque chose, et elle
+   * évite de faire redescendre le curseur à chaque visite. Dès qu'une partie a
+   * été lancée ou reprise, le niveau retenu est un choix : on le garde tel
+   * quel, et la suggestion ne repasse plus derrière.
+   */
+  const niveauArbitre = useRef(false)
+
   const start = useCallback((next: Setup) => {
+    niveauArbitre.current = true
     setSetup(next)
     setResolvedColor(
       next.color === 'random' ? (Math.random() < 0.5 ? 'w' : 'b') : next.color,
@@ -365,6 +377,7 @@ export default function PlayComputerPage() {
   }, [])
 
   const reprendre = useCallback((partie: PartieEnCours) => {
+    niveauArbitre.current = true
     setSetup({
       level: partie.level,
       color: partie.playerColor,
@@ -392,6 +405,7 @@ export default function PlayComputerPage() {
         onStart={start}
         reprise={reprise ?? null}
         onReprendre={reprendre}
+        suggererNiveau={!niveauArbitre.current}
       />
     )
   }
@@ -438,12 +452,20 @@ function SetupScreen({
   onStart,
   reprise,
   onReprendre,
+  suggererNiveau = false,
 }: {
   initial: Setup
   onStart: (setup: Setup) => void
   /** Partie interrompue à reprendre, `null` s'il n'y en a pas. */
   reprise: PartieEnCours | null
   onReprendre: (partie: PartieEnCours) => void
+  /**
+   * Poser le curseur sur le dernier niveau battu dès que la progression arrive.
+   *
+   * Faux dès qu'une partie a été lancée dans la session : le niveau affiché est
+   * alors celui qu'on vient de choisir, et le remplacer serait défaire un choix.
+   */
+  suggererNiveau?: boolean
 }) {
   const [level, setLevel] = useState(initial.level)
   const [color, setColor] = useState<Color | 'random'>(initial.color)
@@ -514,6 +536,33 @@ function SetupScreen({
       .then(setProgress)
       .catch(() => setProgress(null))
   }, [])
+
+  /**
+   * Le curseur part du dernier niveau battu.
+   *
+   * Il partait de six, c'est-à-dire d'un nombre choisi une fois pour tous : pour
+   * qui a déjà battu le niveau onze, c'est cinq crans à remonter à la main avant
+   * chaque partie ; pour qui n'a encore rien battu, c'est un adversaire six fois
+   * trop fort. La progression est justement la seule chose que l'application
+   * sache de la force du joueur — autant s'en servir comme point de départ.
+   *
+   * Le *dernier battu* et non le suivant : le curseur propose ce qu'on sait
+   * faire, et le bouton juste au-dessus propose de monter d'un cran. Deux
+   * choses différentes, laissées toutes deux à un clic.
+   *
+   * `toucheRef` protège la course : la progression arrive du réseau, et il ne
+   * faut pas qu'elle vienne écraser un curseur déjà déplacé entre-temps.
+   */
+  const toucheRef = useRef(false)
+  const choisirNiveau = useCallback((valeur: number) => {
+    toucheRef.current = true
+    setLevel(valeur)
+  }, [])
+  useEffect(() => {
+    if (!suggererNiveau || toucheRef.current) return
+    if (!progress?.tracked || progress.defeated < 1) return
+    setLevel(Math.min(BOT_LEVELS.length, progress.defeated))
+  }, [progress, suggererNiveau])
 
   const bot = botLevel(level)
   const personality = BOT_PERSONALITIES[bot.personality]
@@ -803,7 +852,7 @@ function SetupScreen({
             {progress.defeated < BOT_LEVELS.length && (
               <button
                 type="button"
-                onClick={() => setLevel(Math.min(BOT_LEVELS.length, progress.defeated + 1))}
+                onClick={() => choisirNiveau(Math.min(BOT_LEVELS.length, progress.defeated + 1))}
                 className="mt-1.5 text-[12px] font-semibold text-accent hover:underline"
               >
                 Affronter le niveau {Math.min(BOT_LEVELS.length, progress.defeated + 1)} — le
@@ -844,7 +893,7 @@ function SetupScreen({
             max={BOT_LEVELS.length}
             step={1}
             value={level}
-            onChange={(event) => setLevel(Number(event.target.value))}
+            onChange={(event) => choisirNiveau(Number(event.target.value))}
             /* La barre reste fine, la zone touchable ne l'est plus.
 
                Le champ faisait huit points de haut : c'est la hauteur du rail,
@@ -886,7 +935,7 @@ function SetupScreen({
               <button
                 key={preset.label}
                 type="button"
-                onClick={() => setLevel(preset.level)}
+                onClick={() => choisirNiveau(preset.level)}
                 className={clsx(
                   'rounded-[var(--radius-sm)] border px-2 py-2 text-xs font-medium transition-colors',
                   level === preset.level
