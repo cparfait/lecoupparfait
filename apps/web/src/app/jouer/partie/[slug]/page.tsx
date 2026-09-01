@@ -42,6 +42,7 @@ import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
 import { Button, ButtonLink, Card, Chip, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useLiveGame } from '@/lib/game/useLiveGame.ts'
+import { oublierPartieEnLigne, retenirPartieEnLigne } from '@/lib/game/partieEnLigne.ts'
 import { usePrecoup } from '@/lib/game/usePrecoup.ts'
 import { playMoveSound, playResultSound, playSound } from '@/lib/sound.ts'
 import { useCurrentOpening } from '@/lib/game/useOpeningBook.ts'
@@ -147,6 +148,35 @@ export default function LiveGamePage() {
     finished.current = true
     const won = color !== null && snapshot.result === (color === 'w' ? '1-0' : '0-1')
     playResultSound(snapshot.result === '1/2-1/2' ? 'draw' : won ? 'win' : 'loss')
+  }, [snapshot, color])
+
+  /*
+    Le chemin du retour, retenu tant que la partie dure.
+
+    Une partie en direct n'existe qu'en mémoire du serveur : rien ne permet de
+    la retrouver depuis un autre écran, et quelqu'un qui quittait l'onglet
+    n'avait plus que son historique de navigation — ou la conversation où le
+    lien avait été reçu. Le siège, lui, reste gardé une minute : le retour est
+    donc possible, il n'était simplement pas trouvable.
+
+    Réservé à qui joue : un spectateur n'a pas de partie à reprendre. Et effacé
+    dès qu'elle est finie, pour que le bandeau ne propose pas de retourner
+    quelque part où il n'y a plus rien à faire.
+  */
+  useEffect(() => {
+    if (!snapshot || !color) return
+    if (snapshot.status !== 'playing' && snapshot.status !== 'waiting') {
+      oublierPartieEnLigne()
+      return
+    }
+    const adverse = color === 'w' ? 'b' : 'w'
+    retenirPartieEnLigne({
+      slug: snapshot.slug,
+      // L'adresse complète : la cadence en fait partie, et c'est elle qui crée
+      // le salon si l'on revient avant l'adversaire.
+      href: `${window.location.pathname}${window.location.search}`,
+      adversaire: snapshot.players[adverse]?.name ?? null,
+    })
   }, [snapshot, color])
 
   // Proposition de nulle reçue.

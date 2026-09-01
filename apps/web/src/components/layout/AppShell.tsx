@@ -26,6 +26,7 @@ import clsx from 'clsx'
 import { AccountButton } from '@/components/layout/AccountButton.tsx'
 import { ChallengeWatcher } from '@/components/social/ChallengeWatcher.tsx'
 import { PastilleSerie } from '@/components/daily/PastilleSerie.tsx'
+import { RepriseEnLigne } from '@/components/social/RepriseEnLigne.tsx'
 import { Menu } from '@/components/ui/Menu.tsx'
 import { PorteDuCompte } from '@/components/compte/PorteDuCompte.tsx'
 import type { ReactNode } from 'react'
@@ -185,6 +186,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Un ami peut proposer une partie pendant qu'on lit une leçon : le
           guetteur vit donc dans la coque, pas dans une page. */}
       <ChallengeWatcher />
+
+      {/* Le retour vers une partie en direct qu'on a quittée. Il vaut sur tous
+          les écrans, y compris pendant une autre partie : la place n'est gardée
+          qu'une minute, et le bandeau s'efface de lui-même sur celui de la
+          partie en question. */}
+      <RepriseEnLigne />
 
       {/* ── Barre inférieure mobile ──────────────────────────────────── */}
       {!immersive && (
