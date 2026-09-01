@@ -67,8 +67,25 @@ export interface Board2DProps {
   legalMoves?: Map<Square, Square[]>
   /** Appelé quand l'utilisateur veut jouer un coup. */
   onMove?: (from: Square, to: Square, promotion?: PieceSymbol) => void
-  /** Appelé quand l'utilisateur enregistre un pré-coup. */
-  onPremove?: (from: Square, to: Square) => void
+  /**
+   * Appelé quand l'utilisateur enregistre un pré-coup.
+   *
+   * `promotion` est demandée **au moment de l'enregistrement**, et non quand le
+   * coup part : le sélecteur s'ouvre sur la case d'arrivée, et cette case
+   * n'aura plus la même signification une fois le tour de l'adversaire passé.
+   * Sans cela, un pré-coup de promotion aurait promu en dame d'office — le
+   * contraire de ce que le sélecteur existe pour éviter.
+   */
+  onPremove?: (from: Square, to: Square, promotion?: PieceSymbol) => void
+  /**
+   * Oublier le pré-coup en attente.
+   *
+   * Appelé au premier geste sur le plateau : c'est la convention partout
+   * ailleurs, et c'est la seule façon d'en changer d'avis. Un pré-coup qu'on ne
+   * peut pas retirer devient un piège dès que l'adversaire joue autre chose que
+   * prévu. Si le geste en pose un nouveau, il remplace celui-ci de toute façon.
+   */
+  onPremoveCancel?: () => void
   /**
    * Clic simple sur une case, quel qu'en soit le contenu.
    *
@@ -167,6 +184,7 @@ export const Board2D = memo(function Board2D({
   legalMoves,
   onMove,
   onPremove,
+  onPremoveCancel,
   onSquareClick,
   lastMove,
   checkSquare,
@@ -197,9 +215,19 @@ export const Board2D = memo(function Board2D({
   const [selected, setSelected] = useState<Square | null>(null)
   const [drag, setDrag] = useState<DragState | null>(null)
   const [hoverSquare, setHoverSquare] = useState<Square | null>(null)
-  const [promotion, setPromotion] = useState<{ from: Square; to: Square; color: Color } | null>(
-    null,
-  )
+  /**
+   * Promotion en cours d'arbitrage.
+   *
+   * `precoup` distingue les deux usages du même sélecteur : on choisit la pièce
+   * pour un coup qu'on joue maintenant, ou pour un pré-coup qu'on enregistre.
+   * Le rendu est identique — c'est la destination du choix qui change.
+   */
+  const [promotion, setPromotion] = useState<{
+    from: Square
+    to: Square
+    color: Color
+    precoup?: boolean
+  } | null>(null)
 
   // Annotations dessinées par l'utilisateur, effacées à chaque nouveau coup.
   const [userArrows, setUserArrows] = useState<Arrow[]>([])
@@ -271,10 +299,27 @@ export const Board2D = memo(function Board2D({
         return
       }
 
-      // Coup illégal maintenant, mais peut-être jouable au tour suivant : c'est
-      // un pré-coup. On ne le propose que si la pièce appartient au joueur.
+      /*
+        Coup illégal maintenant, mais peut-être jouable au tour suivant : c'est
+        un pré-coup. On ne le propose que si la pièce appartient au joueur.
+
+        `legal.length === 0` restreint volontairement aux cas où la pièce n'a
+        *aucun* coup légal, c'est-à-dire, en pratique, quand ce n'est pas notre
+        trait. Sans cette borne, viser une case interdite pendant son propre
+        tour enregistrerait un pré-coup au lieu de ne rien faire.
+      */
       const piece = pieces.find((p) => p.square === from)
       if (prefs.premove && onPremove && piece && canMove(piece) && legal.length === 0) {
+        // Un pion qui vise la dernière rangée : on demande la pièce tout de
+        // suite. Attendre le départ du pré-coup reviendrait à promouvoir en
+        // dame d'office, et le sélecteur s'ouvrirait sur une position qui a
+        // changé entre-temps.
+        const derniere = piece.color === 'w' ? '8' : '1'
+        if (piece.type === 'p' && to[1] === derniere) {
+          setPromotion({ from, to, color: piece.color, precoup: true })
+          setSelected(null)
+          return
+        }
         onPremove(from, to)
         setSelected(null)
         return
@@ -308,6 +353,9 @@ export const Board2D = memo(function Board2D({
         return
       }
       if (event.button !== 0) return
+
+      // Un clic gauche annule le pré-coup en attente. Voir `onPremoveCancel`.
+      if (premove) onPremoveCancel?.()
 
       const point = relativePoint(event.clientX, event.clientY)
       if (!point) return
@@ -372,6 +420,8 @@ export const Board2D = memo(function Board2D({
       userArrows.length,
       userCircles.length,
       onSquareClick,
+      premove,
+      onPremoveCancel,
     ],
   )
 
@@ -747,7 +797,10 @@ export const Board2D = memo(function Board2D({
           orientation={orientation}
           pieceSet={prefs.pieceSet}
           onSelect={(type) => {
-            onMove?.(promotion.from, promotion.to, type)
+            // Même sélecteur, deux destinations : le coup qu'on joue, ou le
+            // pré-coup qu'on met en attente.
+            if (promotion.precoup) onPremove?.(promotion.from, promotion.to, type)
+            else onMove?.(promotion.from, promotion.to, type)
             setPromotion(null)
             setSelected(null)
           }}

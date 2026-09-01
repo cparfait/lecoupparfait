@@ -350,6 +350,8 @@ export function Board3D(props: Board2DProps) {
           square={promotion.to}
           orientation={orientation}
           pieceSet={prefs.pieceSet}
+          // La colonne d'arrivée n'existe pas en perspective : voir `centre`.
+          centre
           onSelect={(type: PieceSymbol) => {
             onMove?.(promotion.from, promotion.to, type)
             setPromotion(null)

@@ -42,6 +42,7 @@ import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
 import { Button, ButtonLink, Card, Chip, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useLiveGame } from '@/lib/game/useLiveGame.ts'
+import { usePrecoup } from '@/lib/game/usePrecoup.ts'
 import { playMoveSound, playResultSound, playSound } from '@/lib/sound.ts'
 import { useCurrentOpening } from '@/lib/game/useOpeningBook.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
@@ -370,6 +371,25 @@ export default function LiveGamePage() {
     [game],
   )
 
+  /*
+    Les pré-coups, enfin branchés.
+
+    C'est ici qu'ils comptent le plus : une partie en direct a une pendule, et
+    l'aller-retour réseau s'ajoute au temps de réflexion. Poser son coup pendant
+    que l'adversaire réfléchit est ce qui rend le blitz jouable.
+
+    L'échiquier reste « jouable » même quand ce n'est pas notre trait — sans
+    cela on ne pourrait pas saisir ses propres pièces, et aucun pré-coup ne
+    serait enregistrable. Rien ne part pour autant : `legalMoves` est vide en
+    dehors de son tour, donc tout geste retombe sur la branche pré-coup.
+  */
+  const { precoup, enregistrer, annuler } = usePrecoup({
+    fen: snapshot?.fen ?? START_FEN,
+    couleur: color,
+    actif: revu === null && snapshot?.status === 'playing',
+    jouer: handleMove,
+  })
+
   // ── Échiquier électronique ──────────────────────────────────────────────
   //
   // En direct, on ne dispose pas de l'objet chess.js de la partie — c'est le
@@ -477,15 +497,15 @@ export default function LiveGamePage() {
               fen={revue?.fen ?? snapshot.fen}
               orientation={orientation}
               playable={
-                revue === null &&
-                color !== null &&
-                snapshot.turn === color &&
-                snapshot.status === 'playing'
+                revue === null && color !== null && snapshot.status === 'playing'
                   ? color
                   : null
               }
               legalMoves={legalMoves}
               onMove={handleMove}
+              onPremove={enregistrer}
+              onPremoveCancel={annuler}
+              premove={precoup}
               lastMove={revue ? revue.lastMove : snapshot.lastMove}
               checkSquare={revue ? revue.checkSquare : checkSquare}
               // Cinq autres pages l'annonçaient, celle-ci non : le mat qu'on

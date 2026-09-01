@@ -30,6 +30,7 @@ import clsx from 'clsx'
 import { GameNav } from '@/components/game/GameNav.tsx'
 import { RubanCoups, rubanDepuisLesCoups } from '@/components/game/RubanCoups.tsx'
 import { useSan } from '@/lib/notation.ts'
+import { Chess } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import {
   BOT_LEVELS,
@@ -99,6 +100,7 @@ import {
   type PartieEnCours,
 } from '@/lib/game/partieEnCours.ts'
 import { requestHint, useBotPlayer } from '@/lib/game/useBotPlayer.ts'
+import { usePrecoup } from '@/lib/game/usePrecoup.ts'
 import {
   chapitreDeLUrl,
   deposerGains,
@@ -293,6 +295,60 @@ export default function PlayComputerPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  /**
+   * Position composée dans l'éditeur, transmise par l'adresse.
+   *
+   * L'éditeur proposait « La jouer contre l'ordinateur » et pointait ici avec
+   * `?fen=…`. Le paramètre n'était lu nulle part : on composait sa position, on
+   * cliquait, et l'on tombait sur une partie qui commençait au coup un. Sans un
+   * mot — le pire des cas, puisqu'on ne sait pas si l'on a mal fait ou si c'est
+   * cassé.
+   *
+   * Comme la carrière et le tournoi, on saute l'écran de réglages : quelqu'un
+   * qui vient de poser vingt pièces à la main a déjà répondu à la seule
+   * question qui compte. La couleur, elle, n'est plus un choix — c'est le trait
+   * de la position qui la donne.
+   *
+   * **Jamais classée** : une position fabriquée n'est pas une partie, et rien
+   * n'empêcherait d'y composer une dame de plus.
+   */
+  const [fenImposee, setFenImposee] = useState<string | null>(null)
+  const fenLancee = useRef(false)
+  useEffect(() => {
+    if (fenLancee.current) return
+    const brut = new URLSearchParams(window.location.search).get('fen')
+    if (!brut) return
+
+    // Le paramètre n'est lu qu'une fois, quoi qu'il en sorte. Marqué après le
+    // refus comme après l'acceptation : en développement, React monte deux fois,
+    // et une garde posée seulement sur la réussite affichait le message d'erreur
+    // en double.
+    fenLancee.current = true
+
+    // Une position illisible est ignorée plutôt qu'affichée : un plateau vide
+    // sur lequel rien ne répond serait plus déroutant qu'un départ ordinaire.
+    let position: string
+    try {
+      position = new Chess(brut).fen()
+    } catch {
+      toast.error(
+        'Cette position n’est pas jouable.',
+        'Il manque peut-être un roi, ou un camp est déjà en échec. La partie commence normalement.',
+      )
+      return
+    }
+
+    setFenImposee(position)
+    setSetup((actuel) => ({ ...actuel, color: position.split(' ')[1] === 'b' ? 'b' : 'w', classee: false }))
+    setResolvedColor(position.split(' ')[1] === 'b' ? 'b' : 'w')
+    setCoupsRepris(undefined)
+    setHorlogeReprise(null)
+    oublierPartieEnCours()
+    setGameKey((key) => key + 1)
+    setPhase('playing')
+    playSound('start')
+  }, [])
+
   const start = useCallback((next: Setup) => {
     setSetup(next)
     setResolvedColor(
@@ -344,6 +400,7 @@ export default function PlayComputerPage() {
     <GameScreen
       key={gameKey}
       duel={duel}
+      startFen={fenImposee}
       tournoi={tournoi}
       styleImpose={styleImpose}
       level={setup.level}
@@ -998,6 +1055,7 @@ function GameScreen({
   duel,
   tournoi,
   styleImpose,
+  startFen,
   level,
   playerColor,
   timeControlId,
@@ -1014,6 +1072,8 @@ function GameScreen({
   tournoi: boolean
   /** Style imposé par le tournoi, en dépit de celui du barème. */
   styleImpose: BotPersonalityId | null
+  /** Position de départ composée dans l'éditeur. `null` pour une partie ordinaire. */
+  startFen: string | null
   level: number
   playerColor: Color
   timeControlId: string
@@ -1098,6 +1158,9 @@ function GameScreen({
   const [displayClock, setDisplayClock] = useState(() => remainingAt(clock, Date.now()))
 
   const game = useChessGame({
+    // Une position composée remplace le départ ordinaire. `useChessGame` sait
+    // déjà faire — l'écran des finales s'en sert de la même façon.
+    ...(startFen ? { startFen } : {}),
     initialMoves,
     onMove: (move) => {
       playMoveSound({
@@ -1119,7 +1182,9 @@ function GameScreen({
       setOutcome({ status, result })
       const won = result === (playerColor === 'w' ? '1-0' : '0-1')
       playResultSound(result === '1/2-1/2' ? 'draw' : won ? 'win' : 'loss')
-      recordBotGame(level, won)
+      // Une partie partie d'une position composée ne fait avancer aucune
+      // échelle : rien n'empêche de s'y donner une dame de plus.
+      if (!startFen) recordBotGame(level, won)
       // Une partie menée jusqu'au bout compte, gagnée ou non : la quête
       // récompense d'avoir joué, pas d'avoir eu de la chance.
       marquer('partie')
@@ -1282,11 +1347,12 @@ function GameScreen({
         })
         playResultSound(flagged === playerColor ? 'loss' : 'win')
         // Gagner au temps compte comme une victoire : c'est une partie gagnée.
-        recordBotGame(level, flagged !== playerColor)
+        // Sauf depuis une position composée — même raison que ci-dessus.
+        if (!startFen) recordBotGame(level, flagged !== playerColor)
       }
     }, 100)
     return () => clearInterval(interval)
-  }, [clock, timed, state.isGameOver, outcome, playerColor])
+  }, [clock, timed, state.isGameOver, outcome, playerColor, level, startFen])
 
   // ── Actions ─────────────────────────────────────────────────────────────
   const handleMove = useCallback(
@@ -1296,6 +1362,26 @@ function GameScreen({
     },
     [play, state.turn, state.isLive, playerColor],
   )
+
+  /*
+    Le pré-coup vaut aussi contre l'ordinateur.
+
+    Moins pour la pendule que pour le rythme : l'adversaire simule un temps de
+    réflexion — de deux à plusieurs secondes selon son niveau — et devoir
+    attendre la fin de cette pause avant de poser un coup qu'on a déjà décidé
+    casse l'enchaînement. Dans une finale gagnée où l'on pousse un pion case
+    après case, c'est la moitié du temps passé à regarder l'échiquier ne rien
+    faire.
+  */
+  const { precoup, enregistrer: enregistrerPrecoup, annuler: annulerPrecoup } = usePrecoup({
+    fen: state.currentFen,
+    couleur: playerColor,
+    // `gameOver` n'est calculé que plus bas ; ses deux composantes, elles, sont
+    // déjà là. On les relit plutôt que de déplacer une déclaration dont
+    // dépendent une vingtaine de lignes.
+    actif: state.isLive && !state.isGameOver && outcome === null,
+    jouer: handleMove,
+  })
 
   // Face à l'ordinateur, les LEDs prennent tout leur sens : elles montrent le
   // coup que la machine vient de jouer, à reproduire sur le plateau.
@@ -1334,10 +1420,14 @@ function GameScreen({
   const handleResign = useCallback(() => {
     setClock((current) => stopClock(current, Date.now()))
     setOutcome({ status: 'resign', result: playerColor === 'w' ? '0-1' : '1-0' })
-    // Un abandon compte comme une tentative, jamais comme une victoire.
-    recordBotGame(level, false)
+    // Un abandon compte comme une tentative, jamais comme une victoire — sauf
+    // depuis une position composée, qui ne touche à aucune échelle. La fin de
+    // partie et la chute du drapeau s'en gardaient déjà ; cette voie-ci, non,
+    // et l'on gonflait son nombre de tentatives en abandonnant des positions
+    // qu'on venait de fabriquer.
+    if (!startFen) recordBotGame(level, false)
     playResultSound('loss')
-  }, [playerColor])
+  }, [playerColor, level, startFen])
 
   /**
    * Sens de lecture de l'échiquier.
@@ -1699,6 +1789,9 @@ function GameScreen({
                   playable={state.isLive && !gameOver ? playerColor : null}
                   legalMoves={state.legalMoves}
                   onMove={handleMove}
+                  onPremove={enregistrerPrecoup}
+                  onPremoveCancel={annulerPrecoup}
+                  premove={precoup}
                   lastMove={state.lastMove}
                   checkSquare={state.checkSquare}
                   checkmate={state.status === 'checkmate'}
