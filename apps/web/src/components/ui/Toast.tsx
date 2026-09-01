@@ -74,6 +74,22 @@ export function ToastHost() {
 
   useEffect(() => {
     listeners.add(setItems)
+
+    /*
+      Rattraper ce qui a été poussé avant l'abonnement.
+
+      React exécute les effets en remontant l'arbre : ceux d'une page partent
+      avant celui de cet hôte, qui vit dans la coque. Un message émis au
+      montage d'une page — « cette position n'est pas jouable », « ta session a
+      expiré » — arrivait donc dans une pile que personne n'écoutait encore, et
+      disparaissait sans avoir été vu. Il restait bien dans `toasts`, mais
+      l'hôte partait de son tableau vide et ne l'en sortait jamais.
+
+      C'est le cas des messages qui comptent le plus : ceux qui expliquent
+      pourquoi l'écran n'est pas celui qu'on attendait.
+    */
+    if (toasts.length > 0) setItems([...toasts])
+
     return () => {
       listeners.delete(setItems)
     }
