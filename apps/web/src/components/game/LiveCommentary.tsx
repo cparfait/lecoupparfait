@@ -26,6 +26,7 @@ import {
   EyeOff,
   History,
   Lightbulb,
+  LightbulbOff,
   Loader2,
   MessageSquareText,
   Pause,
@@ -447,10 +448,31 @@ export function CommentaryPanel({
   onReview,
   legende = [],
   voix = true,
+  onDesactiver,
+  placeholder = true,
   className,
 }: {
   commentary: Commentary | null
   loading: boolean
+  /**
+   * Sortir du mode commenté, depuis le panneau lui-même.
+   *
+   * L'interrupteur existait déjà, au fond du menu « … » de la barre d'actions,
+   * et c'est exactement là qu'on ne le cherche pas : quand on veut couper les
+   * commentaires, on regarde le pavé de commentaires. Fourni, il ajoute une
+   * croix à la barre d'icônes du panneau ; absent — page d'analyse, panneau
+   * « Pourquoi ? » — rien ne change.
+   */
+  onDesactiver?: () => void
+  /**
+   * Annoncer le mode commenté tant qu'aucun coup n'a été analysé.
+   *
+   * Faux quand le panneau ne *représente* pas le mode commenté : le panneau
+   * « Pourquoi ce coup ? » emprunte le même rendu pour une explication demandée
+   * à l'unité, et le carton « Mode commenté actif » y annonçait un mode qui ne
+   * l'était pas — en occupant la place d'une réponse qui arrivait.
+   */
+  placeholder?: boolean
   /**
    * Le coach a-t-il le droit de parler ?
    *
@@ -630,14 +652,16 @@ export function CommentaryPanel({
   }, [commentary, markSpeaking])
 
   if (!commentary && !loading) {
+    if (!placeholder) return null
     return (
       <Card className={clsx('p-4', className)}>
         <div className="flex items-start gap-2.5 text-sm text-faint">
           <MessageSquareText size={16} className="mt-0.5 shrink-0" aria-hidden />
-          <p className="leading-relaxed">
+          <p className="min-w-0 flex-1 leading-relaxed">
             Mode commenté actif. Après chaque coup, tu verras ce que tu aurais pu jouer, avec
             les trois meilleures options et la raison de chacune.
           </p>
+          {onDesactiver && <BoutonDesactiver onClick={onDesactiver} />}
         </div>
       </Card>
     )
@@ -809,6 +833,10 @@ export function CommentaryPanel({
               {paused ? <Play size={14} aria-hidden /> : <Pause size={14} aria-hidden />}
             </button>
           )}
+
+          {/* En dernier, et seul de sa catégorie : les trois précédents règlent
+              le commentaire, celui-ci le fait disparaître. */}
+          {onDesactiver && <BoutonDesactiver onClick={onDesactiver} />}
             </div>
         </div>
 
@@ -1108,6 +1136,27 @@ function teinteDeRang(alternative: Alternative): { background: string; color: st
   const couleur = couleurDeLigne(alternative)
   if (!couleur) return undefined
   return { background: `color-mix(in oklab, ${couleur} 25%, transparent)`, color: couleur }
+}
+
+/**
+ * La sortie du mode commenté, posée sur le commentaire lui-même.
+ *
+ * Même dessin que ses voisins de la barre d'icônes, mais avec un libellé écrit
+ * en toutes lettres au survol : une ampoule barrée seule se lit « masquer les
+ * indices », ce qui n'est pas la même chose que couper le mode.
+ */
+function BoutonDesactiver({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title="Désactiver le mode commenté"
+      aria-label="Désactiver le mode commenté"
+      className="grid h-7 w-7 shrink-0 place-items-center rounded-[var(--radius-sm)] text-faint transition-colors hover:bg-surface-hover hover:text-ink"
+    >
+      <LightbulbOff size={14} aria-hidden />
+    </button>
+  )
 }
 
 /** Interrupteur du mode commenté, à poser dans la barre d'actions. */

@@ -73,6 +73,7 @@ import {
   useLiveCommentary,
   type Alternative,
 } from '@/components/game/LiveCommentary.tsx'
+import { PourquoiPanel } from '@/components/game/PourquoiPanel.tsx'
 import { LEGEND, legendFor, type LegendItem } from '@/components/board/ArrowLegend.tsx'
 import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
 import {
@@ -1072,6 +1073,20 @@ function GameScreen({
   const [coachSpeaking, setCoachSpeaking] = useState(false)
   // Le coup proposé reste fléché sur l'échiquier tant qu'on ne le masque pas.
   const [showBestMove, setShowBestMove] = useState(true)
+
+  /**
+   * Couper le mode commenté sans quitter la partie.
+   *
+   * Trois endroits l'appellent — le menu de la barre grand écran, celui de la
+   * barre du pouce, et la croix du panneau lui-même — et les trois doivent
+   * faire exactement la même chose : rendre la main tout de suite, sans qu'une
+   * pause ou une phrase entamée ne retienne l'adversaire.
+   */
+  const couperLeCommentaire = useCallback(() => {
+    prefs.set('commentaryMode', false)
+    setCommentaryPaused(false)
+    setCoachSpeaking(false)
+  }, [prefs])
   const [clock, setClock] = useState<ClockState>(() => {
     const depart = createClock(timeControl, Date.now())
     // Reprise d'une partie chronométrée : on rend à chaque camp le temps qu'il
@@ -1893,20 +1908,23 @@ function GameScreen({
                 Abandonner
               </button>
 
-              <div className="mt-1 border-t border-line/60 pt-1">
-                <CommentaryToggle
-                  active={commentaryMode}
-                  onChange={(value) => {
-                    prefs.set('commentaryMode', value)
-                    // Quitter le mode commenté rend la main tout de suite : ni
-                    // pause ni phrase en cours ne doivent retenir l'adversaire.
-                    if (!value) {
-                      setCommentaryPaused(false)
-                      setCoachSpeaking(false)
-                    }
-                  }}
-                />
-              </div>
+              {/* Absent en partie classée, comme dans la barre du pouce : le
+                  mode y est neutralisé de toute façon, et un interrupteur qui
+                  ne commute rien se lit comme une panne. */}
+              {!classee && (
+                <div className="mt-1 border-t border-line/60 pt-1">
+                  <CommentaryToggle
+                    active={commentaryMode}
+                    onChange={(value) => {
+                      // Quitter le mode commenté rend la main tout de suite :
+                      // ni pause ni phrase en cours ne doivent retenir
+                      // l'adversaire.
+                      if (value) prefs.set('commentaryMode', true)
+                      else couperLeCommentaire()
+                    }}
+                  />
+                </div>
+              )}
             </Menu>
           </div>
 
@@ -1984,11 +2002,8 @@ function GameScreen({
                     <CommentaryToggle
                       active={commentaryMode}
                       onChange={(value) => {
-                        prefs.set('commentaryMode', value)
-                        if (!value) {
-                          setCommentaryPaused(false)
-                          setCoachSpeaking(false)
-                        }
+                        if (value) prefs.set('commentaryMode', true)
+                        else couperLeCommentaire()
                       }}
                     />
                   </div>
@@ -2042,25 +2057,44 @@ function GameScreen({
         <div className="flex min-h-0 flex-col gap-3">
           <OpeningBanner opening={opening} moveCount={state.moves.length} />
 
-          <CommentaryPanel
-              legende={arrowLegend}
-            // Pas de commentaire demandé, pas de voix : le panneau reste
-            // consultable, mais il ne prend plus la parole tout seul.
-            voix={commentaryMode}
-            // En revue, on montre le commentaire du coup consulté plutôt que
-            // celui du dernier coup joué : sinon le texte et l'échiquier
-            // parlent de deux positions différentes.
-            commentary={reviewedMove ? reviewedCommentary : commentary}
-            loading={reviewedMove ? false : coachLoading}
-            paused={commentaryPaused}
-            onTogglePause={() => setCommentaryPaused((value) => !value)}
-            onSpeakingChange={setCoachSpeaking}
-            onHoverAlternative={setHoveredAlternative}
-            showBestMove={showBestMove}
-            onToggleBestMove={() => setShowBestMove((value) => !value)}
-            stale={commentaryStale}
-            onReview={reviewCommented}
-          />
+          {/* ── Le coach, seulement si on l'a demandé ─────────────────────
+              Le panneau était posé sans condition : mode commenté éteint et
+              aucun coup analysé, il affichait quand même « Mode commenté
+              actif. Après chaque coup… » — une annonce fausse, en tête de la
+              colonne, sous laquelle se trouve la liste des coups qu'elle
+              repoussait d'autant.
+
+              Éteint, on retombe donc sur ce que fait déjà la partie à deux sur
+              un écran : rien, sauf un bouton « Pourquoi ce coup ? » pour qui
+              bloque sur un coup précis. Sauf en partie classée, où montrer le
+              meilleur coup à la demande reviendrait à annuler ce que la case
+              « classée » vient de garantir. */}
+          {commentaryMode ? (
+            <CommentaryPanel
+                legende={arrowLegend}
+              voix={commentaryMode}
+              // En revue, on montre le commentaire du coup consulté plutôt que
+              // celui du dernier coup joué : sinon le texte et l'échiquier
+              // parlent de deux positions différentes.
+              commentary={reviewedMove ? reviewedCommentary : commentary}
+              loading={reviewedMove ? false : coachLoading}
+              paused={commentaryPaused}
+              onTogglePause={() => setCommentaryPaused((value) => !value)}
+              onSpeakingChange={setCoachSpeaking}
+              onHoverAlternative={setHoveredAlternative}
+              showBestMove={showBestMove}
+              onToggleBestMove={() => setShowBestMove((value) => !value)}
+              stale={commentaryStale}
+              onReview={reviewCommented}
+              onDesactiver={couperLeCommentaire}
+            />
+          ) : classee ? null : (
+            <PourquoiPanel
+              move={lastPlayed}
+              book={book}
+              openingName={opening?.name ?? null}
+            />
+          )}
 
           <ApprofondirCoup
             commentary={reviewedMove ? reviewedCommentary : commentary}

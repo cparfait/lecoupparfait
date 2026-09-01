@@ -62,7 +62,7 @@ export function PourquoiPanel({
 
   return (
     <div className={className}>
-      <CommentaryPanel commentary={commentary} loading={loading} />
+      <CommentaryPanel commentary={commentary} loading={loading} placeholder={false} />
       <ApprofondirCoup commentary={commentary} openingName={openingName} />
     </div>
   )
