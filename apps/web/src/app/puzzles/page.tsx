@@ -22,6 +22,8 @@ import {
   Check,
   Eye,
   Flame,
+  Home,
+  Swords,
   Loader2,
   RotateCcw,
   Target,
@@ -34,7 +36,7 @@ import { Chess } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { motifCopy, sanToFrench, type MotifId } from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
-import { Button, Card, Chip, EmptyState, Spinner } from '@/components/ui/index.tsx'
+import { Button, ButtonLink, Card, Chip, EmptyState, Spinner } from '@/components/ui/index.tsx'
 import { playMoveSound, playSound } from '@/lib/sound.ts'
 import { speak } from '@/lib/speech.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
@@ -121,6 +123,47 @@ export default function PuzzlesPage() {
   const [streak, setStreak] = useState(0)
 
   const startedAt = useRef(Date.now())
+
+  /**
+   * Les puzzles déjà comptés pendant cette visite.
+   *
+   * Un même puzzle ne doit compter qu'une fois, et rien ne l'empêchait. Le cas
+   * criant est le défi du jour : il n'existe **qu'une** position par jour et
+   * par tranche, tirée de façon déterministe, et le bouton « Puzzle suivant »
+   * rechargeait donc exactement la même. On la résolvait en boucle, et chaque
+   * tour comptait — la série de réussites montait, la quête « enchaîner trois
+   * puzzles » se validait toute seule, et le classement de puzzles gagnait des
+   * points pour un puzzle déjà résolu.
+   *
+   * Le bouton est corrigé plus bas, mais le garde reste : « Recommencer » après
+   * un échec rejoue lui aussi la même position, et il est explicitement là pour
+   * comprendre, pas pour se refaire un score.
+   *
+   * Rangé dans le stockage de session, pour la même raison que `vusRef` : sans
+   * cela, sortir de la page et y revenir suffisait à repartir d'une ardoise
+   * vierge — et la quête « enchaîner trois puzzles » se validait en résolvant
+   * trois fois le défi du jour, avec un aller-retour par l'accueil entre chaque.
+   * Le classement, lui, est protégé côté serveur, où il doit l'être.
+   */
+  const COMPTES_CLE = 'coupparfait.puzzlesComptes'
+  const comptes = useRef<Set<string>>(new Set())
+  useEffect(() => {
+    try {
+      const brut = sessionStorage.getItem(COMPTES_CLE)
+      if (brut) comptes.current = new Set(JSON.parse(brut) as string[])
+    } catch {
+      // Stockage refusé : le garde vaut pour la page en cours.
+    }
+  }, [])
+
+  const compter = useCallback((id: string) => {
+    comptes.current.add(id)
+    try {
+      sessionStorage.setItem(COMPTES_CLE, JSON.stringify([...comptes.current].slice(-200)))
+    } catch {
+      // Idem.
+    }
+  }, [])
 
   /**
    * Numéro de la position en cours.
@@ -337,6 +380,9 @@ export default function PuzzlesPage() {
   const report = useCallback(
     async (solved: boolean) => {
       if (!puzzle) return
+      // Une position ne se compte qu'une fois : voir `comptes`.
+      if (comptes.current.has(puzzle.id)) return
+      compter(puzzle.id)
 
       // La journée se met à jour avant l'appel réseau : elle vit dans le
       // navigateur et ne dépend ni du compte ni de la connexion.
@@ -391,7 +437,7 @@ export default function PuzzlesPage() {
         // Sans compte ou hors ligne : le puzzle reste jouable, rien n'est perdu.
       }
     },
-    [puzzle, moveIndex, marquer, modeDefi, chapitreCarriere, router],
+    [puzzle, moveIndex, marquer, compter, modeDefi, chapitreCarriere, router],
   )
 
   // ── Coup du joueur ──────────────────────────────────────────────────────
@@ -411,9 +457,22 @@ export default function PuzzlesPage() {
         return
       }
 
-      const played = `${from}${to}${promotion ?? ''}`
-      const expectedFrom = expected.slice(0, 2)
-      const expectedTo = expected.slice(2, 4)
+      /*
+        La pièce de promotion fait partie de la réponse.
+
+        La comparaison portait sur les seules cases de départ et d'arrivée, et
+        laissait donc passer n'importe quelle promotion : sur un puzzle de
+        sous-promotion — thème `underPromotion`, où choisir le cavalier *est*
+        l'exercice —, promouvoir en dame était compté juste. Pire, le reste de
+        la solution devenait alors illégal sur un échiquier qui ne correspondait
+        plus, et le puzzle se déclarait résolu au coup suivant. Vu du joueur :
+        un puzzle qui accepte un mauvais coup puis s'arrête sans explication.
+
+        On ne l'exige que si la solution en mentionne une : partout ailleurs, le
+        sélecteur n'apparaît pas et `promotion` reste vide.
+      */
+      const promotionAttendue = expected.length > 4 ? expected[4] : null
+      const joue = `${from}${to}${promotionAttendue ? (promotion ?? 'q') : ''}`
 
       const board = new Chess(fen, { skipValidation: true })
 
@@ -429,8 +488,11 @@ export default function PuzzlesPage() {
         return
       }
 
-      const isCorrect =
-        (from === expectedFrom && to === expectedTo) || matesAnyway
+      const isCorrect = joue === expected || matesAnyway
+
+      // Une position déjà comptée ne touche plus au score : ni la série, ni le
+      // classement, ni les quêtes. On la rejoue pour comprendre — voir `comptes`.
+      const dejaCompte = comptes.current.has(puzzle.id)
 
       if (!isCorrect) {
         setWrongAttempts((count) => count + 1)
@@ -438,7 +500,7 @@ export default function PuzzlesPage() {
         if (wrongAttempts >= 1) {
           setStatus('failed')
           void report(false)
-          setStreak(0)
+          if (!dejaCompte) setStreak(0)
         }
         return
       }
@@ -461,7 +523,7 @@ export default function PuzzlesPage() {
         setFen(board.fen())
         setMoveIndex(nextIndex)
         setStatus('solved')
-        setStreak((value) => value + 1)
+        if (!dejaCompte) setStreak((value) => value + 1)
         playSound('victory')
         void report(wrongAttempts === 0 && !revealed)
         return
@@ -552,6 +614,24 @@ export default function PuzzlesPage() {
     startedAt.current = Date.now()
   }, [puzzle, load])
 
+  /**
+   * Sortir du défi du jour, sans quitter la page.
+   *
+   * Il n'y a **qu'une** position par jour et par tranche — le tirage est
+   * déterministe, et la carte de l'accueil l'annonce en toutes lettres : « une
+   * seule position », « reviens demain ». « Puzzle suivant » rechargeait
+   * pourtant la route du défi, donc rendait la même position, indéfiniment.
+   *
+   * Le bouton dit maintenant ce qu'il fait, et fait ce qu'il dit : il passe aux
+   * puzzles ordinaires, calibrés sur le classement du joueur. L'adresse suit,
+   * sinon un rechargement ramènerait le défi déjà résolu.
+   */
+  const quitterLeDefi = useCallback(() => {
+    setModeDefi(false)
+    setTrancheDefi(null)
+    router.replace('/puzzles')
+  }, [router])
+
   const reveal = useCallback(() => {
     if (!puzzle) return
     setRevealed(true)
@@ -611,17 +691,33 @@ export default function PuzzlesPage() {
     <div className="mx-auto w-full max-w-[1100px] px-3 py-4 sm:px-5 lg:py-8">
       {/* ── Filtres et score ───────────────────────────────────────── */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <h1 className="font-display text-xl font-bold tracking-tight">Puzzles</h1>
-        {/* L'autre façon de travailler les mêmes puzzles : vite, et à la
-            chaîne. Elle entraîne la reconnaissance là où celle-ci entraîne la
-            recherche. */}
-        <Link
-          href="/puzzles/rush"
-          className="flex h-7 items-center gap-1.5 rounded-full bg-accent/15 px-2.5 text-[12px] font-semibold text-accent transition-colors hover:bg-accent/25"
-        >
-          <Timer size={12} aria-hidden />
-          Manche chronométrée
-        </Link>
+        {/* Le titre dit où l'on est.
+
+            Il affichait « Puzzles » dans les deux cas, et proposait juste à
+            côté une manche chronométrée : rien ne distinguait le défi du jour
+            — une position unique, partagée, qui compte pour la série — d'une
+            séance d'entraînement libre. C'est ce qui rendait « Puzzle suivant »
+            crédible là où il n'y a pas de suivant. */}
+        <h1 className="font-display text-xl font-bold tracking-tight">
+          {modeDefi ? 'Défi du jour' : 'Puzzles'}
+        </h1>
+        {modeDefi ? (
+          <Chip tone="accent">
+            <Swords size={11} aria-hidden />
+            une seule position
+          </Chip>
+        ) : (
+          /* L'autre façon de travailler les mêmes puzzles : vite, et à la
+             chaîne. Elle entraîne la reconnaissance là où celle-ci entraîne la
+             recherche. */
+          <Link
+            href="/puzzles/rush"
+            className="flex h-7 items-center gap-1.5 rounded-full bg-accent/15 px-2.5 text-[12px] font-semibold text-accent transition-colors hover:bg-accent/25"
+          >
+            <Timer size={12} aria-hidden />
+            Manche chronométrée
+          </Link>
+        )}
         {playerRating !== null && (
           <Chip tone="accent">
             <Target size={11} aria-hidden />
@@ -657,7 +753,15 @@ export default function PuzzlesPage() {
           voulu et se manipule au doigt, ce qui n'est pas la même chose qu'une
           page qui déborde. Les marges négatives font courir la bande d'un bord
           à l'autre, pour qu'on voie qu'elle continue. */}
-      <div className="-mx-3 mb-4 flex gap-1.5 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
+      {/* Masqués dans le défi du jour : le filtre de thème n'y change rien,
+          la position est tirée par la date et la tranche de niveau. Douze
+          pastilles qui ne font rien se cliquent quand même, une fois. */}
+      <div
+        className={clsx(
+          '-mx-3 mb-4 flex gap-1.5 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0',
+          modeDefi && 'hidden',
+        )}
+      >
         {THEMES.map((entry) => (
           <button
             key={entry.id}
@@ -761,11 +865,18 @@ export default function PuzzlesPage() {
                   <Check size={14} className="text-[var(--q-best)]" />
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-[var(--q-best)]">Résolu !</p>
+                  <p className="text-sm font-semibold text-[var(--q-best)]">
+                    {modeDefi ? 'Défi du jour relevé !' : 'Résolu !'}
+                  </p>
+                  {/* Dans le défi, on ne conseille pas « refais-en un du même
+                      thème » : il n'y a pas de suivant avant demain, et c'est
+                      justement la promesse du format. */}
                   <p className="mt-1 text-[13px] leading-relaxed text-muted">
-                    {wrongAttempts === 0 && !revealed
-                      ? 'Trouvé du premier coup. C’est exactement ce qu’il fallait voir.'
-                      : 'Bien joué. Refais-en un du même thème pour ancrer le motif.'}
+                    {modeDefi
+                      ? 'C’était la position du jour, la même pour tout le monde de ton niveau. La prochaine arrive à minuit.'
+                      : wrongAttempts === 0 && !revealed
+                        ? 'Trouvé du premier coup. C’est exactement ce qu’il fallait voir.'
+                        : 'Bien joué. Refais-en un du même thème pour ancrer le motif.'}
                   </p>
                 </div>
               </div>
@@ -856,10 +967,13 @@ export default function PuzzlesPage() {
               <Button
                 variant="ghost"
                 icon={<ArrowRight size={14} />}
-                onClick={() => void load()}
+                // Dans le défi, « Passer » ne peut pas mener au suivant : il
+                // n'y en a pas. Il quitte donc le défi pour les puzzles
+                // ordinaires, et le libellé le dit.
+                onClick={modeDefi ? quitterLeDefi : () => void load()}
                 fullWidth={revealed}
               >
-                Passer
+                {modeDefi ? 'Passer au libre' : 'Passer'}
               </Button>
             )}
             {/* « Recommencer » d'abord, et il ne recharge rien : c'est la même
@@ -876,7 +990,36 @@ export default function PuzzlesPage() {
                 Recommencer
               </Button>
             )}
-            {(status === 'solved' || status === 'failed') && (
+            {/* ── La sortie, une fois la position finie ────────────────
+                Dans le défi du jour, « Puzzle suivant » était un mensonge : la
+                route rend une position déterministe par jour et par tranche, si
+                bien que le bouton rechargeait celle qu'on venait de résoudre.
+                On la rejouait en boucle, et chaque tour comptait — série,
+                quêtes, classement de puzzles.
+
+                Deux sorties, donc, et aucune ne repasse par le défi : rentrer
+                voir ses quêtes, ou enchaîner sur des puzzles calibrés. */}
+            {(status === 'solved' || status === 'failed') && modeDefi && (
+              <>
+                <ButtonLink
+                  href="/"
+                  variant={status === 'failed' ? 'ghost' : 'secondary'}
+                  icon={<Home size={15} />}
+                  fullWidth
+                >
+                  Mes quêtes
+                </ButtonLink>
+                <Button
+                  variant={status === 'failed' ? 'ghost' : 'primary'}
+                  icon={<ArrowRight size={15} />}
+                  onClick={quitterLeDefi}
+                  fullWidth
+                >
+                  Continuer en libre
+                </Button>
+              </>
+            )}
+            {(status === 'solved' || status === 'failed') && !modeDefi && (
               <Button
                 variant={status === 'failed' ? 'ghost' : 'primary'}
                 icon={<ArrowRight size={15} />}

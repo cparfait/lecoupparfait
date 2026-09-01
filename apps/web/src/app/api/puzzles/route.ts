@@ -212,6 +212,39 @@ export async function POST(request: Request) {
     const puzzle = rows[0]
     if (!puzzle) return NextResponse.json({ error: 'Puzzle inconnu.' }, { status: 404 })
 
+    /*
+      Une position ne compte qu'une fois, et c'est le serveur qui le garantit.
+
+      La table portait déjà la règle — un index unique sur (joueur, puzzle) —
+      mais le classement était mis à jour **avant** l'insertion : la seconde
+      tentative était bien rejetée par `onConflictDoNothing`, après avoir
+      déplacé le classement. Le défi du jour rendait le défaut flagrant, son
+      bouton « suivant » rechargeant la même position à l'infini, mais il
+      valait partout : rouvrir un puzzle déjà résolu suffisait à regagner ses
+      points.
+
+      On lit donc avant d'écrire. La réponse dit la vérité — le classement
+      courant, aucune variation — plutôt que d'annoncer un gain qui n'a pas eu
+      lieu.
+    */
+    const dejaTente = await database
+      .select({ id: puzzleAttempts.id })
+      .from(puzzleAttempts)
+      .where(
+        and(eq(puzzleAttempts.userId, user.userId), eq(puzzleAttempts.puzzleId, body.puzzleId)),
+      )
+      .limit(1)
+
+    if (dejaTente.length > 0) {
+      const courant = await getRating(user.userId, 'puzzle')
+      return NextResponse.json({
+        rating: courant.rating,
+        delta: null,
+        puzzleRating: puzzle.rating,
+        deja: true,
+      })
+    }
+
     const update = await applyPuzzleResult({
       userId: user.userId,
       puzzleRating: puzzle.rating,

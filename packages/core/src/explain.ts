@@ -279,21 +279,57 @@ export function describeMoveInWords(san: string, locale: Locale): string {
   const check = rest.endsWith('+')
   rest = rest.replace(/[+#]/g, '')
 
+  /*
+    La pièce promue est *lue*, et non supposée.
+
+    Elle était annoncée « une dame » quoi qu'il arrive, alors que la lettre
+    figurait déjà dans le coup et que le sélecteur de promotion propose bien les
+    quatre. Sous-promouvoir en cavalier — le cas où l'on choisit justement autre
+    chose, parce qu'il donne échec ou une fourchette — s'entendait donc comme
+    une promotion en dame, sur un échiquier où l'on voit un cavalier.
+  */
   const promotion = /=([QRBNDTFC])/.exec(rest)
+  const promu = promotion ? promotedPiece(promotion[1]!) : null
   rest = rest.replace(/=[QRBNDTFC]/, '')
   const target = rest.slice(-2)
 
   if (!fr) {
     const verb = capture ? `takes on ${target}` : `goes to ${target}`
     const suffix = mate ? ', checkmate' : check ? ', with check' : ''
-    return `the ${piece} ${verb}${promotion ? ', promoting to a queen' : ''}${suffix}`
+    const becomes = promu ? `, promoting to a ${PIECE_NAMES[promu].en}` : ''
+    return `the ${piece} ${verb}${becomes}${suffix}`
   }
 
   const article = feminine ? 'la' : 'le'
   const verbe = capture ? `prend en ${target}` : `va en ${target}`
   const fin = mate ? ', et c’est échec et mat' : check ? ', avec échec' : ''
-  const promu = promotion ? ', et devient une dame' : ''
-  return `${article} ${piece} ${verbe}${promu}${fin}`
+  const devient = promu
+    ? `, et devient ${PIECE_ARTICLE[promu] === 'la' ? 'une' : 'un'} ${PIECE_NAMES[promu].fr}`
+    : ''
+  return `${article} ${piece} ${verbe}${devient}${fin}`
+}
+
+/**
+ * La lettre qui suit le `=` d'une promotion, dans l'une ou l'autre notation.
+ *
+ * `D` et `T` sont françaises, `Q` et `R` anglaises ; `B` est ambigu — fou en
+ * anglais, rien en français — et l'on tranche pour l'anglais, qui est la
+ * notation dans laquelle les coups circulent à l'intérieur de l'application.
+ */
+function promotedPiece(letter: string): PieceSymbol {
+  switch (letter) {
+    case 'R':
+    case 'T':
+      return 'r'
+    case 'B':
+    case 'F':
+      return 'b'
+    case 'N':
+    case 'C':
+      return 'n'
+    default:
+      return 'q'
+  }
 }
 
 /** Reconnaît la lettre de pièce en tête d'un coup, dans une notation donnée. */

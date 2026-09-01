@@ -156,12 +156,22 @@ export default function RushPage() {
       if (!puzzle || phase !== 'jeu') return
 
       const expected = puzzle.moves[moveIndex]
-      const played = `${from}${to}${promotion ?? ''}`
+      /*
+        La pièce de promotion compte, quand la solution en désigne une.
+
+        La seconde branche de la comparaison — les quatre premiers caractères —
+        annulait la première : elle acceptait n'importe quelle promotion sur les
+        bonnes cases, y compris sur un puzzle de sous-promotion où le choix de
+        la pièce est tout l'exercice. Même correction que sur l'écran de puzzles
+        ordinaire.
+      */
+      const promotionAttendue = expected && expected.length > 4 ? expected[4] : null
+      const played = `${from}${to}${promotionAttendue ? (promotion ?? 'q') : ''}`
 
       // Un mat par un autre chemin reste un mat : on essaie le coup avant de
       // le refuser sur la seule comparaison de chaînes.
       const probe = new Chess(board.fen())
-      let ok = played === expected || played.slice(0, 4) === expected?.slice(0, 4)
+      let ok = played === expected
       if (!ok) {
         try {
           probe.move({ from, to, promotion: (promotion ?? 'q') as never })

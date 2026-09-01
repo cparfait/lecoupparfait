@@ -39,6 +39,7 @@
     "brand:cavale": "node scripts/build-cavale.mjs",
     "check:lessons": "node --experimental-strip-types scripts/check-lessons.mjs",
     "check:eboards": "node --experimental-strip-types scripts/check-eboards.mjs",
+    "check:puzzles": "node scripts/check-puzzles.mjs",
     "data:endgames": "node scripts/build-endgames.mjs",
     "data:opening-stats": "node scripts/build-opening-stats.mjs",
     "data:evals": "node scripts/import-evals.mjs",
