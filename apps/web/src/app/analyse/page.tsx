@@ -17,6 +17,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
+  ChevronRight,
   ClipboardPaste,
   Download,
   Gauge,
@@ -346,27 +347,36 @@ function ImportScreen({
     [book, locale, onStart, onDone, onError, onSide],
   )
 
-  // Une partie arrivée depuis la fin d'une partie n'a pas à être relancée à la
-  // main : on vient de la jouer, on veut la voir analysée, pas contempler un
-  // champ de texte. On ne le fait qu'une fois, d'où le drapeau.
-  const autoStarted = useRef(false)
+  /**
+   * L'analyse ne part plus toute seule.
+   *
+   * Elle démarrait dès l'arrivée quand la partie était transmise depuis la
+   * boîte de fin de partie ou l'éditeur. Le raisonnement se tenait — on vient
+   * de jouer, on veut voir — mais il décidait à la place du joueur : une
+   * partie de quarante coups occupe le moteur une trentaine de secondes sur un
+   * serveur partagé, et le seul moyen de ne pas la lancer était d'arriver puis
+   * d'appuyer aussitôt sur « Abandonner l'analyse ». Passer par cet écran pour
+   * ajuster la profondeur, corriger le camp, ou simplement relire son PGN,
+   * était devenu impossible.
+   *
+   * Le champ est rempli, le camp est retenu, le bouton est juste là : il ne
+   * manque qu'un clic, et ce clic appartient au joueur.
+   *
+   * Ne subsiste que l'avertissement : une partie transmise vide vient d'un
+   * défaut de transmission, et le dire tout de suite épargne de chercher
+   * pourquoi le bouton reste éteint.
+   */
+  const videPrevenu = useRef(false)
   useEffect(() => {
-    if (!handedOver || autoStarted.current || running) return
-    if (!parsed || parsed.moves.length === 0) {
-      // Rien d'exploitable : on laisse l'écran d'import visible avec le texte,
-      // plutôt que de lancer une analyse vide.
-      if (parsed !== null || input.trim()) {
-        autoStarted.current = true
-        toast.warning(
-          'La partie transmise ne contenait aucun coup.',
-          'Colle le PGN à la main, ou rejoue une partie.',
-        )
-      }
-      return
-    }
-    autoStarted.current = true
-    void start()
-  }, [handedOver, parsed, running, input, start])
+    if (!handedOver || videPrevenu.current) return
+    if (parsed && parsed.moves.length > 0) return
+    if (parsed === null && !input.trim()) return
+    videPrevenu.current = true
+    toast.warning(
+      'La partie transmise ne contenait aucun coup.',
+      'Colle le PGN à la main, ou rejoue une partie.',
+    )
+  }, [handedOver, parsed, input])
 
   const paste = useCallback(async () => {
     try {
@@ -451,22 +461,45 @@ function ImportScreen({
           </div>
         )}
 
+        {/* ── L'import en ligne, replié ────────────────────────────────────
+            Il occupait quatre-vingts points sans qu'on lui ait rien demandé :
+            un titre, deux lignes d'explication, une bascule de service, un
+            champ et un bouton — le tout entre la liste de ses propres parties
+            et le réglage de profondeur, c'est-à-dire en plein milieu du chemin
+            qu'on parcourt à chaque visite. C'est pourtant un geste qu'on fait
+            une fois, ou jamais.
+
+            Replié, il tient sur une ligne et dit toujours ce qu'il propose. Le
+            pseudo, lui, est déjà mémorisé dans les préférences : celui qui s'en
+            sert le retrouvera saisi en dépliant. */}
         {!handedOver && (
-          <div className="border-t border-line/60 px-5 py-4">
-            <p className="mb-2 text-sm font-medium">Depuis ton compte en ligne</p>
-            <p className="mb-3 text-xs text-muted">
-              Tu joues déjà quelque part ? Récupère tes dernières parties et fais-les
-              analyser ici — aucun compte n’est nécessaire, rien n’est enregistré.
-            </p>
-            <ImportEnLigne
-              onChoisir={(pgn, campImporte) => {
-                setInput(pgn)
-                // Le camp du joueur cherché : c'est lui qui lira l'analyse.
-                setCamp(campImporte)
-                onSide(campImporte)
-              }}
-            />
-          </div>
+          <details className="group border-t border-line/60 [&_summary::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center gap-2 px-5 py-3 text-sm transition-colors hover:bg-surface-hover">
+              <ChevronRight
+                size={15}
+                aria-hidden
+                className="shrink-0 text-faint transition-transform group-open:rotate-90"
+              />
+              <span className="font-medium">Depuis ton compte en ligne</span>
+              <span className="min-w-0 flex-1 truncate text-xs text-faint">
+                Chess.com ou Lichess, à partir du seul pseudo
+              </span>
+            </summary>
+            <div className="px-5 pb-4">
+              <p className="mb-3 text-xs text-muted">
+                Récupère tes dernières parties et fais-les analyser ici — aucun compte n’est
+                nécessaire, rien n’est enregistré.
+              </p>
+              <ImportEnLigne
+                onChoisir={(pgn, campImporte) => {
+                  setInput(pgn)
+                  // Le camp du joueur cherché : c'est lui qui lira l'analyse.
+                  setCamp(campImporte)
+                  onSide(campImporte)
+                }}
+              />
+            </div>
+          </details>
         )}
 
         {/* Qui es-tu dans cette partie ?
@@ -542,6 +575,16 @@ function ImportScreen({
         </div>
 
         <div className="border-t border-line/60 p-5">
+          {/* La partie transmise s'annonce, puisqu'elle ne se lance plus seule.
+              Sans cette ligne, on arrive sur un champ pré-rempli sans savoir
+              d'où il sort ni ce qu'on attend de nous. */}
+          {handedOver && !running && parsed && parsed.moves.length > 0 && (
+            <p className="mb-2.5 text-[13px] leading-relaxed text-muted">
+              Ta partie est prête, avec ton camp déjà retenu. Règle la profondeur si tu veux,
+              puis lance l’analyse.
+            </p>
+          )}
+
           <Button
             variant="primary"
             size="lg"

@@ -86,9 +86,25 @@ export function GameNav({
   }, [cursor, last, min, onSeek])
 
   return (
+    /*
+      Une pastille, et non quatre carrés dans un cadre.
+
+      Le rang gardait le dessin d'un champ de formulaire — coins droits,
+      contour d'un pixel, boutons de vingt-huit points collés bord à bord — au
+      milieu d'un écran d'analyse où tout le reste est arrondi : la bascule 2D /
+      3D, les puces, les cartes. Il se lisait comme un vestige, et sa commande la
+      plus utile — la lecture, qui déroule la partie toute seule — n'y avait pas
+      plus de poids qu'une flèche.
+
+      La barre reprend donc la même pilule que la bascule de vue, avec laquelle
+      elle voisine, et la lecture y prend le centre : disque plein aux couleurs
+      d'accent, la seule marque de cette intensité dans la rangée. On sait d'un
+      coup d'œil où appuyer, et l'on voit sans lire si ça défile.
+    */
     <div
       className={clsx(
-        'flex items-center gap-0.5 rounded-[var(--radius-sm)] border border-line/60 p-0.5',
+        'flex w-fit items-center gap-0.5 rounded-full p-1',
+        'popover !rounded-full shadow-[var(--shadow)]',
         className,
       )}
       role="group"
@@ -105,13 +121,28 @@ export function GameNav({
         <ChevronLeft size={16} aria-hidden />
       </SeekButton>
       {onToggleAutoplay && (
-        <SeekButton
+        <button
+          type="button"
           onClick={onToggleAutoplay}
-          label={autoplay ? 'Interrompre la lecture' : 'Dérouler la partie coup par coup'}
-          accent={autoplay}
+          aria-pressed={autoplay}
+          title={autoplay ? 'Interrompre la lecture' : 'Dérouler la partie coup par coup'}
+          aria-label={autoplay ? 'Interrompre la lecture' : 'Dérouler la partie coup par coup'}
+          className={clsx(
+            'mx-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full transition-all',
+            autoplay
+              ? 'bg-accent text-[var(--accent-contrast)] shadow-[var(--glow)]'
+              : 'bg-[color-mix(in_oklab,var(--accent)_16%,transparent)] text-accent hover:bg-[color-mix(in_oklab,var(--accent)_28%,transparent)]',
+          )}
         >
-          {autoplay ? <Pause size={15} aria-hidden /> : <Play size={15} aria-hidden />}
-        </SeekButton>
+          {/* Le triangle est décentré par sa propre géométrie : le rempli
+              pousse la masse à gauche du carré qui le contient. On le décale
+              d'un point pour qu'il paraisse au milieu du disque. */}
+          {autoplay ? (
+            <Pause size={15} aria-hidden fill="currentColor" strokeWidth={0} />
+          ) : (
+            <Play size={15} aria-hidden fill="currentColor" strokeWidth={0} className="ml-px" />
+          )}
+        </button>
       )}
       <SeekButton
         onClick={() => onSeek(cursor + 1)}
@@ -138,13 +169,11 @@ function SeekButton({
   onClick,
   disabled,
   label,
-  accent,
   children,
 }: {
   onClick: () => void
   disabled?: boolean
   label: string
-  accent?: boolean
   children: React.ReactNode
 }) {
   return (
@@ -154,10 +183,7 @@ function SeekButton({
       disabled={disabled}
       title={label}
       aria-label={label}
-      className={clsx(
-        'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover hover:text-ink disabled:cursor-default disabled:text-faint/40 disabled:hover:bg-transparent',
-        accent ? 'text-accent' : 'text-muted',
-      )}
+      className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition-colors hover:bg-surface-hover hover:text-ink disabled:cursor-default disabled:text-faint/40 disabled:hover:bg-transparent"
     >
       {children}
     </button>

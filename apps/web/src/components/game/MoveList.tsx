@@ -159,10 +159,29 @@ export function MoveList({
           >
             <ChevronLeft size={17} aria-hidden />
           </NavButton>
+          {/* Le même disque d'accent que sous l'échiquier : c'est la même
+              commande, et rien ne justifierait qu'elle se dessine autrement
+              selon qu'on la trouve en tête de la liste ou sous le plateau. */}
           {onToggleAutoplay && (
-            <NavButton onClick={onToggleAutoplay} label={autoplay ? 'Pause' : 'Lecture'}>
-              {autoplay ? <Pause size={15} aria-hidden /> : <Play size={15} aria-hidden />}
-            </NavButton>
+            <button
+              type="button"
+              onClick={onToggleAutoplay}
+              aria-pressed={autoplay}
+              aria-label={autoplay ? 'Interrompre la lecture' : 'Dérouler la partie'}
+              title={autoplay ? 'Interrompre la lecture' : 'Dérouler la partie'}
+              className={clsx(
+                'mx-1 grid h-8 w-8 shrink-0 place-items-center rounded-full transition-all',
+                autoplay
+                  ? 'bg-accent text-[var(--accent-contrast)] shadow-[var(--glow)]'
+                  : 'bg-[color-mix(in_oklab,var(--accent)_16%,transparent)] text-accent hover:bg-[color-mix(in_oklab,var(--accent)_28%,transparent)]',
+              )}
+            >
+              {autoplay ? (
+                <Pause size={15} aria-hidden fill="currentColor" strokeWidth={0} />
+              ) : (
+                <Play size={15} aria-hidden fill="currentColor" strokeWidth={0} className="ml-px" />
+              )}
+            </button>
           )}
           <NavButton
             onClick={() => onSeek(cursor + 1)}
