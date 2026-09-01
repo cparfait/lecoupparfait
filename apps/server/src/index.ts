@@ -450,9 +450,9 @@ io.on('connection', (socket) => {
 
       socket.emit('joined', { color, snapshot: room.snapshot() })
 
-      // Un seul abonnement par salon : on diffuse à la pièce entière.
-      if (!subscribed.has(slug)) {
-        subscribed.add(slug)
+      // Un seul abonnement par salon : on diffuse à la pièce entière. C'est le
+      // salon lui-même qui sait s'il est déjà écouté — voir `hasSubscriber`.
+      if (!room.hasSubscriber) {
         room.subscribe((event) => {
           io.to(slug).emit(event.type, event)
           if (event.type === 'end') {
@@ -497,8 +497,6 @@ io.on('connection', (socket) => {
     rooms.get(currentSlug)?.disconnect(socket.id)
   })
 })
-
-const subscribed = new Set<string>()
 
 function withRoom(slug: string | null, action: (room: GameRoom) => void): void {
   if (!slug) return

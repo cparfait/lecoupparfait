@@ -176,6 +176,24 @@ export class GameRoom {
     return () => this.listeners.delete(listener)
   }
 
+  /**
+   * Quelqu'un écoute-t-il déjà ce salon ?
+   *
+   * La couche socket n'abonne qu'une fois par salon — elle diffuse ensuite à la
+   * pièce entière — et retenait ce fait dans un ensemble d'identifiants tenu à
+   * côté. Cet ensemble n'était jamais purgé : un salon libéré puis recréé sous
+   * le même identifiant se voyait déjà abonné, et n'abonnait donc personne.
+   * Plus rien n'en sortait — ni coup, ni tchat, ni fin de partie —, chacun
+   * gardant l'instantané reçu à l'arrivée, qui lui, part en direct.
+   *
+   * La réponse est ici parce que c'est ici qu'elle est vraie : `dispose()` vide
+   * les auditeurs, un salon neuf n'en a aucun. Deux sources de vérité pour un
+   * seul fait, c'était la seconde qui se périmait.
+   */
+  get hasSubscriber(): boolean {
+    return this.listeners.size > 0
+  }
+
   private emit(event: RoomEvent): void {
     for (const listener of this.listeners) listener(event)
   }
