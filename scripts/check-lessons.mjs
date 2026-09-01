@@ -107,6 +107,36 @@ for (const chapter of CHAPTERS) {
               index,
               `coup attendu illégal : « ${answer} » — coups possibles : ${legal.slice(0, 12).join(', ')}${legal.length > 12 ? '…' : ''}`,
             )
+            continue
+          }
+
+          /*
+            Le suffixe annonce quelque chose : on le vérifie.
+
+            chess.js accepte « Ra8# » sur un coup qui ne fait qu'échec — le
+            suffixe est décoratif dans sa lecture du SAN. Le contrôle passait
+            donc au vert sur une leçon d'échec et mat dont la position n'en
+            était pas un : le roi noir en e8, une tour blanche arrivant en a8,
+            et l'autre tour restée en h1 — qui contrôle la rangée 1, pas la 7.
+            L'apprenant jouait le coup annoncé, le coach annonçait « échec et
+            mat », et le roi pouvait tranquillement aller en e7.
+
+            C'est le genre d'erreur qu'on ne voit pas en relisant : la phrase
+            est juste, la position ne l'est pas. La machine, elle, sait compter
+            les cases de fuite.
+          */
+          const attenduMat = answer.includes('#')
+          const attenduEchec = answer.includes('+')
+          if (attenduMat && !probe.isCheckmate()) {
+            fail(
+              lesson,
+              index,
+              `« ${answer} » annonce un mat qui n'en est pas un — le roi peut encore jouer : ${probe.moves().slice(0, 8).join(', ')}`,
+            )
+          } else if (attenduEchec && !probe.inCheck()) {
+            fail(lesson, index, `« ${answer} » annonce un échec qui n'en est pas un`)
+          } else if (!attenduMat && probe.isCheckmate()) {
+            warn(lesson, index, `« ${answer} » mate sans que la notation le dise (« # » manquant)`)
           }
         }
 

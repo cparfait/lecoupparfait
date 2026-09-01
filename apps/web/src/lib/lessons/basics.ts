@@ -438,9 +438,26 @@ export const basicsChapter: Chapter = {
           arrows: [{ from: 'e2', to: 'e8', color: 'red' }],
         },
         {
+          /*
+            La seconde tour est **déjà** en h7, et c'est tout l'exercice.
+
+            Elle était en h1, avec les deux tours à leur case de départ, et le
+            coup demandé — « Ra8 » — était annoncé comme un mat qu'il n'était
+            pas : une tour en h1 contrôle la rangée 1, pas la 7, et le roi noir
+            s'en allait tranquillement en d7, e7 ou f7. L'étape suivante
+            expliquait pourtant, en toutes lettres, qu'il ne pouvait pas fuir
+            « parce que l'autre tour la contrôle ». La phrase était juste ; la
+            position ne l'était pas.
+
+            Un débutant n'a aucun moyen de repérer l'erreur : il apprend une
+            fausse définition du mat sur l'écran même qui la lui enseigne.
+            `check-lessons.mjs` vérifie désormais les suffixes « + » et « # »
+            contre la position réelle.
+          */
           kind: 'show',
-          fen: '4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1',
-          say: "Avec deux tours, on peut mater. Voici la technique de l'escalier : une tour donne échec, l'autre coupe la retraite.",
+          fen: '4k3/7R/8/8/8/8/8/R3K3 w - - 0 1',
+          say: "Avec deux tours, on peut mater. Voici la technique de l'escalier : celle de h7 barre déjà la rangée 7, il ne reste plus qu'à donner échec sur la dernière.",
+          arrows: [{ from: 'h7', to: 'a7', color: 'blue' }],
         },
         {
           kind: 'play',
