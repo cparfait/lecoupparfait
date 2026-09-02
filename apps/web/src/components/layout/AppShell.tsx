@@ -172,10 +172,21 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Settings size={17} aria-hidden />
             </Link>
             <AccountButton />
+            {/* Le hamburger n'est plus dans la barre du haut.
+
+                Il ouvrait exactement le même panneau que « Menu », en bas à
+                droite : deux boutons pour une seule chose, l'un sous le pouce,
+                l'autre à l'opposé de l'écran, en haut à droite — le coin le
+                plus difficile à atteindre d'une main. Sur un téléphone, la
+                navigation se tient en bas.
+
+                Il ne survit qu'en paysage, où la barre du bas s'efface pour
+                rendre sa hauteur à l'échiquier : sans lui, il n'y aurait plus
+                aucune porte de sortie. */}
             <button
               type="button"
               onClick={() => setMenuOpen((open) => !open)}
-              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt lg:hidden"
+              className="hidden h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt max-lg:paysage:grid"
               aria-label={t('nav.menu')}
               aria-expanded={menuOpen}
             >
@@ -485,7 +496,8 @@ function BottomBar({
     <nav
       // En paysage sur téléphone, soixante-sept pixels sur trois cent
       // quatre-vingt-dix : la barre prenait un sixième de la hauteur, et
-      // recouvrait le bas de l'échiquier. Le menu de l'en-tête reste.
+      // recouvrait le bas de l'échiquier. C'est le seul cas où le hamburger
+      // de l'en-tête reparaît, et la seule raison qui le fait vivre encore.
       className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-[var(--bg)]/88 backdrop-blur-xl safe-bottom lg:hidden paysage:hidden"
       aria-label="Navigation rapide"
     >
