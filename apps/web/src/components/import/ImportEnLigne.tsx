@@ -12,7 +12,7 @@
  * Rien n'est enregistré : la liste vit le temps de la visite.
  */
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Download, ExternalLink } from 'lucide-react'
 import type { Color } from 'chess.js'
 import clsx from 'clsx'
@@ -44,23 +44,45 @@ export function ImportEnLigne({
   const pseudo = source === 'chesscom' ? chesscomUsername : lichessUsername
   const clePseudo = source === 'chesscom' ? 'chesscomUsername' : 'lichessUsername'
 
+  // Numéro de la dernière demande : une réponse arrivée après un changement
+  // de service ou de pseudo ne doit pas remplir la liste de l'autre.
+  const demande = useRef(0)
+
   const charger = useCallback(async () => {
     if (!pseudo.trim()) return
+    const numero = ++demande.current
     setChargement(true)
     setErreur(null)
     setParties(null)
     try {
       const resultat = await chargerParties(source, pseudo.trim())
+      if (numero !== demande.current) return
       setParties(resultat)
       if (resultat.length === 0) {
         setErreur('Aucune partie standard récente sur ce compte.')
       }
     } catch (echec) {
+      if (numero !== demande.current) return
       setErreur(echec instanceof Error ? echec.message : 'Récupération impossible.')
     } finally {
-      setChargement(false)
+      if (numero === demande.current) setChargement(false)
     }
   }, [source, pseudo])
+
+  /*
+    Le service choisi charge tout seul.
+
+    Le pseudo est mémorisé, mais il fallait encore appuyer sur « Charger » :
+    choisir « Chess.com » puis « Lichess » ne changeait rien à l'écran, et l'on
+    croyait la bascule cassée. Dès qu'un service a un pseudo connu, ses
+    parties arrivent — au dépliage comme au changement de service. Le bouton
+    reste pour recharger, ou après avoir tapé un pseudo.
+  */
+  useEffect(() => {
+    void charger()
+    // Au changement de service seulement : pas à chaque lettre du pseudo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [source])
 
   return (
     <div className="space-y-3">
@@ -85,7 +107,7 @@ export function ImportEnLigne({
         <input
           value={pseudo}
           onChange={(event) => set(clePseudo, event.target.value)}
-          placeholder="ton pseudo"
+          placeholder={`ton pseudo ${source === 'chesscom' ? 'Chess.com' : 'Lichess'}`}
           spellCheck={false}
           autoComplete="off"
           aria-label={`Pseudo ${source === 'chesscom' ? 'Chess.com' : 'Lichess'}`}
