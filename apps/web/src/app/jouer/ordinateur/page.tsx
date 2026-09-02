@@ -2120,7 +2120,7 @@ function GameScreen({
                 label="Options de la partie"
                 className="flex-1"
                 declencheur={() => (
-                  <span className="flex w-full flex-col items-center gap-0.5">
+                  <span className="flex min-h-11 w-full flex-col items-center justify-center gap-0.5">
                     <MoreHorizontal size={19} aria-hidden />
                     <span className="text-[10px] font-medium leading-none">Options</span>
                   </span>
@@ -2346,7 +2346,9 @@ function ActionDuPouce({
   danger?: boolean
 }) {
   const classe = clsx(
-    'flex flex-1 flex-col items-center gap-0.5 rounded-[var(--radius-sm)] px-1 py-1.5',
+    // Quarante-quatre points de haut au minimum : la barre en faisait
+    // quarante-trois, juste sous la taille où le pouce rate une fois sur cinq.
+    'flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-[var(--radius-sm)] px-1 py-1.5',
     'text-[10px] font-medium transition-colors',
     disabled
       ? 'pointer-events-none text-faint opacity-40'

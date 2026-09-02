@@ -59,7 +59,7 @@ export function PhysicalBoardPanel({
       <button
         type="button"
         onClick={() => setDeplie(true)}
-        className="flex w-full items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-left text-xs text-faint transition-colors hover:bg-surface-hover hover:text-muted"
+        className="flex w-full items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-left text-xs text-faint transition-colors hover:bg-surface-hover hover:text-muted pointer-coarse:min-h-11"
       >
         <Bluetooth size={13} className="shrink-0" aria-hidden />
         <span className="min-w-0 flex-1 truncate">Brancher un échiquier électronique</span>

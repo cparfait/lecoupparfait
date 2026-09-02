@@ -117,7 +117,7 @@ export function RubanCoups({
         onClick={() => onSeek(Math.max(0, cursor - 1))}
         disabled={cursor <= 0}
         aria-label="Coup précédent"
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover disabled:opacity-30"
+        className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover disabled:opacity-30 pointer-coarse:h-11 pointer-coarse:w-11"
       >
         <ChevronLeft size={18} aria-hidden />
       </button>
@@ -134,7 +134,7 @@ export function RubanCoups({
               onClick={() => onSeek(index)}
               aria-current={courant ? 'true' : undefined}
               className={clsx(
-                'flex min-w-0 items-center gap-1 rounded-[var(--radius-sm)] px-2 py-1.5 text-[13px] transition-colors',
+                'flex min-w-0 items-center gap-1 rounded-[var(--radius-sm)] px-2 py-1.5 text-[13px] transition-colors pointer-coarse:min-h-11',
                 courant ? 'bg-surface-strong font-bold text-ink' : 'text-muted hover:bg-surface-hover',
               )}
             >
@@ -173,7 +173,7 @@ export function RubanCoups({
         onClick={() => onSeek(Math.min(coups.length - 1, cursor + 1))}
         disabled={cursor >= coups.length - 1}
         aria-label="Coup suivant"
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover disabled:opacity-30"
+        className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover disabled:opacity-30 pointer-coarse:h-11 pointer-coarse:w-11"
       >
         <ChevronRight size={18} aria-hidden />
       </button>

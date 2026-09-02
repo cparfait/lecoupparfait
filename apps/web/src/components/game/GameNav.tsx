@@ -128,7 +128,7 @@ export function GameNav({
           title={autoplay ? 'Interrompre la lecture' : 'Dérouler la partie coup par coup'}
           aria-label={autoplay ? 'Interrompre la lecture' : 'Dérouler la partie coup par coup'}
           className={clsx(
-            'mx-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full transition-all',
+            'mx-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full transition-all pointer-coarse:h-11 pointer-coarse:w-11',
             autoplay
               ? 'bg-accent text-[var(--accent-contrast)] shadow-[var(--glow)]'
               : 'bg-[color-mix(in_oklab,var(--accent)_16%,transparent)] text-accent hover:bg-[color-mix(in_oklab,var(--accent)_28%,transparent)]',
@@ -183,7 +183,7 @@ function SeekButton({
       disabled={disabled}
       title={label}
       aria-label={label}
-      className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition-colors hover:bg-surface-hover hover:text-ink disabled:cursor-default disabled:text-faint/40 disabled:hover:bg-transparent"
+      className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition-colors hover:bg-surface-hover hover:text-ink disabled:cursor-default disabled:text-faint/40 disabled:hover:bg-transparent pointer-coarse:h-11 pointer-coarse:w-11"
     >
       {children}
     </button>

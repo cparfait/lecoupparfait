@@ -170,7 +170,7 @@ export function MoveList({
               aria-label={autoplay ? 'Interrompre la lecture' : 'Dérouler la partie'}
               title={autoplay ? 'Interrompre la lecture' : 'Dérouler la partie'}
               className={clsx(
-                'mx-1 grid h-8 w-8 shrink-0 place-items-center rounded-full transition-all',
+                'mx-1 grid h-8 w-8 shrink-0 place-items-center rounded-full transition-all pointer-coarse:h-11 pointer-coarse:w-11',
                 autoplay
                   ? 'bg-accent text-[var(--accent-contrast)] shadow-[var(--glow)]'
                   : 'bg-[color-mix(in_oklab,var(--accent)_16%,transparent)] text-accent hover:bg-[color-mix(in_oklab,var(--accent)_28%,transparent)]',
@@ -314,7 +314,9 @@ const MoveCell = function MoveCell({
       // survolant qu'on l'apprend.
       title={dire(move.san)}
       className={clsx(
-        'flex items-center gap-1 px-2 py-1.5 text-left font-medium transition-colors',
+        // Au doigt, la ligne s'épaissit jusqu'à la taille d'un pouce ; la
+        // liste s'allonge d'autant, mais elle défile.
+        'flex items-center gap-1 px-2 py-1.5 text-left font-medium transition-colors pointer-coarse:py-3',
         active ? 'bg-accent/18 text-ink ring-1 ring-inset ring-accent/40' : 'hover:bg-surface-hover',
       )}
       aria-current={active ? 'true' : undefined}
@@ -351,7 +353,7 @@ function NavButton({
       disabled={disabled}
       aria-label={label}
       title={label}
-      className="grid h-8 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink disabled:pointer-events-none disabled:opacity-30"
+      className="grid h-8 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink disabled:pointer-events-none disabled:opacity-30 pointer-coarse:h-11 pointer-coarse:w-11"
     >
       {children}
     </button>
