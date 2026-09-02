@@ -3,63 +3,71 @@
 /**
  * L'accueil de quelqu'un qui a un compte.
  *
- * La page d'accueil publique vend le produit : « les échecs, enfin expliqués »,
- * ce que le compte apporte, les chiffres du catalogue. C'est ce qu'il faut dire
- * à un visiteur, et c'est exactement ce dont quelqu'un qui revient n'a rien à
- * faire — il a déjà choisi, il vient jouer.
+ * L'accueil public vend le produit — « les échecs, enfin expliqués », ce qu'un
+ * compte apporte, les chiffres du catalogue. C'est ce qu'il faut dire à un
+ * visiteur, et exactement ce dont quelqu'un qui revient n'a rien à faire : il a
+ * déjà choisi, il vient jouer.
  *
- * Cet écran répond donc à une autre question : **où j'en suis, et que faire
- * maintenant ?** D'où l'ordre, qui est celui de l'urgence et non celui du
- * catalogue :
+ * Cet écran répond donc à une seule question : **qu'est-ce que je fais
+ * maintenant ?**
  *
- *  1. ce qui **attend** — une partie en plan, une correspondance où c'est ton
- *     tour ; ce sont des obligations, elles passent avant les propositions ;
- *  2. ta **carrière**, qui est le chemin qu'on a choisi de suivre ;
- *  3. le **défi du jour**, qui expire à minuit ;
- *  4. ce qu'on a **fait** — parties et analyses, pour y revenir.
+ * ── Ce qui n'allait pas, et qui a dicté cette forme ───────────────────────
  *
- * Rien n'est inventé ici : tout vient d'API qui existaient déjà et qui étaient
- * jusqu'à présent dispersées sur quatre écrans.
+ * La version précédente posait la bonne intention en commentaire — « l'ordre de
+ * l'urgence » — et ne la tenait pas à l'écran :
+ *
+ *  - **trois appels à l'action de même poids** : un bouton « Commencer la
+ *    leçon », un « Jouer → » dans le défi, cinq liens « Aller jouer ». Trois
+ *    invitations concurrentes, donc aucune ; le regard n'avait nulle part où se
+ *    poser et la page se lisait comme un sommaire ;
+ *  - **la carrière passait avant le défi**, alors qu'elle n'a aucune échéance et
+ *    que le défi meurt à minuit ;
+ *  - **une carte « défi du jour » qui faisait quatre choses**, dont les deux
+ *    tiers de la hauteur pour les quêtes — qui ne sont pas le défi ;
+ *  - **« Aller jouer » recopiait la barre de navigation.** Les cinq destinations
+ *    sont déjà dans les menus du haut ; c'est le doublon qu'on a retiré ailleurs
+ *    du menu déroulé et de la barre du pouce ;
+ *  - **deux compteurs nommés « points »** — l'expérience de carrière et celle du
+ *    jour — sur le même écran ;
+ *  - **une colonne latérale presque vide** face à une colonne principale qui
+ *    empilait tout.
+ *
+ * ── La forme retenue ──────────────────────────────────────────────────────
+ *
+ *  1. **Maintenant** — une seule chose à faire, calculée par urgence (voir
+ *     `prochainesChoses`), avec le seul bouton primaire de la page. Ce qui
+ *     attend aussi se range en dessous, une ligne chacun.
+ *  2. **Aujourd'hui** et **Ton parcours**, côte à côte : où j'en suis dans la
+ *     journée, où j'en suis dans le chemin long. Deux états, pas deux
+ *     destinations.
+ *  3. **Tes dernières parties** — ce qu'on a fait, et la porte vers l'analyse.
+ *
+ * Rien n'est inventé : toutes les données viennent d'API qui existaient déjà.
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import {
-  ArrowRight,
-  Clock,
-  Gauge,
-  Mailbox,
-  Play,
-  Sparkles,
-  Swords,
-  Trophy,
-} from 'lucide-react'
-import clsx from 'clsx'
+import { Flame, Gauge, Sparkles } from 'lucide-react'
 import {
   CHAPITRES,
   CARRIERE_TERMINEE,
   chapitre as chapitreNumero,
+  etapesDe,
   prochaineEtape,
   rangPour,
 } from '@coupparfait/core'
-import { Button, ButtonLink, Card, Chip, SectionTitle, Skeleton } from '@/components/ui/index.tsx'
+import clsx from 'clsx'
+import { Button, ButtonLink, Card, Chip, Skeleton } from '@/components/ui/index.tsx'
 import { useCarriere } from '@/lib/carriere/useCarriere.ts'
 import { listerAnalyses, type AnalyseEnregistree } from '@/lib/analysis/enregistrees.ts'
-import {
-  chargerPartieEnCours,
-  depuis,
-  oublierPartieEnCours,
-  type PartieEnCours,
-} from '@/lib/game/partieEnCours.ts'
-import { DefiDuJour } from '@/components/daily/DefiDuJour.tsx'
-import { toast } from '@/components/ui/Toast.tsx'
+import { chargerPartieEnCours, type PartieEnCours } from '@/lib/game/partieEnCours.ts'
+import { jourLocal, queteFaite } from '@/lib/daily/quotidien.ts'
+import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
+import { Aujourdhui, type TrancheDefi } from './Aujourdhui.tsx'
+import { Maintenant } from './Maintenant.tsx'
+import { prochainesChoses, type EtatAccueil } from './prochainesChoses.ts'
 
-/**
- * Une partie contre quelqu'un, encore ouverte quelque part.
- *
- * Elle ne vit qu'en mémoire du serveur temps réel : on ne la retrouve donc pas
- * en base, mais en le lui demandant.
- */
+/** Une partie contre quelqu'un, encore ouverte dans la mémoire du serveur temps réel. */
 interface PartieEnDirect {
   slug: string
   color: 'w' | 'b'
@@ -103,6 +111,15 @@ const ISSUE: Record<PartieJouee['issue'], string> = {
   nulle: 'Nulle',
 }
 
+/**
+ * Trois, et non cinq.
+ *
+ * La liste des parties jouées prenait autant de hauteur que tout ce qui est
+ * actionnable sur la page. On en garde de quoi reconnaître sa dernière séance ;
+ * « tout voir » mène au profil, dont c'est le métier.
+ */
+const PARTIES_MONTREES = 3
+
 /** Dépose la partie où l'écran d'analyse va la chercher, puis y va. */
 function analyser(partie: PartieJouee): void {
   try {
@@ -118,37 +135,48 @@ function analyser(partie: PartieJouee): void {
 
 export function AccueilConnecte({ pseudo }: { pseudo: string }) {
   const progression = useCarriere()
+  const { etat: journee } = useQuotidien()
 
   const [reprise, setReprise] = useState<PartieEnCours | null | undefined>(undefined)
-  const [enDirect, setEnDirect] = useState<PartieEnDirect[]>([])
+  const [enDirect, setEnDirect] = useState<PartieEnDirect[] | null>(null)
   const [parties, setParties] = useState<PartieJouee[] | null>(null)
   const [analyses, setAnalyses] = useState<AnalyseEnregistree[] | null>(null)
-  const [aToiDeJouer, setAToiDeJouer] = useState(0)
+  const [correspondances, setCorrespondances] = useState<number | null>(null)
+  const [defi, setDefi] = useState<{ tranche: TrancheDefi | null; niveau: number | null }>({
+    tranche: null,
+    niveau: null,
+  })
 
   useEffect(() => {
     let vivant = true
 
     void chargerPartieEnCours().then((p) => vivant && setReprise(p))
 
-    // Les parties contre quelqu'un, laissées ouvertes en changeant d'écran.
     void fetch('/api/parties/miennes', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : { games: [] }))
       .then((d: { games?: PartieEnDirect[] }) => vivant && setEnDirect(d.games ?? []))
-      .catch(() => undefined)
+      .catch(() => vivant && setEnDirect([]))
 
-    void fetch('/api/parties/terminee?limite=5', { cache: 'no-store' })
+    void fetch(`/api/parties/terminee?limite=${PARTIES_MONTREES}`, { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : { parties: [] }))
       .then((d: { parties?: PartieJouee[] }) => vivant && setParties(d.parties ?? []))
       .catch(() => vivant && setParties([]))
 
     void listerAnalyses().then((l) => vivant && setAnalyses(l.slice(0, 3)))
 
-    // Les correspondances où c'est ton tour : la seule chose de cet écran qui
-    // soit une obligation envers quelqu'un d'autre.
     void fetch('/api/correspondance', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : { games: [] }))
       .then((d: { games?: Array<{ yourTurn: boolean }> }) => {
-        if (vivant) setAToiDeJouer((d.games ?? []).filter((g) => g.yourTurn).length)
+        if (vivant) setCorrespondances((d.games ?? []).filter((g) => g.yourTurn).length)
+      })
+      .catch(() => vivant && setCorrespondances(0))
+
+    // La tranche du jour et la cote du défi : ce qui reste à en dire une fois
+    // qu'il est résolu, et les paliers au-dessus.
+    void fetch(`/api/defi-du-jour?jour=${jourLocal()}`, { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { tranche?: TrancheDefi; puzzle?: { rating: number } } | null) => {
+        if (vivant) setDefi({ tranche: d?.tranche ?? null, niveau: d?.puzzle?.rating ?? null })
       })
       .catch(() => undefined)
 
@@ -160,147 +188,165 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
   const chapitre = progression ? chapitreNumero(progression.chapter) : null
   const suite = chapitre && progression ? prochaineEtape(chapitre, progression) : null
   const rang = progression ? rangPour(progression.xp) : null
+  const carriereEnCours =
+    progression != null && progression.chapter < CARRIERE_TERMINEE && chapitre != null
+  const defiFait = journee ? queteFaite(journee, 'defi') : null
+
+  /*
+    On attend de savoir avant de proposer.
+
+    Une proposition affichée puis remplacée une demi-seconde plus tard est pire
+    qu'un instant d'attente : on commence à lire, et la phrase change sous les
+    yeux. Les trois sources qui décident de l'ordre sont donc attendues.
+  */
+  const chargement =
+    reprise === undefined ||
+    enDirect === null ||
+    correspondances === null ||
+    defiFait === null ||
+    progression === undefined
+
+  const choses = useMemo(() => {
+    const etat: EtatAccueil = {
+      enDirect: enDirect ?? [],
+      correspondances: correspondances ?? 0,
+      reprise: reprise ? { moves: reprise.moves.length } : null,
+      defiFait,
+      carriere:
+        carriereEnCours && chapitre
+          ? {
+              chapitre: chapitre.titre,
+              numero: chapitre.numero,
+              libelle: suite?.libelle ?? 'Voir la carte',
+              lien: suite?.lien ?? '/carriere',
+            }
+          : null,
+    }
+    return prochainesChoses(etat)
+  }, [enDirect, correspondances, reprise, defiFait, carriereEnCours, chapitre, suite])
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:py-8">
-      <header className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="font-display text-3xl font-bold tracking-tight">
+      {/* ── L'en-tête : qui je suis, où j'en suis ──────────────────────
+          Les deux compteurs sont nommés. « 2560 points » seul, à côté d'un
+          « 45 / 80 points » plus bas, laissait deviner un rapport entre les
+          deux — il n'y en a aucun. */}
+      <header className="mb-5 flex flex-wrap items-center justify-between gap-2">
+        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
           Bonjour {pseudo}
         </h1>
-        {rang && (
-          <Chip tone="accent">
-            <span aria-hidden>{rang.rang.emoji}</span> {rang.rang.nom} · {progression?.xp} points
-          </Chip>
-        )}
-      </header>
-
-      {/* ── Ce qui attend ────────────────────────────────────────── */}
-      {(reprise || enDirect.length > 0 || aToiDeJouer > 0) && (
-        <div className="mb-4 grid gap-3 sm:grid-cols-2">
-          {/* ── Les parties contre quelqu'un, restées ouvertes ────────
-              On lance une partie, on va voir autre chose, et l'échiquier
-              disparaît : son adresse n'était que dans l'historique du
-              navigateur. L'adversaire, lui, attend toujours son coup.
-
-              Elles passent avant la partie contre l'ordinateur : celle-ci
-              patiente indéfiniment, une personne non. */}
-          {enDirect.map((partie) => (
-            <PartieEnDirectCarte
-              key={partie.slug}
-              partie={partie}
-              onQuittee={() =>
-                setEnDirect((liste) => liste.filter((autre) => autre.slug !== partie.slug))
-              }
-            />
-          ))}
-
-          {reprise && (
-            <Card className="border-accent/50 p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-accent">
-                Partie en plan
-              </p>
-              <p className="mt-1 text-sm font-medium">
-                Contre l’ordinateur, {reprise.moves.length} demi-coup
-                {reprise.moves.length > 1 ? 's joués' : ' joué'}
-              </p>
-              <p className="text-[12px] text-faint">{depuis(reprise.enregistreLe)}</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <ButtonLink href="/jouer/ordinateur" variant="primary" size="sm">
-                  Reprendre
-                </ButtonLink>
-                {/* La partie proposée à la reprise ne s'effaçait que depuis
-                    l'écran de configuration, où il fallait aller la chercher.
-                    Une proposition dont on ne peut pas dire non revient tous
-                    les jours. */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    oublierPartieEnCours()
-                    setReprise(null)
-                    toast.info('Partie abandonnée.', 'Elle ne te sera plus proposée.')
-                  }}
-                >
-                  Abandonner
-                </Button>
-              </div>
-            </Card>
+        <div className="flex flex-wrap items-center gap-2">
+          {journee != null && journee.serie > 0 && (
+            <Chip tone="warning" title="Jours d’affilée avec au moins une quête faite">
+              <Flame size={11} aria-hidden />
+              {journee.serie} jour{journee.serie > 1 ? 's' : ''} d’affilée
+            </Chip>
           )}
-
-          {aToiDeJouer > 0 && (
-            <Card className="border-accent/50 p-4">
-              <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-accent">
-                <Mailbox size={12} aria-hidden />
-                Correspondance
-              </p>
-              <p className="mt-1 text-sm font-medium">
-                {aToiDeJouer} partie{aToiDeJouer > 1 ? 's' : ''} où c’est à toi de jouer
-              </p>
-              <p className="text-[12px] text-faint">Quelqu’un attend ton coup.</p>
-              <ButtonLink href="/correspondance" variant="primary" size="sm" className="mt-3">
-                Y aller
-              </ButtonLink>
-            </Card>
+          {rang && (
+            <Chip tone="accent" title="Expérience accumulée en carrière">
+              <span aria-hidden>{rang.rang.emoji}</span> {rang.rang.nom} · {progression?.xp} pts de
+              carrière
+            </Chip>
           )}
         </div>
-      )}
+      </header>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="min-w-0 space-y-4">
-          {/* ── La carrière ──────────────────────────────────────── */}
-          {progression === undefined ? (
-            <Skeleton className="h-32 w-full" />
-          ) : progression && progression.chapter < CARRIERE_TERMINEE && chapitre ? (
-            <Card className="overflow-hidden">
-              <div className="h-1" style={{ background: chapitre.teinte }} aria-hidden />
-              <div className="p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-                  Ta carrière · chapitre {chapitre.numero} sur {CHAPITRES.length}
-                </p>
-                <p className="mt-0.5 font-display text-lg font-bold leading-tight">
-                  {chapitre.titre}
-                </p>
-                <p className="mt-1 text-[13px] text-muted">{chapitre.objectif}</p>
-                <Link href={suite?.lien ?? '/carriere'} className="mt-3 block">
-                  <Button variant="primary" fullWidth icon={<Sparkles size={15} />}>
-                    {suite?.libelle ?? 'Voir la carte'}
-                  </Button>
-                </Link>
-              </div>
-            </Card>
-          ) : (
-            <Card className="p-4">
-              <p className="font-display text-lg font-bold leading-tight">
-                {progression && progression.chapter >= CARRIERE_TERMINEE
-                  ? 'Carrière terminée 👑'
-                  : 'Commence ta carrière'}
+      {/* ── 1. Maintenant ─────────────────────────────────────────────── */}
+      <Maintenant choses={choses} chargement={chargement} />
+
+      {/* ── 2. Les deux états : la journée, et le chemin ────────────────
+          Côte à côte et de poids égal, parce qu'ils répondent à la même
+          question à deux échelles — « où j'en suis ? ». Ils s'empilent sous
+          `md`, la journée d'abord : c'est elle qui expire. */}
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <Aujourdhui
+          defiFait={defiFait === true}
+          tranche={defi.tranche}
+          niveauDefi={defi.niveau}
+        />
+
+        {progression === undefined ? (
+          <Skeleton className="h-48 w-full" />
+        ) : carriereEnCours && chapitre && progression ? (
+          <Card className="overflow-hidden">
+            <div className="h-1" style={{ background: chapitre.teinte }} aria-hidden />
+            <div className="flex items-baseline justify-between gap-2 border-b border-line/60 px-4 py-2.5">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
+                Ton parcours
               </p>
-              <p className="mt-1 text-[13px] text-muted">
-                Douze chapitres, du premier coup à la première victoire nette.
+              <p className="text-[11px] tabular-nums text-muted">
+                chapitre {chapitre.numero} / {CHAPITRES.length}
               </p>
-              <ButtonLink href="/carriere" variant="primary" size="sm" className="mt-3">
-                {progression && progression.chapter >= CARRIERE_TERMINEE
-                  ? 'Revoir le parcours'
-                  : 'Commencer'}
+            </div>
+            <div className="p-4">
+              <p className="font-display text-base font-bold leading-tight">{chapitre.titre}</p>
+              <p className="mt-1 text-[12px] leading-snug text-muted">{chapitre.objectif}</p>
+
+              {/* Les trois temps du chapitre, en une ligne chacun : c'est ce
+                  qui manquait pour savoir combien il reste avant le suivant. */}
+              <ul className="mt-3 space-y-1">
+                {etapesDe(chapitre, progression).map((etape) => (
+                  <li
+                    key={etape.cle}
+                    className={clsx(
+                      'flex items-center gap-2 text-[12px]',
+                      etape.termine ? 'text-faint line-through' : 'text-muted',
+                    )}
+                  >
+                    <span
+                      aria-hidden
+                      className={clsx(
+                        'grid h-4 w-4 shrink-0 place-items-center rounded-full border text-[9px] font-bold',
+                        etape.termine
+                          ? 'border-[var(--q-best)] bg-[var(--q-best)] text-white'
+                          : 'border-line',
+                      )}
+                    >
+                      {etape.termine ? '✓' : ''}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate">{etape.titre}</span>
+                    {etape.total > 1 && (
+                      <span className="shrink-0 tabular-nums text-[11px] text-faint">
+                        {etape.fait} / {etape.total}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+
+              {/* Bouton secondaire, et c'est délibéré : si l'étape de carrière
+                  est *la* chose à faire, elle est déjà en haut avec le bouton
+                  primaire. Ici on ouvre la carte, on ne relance pas. */}
+              <ButtonLink href="/carriere" variant="secondary" size="sm" fullWidth className="mt-3">
+                Voir la carte
               </ButtonLink>
-            </Card>
-          )}
+            </div>
+          </Card>
+        ) : (
+          <Card className="p-4">
+            <p className="font-display text-base font-bold leading-tight">
+              {progression && progression.chapter >= CARRIERE_TERMINEE
+                ? 'Carrière terminée 👑'
+                : 'Commence ta carrière'}
+            </p>
+            <p className="mt-1 text-[12px] leading-snug text-muted">
+              Douze chapitres, du premier coup à la première victoire nette.
+            </p>
+            <ButtonLink href="/carriere" variant="secondary" size="sm" className="mt-3">
+              {progression && progression.chapter >= CARRIERE_TERMINEE
+                ? 'Revoir le parcours'
+                : 'Commencer'}
+            </ButtonLink>
+          </Card>
+        )}
+      </div>
 
-          {/* ── Le défi du jour ──────────────────────────────────────
-              Dans la colonne principale, au-dessus des parties jouées.
-
-              Il vivait dans la colonne de droite. Sur grand écran cela se
-              défendait ; sur téléphone, les colonnes s'empilent dans l'ordre du
-              document, et il se retrouvait donc *sous* la liste des parties —
-              c'est-à-dire après ce qu'on a déjà fait, alors qu'il expire à
-              minuit. Ce qui a une échéance passe avant ce qui n'en a plus.
-
-              Un seul exemplaire, déplacé plutôt que dupliqué : le composant
-              interroge le serveur au montage, et deux copies masquées l'une
-              après l'autre feraient deux appels pour un seul défi. */}
-          <DefiDuJour />
-
-          {/* ── Tes dernières parties ────────────────────────────── */}
+      {/* ── 3. Ce qu'on a fait ─────────────────────────────────────────
+          En bas, et c'est sa place : on ne rouvre pas l'application pour
+          relire ce qu'on a joué hier. Mais les lignes mènent à l'analyse, et
+          le disent maintenant — un chevron gris ne l'annonçait pas. */}
+      {(parties === null || parties.length > 0 || (analyses?.length ?? 0) > 0) && (
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
           <Card className="overflow-hidden">
             <div className="flex items-baseline justify-between border-b border-line/60 px-4 py-2.5">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
@@ -329,12 +375,10 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
               <ul>
                 {parties.map((partie) => (
                   <li key={partie.slug} className="border-b border-line/40 last:border-0">
-                    {/* Cliquable en entier, et vers l'analyse : c'est la seule
-                        chose qu'on puisse vouloir faire d'une partie finie. */}
                     <button
                       type="button"
                       onClick={() => analyser(partie)}
-                      className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-surface-hover"
+                      className="group flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-surface-hover"
                     >
                       <span
                         className="w-1 shrink-0 self-stretch rounded-full"
@@ -353,21 +397,20 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                           {partie.coups} demi-coups
                         </span>
                       </span>
-                      <Gauge size={14} className="shrink-0 text-faint" aria-label="Analyser" />
+                      {/* Le mot, et pas seulement l'icône : rien ne disait que
+                          cliquer une ligne ouvrait l'analyse. */}
+                      <span className="flex shrink-0 items-center gap-1 text-[11px] font-semibold text-faint transition-colors group-hover:text-accent">
+                        <Gauge size={13} aria-hidden />
+                        Analyser
+                      </span>
                     </button>
                   </li>
                 ))}
               </ul>
             )}
           </Card>
-        </div>
 
-        {/* ── Colonne latérale ───────────────────────────────────── */}
-        <div className="space-y-4">
-
-          {/* Les analyses conservées ne s'affichent que s'il y en a : une carte
-              vide de plus sur un écran qui en compte déjà cinq n'apprend rien. */}
-          {analyses && analyses.length > 0 && (
+          {analyses && analyses.length > 0 ? (
             <Card className="overflow-hidden">
               <div className="flex items-baseline justify-between border-b border-line/60 px-4 py-2.5">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
@@ -381,7 +424,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                 {analyses.map((analyse) => (
                   <li
                     key={analyse.id}
-                    className="border-b border-line/40 px-4 py-2 last:border-0 text-[13px]"
+                    className="border-b border-line/40 px-4 py-2 text-[13px] last:border-0"
                   >
                     <span className="block truncate">
                       {analyse.whiteName ?? 'Blancs'} — {analyse.blackName ?? 'Noirs'}
@@ -393,117 +436,28 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                 ))}
               </ul>
             </Card>
+          ) : (
+            /* Pas d'analyse conservée : plutôt qu'une carte vide, on dit à quoi
+               sert la colonne. C'est la seule invitation de la page, et elle
+               vise ce qu'on ne pense pas à faire tout seul. */
+            <Card className="flex flex-col justify-center p-4">
+              <p className="flex items-center gap-2 text-[13px] font-semibold">
+                <Sparkles size={14} className="shrink-0 text-accent" aria-hidden />
+                Fais analyser une partie
+              </p>
+              <p className="mt-1 text-[12px] leading-relaxed text-muted">
+                Coup par coup, ce qui a basculé et pourquoi — avec le meilleur coup montré sur
+                l’échiquier. Tes analyses restent ici.
+              </p>
+              <Link href="/analyse" className="mt-3">
+                <Button variant="secondary" size="sm" fullWidth icon={<Gauge size={14} />}>
+                  Analyser une partie
+                </Button>
+              </Link>
+            </Card>
           )}
-
-          {/* ── Les portes ────────────────────────────────────────── */}
-          <Card className="p-3">
-            <SectionTitle>Aller jouer</SectionTitle>
-            <div className="space-y-1">
-              {[
-                { href: '/jouer/ordinateur', icon: Play, label: 'Contre l’ordinateur' },
-                { href: '/jouer/ami', icon: Swords, label: 'Contre quelqu’un' },
-                { href: '/tournois/ordinateur', icon: Trophy, label: 'Un tournoi solo' },
-                { href: '/puzzles', icon: Clock, label: 'Des puzzles' },
-                { href: '/analyse', icon: Gauge, label: 'Analyser une partie' },
-              ].map((porte) => (
-                <Link
-                  key={porte.href}
-                  href={porte.href}
-                  className="flex items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-sm transition-colors hover:bg-surface-hover"
-                >
-                  <porte.icon size={15} className="shrink-0 text-accent" aria-hidden />
-                  <span className="min-w-0 flex-1 truncate">{porte.label}</span>
-                  <ArrowRight size={13} className="shrink-0 text-faint" aria-hidden />
-                </Link>
-              ))}
-            </div>
-          </Card>
         </div>
-      </div>
+      )}
     </div>
-  )
-}
-
-/**
- * Une partie contre quelqu'un, restée ouverte.
- *
- * Deux issues, et l'écran doit rendre les deux faciles : **y retourner**, ce
- * qu'on veut presque toujours quand l'adversaire est encore là, ou **la
- * quitter**, ce qui n'était possible que depuis l'échiquier lui-même. Quitter
- * une partie sans un coup joué l'annule, et n'inscrit donc aucune défaite ;
- * après le premier coup, c'est un abandon — le mot change avec la chose.
- *
- * Le lien emporte la cadence : sans elle, la page de partie afficherait la
- * pendule de repli au-dessus de l'horloge réelle du salon.
- */
-function PartieEnDirectCarte({
-  partie,
-  onQuittee,
-}: {
-  partie: PartieEnDirect
-  onQuittee: () => void
-}) {
-  const [envoi, setEnvoi] = useState(false)
-  const commencee = partie.moves > 0
-  const tc = `${partie.timeControl.initial}+${partie.timeControl.increment}`
-
-  const quitter = async () => {
-    const mot = commencee ? 'Abandonner cette partie ?' : 'Annuler cette partie ?'
-    if (!confirm(mot)) return
-    setEnvoi(true)
-    try {
-      const reponse = await fetch('/api/parties/miennes', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ slug: partie.slug }),
-      })
-      if (!reponse.ok) {
-        toast.error('La partie n’a pas pu être quittée.')
-        return
-      }
-      toast.info(commencee ? 'Partie abandonnée.' : 'Partie annulée.')
-      onQuittee()
-    } catch {
-      toast.error('Le serveur de parties est injoignable.')
-    } finally {
-      setEnvoi(false)
-    }
-  }
-
-  return (
-    <Card className="border-accent/50 p-4">
-      <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-accent">
-        <Swords size={12} aria-hidden />
-        Partie en cours
-      </p>
-      <p className="mt-1 text-sm font-medium">
-        {partie.opponent ? `Contre ${partie.opponent}` : 'En attente d’un adversaire'}
-        {commencee && `, ${partie.moves} demi-coup${partie.moves > 1 ? 's joués' : ' joué'}`}
-      </p>
-      <p className="text-[12px] text-faint">
-        {/* Ce qu'on veut savoir avant de décider : est-ce qu'il est toujours
-            là ? Une partie dont l'adversaire est parti ne se reprend pas, elle
-            se quitte. */}
-        {!partie.opponent
-          ? 'Personne n’a encore ouvert ton lien.'
-          : partie.opponentConnected
-            ? partie.yourTurn
-              ? 'En ligne — c’est à toi de jouer.'
-              : 'En ligne — il réfléchit.'
-            : 'Déconnecté pour le moment.'}
-      </p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <ButtonLink
-          href={`/jouer/partie/${partie.slug}?tc=${tc}${partie.rated ? '&classee=1' : ''}`}
-          variant="primary"
-          size="sm"
-        >
-          Reprendre
-        </ButtonLink>
-        <Button variant="ghost" size="sm" disabled={envoi} onClick={() => void quitter()}>
-          {commencee ? 'Abandonner' : 'Annuler'}
-        </Button>
-      </div>
-    </Card>
   )
 }
