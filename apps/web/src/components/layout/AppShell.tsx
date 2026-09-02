@@ -157,7 +157,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <ThemeQuickSwitch />
             <Link
               href="/preferences"
-              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink"
+              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
               aria-label={t('nav.settings')}
             >
               <Settings size={17} aria-hidden />
@@ -166,7 +166,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <button
               type="button"
               onClick={() => setMenuOpen((open) => !open)}
-              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink lg:hidden"
+              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt lg:hidden"
               aria-label={t('nav.menu')}
               aria-expanded={menuOpen}
             >

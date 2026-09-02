@@ -954,6 +954,22 @@ button.gradient-ring:hover::before {
   .browser-only { display: none; }
 }
 
+/* Une cible de toucher de quarante-quatre points sans changer la mise en
+   page. Dans l'en-tête, cinq commandes tiennent à 360 px avec des boutons
+   de 36 : les passer à 44 faisait déborder la barre. On agrandit donc la
+   zone qui répond au doigt, pas le dessin — un pseudo-élément de quatre
+   points de plus de chaque côté, au pointeur grossier seulement. */
+.cible-doigt {
+  position: relative;
+}
+@media (pointer: coarse) {
+  .cible-doigt::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+  }
+}
+
 /* Empêche la sélection de texte pendant un glisser-déposer de pièce. */
 .no-select {
   -webkit-user-select: none;

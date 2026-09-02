@@ -62,7 +62,7 @@ export function AccountButton({ variant = 'header' }: { variant?: 'header' | 'me
         className={clsx(
           'items-center justify-center rounded-[var(--radius-sm)] bg-accent font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110',
           variant === 'header'
-            ? 'inline-flex h-9 whitespace-nowrap px-2.5 text-[13px] sm:px-3.5'
+            ? 'cible-doigt inline-flex h-9 whitespace-nowrap px-2.5 text-[13px] sm:px-3.5'
             : 'col-span-2 mt-1 flex gap-2 px-3 py-2.5 text-sm',
         )}
       >

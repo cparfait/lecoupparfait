@@ -44,7 +44,7 @@ export function ThemeQuickSwitch() {
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink"
+        className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
         aria-label={t('settings.theme')}
         aria-haspopup="menu"
         aria-expanded={open}

@@ -36,7 +36,7 @@ export function VoiceQuickToggle({ className }: { className?: string }) {
       aria-label={label}
       title={label}
       className={clsx(
-        'grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] transition-colors',
+        'grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] transition-colors pointer-coarse:h-11 pointer-coarse:w-11',
         voiceEnabled
           ? 'text-accent hover:bg-surface-hover'
           : 'text-faint hover:bg-surface-hover hover:text-muted',
