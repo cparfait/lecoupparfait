@@ -61,8 +61,10 @@ export interface ChessBoardProps extends Board2DProps {
    *
    * On mesure au lieu d'écrire `max-height: 100%` : un pourcentage ne se
    * résout que contre une hauteur définie, et celle d'un élément flexible ne
-   * l'est pas — la règle était donc ignorée. Le calcul ne boucle pas : le
-   * conteneur tient sa hauteur du partage flex, pas de son contenu.
+   * l'est pas — la règle était donc ignorée. La mesure ne vaut que si le
+   * parent tient sa hauteur du partage flex et non de son contenu ; en
+   * dessous de `lg`, où les colonnes s'empilent, ce n'est plus le cas et l'on
+   * retombe sur la borne en `dvh` — voir la mesure elle-même.
    */
   fitParentHeight?: boolean
 }
@@ -129,16 +131,41 @@ export function ChessBoard({
     const area = containerRef.current?.parentElement
     if (!area) return
 
+    const colonne = containerRef.current
     const measure = () => {
-      const box = area.getBoundingClientRect()
+      if (!colonne) return
       const style = getComputedStyle(area)
-      const height =
-        box.height - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)
-      // Une hauteur nulle signifie que la colonne n'est pas encore posée : on
-      // s'abstient plutôt que de réduire le plateau à rien.
-      setFitSide(
-        height > 0 ? Math.floor(Math.min(box.width, height - toggleRow)) : null,
-      )
+      const marges = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
+
+      /*
+        Le parent tient-il sa hauteur de la fenêtre, ou du plateau lui-même ?
+
+        Au-dessus de `lg`, la grille de la page a une hauteur imposée et la
+        colonne reçoit ce qui reste : la mesure est saine. En dessous, les
+        colonnes s'empilent et le parent n'a d'autre hauteur que celle de son
+        contenu — c'est-à-dire du plateau. Mesurer, c'était alors se mesurer
+        soi-même : le plateau pouvait rétrécir, jamais regrandir, et un
+        téléphone tourné en paysage puis remis en portrait gardait un
+        échiquier de la taille du paysage.
+
+        On retire donc le plateau du flux le temps d'une lecture. S'il ne
+        reste rien, le parent n'impose rien, et l'on s'en remet à la borne en
+        `dvh` du rendu. Tout se passe dans la même tâche, sans image
+        intermédiaire, et l'observateur ne voit aucune taille changer.
+      */
+      const affichage = colonne.style.display
+      colonne.style.display = 'none'
+      const sansLePlateau = area.getBoundingClientRect().height - marges
+      colonne.style.display = affichage
+
+      if (sansLePlateau < MIN_BOARD_PX) {
+        setFitSide(null)
+        return
+      }
+
+      const box = area.getBoundingClientRect()
+      const height = box.height - marges
+      setFitSide(Math.floor(Math.min(box.width, height - toggleRow)))
     }
 
     measure()
