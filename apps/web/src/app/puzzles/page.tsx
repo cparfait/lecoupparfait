@@ -52,6 +52,7 @@ import {
 import { chapitre as chapitreCarriereNumero } from '@coupparfait/core'
 import { useRouter } from 'next/navigation'
 import { jourLocal } from '@/lib/daily/quotidien.ts'
+import type { Locale } from '@/lib/i18n/dictionary.ts'
 
 interface Puzzle {
   id: string
@@ -106,6 +107,15 @@ export default function PuzzlesPage() {
   const [lastMove, setLastMove] = useState<{ from: Square; to: Square } | null>(null)
   const [wrongAttempts, setWrongAttempts] = useState(0)
   const [revealed, setRevealed] = useState(false)
+  /**
+   * La catégorie est demandée.
+   *
+   * L'état vit ici et non dans la pastille : elle est rendue deux fois — sur
+   * la ligne au-dessus du plateau et dans le panneau —, et les deux doivent
+   * répondre au même geste. Sans quoi on la révèle d'un côté et l'autre
+   * continue de la proposer.
+   */
+  const [categorieVisible, setCategorieVisible] = useState(false)
 
   /**
    * L'adversaire est-il en train de répondre ?
@@ -283,6 +293,7 @@ export default function PuzzlesPage() {
     setPuzzleIllisible(false)
     setRatingDelta(null)
     setRevealed(false)
+    setCategorieVisible(false)
     setWrongAttempts(0)
     const demande = generation.current
 
@@ -610,6 +621,7 @@ export default function PuzzlesPage() {
     setMoveIndex(1)
     setWrongAttempts(0)
     setRevealed(false)
+    setCategorieVisible(false)
     setStatus('playing')
     startedAt.current = Date.now()
   }, [puzzle, load])
@@ -786,6 +798,16 @@ export default function PuzzlesPage() {
 
       </div>
 
+      {/* ── La catégorie de ce puzzle ────────────────────────────────────
+          On cherche mieux en sachant ce qu'on cherche : « clouage » ne donne
+          pas le coup, mais dit où regarder, et c'est ce qui transforme un
+          essai au hasard en reconnaissance de motif.
+
+          Nuance qui compte : un puzzle porte plusieurs motifs, et le premier
+          est parfois l'issue elle-même — « mat en 1 » enlève tout à chercher.
+          Quand on a choisi un filtre, la catégorie est déjà connue : on
+          l'affiche. Sinon elle reste sous un bouton, offerte à qui la
+          demande, comme un indice avoué. */}
       <div className="etude-corps grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         {/* ── Échiquier ──────────────────────────────────────────── */}
         <div className="etude-plateau min-w-0">
@@ -811,6 +833,14 @@ export default function PuzzlesPage() {
               <span className="truncate font-normal text-muted">
                 — trouve le meilleur coup
               </span>
+              <CategorieDuPuzzle
+                puzzle={puzzle}
+                filtre={theme}
+                locale={locale}
+                visible={categorieVisible}
+                onDemander={() => setCategorieVisible(true)}
+                className="ml-auto"
+              />
             </p>
           )}
 
@@ -839,9 +869,18 @@ export default function PuzzlesPage() {
           <Card className="p-4">
             {status === 'playing' && (
               <>
-                <p className="text-sm font-semibold">
-                  {orientation === 'w' ? 'Les Blancs jouent' : 'Les Noirs jouent'}
-                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-sm font-semibold">
+                    {orientation === 'w' ? 'Les Blancs jouent' : 'Les Noirs jouent'}
+                  </p>
+                  <CategorieDuPuzzle
+                    puzzle={puzzle}
+                    filtre={theme}
+                    locale={locale}
+                    visible={categorieVisible}
+                    onDemander={() => setCategorieVisible(true)}
+                  />
+                </div>
                 <p className="mt-1 text-[13px] leading-relaxed text-muted">
                   Trouve le meilleur coup. Il y en a un seul.
                 </p>
@@ -898,21 +937,24 @@ export default function PuzzlesPage() {
                 </span>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-[var(--q-blunder)]">Raté</p>
-                  {/* La solution, écrite.
-                      Le texte disait « regarde la solution » sans jamais la
-                      montrer : elle n'apparaissait qu'à qui avait cliqué sur
-                      « Solution » *avant* de se tromper deux fois, c'est-à-dire
-                      à peu près personne. On la donne donc ici, où elle est la
-                      seule chose qui reste à apprendre. */}
-                  {solutionRatee && (
+                  {/* La solution reste offerte, jamais imposée.
+
+                      Elle s'affichait d'elle-même dès la seconde erreur, et
+                      c'était trop tôt : on ne peut plus chercher une fois
+                      qu'on a lu la réponse, et le puzzle est perdu comme
+                      exercice. Le bouton « Solution » est juste dessous, il
+                      n'attend qu'un geste — et refuser ce geste, c'est encore
+                      chercher. */}
+                  {solutionRatee && revealed && (
                     <p className="mt-1.5 rounded-[var(--radius-sm)] bg-surface px-2.5 py-2 text-[13px]">
                       Il fallait jouer{' '}
                       <strong className="text-accent">{format(solutionRatee)}</strong>
                     </p>
                   )}
                   <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
-                    Rejoue la position : c’est en refaisant le coup soi-même qu’on finit par
-                    reconnaître le motif d’instinct.
+                    {revealed
+                      ? 'Rejoue la position : c’est en refaisant le coup soi-même qu’on finit par reconnaître le motif d’instinct.'
+                      : 'Rejoue la position, ou demande la solution si tu sèches : c’est en refaisant le coup soi-même qu’on finit par reconnaître le motif d’instinct.'}
                   </p>
                 </div>
               </div>
@@ -958,7 +1000,9 @@ export default function PuzzlesPage() {
               `lg`, la colonne est à côté de l'échiquier et tient dans l'écran :
               la barre redevient un élément ordinaire du flux. */}
           <div className="sticky bottom-16 z-10 -mx-1 flex gap-2 rounded-[var(--radius)] bg-bg/85 px-1 py-2 backdrop-blur-sm lg:static lg:mx-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
-            {status === 'playing' && !revealed && (
+            {/* Y compris après un échec : la solution ne s'affiche plus
+                d'elle-même, il faut donc pouvoir la demander là aussi. */}
+            {(status === 'playing' || status === 'failed') && !revealed && (
               <Button variant="ghost" icon={<Eye size={14} />} onClick={reveal} fullWidth>
                 Solution
               </Button>
@@ -1095,4 +1139,73 @@ function sanOf(fen: string, uci: string | undefined): string | null {
 
 function sanToSpeechSafe(san: string, locale: 'fr' | 'en'): string {
   return locale === 'fr' ? sanToFrench(san) : san
+}
+
+/**
+ * La catégorie du puzzle qu'on est en train de chercher.
+ *
+ * Savoir qu'on cherche un clouage ne donne pas le coup, mais dit où regarder :
+ * c'est la différence entre essayer des coups et reconnaître un motif. C'est
+ * d'ailleurs ce que fait un livre d'exercices, dont chaque chapitre porte un
+ * titre.
+ *
+ * On ne montre que les catégories du filtre ci-dessus — le vocabulaire que
+ * l'application enseigne. Les puzzles importés portent aussi les étiquettes de
+ * Lichess : « endgame », « short », « master », qui décrivent la partie et non
+ * le motif, et ne diraient rien à personne devant l'échiquier.
+ *
+ * Deux cas, et le second est le seul qui demandait réflexion :
+ *  - **un filtre est actif** — la catégorie est celle qu'on a choisie, la
+ *    montrer ne révèle rien qu'on ne sache déjà ;
+ *  - **« Tous »** — l'afficher d'office reviendrait à souffler la réponse sur
+ *    les motifs qui *sont* la solution : « mat en 1 » ne laisse plus rien à
+ *    trouver. Elle se demande donc, d'un bouton, comme un indice assumé.
+ */
+function CategorieDuPuzzle({
+  puzzle,
+  filtre,
+  locale,
+  visible,
+  onDemander,
+  className,
+}: {
+  puzzle: Puzzle | null
+  filtre: string
+  locale: Locale
+  /** Vrai quand on a demandé à la voir — l'état vit dans la page. */
+  visible: boolean
+  onDemander: () => void
+  className?: string
+}) {
+  if (!puzzle) return null
+
+  const choisi = filtre !== 'all' && puzzle.themes.includes(filtre) ? filtre : null
+  const motif =
+    choisi ?? THEMES.find((entree) => entree.id !== 'all' && puzzle.themes.includes(entree.id))?.id
+  if (!motif) return null
+
+  const label = THEMES.find((entree) => entree.id === motif)?.label ?? motif
+  const definition = motifCopy(motif as MotifId, locale)?.definition
+
+  if (!choisi && !visible) {
+    return (
+      <button
+        type="button"
+        onClick={onDemander}
+        className={clsx(
+          'shrink-0 rounded-full border border-line px-2.5 py-1 text-[11px] font-medium text-muted',
+          'transition-colors hover:bg-surface-hover hover:text-ink',
+          className,
+        )}
+      >
+        Voir la catégorie
+      </button>
+    )
+  }
+
+  return (
+    <Chip tone="accent" className={clsx('shrink-0', className)} title={definition}>
+      {label}
+    </Chip>
+  )
 }
