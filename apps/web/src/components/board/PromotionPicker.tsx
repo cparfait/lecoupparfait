@@ -12,6 +12,12 @@
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { pieceUrl, squarePosition } from './boardKit.ts'
 
+/*
+  Le voile flouté disparaît en mode « performance » : le flou d'arrière-plan
+  est ce qui coûte le plus cher au GPU d'un téléphone, et il s'appliquait ici
+  à un plateau entier au moment précis où l'on doit choisir vite.
+*/
+
 const CHOICES: Array<{ type: PieceSymbol; labelFr: string }> = [
   { type: 'q', labelFr: 'Dame' },
   { type: 'r', labelFr: 'Tour' },
@@ -63,7 +69,7 @@ export function PromotionPicker({
         aria-modal="true"
         aria-label="Choix de la pièce de promotion"
       >
-        <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] [[data-effects=low]_&]:backdrop-blur-none" />
 
         <div
           className="popover relative flex gap-1 p-2 shadow-[var(--shadow-lg)]"
@@ -106,7 +112,7 @@ export function PromotionPicker({
       aria-modal="true"
       aria-label="Choix de la pièce de promotion"
     >
-      <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" />
+      <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] [[data-effects=low]_&]:backdrop-blur-none" />
 
       <div
         className="absolute flex flex-col"

@@ -716,13 +716,16 @@ export const Board2D = memo(function Board2D({
             />
           )}
 
+          {/* La pulsation anime une ombre portée, donc repeint la case à
+              chaque image tant que le motif est affiché : on la réserve au
+              mode spectaculaire, comme le sillage et les ondes du mat. */}
           {[...highlightSet].map((square) => (
             <SquareOverlay
               key={`hl-${square}`}
               square={square}
               orientation={orientation}
               color="color-mix(in oklab, var(--accent) 42%, transparent)"
-              pulse
+              pulse={prefs.effects === 'high'}
             />
           ))}
 
@@ -930,7 +933,10 @@ const Piece = memo(function Piece({
   return (
     <div
       ref={ref}
-      className={clsx('absolute pointer-events-none will-change-transform', saisie && 'z-30')}
+      // `will-change` seulement sur la pièce tenue : posé sur les trente-deux
+      // en permanence, il tenait trente-deux couches de composition en mémoire
+      // GPU pour un plateau qui, la plupart du temps, ne bouge pas.
+      className={clsx('absolute pointer-events-none', saisie && 'z-30 will-change-transform')}
       style={{
         width: '12.5%',
         height: '12.5%',
