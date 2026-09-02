@@ -416,6 +416,9 @@ export const Board2D = memo(function Board2D({
       const square = squareAt(point.x, point.y, orientation)
       if (!square) return
 
+      // Le clavier reprend là où le pointeur s'est posé.
+      setFocusSquare(square)
+
       // L'éditeur de position prend la main sur tout le reste : poser une
       // pièce et en déplacer une sont deux gestes incompatibles.
       if (onSquareClick) {
@@ -544,6 +547,13 @@ export const Board2D = memo(function Board2D({
   // ── Accessibilité clavier ─────────────────────────────────────────────────
 
   const [focusSquare, setFocusSquare] = useState<Square>('e4')
+  /*
+    La case qui a le focus n'était montrée nulle part : les flèches la
+    déplaçaient, Entrée jouait, et l'on jouait à l'aveugle. L'anneau n'apparaît
+    qu'au clavier — `:focus-visible` — pour ne rien ajouter sous la souris ou
+    le doigt, qui ont leur propre sélection.
+  */
+  const [focusVisible, setFocusVisible] = useState(false)
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -586,6 +596,10 @@ export const Board2D = memo(function Board2D({
       if (next) {
         event.preventDefault()
         setFocusSquare(next)
+        // Le plateau a pu recevoir le focus à la souris, sans anneau ; dès
+        // qu'on s'en sert au clavier, le navigateur le marque `:focus-visible`
+        // et l'on suit.
+        setFocusVisible(true)
       }
     },
     [focusSquare, orientation, pieces, selected, attemptMove, canMove],
@@ -643,6 +657,8 @@ export const Board2D = memo(function Board2D({
         onPointerCancel={handlePointerCancel}
         onContextMenu={(event) => event.preventDefault()}
         onKeyDown={handleKeyDown}
+        onFocus={(event) => setFocusVisible(event.currentTarget.matches(':focus-visible'))}
+        onBlur={() => setFocusVisible(false)}
       >
         {/* ── Cases ─────────────────────────────────────────────────────── */}
         <div className="absolute inset-0 grid grid-cols-8 grid-rows-8">
@@ -685,6 +701,10 @@ export const Board2D = memo(function Board2D({
 
           {selected && (
             <SquareOverlay square={selected} orientation={orientation} color={skin.selected} />
+          )}
+
+          {focusVisible && (
+            <SquareOverlay square={focusSquare} orientation={orientation} color="var(--accent)" ring />
           )}
 
           {hoverSquare && drag && selectedTargets.includes(hoverSquare) && (
