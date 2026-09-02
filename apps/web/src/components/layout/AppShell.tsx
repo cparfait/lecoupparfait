@@ -21,7 +21,16 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronDown, ChevronRight, Lock, Menu as MenuIcon, Settings, X } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronRight,
+  Info,
+  Lock,
+  Menu as MenuIcon,
+  Scale,
+  Settings,
+  X,
+} from 'lucide-react'
 import clsx from 'clsx'
 import { AccountButton } from '@/components/layout/AccountButton.tsx'
 import { ChallengeWatcher } from '@/components/social/ChallengeWatcher.tsx'
@@ -365,10 +374,20 @@ function MenuSection({
  * en petit oblige à choisir deux fois, et il fallait le faire défiler pour
  * atteindre « Communauté », tout en bas.
  *
- * Il ne garde donc que ce qu'on ne trouve pas ailleurs : les cinq rubriques —
- * dont « Communauté », qui n'a pas de page à elle et déplie ses entrées — et
- * les réglages du compte. Le reste est allé dans les pages, où il y a la place
- * de le nommer et de l'expliquer : voir `AutresDeLaSection`.
+ * Il ne garde donc que ce qu'on ne trouve pas ailleurs, et la barre du bas
+ * en offre déjà quatre : « Jouer », « Apprendre », « Puzzles », « Analyse ».
+ * Les répéter ici mettait deux fois les mêmes destinations sur le même écran,
+ * à trois centimètres d'écart. Restent donc :
+ *
+ *  - **Communauté**, la seule rubrique sans page à elle ;
+ *  - **l'application elle-même** — préférences, à propos, crédits —, jusqu'ici
+ *    reléguée dans un pied de page qui ne s'affiche qu'à partir de `lg` :
+ *    trois écrans qu'un téléphone ne pouvait pas atteindre ;
+ *  - **les quatre rubriques de la barre du bas, en paysage seulement**, où
+ *    cette barre s'efface pour rendre sa hauteur à l'échiquier.
+ *
+ * Le reste est allé dans les pages, où il y a la place de le nommer et de
+ * l'expliquer : voir `AutresDeLaSection`.
  */
 function MobileMenu({
   pathname,
@@ -443,12 +462,16 @@ function MobileMenu({
             )
           }
 
+          /*
+            Cette rubrique est déjà dans la barre du bas — sauf en paysage, où
+            la barre n'existe pas. On ne l'affiche donc que là.
+          */
           return (
             <Link
               key={section.id}
               href={section.sommaire}
               className={clsx(
-                'flex min-h-14 items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2.5 transition-colors',
+                'hidden min-h-14 items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2.5 transition-colors paysage:flex',
                 active
                   ? 'bg-surface-strong ring-1 ring-inset ring-accent/50'
                   : 'bg-surface/70 hover:bg-surface-hover',
@@ -476,6 +499,35 @@ function MobileMenu({
             </Link>
           )
         })}
+
+        {/* ── L'application ────────────────────────────────────────────────
+            Ces trois pages n'étaient nulle part sur un téléphone : le pied de
+            page qui les portait ne s'affiche qu'à partir de `lg`. On les
+            atteignait donc uniquement en écrivant l'adresse. */}
+        <div className="rounded-[var(--radius-sm)] bg-surface/70 p-2.5">
+          <p className="mb-1.5 px-0.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
+            L’application
+          </p>
+          <div className="grid grid-cols-2 gap-1.5">
+            {[
+              { href: '/preferences', label: t('nav.settings'), icon: Settings },
+              { href: '/a-propos', label: 'À propos', icon: Info },
+              { href: '/credits', label: 'Crédits', icon: Scale },
+            ].map((page) => {
+              const Icone = page.icon
+              return (
+                <Link
+                  key={page.href}
+                  href={page.href}
+                  className="flex min-h-11 items-center gap-2 rounded-[var(--radius-sm)] bg-bg-elev px-2.5 text-sm font-medium text-ink"
+                >
+                  <Icone size={15} className="shrink-0 text-faint" aria-hidden />
+                  <span className="min-w-0 flex-1 truncate">{page.label}</span>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
       </nav>
     </div>
   )
