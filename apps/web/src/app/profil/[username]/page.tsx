@@ -25,6 +25,7 @@ import clsx from 'clsx'
 import { SPEED_LABELS, ratingTitle } from '@coupparfait/core'
 import { Button, Card, Chip, EmptyState, Skeleton } from '@/components/ui/index.tsx'
 import { AvatarPicker } from '@/components/profile/AvatarPicker.tsx'
+import { ComptesAilleurs } from '@/components/profile/ComptesAilleurs.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { effacerPartie } from '@/lib/game/partieEnCours.ts'
 import { useCourrielDisponible } from '@/lib/auth/useIdentite.ts'
@@ -291,6 +292,9 @@ export default function ProfilePage() {
         {/* Chez soi seulement : ni l'adresse ni l'avatar des autres ne
             regardent qui que ce soit. */}
         {isMe && email?.email && <EmailStatus email={email} />}
+
+        {/* Ses pseudos d'ailleurs, pour que l'analyse les trouve remplis. */}
+        {isMe && <ComptesAilleurs />}
 
         {/* ── Se déconnecter ────────────────────────────────────────
             Elle était en haut, en bouton fantôme, coincée entre le pseudo et
