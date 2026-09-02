@@ -21,7 +21,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronDown, Lock, Menu as MenuIcon, Settings, X } from 'lucide-react'
+import { ChevronDown, ChevronRight, Lock, Menu as MenuIcon, Settings, X } from 'lucide-react'
 import clsx from 'clsx'
 import { AccountButton } from '@/components/layout/AccountButton.tsx'
 import { ChallengeWatcher } from '@/components/social/ChallengeWatcher.tsx'
@@ -339,12 +339,19 @@ function MenuSection({
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Menu mobile : les mêmes sections, dépliées.
+ * Menu mobile : les rubriques, pas leur contenu.
  *
- * Sur un écran étroit on préfère tout montrer plutôt que d'empiler un second
- * niveau de repli : cinq titres et une vingtaine de liens tiennent dans un
- * défilement court, alors qu'un accordéon demanderait un geste de plus pour
- * chaque rubrique.
+ * Il dépliait les trente entrées de la navigation, et c'était trois fois la
+ * même liste : la barre du bas conduit déjà aux quatre rubriques principales,
+ * et chaque page de rubrique montre ce qu'elle contient — « Jouer » aligne ses
+ * six façons de jouer en grand, sous le pouce. Un panneau qui répète tout cela
+ * en petit oblige à choisir deux fois, et il fallait le faire défiler pour
+ * atteindre « Communauté », tout en bas.
+ *
+ * Il ne garde donc que ce qu'on ne trouve pas ailleurs : les cinq rubriques —
+ * dont « Communauté », qui n'a pas de page à elle et déplie ses entrées — et
+ * les réglages du compte. Le reste est allé dans les pages, où il y a la place
+ * de le nommer et de l'expliquer : voir `AutresDeLaSection`.
  */
 function MobileMenu({
   pathname,
@@ -359,88 +366,99 @@ function MobileMenu({
 
   return (
     <div className="animate-slide-up max-h-[70dvh] overflow-y-auto border-t border-line bg-[var(--bg-elev)] lg:hidden">
-      {/*
-        ── Lisibilité du menu déroulé ──────────────────────────────────────
+      <nav className="space-y-2 p-3" aria-label="Navigation">
+        {SECTIONS.map((section) => {
+          const Icone = section.icon
+          const active = sectionActive(section, pathname)
 
-        Trente entrées grises, séparées par des titres gris plus petits, sur un
-        fond gris : tout y était, et l'on ne distinguait rien. Le regard n'a
-        aucun point d'accroche pour savoir où finit « Jouer » et où commence
-        « Apprendre », ce qui oblige à *lire* la liste entière au lieu de la
-        balayer.
+          /*
+            Une rubrique qui a une page y conduit ; les autres se déplient.
 
-        Trois changements, aucun décoratif :
+            « Communauté » est la seule sans page-sommaire : classement, amis,
+            correspondance et statistiques ne se rejoignent nulle part
+            ailleurs, et les cacher derrière un titre inerte les rendrait
+            introuvables. Elle garde donc ses entrées, en petit, sous son nom.
+          */
+          if (!section.sommaire) {
+            return (
+              <div key={section.id} className="rounded-[var(--radius-sm)] bg-surface/70 p-2.5">
+                <p
+                  className="mb-1.5 flex items-center gap-2 px-0.5 text-[11px] font-semibold uppercase tracking-wide"
+                  style={{ color: section.teinte }}
+                >
+                  <Icone size={12} aria-hidden />
+                  {t(section.labelKey)}
+                </p>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {section.entrees.map((entree) => {
+                    const IconeEntree = entree.icon
+                    const reservee = intercepter(entree.href)
+                    return (
+                      <Link
+                        key={entree.href}
+                        href={entree.href}
+                        onClick={(event) => {
+                          if (!reservee) return
+                          event.preventDefault()
+                          onPorte({ avantage: reservee, href: entree.href })
+                        }}
+                        className="flex min-h-11 items-center gap-2 rounded-[var(--radius-sm)] bg-bg-elev px-2.5 text-sm font-medium text-ink"
+                      >
+                        <IconeEntree
+                          size={15}
+                          className="shrink-0"
+                          style={{ color: section.teinte }}
+                          aria-hidden
+                        />
+                        <span className="min-w-0 flex-1 truncate">{t(entree.labelKey)}</span>
+                        {reservee && (
+                          <Lock
+                            size={11}
+                            className="shrink-0 text-faint"
+                            aria-label="demande un compte"
+                          />
+                        )}
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          }
 
-         - **le titre prend la couleur de sa section** et tire un filet jusqu'au
-           bord. C'est le repère qui survit à un défilement rapide au pouce, et
-           c'est aussi la couleur qu'on retrouve sur l'icône de chaque entrée ;
-         - **les entrées passent en `text-ink` sur une surface** au lieu de
-           flotter en gris sur le fond. Une ligne qu'on peut toucher doit
-           ressembler à une chose qu'on peut toucher ;
-         - **l'entrée courante porte un anneau d'accent** plutôt qu'un simple
-           fond légèrement plus clair, indistinguable des autres sur un écran
-           de téléphone en plein jour.
-      */}
-      <nav className="space-y-4 p-3" aria-label="Navigation">
-        {SECTIONS.map((section) => (
-          <div key={section.id}>
-            <p
-              className="mb-1.5 flex items-center gap-2 px-1 text-[11px] font-semibold uppercase tracking-wide"
-              style={{ color: section.teinte }}
+          return (
+            <Link
+              key={section.id}
+              href={section.sommaire}
+              className={clsx(
+                'flex min-h-14 items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2.5 transition-colors',
+                active
+                  ? 'bg-surface-strong ring-1 ring-inset ring-accent/50'
+                  : 'bg-surface/70 hover:bg-surface-hover',
+              )}
             >
-              <section.icon size={12} aria-hidden />
-              {t(section.labelKey)}
               <span
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)]"
+                style={{ background: `color-mix(in oklab, ${section.teinte} 18%, transparent)` }}
                 aria-hidden
-                className="h-px flex-1 rounded-full"
-                style={{ background: `color-mix(in oklab, ${section.teinte} 30%, transparent)` }}
-              />
-            </p>
-            <div className="grid grid-cols-2 gap-1.5">
-              {section.entrees.map((entree) => {
-                const Icone = entree.icon
-                const chemin = entree.href.split(/[?#]/)[0] ?? entree.href
-                const active = pathname === chemin
-                const reservee = intercepter(entree.href)
-                return (
-                  <Link
-                    key={entree.href}
-                    href={entree.href}
-                    onClick={(event) => {
-                      if (!reservee) return
-                      event.preventDefault()
-                      onPorte({ avantage: reservee, href: entree.href })
-                    }}
-                    className={clsx(
-                      'flex items-center gap-2 rounded-[var(--radius-sm)] px-2.5 py-2.5 text-sm font-medium transition-colors',
-                      active
-                        ? 'bg-surface-strong text-ink ring-1 ring-inset ring-accent/50'
-                        : 'bg-surface/70 text-ink',
-                    )}
-                  >
-                    <Icone
-                      size={16}
-                      className="shrink-0"
-                      style={{ color: section.teinte }}
-                      aria-hidden
-                    />
-                    <span className="min-w-0 flex-1 truncate">{t(entree.labelKey)}</span>
-                    {reservee && (
-                      <Lock
-                        size={11}
-                        className="shrink-0 text-faint"
-                        aria-label="demande un compte"
-                      />
-                    )}
-                  </Link>
-                )
-              })}
-            </div>
-          </div>
-        ))}
-
-        <div className="border-t border-line/60 pt-3">
-          <AccountButton variant="menu" />
-        </div>
+              >
+                <Icone size={17} style={{ color: section.teinte }} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-ink">
+                  {t(section.labelKey)}
+                </span>
+                <span className="block truncate text-[11px] text-faint">
+                  {section.entrees
+                    .slice(0, 3)
+                    .map((entree) => t(entree.labelKey))
+                    .join(' · ')}
+                </span>
+              </span>
+              <ChevronRight size={16} className="shrink-0 text-faint" aria-hidden />
+            </Link>
+          )
+        })}
       </nav>
     </div>
   )

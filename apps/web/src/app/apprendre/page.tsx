@@ -15,6 +15,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
+import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
 import { Check, ChevronDown, Clock, Play } from 'lucide-react'
 import clsx from 'clsx'
 import {
@@ -315,6 +316,8 @@ export default function LearnPage() {
         Environ {Math.round(CURRICULUM_STATS.minutes / 60)} heures de contenu au total.
         Aucune leçon n’est verrouillée : va où tu veux, dans l’ordre que tu veux.
       </p>
+
+      <AutresDeLaSection section="apprendre" />
     </div>
   )
 }

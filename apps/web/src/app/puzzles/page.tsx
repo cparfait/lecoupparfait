@@ -42,6 +42,7 @@ import { speak } from '@/lib/speech.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { useSan } from '@/lib/notation.ts'
 import { VoiceQuickToggle } from '@/components/layout/VoiceQuickToggle.tsx'
+import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import {
   chapitreDeLUrl,
@@ -1087,6 +1088,10 @@ export default function PuzzlesPage() {
               positions.
             </p>
           )}
+
+          {/* En paysage, la colonne défile déjà et l'écran est plein : on ne
+              lui ajoute pas une liste de liens. */}
+          <AutresDeLaSection section="entrainer" className="paysage:hidden" />
         </div>
       </div>
     </div>
