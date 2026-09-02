@@ -122,7 +122,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             </span>
           </Link>
 
-          <nav className="ml-2 hidden items-center gap-0.5 md:flex" aria-label="Navigation principale">
+          {/* La navigation à plat n'apparaît qu'à partir de `lg`, pas de `md` :
+              cinq rubriques, le nom du site et cinq commandes à droite font
+              plus de 800 px, et entre 768 et 900 px — tablette en portrait,
+              téléphone en paysage — l'en-tête débordait de l'écran, seule
+              source de défilement horizontal de tout le site. En dessous, la
+              barre du bas et le menu font le travail, et ils sont faits pour
+              le doigt. */}
+          <nav className="ml-2 hidden items-center gap-0.5 lg:flex" aria-label="Navigation principale">
             {SECTIONS.map((section) => (
               <MenuSection
                 key={section.id}
@@ -156,7 +163,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <button
               type="button"
               onClick={() => setMenuOpen((open) => !open)}
-              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink md:hidden"
+              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink lg:hidden"
               aria-label={t('nav.menu')}
               aria-expanded={menuOpen}
             >
@@ -182,7 +189,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
 
       {/* ── Contenu ──────────────────────────────────────────────────── */}
-      <main className={clsx('flex-1', !immersive && 'pb-20 md:pb-0')}>{children}</main>
+      <main className={clsx('flex-1', !immersive && 'pb-20 lg:pb-0')}>{children}</main>
 
       {/* Un ami peut proposer une partie pendant qu'on lit une leçon : le
           guetteur vit donc dans la coque, pas dans une page. */}
@@ -335,7 +342,7 @@ function MobileMenu({
   const t = useT()
 
   return (
-    <div className="animate-slide-up max-h-[70dvh] overflow-y-auto border-t border-line bg-[var(--bg-elev)] md:hidden">
+    <div className="animate-slide-up max-h-[70dvh] overflow-y-auto border-t border-line bg-[var(--bg-elev)] lg:hidden">
       {/*
         ── Lisibilité du menu déroulé ──────────────────────────────────────
 
@@ -436,7 +443,7 @@ function BottomBar({
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-[var(--bg)]/88 backdrop-blur-xl safe-bottom md:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-[var(--bg)]/88 backdrop-blur-xl safe-bottom lg:hidden"
       aria-label="Navigation rapide"
     >
       <div className="mx-auto flex max-w-md items-stretch justify-around px-1 pt-1.5">
@@ -528,7 +535,7 @@ function BottomBar({
 
 function SiteFooter() {
   return (
-    <footer className="browser-only mt-auto hidden border-t border-line/60 py-6 md:block">
+    <footer className="browser-only mt-auto hidden border-t border-line/60 py-6 lg:block">
       <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-3 px-5 text-xs text-faint">
         <p>
           Le Coup Parfait — logiciel libre sous licence AGPL-3.0. Aucune publicité, aucun traqueur,
