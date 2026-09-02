@@ -177,6 +177,22 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
   /** Incrémenté pour remonter le canevas de zéro. */
   const [reprise, setReprise] = useState(0)
 
+  /*
+    Et il peut ne pas exister du tout.
+
+    Un navigateur sans WebGL — accélération désactivée, pilote sur liste
+    noire, mode économie d'énergie — faisait échouer la création du canevas
+    en plein rendu : un écran vide, ou une page qui saute. On vérifie avant
+    de monter quoi que ce soit, après montage pour ne pas diverger du rendu
+    serveur, et l'on dit ce qui se passe avec la seule sortie utile.
+  */
+  const [webglAbsent, setWebglAbsent] = useState(false)
+  useEffect(() => {
+    const essai = document.createElement('canvas')
+    const contexte = essai.getContext('webgl2') ?? essai.getContext('webgl')
+    setWebglAbsent(!contexte)
+  }, [])
+
   // Dimensions mesurées du conteneur, en pixels.
   //
   // React Three Fiber mesure normalement son parent tout seul, mais cette
@@ -275,7 +291,7 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
       ref={containerRef}
       className={`relative aspect-square w-full overflow-hidden rounded-[var(--radius)] ${className ?? ''}`}
     >
-      {size > 0 && (
+      {size > 0 && !webglAbsent && (
       <Canvas
         key={reprise}
         style={{ width: size, height: size }}
@@ -348,6 +364,27 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
           target={[0, 0, 0]}
         />
       </Canvas>
+      )}
+
+      {webglAbsent && (
+        <div className="absolute inset-0 grid place-items-center bg-[var(--bg)]/92 p-6 text-center">
+          <div>
+            <p className="text-sm font-semibold">La vue 3D n’est pas disponible ici</p>
+            <p className="mx-auto mt-1.5 max-w-xs text-[13px] leading-relaxed text-muted">
+              Ce navigateur n’offre pas l’accélération graphique dont elle a besoin. La
+              vue 2D joue exactement la même partie.
+            </p>
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={() => prefs.set('view', '2d')}
+                className="rounded-[var(--radius-sm)] bg-accent px-3 py-1.5 text-[13px] font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
+              >
+                Passer en 2D
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Un canevas vide n'explique rien. On dit ce qui s'est passé et on
