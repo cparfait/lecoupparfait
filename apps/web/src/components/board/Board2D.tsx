@@ -36,6 +36,7 @@ import {
   ANNOTATION_COLORS,
   BOARD_SKINS,
   type Arrow,
+  type BoardSkin,
   type AnnotationColor,
   type BoardPiece,
   type CircleMark,
@@ -165,9 +166,6 @@ export interface Board2DProps {
 
 type DragState = {
   piece: BoardPiece
-  /** Position du curseur en pourcentage du plateau. */
-  x: number
-  y: number
   pointerId: number
   /** Vrai dès que le pointeur a bougé : distingue un clic d'un glisser. */
   moved: boolean
@@ -237,6 +235,39 @@ export const Board2D = memo(function Board2D({
   const [selected, setSelected] = useState<Square | null>(null)
   const [drag, setDrag] = useState<DragState | null>(null)
   const [hoverSquare, setHoverSquare] = useState<Square | null>(null)
+
+  /*
+    La pièce qu'on traîne suit le doigt sans passer par React.
+
+    Chaque `pointermove` mettait sa position dans l'état, et l'état re-rendait
+    le plateau entier — les soixante-quatre cases, les trente-deux pièces, les
+    surlignages : cinq millisecondes par événement sur un processeur de
+    bureau, quatre fois plus sur un téléphone moyen, soit plus qu'une image.
+    Le glisser saccadait.
+
+    La position vit donc dans une variable CSS écrite directement sur le nœud
+    de la pièce, que React ne connaît pas et ne réécrit donc jamais. L'état ne
+    retient plus que *quelle* pièce est saisie, ce qui ne change qu'au début
+    et à la fin du geste.
+
+    Le rectangle du plateau est mesuré une fois, à la prise : le lire à chaque
+    mouvement forçait une mise en page, et le plateau ne bouge pas pendant
+    qu'on tient une pièce — `touch-none` interdit le défilement.
+  */
+  const noeudsDesPieces = useRef(new Map<string, HTMLDivElement>())
+  const rectangleSaisie = useRef<DOMRect | null>(null)
+  const enregistrerPiece = useCallback((id: string, noeud: HTMLDivElement | null) => {
+    if (noeud) noeudsDesPieces.current.set(id, noeud)
+    else noeudsDesPieces.current.delete(id)
+  }, [])
+  const poserSousLeDoigt = useCallback((id: string, x: number, y: number) => {
+    // Les pourcentages d'une translation se rapportent à la taille de
+    // l'élément (12,5 % du plateau) : un déplacement de X % du plateau vaut
+    // donc X × 8 % ici.
+    noeudsDesPieces.current
+      .get(id)
+      ?.style.setProperty('--saisie', `translate(${(x - 6.25) * 8}%, ${(y - 6.25) * 8}%) scale(1.16)`)
+  }, [])
   /**
    * Promotion en cours d'arbitrage.
    *
@@ -287,7 +318,7 @@ export const Board2D = memo(function Board2D({
 
   /** Coordonnées relatives (0–1) d'un événement pointeur dans le plateau. */
   const relativePoint = useCallback((clientX: number, clientY: number) => {
-    const rect = boardRef.current?.getBoundingClientRect()
+    const rect = rectangleSaisie.current ?? boardRef.current?.getBoundingClientRect()
     if (!rect || rect.width === 0) return null
     return {
       x: (clientX - rect.left) / rect.width,
@@ -369,6 +400,7 @@ export const Board2D = memo(function Board2D({
               : event.ctrlKey
                 ? 'red'
                 : 'green'
+          rectangleSaisie.current = boardRef.current?.getBoundingClientRect() ?? null
           setDraft({ from: square, to: null, color })
           boardRef.current?.setPointerCapture(event.pointerId)
         }
@@ -420,13 +452,11 @@ export const Board2D = memo(function Board2D({
       }
 
       setSelected(square)
-      setDrag({
-        piece,
-        x: point.x * 100,
-        y: point.y * 100,
-        pointerId: event.pointerId,
-        moved: false,
-      })
+      rectangleSaisie.current = boardRef.current?.getBoundingClientRect() ?? null
+      // La variable est posée avant le rendu qui la lira : la pièce ne passe
+      // jamais par une image sans position.
+      poserSousLeDoigt(piece.id, point.x * 100, point.y * 100)
+      setDrag({ piece, pointerId: event.pointerId, moved: false })
       boardRef.current?.setPointerCapture(event.pointerId)
     },
     [
@@ -444,6 +474,7 @@ export const Board2D = memo(function Board2D({
       onSquareClick,
       premove,
       onPremoveCancel,
+      poserSousLeDoigt,
     ],
   )
 
@@ -452,9 +483,12 @@ export const Board2D = memo(function Board2D({
       const point = relativePoint(event.clientX, event.clientY)
       if (!point) return
 
+      // Les mises à jour d'état ne partent que lorsque la case change : React
+      // ignore une valeur identique, et c'est ce qui évite un rendu par
+      // millimètre parcouru.
       if (draft) {
         const square = squareAt(point.x, point.y, orientation)
-        setDraft((current) => (current ? { ...current, to: square } : null))
+        setDraft((current) => (current && current.to !== square ? { ...current, to: square } : current))
         return
       }
 
@@ -462,12 +496,11 @@ export const Board2D = memo(function Board2D({
         return
       }
 
-      setDrag((current) =>
-        current ? { ...current, x: point.x * 100, y: point.y * 100, moved: true } : null,
-      )
+      poserSousLeDoigt(drag.piece.id, point.x * 100, point.y * 100)
+      if (!drag.moved) setDrag({ ...drag, moved: true })
       setHoverSquare(squareAt(point.x, point.y, orientation))
     },
-    [relativePoint, draft, drag, orientation],
+    [relativePoint, draft, drag, orientation, poserSousLeDoigt],
   )
 
   const handlePointerUp = useCallback(
@@ -483,6 +516,7 @@ export const Board2D = memo(function Board2D({
         } else if (square) {
           setUserCircles((current) => toggleCircle(current, { square, color: draft.color }))
         }
+        rectangleSaisie.current = null
         setDraft(null)
         return
       }
@@ -493,6 +527,7 @@ export const Board2D = memo(function Board2D({
       if (drag.moved && square) {
         attemptMove(drag.piece.square, square)
       }
+      rectangleSaisie.current = null
       setDrag(null)
       setHoverSquare(null)
     },
@@ -500,6 +535,7 @@ export const Board2D = memo(function Board2D({
   )
 
   const handlePointerCancel = useCallback(() => {
+    rectangleSaisie.current = null
     setDrag(null)
     setDraft(null)
     setHoverSquare(null)
@@ -573,8 +609,8 @@ export const Board2D = memo(function Board2D({
     return evaluateMoveSafety(fen, selected, selectedTargets)
   }, [prefs.moveSafetyHints, selected, selectedTargets, fen])
   const occupied = useMemo(() => new Set(pieces.map((p) => p.square)), [pieces])
-  const allArrows = [...arrows, ...userArrows]
-  const allCircles = [...circles, ...userCircles]
+  const allArrows = useMemo(() => [...arrows, ...userArrows], [arrows, userArrows])
+  const allCircles = useMemo(() => [...circles, ...userCircles], [circles, userCircles])
   const highlightSet = useMemo(() => new Set(highlights), [highlights])
   const spotlightSet = useMemo(() => (spotlight ? new Set(spotlight) : null), [spotlight])
 
@@ -610,24 +646,14 @@ export const Board2D = memo(function Board2D({
       >
         {/* ── Cases ─────────────────────────────────────────────────────── */}
         <div className="absolute inset-0 grid grid-cols-8 grid-rows-8">
-          {squares.map((square) => {
-            const light = isLightSquare(square)
-            const isSpotlit = spotlightSet ? spotlightSet.has(square) : true
-            return (
-              <div
-                key={square}
-                role="gridcell"
-                aria-label={square}
-                className="relative"
-                style={{
-                  background: light ? skin.light : skin.dark,
-                  backgroundImage: !light ? skin.texture : undefined,
-                  opacity: isSpotlit ? 1 : 0.42,
-                  transition: 'opacity .3s ease',
-                }}
-              />
-            )
-          })}
+          {squares.map((square) => (
+            <Case
+              key={square}
+              square={square}
+              skin={skin}
+              spotlit={spotlightSet ? spotlightSet.has(square) : true}
+            />
+          ))}
         </div>
 
         {/* ── Surlignages ───────────────────────────────────────────────── */}
@@ -723,39 +749,19 @@ export const Board2D = memo(function Board2D({
             en glissant, ce qui n'est pas un coup et ne doit pas y ressembler. */}
         <Fragment key={orientation}>
           {pieces.map((piece) => {
-            const isDragged = drag?.piece.square === piece.square && drag.moved
             const position = squarePosition(piece.square, orientation)
             return (
-              <div
+              <Piece
                 key={piece.id}
-                className={clsx(
-                  'absolute pointer-events-none will-change-transform',
-                  isDragged && 'z-30',
-                )}
-                style={{
-                  width: '12.5%',
-                  height: '12.5%',
-                  left: 0,
-                  top: 0,
-                  // Les pourcentages d'une translation se rapportent à la taille
-                  // de l'élément (12,5 % du plateau) : un déplacement de X % du
-                  // plateau vaut donc X × 8 % ici.
-                  transform: isDragged
-                    ? `translate(${(drag.x - 6.25) * 8}%, ${(drag.y - 6.25) * 8}%) scale(1.16)`
-                    : `translate(${position.left * 8}%, ${position.top * 8}%)`,
-                  transition: isDragged ? 'none' : `transform ${animationMs}ms cubic-bezier(.2,.9,.25,1)`,
-                  filter: isDragged ? 'drop-shadow(0 12px 18px rgb(0 0 0 / .45))' : undefined,
-                  zIndex: isDragged ? 30 : 10,
-                }}
-              >
-                <img
-                  src={pieceUrl(prefs.pieceSet, piece.color, piece.type)}
-                  alt=""
-                  draggable={false}
-                  className="h-full w-full"
-                  style={{ imageRendering: prefs.pieceSet === 'pixel' ? 'pixelated' : undefined }}
-                />
-              </div>
+                id={piece.id}
+                url={pieceUrl(prefs.pieceSet, piece.color, piece.type)}
+                left={position.left}
+                top={position.top}
+                saisie={drag?.piece.id === piece.id && drag.moved}
+                animationMs={animationMs}
+                pixelisee={prefs.pieceSet === 'pixel'}
+                enregistrer={enregistrerPiece}
+              />
             )
           })}
         </Fragment>
@@ -844,6 +850,88 @@ export const Board2D = memo(function Board2D({
 // ─────────────────────────────────────────────────────────────────────────────
 //  Sous-composants
 // ─────────────────────────────────────────────────────────────────────────────
+
+/** Une case du damier. Mémoïsée : elle ne change qu'avec l'habillage ou le projecteur. */
+const Case = memo(function Case({
+  square,
+  skin,
+  spotlit,
+}: {
+  square: Square
+  skin: BoardSkin
+  spotlit: boolean
+}) {
+  const light = isLightSquare(square)
+  return (
+    <div
+      role="gridcell"
+      aria-label={square}
+      className="relative"
+      style={{
+        background: light ? skin.light : skin.dark,
+        backgroundImage: !light ? skin.texture : undefined,
+        opacity: spotlit ? 1 : 0.42,
+        transition: 'opacity .3s ease',
+      }}
+    />
+  )
+})
+
+/**
+ * Une pièce posée, ou saisie.
+ *
+ * Saisie, sa translation est la variable `--saisie`, que le plateau écrit
+ * directement sur le nœud à chaque mouvement du doigt — voir
+ * `poserSousLeDoigt`. React ne voit qu'une chaîne constante et ne réécrit
+ * donc jamais le style par-dessus. Relâchée, elle retrouve une translation
+ * ordinaire, et la transition la fait glisser depuis le doigt jusqu'au centre
+ * de sa case.
+ */
+const Piece = memo(function Piece({
+  id,
+  url,
+  left,
+  top,
+  saisie,
+  animationMs,
+  pixelisee,
+  enregistrer,
+}: {
+  id: string
+  url: string
+  left: number
+  top: number
+  saisie: boolean
+  animationMs: number
+  pixelisee: boolean
+  enregistrer: (id: string, noeud: HTMLDivElement | null) => void
+}) {
+  const ref = useCallback((noeud: HTMLDivElement | null) => enregistrer(id, noeud), [enregistrer, id])
+  return (
+    <div
+      ref={ref}
+      className={clsx('absolute pointer-events-none will-change-transform', saisie && 'z-30')}
+      style={{
+        width: '12.5%',
+        height: '12.5%',
+        left: 0,
+        top: 0,
+        transform: saisie ? 'var(--saisie)' : `translate(${left * 8}%, ${top * 8}%)`,
+        transition: saisie ? 'none' : `transform ${animationMs}ms cubic-bezier(.2,.9,.25,1)`,
+        filter: saisie ? 'drop-shadow(0 12px 18px rgb(0 0 0 / .45))' : undefined,
+        zIndex: saisie ? 30 : 10,
+      }}
+    >
+      <img
+        src={url}
+        alt=""
+        draggable={false}
+        className="h-full w-full"
+        style={{ imageRendering: pixelisee ? 'pixelated' : undefined }}
+      />
+    </div>
+  )
+})
 
 function percentBox(square: Square, orientation: Color) {
   const { left, top } = squarePosition(square, orientation)
@@ -986,12 +1074,12 @@ function SquareOverlay({
   )
 }
 
-function Coordinates({
+const Coordinates = memo(function Coordinates({
   orientation,
   skin,
 }: {
   orientation: Color
-  skin: (typeof BOARD_SKINS)[keyof typeof BOARD_SKINS]
+  skin: BoardSkin
 }) {
   // Capitales pour les colonnes, et seulement pour l'affichage : la notation
   // reste en minuscules partout ailleurs — `lib/board/types.ts` engendre les
@@ -1042,7 +1130,7 @@ function Coordinates({
       ))}
     </div>
   )
-}
+})
 
 /**
  * Couche SVG des annotations.
@@ -1050,7 +1138,7 @@ function Coordinates({
  * Un seul SVG en coordonnées 0–100 superposé au plateau : il se redimensionne
  * avec lui sans le moindre calcul en JavaScript.
  */
-function AnnotationLayer({
+const AnnotationLayer = memo(function AnnotationLayer({
   arrows,
   circles,
   draft,
@@ -1166,7 +1254,7 @@ function AnnotationLayer({
       })}
     </svg>
   )
-}
+})
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Aides
