@@ -227,13 +227,16 @@ export const BOARD_SKINS: Record<BoardStyleId, BoardSkin> = {
 //  Annotations
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type AnnotationColor = 'green' | 'red' | 'blue' | 'orange' | 'accent'
+export type AnnotationColor = 'green' | 'red' | 'blue' | 'orange' | 'yellow' | 'accent'
 
 export const ANNOTATION_COLORS: Record<AnnotationColor, string> = {
   green: '#21b96b',
   red: '#e5484d',
   blue: '#4a9eff',
   orange: '#f0870c',
+  // Les coups possibles d'une pièce, montrés d'un appui long au doigt. Ni le
+  // vert du coup joué, ni le bleu du coup conseillé, ni l'orange de l'indice.
+  yellow: '#f5c400',
   accent: 'var(--accent)',
 }
 

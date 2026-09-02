@@ -164,6 +164,10 @@ export interface Board2DProps {
   animationMs?: number
 }
 
+/** Durée d'un appui long, et distance au-delà de laquelle c'est un glisser. */
+const APPUI_LONG_MS = 450
+const SEUIL_GLISSER_PX = 8
+
 type DragState = {
   piece: BoardPiece
   pointerId: number
@@ -254,6 +258,30 @@ export const Board2D = memo(function Board2D({
     mouvement forçait une mise en page, et le plateau ne bouge pas pendant
     qu'on tient une pièce — `touch-none` interdit le défilement.
   */
+  /*
+    L'appui long, au doigt, montre où la pièce peut aller.
+
+    Les flèches se tracent au clic droit, et un doigt n'en a pas. On ne lui
+    donne pas le tracé libre — viser une case précise avec un doigt qui cache
+    la moitié du plateau tient de l'adresse — mais quelque chose de plus
+    utile à qui apprend : tenir une pièce un instant sans la bouger dessine,
+    en jaune, une flèche vers chacune de ses cases d'arrivée légales. Le
+    prochain geste sur le plateau les efface, comme toute annotation.
+
+    Le seuil de mouvement distingue l'appui d'un glisser qui hésite : au-delà
+    de quelques pixels, c'est un déplacement, et la minuterie tombe.
+  */
+  const minuterieAppuiLong = useRef<number | null>(null)
+  const departAppuiLong = useRef<{ x: number; y: number } | null>(null)
+  const annulerAppuiLong = useCallback(() => {
+    if (minuterieAppuiLong.current != null) {
+      window.clearTimeout(minuterieAppuiLong.current)
+      minuterieAppuiLong.current = null
+    }
+    departAppuiLong.current = null
+  }, [])
+  useEffect(() => annulerAppuiLong, [annulerAppuiLong])
+
   const noeudsDesPieces = useRef(new Map<string, HTMLDivElement>())
   const rectangleSaisie = useRef<DOMRect | null>(null)
   const enregistrerPiece = useCallback((id: string, noeud: HTMLDivElement | null) => {
@@ -461,6 +489,21 @@ export const Board2D = memo(function Board2D({
       poserSousLeDoigt(piece.id, point.x * 100, point.y * 100)
       setDrag({ piece, pointerId: event.pointerId, moved: false })
       boardRef.current?.setPointerCapture(event.pointerId)
+
+      if (event.pointerType !== 'mouse' && allowAnnotations) {
+        const cibles = targetsFor(square)
+        annulerAppuiLong()
+        if (cibles.length > 0) {
+          departAppuiLong.current = { x: event.clientX, y: event.clientY }
+          minuterieAppuiLong.current = window.setTimeout(() => {
+            minuterieAppuiLong.current = null
+            // La pièce retombe sur sa case ; le geste devient une annotation.
+            setDrag(null)
+            setUserArrows(cibles.map((to) => ({ from: square, to, color: 'yellow' as const })))
+            navigator.vibrate?.(12)
+          }, APPUI_LONG_MS)
+        }
+      }
     },
     [
       allowAnnotations,
@@ -478,6 +521,7 @@ export const Board2D = memo(function Board2D({
       premove,
       onPremoveCancel,
       poserSousLeDoigt,
+      annulerAppuiLong,
     ],
   )
 
@@ -499,15 +543,21 @@ export const Board2D = memo(function Board2D({
         return
       }
 
+      const depart = departAppuiLong.current
+      if (depart && Math.hypot(event.clientX - depart.x, event.clientY - depart.y) > SEUIL_GLISSER_PX) {
+        annulerAppuiLong()
+      }
+
       poserSousLeDoigt(drag.piece.id, point.x * 100, point.y * 100)
       if (!drag.moved) setDrag({ ...drag, moved: true })
       setHoverSquare(squareAt(point.x, point.y, orientation))
     },
-    [relativePoint, draft, drag, orientation, poserSousLeDoigt],
+    [relativePoint, draft, drag, orientation, poserSousLeDoigt, annulerAppuiLong],
   )
 
   const handlePointerUp = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
+      annulerAppuiLong()
       const point = relativePoint(event.clientX, event.clientY)
       const square = point ? squareAt(point.x, point.y, orientation) : null
 
@@ -534,15 +584,16 @@ export const Board2D = memo(function Board2D({
       setDrag(null)
       setHoverSquare(null)
     },
-    [relativePoint, orientation, draft, drag, attemptMove],
+    [relativePoint, orientation, draft, drag, attemptMove, annulerAppuiLong],
   )
 
   const handlePointerCancel = useCallback(() => {
+    annulerAppuiLong()
     rectangleSaisie.current = null
     setDrag(null)
     setDraft(null)
     setHoverSquare(null)
-  }, [])
+  }, [annulerAppuiLong])
 
   // ── Accessibilité clavier ─────────────────────────────────────────────────
 
