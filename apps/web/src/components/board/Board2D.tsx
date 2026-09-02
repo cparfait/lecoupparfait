@@ -20,6 +20,7 @@
  */
 
 import {
+  Fragment,
   memo,
   useCallback,
   useEffect,
@@ -43,6 +44,7 @@ import {
   orderedSquares,
   pieceUrl,
   piecesFromFen,
+  reconduireIdentites,
   squareAt,
   squareCentre,
   squarePosition,
@@ -209,7 +211,27 @@ export const Board2D = memo(function Board2D({
   // ailleurs `skinId` est absent et la préférence gagne.
   const skin = BOARD_SKINS[skinId ?? prefs.boardStyle] ?? BOARD_SKINS.aurore
 
-  const pieces = useMemo(() => piecesFromFen(fen), [fen])
+  /*
+    Les pièces gardent leur identité d'une position à l'autre : c'est ce qui
+    permet à React de réutiliser le nœud et à la transition sur `transform`
+    de faire glisser la pièce. Le précédent est gardé dans une référence — et
+    non dans l'état — parce que le calcul doit se faire dans le même rendu que
+    la nouvelle position, sans image intermédiaire. Il est idempotent : le
+    rejouer sur son propre résultat rend les mêmes identifiants, ce qui le
+    met à l'abri du double appel du mode strict.
+  */
+  const piecesPrecedentes = useRef<BoardPiece[]>([])
+  const compteurIdentifiants = useRef(0)
+  const pieces = useMemo(() => {
+    const suivies = reconduireIdentites(
+      piecesPrecedentes.current,
+      piecesFromFen(fen),
+      lastMove,
+      () => `piece-${compteurIdentifiants.current++}`,
+    )
+    piecesPrecedentes.current = suivies
+    return suivies
+  }, [fen, lastMove])
   const squares = useMemo(() => orderedSquares(orientation), [orientation])
 
   const [selected, setSelected] = useState<Square | null>(null)
@@ -696,42 +718,47 @@ export const Board2D = memo(function Board2D({
         )}
 
         {/* ── Pièces ────────────────────────────────────────────────────── */}
-        {pieces.map((piece) => {
-          const isDragged = drag?.piece.square === piece.square && drag.moved
-          const position = squarePosition(piece.square, orientation)
-          return (
-            <div
-              key={piece.id}
-              className={clsx(
-                'absolute pointer-events-none will-change-transform',
-                isDragged && 'z-30',
-              )}
-              style={{
-                width: '12.5%',
-                height: '12.5%',
-                left: 0,
-                top: 0,
-                // Les pourcentages d'une translation se rapportent à la taille
-                // de l'élément (12,5 % du plateau) : un déplacement de X % du
-                // plateau vaut donc X × 8 % ici.
-                transform: isDragged
-                  ? `translate(${(drag.x - 6.25) * 8}%, ${(drag.y - 6.25) * 8}%) scale(1.16)`
-                  : `translate(${position.left * 8}%, ${position.top * 8}%)`,
-                transition: isDragged ? 'none' : `transform ${animationMs}ms cubic-bezier(.2,.9,.25,1)`,
-                filter: isDragged ? 'drop-shadow(0 12px 18px rgb(0 0 0 / .45))' : undefined,
-                zIndex: isDragged ? 30 : 10,
-              }}
-            >
-              <img
-                src={pieceUrl(prefs.pieceSet, piece.color, piece.type)}
-                alt=""
-                draggable={false}
-                className="h-full w-full"
-                style={{ imageRendering: prefs.pieceSet === 'pixel' ? 'pixelated' : undefined }}
-              />
-            </div>
-          )
-        })}
+        {/* La clé sur l'orientation remonte toutes les pièces quand on
+            retourne le plateau : sans elle, chacune traverserait l'échiquier
+            en glissant, ce qui n'est pas un coup et ne doit pas y ressembler. */}
+        <Fragment key={orientation}>
+          {pieces.map((piece) => {
+            const isDragged = drag?.piece.square === piece.square && drag.moved
+            const position = squarePosition(piece.square, orientation)
+            return (
+              <div
+                key={piece.id}
+                className={clsx(
+                  'absolute pointer-events-none will-change-transform',
+                  isDragged && 'z-30',
+                )}
+                style={{
+                  width: '12.5%',
+                  height: '12.5%',
+                  left: 0,
+                  top: 0,
+                  // Les pourcentages d'une translation se rapportent à la taille
+                  // de l'élément (12,5 % du plateau) : un déplacement de X % du
+                  // plateau vaut donc X × 8 % ici.
+                  transform: isDragged
+                    ? `translate(${(drag.x - 6.25) * 8}%, ${(drag.y - 6.25) * 8}%) scale(1.16)`
+                    : `translate(${position.left * 8}%, ${position.top * 8}%)`,
+                  transition: isDragged ? 'none' : `transform ${animationMs}ms cubic-bezier(.2,.9,.25,1)`,
+                  filter: isDragged ? 'drop-shadow(0 12px 18px rgb(0 0 0 / .45))' : undefined,
+                  zIndex: isDragged ? 30 : 10,
+                }}
+              >
+                <img
+                  src={pieceUrl(prefs.pieceSet, piece.color, piece.type)}
+                  alt=""
+                  draggable={false}
+                  className="h-full w-full"
+                  style={{ imageRendering: prefs.pieceSet === 'pixel' ? 'pixelated' : undefined }}
+                />
+              </div>
+            )
+          })}
+        </Fragment>
 
         {/* ── Indications de coups légaux ───────────────────────────────── */}
         {prefs.showLegalMoves && selected && (

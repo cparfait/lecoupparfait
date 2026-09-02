@@ -351,9 +351,9 @@ export interface BoardPiece {
 /**
  * Convertit le champ « placement » d'une FEN en liste de pièces.
  *
- * L'identifiant est dérivé de la case : il suffit pour que React réutilise le
- * même nœud DOM tant que la pièce ne bouge pas. L'animation d'un déplacement est
- * gérée séparément, en connaissant le coup joué.
+ * L'identifiant est ici la case, ce qui ne suffit pas à animer un
+ * déplacement : voir `reconduireIdentites`, qui redonne à chaque pièce
+ * l'identité qu'elle avait dans la position précédente.
  */
 export function piecesFromFen(fen: string): BoardPiece[] {
   const placement = fen.split(' ')[0] ?? ''
@@ -384,4 +384,82 @@ export function piecesFromFen(fen: string): BoardPiece[] {
     file++
   }
   return pieces
+}
+
+/**
+ * Redonne aux pièces d'une position l'identité qu'elles avaient dans la
+ * précédente.
+ *
+ * React n'anime le déplacement d'un élément que s'il le reconnaît d'un rendu
+ * à l'autre, par sa clé. Avec la case pour clé, un coup e7-e5 est la
+ * disparition d'une pièce et l'apparition d'une autre : l'ancienne est
+ * démontée, la nouvelle est montée déjà en place, et la transition sur
+ * `transform` n'a jamais rien à faire. C'était le cas jusqu'ici — aucune
+ * pièce n'a jamais glissé, quel que fût le réglage de durée.
+ *
+ * On apparie donc sans rien savoir des règles, du plus sûr au plus flou :
+ *  1. même case, même couleur, même figure — la pièce n'a pas bougé ;
+ *  2. le dernier coup, s'il est connu — c'est lui qu'on veut voir glisser,
+ *     figure comprise ou non (la promotion change l'image en route) ;
+ *  3. même couleur et même figure, la plus proche — c'est ce qui attrape la
+ *     tour du roque, et ce qui garde une animation raisonnable quand on saute
+ *     plusieurs coups d'un seul geste en analyse.
+ *
+ * Ce qui reste est une pièce nouvelle, et reçoit un identifiant neuf.
+ */
+export function reconduireIdentites(
+  anciennes: BoardPiece[],
+  nouvelles: BoardPiece[],
+  dernierCoup: { from: Square; to: Square } | null | undefined,
+  identifiantNeuf: () => string,
+): BoardPiece[] {
+  const parCase = new Map(anciennes.map((piece) => [piece.square, piece]))
+  const libres = new Set(anciennes)
+  const resultat: BoardPiece[] = []
+  const enAttente: BoardPiece[] = []
+
+  for (const piece of nouvelles) {
+    const meme = parCase.get(piece.square)
+    if (meme && libres.has(meme) && meme.color === piece.color && meme.type === piece.type) {
+      libres.delete(meme)
+      resultat.push({ ...piece, id: meme.id })
+    } else {
+      enAttente.push(piece)
+    }
+  }
+
+  const reprendre = (piece: BoardPiece, ancienne: BoardPiece) => {
+    libres.delete(ancienne)
+    resultat.push({ ...piece, id: ancienne.id })
+  }
+
+  const restantes: BoardPiece[] = []
+  for (const piece of enAttente) {
+    const origine = dernierCoup && piece.square === dernierCoup.to ? parCase.get(dernierCoup.from) : null
+    if (origine && libres.has(origine) && origine.color === piece.color) {
+      reprendre(piece, origine)
+    } else {
+      restantes.push(piece)
+    }
+  }
+
+  for (const piece of restantes) {
+    let plusProche: BoardPiece | null = null
+    let distance = Infinity
+    for (const candidate of libres) {
+      if (candidate.color !== piece.color || candidate.type !== piece.type) continue
+      const d = Math.max(
+        Math.abs(fileOf(candidate.square) - fileOf(piece.square)),
+        Math.abs(rankOf(candidate.square) - rankOf(piece.square)),
+      )
+      if (d < distance) {
+        distance = d
+        plusProche = candidate
+      }
+    }
+    if (plusProche) reprendre(piece, plusProche)
+    else resultat.push({ ...piece, id: identifiantNeuf() })
+  }
+
+  return resultat
 }
