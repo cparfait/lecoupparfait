@@ -434,6 +434,10 @@ html {
   -webkit-text-size-adjust: 100%;
   /* Empêche le zoom involontaire au double-tap sur mobile pendant une partie. */
   touch-action: manipulation;
+  /* Android peint un rectangle gris sur tout ce qu'on tape — boutons,
+     pièces de promotion, bascule de vue. Nos états pressés sont dessinés par
+     nous ; celui du système ne fait que les recouvrir. */
+  -webkit-tap-highlight-color: transparent;
 }
 
 /*
