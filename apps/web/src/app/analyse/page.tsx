@@ -60,6 +60,7 @@ import {
   type AnalysisProgress,
 } from '@/lib/analysis/runner.ts'
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
+import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { ImportEnLigne } from '@/components/import/ImportEnLigne.tsx'
 import { MesAnalyses } from '@/components/analysis/MesAnalyses.tsx'
@@ -470,7 +471,65 @@ function ImportScreen({
         </span>
       </p>
 
-      <Card glow className="mt-4 overflow-hidden sm:mt-7">
+      {/* ── D'où vient la partie ? ───────────────────────────────────────
+          Trois provenances, trois blocs, et c'est le sujet même de cet écran :
+          une partie jouée ici, une partie jouée ailleurs, ou un texte qu'on
+          colle. Elles étaient empilées dans une seule carte, séparées par des
+          filets et deux volets repliés : on ne distinguait plus la liste de
+          ses propres parties du champ de saisie, et le choix ressemblait à un
+          formulaire à remplir de haut en bas. Chacune a maintenant sa carte et
+          son titre.
+
+          L'ordre suit ce qu'on vient chercher : ses parties d'ici d'abord —
+          celle qu'on vient de perdre est la raison la plus fréquente d'ouvrir
+          cette page —, puis celles d'ailleurs, puis le collage, qui est le
+          recours de qui n'a ni compte ici ni compte là-bas. */}
+
+      {/* Rien à choisir quand la partie vient d'être jouée : on arrive de la
+          boîte de fin de partie, le texte est déjà là, et proposer d'aller en
+          chercher une autre revient à demander « et sinon, laquelle ? » à
+          quelqu'un qui vient de répondre. */}
+      {/* `empty:hidden` et deux enfants directs, sans conteneur : les deux
+          listes ne rendent rien tant qu'on n'est pas connecté, et une carte
+          vide de cent points s'affichait au-dessus de tout le reste. Un
+          `<div>` d'espacement autour d'elles aurait suffi à la rendre non
+          vide, donc visible. L'écart vient de `space-y`. */}
+      {!handedOver && (
+        <Card className="mt-4 space-y-5 overflow-hidden p-5 empty:hidden empty:p-0 sm:mt-7">
+          <MesAnalyses onOuvrir={(id) => void ouvrirEnregistree(id)} />
+          <MesParties
+            onChoisir={(pgn, campJoue) => {
+              setInput(pgn)
+              setCamp(campJoue)
+              onSide(campJoue)
+            }}
+          />
+        </Card>
+      )}
+
+      {!handedOver && (
+        <Card className="mt-3 overflow-hidden p-5">
+          <SectionTitle>Tes parties en ligne</SectionTitle>
+          <p className="mt-1 text-xs text-muted">
+            Chess.com ou Lichess, à partir du seul pseudo. Aucun compte n’est nécessaire ici,
+            et rien n’est enregistré.
+          </p>
+          <div className="mt-3">
+            <ImportEnLigne
+              serviceInitial={serviceDemande ?? (chesscomUsername.trim() || !lichessUsername.trim() ? 'chesscom' : 'lichess')}
+              onChoisir={(pgn, campImporte) => {
+                // Le camp du joueur cherché : c'est lui qui lira l'analyse.
+                setCamp(campImporte)
+                onSide(campImporte)
+                lancerDesQueLue.current = true
+                setInput(pgn)
+              }}
+            />
+          </div>
+        </Card>
+      )}
+
+      <Card glow className="mt-3 overflow-hidden">
         <details
           className="group [&_summary::-webkit-details-marker]:hidden"
           open={collageOuvert}
@@ -521,83 +580,6 @@ function ImportScreen({
           </div>
         </div>
         </details>
-
-        {/* Rien à importer quand la partie vient d'être jouée.
-            On arrive ici depuis la boîte de fin de partie, le PGN est déjà
-            dans le champ ci-dessus : proposer d'aller chercher des parties
-            ailleurs revient à demander « et sinon, laquelle veux-tu analyser ? »
-            à quelqu'un qui vient précisément de répondre. */}
-        {/* Avant l'import en ligne, et volontairement : la première question
-            devant cet écran est « je l'ai déjà analysée, non ? ». La liste ne
-            s'affiche que si elle a quelque chose à montrer. */}
-        {!handedOver && (
-          <div className="border-t border-line/60 px-5 py-4 empty:hidden">
-            <MesAnalyses onOuvrir={(id) => void ouvrirEnregistree(id)} />
-          </div>
-        )}
-
-        {/* Les parties jouées ici, avant celles d'ailleurs.
-            Quelqu'un qui vient d'abandonner sa partie contre l'ordinateur et
-            qui ouvre cet écran cherche cette partie-là, pas son historique
-            chess.com — et jusqu'ici il ne trouvait que le second. */}
-        {!handedOver && (
-          <div className="border-t border-line/60 px-5 py-4 empty:hidden">
-            <MesParties
-              onChoisir={(pgn, campJoue) => {
-                setInput(pgn)
-                setCamp(campJoue)
-                onSide(campJoue)
-              }}
-            />
-          </div>
-        )}
-
-        {/* ── L'import en ligne, replié ────────────────────────────────────
-            Il occupait quatre-vingts points sans qu'on lui ait rien demandé :
-            un titre, deux lignes d'explication, une bascule de service, un
-            champ et un bouton — le tout entre la liste de ses propres parties
-            et le réglage de profondeur, c'est-à-dire en plein milieu du chemin
-            qu'on parcourt à chaque visite. C'est pourtant un geste qu'on fait
-            une fois, ou jamais.
-
-            Replié, il tient sur une ligne et dit toujours ce qu'il propose. Le
-            pseudo, lui, est déjà mémorisé dans les préférences : celui qui s'en
-            sert le retrouvera saisi en dépliant. */}
-        {!handedOver && (
-          <details
-            className="group border-t border-line/60 [&_summary::-webkit-details-marker]:hidden"
-            open={importOuvert}
-            onToggle={(event) => setImportOuvert(event.currentTarget.open)}
-          >
-            <summary className="flex cursor-pointer list-none items-center gap-2 px-5 py-3 text-sm transition-colors hover:bg-surface-hover">
-              <ChevronRight
-                size={15}
-                aria-hidden
-                className="shrink-0 text-faint transition-transform group-open:rotate-90"
-              />
-              <span className="font-medium">Depuis ton compte en ligne</span>
-              <span className="min-w-0 flex-1 truncate text-xs text-faint">
-                Chess.com ou Lichess, à partir du seul pseudo
-              </span>
-            </summary>
-            <div className="px-5 pb-4">
-              <p className="mb-3 text-xs text-muted">
-                Récupère tes dernières parties et fais-les analyser ici — aucun compte n’est
-                nécessaire, rien n’est enregistré.
-              </p>
-              <ImportEnLigne
-                serviceInitial={serviceDemande ?? (chesscomUsername.trim() || !lichessUsername.trim() ? 'chesscom' : 'lichess')}
-                onChoisir={(pgn, campImporte) => {
-                  // Le camp du joueur cherché : c'est lui qui lira l'analyse.
-                  setCamp(campImporte)
-                  onSide(campImporte)
-                  lancerDesQueLue.current = true
-                  setInput(pgn)
-                }}
-              />
-            </div>
-          </details>
-        )}
 
         {/* Qui es-tu dans cette partie ?
         
@@ -751,6 +733,8 @@ function ImportScreen({
         L’analyse tourne d’abord sur le Stockfish natif du serveur. S’il est indisponible,
         elle se poursuit dans ton navigateur, un peu moins profondément.
       </p>
+
+      <AutresDeLaSection section="analyser" />
     </div>
   )
 }

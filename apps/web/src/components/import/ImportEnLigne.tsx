@@ -152,7 +152,11 @@ export function ImportEnLigne({
               sous le bord, et l'on ne savait plus où en était l'écran. On
               vient le plus souvent chercher la dernière partie jouée, ou
               l'une des deux d'avant ; au-delà, on fait défiler le cadre. */}
-          <ul className="max-h-[10.5rem] space-y-1 overflow-y-auto overscroll-contain pr-1">
+          {/* Pas d'`overscroll-contain` : arrivé au bout des trois lignes, le
+              geste doit continuer la page. Retenu ici, le doigt bute sur un
+              cadre de dix rems au milieu de l'écran et l'on croit la page
+              bloquée. */}
+          <ul className="max-h-[10.5rem] space-y-1 overflow-y-auto pr-1">
             {parties.map((partie) => (
               <li key={partie.id}>
                 <LignePartie partie={partie} onChoisir={onChoisir} />
