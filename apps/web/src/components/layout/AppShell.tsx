@@ -89,7 +89,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col">
       {/* ── Barre supérieure ─────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 border-b border-line/70 backdrop-blur-xl">
+      {/* Zone sûre en haut : `viewport-fit=cover` fait passer la page sous la
+          barre d'état et l'encoche en mode installé, et l'en-tête collant
+          commençait là-dessous. Le rembourrage vaut zéro partout ailleurs. */}
+      <header className="sticky top-0 z-50 border-b border-line/70 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
         <div className="absolute inset-0 -z-10 bg-[var(--bg)]/72" aria-hidden />
         {/* Le resserrement sous 360 px n'est pas cosmétique.
             Cinq commandes à droite — série, thème, préférences, compte,
@@ -189,7 +192,17 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
 
       {/* ── Contenu ──────────────────────────────────────────────────── */}
-      <main className={clsx('flex-1', !immersive && 'pb-20 lg:pb-0')}>{children}</main>
+      {/* Les encoches latérales en paysage, et la barre de gestes en bas des
+          écrans immersifs, qui n'ont pas la barre de navigation pour les en
+          protéger. */}
+      <main
+        className={clsx(
+          'flex-1 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]',
+          immersive ? 'pb-[env(safe-area-inset-bottom)]' : 'pb-20 lg:pb-0',
+        )}
+      >
+        {children}
+      </main>
 
       {/* Un ami peut proposer une partie pendant qu'on lit une leçon : le
           guetteur vit donc dans la coque, pas dans une page. */}
