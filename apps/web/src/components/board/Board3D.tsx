@@ -29,7 +29,14 @@ import {
   pieceGeometry,
   type Piece3DType,
 } from './pieceGeometry.ts'
-import { BOARD_SKINS, isLightSquare, orderedSquares, piecesFromFen, type BoardPiece } from './boardKit.ts'
+import {
+  BOARD_SKINS,
+  isLightSquare,
+  orderedSquares,
+  piecesFromFen,
+  reconduireIdentites,
+  type BoardPiece,
+} from './boardKit.ts'
 import { PromotionPicker } from './PromotionPicker.tsx'
 import { resolvePieceColours, usePreferences } from '@/lib/store/preferences.ts'
 import type { Board2DProps } from './Board2D.tsx'
@@ -101,7 +108,21 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
     null,
   )
 
-  const pieces = useMemo(() => piecesFromFen(fen), [fen])
+  // Même appariement qu'en 2D : une pièce garde son identité d'une position à
+  // l'autre, sans quoi React démonte l'ancienne et monte la nouvelle déjà en
+  // place — et l'interpolation de `Piece3D` n'a jamais rien à faire glisser.
+  const piecesPrecedentes = useRef<BoardPiece[]>([])
+  const compteurIdentifiants = useRef(0)
+  const pieces = useMemo(() => {
+    const suivies = reconduireIdentites(
+      piecesPrecedentes.current,
+      piecesFromFen(fen),
+      lastMove,
+      () => `piece-${compteurIdentifiants.current++}`,
+    )
+    piecesPrecedentes.current = suivies
+    return suivies
+  }, [fen, lastMove])
   useEffect(() => setSelected(null), [fen])
 
   const targets = selected ? (legalMoves?.get(selected) ?? []) : []
@@ -568,17 +589,21 @@ function Scene({
       })}
 
       {/* ── Pièces ────────────────────────────────────────────────────── */}
-      {pieces.map((piece) => (
-        <Piece3D
-          key={piece.id}
-          piece={piece}
-          orientation={orientation}
-          quality={quality}
-          selected={selected === piece.square}
-          material={prefs.pieceMaterial}
-          onClick={() => onSquareClick(piece.square)}
-        />
-      ))}
+      {/* La clé sur l'orientation remonte toutes les pièces quand on retourne
+          le plateau : elles ne doivent pas le traverser en glissant. */}
+      <group key={orientation}>
+        {pieces.map((piece) => (
+          <Piece3D
+            key={piece.id}
+            piece={piece}
+            orientation={orientation}
+            quality={quality}
+            selected={selected === piece.square}
+            material={prefs.pieceMaterial}
+            onClick={() => onSquareClick(piece.square)}
+          />
+        ))}
+      </group>
 
       {/* Ombre de contact : ce qui « pose » vraiment les pièces sur le bois. */}
       {quality === 'high' && (
@@ -629,6 +654,16 @@ function Piece3D({
   )
 
   target.current.set(x, 0.02, z)
+
+  // La position n'est posée qu'au montage : ensuite, c'est l'interpolation qui
+  // conduit la pièce. Passée en propriété, React Three Fiber la réappliquerait
+  // à chaque changement de case, et la pièce sauterait au lieu de glisser.
+  const posee = useRef(false)
+  useLayoutEffect(() => {
+    if (posee.current) return
+    posee.current = true
+    groupRef.current?.position.set(x, 0.02, z)
+  }, [x, z])
 
   // Interpolation vers la case cible : c'est ce qui fait glisser la pièce
   // plutôt que de la téléporter, sans avoir à orchestrer d'animation.
@@ -683,7 +718,6 @@ function Piece3D({
   return (
     <group
       ref={groupRef}
-      position={[x, 0.02, z]}
       onClick={(event: ThreeEvent<MouseEvent>) => {
         event.stopPropagation()
         onClick()
