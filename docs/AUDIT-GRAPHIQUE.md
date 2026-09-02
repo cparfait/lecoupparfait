@@ -502,6 +502,21 @@ prend `--accent` : jaune en contraste, violet ailleurs.
 Tablette 768×1024 : `/`, `apprendre` sans débordement, disposition
 empilée avec la barre du bas — c'est celle du téléphone, plus large.
 
+Sélecteur de promotion, **constaté** à 360×640 sur une position composée
+(pion blanc en g7) : colonne des quatre pièces déroulée depuis g8, voile
+flouté de 2 px en mode spectaculaire, choix du cavalier joué (`g8=♘`).
+Les boutons font 43 × 43 px à cette largeur (un huitième du plateau) —
+44 dès 368 px de large ; laissé ainsi, la colonne doit rester calée sur
+la case d'arrivée.
+
+CLS au chargement, **mesuré** (`layout-shift` en tampon) : 0 sur `/`,
+`/puzzles`, `/apprendre/echiquier`, `/jouer`.
+
+Changement de thème en 3D : le thème ne touche pas la scène (le damier
+suit `boardStyle`, pas `theme`) ; un changement de damier recrée la seule
+texture de fond et la libère, le canevas garde sa clé. Vérifié dans le
+code, pas à l'écran.
+
 ### E2 — Cibles de l'en-tête à 36 px — gênant
 
 Thème, préférences, menu : 36 × 36 (`AppShell.tsx:137-166`). Au pointeur
