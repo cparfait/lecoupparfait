@@ -478,13 +478,20 @@ finales 265. Portrait et 1024×768 inchangés.
 113 à 373, entier ; la légende passe sous le bord (page de 417 px). Laissé
 ainsi.
 
-`analyse` avec une partie chargée, **constaté** à 844×390 : plateau de 260
-px de 144 à 404, dix pixels sous le bord, page qui défile. La disposition
-« page d'étude » y a été essayée puis **retirée** : la colonne du plateau y
-porte aussi la navigation, la courbe et les cartes de précision, qui ne
-tiennent pas dans 390 px de haut — le plateau passait par-dessus. Une
-disposition paysage propre pour l'analyse demande son propre dessin
-(quoi garder à côté du plateau) ; c'est un arbitrage, pas une correction.
+`analyse` avec une partie chargée, **constaté** à 844×390 avant : plateau
+de 260 px de 144 à 404, dix pixels sous le bord, page qui défile. La
+disposition « page d'étude » y a d'abord été essayée puis retirée : la
+colonne du plateau porte aussi la navigation, la courbe et le bilan, qui
+ne tiennent pas dans 390 px — le plateau passait par-dessus. **Corrigé
+ensuite** par une grille à zones propre à la page (`.grille-analyse`) : en
+paysage le plateau à gauche, navigation et courbe en haut à droite, la
+colonne qui défile dessous, le bilan et les pastilles d'en-tête retirés
+(la colonne donne le résumé). **Constaté** : plateau 273 px de 109 à 382,
+page sans défilement ; portrait et 1024×768 inchangés.
+
+E3 **corrigé** : l'expression « immersive » ne retient plus que les écrans
+où l'on joue ; `jouer/ami` retrouve sa barre du bas (**constaté** à
+360×640).
 
 Quatre thèmes : la page de partie revue en aurora, club, clair et contraste,
 en portrait et en paysage ; les corrections n'introduisent aucune couleur
@@ -574,7 +581,7 @@ Ce que ces corrections ont pu casser, et ce qui a été revérifié :
 
 ## Bilan au 2 septembre 2026
 
-Vingt-trois commits de corrections sur `main`, de `cebffe4` à `df4e9c5`, non poussés.
+Vingt-cinq commits de corrections sur `main`, de `cebffe4` à `3e264f9`, non poussés.
 `npm run typecheck`, `npm test` (71 vérifications) et `npm run build`
 passent sur la pointe, sans avertissement.
 
@@ -590,7 +597,7 @@ passent sur la pointe, sans avertissement.
 - `100vh` : plus aucun (les deux du plein écran passés en `dvh`/`dvw`).
 - Paysage téléphone, échiquier entier : **vrai** sur les trois pages de
   partie, puzzles, leçon, éditeur, ouvertures, finales, manche
-  chronométrée ; **faux de dix pixels** sur l'analyse (voir E1).
+  chronométrée et l'analyse détaillée.
 - CLS : 0 mesuré sur `/puzzles` ; non mesuré ailleurs.
 
 **Échiquier**
@@ -629,9 +636,6 @@ passent sur la pointe, sans avertissement.
 
 ### Ce qui reste
 
-- `analyse` en paysage (E1) : dix pixels sous le bord, arbitrage de
-  disposition à faire.
-- `jouer/ami` et `jouer/regarder` sans barre du bas (E3) : arbitrage produit.
 - Écrans réservés à un compte (études, statistiques, profil, tournois en
   cours, correspondance, amis) : seule l'invitation à se connecter a été
   vue.
