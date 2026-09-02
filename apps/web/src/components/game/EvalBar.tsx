@@ -49,9 +49,12 @@ export const EvalBar = memo(function EvalBar({
         aria-valuemax={100}
         aria-label={`Évaluation : ${label}`}
       >
+        {/* La jauge est une mise à l'échelle, pas une largeur qui change :
+            une transition sur `width` refait la mise en page à chaque image
+            pendant une demi-seconde, `transform` ne touche qu'au compositeur. */}
         <div
-          className="absolute inset-y-0 left-0 transition-[width] duration-500 ease-out"
-          style={{ width: `${bottomShare}%`, background: 'var(--eval-white)' }}
+          className="absolute inset-0 origin-left transition-transform duration-500 ease-out"
+          style={{ transform: `scaleX(${bottomShare / 100})`, background: 'var(--eval-white)' }}
         />
         {showLabel && (
           <span
@@ -81,10 +84,12 @@ export const EvalBar = memo(function EvalBar({
       aria-valuemax={100}
       aria-label={`Évaluation : ${label}`}
     >
+      {/* Même principe qu'en horizontal : `scaleY` depuis le bas, et non une
+          hauteur animée. */}
       <div
-        className="absolute inset-x-0 bottom-0 transition-[height] duration-500 ease-out"
+        className="absolute inset-0 origin-bottom transition-transform duration-500 ease-out"
         style={{
-          height: `${bottomShare}%`,
+          transform: `scaleY(${bottomShare / 100})`,
           background: 'var(--eval-white)',
           boxShadow: decisive ? '0 0 12px var(--accent)' : undefined,
         }}
