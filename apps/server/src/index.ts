@@ -33,6 +33,8 @@ import { isTablebaseEnabled } from './engine/tablebase.ts'
 import { disposeVoices, isPiperAvailable, listPiperVoices, synthesise } from './tts/piper.ts'
 import { GameRoom } from './realtime/gameRoom.ts'
 import { persistFinishedGame } from './persistence.ts'
+import { pruneSessions } from '@coupparfait/db/auth'
+import { pruneEvaluations } from '@coupparfait/db/menage'
 import { verifySessionToken } from './auth.ts'
 import { adresseDe, creerLimiteur } from './limites.ts'
 import { rappelDuDefi, rappelsPossibles } from './rappels.ts'
@@ -902,42 +904,107 @@ async function arenaTick(): Promise<void> {
  * Le rétablissement se dit aussi, sur une ligne : sans lui, on ne saurait pas
  * que la base est revenue, et l'on chercherait ailleurs.
  */
-let dernierEchecArene: string | null = null
+function signaleurDePanne(etiquette: string, aVide: string) {
+  let derniere: string | null = null
 
-function signalerEchecArene(error: unknown): void {
-  const message = error instanceof Error ? error.message : String(error)
-  // `ECONNREFUSED` arrive enveloppé dans une `DrizzleQueryError` dont le message
-  // contient la requête entière. On le reconnaît pour le dire en une ligne :
-  // « la base ne répond pas » est tout ce qu'on peut faire de cette panne-là.
-  const injoignable = /ECONNREFUSED|ENOTFOUND|ETIMEDOUT|Connection terminated/i.test(
-    message + String((error as { cause?: unknown } | null)?.cause ?? ''),
-  )
-  const empreinte = injoignable ? 'base-injoignable' : message
+  return {
+    echec(error: unknown): void {
+      const message = error instanceof Error ? error.message : String(error)
+      // `ECONNREFUSED` arrive enveloppé dans une `DrizzleQueryError` dont le
+      // message contient la requête entière. On le reconnaît pour le dire en
+      // une ligne : « la base ne répond pas » est tout ce qu'on peut faire de
+      // cette panne-là.
+      const injoignable = /ECONNREFUSED|ENOTFOUND|ETIMEDOUT|Connection terminated/i.test(
+        message + String((error as { cause?: unknown } | null)?.cause ?? ''),
+      )
+      const empreinte = injoignable ? 'base-injoignable' : message
 
-  if (empreinte === dernierEchecArene) return
-  dernierEchecArene = empreinte
+      if (empreinte === derniere) return
+      derniere = empreinte
 
-  if (injoignable) {
-    console.warn(
-      '[tournoi] base de données injoignable — la boucle des arènes tourne à vide.\n' +
-        '          Lance PostgreSQL, ou ignore : le reste de l’application n’en dépend pas.',
-    )
-    return
+      if (injoignable) {
+        console.warn(
+          `[${etiquette}] base de données injoignable — ${aVide}\n` +
+            '          Lance PostgreSQL, ou ignore : le reste de l’application n’en dépend pas.',
+        )
+        return
+      }
+      console.error(`[${etiquette}] en erreur :`, error)
+    },
+
+    reussite(): void {
+      if (derniere === null) return
+      console.log(`[${etiquette}] base de données de nouveau joignable.`)
+      derniere = null
+    },
   }
-  console.error('[tournoi] boucle en erreur :', error)
 }
 
+const pannesArene = signaleurDePanne('tournoi', 'la boucle des arènes tourne à vide.')
+
 const arenaTimer = setInterval(() => {
-  void arenaTick()
-    .then(() => {
-      if (dernierEchecArene !== null) {
-        console.log('[tournoi] base de données de nouveau joignable.')
-        dernierEchecArene = null
-      }
-    })
-    .catch(signalerEchecArene)
+  void arenaTick().then(pannesArene.reussite).catch(pannesArene.echec)
 }, ARENA_TICK_MS)
 arenaTimer.unref?.()
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Ménage quotidien
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Les purges, une fois par jour, à 4 h locales.
+ *
+ * `pruneSessions` existait déjà mais n'était appelée que depuis un bouton de
+ * l'écran d'administration : elle ne tournait donc que si quelqu'un y pensait.
+ * Le cache d'évaluations, lui, n'était purgé nulle part — l'écran de santé se
+ * contentait de le regarder grossir. Deux tables qui montent sans jamais
+ * redescendre, sur une plateforme dont l'intérêt est qu'on n'ait pas à s'en
+ * occuper.
+ *
+ * Ici plutôt qu'ailleurs parce que c'est le seul processus toujours vivant, et
+ * qu'il a déjà une boucle. Quatre heures du matin parce que c'est l'heure où
+ * une suppression de plusieurs milliers de lignes ne gêne personne.
+ *
+ * `PURGE_HEURE` sert à éprouver le mécanisme sans attendre la nuit ; elle n'est
+ * pas documentée dans `.env.example`, il n'y a aucune raison d'y toucher en
+ * production.
+ */
+const PURGE_HEURE = Number(process.env.PURGE_HEURE ?? 4)
+
+/** Jours au-delà desquels une évaluation en cache est effacée. */
+const CONSERVATION_EVALUATIONS = Number(process.env.EVAL_CONSERVATION_JOURS ?? 90)
+
+const pannesMenage = signaleurDePanne('ménage', 'les purges quotidiennes sont reportées.')
+
+/** Dernier jour où le ménage a été fait, pour ne pas le refaire à chaque tour. */
+let dernierMenage: string | null = null
+
+async function menageQuotidien(): Promise<void> {
+  const maintenant = new Date()
+  if (maintenant.getHours() !== PURGE_HEURE) return
+
+  // La date locale sert de jeton : la boucle passe soixante fois dans l'heure,
+  // le ménage n'a lieu qu'une.
+  const jour = maintenant.toDateString()
+  if (jour === dernierMenage) return
+  dernierMenage = jour
+
+  const sessions = await pruneSessions()
+  const evaluations = await pruneEvaluations(CONSERVATION_EVALUATIONS)
+  const salons = await purgerSalonsPerimes(FENETRE_REPRISE_MS)
+
+  console.log(
+    `[ménage] sessions expirées : ${sessions} · évaluations de plus de ` +
+      `${CONSERVATION_EVALUATIONS} jours : ${evaluations} · salons périmés : ${salons}`,
+  )
+}
+
+// Une minute : assez fin pour attraper l'heure dite, assez large pour ne rien
+// peser. La boucle des arènes bat vingt fois plus vite et n'a pas à porter ça.
+const menageTimer = setInterval(() => {
+  void menageQuotidien().then(pannesMenage.reussite).catch(pannesMenage.echec)
+}, 60_000)
+menageTimer.unref?.()
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Rappel du défi du jour

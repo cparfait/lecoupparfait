@@ -17,7 +17,8 @@
     "./tournaments": "./src/tournaments.ts",
     "./ratings": "./src/ratings.ts",
     "./push": "./src/push.ts",
-    "./live": "./src/live.ts"
+    "./live": "./src/live.ts",
+    "./menage": "./src/menage.ts"
   },
   "scripts": {
     "db:generate": "drizzle-kit generate",

@@ -8,7 +8,8 @@
       "@coupparfait/db": ["../../packages/db/src/index.ts"],
       "@coupparfait/db/auth": ["../../packages/db/src/auth.ts"],
       "@coupparfait/db/ratings": ["../../packages/db/src/ratings.ts"],
-      "@coupparfait/db/live": ["../../packages/db/src/live.ts"]
+      "@coupparfait/db/live": ["../../packages/db/src/live.ts"],
+      "@coupparfait/db/menage": ["../../packages/db/src/menage.ts"]
     }
   },
   "include": ["src/**/*.ts", "test/**/*.ts"]
