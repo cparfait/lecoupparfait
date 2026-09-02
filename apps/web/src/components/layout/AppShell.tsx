@@ -84,7 +84,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   useEffect(() => setPorte(null), [pathname])
 
   // Les pages de partie masquent la navigation mobile pour libérer l'écran.
-  const immersive = /^\/(jouer|puzzles|apprendre)\/[^/]+/.test(pathname)
+  // Seulement celles où l'on joue : le choix d'une cadence et la liste des
+  // parties à regarder sont des écrans de navigation, qui la perdaient aussi.
+  const immersive =
+    /^\/(jouer\/(ordinateur|local|partie)|puzzles\/rush|apprendre\/[^/]+)/.test(pathname)
 
   return (
     <div className="flex min-h-dvh flex-col">
