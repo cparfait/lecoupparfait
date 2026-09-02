@@ -130,14 +130,16 @@ export default function EditorPage() {
   }, [fen, verdict])
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
+    <div className="etude mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
       <SectionTitle hint="Reproduis une position vue ailleurs, puis analyse-la ou joue-la.">
         Éditeur de position
       </SectionTitle>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="min-w-0">
+      <div className="etude-corps grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="etude-plateau min-w-0">
+          <div className="etude-cadre">
           <ChessBoard
+            fitParentHeight
             fen={fen}
             orientation={orientation}
             playable={null}
@@ -145,9 +147,10 @@ export default function EditorPage() {
             showViewToggle={false}
             reservedHeight={14}
           />
+          </div>
         </div>
 
-        <div className="flex min-w-0 flex-col gap-3">
+        <div className="etude-aside flex min-w-0 flex-col gap-3">
           {/* ── Pièces ─────────────────────────────────────────── */}
           <Card className="p-3">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">

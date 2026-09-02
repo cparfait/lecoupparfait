@@ -201,7 +201,7 @@ export default function OpeningsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1400px] px-3 py-5 sm:px-5 lg:py-8">
+    <div className="etude mx-auto w-full max-w-[1400px] px-3 py-5 sm:px-5 lg:py-8">
       <div className="mb-4">
         <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
           Explorateur d’ouvertures
@@ -209,7 +209,9 @@ export default function OpeningsPage() {
         {/* Il fallait le dire : sans cette phrase, on attend que l'ordinateur
             réponde et on croit l'échiquier cassé. Ce n'est pas une partie,
             c'est un plateau d'étude où l'on joue les deux camps. */}
-        <p className="mt-1.5 text-sm text-muted">
+        {/* En paysage sur téléphone, cette phrase coûterait trois rangées
+            d'échiquier ; elle reste partout ailleurs. */}
+        <p className="mt-1.5 text-sm text-muted paysage:hidden">
           {book?.size.toLocaleString('fr-FR')} ouvertures répertoriées.{' '}
           <strong className="font-semibold text-ink">
             Tu joues les deux couleurs
@@ -220,10 +222,19 @@ export default function OpeningsPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
+      <div className="etude-corps grid gap-4 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
         {/* ── Échiquier ────────────────────────────────────────────── */}
-        <div className="min-w-0">
-          <ChessBoard fen={fen} playable="both" legalMoves={legalMoves} onMove={play} lastMove={lastMove} />
+        <div className="etude-plateau min-w-0">
+          <div className="etude-cadre">
+            <ChessBoard
+              fitParentHeight
+              fen={fen}
+              playable="both"
+              legalMoves={legalMoves}
+              onMove={play}
+              lastMove={lastMove}
+            />
+          </div>
 
           <div className="mt-2 flex gap-1.5">
             <Button size="sm" variant="ghost" icon={<Undo2 size={14} />} onClick={undo} disabled={history.length === 0}>
@@ -235,7 +246,7 @@ export default function OpeningsPage() {
           </div>
 
           {history.length > 0 && (
-            <Card className="mt-2 p-3">
+            <Card className="mt-2 p-3 paysage:hidden">
               <p className="font-mono text-[13px] leading-relaxed">
                 {history
                   .map((san, index) =>
@@ -251,7 +262,10 @@ export default function OpeningsPage() {
           )}
 
           {/* Ouverture reconnue */}
-          <Card glow className="mt-2 p-4">
+          {/* En paysage sur téléphone, la colonne du plateau n'a de place que
+              pour le plateau et ses deux boutons : les cartes de texte
+              reprendraient trois rangées d'échiquier. */}
+          <Card glow className="mt-2 p-4 paysage:hidden">
             {current || deepest ? (
               <>
                 <div className="flex items-center gap-2">
@@ -295,7 +309,7 @@ export default function OpeningsPage() {
         </div>
 
         {/* ── Panneau de droite ────────────────────────────────────── */}
-        <div className="flex min-w-0 flex-col gap-3">
+        <div className="etude-aside flex min-w-0 flex-col gap-3">
           {/* Ce que les joueurs jouent vraiment ici */}
           {stats && (
             <PopularMoves

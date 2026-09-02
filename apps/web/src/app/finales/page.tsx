@@ -404,7 +404,7 @@ function EndgameTrainer({
       : 'Tenir la nulle'
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-3 py-4 sm:px-5 lg:py-8">
+    <div className="etude mx-auto w-full max-w-[1200px] px-3 py-4 sm:px-5 lg:py-8">
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <button
           type="button"
@@ -426,9 +426,11 @@ function EndgameTrainer({
         <VoiceQuickToggle />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="min-w-0">
+      <div className="etude-corps grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="etude-plateau min-w-0">
+          <div className="etude-cadre">
           <ChessBoard
+            fitParentHeight
             fen={state.fen}
             orientation={playerColor}
             playable={outcome === 'playing' && !state.isGameOver ? playerColor : null}
@@ -436,11 +438,12 @@ function EndgameTrainer({
             onMove={play}
             lastMove={state.lastMove}
             checkSquare={state.checkSquare}
-                  checkmate={state.status === 'checkmate'}
+            checkmate={state.status === 'checkmate'}
           />
+          </div>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="etude-aside flex flex-col gap-3">
           {/* ── Objectif ─────────────────────────────────────────── */}
           <Card glow className="p-4">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">

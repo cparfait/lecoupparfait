@@ -714,6 +714,12 @@ button.gradient-ring:hover::before {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Hauteur de la barre supérieure, bordure comprise : ce que retranche
+   toute hauteur calée sur la fenêtre. */
+:root {
+  --entete: calc(3.5rem + 1px);
+}
+
 /* Ce qui apparaît en haut de l'écran vient d'en haut.
    `slide-up` remonte de 14 px : appliqué à un bandeau collé sous l'en-tête, il
    le faisait sortir de dessous la barre au lieu d'y entrer. */
@@ -827,13 +833,12 @@ button.gradient-ring:hover::before {
      ligne de flottaison.
 
    `--aside` est la largeur de la colonne latérale sur grand écran ; chaque
-   page fixe la sienne. `--entete` est la hauteur de la barre supérieure,
-   bordure comprise : les hauteurs calées sur la fenêtre la retranchent, avec
-   le rembourrage vertical de la page (`py-6` sur grand écran, `py-3`
-   ailleurs). Un pixel de trop et la page défile d'un pixel. */
+   page fixe la sienne. Les hauteurs calées sur la fenêtre retranchent
+   l'en-tête (`--entete`, bordure comprise) et le rembourrage vertical de la
+   page (`py-6` sur grand écran, `py-3` ailleurs). Un pixel de trop et la
+   page défile d'un pixel. */
 .grille-partie {
   --aside: 360px;
-  --entete: calc(3.5rem + 1px);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas: 'pion' 'plateau' 'moi' 'barre' 'aside';
@@ -866,6 +871,77 @@ button.gradient-ring:hover::before {
       'plateau barre'
       'plateau aside';
     column-gap: 0.75rem;
+  }
+}
+
+/* ── Page d'étude en paysage ──────────────────────────────────────────────
+   Puzzles, leçons, éditeur, ouvertures, finales : un en-tête, puis un
+   plateau et une colonne. Ces classes ne font rien en portrait ni sur grand
+   écran. En paysage sur téléphone, la page prend la hauteur de la fenêtre,
+   l'en-tête garde la sienne, le plateau se cale sur ce qui reste — c'est
+   `fitParentHeight` qui le mesure — et la colonne défile à côté. Avant cela,
+   l'échiquier passait sous le bord inférieur, de dix à cent pixels selon la
+   page, et il fallait défiler pour voir la huitième rangée.
+
+   `etude-tete` regroupe les blocs d'en-tête d'une page qui en a plusieurs :
+   `display: contents` ailleurs, pour ne rien changer à leur mise en page ;
+   en paysage, les blocs se rangent côte à côte sur une seule ligne — le
+   titre, puis les filtres qui défilent —, parce que chaque rangée d'en-tête
+   se paie en pixels de plateau. */
+.etude-tete {
+  display: contents;
+}
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .etude {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    height: calc(100dvh - var(--entete));
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  .etude-tete {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+    margin-bottom: 0.5rem;
+  }
+  .etude-tete > * {
+    margin-bottom: 0;
+    min-width: 0;
+  }
+  /* Le titre garde sa largeur et ne se plie pas ; ce sont les filtres qui
+     cèdent, en défilant. */
+  .etude-tete > :first-child {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+  }
+  .etude-tete > :last-child {
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .etude-corps {
+    min-height: 0;
+    grid-template-columns: minmax(0, calc(100dvh - var(--entete) - 1rem)) minmax(0, 1fr);
+    column-gap: 0.75rem;
+    row-gap: 0;
+  }
+  .etude-plateau {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .etude-cadre {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .etude-aside {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 }
 

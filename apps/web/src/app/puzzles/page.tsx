@@ -688,7 +688,8 @@ export default function PuzzlesPage() {
   const solutionRatee = status === 'failed' && puzzle ? sanOf(fen, puzzle.moves[moveIndex]) : null
 
   return (
-    <div className="mx-auto w-full max-w-[1100px] px-3 py-4 sm:px-5 lg:py-8">
+    <div className="etude mx-auto w-full max-w-[1100px] px-3 py-4 sm:px-5 lg:py-8">
+      <div className="etude-tete">
       {/* ── Filtres et score ───────────────────────────────────────── */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         {/* Le titre dit où l'on est.
@@ -783,9 +784,11 @@ export default function PuzzlesPage() {
         ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+      </div>
+
+      <div className="etude-corps grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         {/* ── Échiquier ──────────────────────────────────────────── */}
-        <div className="min-w-0">
+        <div className="etude-plateau min-w-0">
           {/* Qui joue, au-dessus du plateau et non en dessous.
 
               C'est la première chose à savoir devant une position — avant même
@@ -794,7 +797,7 @@ export default function PuzzlesPage() {
               l'écran. Sur grand écran le panneau est à côté et dit déjà tout :
               la ligne n'apparaît qu'en dessous de `lg`. */}
           {status === 'playing' && (
-            <p className="mb-1.5 flex items-center gap-2 text-[13px] font-medium lg:hidden">
+            <p className="mb-1.5 flex items-center gap-2 text-[13px] font-medium lg:hidden paysage:hidden">
               <span
                 className={clsx(
                   'h-2.5 w-2.5 rounded-full',
@@ -811,12 +814,14 @@ export default function PuzzlesPage() {
             </p>
           )}
 
+          <div className="etude-cadre">
           {status === 'loading' ? (
             <div className="grid aspect-square w-full place-items-center rounded-[var(--radius)] glass">
               <Spinner size={26} />
             </div>
           ) : (
             <ChessBoard
+              fitParentHeight
               fen={fen}
               orientation={orientation}
               playable={status === 'playing' && !repliqueEnCours ? orientation : null}
@@ -826,10 +831,11 @@ export default function PuzzlesPage() {
               allowAnnotations
             />
           )}
+          </div>
         </div>
 
         {/* ── Panneau ────────────────────────────────────────────── */}
-        <div className="flex flex-col gap-3">
+        <div className="etude-aside flex flex-col gap-3">
           <Card className="p-4">
             {status === 'playing' && (
               <>

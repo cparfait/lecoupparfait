@@ -393,7 +393,8 @@ export default function LessonPage() {
   const upcoming = nextLesson(lesson.id)
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-3 py-4 sm:px-5 lg:py-8">
+    <div className="etude mx-auto w-full max-w-[1200px] px-3 py-4 sm:px-5 lg:py-8">
+      <div className="etude-tete">
       {/* ── En-tête ────────────────────────────────────────────────── */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <Link
@@ -435,10 +436,14 @@ export default function LessonPage() {
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_400px]">
+      </div>
+
+      <div className="etude-corps grid gap-4 lg:grid-cols-[minmax(0,1fr)_400px]">
         {/* ── Échiquier ────────────────────────────────────────────── */}
-        <div className="min-w-0">
+        <div className="etude-plateau min-w-0">
+          <div className="etude-cadre">
           <ChessBoard
+            fitParentHeight
             fen={fen}
             orientation={orientation}
             playable={needsAction && !solved ? orientation : null}
@@ -453,6 +458,7 @@ export default function LessonPage() {
             checkmate={mate !== null}
             allowAnnotations={false}
           />
+          </div>
 
           <ArrowLegend
             items={legendFor(arrows, [
@@ -489,7 +495,7 @@ export default function LessonPage() {
         </div>
 
         {/* ── Panneau du coach ─────────────────────────────────────── */}
-        <div className="flex flex-col gap-3">
+        <div className="etude-aside flex flex-col gap-3">
           <Card glow className="p-5">
             <div className="mb-3 flex items-center gap-2">
               <span

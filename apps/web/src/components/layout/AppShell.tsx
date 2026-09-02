@@ -198,7 +198,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main
         className={clsx(
           'flex-1 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]',
-          immersive ? 'pb-[env(safe-area-inset-bottom)]' : 'pb-20 lg:pb-0',
+          immersive ? 'pb-[env(safe-area-inset-bottom)]' : 'pb-20 lg:pb-0 paysage:pb-[env(safe-area-inset-bottom)]',
         )}
       >
         {children}
@@ -456,7 +456,10 @@ function BottomBar({
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-[var(--bg)]/88 backdrop-blur-xl safe-bottom lg:hidden"
+      // En paysage sur téléphone, soixante-sept pixels sur trois cent
+      // quatre-vingt-dix : la barre prenait un sixième de la hauteur, et
+      // recouvrait le bas de l'échiquier. Le menu de l'en-tête reste.
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-[var(--bg)]/88 backdrop-blur-xl safe-bottom lg:hidden paysage:hidden"
       aria-label="Navigation rapide"
     >
       <div className="mx-auto flex max-w-md items-stretch justify-around px-1 pt-1.5">
