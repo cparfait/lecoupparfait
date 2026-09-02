@@ -1098,8 +1098,13 @@ const Coordinates = memo(function Coordinates({
 
       Les bornes ne servent plus qu'aux extrêmes : lisible sur une miniature,
       jamais démesuré en plein écran.
+
+      Sous les pièces (elles sont à `z-10`), comme sur un diagramme imprimé :
+      posées au-dessus, la lettre de colonne mordait sur la tour du coin.
+      Au-dessus des surlignages, pour rester lisibles sur les cases du dernier
+      coup.
     */
-    <div className="pointer-events-none absolute inset-0 z-[15] text-[clamp(9px,2.2cqw,22px)] font-bold leading-none">
+    <div className="pointer-events-none absolute inset-0 z-[5] text-[clamp(9px,2.2cqw,22px)] font-bold leading-none">
       {[...ranks].map((rank, index) => (
         <span
           key={rank}
