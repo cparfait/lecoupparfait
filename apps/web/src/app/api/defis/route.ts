@@ -23,6 +23,7 @@ import {
   purgeExpiredChallenges,
   respondToChallenge,
 } from '@coupparfait/db/friends'
+import { creerLimiteur } from '@/lib/server/limiteur.ts'
 import { getCurrentUser } from '@/lib/server/session.ts'
 import { prevenir } from '@/lib/server/push.ts'
 
@@ -102,20 +103,7 @@ export async function GET() {
  * quelqu'un en boucle. Dix par quart d'heure et par adresse IP suffisent
  * largement à un usage honnête.
  */
-const guestAttempts = new Map<string, { count: number; resetAt: number }>()
-const GUEST_WINDOW_MS = 15 * 60 * 1000
-const GUEST_MAX = 10
-
-function guestRateLimited(ip: string): boolean {
-  const now = Date.now()
-  const entry = guestAttempts.get(ip)
-  if (!entry || entry.resetAt < now) {
-    guestAttempts.set(ip, { count: 1, resetAt: now + GUEST_WINDOW_MS })
-    return false
-  }
-  entry.count++
-  return entry.count > GUEST_MAX
-}
+const invitesVisiteurs = creerLimiteur(15 * 60 * 1000, 10)
 
 export async function POST(request: Request) {
   let body: {
@@ -143,7 +131,7 @@ export async function POST(request: Request) {
       request.headers.get('x-real-ip') ??
       'inconnu'
 
-    if (guestRateLimited(ip)) {
+    if (invitesVisiteurs.depasse(ip)) {
       return NextResponse.json(
         { error: 'Trop d’invitations envoyées. Réessaie dans quelques minutes.' },
         { status: 429 },

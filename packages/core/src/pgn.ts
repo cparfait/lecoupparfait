@@ -316,6 +316,34 @@ export function describeResult(
   return table[result][locale]
 }
 
+/**
+ * Le résultat que la position **impose**, ou `null` si la partie continue.
+ *
+ * Sert à recouper le résultat déclaré par un client. Un mat, un pat, une nulle
+ * par matériel insuffisant, par répétition ou par la règle des cinquante coups
+ * se lisent sur l'échiquier et ne se discutent pas ; tout le reste — abandon,
+ * chute du drapeau, nulle par accord — ne s'y lit pas, et c'est à l'appelant de
+ * décider ce qu'il accepte alors.
+ *
+ * On ne prend pas `isDraw()` de chess.js : il regroupe des cas qu'on veut
+ * distinguer, et il a changé de définition d'une version à l'autre.
+ */
+export function resultatImpose(chess: Chess): GameResult | null {
+  if (chess.isCheckmate()) {
+    // `turn()` est le camp au trait, c'est-à-dire celui qui est maté.
+    return chess.turn() === 'w' ? '0-1' : '1-0'
+  }
+  if (
+    chess.isStalemate() ||
+    chess.isInsufficientMaterial() ||
+    chess.isThreefoldRepetition() ||
+    chess.isDrawByFiftyMoves()
+  ) {
+    return '1/2-1/2'
+  }
+  return null
+}
+
 /** Score d'un camp à partir du résultat, pour le calcul du classement. */
 export function resultToScore(result: GameResult, color: 'w' | 'b'): 0 | 0.5 | 1 | null {
   if (result === '1/2-1/2') return 0.5

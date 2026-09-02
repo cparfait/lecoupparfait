@@ -24,45 +24,18 @@ import {
 } from '@coupparfait/db/auth'
 import { avatarAuHasard, isKnownAvatar } from '@/lib/avatars.ts'
 import { courrielDisponible, resetMail, sendMail, verificationMail } from '@/lib/server/mailer.ts'
+import { creerLimiteur } from '@/lib/server/limiteur.ts'
 import { endSession, getCurrentUser, startSession } from '@/lib/server/session.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 /**
- * Limitation du rythme des tentatives.
+ * Limitation du rythme des tentatives : douze par dix minutes.
  *
- * En mémoire, donc remise à zéro à chaque redémarrage : c'est volontaire.
- * L'objectif est de ralentir une attaque par force brute, pas de tenir un
- * registre. Une plateforme auto-hébergée pour un cercle d'amis n'a pas besoin
- * de Redis pour ça.
+ * Le mécanisme lui-même vit dans `lib/server/limiteur.ts`, avec ses raisons.
  */
-const attempts = new Map<string, { count: number; resetAt: number }>()
-const WINDOW_MS = 10 * 60 * 1000
-const MAX_ATTEMPTS = 12
-
-function rateLimited(key: string): boolean {
-  const now = Date.now()
-  const entry = attempts.get(key)
-
-  if (!entry || entry.resetAt < now) {
-    attempts.set(key, { count: 1, resetAt: now + WINDOW_MS })
-    return false
-  }
-  entry.count++
-  return entry.count > MAX_ATTEMPTS
-}
-
-/** Purge périodique, pour que la table ne grossisse pas indéfiniment. */
-setInterval(
-  () => {
-    const now = Date.now()
-    for (const [key, entry] of attempts) {
-      if (entry.resetAt < now) attempts.delete(key)
-    }
-  },
-  WINDOW_MS,
-).unref?.()
+const tentatives = creerLimiteur(10 * 60 * 1000, 12)
 
 const ERROR_MESSAGES: Record<ValidationError, string> = {
   usernameTooShort: 'Pseudo trop court : trois caractères au minimum.',
@@ -145,7 +118,7 @@ export async function POST(request: Request) {
       request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
       request.headers.get('x-real-ip') ??
       'inconnu'
-    if (rateLimited(`oubli:${ip}`)) {
+    if (tentatives.depasse(`oubli:${ip}`)) {
       return NextResponse.json(
         { error: 'Trop de demandes. Réessaie dans quelques minutes.' },
         { status: 429 },
@@ -205,7 +178,7 @@ export async function POST(request: Request) {
       request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
       request.headers.get('x-real-ip') ??
       'inconnu'
-    if (rateLimited(`renvoi:${address}:${me.username.toLowerCase()}`)) {
+    if (tentatives.depasse(`renvoi:${address}:${me.username.toLowerCase()}`)) {
       return NextResponse.json(
         { error: 'Trop de renvois. Réessaie dans quelques minutes.' },
         { status: 429 },
@@ -247,7 +220,7 @@ export async function POST(request: Request) {
     request.headers.get('x-real-ip') ??
     'inconnu'
 
-  if (rateLimited(`${ip}:${username.toLowerCase()}`)) {
+  if (tentatives.depasse(`${ip}:${username.toLowerCase()}`)) {
     return NextResponse.json(
       { error: 'Trop de tentatives. Réessaie dans quelques minutes.' },
       { status: 429 },
@@ -312,7 +285,7 @@ export async function POST(request: Request) {
       }
       await startSession(result.user.id)
       // Une connexion réussie remet le compteur à zéro.
-      attempts.delete(`${ip}:${username.toLowerCase()}`)
+      tentatives.oublie(`${ip}:${username.toLowerCase()}`)
       return NextResponse.json({
         user: {
           userId: result.user.id,

@@ -22,24 +22,41 @@
  * reste une approximation, et l'incertitude doit se voir dans le calcul plutôt
  * que d'être passée sous silence.
  *
- * On fait confiance au client, et il n'y a pas de moyen de faire autrement —
- * la partie s'est jouée chez lui, coups compris. Quelqu'un qui veut se
- * fabriquer un classement y arrivera ; il aura triché contre lui-même, sur une
- * plateforme qu'il héberge lui-même. Ce qui est protégé, en revanche, c'est le
- * joueur honnête : sans le drapeau, rien n'est classé.
+ * On fait confiance au client pour les coups, et il n'y a pas de moyen de faire
+ * autrement — la partie s'est jouée chez lui. Mais on ne le croit plus sur le
+ * *résultat* : un `fetch` fabriqué à la main annonçait une victoire contre le
+ * niveau 25 sans avoir joué la moindre partie, et le classement l'enregistrait.
+ * Voir `coherent()` plus bas.
  */
 
 import { NextResponse } from 'next/server'
 import { Chess } from 'chess.js'
-import { botLevel } from '@coupparfait/core'
+import { botLevel, resultatImpose } from '@coupparfait/core'
 import { and, desc, eq, games, getDb, sql } from '@coupparfait/db'
 import { applyGameResult, type RatingCategory } from '@coupparfait/db/ratings'
+import { creerLimiteur } from '@/lib/server/limiteur.ts'
 import { getCurrentUser } from '@/lib/server/session.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const MAX_COUPS = 400
+
+/**
+ * Une partie classée compte au moins dix demi-coups, et une par minute.
+ *
+ * Deux bornes, deux abus différents. Les dix demi-coups ferment la partie
+ * fabriquée en trois coups — un mat du berger monté à la main coûte alors dix
+ * coups légaux à écrire plutôt que quatre, ce qui ne l'empêche pas mais lui
+ * retire tout intérêt. La minute ferme la boucle : cent parties gagnées en dix
+ * secondes ne remontent plus un classement.
+ *
+ * Ces deux limites ne s'appliquent qu'au **classement**. Une partie courte ou
+ * une deuxième partie dans la minute s'archivent normalement : c'est
+ * l'historique du joueur, il n'y a rien à en protéger.
+ */
+const MIN_COUPS_CLASSEE = 10
+const partiesClassees = creerLimiteur(60 * 1000, 1)
 const ALPHABET = 'abcdefghijkmnopqrstuvwxyz23456789'
 const MODES = new Set(['computer', 'local'])
 const RESULTATS = new Set(['1-0', '0-1', '1/2-1/2'])
@@ -111,13 +128,73 @@ export async function POST(request: Request) {
   const debut = body.startedAt ? new Date(body.startedAt) : new Date()
 
   /*
+    Le résultat, recoupé avec la position atteinte.
+
+    Un mat, un pat, une nulle par matériel, par répétition ou par les cinquante
+    coups se lisent sur l'échiquier : le déclaré doit alors être **égal** à
+    l'imposé, sans quoi la liste de coups et le résultat ne parlent pas de la
+    même partie. Ce refus-là vaut pour toutes les parties, classées ou non :
+    ce n'est pas une question de triche, c'est une incohérence.
+  */
+  const impose = resultatImpose(echiquier)
+  if (impose && impose !== result) {
+    return NextResponse.json({ ok: false, raison: 'résultat incohérent' }, { status: 400 })
+  }
+
+  /*
+    Quand la position n'impose rien, la partie s'est terminée par un abandon,
+    une chute du drapeau ou une nulle par accord — trois choses qui ne se
+    lisent nulle part et qu'aucune vérification ne peut départager d'une
+    invention. On n'accepte alors, **pour le classement**, que ce qui
+    défavorise le joueur : sa défaite, ou la nulle.
+
+    Ce qu'on y perd : une victoire honnête au temps contre l'ordinateur ne
+    comptera pas au classement. Ce qu'on y gagne : « l'ordinateur a abandonné »
+    n'existe plus comme moyen de se fabriquer une cote, et c'était la porte la
+    plus large. Un cas rare et honnête contre un cas facile et malhonnête.
+
+    La partie, elle, s'archive quand même, avec son vrai résultat : c'est son
+    historique. Seul le drapeau `rated` tombe.
+  */
+  const gagneeParLeJoueur = result !== '1/2-1/2' && (result === '1-0') === (camp === 'w')
+  const verifiable = impose !== null || !gagneeParLeJoueur
+
+  /*
     Classée ? Seulement contre l'ordinateur, seulement si on l'a demandé, et
     seulement avec un niveau d'adversaire connu — c'est lui qui fournit le
     classement d'en face.
   */
   const niveau = typeof body.botLevel === 'number' ? Math.round(body.botLevel) : null
+  const niveauRetenu = niveau === null ? null : botLevel(niveau).level
   const classee =
-    body.classee === true && body.mode === 'computer' && niveau !== null && niveau >= 1
+    body.classee === true &&
+    body.mode === 'computer' &&
+    niveau !== null &&
+    niveau >= 1 &&
+    verifiable &&
+    moves.length >= MIN_COUPS_CLASSEE &&
+    // Compté en dernier : le limiteur consomme un jeton dès qu'on l'interroge,
+    // et une partie recalée pour une autre raison n'a pas à en brûler un.
+    !partiesClassees.depasse(user.userId)
+
+  /*
+    Pourquoi une partie annoncée classée ne l'est pas.
+
+    Le joueur a coché la case avant de commencer et a joué sans « Annuler »,
+    sans « Indice » et sans le mode commenté : un silence, ici, passerait pour
+    une panne. On ne le renvoie que s'il a demandé le classement — dans tous
+    les autres cas il n'y a rien à expliquer.
+  */
+  const raison =
+    classee || body.classee !== true
+      ? undefined
+      : body.mode !== 'computer' || niveau === null || niveau < 1
+        ? 'adversaire sans classement'
+        : !verifiable
+          ? 'résultat non vérifiable'
+          : moves.length < MIN_COUPS_CLASSEE
+            ? 'partie trop courte'
+            : 'une partie classée par minute'
 
   try {
     await getDb()
@@ -131,7 +208,9 @@ export async function POST(request: Request) {
         blackId: camp === 'b' ? user.userId : null,
         whiteName: camp === 'w' ? user.username : adversaire,
         blackName: camp === 'b' ? user.username : adversaire,
-        botLevel: typeof body.botLevel === 'number' ? Math.round(body.botLevel) : null,
+        // Le niveau borné, et pas celui reçu : la colonne servait d'écho fidèle
+        // à ce que le client avait bien voulu dire, y compris un niveau 900.
+        botLevel: niveauRetenu,
         initialTime: Math.max(0, Math.round(body.initialTime ?? 0)),
         increment: Math.max(0, Math.round(body.increment ?? 0)),
         startFen: body.startFen || null,
@@ -146,7 +225,12 @@ export async function POST(request: Request) {
         endedAt: new Date(),
       })
 
-    if (!classee) return NextResponse.json({ ok: true })
+    // `niveau` accompagne toujours la réponse : le client saura ainsi qu'un
+    // niveau hors barème a été ramené dans le barème, au lieu de croire que
+    // sa demande a été suivie.
+    if (!classee) {
+      return NextResponse.json({ ok: true, classee: false, niveau: niveauRetenu, raison })
+    }
 
     /*
       Le classement, une fois la partie rangée.
@@ -169,6 +253,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ok: true,
+      classee: true,
+      niveau: niveauRetenu,
       classement: {
         avant: variation.before,
         apres: variation.after,

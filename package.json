@@ -20,7 +20,7 @@
     "start:web": "npm run start -w @coupparfait/web",
     "start:server": "npm run start -w @coupparfait/server",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "test": "node --experimental-strip-types scripts/check-lessons.mjs && node --experimental-strip-types scripts/check-eboards.mjs && node --experimental-strip-types scripts/check-elo.mjs && node --experimental-strip-types scripts/check-carriere.mjs && node --experimental-strip-types scripts/check-tournoi.mjs && node --experimental-strip-types scripts/check-cadences.mjs",
+    "test": "node --experimental-strip-types scripts/check-lessons.mjs && node --experimental-strip-types scripts/check-eboards.mjs && node --experimental-strip-types scripts/check-elo.mjs && node --experimental-strip-types scripts/check-carriere.mjs && node --experimental-strip-types scripts/check-tournoi.mjs && node --experimental-strip-types scripts/check-cadences.mjs && node --experimental-strip-types scripts/check-partie-terminee.mjs",
     "test:realtime": "node scripts/smoke-realtime.mjs",
     "db:push": "npm run db:push -w @coupparfait/db",
     "install:maia": "node scripts/install-maia.mjs",
