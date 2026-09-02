@@ -130,7 +130,12 @@ export function ChessBoard({
   const [compact, setCompact] = useState(false)
   const [tactile, setTactile] = useState(false)
   useEffect(() => {
-    const etroit = window.matchMedia('(max-width: 639px)')
+    // Étroit, ou bas : en paysage sur téléphone la hauteur est la ressource
+    // rare, et la rangée de boutons prendrait un sixième du plateau. La barre
+    // d'actions reprend alors la bascule, comme sous `sm`.
+    const etroit = window.matchMedia(
+      '(max-width: 639px), ((orientation: landscape) and (max-height: 540px))',
+    )
     const doigt = window.matchMedia('(pointer: coarse)')
     const sync = () => {
       setCompact(etroit.matches)

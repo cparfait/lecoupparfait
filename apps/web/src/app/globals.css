@@ -806,6 +806,69 @@ button.gradient-ring:hover::before {
    MOBILE
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* Un téléphone tenu en travers : large, et surtout bas. Ce n'est ni `sm` ni
+   `lg` — 844 px de large pour 390 de haut —, et c'est pourtant l'écran où la
+   mise en page décide si l'on voit l'échiquier entier ou seulement son
+   tiers. La variante s'écrit `paysage:` dans les classes. */
+@custom-variant paysage (@media (orientation: landscape) and (max-height: 540px));
+
+/* ── Grille de partie ─────────────────────────────────────────────────────
+   Cinq zones — pendule adverse, plateau, sa pendule, barre d'actions,
+   colonne latérale — placées par nom, pour que la même page se plie à trois
+   écrans sans dupliquer un composant :
+
+   - téléphone en portrait : tout s'empile, la page défile ;
+   - grand écran : plateau et pendules à gauche, colonne à droite, hauteur
+     calée sur la fenêtre pour que rien ne sorte de l'écran ;
+   - téléphone en paysage : le plateau seul à gauche, aussi large que la
+     hauteur disponible, et tout le reste à droite, dans une colonne qui
+     défile. Avant cela, le plateau y tombait à son plancher de 260 px entre
+     deux marges vides, et les pendules poussaient la barre d'actions sous la
+     ligne de flottaison.
+
+   `--aside` est la largeur de la colonne latérale sur grand écran ; chaque
+   page fixe la sienne. `--entete` est la hauteur de la barre supérieure,
+   bordure comprise : les hauteurs calées sur la fenêtre la retranchent, avec
+   le rembourrage vertical de la page (`py-6` sur grand écran, `py-3`
+   ailleurs). Un pixel de trop et la page défile d'un pixel. */
+.grille-partie {
+  --aside: 360px;
+  --entete: calc(3.5rem + 1px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'pion' 'plateau' 'moi' 'barre' 'aside';
+  column-gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .grille-partie {
+    height: calc(100dvh - var(--entete) - 3rem);
+    grid-template-columns: minmax(0, 1fr) var(--aside);
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'pion aside'
+      'plateau aside'
+      'moi aside'
+      'barre aside';
+  }
+}
+
+/* Après `lg` dans la feuille : un ordinateur portable très bas est un écran
+   large, mais c'est la disposition en paysage qui lui va. */
+@media (orientation: landscape) and (max-height: 540px) {
+  .grille-partie {
+    height: calc(100dvh - var(--entete) - 1.5rem);
+    grid-template-columns: calc(100dvh - var(--entete) - 1.5rem) minmax(0, 1fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+    grid-template-areas:
+      'plateau pion'
+      'plateau moi'
+      'plateau barre'
+      'plateau aside';
+    column-gap: 0.75rem;
+  }
+}
+
 /* Zone sûre des téléphones à encoche. */
 .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
 .safe-top { padding-top: max(env(safe-area-inset-top), 0.5rem); }

@@ -1779,154 +1779,157 @@ function GameScreen({
 
   return (
     <div className="mx-auto w-full max-w-[1500px] px-2 py-3 sm:px-4 lg:py-6">
-      <div className="grid gap-4 lg:h-[calc(100dvh-6rem)] lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_400px]">
-        {/* ── Colonne échiquier ────────────────────────────────────── */}
-        {/*
-          Sur grand écran, la zone de jeu tient dans la fenêtre : on lui donne
-          une hauteur, et chaque colonne se partage ce qui reste. Un bandeau qui
-          apparaît sous l'échiquier le rétrécit alors d'autant, au lieu de
-          pousser les pendules et la barre d'actions hors de l'écran. En dessous
-          de `lg`, les colonnes s'empilent et la page défile — c'est ce qu'on
-          attend d'un téléphone.
-        */}
-        <div className="flex min-h-0 min-w-0 flex-col">
-          <div className="flex min-h-0 flex-1 gap-2">
-            {/* La barre d'évaluation dit, à chaque coup, si l'on vient de se
-                tromper. C'est une aide au même titre que l'indice : elle
-                disparaît en partie classée. */}
-            {prefs.showEvalDuringGame && !classee && (
-              <EvalBar
-                score={commentary?.scoreAfter ?? null}
+      {/*
+        Les zones de la grille — pendule adverse, plateau, pendule, barre,
+        colonne — sont placées par nom : voir `.grille-partie` dans
+        `globals.css`. Sur grand écran la zone de jeu tient dans la fenêtre,
+        et un bandeau qui apparaît sous l'échiquier le rétrécit d'autant au
+        lieu de pousser les pendules hors de l'écran ; sur téléphone en
+        portrait tout s'empile et la page défile ; en paysage le plateau
+        prend la gauche et tout le reste la droite.
+      */}
+      <div className="grille-partie xl:[--aside:400px]">
+        {/* ── Plateau ──────────────────────────────────────────────── */}
+        <PlayerBar
+          className="[grid-area:pion]"
+          name={personality.name.fr}
+          rating={bot.elo}
+          color={botColor}
+          avatar={personality.portrait}
+          timeMs={timed ? displayClock[botColor] : null}
+          timeControl={timeControl}
+          active={state.turn === botColor && !gameOver}
+          captured={state.material[botColor]}
+          materialLead={
+            botColor === 'w' ? Math.max(0, state.material.balance) : Math.max(0, -state.material.balance)
+          }
+          status={
+            botPlayer.loading
+              ? 'Chargement du moteur…'
+              : botPlayer.thinking
+                ? 'réfléchit…'
+                : // Le moteur reste affiché pendant toute la partie :
+                  // choisi une fois à la configuration, on l'oublie
+                  // aussitôt, et l'on ne sait plus qui l'on affronte.
+                  `${human ? 'Maia' : 'Stockfish'} · niveau ${bot.level}`
+          }
+        />
+        <div className="[grid-area:plateau] flex min-h-0 min-w-0 gap-2">
+          {/* La barre d'évaluation dit, à chaque coup, si l'on vient de se
+              tromper. C'est une aide au même titre que l'indice : elle
+              disparaît en partie classée. */}
+          {prefs.showEvalDuringGame && !classee && (
+            <EvalBar
+              score={commentary?.scoreAfter ?? null}
+              orientation={orientation}
+              loading={coachLoading}
+              className="hidden sm:block"
+            />
+          )}
+
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+
+            <div className="my-1.5 flex min-h-0 flex-1 items-center justify-center">
+              <ChessBoard
+                // La colonne a une hauteur imposée : c'est elle qui borne
+                // le plateau. L'estimation en `dvh` ne sert plus qu'aux
+                // petits écrans, où les colonnes s'empilent et défilent.
+                fitParentHeight
+                reservedHeight={9}
+                fen={state.fen}
                 orientation={orientation}
-                loading={coachLoading}
-                className="hidden sm:block"
-              />
-            )}
-
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-              <PlayerBar
-                name={personality.name.fr}
-                rating={bot.elo}
-                color={botColor}
-                avatar={personality.portrait}
-                timeMs={timed ? displayClock[botColor] : null}
-                timeControl={timeControl}
-                active={state.turn === botColor && !gameOver}
-                captured={state.material[botColor]}
-                materialLead={
-                  botColor === 'w' ? Math.max(0, state.material.balance) : Math.max(0, -state.material.balance)
-                }
-                status={
-                  botPlayer.loading
-                    ? 'Chargement du moteur…'
-                    : botPlayer.thinking
-                      ? 'réfléchit…'
-                      : // Le moteur reste affiché pendant toute la partie :
-                        // choisi une fois à la configuration, on l'oublie
-                        // aussitôt, et l'on ne sait plus qui l'on affronte.
-                        `${human ? 'Maia' : 'Stockfish'} · niveau ${bot.level}`
-                }
-              />
-
-              <div className="my-1.5 flex min-h-0 flex-1 items-center justify-center">
-                <ChessBoard
-                  // La colonne a une hauteur imposée : c'est elle qui borne
-                  // le plateau. L'estimation en `dvh` ne sert plus qu'aux
-                  // petits écrans, où les colonnes s'empilent et défilent.
-                  fitParentHeight
-                  reservedHeight={9}
-                  fen={state.fen}
-                  orientation={orientation}
-                  playable={state.isLive && !gameOver ? playerColor : null}
-                  legalMoves={state.legalMoves}
-                  onMove={handleMove}
-                  onPremove={enregistrerPrecoup}
-                  onPremoveCancel={annulerPrecoup}
-                  premove={precoup}
-                  lastMove={state.lastMove}
-                  checkSquare={state.checkSquare}
-                  checkmate={state.status === 'checkmate'}
-                  highlights={(commentaryMode ? commentary?.highlights : undefined) as never}
-                  /* Le verdict sur la case d'arrivée, tant que le commentaire
-                     parle bien de la position affichée. Périmé, il jugerait le
-                     coup précédent sur la case du dernier — le pire des deux
-                     mondes, puisque la pastille serait à la fois visible et
-                     fausse. */
-                  verdict={verdictDuCoup}
-                  arrows={arrows}
-                  onArrowClick={handleArrowClick}
-                  // Le coup de l'adversaire arrive sans qu'on l'ait anticipé :
-                  // à la vitesse d'un coup qu'on joue soi-même, on ne voit pas
-                  // quelle pièce a bougé. On lui laisse le temps d'être vu.
-                  animationMs={lastPlayed?.color === botColor ? 420 : undefined}
-                />
-              </div>
-
-              {/* ── Le verdict, en toutes lettres ─────────────────────────
-                  La pastille posée sur la case porte un glyphe — 📖, !!, ?? —
-                  et rien n'en donnait la clé. Elle contenait bien son
-                  explication dans un attribut `title`, mais inatteignable :
-                  son conteneur est en `pointer-events-none`, donc l'élément ne
-                  reçoit jamais le survol. Et sur un téléphone il n'y a pas de
-                  survol du tout. Une légende écrite ne dépend d'aucun geste.
-
-                  Elle rend du même coup la pastille franchement décorative,
-                  ce qui justifie enfin son `aria-hidden` : le mot est lu ici,
-                  une seule fois. */}
-              {verdictDuCoup && (
-                <LegendeDuVerdict quality={verdictDuCoup.quality} conseil={conseilDuCoup} />
-              )}
-
-              {reviewing && (
-                <div className="mb-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2 text-[13px]">
-                  <Eye size={15} className="shrink-0 text-accent" aria-hidden />
-                  <span className="min-w-0 flex-1 leading-snug text-muted">
-                    Tu revois la partie{reviewedMove ? <> — coup <strong className="font-semibold text-ink">{formatMove(reviewedMove.san)}</strong></> : null}. Rien n’est effacé.
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => goTo(state.moves.length - 1)}
-                    className="shrink-0 rounded-[var(--radius-sm)] bg-accent px-2.5 py-1 text-xs font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
-                  >
-                    Retour à la partie
-                  </button>
-                </div>
-              )}
-
-              {studyPause && (
-                <div className="mb-1.5 h-10">
-                  {awaitingReview && (
-                    <button
-                      type="button"
-                      onClick={() => setReviewedFen(state.currentFen)}
-                      className="flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-accent px-4 text-sm font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
-                    >
-                      <Play size={15} aria-hidden />
-                      Continuer — {personality.name.fr} joue
-                    </button>
-                  )}
-                </div>
-              )}
-
-
-              <PlayerBar
-                name="Toi"
-                color={playerColor}
-                avatar="🙂"
-                timeMs={timed ? displayClock[playerColor] : null}
-                timeControl={timeControl}
-                active={state.turn === playerColor && !gameOver}
-                captured={state.material[playerColor]}
-                materialLead={
-                  playerColor === 'w'
-                    ? Math.max(0, state.material.balance)
-                    : Math.max(0, -state.material.balance)
-                }
+                playable={state.isLive && !gameOver ? playerColor : null}
+                legalMoves={state.legalMoves}
+                onMove={handleMove}
+                onPremove={enregistrerPrecoup}
+                onPremoveCancel={annulerPrecoup}
+                premove={precoup}
+                lastMove={state.lastMove}
+                checkSquare={state.checkSquare}
+                checkmate={state.status === 'checkmate'}
+                highlights={(commentaryMode ? commentary?.highlights : undefined) as never}
+                /* Le verdict sur la case d'arrivée, tant que le commentaire
+                   parle bien de la position affichée. Périmé, il jugerait le
+                   coup précédent sur la case du dernier — le pire des deux
+                   mondes, puisque la pastille serait à la fois visible et
+                   fausse. */
+                verdict={verdictDuCoup}
+                arrows={arrows}
+                onArrowClick={handleArrowClick}
+                // Le coup de l'adversaire arrive sans qu'on l'ait anticipé :
+                // à la vitesse d'un coup qu'on joue soi-même, on ne voit pas
+                // quelle pièce a bougé. On lui laisse le temps d'être vu.
+                animationMs={lastPlayed?.color === botColor ? 420 : undefined}
               />
             </div>
-          </div>
 
-          {/* ── Barre d'actions, grands écrans ───────────────────────
+            {/* ── Le verdict, en toutes lettres ─────────────────────────
+                La pastille posée sur la case porte un glyphe — 📖, !!, ?? —
+                et rien n'en donnait la clé. Elle contenait bien son
+                explication dans un attribut `title`, mais inatteignable :
+                son conteneur est en `pointer-events-none`, donc l'élément ne
+                reçoit jamais le survol. Et sur un téléphone il n'y a pas de
+                survol du tout. Une légende écrite ne dépend d'aucun geste.
+
+                Elle rend du même coup la pastille franchement décorative,
+                ce qui justifie enfin son `aria-hidden` : le mot est lu ici,
+                une seule fois. */}
+            {verdictDuCoup && (
+              <LegendeDuVerdict quality={verdictDuCoup.quality} conseil={conseilDuCoup} />
+            )}
+
+            {reviewing && (
+              <div className="mb-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2 text-[13px]">
+                <Eye size={15} className="shrink-0 text-accent" aria-hidden />
+                <span className="min-w-0 flex-1 leading-snug text-muted">
+                  Tu revois la partie{reviewedMove ? <> — coup <strong className="font-semibold text-ink">{formatMove(reviewedMove.san)}</strong></> : null}. Rien n’est effacé.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => goTo(state.moves.length - 1)}
+                  className="shrink-0 rounded-[var(--radius-sm)] bg-accent px-2.5 py-1 text-xs font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
+                >
+                  Retour à la partie
+                </button>
+              </div>
+            )}
+
+            {studyPause && (
+              <div className="mb-1.5 h-10">
+                {awaitingReview && (
+                  <button
+                    type="button"
+                    onClick={() => setReviewedFen(state.currentFen)}
+                    className="flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-accent px-4 text-sm font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
+                  >
+                    <Play size={15} aria-hidden />
+                    Continuer — {personality.name.fr} joue
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <PlayerBar
+          className="[grid-area:moi]"
+          name="Toi"
+          color={playerColor}
+          avatar="🙂"
+          timeMs={timed ? displayClock[playerColor] : null}
+          timeControl={timeControl}
+          active={state.turn === playerColor && !gameOver}
+          captured={state.material[playerColor]}
+          materialLead={
+            playerColor === 'w'
+              ? Math.max(0, state.material.balance)
+              : Math.max(0, -state.material.balance)
+          }
+        />
+
+        {/* ── Barre d'actions ──────────────────────────────────────── */}
+        <div className="[grid-area:barre]">
+          {/* ── Grands écrans ─────────────────────────────────────────
               Sous `sm`, elle cède la place au ruban et à la barre du bas, plus
               bas dans ce fichier : les mêmes actions, disposées pour un pouce
               plutôt que pour une souris. */}
@@ -1960,7 +1963,9 @@ function GameScreen({
                 dixièmes de vide, pris sur le plateau. Ici elle voisine avec
                 des boutons. Le plein écran n'y figure pas : c'est le seul des
                 trois que les navigateurs mobiles refusent le plus souvent. */}
-            <ViewToggle className="sm:hidden" />
+            {/* Visible en paysage seulement : le plateau y cède sa rangée de
+                bascule pour garder la hauteur, et c'est ici qu'elle revient. */}
+            <ViewToggle className="hidden paysage:flex" />
 
             {/* ── La sortie, une fois la partie finie ───────────────────
                 Elle existait, cachée derrière les trois petits points, à côté
@@ -2198,7 +2203,7 @@ function GameScreen({
         </div>
 
         {/* ── Colonne latérale ─────────────────────────────────────── */}
-        <div className="flex min-h-0 flex-col gap-3">
+        <div className="[grid-area:aside] mt-4 flex min-h-0 flex-col gap-3 lg:mt-0 paysage:mt-0 paysage:overflow-y-auto paysage:overscroll-contain">
           <OpeningBanner opening={opening} moveCount={state.moves.length} />
 
           {/* ── Le coach, seulement si on l'a demandé ─────────────────────
