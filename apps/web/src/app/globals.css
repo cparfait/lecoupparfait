@@ -41,10 +41,17 @@
   --border: rgb(255 255 255 / 0.09);
   --border-strong: rgb(255 255 255 / 0.17);
 
-  /* Texte */
+  /* Texte
+
+     `--text-faint` porte presque toujours du 11px : libellés de sections,
+     compteurs « 2 / 5 », détails sous un lien. Du texte petit, donc du texte
+     qui demande 4,5:1 — et l'ancien `#6d6b83` n'en donnait que 3,6 sur une
+     carte. C'était lisible en le cherchant, pas en le lisant. Éclairci juste
+     assez pour passer le seuil (4,7:1) : même teinte, même rôle de troisième
+     niveau, largement en dessous de `--text-muted` à 8:1. */
   --text: #f2f1f8;
   --text-muted: #a9a7bd;
-  --text-faint: #6d6b83;
+  --text-faint: #7f7d95;
   --text-inverse: #07070c;
 
   /* Accents */
@@ -120,7 +127,8 @@
 
   --text: #f0e7d6;
   --text-muted: #b6a68c;
-  --text-faint: #7d7059;
+  /* Même correction que sur `aurora` : 3,6:1 → 4,7:1 sur une carte. */
+  --text-faint: #928368;
   --text-inverse: #14100b;
 
   --accent: #c9a227;
@@ -193,7 +201,9 @@
 
   --text: #14141c;
   --text-muted: #55556a;
-  --text-faint: #8a8a9c;
+  /* Le thème clair souffrait du même défaut, en plus marqué : 3,4:1. Assombri
+     plutôt qu'éclairci, mêmes 4,7:1 à l'arrivée. */
+  --text-faint: #6e6e82;
   --text-inverse: #ffffff;
 
   --accent: #5b3ce0;
