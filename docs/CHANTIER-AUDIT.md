@@ -595,4 +595,64 @@ l'écran principal du site.
 à l'écran ou par la mesure, et ce qu'on a trouvé en passant sans le traiter.
 C'est la partie du document qui compte le plus dans six mois.
 
-*(vide au 3 septembre 2026)*
+### Lot A — 3 septembre 2026
+
+**A1.** `resultatImpose(chess)` est dans `packages/core/src/pgn.ts`, la route la
+confronte au résultat déclaré. Écart assumé sur le point 2 : quand la position
+n'impose rien et que le joueur annonce sa victoire, la partie **s'archive quand
+même**, seul le drapeau `rated` tombe. Le document demandait un `400` en un
+endroit et « ne s'enregistre pas classée » en un autre ; on a retenu le second,
+qui ne prive personne de son historique. `scripts/check-partie-terminee.mjs`,
+quatorze vérifications, dans `npm test`. Le limiteur des trois routes est
+maintenant unique (`apps/web/src/lib/server/limiteur.ts`).
+
+*Trouvé en passant, non traité :* le client peut changer de niveau en cours de
+partie (`setLevel`), et c'est le dernier niveau choisi qui part à l'archivage.
+Ça ne se voit pas dans une partie classée — les aides sont retirées — mais la
+valeur envoyée n'est pas rigoureusement « le niveau joué ».
+
+**A2.** Garde armée après le `go` : `movetime + 5 s`, ou 30 s en profondeur,
+puis `stop`, deux secondes d'insistance, `SIGKILL`. `restarts` dans `/health`.
+Mesuré : abandon en 7,1 s pour un moteur sourd, 5,1 s pour un moteur qui obéit
+à `stop`. Le faux moteur est permanent (`apps/server/test/faux-stockfish.mjs`,
+E1 le demandait) et se lance par `process.execPath` — d'où une option `args`
+ajoutée à `EngineProcess` : un script à shebang ne se lance pas sous Windows.
+
+**A3.** Trente `curl` en parallèle : 30 × 200 puis 429 avec `Retry-After: 51`.
+`X-Forwarded-For` forgé sans `TRUST_PROXY` : ignoré, avertissement au journal.
+Avec `TRUST_PROXY=1`, deux adresses forgées ont bien deux compteurs. Part de
+file par adresse : six analyses profondes simultanées → quatre servies, deux
+refusées en 429. `npm run test:realtime` vert.
+
+*Le piège, à ne pas réintroduire :* les analyses du navigateur passent par la
+passerelle `/api/analyse`, donc arrivent toutes de la même adresse. Sans les
+en-têtes de relais (`apps/web/src/lib/server/passerelle.ts`) et sans
+`TRUST_PROXY=1`, le quota d'une route se partage entre tous les joueurs.
+`docker-compose.yml` pose la variable.
+
+**A4.** Écart assumé : table dédiée `live_games` (clé = `slug`) et non une
+colonne de `active_games`, dont la clé primaire est `user_id` — inutilisable
+pour un salon à deux joueurs dont l'un peut être un invité sans compte.
+Recette faite avec `scripts/essai-reprise.mjs` : cinq coups, serveur tué
+brutalement, relancé. Position identique, statut `playing`, pendules 185,0 s /
+125,0 s contre 185,0 s / 183,0 s avant l'arrêt — les 58 secondes de coupure
+décomptées au camp au trait, comme voulu. Sixième coup accepté.
+
+*Trouvé et traité en passant :* un salon repris que personne ne rejoint ne
+finissait jamais (ses joueurs n'ont pas d'horodatage de déconnexion, exprès).
+Le ramassage périodique le relâche au-delà de deux heures.
+
+*Trouvé et corrigé :* `purgerSalonsPerimes` liait sa date par un fragment `sql`
+brut, que le pilote refusait à l'exécution — invisible au typage. Repassé par
+`lt()`.
+
+**A5.** Fait dans le même commit qu'A4, même fonction. `shutdown` attend les
+deux `close()` avec un plafond de 5 s, ne s'exécute qu'une fois, journalise sa
+durée, et `uncaughtException` est écouté. **Non vérifié à l'exécution :** Node
+sous Windows n'émet pas `SIGTERM` depuis `process.kill`, la recette du document
+n'y est pas reproductible. À refaire sur le serveur.
+
+**A6.** Tâche à 4 h locales, forcée par `PURGE_HEURE` pour l'essai. Journal
+observé : « sessions expirées : 0 · évaluations de plus de 90 jours : 1 ·
+salons périmés : 0 », puis silence au tour suivant — elle ne passe qu'une fois
+par jour. `position_evals` n'est pas purgée, c'est dit dans le commentaire.
