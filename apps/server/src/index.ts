@@ -115,6 +115,9 @@ const httpServer = createServer(async (request, response) => {
           queued: pool.queueLength,
           searches: pool.stats.searches,
           errors: pool.stats.errors,
+          // Un moteur muet ne se voyait que par une disponibilité qui baissait
+          // sans raison : ce compteur nomme la raison.
+          restarts: pool.stats.restarts,
           averageMs:
             pool.stats.searches > 0
               ? Math.round(pool.stats.totalMs / pool.stats.searches)

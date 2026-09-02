@@ -10,7 +10,8 @@
     "dev": "node --watch --experimental-strip-types --env-file-if-exists=../../.env src/index.ts",
     "start": "node --experimental-strip-types src/index.ts",
     "build": "tsc --noEmit",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types \"test/*.test.ts\""
   },
   "dependencies": {
     "@coupparfait/core": "*",

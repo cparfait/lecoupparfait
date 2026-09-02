@@ -55,6 +55,14 @@ export class EnginePool {
     queuedPeak: 0,
     errors: 0,
     totalMs: 0,
+    /**
+     * Processus tués parce qu'ils ne répondaient plus.
+     *
+     * Le chiffre qui manquait : un moteur muet dégradait la réserve en
+     * silence, et `available` baissait sans que rien ne dise pourquoi.
+     * Non nul et qui monte, c'est un binaire ou une machine à regarder.
+     */
+    restarts: 0,
   }
 
   private readonly options: PoolOptions
@@ -83,6 +91,11 @@ export class EnginePool {
 
       // Sans écouteur « error », Node transforme l'événement en exception fatale.
       engine.on('error', () => {})
+
+      engine.on('relance', () => {
+        this.stats.restarts++
+        console.error(`[moteur ${i}] sans réponse au-delà du délai de garde : relancé.`)
+      })
 
       engine.on('exit', () => {
         if (this.stopping || !this.started) return

@@ -25,9 +25,31 @@ import {
   type UciMove,
 } from '@coupparfait/core'
 
+/**
+ * Marge accordée à une recherche en profondeur, qui n'annonce aucune échéance.
+ * Trente secondes : au-delà, la réserve plafonne de toute façon à `maxDepth`, et
+ * aucune analyse honnête ne met ce temps sur le matériel visé.
+ */
+const GARDE_PROFONDEUR_MS = 30_000
+
+/** Marge accordée en plus du `movetime` demandé. */
+const GARDE_MOVETIME_MS = 5_000
+
+/** Temps laissé au moteur pour obéir à `stop` avant qu'on le tue. */
+const INSISTANCE_MS = 2_000
+
 export interface EngineProcessOptions {
   /** Chemin du binaire Stockfish. */
   binary: string
+  /**
+   * Arguments passés au binaire. Vide pour Stockfish, qui n'en prend pas.
+   *
+   * Ils existent pour les tests : un faux moteur écrit en JavaScript se lance
+   * par `binary: process.execPath, args: [chemin]`, ce qui marche sur les trois
+   * systèmes — un script à shebang ne se lance pas sous Windows, et Node refuse
+   * depuis la version 20 de lancer un `.cmd` sans passer par un interpréteur.
+   */
+  args?: string[]
   /** Fils d'exécution alloués à ce processus. */
   threads: number
   /** Table de hachage, en mégaoctets. */
@@ -76,9 +98,12 @@ export class EngineProcess extends EventEmitter {
   /** Options UCI déjà appliquées, pour ne pas les réémettre inutilement. */
   private applied = new Map<string, string>()
 
+  /** Délai de garde de la recherche en cours. Voir `armerLaGarde()`. */
+  private garde: ReturnType<typeof setTimeout> | null = null
+
   constructor(options: EngineProcessOptions) {
     super()
-    this.options = { multiPv: 1, ...options }
+    this.options = { multiPv: 1, args: [], ...options }
   }
 
   get isReady(): boolean {
@@ -94,7 +119,7 @@ export class EngineProcess extends EventEmitter {
   async start(): Promise<void> {
     if (this.child) return
 
-    const child = spawn(this.options.binary, [], {
+    const child = spawn(this.options.binary, this.options.args, {
       stdio: ['pipe', 'pipe', 'pipe'],
       // Le moteur ne doit pas empêcher le serveur de s'arrêter.
       detached: false,
@@ -230,7 +255,13 @@ export class EngineProcess extends EventEmitter {
         ponder: null,
       }
 
-      const onAbort = () => this.send('stop')
+      // On ne *coupe* pas la garde à l'abandon, on la raccourcit : après un
+      // `stop`, un moteur en vie répond `bestmove` dans la seconde. S'il ne
+      // répond pas non plus à ça, c'est exactement le cas qu'on cherche.
+      const onAbort = () => {
+        this.send('stop')
+        this.armerLaGarde(INSISTANCE_MS)
+      }
       request.signal?.addEventListener('abort', onAbort, { once: true })
 
       this.send(positionCommand(request.fen, request.moves ?? []))
@@ -241,7 +272,54 @@ export class EngineProcess extends EventEmitter {
           nodes: request.nodes,
         }),
       )
+
+      // Après le `go`, et pas avant : c'est de la réponse à celui-ci qu'on se
+      // garde. Une recherche en `movetime` a une échéance annoncée, on lui
+      // laisse cinq secondes de marge ; une recherche en profondeur n'en a
+      // aucune, d'où les trente secondes.
+      this.armerLaGarde(
+        request.movetimeMs ? request.movetimeMs + GARDE_MOVETIME_MS : GARDE_PROFONDEUR_MS,
+      )
     })
+  }
+
+  /**
+   * Le délai de garde de la recherche en cours.
+   *
+   * `search()` posait `busy = true` et attendait `bestmove` sans échéance :
+   * seule la poignée de main en avait une. Un Stockfish qui ne répond plus —
+   * bloqué sur une lecture NNUE, tué par le gestionnaire de mémoire, ou
+   * simplement suspendu — restait donc occupé **pour toujours**. La réserve
+   * passait de deux processus à un, puis à zéro, sans jamais se rétablir, et
+   * `/health` continuait d'annoncer une disponibilité qui décroissait sans
+   * qu'on sache pourquoi.
+   *
+   * À l'échéance on demande poliment (`stop`), puis on tue. Le redémarrage est
+   * déjà écrit : l'événement `exit` du processus enfant est écouté par la
+   * réserve, qui relance après deux secondes.
+   */
+  private armerLaGarde(delaiMs: number): void {
+    this.annulerLaGarde()
+    this.garde = setTimeout(() => {
+      if (!this.current) return
+      this.send('stop')
+      this.garde = setTimeout(() => {
+        if (!this.current) return
+        // L'ordre compte : on rejette avec la vraie raison avant de tuer,
+        // sinon le gestionnaire `exit` rejetterait le premier, avec un message
+        // qui ne dirait pas ce qui s'est passé.
+        this.failCurrent(new Error('Le moteur n’a pas répondu : il a été relancé.'))
+        this.emit('relance')
+        this.child?.kill('SIGKILL')
+      }, INSISTANCE_MS)
+      this.garde.unref?.()
+    }, delaiMs)
+    this.garde.unref?.()
+  }
+
+  private annulerLaGarde(): void {
+    if (this.garde) clearTimeout(this.garde)
+    this.garde = null
   }
 
   stop(): void {
@@ -288,6 +366,7 @@ export class EngineProcess extends EventEmitter {
   private finish(): void {
     const current = this.current
     if (!current) return
+    this.annulerLaGarde()
     this.current = null
     this.busy = false
 
@@ -306,6 +385,7 @@ export class EngineProcess extends EventEmitter {
 
   private failCurrent(error: Error): void {
     const current = this.current
+    this.annulerLaGarde()
     this.current = null
     this.busy = false
     current?.reject(error)
