@@ -198,6 +198,13 @@ services:
       ENGINE_DEFAULT_DEPTH: ${ENGINE_DEFAULT_DEPTH:-24}
       ENGINE_MAX_DEPTH: ${ENGINE_MAX_DEPTH:-34}
       ENGINE_MAX_QUEUE: ${ENGINE_MAX_QUEUE:-16}
+      # Le serveur compte ses requêtes par adresse, et il n'en voit jamais une
+      # vraie : il y a toujours quelque chose devant lui — la passerelle
+      # `/api/analyse` du conteneur web, et le relais d'entrée. Sans ce
+      # drapeau, il ne croit que `socket.remoteAddress`, c'est-à-dire l'adresse
+      # du conteneur voisin, et le quota d'une route se partagerait entre tous
+      # les joueurs. Ici la chaîne est interne et connue : on la croit.
+      TRUST_PROXY: ${TRUST_PROXY:-1}
       LICHESS_TABLEBASE_URL: ${LICHESS_TABLEBASE_URL:-https://tablebase.lichess.ovh}
       # Voix neuronale du coach. Ces chemins existent dans l'image ; si Piper
       # n'a pas été inclus à la construction, l'application bascule d'elle-même

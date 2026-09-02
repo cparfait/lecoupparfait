@@ -16,6 +16,7 @@
  */
 
 import { NextResponse } from 'next/server'
+import { entetesDeRelais } from '@/lib/server/passerelle.ts'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { Chess } from 'chess.js'
@@ -152,7 +153,7 @@ export async function POST(request: Request) {
   try {
     const upstream = await fetch(`${SERVER_URL}/maia`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: entetesDeRelais(request),
       body: JSON.stringify({ fen, elo: body.elo ?? 1500 }),
       signal: AbortSignal.timeout(6000),
       cache: 'no-store',

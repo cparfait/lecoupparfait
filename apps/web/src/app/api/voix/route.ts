@@ -12,6 +12,7 @@
  */
 
 import { NextResponse } from 'next/server'
+import { entetesDeRelais } from '@/lib/server/passerelle.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -55,6 +56,7 @@ export async function GET(request: Request) {
         rate: Number(url.searchParams.get('debit') ?? 1),
       },
       request.headers.get('range'),
+      entetesDeRelais(request),
     )
   }
 
@@ -84,12 +86,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Le champ « text » est requis.' }, { status: 400 })
   }
 
-  return synthesise({
-    text,
-    voice: body.voice,
-    language: body.language,
-    rate: Number(body.rate ?? 1),
-  })
+  return synthesise(
+    {
+      text,
+      voice: body.voice,
+      language: body.language,
+      rate: Number(body.rate ?? 1),
+    },
+    null,
+    entetesDeRelais(request),
+  )
 }
 
 /**
@@ -113,7 +119,8 @@ async function synthesise(
     language?: 'fr' | 'en'
     rate?: number
   },
-  range?: string | null,
+  range: string | null,
+  entetes: Record<string, string>,
 ): Promise<Response> {
   const rate = Number.isFinite(options.rate) ? Math.max(0.5, Math.min(2, options.rate!)) : 1
 
@@ -121,7 +128,7 @@ async function synthesise(
   try {
     const upstream = await fetch(`${SERVER_URL}/voix`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: entetes,
       body: JSON.stringify({
         text: options.text,
         voice: options.voice,

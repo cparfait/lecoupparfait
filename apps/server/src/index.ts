@@ -27,13 +27,14 @@ import {
 } from '@coupparfait/db/tournaments'
 import type { Square, PieceSymbol } from 'chess.js'
 import { parseTimeControl, type TimeControl } from '@coupparfait/core'
-import { getPool, disposePool } from './engine/pool.ts'
+import { FileSaturee, getPool, disposePool } from './engine/pool.ts'
 import { analyseGamePositions, analysePosition } from './engine/analysis.ts'
 import { isTablebaseEnabled } from './engine/tablebase.ts'
 import { disposeVoices, isPiperAvailable, listPiperVoices, synthesise } from './tts/piper.ts'
 import { GameRoom } from './realtime/gameRoom.ts'
 import { persistFinishedGame } from './persistence.ts'
 import { verifySessionToken } from './auth.ts'
+import { adresseDe, creerLimiteur } from './limites.ts'
 import { rappelDuDefi, rappelsPossibles } from './rappels.ts'
 
 const PORT = Number(process.env.SERVER_PORT ?? 3001)
@@ -46,6 +47,40 @@ const pool = getPool()
 
 /** Message unique, pour que le client reconnaisse la situation sans deviner. */
 const ENGINE_UNAVAILABLE = 'Moteur d’analyse indisponible sur le serveur.'
+
+/**
+ * Rythme accepté par route et par adresse.
+ *
+ * Les quatre chiffres sont taillés sur l'usage réel et non sur une intuition :
+ * l'écran d'analyse demande une position à chaque coup parcouru, la voix une
+ * phrase par commentaire, Maia un coup par tour. Trois analyses de partie
+ * complètes par minute, en revanche, occupent déjà la réserve plusieurs
+ * minutes — c'est la route qui coûte cher, et celle qu'on serre.
+ */
+const rythmes = {
+  '/analyse': creerLimiteur(60_000, 30),
+  '/analyse/partie': creerLimiteur(60_000, 3),
+  '/voix': creerLimiteur(60_000, 60),
+  '/maia': creerLimiteur(60_000, 60),
+} as const
+
+/**
+ * Applique le rythme d'une route. Rend `true` si la requête a été refusée.
+ *
+ * `Retry-After` n'est pas une politesse : sans elle, un client qui reçoit un
+ * 429 réessaie aussitôt, et c'est le refus lui-même qui devient la charge.
+ */
+function trop(
+  chemin: keyof typeof rythmes,
+  adresse: string,
+  response: import('node:http').ServerResponse,
+): boolean {
+  const limiteur = rythmes[chemin]
+  if (!limiteur.depasse(adresse)) return false
+  response.setHeader('Retry-After', String(Math.max(1, limiteur.attente(adresse))))
+  json(response, 429, { error: 'Trop de demandes. Réessaie dans un instant.' })
+  return true
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Salons de partie
@@ -104,6 +139,7 @@ const httpServer = createServer(async (request, response) => {
   }
 
   const url = new URL(request.url ?? '/', `http://${request.headers.host}`)
+  const adresse = adresseDe(request)
 
   try {
     // ── Sonde de santé ─────────────────────────────────────────────────────
@@ -137,6 +173,7 @@ const httpServer = createServer(async (request, response) => {
     // demande Lc0. Le bot Stockfish, lui, reste côté client — les deux
     // coexistent, et l'appelant choisit.
     if (url.pathname === '/maia' && request.method === 'POST') {
+      if (trop('/maia', adresse, response)) return
       if (!maiaAvailable()) {
         return json(response, 503, {
           error: 'Maia n’est pas installée. Lance : node scripts/install-maia.mjs',
@@ -241,11 +278,14 @@ const httpServer = createServer(async (request, response) => {
 
     // ── Analyse d'une position ─────────────────────────────────────────────
     if (url.pathname === '/analyse' && request.method === 'POST') {
+      if (trop('/analyse', adresse, response)) return
+
       const body = await readJson<{
         fen?: string
         depth?: number
         multiPv?: number
         fresh?: boolean
+        token?: string
       }>(request)
 
       if (!body.fen) return json(response, 400, { error: 'Le champ « fen » est requis.' })
@@ -256,18 +296,22 @@ const httpServer = createServer(async (request, response) => {
         depth: body.depth,
         multiPv: body.multiPv,
         fresh: body.fresh,
-        priority: 'interactive',
+        priority: await priorite(body.token),
+        client: adresse,
       })
       return json(response, 200, analysis)
     }
 
     // ── Analyse d'une partie complète, en flux ─────────────────────────────
     if (url.pathname === '/analyse/partie' && request.method === 'POST') {
+      if (trop('/analyse/partie', adresse, response)) return
+
       const body = await readJson<{
         moves?: string[]
         startFen?: string
         depth?: number
         multiPv?: number
+        token?: string
       }>(request)
 
       if (!Array.isArray(body.moves) || body.moves.length === 0) {
@@ -294,11 +338,16 @@ const httpServer = createServer(async (request, response) => {
       const controller = new AbortController()
       request.on('close', () => controller.abort())
 
+      // `batch` quelle que soit l'identité, et c'est voulu : quatre-vingts
+      // positions en `interactive` feraient attendre tous ceux qui regardent
+      // une seule position. La priorité selon l'identité vaut pour `/analyse`,
+      // où elle départage deux demandes de même coût.
       const analyses = await analyseGamePositions({
         moves: body.moves,
         startFen: body.startFen,
         depth: body.depth,
         multiPv: body.multiPv ?? 2,
+        client: adresse,
         signal: controller.signal,
         onProgress: (done, total) => {
           response.write(`${JSON.stringify({ type: 'progress', done, total })}\n`)
@@ -328,6 +377,7 @@ const httpServer = createServer(async (request, response) => {
     }
 
     if (url.pathname === '/voix' && request.method === 'POST') {
+      if (trop('/voix', adresse, response)) return
       if (!(await isPiperAvailable())) {
         return json(response, 503, { error: 'Voix neuronale indisponible.' })
       }
@@ -363,12 +413,37 @@ const httpServer = createServer(async (request, response) => {
 
     return json(response, 404, { error: 'Route inconnue.' })
   } catch (error) {
+    // Une analyse en flux a déjà écrit son en-tête : plus rien à annoncer, on
+    // clôt. Sans ce garde, l'échec de la réponse d'erreur masquait l'erreur.
+    if (response.headersSent) {
+      response.end()
+      return
+    }
+    // Refus faute de place : ce n'est pas une panne, et le client peut
+    // réessayer. Voir `FileSaturee`.
+    if (error instanceof FileSaturee) {
+      response.setHeader('Retry-After', '5')
+      return json(response, 429, { error: error.message })
+    }
     console.error('[http]', error)
     return json(response, 500, {
       error: error instanceof Error ? error.message : 'Erreur interne.',
     })
   }
 })
+
+/**
+ * La priorité d'une demande d'analyse, d'après qui la fait.
+ *
+ * Le mécanisme existait déjà dans la réserve mais rien ne s'en servait pour
+ * départager les gens : toute analyse de position partait en `interactive`, y
+ * compris celle d'un `curl` anonyme, qui passait donc devant un joueur inscrit.
+ * `live` reste réservé aux coups des parties en cours, il ne se demande pas.
+ */
+async function priorite(token: string | undefined): Promise<'interactive' | 'batch'> {
+  if (!token) return 'batch'
+  return (await verifySessionToken(token)) ? 'interactive' : 'batch'
+}
 
 function json(response: import('node:http').ServerResponse, status: number, body: unknown): void {
   const payload = JSON.stringify(body)

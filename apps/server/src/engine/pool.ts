@@ -38,10 +38,37 @@ export interface PoolOptions {
 interface QueuedTask {
   request: SearchRequest
   priority: Priority
+  /** Adresse de l'appelant, pour la part de file qui lui revient. */
+  client: string
   resolve: (analysis: PositionAnalysis) => void
   reject: (error: Error) => void
   enqueuedAt: number
 }
+
+/**
+ * Places en file par appelant.
+ *
+ * Le plafond global de seize protégeait la machine et personne d'autre : une
+ * seule adresse pouvait le remplir à elle seule, et les quinze autres joueurs
+ * recevaient un refus qu'ils n'avaient pas mérité. Deux places par adresse
+ * suffisent — un client n'a de toute façon qu'une position en vol à la fois,
+ * `analyseGamePositions` les enchaîne — et le refus reste sans gravité :
+ * l'appelant a un moteur dans son navigateur.
+ *
+ * Sans identité d'appelant (les appels internes du serveur lui-même), la part
+ * ne s'applique pas : c'est le plafond global qui décide.
+ */
+const FILE_PAR_CLIENT = 2
+
+/**
+ * Refus faute de place, et non panne.
+ *
+ * La distinction n'est pas cosmétique : ces deux refus sortaient en `500`,
+ * c'est-à-dire « le serveur est cassé », alors qu'ils veulent dire « reviens
+ * dans un instant ». Un client qui lit un 500 abandonne et bascule sur son
+ * moteur local ; sur un 429 il sait qu'il peut réessayer.
+ */
+export class FileSaturee extends Error {}
 
 export class EnginePool {
   private readonly processes: EngineProcess[] = []
@@ -152,9 +179,19 @@ export class EnginePool {
    * La profondeur est plafonnée : une requête malveillante ne doit pas pouvoir
    * mobiliser un cœur pendant une heure.
    */
-  analyse(request: SearchRequest, priority: Priority = 'interactive'): Promise<PositionAnalysis> {
+  analyse(
+    request: SearchRequest,
+    priority: Priority = 'interactive',
+    client = '',
+  ): Promise<PositionAnalysis> {
     if (!this.started) {
       return Promise.reject(new Error('La réserve moteur n’est pas démarrée.'))
+    }
+
+    if (client && this.queue.filter((task) => task.client === client).length >= FILE_PAR_CLIENT) {
+      return Promise.reject(
+        new FileSaturee('Trop d’analyses en attente pour cette adresse. Réessaie dans un instant.'),
+      )
     }
 
     /**
@@ -182,7 +219,7 @@ export class EnginePool {
     const maxQueue = this.options.maxQueue ?? Number(process.env.ENGINE_MAX_QUEUE ?? 16)
     if (this.queue.length >= maxQueue) {
       return Promise.reject(
-        new Error('Le serveur d’analyse est saturé. Réessaie dans quelques secondes.'),
+        new FileSaturee('Le serveur d’analyse est saturé. Réessaie dans quelques secondes.'),
       )
     }
 
@@ -201,6 +238,7 @@ export class EnginePool {
       const task: QueuedTask = {
         request: bounded,
         priority,
+        client,
         resolve,
         reject,
         enqueuedAt: Date.now(),

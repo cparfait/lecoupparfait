@@ -27,11 +27,16 @@ export interface AnalyseOptions {
   /** Ignore le cache et force un nouveau calcul. */
   fresh?: boolean
   signal?: AbortSignal
+  /**
+   * Adresse de l'appelant. Elle ne sert qu'à lui réserver sa part de la file :
+   * voir `FILE_PAR_CLIENT` dans la réserve. Vide pour un appel interne.
+   */
+  client?: string
 }
 
 /** Analyse une position en passant par le cache et les tables de finales. */
 export async function analysePosition(options: AnalyseOptions): Promise<PositionAnalysis> {
-  const { fen, multiPv = 1, priority = 'interactive', fresh = false, signal } = options
+  const { fen, multiPv = 1, priority = 'interactive', fresh = false, signal, client } = options
   // Vingt-quatre demi-coups par défaut. Le moteur natif les atteint en une
   // fraction de seconde par position, et c'est à partir de là qu'il départage
   // deux bons coups plutôt que de se contenter de repérer les fautes.
@@ -106,7 +111,7 @@ export async function analysePosition(options: AnalyseOptions): Promise<Position
   }
 
   // ── 4. Moteur ───────────────────────────────────────────────────────────
-  const analysis = await getPool().analyse({ fen, depth, multiPv, signal }, priority)
+  const analysis = await getPool().analyse({ fen, depth, multiPv, signal }, priority, client)
 
   void writeCache(epd, analysis).catch((error: unknown) => {
     console.warn('[analyse] écriture du cache impossible :', error)
@@ -373,6 +378,9 @@ export interface GameAnalysisRequest {
   multiPv?: number
   onProgress?: (done: number, total: number) => void
   signal?: AbortSignal
+  /** Priorité des positions : `batch` par défaut, voir `analysePosition`. */
+  priority?: Priority
+  client?: string
 }
 
 /**
@@ -411,7 +419,8 @@ export async function analyseGamePositions(
         fen: positions[i]!,
         depth: request.depth,
         multiPv: request.multiPv ?? 2,
-        priority: 'batch',
+        priority: request.priority ?? 'batch',
+        client: request.client,
         signal: request.signal,
       }),
     )

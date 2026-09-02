@@ -12,6 +12,8 @@
  */
 
 import { NextResponse } from 'next/server'
+import { entetesDeRelais } from '@/lib/server/passerelle.ts'
+import { getSessionToken } from '@/lib/server/session.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -69,13 +71,18 @@ export async function POST(request: Request) {
     // maintient la connexion vivante entre-temps.
     const timeout = setTimeout(() => controller.abort(), isGame ? 300_000 : 60_000)
 
+    // Le jeton sert à la priorité : un joueur connecté passe devant un appel
+    // anonyme. Il ne quitte pas le réseau interne, et la route est déjà
+    // `force-dynamic`. Pour l'adresse, voir `entetesDeRelais`.
+    const token = (await getSessionToken()) ?? undefined
+
     const upstream = await fetch(`${SERVER_URL}${isGame ? '/analyse/partie' : '/analyse'}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: entetesDeRelais(request),
       body: JSON.stringify(
         isGame
-          ? { moves: body.moves, depth, multiPv }
-          : { fen: body.fen, depth, multiPv },
+          ? { moves: body.moves, depth, multiPv, token }
+          : { fen: body.fen, depth, multiPv, token },
       ),
       signal: controller.signal,
     })
