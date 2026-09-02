@@ -378,6 +378,23 @@ function ImportScreen({
     )
   }, [handedOver, parsed, input])
 
+  /*
+    Sauf quand le clic *est* le choix.
+
+    Dans la liste des parties Chess.com ou Lichess, on a déjà désigné une
+    partie parmi trente : la coller dans le champ pour demander ensuite de
+    cliquer « Lancer l'analyse » ajoute un geste à quelqu'un qui vient de
+    décider. Celle-là part dès qu'elle est lue. Le camp est celui du pseudo
+    cherché, et la profondeur celle qui est réglée.
+  */
+  const lancerDesQueLue = useRef(false)
+  useEffect(() => {
+    if (!lancerDesQueLue.current) return
+    if (!parsed || parsed.moves.length === 0) return
+    lancerDesQueLue.current = false
+    void start()
+  }, [parsed, start])
+
   const paste = useCallback(async () => {
     try {
       setInput(await navigator.clipboard.readText())
@@ -492,10 +509,11 @@ function ImportScreen({
               </p>
               <ImportEnLigne
                 onChoisir={(pgn, campImporte) => {
-                  setInput(pgn)
                   // Le camp du joueur cherché : c'est lui qui lira l'analyse.
                   setCamp(campImporte)
                   onSide(campImporte)
+                  lancerDesQueLue.current = true
+                  setInput(pgn)
                 }}
               />
             </div>
