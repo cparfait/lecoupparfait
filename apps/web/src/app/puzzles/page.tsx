@@ -52,7 +52,7 @@ import {
 } from '@/lib/carriere/useCarriere.ts'
 import { chapitre as chapitreCarriereNumero } from '@coupparfait/core'
 import { useRouter } from 'next/navigation'
-import { jourLocal } from '@/lib/daily/quotidien.ts'
+import { jourLocal, queteFaite } from '@/lib/daily/quotidien.ts'
 import type { Locale } from '@/lib/i18n/dictionary.ts'
 
 interface Puzzle {
@@ -226,7 +226,8 @@ export default function PuzzlesPage() {
     }
   }, [])
 
-  const { marquer } = useQuotidien()
+  const { etat: journee, marquer } = useQuotidien()
+
   const router = useRouter()
 
   /**
@@ -240,6 +241,19 @@ export default function PuzzlesPage() {
   const [modeDefi, setModeDefi] = useState<boolean | null>(null)
   /** Tranche du défi du jour, quand on arrive par un lien qui en désigne une. */
   const [trancheDefi, setTrancheDefi] = useState<string | null>(null)
+  /**
+   * Le défi du jour est-il déjà relevé ?
+   *
+   * Rien ne le disait sur cet écran : on y revenait par un lien, par
+   * l'historique ou par curiosité, on retrouvait la position — la même, le
+   * tirage étant déterministe — et rien n'indiquait qu'elle avait déjà été
+   * résolue. On la cherchait donc une seconde fois sans savoir qu'on la
+   * refaisait, et sans que ça compte : ni série, ni quête, ni classement.
+   *
+   * On le dit, et on n'interdit rien : refaire une position pour la comprendre
+   * est légitime, c'est la comptabiliser deux fois qui ne l'était pas.
+   */
+  const defiDejaFait = modeDefi === true && journee != null && queteFaite(journee, 'defi')
   /**
    * Chapitre de carrière en cours, s'il y en a un.
    *
@@ -716,9 +730,9 @@ export default function PuzzlesPage() {
           {modeDefi ? 'Défi du jour' : 'Puzzles'}
         </h1>
         {modeDefi ? (
-          <Chip tone="accent">
-            <Swords size={11} aria-hidden />
-            une seule position
+          <Chip tone={defiDejaFait ? 'success' : 'accent'}>
+            {defiDejaFait ? <Check size={11} aria-hidden /> : <Swords size={11} aria-hidden />}
+            {defiDejaFait ? 'déjà relevé aujourd’hui' : 'une seule position'}
           </Chip>
         ) : (
           /* L'autre façon de travailler les mêmes puzzles : vite, et à la

@@ -56,8 +56,21 @@ export function Aujourdhui({
 
   return (
     <Card className="overflow-hidden">
+      {/* Le liseré vert, comme la teinte de chapitre sur la carte voisine.
+          C'est ce qui se voit sans lire, et c'est tout l'objet : la question
+          « est-ce que j'ai fait le défi aujourd'hui ? » doit se répondre d'un
+          coup d'œil, pas en cherchant une ligne au milieu d'une liste. */}
+      {defiFait && <div className="h-1 bg-[var(--q-best)]" aria-hidden />}
+
       <div className="flex items-baseline justify-between gap-2 border-b border-line/60 px-4 py-2.5">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">Aujourd’hui</p>
+        {defiFait ? (
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--q-best)]">
+            <Check size={12} strokeWidth={3} aria-hidden />
+            Défi du jour relevé
+          </p>
+        ) : (
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">Aujourd’hui</p>
+        )}
         <p className="text-[11px] tabular-nums text-muted">
           {xp} / {XP_TOTAL} points du jour
         </p>
@@ -82,10 +95,9 @@ export function Aujourdhui({
             tête de page dans « Maintenant » : le répéter à deux endroits ferait
             deux boutons pour une position unique. */}
         {defiFait && (
-          <p className="mb-2.5 flex items-center gap-2 rounded-[var(--radius-sm)] bg-[color-mix(in_oklab,var(--q-best)_10%,transparent)] px-2.5 py-2 text-[12px] text-ink">
-            <Check size={14} className="shrink-0 text-[var(--q-best)]" aria-hidden />
-            Défi du jour relevé{niveauDefi ? ` — niveau ${niveauDefi}` : ''}. La prochaine
-            position arrive à minuit.
+          <p className="mb-2.5 rounded-[var(--radius-sm)] bg-[color-mix(in_oklab,var(--q-best)_10%,transparent)] px-2.5 py-2 text-[12px] leading-relaxed text-muted">
+            {niveauDefi ? `La position du jour valait ${niveauDefi}. ` : ''}
+            La prochaine arrive à minuit — reviens demain.
           </p>
         )}
 
