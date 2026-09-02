@@ -3,7 +3,9 @@
 /**
  * Menu déroulant : un bouton, un panneau, et les gestes qu'on attend.
  *
- * Extrait de `ThemeQuickSwitch`, qui en contenait déjà la mécanique complète.
+ * Extrait du sélecteur de thème de l'en-tête, qui en contenait déjà la
+ * mécanique complète — et qui a disparu depuis, le réglage vivant dans les
+ * préférences.
  * L'en-tête en compte désormais cinq : sans mise en commun, on aurait six
  * implémentations de la même chose, et elles auraient dérivé — c'est toujours
  * la fermeture au clic extérieur qu'on oublie dans la sixième.

@@ -35,7 +35,6 @@ import { useT } from '@/lib/i18n/index.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { avantagePour, type AvantageCompte } from '@/lib/compte/avantages.ts'
 import { RACCOURCIS_MOBILES, SECTIONS, sectionActive } from '@/lib/navigation.ts'
-import { ThemeQuickSwitch } from './ThemeQuickSwitch.tsx'
 
 /**
  * Ce qu'il y a à dire avant d'ouvrir cette rubrique, s'il y a quelque chose.
@@ -157,7 +156,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                 désormais posé dans chaque écran qui parle — puzzles, leçons,
                 finales, panneau du coach, analyse —, à côté de ce qu'il fait
                 taire. Le réglage durable reste dans les préférences. */}
-            <ThemeQuickSwitch />
+            {/* Le sélecteur de thème non plus.
+
+                Même raison, et un an plus tard le même constat : une palette
+                dans la barre est une commande de plus à côté de l'engrenage
+                qui mène à la page où le même réglage se trouve, en plus grand
+                et nommé. Deux chemins pour un choix qu'on fait une fois — et
+                celui-ci occupait une des cinq places de la barre sur
+                téléphone, là où elles se disputent la largeur. */}
             <Link
               href="/preferences"
               className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
