@@ -17,7 +17,7 @@
  *    sous le plateau ni le regarder à plat, deux angles où l'on ne joue plus.
  */
 
-import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import type { ThreeEvent } from '@react-three/fiber'
 import { ContactShadows, OrbitControls, RoundedBox } from '@react-three/drei'
@@ -75,7 +75,14 @@ function squareToWorld(square: Square, orientation: Color): [number, number] {
   return [x, z]
 }
 
-export function Board3D(props: Board2DProps) {
+/*
+  Mémoïsé, comme la vue 2D : la page de partie se re-rend à chaque seconde de
+  pendule, et sans cela le plateau suivait — soixante-quatre cases et
+  trente-deux pièces réconciliées, puis une image dessinée pour rien. Les
+  propriétés que la page transmet sont stables tant que la position ne change
+  pas ; c'est ce qui rend la mémoïsation efficace.
+*/
+export const Board3D = memo(function Board3D(props: Board2DProps) {
   const prefs = usePreferences()
   const {
     fen,
@@ -251,6 +258,18 @@ export function Board3D(props: Board2DProps) {
       <Canvas
         key={reprise}
         style={{ width: size, height: size }}
+        /*
+          Rendu à la demande, et non soixante images par seconde en continu.
+
+          Un échiquier immobile rendait en boucle : deux cent soixante appels
+          de dessin par image, sans que rien ne bouge — c'est ce qui vidait la
+          batterie et chauffait le téléphone. En mode « demand », le moteur ne
+          dessine que lorsqu'on le lui demande : React Three Fiber le fait à
+          chaque changement de propriété, les contrôles de caméra à chaque
+          mouvement, et les pièces elles-mêmes tant qu'elles glissent — voir
+          `Piece3D`.
+        */
+        frameloop="demand"
         shadows={quality === 'high'}
         dpr={quality === 'high' ? [1, 2] : 1}
         gl={{
@@ -361,7 +380,7 @@ export function Board3D(props: Board2DProps) {
       )}
     </div>
   )
-}
+})
 
 /**
  * Sommes-nous sur un appareil à écran tactile étroit ?
@@ -596,6 +615,7 @@ function Piece3D({
   onClick: () => void
 }) {
   const prefs = usePreferences()
+  const invalidate = useThree((state) => state.invalidate)
   const groupRef = useRef<THREE.Group>(null)
   const [x, z] = squareToWorld(piece.square, orientation)
   const target = useRef(new THREE.Vector3(x, 0.02, z))
@@ -612,6 +632,11 @@ function Piece3D({
 
   // Interpolation vers la case cible : c'est ce qui fait glisser la pièce
   // plutôt que de la téléporter, sans avoir à orchestrer d'animation.
+  //
+  // Le rendu étant à la demande, c'est la pièce qui réclame l'image suivante
+  // tant qu'elle n'est pas arrivée — et se tait dès qu'elle est posée. Une
+  // interpolation ne « finit » jamais tout à fait : on la coupe au millième,
+  // invisible à l'écran, sans quoi le plateau rendrait indéfiniment.
   useFrame((_, delta) => {
     const group = groupRef.current
     if (!group) return
@@ -621,13 +646,32 @@ function Piece3D({
 
     // Lévitation discrète de la pièce sélectionnée.
     const lift = selected ? 0.22 : hovered ? 0.06 : 0
-    group.position.y += (0.02 + lift - group.position.y) * Math.min(1, delta * 12)
+    const hauteur = 0.02 + lift
+    group.position.y += (hauteur - group.position.y) * Math.min(1, delta * 12)
 
-    if (selected && prefs.effects === 'high') {
+    // La rotation continue de la pièce choisie est réservée au rendu complet :
+    // sur un téléphone, elle maintiendrait le moteur en marche tant que la
+    // pièce est sélectionnée.
+    const tourne = selected && quality === 'high'
+    if (tourne) {
       group.rotation.y += delta * 0.7
     } else {
       group.rotation.y += (0 - group.rotation.y) * Math.min(1, delta * 6)
     }
+
+    const posee =
+      Math.abs(group.position.x - target.current.x) < 0.001 &&
+      Math.abs(group.position.z - target.current.z) < 0.001 &&
+      Math.abs(group.position.y - hauteur) < 0.001 &&
+      (tourne || Math.abs(group.rotation.y) < 0.001)
+    if (!posee) {
+      invalidate()
+    } else {
+      // On pose exactement, pour que la comparaison suivante soit franche.
+      group.position.set(target.current.x, hauteur, target.current.z)
+      if (!tourne) group.rotation.y = 0
+    }
+    if (tourne) invalidate()
   })
 
   const isWhite = piece.color === 'w'

@@ -164,6 +164,22 @@ export function useChessGame(options: UseChessGameOptions = {}) {
     material,
   }
 
+  /*
+    Les options et l'état sont lus au moment de jouer, pas capturés.
+
+    `play` dépendait de `options` — un objet littéral que la page recrée à
+    chaque rendu — et de `state`, reconstruit de même. La fonction changeait
+    donc d'identité à chaque rendu de la page, c'est-à-dire dix fois par
+    seconde quand la pendule tourne. Tout ce qui la recevait en propriété se
+    re-rendait avec elle : les deux échiquiers, qui sont `memo` précisément
+    pour ne pas suivre la pendule, et en 3D chaque re-rendu faisait dessiner
+    une image pour rien.
+  */
+  const optionsRef = useRef(options)
+  optionsRef.current = options
+  const stateRef = useRef(state)
+  stateRef.current = state
+
   // ── Actions ───────────────────────────────────────────────────────────────
 
   /**
@@ -185,8 +201,8 @@ export function useChessGame(options: UseChessGameOptions = {}) {
       setCursor(nextMoves.length - 1)
       forceRender((n) => n + 1)
 
-      options.onMove?.(played, {
-        ...state,
+      optionsRef.current.onMove?.(played, {
+        ...stateRef.current,
         fen: played.after,
         currentFen: played.after,
         moves: nextMoves,
@@ -205,12 +221,12 @@ export function useChessGame(options: UseChessGameOptions = {}) {
                 : 'fiftyMoves'
         const finalResult: GameResult =
           finalStatus === 'checkmate' ? (chess.turn() === 'w' ? '0-1' : '1-0') : '1/2-1/2'
-        options.onGameOver?.(finalStatus, finalResult)
+        optionsRef.current.onGameOver?.(finalStatus, finalResult)
       }
 
       return played
     },
-    [chess, moves, options, state],
+    [chess, moves],
   )
 
   /** Joue un coup donné en notation algébrique (utilisé par les leçons). */
