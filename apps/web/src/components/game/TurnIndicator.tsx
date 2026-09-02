@@ -34,7 +34,9 @@ export function TurnIndicator({
         className={clsx(
           'h-2.5 w-2.5 rounded-full',
           turn === 'w' ? 'bg-[var(--eval-white)]' : 'bg-[var(--eval-black)] ring-1 ring-line',
-          yours && 'animate-[pulse-ring_1.8s_ease-in-out_infinite]',
+          // La pulsation anime une ombre, donc repeint en boucle : on la coupe
+          // en mode « performance », comme les autres.
+          yours && 'animate-[pulse-ring_1.8s_ease-in-out_infinite] [[data-effects=low]_&]:animate-none',
         )}
         aria-hidden
       />
