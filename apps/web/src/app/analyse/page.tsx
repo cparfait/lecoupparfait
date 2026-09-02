@@ -1126,6 +1126,7 @@ function ReviewScreen({
    */
   const echiquier = (
             <ChessBoard
+              fitParentHeight
               fen={
                 // Pendant la question, on remonte d'un coup : c'est la position
                 // où le choix se posait, pas celle qui a suivi.
@@ -1209,7 +1210,15 @@ function ReviewScreen({
   const style = move ? QUALITY_STYLES[move.quality] : null
 
   return (
-    <div className="mx-auto w-full max-w-[1600px] px-2 py-3 sm:px-4 lg:py-6">
+    <div
+      // En paysage sur téléphone, la vue détaillée se cale sur la fenêtre :
+      // voir `.etude` et `.grille-analyse` dans `globals.css`. Le pas à pas
+      // garde sa page qui défile.
+      className={clsx(
+        'mx-auto w-full max-w-[1600px] px-2 py-3 sm:px-4 lg:py-6',
+        !relecture && 'etude',
+      )}
+    >
       {/* ── En-tête ────────────────────────────────────────────────── */}
       <div className="mb-3 flex flex-wrap items-center gap-2">
         {/*
@@ -1225,7 +1234,8 @@ function ReviewScreen({
         */}
         <div
           className={clsx(
-            'flex flex-wrap items-center gap-2',
+            // En paysage, la ligne qu'elles prennent vaut un tiers du plateau.
+            'flex flex-wrap items-center gap-2 paysage:hidden',
             relecture && 'hidden sm:flex',
           )}
         >
@@ -1330,10 +1340,9 @@ function ReviewScreen({
           onReveler={reveler}
         />
       ) : (
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_380px] xl:grid-cols-[minmax(0,1fr)_440px]">
+      <div className="grille-analyse">
         {/* ── Échiquier ────────────────────────────────────────────── */}
-        <div className="min-w-0">
-          <div className="flex gap-2">
+          <div className="[grid-area:plateau] flex min-h-0 min-w-0 gap-2">
             <EvalBar
               score={move?.scoreAfter ?? null}
               orientation={orientation}
@@ -1353,7 +1362,7 @@ function ReviewScreen({
               faisait défiler la page latéralement. Elle prend maintenant toute
               la largeur sous les commandes, ce qui la rend au passage lisible —
               c'est un graphique, il vit de sa largeur. */}
-          <div className="mt-2 flex flex-wrap items-center gap-2">
+          <div className="[grid-area:barre] mt-2 flex flex-wrap items-center gap-2">
             {/*
               Ces boutons existaient déjà, mais au bas de la liste des coups —
               tout en bas à droite, hors de l'écran. Le bouton lecture, qui
@@ -1387,7 +1396,9 @@ function ReviewScreen({
           </div>
 
           {/* ── Bilan ────────────────────────────────────────────── */}
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {/* En paysage, le résumé de la colonne de droite suffit : les deux
+              cartes ne tiendraient pas sous le plateau. */}
+          <div className="[grid-area:bilan] mt-4 grid gap-3 sm:grid-cols-2 paysage:hidden">
             {(['w', 'b'] as const).map((colour) => (
               <PlayerReport
                 key={colour}
@@ -1402,10 +1413,9 @@ function ReviewScreen({
               />
             ))}
           </div>
-        </div>
 
         {/* ── Panneau latéral ──────────────────────────────────────── */}
-        <div className="flex min-h-0 flex-col gap-3">
+        <div className="[grid-area:aside] mt-4 flex min-h-0 flex-col gap-3 lg:mt-0 paysage:mt-0 paysage:overflow-y-auto paysage:overscroll-contain">
           {/*
             Le bilan détaillé est sous l'échiquier, donc hors de l'écran : on
             ne voyait qu'une liste de coups, et l'analyse passait pour absente.

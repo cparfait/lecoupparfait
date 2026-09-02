@@ -945,6 +945,49 @@ button.gradient-ring:hover::before {
   }
 }
 
+/* ── Grille de l'analyse détaillée ────────────────────────────────────────
+   Quatre zones : plateau, barre de navigation et courbe, bilan des deux
+   camps, colonne latérale. Empilées sur téléphone, colonne à droite sur
+   grand écran. En paysage sur téléphone, le plateau prend la gauche, la
+   barre et la colonne la droite, et le bilan se retire — il était
+   sous le plateau, donc sous le bord de l'écran, et la colonne en donne
+   déjà le résumé. */
+.grille-analyse {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'plateau' 'barre' 'bilan' 'aside';
+  column-gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .grille-analyse {
+    grid-template-columns: minmax(0, 1fr) 380px;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      'plateau aside'
+      'barre aside'
+      'bilan aside';
+  }
+}
+
+@media (min-width: 1280px) {
+  .grille-analyse {
+    grid-template-columns: minmax(0, 1fr) 440px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .grille-analyse {
+    min-height: 0;
+    grid-template-columns: minmax(0, calc(100dvh - var(--entete) - 1rem)) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      'plateau barre'
+      'plateau aside';
+    column-gap: 0.75rem;
+  }
+}
+
 /* Zone sûre des téléphones à encoche. */
 .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
 .safe-top { padding-top: max(env(safe-area-inset-top), 0.5rem); }
