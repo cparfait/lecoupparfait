@@ -47,6 +47,21 @@ Les deux conteneurs lisent les clés au démarrage : **rien à reconstruire**. L
 clé publique n'a délibérément pas le préfixe `NEXT_PUBLIC_`, parce qu'elle n'est
 jamais lue par le code du navigateur — il la demande à `/api/notifications`.
 
+### La table, aussi
+
+Les abonnements vivent dans `push_subscriptions`, créée par la migration
+`0003`. Sans elle, tout a l'air en place — le réglage s'affiche, la clé arrive —
+et rien ne part jamais.
+
+```bash
+docker compose exec web node scripts/migrate.mjs
+```
+
+C'est l'oubli qui coûte le plus cher ici, parce qu'il ne se voit pas : les clés
+suffisent à faire apparaître le réglage, et l'envoi échoue plus loin, dans du
+code qui a pour consigne de ne rien casser. Le seul symptôme est une invitation
+qui n'arrive pas — indiscernable de « la personne n'est pas abonnée ».
+
 ### Ne regénère pas la paire sans raison
 
 Un abonnement est lié à la clé publique avec laquelle il a été pris. Changer de

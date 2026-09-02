@@ -118,9 +118,21 @@ export async function envoyerAux(
         envoyes.push(abonnement.endpoint)
       } catch (erreur) {
         const code = (erreur as { statusCode?: number }).statusCode
-        if (code === 404 || code === 410) morts.push(abonnement.endpoint)
-        // Les autres codes — 429, 500, réseau coupé — sont passagers : on
-        // laisse la ligne en place, le prochain envoi retentera.
+        if (code === 404 || code === 410) {
+          morts.push(abonnement.endpoint)
+        } else {
+          /*
+            On laisse la ligne en place — mais on le dit.
+
+            429, 500, réseau coupé : c'est passager, le prochain envoi
+            retentera, et il n'y a rien à faire. Un 403 est d'une tout autre
+            nature : il veut dire que la signature VAPID ne correspond pas à la
+            clé avec laquelle cet abonnement a été pris. Celui-là ne guérira
+            jamais tout seul, et sans trace il est indiscernable d'un
+            destinataire qui n'a simplement pas d'appareil abonné.
+          */
+          console.error(`[push] ${abonnement.endpoint.slice(0, 60)}… → ${code ?? 'sans code'}`)
+        }
       }
     }),
   )
@@ -148,8 +160,19 @@ export function prevenir(
       const abonnements = await abonnementsPour(userId, usage)
       const { morts } = await envoyerAux(abonnements, notification)
       await retirerAbonnements(morts)
-    } catch {
-      // Silence assumé : une notification manquée ne casse rien.
+    } catch (erreur) {
+      /*
+        Silencieux pour l'appelant, mais pas pour l'exploitant.
+
+        Une notification manquée ne casse rien et ne doit rien interrompre —
+        c'est le contrat du fichier. Mais tout se taire ici rend deux
+        situations indiscernables : « personne n'est abonné » et « le serveur
+        est cassé ». C'est exactement ce qui est arrivé — une base restée trois
+        migrations en arrière, sans table `push_subscriptions` : chaque envoi
+        levait une erreur, avalée là, et la fonctionnalité paraissait
+        simplement inutilisée pendant des semaines.
+      */
+      console.error('[push] envoi impossible :', erreur)
     }
   })()
 }
