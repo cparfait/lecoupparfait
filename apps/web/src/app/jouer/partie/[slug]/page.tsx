@@ -515,184 +515,192 @@ export default function LiveGamePage() {
         </div>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+      {/* Les zones sont placées par nom : voir `.grille-partie` dans
+          `globals.css`. Même grille que la partie contre l'ordinateur — en
+          paysage, le plateau à gauche et tout le reste à droite. */}
+      <div className="grille-partie [--aside:340px]">
         {/* ── Échiquier ──────────────────────────────────────────── */}
-        <div className="min-w-0">
-          <PlayerBar
-            name={opponent?.name ?? 'En attente…'}
-            rating={opponent?.rating ?? null}
-            color={opponentColor}
-            timeMs={clock ? clock[opponentColor] : null}
-            timeControl={timeControl}
-            active={snapshot.turn === opponentColor && !over}
-            status={opponent && !opponent.connected ? 'déconnecté' : undefined}
+        <PlayerBar
+          className="[grid-area:pion]"
+          name={opponent?.name ?? 'En attente…'}
+          rating={opponent?.rating ?? null}
+          color={opponentColor}
+          timeMs={clock ? clock[opponentColor] : null}
+          timeControl={timeControl}
+          active={snapshot.turn === opponentColor && !over}
+          status={opponent && !opponent.connected ? 'déconnecté' : undefined}
+        />
+
+        <div className="[grid-area:plateau] flex min-h-0 min-w-0 flex-col">
+        <div className="my-1.5 flex min-h-0 flex-1 items-center justify-center">
+          <ChessBoard
+            fitParentHeight
+            reservedHeight={9}
+            fen={revue?.fen ?? snapshot.fen}
+            orientation={orientation}
+            playable={
+              revue === null && color !== null && snapshot.status === 'playing'
+                ? color
+                : null
+            }
+            legalMoves={legalMoves}
+            onMove={handleMove}
+            onPremove={enregistrer}
+            onPremoveCancel={annuler}
+            premove={precoup}
+            lastMove={revue ? revue.lastMove : snapshot.lastMove}
+            checkSquare={revue ? revue.checkSquare : checkSquare}
+            // Cinq autres pages l'annonçaient, celle-ci non : le mat qu'on
+            // vient de porter à un ami passait donc inaperçu, alors que
+            // c'est le seul moment de la partie qui mérite une animation.
+            checkmate={snapshot.status === 'checkmate'}
           />
+        </div>
 
-          <div className="my-1.5">
-            <ChessBoard
-              fen={revue?.fen ?? snapshot.fen}
-              orientation={orientation}
-              playable={
-                revue === null && color !== null && snapshot.status === 'playing'
-                  ? color
-                  : null
-              }
-              legalMoves={legalMoves}
-              onMove={handleMove}
-              onPremove={enregistrer}
-              onPremoveCancel={annuler}
-              premove={precoup}
-              lastMove={revue ? revue.lastMove : snapshot.lastMove}
-              checkSquare={revue ? revue.checkSquare : checkSquare}
-              // Cinq autres pages l'annonçaient, celle-ci non : le mat qu'on
-              // vient de porter à un ami passait donc inaperçu, alors que
-              // c'est le seul moment de la partie qui mérite une animation.
-              checkmate={snapshot.status === 'checkmate'}
-            />
-          </div>
-
-          {/* Le retour au direct, en clair et à portée de pouce : sans lui, on
-              se retrouve devant un échiquier qui refuse les coups sans dire
-              pourquoi — et l'adversaire attend. */}
-          {revue !== null && (
-            <div className="mb-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2 text-[13px]">
-              <Eye size={15} className="shrink-0 text-accent" aria-hidden />
-              <span className="min-w-0 flex-1 leading-snug text-muted">
-                {/* La pendule ne tourne plus quand la partie est finie :
-                    l'écrire quand même ferait courir un temps qui n'existe
-                    pas, et presserait quelqu'un qui a tout le sien. */}
-                {over
-                  ? 'Tu revois un coup passé. La partie est terminée, rien ne presse.'
-                  : 'Tu revois un coup passé. La pendule, elle, continue.'}
-              </span>
-              <button
-                type="button"
-                onClick={() => setRevu(null)}
-                className="shrink-0 rounded-[var(--radius-sm)] bg-accent px-2.5 py-1 text-xs font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
-              >
-                Revenir au direct
-              </button>
-            </div>
-          )}
-
-          <PlayerBar
-            name={me?.name ?? 'Toi'}
-            rating={me?.rating ?? null}
-            color={orientation}
-            timeMs={clock ? clock[orientation] : null}
-            timeControl={timeControl}
-            active={snapshot.turn === orientation && !over}
-          />
-
-          {/* ── Actions ────────────────────────────────────────── */}
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {/* La bascule 2D / 3D sous `sm` : elle occupait sinon une rangée
-                entière sous l'échiquier pour trois boutons alignés à droite. */}
-            <ViewToggle className="sm:hidden" />
-            {/* Une partie finie n'a plus rien à proposer : « Proposer nulle »,
-                « Reprendre » et « Abandonner » se désactivent tous les trois
-                en même temps, et il ne reste qu'une barre grise. La boîte de
-                résultat refermée, on est devant un échiquier mort sans aucune
-                porte — celles-ci prennent la place des trois autres. */}
-            {over ? (
-              <>
-                <ButtonLink href="/jouer/ami" size="sm" variant="primary" icon={<Swords size={14} />}>
-                  Nouvelle partie
-                </ButtonLink>
-                <ButtonLink href="/jouer" size="sm" variant="ghost" icon={<LayoutGrid size={14} />}>
-                  Menu
-                </ButtonLink>
-              </>
-            ) : drawOfferedToMe ? (
-              <>
-                <Button size="sm" variant="primary" onClick={game.offerDraw}>
-                  Accepter la nulle
-                </Button>
-                <Button size="sm" variant="ghost" onClick={game.declineDraw}>
-                  Refuser
-                </Button>
-              </>
-            ) : (
-              <Button
-                size="sm"
-                variant="ghost"
-                icon={<Handshake size={14} />}
-                onClick={game.offerDraw}
-                disabled={over || waiting || color === null}
-              >
-                {snapshot.drawOfferFrom === color ? 'Nulle proposée' : 'Proposer nulle'}
-              </Button>
-            )}
-
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={<Undo2 size={14} />}
-              onClick={
-                snapshot.takebackFrom && snapshot.takebackFrom !== color
-                  ? game.acceptTakeback
-                  : game.requestTakeback
-              }
-              disabled={over || waiting || color === null || snapshot.moves.length < 2}
+        {/* Le retour au direct, en clair et à portée de pouce : sans lui, on
+            se retrouve devant un échiquier qui refuse les coups sans dire
+            pourquoi — et l'adversaire attend. */}
+        {revue !== null && (
+          <div className="mb-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2 text-[13px]">
+            <Eye size={15} className="shrink-0 text-accent" aria-hidden />
+            <span className="min-w-0 flex-1 leading-snug text-muted">
+              {/* La pendule ne tourne plus quand la partie est finie :
+                  l'écrire quand même ferait courir un temps qui n'existe
+                  pas, et presserait quelqu'un qui a tout le sien. */}
+              {over
+                ? 'Tu revois un coup passé. La partie est terminée, rien ne presse.'
+                : 'Tu revois un coup passé. La pendule, elle, continue.'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setRevu(null)}
+              className="shrink-0 rounded-[var(--radius-sm)] bg-accent px-2.5 py-1 text-xs font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
             >
-              {snapshot.takebackFrom && snapshot.takebackFrom !== color
-                ? 'Accepter la reprise'
-                : 'Reprendre'}
-            </Button>
+              Revenir au direct
+            </button>
+          </div>
+        )}
+        </div>
 
+        <PlayerBar
+          className="[grid-area:moi]"
+          name={me?.name ?? 'Toi'}
+          rating={me?.rating ?? null}
+          color={orientation}
+          timeMs={clock ? clock[orientation] : null}
+          timeControl={timeControl}
+          active={snapshot.turn === orientation && !over}
+        />
+
+        {/* ── Actions ────────────────────────────────────────── */}
+        <div className="[grid-area:barre] mt-3 flex flex-wrap gap-1.5">
+          {/* La bascule 2D / 3D sous `sm` et en paysage : ailleurs elle
+              occupait une rangée entière sous l'échiquier pour trois
+              boutons alignés à droite. */}
+          <ViewToggle className="sm:hidden paysage:flex" />
+          {/* Une partie finie n'a plus rien à proposer : « Proposer nulle »,
+              « Reprendre » et « Abandonner » se désactivent tous les trois
+              en même temps, et il ne reste qu'une barre grise. La boîte de
+              résultat refermée, on est devant un échiquier mort sans aucune
+              porte — celles-ci prennent la place des trois autres. */}
+          {over ? (
+            <>
+              <ButtonLink href="/jouer/ami" size="sm" variant="primary" icon={<Swords size={14} />}>
+                Nouvelle partie
+              </ButtonLink>
+              <ButtonLink href="/jouer" size="sm" variant="ghost" icon={<LayoutGrid size={14} />}>
+                Menu
+              </ButtonLink>
+            </>
+          ) : drawOfferedToMe ? (
+            <>
+              <Button size="sm" variant="primary" onClick={game.offerDraw}>
+                Accepter la nulle
+              </Button>
+              <Button size="sm" variant="ghost" onClick={game.declineDraw}>
+                Refuser
+              </Button>
+            </>
+          ) : (
             <Button
               size="sm"
               variant="ghost"
-              icon={<Flag size={14} />}
-              onClick={() => {
-                if (confirm('Abandonner la partie ?')) game.resign()
-              }}
+              icon={<Handshake size={14} />}
+              onClick={game.offerDraw}
               disabled={over || waiting || color === null}
             >
-              Abandonner
+              {snapshot.drawOfferFrom === color ? 'Nulle proposée' : 'Proposer nulle'}
             </Button>
+          )}
 
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={<MessageSquare size={14} />}
-              onClick={() => setChatOpen((value) => !value)}
-              className="relative ml-auto lg:hidden"
-            >
-              Tchat
-              {/* La pastille compte ce qu'on n'a pas lu. Elle est aussi
-                  annoncée dans le nom du bouton, sans quoi un lecteur d'écran
-                  n'y verrait qu'un chiffre posé à côté d'un mot. */}
-              {nonLus > 0 && (
-                <span
-                  className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold text-[var(--accent-contrast)]"
-                  aria-label={`${nonLus} message${nonLus > 1 ? 's' : ''} non lu${nonLus > 1 ? 's' : ''}`}
-                >
-                  {nonLus > 9 ? '9+' : nonLus}
-                </span>
-              )}
-            </Button>
-          </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Undo2 size={14} />}
+            onClick={
+              snapshot.takebackFrom && snapshot.takebackFrom !== color
+                ? game.acceptTakeback
+                : game.requestTakeback
+            }
+            disabled={over || waiting || color === null || snapshot.moves.length < 2}
+          >
+            {snapshot.takebackFrom && snapshot.takebackFrom !== color
+              ? 'Accepter la reprise'
+              : 'Reprendre'}
+          </Button>
+
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Flag size={14} />}
+            onClick={() => {
+              if (confirm('Abandonner la partie ?')) game.resign()
+            }}
+            disabled={over || waiting || color === null}
+          >
+            Abandonner
+          </Button>
+
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<MessageSquare size={14} />}
+            onClick={() => setChatOpen((value) => !value)}
+            className="relative ml-auto lg:hidden"
+          >
+            Tchat
+            {/* La pastille compte ce qu'on n'a pas lu. Elle est aussi
+                annoncée dans le nom du bouton, sans quoi un lecteur d'écran
+                n'y verrait qu'un chiffre posé à côté d'un mot. */}
+            {nonLus > 0 && (
+              <span
+                className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold text-[var(--accent-contrast)]"
+                aria-label={`${nonLus} message${nonLus > 1 ? 's' : ''} non lu${nonLus > 1 ? 's' : ''}`}
+              >
+                {nonLus > 9 ? '9+' : nonLus}
+              </span>
+            )}
+          </Button>
         </div>
 
         {/* ── Panneau latéral ────────────────────────────────────── */}
         {/*
-          Visible sur téléphone, et c'est un changement.
+        Visible sur téléphone, et c'est un changement.
 
-          Toute la colonne était masquée sous `lg` et n'apparaissait qu'en
-          appuyant sur « Tchat ». La liste des coups vit dedans : sur téléphone,
-          elle n'existait donc pas — sauf à deviner qu'elle se cache derrière un
-          bouton qui annonce une conversation.
+        Toute la colonne était masquée sous `lg` et n'apparaissait qu'en
+        appuyant sur « Tchat ». La liste des coups vit dedans : sur téléphone,
+        elle n'existait donc pas — sauf à deviner qu'elle se cache derrière un
+        bouton qui annonce une conversation.
 
-          On s'en aperçoit surtout à la fin. La partie perdue, les trois boutons
-          d'action se désactivent d'un coup et il ne reste rien à toucher :
-          impossible de revoir le coup qui a tout fait basculer, au moment
-          précis où c'est la seule chose qu'on veuille faire.
+        On s'en aperçoit surtout à la fin. La partie perdue, les trois boutons
+        d'action se désactivent d'un coup et il ne reste rien à toucher :
+        impossible de revoir le coup qui a tout fait basculer, au moment
+        précis où c'est la seule chose qu'on veuille faire.
 
-          Seul le tchat garde son bouton : une conversation qu'on n'a pas
-          ouverte n'a pas à pousser la liste des coups hors de l'écran.
+        Seul le tchat garde son bouton : une conversation qu'on n'a pas
+        ouverte n'a pas à pousser la liste des coups hors de l'écran.
         */}
-        <div className="flex min-h-0 flex-col gap-3">
+        <div className="[grid-area:aside] mt-4 flex min-h-0 flex-col gap-3 lg:mt-0 paysage:mt-0 paysage:overflow-y-auto paysage:overscroll-contain">
           {/*
             Spectateur : les deux places étaient prises à l'arrivée. Le dire
             évite de chercher pourquoi l'échiquier ne répond pas.

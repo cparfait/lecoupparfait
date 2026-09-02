@@ -193,105 +193,110 @@ export default function LocalGamePage() {
 
   return (
     <div className="mx-auto w-full max-w-[1300px] px-2 py-3 sm:px-4 lg:py-6">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="min-w-0">
-          <PlayerBar
-            name={orientation === 'w' ? 'Noirs' : 'Blancs'}
-            color={orientation === 'w' ? 'b' : 'w'}
-            avatar={orientation === 'w' ? '♚' : '♔'}
-            active={state.turn !== orientation && !state.isGameOver}
-            captured={state.material[orientation === 'w' ? 'b' : 'w']}
-            materialLead={
-              orientation === 'w'
-                ? Math.max(0, -state.material.balance)
-                : Math.max(0, state.material.balance)
-            }
+      {/* Les zones sont placées par nom : voir `.grille-partie` dans
+          `globals.css`. Même grille que la partie contre l'ordinateur — en
+          paysage, le plateau à gauche et tout le reste à droite. */}
+      <div className="grille-partie [--aside:320px]">
+        <PlayerBar
+          className="[grid-area:pion]"
+          name={orientation === 'w' ? 'Noirs' : 'Blancs'}
+          color={orientation === 'w' ? 'b' : 'w'}
+          avatar={orientation === 'w' ? '♚' : '♔'}
+          active={state.turn !== orientation && !state.isGameOver}
+          captured={state.material[orientation === 'w' ? 'b' : 'w']}
+          materialLead={
+            orientation === 'w'
+              ? Math.max(0, -state.material.balance)
+              : Math.max(0, state.material.balance)
+          }
+        />
+
+        <div className="[grid-area:plateau] my-1.5 flex min-h-0 min-w-0 items-center justify-center">
+          <ChessBoard
+            key={gameKey}
+            fitParentHeight
+            reservedHeight={9}
+            fen={state.fen}
+            orientation={orientation}
+            playable={state.isLive && !state.isGameOver && !rotationEnAttente ? 'both' : null}
+            legalMoves={state.legalMoves}
+            onMove={handleMove}
+            lastMove={state.lastMove}
+            checkSquare={state.checkSquare}
+                checkmate={state.status === 'checkmate'}
+            arrows={arrows}
+            highlights={commentaryMode ? (commentary?.highlights ?? []) : []}
           />
-
-          <div className="my-1.5">
-            <ChessBoard
-              key={gameKey}
-              fen={state.fen}
-              orientation={orientation}
-              playable={state.isLive && !state.isGameOver && !rotationEnAttente ? 'both' : null}
-              legalMoves={state.legalMoves}
-              onMove={handleMove}
-              lastMove={state.lastMove}
-              checkSquare={state.checkSquare}
-                  checkmate={state.status === 'checkmate'}
-              arrows={arrows}
-              highlights={commentaryMode ? (commentary?.highlights ?? []) : []}
-            />
-          </div>
-
-
-          <PlayerBar
-            name={orientation === 'w' ? 'Blancs' : 'Noirs'}
-            color={orientation}
-            avatar={orientation === 'w' ? '♔' : '♚'}
-            active={state.turn === orientation && !state.isGameOver}
-            captured={state.material[orientation]}
-            materialLead={
-              orientation === 'w'
-                ? Math.max(0, state.material.balance)
-                : Math.max(0, -state.material.balance)
-            }
-          />
-
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {/* La bascule 2D / 3D sous `sm` : elle occupait sinon une rangée
-                entière sous l'échiquier pour trois boutons alignés à droite. */}
-            <ViewToggle className="sm:hidden" />
-            <span className="mr-auto flex items-center gap-2 pl-1 text-sm">
-              <span
-                className={
-                  state.turn === 'w'
-                    ? 'h-2.5 w-2.5 rounded-full bg-[var(--eval-white)]'
-                    : 'h-2.5 w-2.5 rounded-full bg-[var(--eval-black)] ring-1 ring-line'
-                }
-                aria-hidden
-              />
-              {state.isGameOver
-                ? 'Partie terminée'
-                : rotationEnAttente
-                  ? 'Coup joué — l’échiquier pivote…'
-                  : `Trait aux ${state.turn === 'w' ? 'Blancs' : 'Noirs'}`}
-            </span>
-
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={<RotateCcw size={14} />}
-              onClick={() => {
-                // Retourner à la main pendant la pause doit gagner : sans cette
-                // annulation, la minuterie basculerait le plateau une seconde
-                // plus tard et défairait le geste.
-                annulerRotation()
-                setOrientation((value) => (value === 'w' ? 'b' : 'w'))
-              }}
-            >
-              Retourner
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={<Undo2 size={14} />}
-              onClick={annulerCoup}
-              disabled={state.moves.length === 0}
-            >
-              Annuler
-            </Button>
-            <Button size="sm" variant="ghost" icon={<RefreshCw size={14} />} onClick={newGame}>
-              Nouvelle partie
-            </Button>
-            <CommentaryToggle
-              active={commentaryMode}
-              onChange={(value) => setPreference('commentaryMode', value)}
-            />
-          </div>
         </div>
 
-        <div className="flex min-h-0 flex-col gap-3">
+        <PlayerBar
+          className="[grid-area:moi]"
+          name={orientation === 'w' ? 'Blancs' : 'Noirs'}
+          color={orientation}
+          avatar={orientation === 'w' ? '♔' : '♚'}
+          active={state.turn === orientation && !state.isGameOver}
+          captured={state.material[orientation]}
+          materialLead={
+            orientation === 'w'
+              ? Math.max(0, state.material.balance)
+              : Math.max(0, -state.material.balance)
+          }
+        />
+
+        <div className="[grid-area:barre] mt-3 flex flex-wrap gap-1.5">
+          {/* La bascule 2D / 3D sous `sm` et en paysage : ailleurs elle
+              occupait une rangée entière sous l'échiquier pour trois
+              boutons alignés à droite. */}
+          <ViewToggle className="sm:hidden paysage:flex" />
+          <span className="mr-auto flex items-center gap-2 pl-1 text-sm">
+            <span
+              className={
+                state.turn === 'w'
+                  ? 'h-2.5 w-2.5 rounded-full bg-[var(--eval-white)]'
+                  : 'h-2.5 w-2.5 rounded-full bg-[var(--eval-black)] ring-1 ring-line'
+              }
+              aria-hidden
+            />
+            {state.isGameOver
+              ? 'Partie terminée'
+              : rotationEnAttente
+                ? 'Coup joué — l’échiquier pivote…'
+                : `Trait aux ${state.turn === 'w' ? 'Blancs' : 'Noirs'}`}
+          </span>
+
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<RotateCcw size={14} />}
+            onClick={() => {
+              // Retourner à la main pendant la pause doit gagner : sans cette
+              // annulation, la minuterie basculerait le plateau une seconde
+              // plus tard et défairait le geste.
+              annulerRotation()
+              setOrientation((value) => (value === 'w' ? 'b' : 'w'))
+            }}
+          >
+            Retourner
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Undo2 size={14} />}
+            onClick={annulerCoup}
+            disabled={state.moves.length === 0}
+          >
+            Annuler
+          </Button>
+          <Button size="sm" variant="ghost" icon={<RefreshCw size={14} />} onClick={newGame}>
+            Nouvelle partie
+          </Button>
+          <CommentaryToggle
+            active={commentaryMode}
+            onChange={(value) => setPreference('commentaryMode', value)}
+          />
+        </div>
+
+        <div className="[grid-area:aside] mt-4 flex min-h-0 flex-col gap-3 lg:mt-0 paysage:mt-0 paysage:overflow-y-auto paysage:overscroll-contain">
           {commentaryMode ? (
             <CommentaryPanel
               legende={arrowLegend}
