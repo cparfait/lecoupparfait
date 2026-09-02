@@ -36,6 +36,12 @@ import { persistFinishedGame } from './persistence.ts'
 import { verifySessionToken } from './auth.ts'
 import { adresseDe, creerLimiteur } from './limites.ts'
 import { rappelDuDefi, rappelsPossibles } from './rappels.ts'
+import {
+  enregistrerSalon,
+  oublierSalon,
+  purgerSalonsPerimes,
+  salonsAReprendre,
+} from '@coupparfait/db/live'
 
 const PORT = Number(process.env.SERVER_PORT ?? 3001)
 const ORIGINS = (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000')
@@ -88,6 +94,67 @@ function trop(
 
 const rooms = new Map<string, GameRoom>()
 
+/**
+ * Au-delà, une partie en cours n'attend plus personne.
+ *
+ * Deux heures : la pendule d'une partie chronométrée est tombée depuis
+ * longtemps, et une partie sans pendule laissée deux heures ne reprendra pas.
+ * C'est la même fenêtre des deux côtés — ce qu'on reprend au démarrage et ce
+ * qu'on relâche en cours de route.
+ */
+const FENETRE_REPRISE_MS = 2 * 60 * 60 * 1000
+
+/**
+ * Branche un salon sur le fil et sur la base.
+ *
+ * Un seul abonnement par salon : c'est le salon lui-même qui sait s'il est
+ * déjà écouté. Il était posé dans le gestionnaire `join`, ce qui suffisait
+ * tant qu'un salon ne pouvait naître que de l'arrivée d'un joueur. Depuis
+ * qu'un salon peut aussi renaître au démarrage, il faut pouvoir le brancher
+ * sans que personne ne soit encore là — sinon une pendule tombée pendant
+ * l'arrêt du serveur se constate dans le vide, et la partie ne s'écrit nulle
+ * part.
+ */
+function brancher(room: GameRoom): void {
+  if (room.hasSubscriber) return
+
+  room.subscribe((event) => {
+    io.to(room.slug).emit(event.type, event)
+
+    if (event.type === 'end') {
+      void persistFinishedGame(room).catch((error: unknown) => {
+        console.error('[persistance] enregistrement impossible :', error)
+      })
+      // La partie vit désormais dans `games` : son instantané n'a plus lieu
+      // d'être, et le laisser ferait ressusciter une partie finie au prochain
+      // démarrage.
+      void oublierSalon(room.slug)
+      // Si ce salon appartenait à une arène, les points s'attribuent ici :
+      // c'est le seul endroit qui sache qu'une partie vient de se terminer.
+      // Sans effet pour les autres parties.
+      void recordResult(room.slug, event.result).catch((error: unknown) => {
+        console.error('[tournoi] résultat non enregistré :', error)
+      })
+      return
+    }
+
+    /*
+      L'instantané, à chaque coup et à chaque changement d'état.
+
+      Sans attendre l'écriture : le coup part au joueur d'abord, la base
+      ensuite. Une écriture par coup, c'est quelques centaines d'octets et une
+      ligne remplacée — négligeable devant ce qu'on y gagne, à savoir que la
+      partie survit au processus.
+
+      `state` compte autant que `move` : c'est lui qui porte l'arrivée du
+      second joueur, donc le passage à `playing` et le démarrage des pendules.
+    */
+    if (event.type === 'move' || event.type === 'state') {
+      void enregistrerSalon(room.slug, room.etatPersistant() as unknown as Record<string, unknown>)
+    }
+  })
+}
+
 function roomFor(slug: string, options?: { timeControl?: TimeControl; rated?: boolean }): GameRoom {
   const existing = rooms.get(slug)
   if (existing) return existing
@@ -111,9 +178,24 @@ function roomFor(slug: string, options?: { timeControl?: TimeControl; rated?: bo
 setInterval(
   () => {
     for (const [slug, room] of rooms) {
-      if (room.isEmpty && room.isFinished) {
+      if (!room.isEmpty) continue
+
+      if (room.isFinished) {
         room.dispose()
         rooms.delete(slug)
+        continue
+      }
+
+      // Une partie reprise au démarrage que personne n'est venu rejoindre. Ses
+      // joueurs n'ont pas d'horodatage de déconnexion — on ne fait perdre
+      // personne pour un redémarrage —, donc rien ne la termine jamais. Passé
+      // la fenêtre de reprise, elle n'attend plus personne : on la relâche, et
+      // on efface son instantané pour qu'elle ne renaisse pas au démarrage
+      // suivant.
+      if (room.inactifDepuis > FENETRE_REPRISE_MS) {
+        room.dispose()
+        rooms.delete(slug)
+        void oublierSalon(slug)
       }
     }
   },
@@ -527,25 +609,7 @@ io.on('connection', (socket) => {
       })
 
       socket.emit('joined', { color, snapshot: room.snapshot() })
-
-      // Un seul abonnement par salon : on diffuse à la pièce entière. C'est le
-      // salon lui-même qui sait s'il est déjà écouté — voir `hasSubscriber`.
-      if (!room.hasSubscriber) {
-        room.subscribe((event) => {
-          io.to(slug).emit(event.type, event)
-          if (event.type === 'end') {
-            void persistFinishedGame(room).catch((error: unknown) => {
-              console.error('[persistance] enregistrement impossible :', error)
-            })
-            // Si ce salon appartenait à une arène, les points s'attribuent
-            // ici : c'est le seul endroit qui sache qu'une partie vient de se
-            // terminer. Sans effet pour les autres parties.
-            void recordResult(slug, event.result).catch((error: unknown) => {
-              console.error('[tournoi] résultat non enregistré :', error)
-            })
-          }
-        })
-      }
+      brancher(room)
     },
   )
 
@@ -633,6 +697,8 @@ async function main(): Promise<void> {
     process.exit(1)
   })
 
+  await reprendreLesSalons()
+
   httpServer.listen(PORT, () => {
     console.log(`✓ Serveur Le Coup Parfait à l’écoute sur le port ${PORT}`)
     console.log(`  origines autorisées : ${ORIGINS.join(', ')}`)
@@ -644,17 +710,97 @@ async function main(): Promise<void> {
   })
 }
 
-/** Arrêt propre : on prévient les joueurs avant de couper. */
+/**
+ * Les parties en cours, reprises là où le processus précédent les a laissées.
+ *
+ * **Le temps de l'arrêt est décompté**, et c'est un choix. Les pendules sont
+ * tenues en horodatages absolus : la relecture calcule le temps restant à
+ * l'instant présent, donc l'arrêt a coûté du temps à celui qui avait le trait.
+ * C'est la règle des tournois en salle — la pendule d'un incident technique ne
+ * se rend pas —, et c'est aussi la seule qui ne demande à personne de croire
+ * le serveur sur la durée de sa propre panne. Un salon dont le drapeau est
+ * tombé pendant l'arrêt se termine au temps dès la première seconde de la
+ * surveillance, sans attendre que quiconque se reconnecte.
+ *
+ * Deux heures de fenêtre : au-delà, personne ne revient. Le reste est purgé,
+ * sans quoi ces lignes-là ne disparaîtraient jamais — elles ne s'effacent
+ * qu'à la fin d'une partie qui, elle, ne finira plus.
+ */
+async function reprendreLesSalons(): Promise<void> {
+  const perimes = await purgerSalonsPerimes(FENETRE_REPRISE_MS)
+  if (perimes > 0) console.log(`  salons périmés effacés : ${perimes}`)
+
+  let repris = 0
+  let illisibles = 0
+  for (const ligne of await salonsAReprendre(FENETRE_REPRISE_MS)) {
+    const room = GameRoom.restaurer(ligne.salon)
+    if (!room) {
+      illisibles++
+      void oublierSalon(ligne.slug)
+      continue
+    }
+    if (room.isFinished) {
+      void oublierSalon(ligne.slug)
+      continue
+    }
+    rooms.set(room.slug, room)
+    brancher(room)
+    repris++
+  }
+
+  if (repris > 0) console.log(`  parties en cours reprises : ${repris}`)
+  if (illisibles > 0) console.warn(`  instantanés illisibles écartés : ${illisibles}`)
+}
+
+/**
+ * Arrêt propre.
+ *
+ * `shutdown` **n'annule plus les parties**. Il les annulait, ce qui revenait à
+ * dire qu'un redéploiement valait annulation pour tout le monde ; maintenant
+ * que chaque salon est écrit en base à chaque coup, il suffit de prévenir et
+ * de laisser partir. Le client se reconnecte déjà tout seul, il retrouvera son
+ * salon reconstruit à l'identique.
+ *
+ * Le reste corrige un arrêt qui n'attendait rien : `io.close()` et
+ * `httpServer.close()` prennent un rappel dont personne ne se souciait, et le
+ * `process.exit(0)` qui suivait coupait les requêtes en vol. On les attend,
+ * avec un plafond — un serveur qui refuse de s'arrêter doit finir par
+ * s'arrêter quand même.
+ */
+let arretEnCours = false
+
 async function shutdown(signal: string): Promise<void> {
+  // Un garde-fou, pas une précaution de style : `uncaughtException` peut
+  // survenir *pendant* l'arrêt, et deux `shutdown` concurrents libéreraient
+  // la réserve deux fois.
+  if (arretEnCours) return
+  arretEnCours = true
+
+  const debut = Date.now()
   console.log(`\n${signal} reçu — arrêt en cours…`)
+
   for (const room of rooms.values()) {
-    if (!room.isFinished) room.abort('Le serveur redémarre. La partie est mise en pause.')
+    if (!room.isFinished) {
+      // Un message, et rien d'autre : la partie reste ouverte, son instantané
+      // est déjà en base, et elle repartira d'elle-même au redémarrage.
+      room.avertir('Le serveur redémarre, la partie reprend dans un instant.')
+    }
     room.dispose()
   }
+
   disposeMaia()
-  io.close()
-  httpServer.close()
+
+  // Cinq secondes au plus. Au-delà, ce qui traîne traînera sans nous.
+  await Promise.race([
+    Promise.all([
+      new Promise<void>((resolve) => io.close(() => resolve())),
+      new Promise<void>((resolve) => httpServer.close(() => resolve())),
+    ]),
+    new Promise<void>((resolve) => setTimeout(resolve, 5000).unref?.()),
+  ])
+
   await disposePool()
+  console.log(`  arrêté en ${Date.now() - debut} ms`)
   process.exit(0)
 }
 
@@ -663,6 +809,23 @@ process.on('SIGINT', () => void shutdown('SIGINT'))
 
 process.on('unhandledRejection', (reason) => {
   console.error('[promesse non gérée]', reason)
+})
+
+/**
+ * Une exception synchrone ne doit pas emporter le serveur en silence.
+ *
+ * `uncaughtException` n'était pas écouté : une exception dans un rappel de
+ * socket tuait le processus sans passer par `shutdown`, donc sans prévenir un
+ * seul joueur et sans libérer un seul processus moteur. On journalise, puis on
+ * sort par la porte — l'arrêt reste un arrêt, il n'est simplement plus muet.
+ *
+ * On ne continue **pas** après : l'état du processus n'est plus fiable, et le
+ * superviseur (Docker, systemd) sait relancer. Ce qu'on gagne, c'est la trace
+ * et le message aux joueurs.
+ */
+process.on('uncaughtException', (error) => {
+  console.error('[exception non interceptée]', error)
+  void shutdown('uncaughtException')
 })
 
 void main().catch((error: unknown) => {

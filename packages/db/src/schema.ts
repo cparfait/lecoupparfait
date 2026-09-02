@@ -972,6 +972,33 @@ export const activeGames = pgTable('active_games', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+/**
+ * Salons de partie en direct, pour qu'un redémarrage ne les emporte pas.
+ *
+ * Les salons du serveur temps réel ne vivaient qu'en mémoire, et une partie
+ * n'était écrite qu'une fois **finie**. Un redéploiement, un plantage, ou un
+ * simple `docker compose up -d --build` pendant une partie la perdait : les
+ * deux joueurs retrouvaient un salon vide, sans un mot d'explication et sans
+ * moyen de reprendre.
+ *
+ * **Pourquoi pas `active_games`.** C'était l'idée de départ, et elle ne tient
+ * pas : cette table-là a `user_id` pour clé primaire — une ligne par joueur,
+ * pour la partie solo. Un salon a deux joueurs, et l'un des deux peut être un
+ * invité sans compte, donc sans clé. La clé d'un salon, c'est son `slug`.
+ *
+ * L'état tient en JSON pour la même raison qu'à côté : il décrit une session
+ * en cours, pas une entité. Ce qui compte, c'est qu'il contienne les pendules
+ * en **horodatages absolus** — le temps écoulé pendant l'arrêt est ainsi
+ * décompté à la relecture, comme dans un tournoi en salle où l'incident
+ * technique ne rend pas le temps.
+ */
+export const liveGames = pgTable('live_games', {
+  slug: varchar('slug', { length: 16 }).primaryKey(),
+  /** Instantané complet du salon — voir `etatPersistant()` côté serveur. */
+  salon: jsonb('salon').$type<Record<string, unknown>>().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  Relations
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1021,4 +1048,5 @@ export type Challenge = typeof challenges.$inferSelect
 export type Evaluation = typeof evaluations.$inferSelect
 export type DailyProgress = typeof dailyProgress.$inferSelect
 export type ActiveGame = typeof activeGames.$inferSelect
+export type LiveGame = typeof liveGames.$inferSelect
 export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect

@@ -87,6 +87,44 @@ export interface GameSnapshot {
   abandonAt: number | null
 }
 
+/**
+ * L'instantané qu'on range en base pour survivre à un redémarrage.
+ *
+ * Volontairement distinct de `GameSnapshot`, qui est le format **du fil** : ce
+ * dernier porte des durées restantes calculées pour l'instant présent, et une
+ * durée restante ne se relit pas trois minutes plus tard. Ici la pendule est
+ * gardée telle quelle, en horodatages absolus.
+ *
+ * `version` n'est pas de la cérémonie : ces lignes-là traversent un
+ * déploiement par définition, donc un changement de code. Un instantané d'une
+ * version qu'on ne sait plus lire est ignoré, et la partie perdue — ce qui est
+ * exactement ce qui se passait avant, donc jamais une régression.
+ */
+export interface EtatPersistant {
+  version: 1
+  slug: string
+  startFen: string | null
+  moves: string[]
+  lastMove: { from: Square; to: Square } | null
+  status: GameStatus
+  result: GameResult
+  clock: ClockState
+  timeControl: TimeControl
+  rated: boolean
+  startedAt: number | null
+  chat: ChatMessage[]
+  players: Record<Color, PersonneRangee | null>
+}
+
+/** Un joueur, sans ce qui appartient au processus : ses connexions. */
+export type PersonneRangee = Pick<Participant, 'userId' | 'clientId' | 'name' | 'rating'>
+
+function personneRangee(joueur: Participant | null): PersonneRangee | null {
+  if (!joueur) return null
+  const { userId, clientId, name, rating } = joueur
+  return { userId, clientId, name, rating }
+}
+
 export type RoomEvent =
   | { type: 'state'; snapshot: GameSnapshot }
   | { type: 'move'; san: string; uci: string; snapshot: GameSnapshot }
@@ -117,6 +155,8 @@ export class GameRoom {
   readonly slug: string
   readonly timeControl: TimeControl
   readonly rated: boolean
+  /** Position de départ, `null` si c'est la position initiale. Voir `restaurer`. */
+  readonly startFen: string | null
 
   private readonly chess: Chess
   private clock: ClockState
@@ -148,6 +188,7 @@ export class GameRoom {
     this.slug = options.slug
     this.timeControl = options.timeControl
     this.rated = options.rated
+    this.startFen = options.startFen ?? null
     this.chess = new Chess(options.startFen, { skipValidation: true })
     this.clock = createClock(options.timeControl, Date.now())
 
@@ -601,10 +642,36 @@ export class GameRoom {
     this.emit({ type: 'end', status, result, snapshot: this.snapshot() })
   }
 
-  /** Termine la partie de l'extérieur (arrêt du serveur, annulation). */
+  /**
+   * Depuis combien de temps il ne s'est rien passé ici, en millisecondes.
+   *
+   * Sert au ménage. Un salon repris au démarrage que personne ne rejoint ne
+   * finit jamais : ses joueurs sont déclarés déconnectés mais sans horodatage
+   * — on ne fait pas perdre quelqu'un pour un redémarrage qu'il n'a pas
+   * demandé —, donc l'abandon automatique ne se déclenche pas, et le
+   * ramassage périodique ne prend que les parties **terminées**. Sans cette
+   * mesure, il resterait en mémoire jusqu'au prochain arrêt.
+   */
+  get inactifDepuis(): number {
+    return Date.now() - Math.max(this.clock.updatedAt, this.startedAt ?? 0)
+  }
+
+  /** Termine la partie de l'extérieur (annulation). */
   abort(reason = 'Partie annulée.'): void {
     this.system(reason)
     this.finish('aborted', '*')
+  }
+
+  /**
+   * Dit quelque chose aux joueurs sans toucher à la partie.
+   *
+   * C'est ce que l'arrêt du serveur appelle désormais. Il appelait `abort()`,
+   * c'est-à-dire qu'un redéploiement annulait toutes les parties en cours ;
+   * maintenant que le salon est écrit en base à chaque coup, il n'y a plus
+   * rien à annuler — seulement à prévenir.
+   */
+  avertir(texte: string): void {
+    this.system(texte)
   }
 
   dispose(): void {
@@ -662,6 +729,102 @@ export class GameRoom {
 
   broadcastState(): void {
     this.emit({ type: 'state', snapshot: this.snapshot() })
+  }
+
+  // ── Survie à un redémarrage ───────────────────────────────────────────────
+
+  /**
+   * Tout ce qu'il faut pour reconstruire ce salon dans un autre processus.
+   *
+   * Ce n'est pas `snapshot()`, et la différence est le cœur du mécanisme :
+   * l'instantané envoyé au client porte le temps **restant**, calculé pour
+   * l'instant présent, ce qui n'a plus aucun sens quinze secondes plus tard.
+   * On écrit donc la pendule telle qu'elle est tenue ici — des horodatages
+   * absolus —, si bien que la relecture décompte d'elle-même le temps passé
+   * hors ligne.
+   *
+   * Les `sockets` n'y sont pas : elles appartiennent au processus qui meurt.
+   * Les joueurs y reviennent déconnectés, et se reconnecteront.
+   */
+  etatPersistant(): EtatPersistant {
+    return {
+      version: 1,
+      slug: this.slug,
+      startFen: this.startFen,
+      moves: this.chess.history(),
+      lastMove: this.lastMove,
+      status: this.status,
+      result: this.result,
+      clock: this.clock,
+      timeControl: this.timeControl,
+      rated: this.rated,
+      startedAt: this.startedAt,
+      chat: this.chat.slice(-50),
+      players: {
+        w: personneRangee(this.players.w),
+        b: personneRangee(this.players.b),
+      },
+    }
+  }
+
+  /**
+   * Reconstruit un salon à partir de son instantané.
+   *
+   * Les coups sont **rejoués**, pas restaurés : c'est la seule façon d'avoir
+   * un `Chess` cohérent — historique, répétitions, roques, prise en passant.
+   * Un coup illisible arrête la relecture ; le salon rendu est alors court
+   * mais valide, ce qui vaut mieux qu'un salon impossible.
+   *
+   * Rend `null` si l'instantané n'est pas exploitable : mieux vaut une partie
+   * perdue qu'un salon qui ment sur sa position.
+   */
+  static restaurer(brut: unknown): GameRoom | null {
+    const etat = brut as EtatPersistant | null
+    if (!etat || etat.version !== 1 || typeof etat.slug !== 'string') return null
+
+    let salon: GameRoom
+    try {
+      salon = new GameRoom({
+        slug: etat.slug,
+        timeControl: etat.timeControl,
+        rated: etat.rated,
+        startFen: etat.startFen ?? undefined,
+      })
+      for (const san of etat.moves ?? []) salon.chess.move(san)
+    } catch {
+      return null
+    }
+
+    // Le compte à rebours d'annulation ne se rejoue pas : une partie reprise
+    // n'est pas une partie qu'on vient de créer et que personne n'a rejointe.
+    salon.clearIdleTimer()
+
+    salon.status = etat.status
+    salon.result = etat.result
+    salon.clock = etat.clock
+    salon.startedAt = etat.startedAt
+    salon.lastMove = etat.lastMove
+    salon.chat = Array.isArray(etat.chat) ? etat.chat : []
+    for (const couleur of ['w', 'b'] as const) {
+      const range = etat.players?.[couleur]
+      if (!range) continue
+      salon.players[couleur] = {
+        ...range,
+        sockets: new Set(),
+        connected: false,
+        // `null` et non « à l'instant » : un joueur absent depuis le
+        // redémarrage n'a pas à être déclaré abandonnant une minute après,
+        // alors qu'il n'a rien fait de mal. Le décompte repartira à sa
+        // prochaine déconnexion, ou dès qu'on saura qu'il ne revient pas.
+        disconnectedAt: null,
+      }
+    }
+
+    // La surveillance du drapeau reprend : c'est elle qui constatera qu'une
+    // pendule est tombée pendant l'arrêt, dès le premier tour de boucle.
+    if (salon.status === 'playing') salon.startFlagWatcher()
+
+    return salon
   }
 
   /** Données nécessaires à l'enregistrement en base à la fin de la partie. */
