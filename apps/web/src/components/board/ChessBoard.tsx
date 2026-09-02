@@ -85,9 +85,11 @@ const MIN_BOARD_PX = 260
  * taille et la rangée déborderait de la colonne — ce qui repousserait hors de
  * l'écran la barre d'actions, exactement ce que `fitParentHeight` évite.
  *
- * 32 px de bouton, 2 px de gouttière et 6 px de marge haute.
+ * 32 px de bouton, 2 px de gouttière et 6 px de marge haute — 44 px de bouton
+ * au doigt, voir `ViewToggle`.
  */
 const TOGGLE_ROW_PX = 40
+const TOGGLE_ROW_TACTILE_PX = 52
 
 export function ChessBoard({
   showViewToggle = true,
@@ -115,16 +117,25 @@ export function ChessBoard({
    * entre dans le calcul de la taille du plateau, qui est un style en ligne.
    */
   const [compact, setCompact] = useState(false)
+  const [tactile, setTactile] = useState(false)
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 639px)')
-    const sync = () => setCompact(mq.matches)
+    const etroit = window.matchMedia('(max-width: 639px)')
+    const doigt = window.matchMedia('(pointer: coarse)')
+    const sync = () => {
+      setCompact(etroit.matches)
+      setTactile(doigt.matches)
+    }
     sync()
-    mq.addEventListener('change', sync)
-    return () => mq.removeEventListener('change', sync)
+    etroit.addEventListener('change', sync)
+    doigt.addEventListener('change', sync)
+    return () => {
+      etroit.removeEventListener('change', sync)
+      doigt.removeEventListener('change', sync)
+    }
   }, [])
 
   const barreVisible = showViewToggle && !compact
-  const toggleRow = barreVisible ? TOGGLE_ROW_PX : 0
+  const toggleRow = barreVisible ? (tactile ? TOGGLE_ROW_TACTILE_PX : TOGGLE_ROW_PX) : 0
 
   useEffect(() => {
     if (!fitParentHeight) return
@@ -262,6 +273,10 @@ export function ChessBoard({
  * préférences : c'est un choix qu'on refait souvent — la 3D pour admirer, la 2D
  * pour calculer. Près, mais pas dessus : un plateau n'a pas de marge, chaque
  * pixel du carré appartient à une case.
+ *
+ * Trente-deux pixels à la souris, quarante-quatre au doigt : c'est la taille
+ * en deçà de laquelle on rate un bouton une fois sur cinq sur un téléphone.
+ * Le dessin ne change pas, la pilule grandit avec ses boutons.
  */
 export function ViewToggle({
   className,
@@ -299,7 +314,7 @@ export function ViewToggle({
           aria-pressed={view === id}
           title={label}
           className={clsx(
-            'grid h-8 w-8 place-items-center rounded-full transition-all',
+            'grid h-8 w-8 place-items-center rounded-full transition-all pointer-coarse:h-11 pointer-coarse:w-11',
             view === id
               ? 'bg-accent text-[var(--accent-contrast)] shadow-[var(--glow)]'
               : 'text-muted hover:text-ink hover:bg-surface-hover',
@@ -316,7 +331,7 @@ export function ViewToggle({
           onClick={onToggleFullscreen}
           aria-pressed={fullscreen}
           title={fullscreen ? 'Quitter le plein écran' : 'Plein écran'}
-          className="grid h-8 w-8 place-items-center rounded-full text-muted transition-all hover:bg-surface-hover hover:text-ink"
+          className="grid h-8 w-8 place-items-center rounded-full text-muted transition-all hover:bg-surface-hover hover:text-ink pointer-coarse:h-11 pointer-coarse:w-11"
         >
           {fullscreen ? (
             <Minimize2 size={15} strokeWidth={2.2} aria-hidden />
