@@ -102,6 +102,17 @@ export function ChessBoard({
   const [fullscreen, setFullscreen] = useState(false)
   const [fitSide, setFitSide] = useState<number | null>(null)
 
+  /*
+    Le plein écran n'existe pas partout : Safari sur iPhone ne l'accorde qu'aux
+    vidéos. Le bouton appelait `requestFullscreen`, avalait le refus, et ne
+    faisait donc rien — sans un mot. On ne le propose que là où le document
+    le permet, lu après montage pour ne pas diverger du rendu serveur.
+  */
+  const [pleinEcranPossible, setPleinEcranPossible] = useState(false)
+  useEffect(() => {
+    setPleinEcranPossible(Boolean(document.fullscreenEnabled))
+  }, [])
+
   /**
    * Sur téléphone, la bascule ne prend pas de ligne à elle.
    *
@@ -219,7 +230,7 @@ export function ChessBoard({
         fullscreen && 'grid place-items-center bg-[var(--bg)]',
       )}
       // En plein écran, le conteneur occupe tout l'écran et centre le plateau.
-      style={fullscreen ? { width: '100vw', height: '100vh' } : undefined}
+      style={fullscreen ? { width: '100dvw', height: '100dvh' } : undefined}
     >
       {/*
         Le plateau est toujours carré, et la rangée de boutons se cale sur sa
@@ -236,7 +247,7 @@ export function ChessBoard({
         style={
           fullscreen
             ? {
-                width: `min(100vw - 1.5rem, 100vh - 1.5rem - ${toggleRow}px)`,
+                width: `min(100dvw - 1.5rem, 100dvh - 1.5rem - ${toggleRow}px)`,
               }
             : // `dvh` plutôt que `vh` : sur mobile, la barre d'adresse se
               // rétracte au défilement et `vh` reste figé sur la hauteur
@@ -258,7 +269,7 @@ export function ChessBoard({
           <ViewToggle
             className="mt-1.5 self-end"
             fullscreen={fullscreen}
-            onToggleFullscreen={toggleFullscreen}
+            onToggleFullscreen={pleinEcranPossible ? toggleFullscreen : undefined}
           />
         )}
       </div>
