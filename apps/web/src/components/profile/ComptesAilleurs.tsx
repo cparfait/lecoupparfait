@@ -57,7 +57,10 @@ export function ComptesAilleurs() {
         ))}
       </div>
       {renseigne && (
-        <Link href="/analyse" className="mt-3 inline-block">
+        <Link
+          href={`/analyse?compte=${chesscom.trim() ? 'chesscom' : 'lichess'}`}
+          className="mt-3 inline-block"
+        >
           <Button size="sm" variant="secondary" icon={<Gauge size={14} />}>
             Analyser une de ces parties
           </Button>

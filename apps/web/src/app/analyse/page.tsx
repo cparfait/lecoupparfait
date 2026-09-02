@@ -395,6 +395,52 @@ function ImportScreen({
     void start()
   }, [parsed, start])
 
+  /*
+    Le champ de collage est replié tant qu'il est vide.
+
+    Sur téléphone, ses huit lignes et leur mode d'emploi repoussaient le
+    réglage de profondeur et le bouton « Lancer l'analyse » sous le bord de
+    l'écran : on arrivait devant une page qui semblait n'offrir qu'un champ
+    vide. Replié, il tient sur une ligne qui dit toujours ce qu'il propose,
+    et il s'ouvre de lui-même dès qu'une partie y arrive — collée, transmise
+    depuis la fin d'une partie, ou choisie dans une liste.
+  */
+  const [collageOuvert, setCollageOuvert] = useState(false)
+  useEffect(() => {
+    if (input.trim() !== '') setCollageOuvert(true)
+  }, [input])
+
+  /*
+    Et l'import en ligne s'ouvre de lui-même quand on sait déjà qui chercher.
+
+    Replié, il ne coûtait rien à qui colle un PGN ; mais pour qui a noté son
+    pseudo sur sa fiche, arriver ici, c'est vouloir ses parties. La section
+    s'ouvre donc si un pseudo est mémorisé — et `/analyse?compte=chesscom`
+    ou `?compte=lichess` l'ouvre sur ce service-là, quelle que soit la
+    mémoire : c'est l'adresse que donne le bouton de la fiche. Lue dans un
+    effet plutôt qu'avec `useSearchParams`, qui exigerait une frontière
+    `Suspense` autour de toute la page.
+  */
+  const chesscomUsername = usePreferences((state) => state.chesscomUsername)
+  const lichessUsername = usePreferences((state) => state.lichessUsername)
+  // Les réglages mémorisés n'arrivent qu'après le premier rendu : avant, les
+  // pseudos sont vides et l'on croirait n'en connaître aucun.
+  const prefsHydratees = usePreferences((state) => state.hydrated)
+  const [importOuvert, setImportOuvert] = useState(false)
+  const [serviceDemande, setServiceDemande] = useState<'chesscom' | 'lichess' | null>(null)
+  useEffect(() => {
+    if (!prefsHydratees) return
+    const compte = new URLSearchParams(window.location.search).get('compte')
+    if (compte === 'chesscom' || compte === 'lichess') {
+      setServiceDemande(compte)
+      setImportOuvert(true)
+      return
+    }
+    if (chesscomUsername.trim() || lichessUsername.trim()) setImportOuvert(true)
+    // À l'arrivée seulement : ce qu'on tape ensuite ne doit pas rouvrir la section.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefsHydratees])
+
   const paste = useCallback(async () => {
     try {
       setInput(await navigator.clipboard.readText())
@@ -405,17 +451,44 @@ function ImportScreen({
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:py-14">
-      <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+      {/* Titre et promesse tiennent en trois lignes sur téléphone.
+
+          Ils en prenaient sept — un titre de trente-six points et quatre
+          lignes de texte —, soit le quart de l'écran avant la moindre
+          commande, à chaque visite. La phrase longue reste, mais à partir de
+          `sm` : c'est là qu'elle ne coûte rien. */}
+      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-4xl">
         Analyse expliquée
       </h1>
-      <p className="mt-2 max-w-2xl text-muted">
-        Colle une partie et découvre, coup par coup, ce qui a basculé — avec le meilleur coup
-        montré sur l’échiquier et la raison écrite en toutes lettres.
+      <p className="mt-1.5 max-w-2xl text-sm text-muted sm:mt-2 sm:text-base">
+        <span className="sm:hidden">
+          Coup par coup, ce qui a basculé et le meilleur coup, expliqué.
+        </span>
+        <span className="max-sm:hidden">
+          Colle une partie et découvre, coup par coup, ce qui a basculé — avec le meilleur
+          coup montré sur l’échiquier et la raison écrite en toutes lettres.
+        </span>
       </p>
 
-      <Card glow className="mt-7 overflow-hidden">
-        <div className="p-5">
-          <label htmlFor="pgn" className="mb-2 block text-sm font-medium">
+      <Card glow className="mt-4 overflow-hidden sm:mt-7">
+        <details
+          className="group [&_summary::-webkit-details-marker]:hidden"
+          open={collageOuvert}
+          onToggle={(event) => setCollageOuvert(event.currentTarget.open)}
+        >
+          <summary className="flex cursor-pointer list-none items-center gap-2 px-5 py-3 text-sm transition-colors hover:bg-surface-hover">
+            <ChevronRight
+              size={15}
+              aria-hidden
+              className="shrink-0 text-faint transition-transform group-open:rotate-90"
+            />
+            <span className="font-medium">Partie à analyser</span>
+            <span className="min-w-0 flex-1 truncate text-xs text-faint">
+              {parsed ? `${parsed.moves.length} demi-coups` : 'Colle un PGN, une liste de coups ou une FEN'}
+            </span>
+          </summary>
+        <div className="px-5 pb-5">
+          <label htmlFor="pgn" className="sr-only">
             Partie à analyser
           </label>
           <textarea
@@ -447,6 +520,7 @@ function ImportScreen({
             )}
           </div>
         </div>
+        </details>
 
         {/* Rien à importer quand la partie vient d'être jouée.
             On arrive ici depuis la boîte de fin de partie, le PGN est déjà
@@ -490,7 +564,11 @@ function ImportScreen({
             pseudo, lui, est déjà mémorisé dans les préférences : celui qui s'en
             sert le retrouvera saisi en dépliant. */}
         {!handedOver && (
-          <details className="group border-t border-line/60 [&_summary::-webkit-details-marker]:hidden">
+          <details
+            className="group border-t border-line/60 [&_summary::-webkit-details-marker]:hidden"
+            open={importOuvert}
+            onToggle={(event) => setImportOuvert(event.currentTarget.open)}
+          >
             <summary className="flex cursor-pointer list-none items-center gap-2 px-5 py-3 text-sm transition-colors hover:bg-surface-hover">
               <ChevronRight
                 size={15}
@@ -508,6 +586,7 @@ function ImportScreen({
                 nécessaire, rien n’est enregistré.
               </p>
               <ImportEnLigne
+                serviceInitial={serviceDemande ?? (chesscomUsername.trim() || !lichessUsername.trim() ? 'chesscom' : 'lichess')}
                 onChoisir={(pgn, campImporte) => {
                   // Le camp du joueur cherché : c'est lui qui lira l'analyse.
                   setCamp(campImporte)

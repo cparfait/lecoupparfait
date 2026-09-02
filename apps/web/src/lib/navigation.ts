@@ -23,7 +23,6 @@ import {
   GraduationCap,
   Grid3x3,
   Handshake,
-  Import,
   Mail,
   Monitor,
   Puzzle,
@@ -139,7 +138,6 @@ export const SECTIONS: SectionNav[] = [
     sommaire: '/analyse',
     entrees: [
       { href: '/analyse', labelKey: 'nav.analyseGame', icon: Gauge, hintKey: 'nav.analyseGameHint' },
-      { href: '/analyse#en-ligne', labelKey: 'nav.importOnline', icon: Import, hintKey: 'nav.importOnlineHint' },
       { href: '/etudes', labelKey: 'nav.studies', icon: BookMarked, hintKey: 'nav.studiesHint' },
       { href: '/editeur', labelKey: 'nav.editor', icon: Grid3x3, hintKey: 'nav.editorHint' },
     ],

@@ -56,7 +56,6 @@ export const fr = {
     puzzleRush: 'Puzzle rush',
     dailyChallenge: 'Défi du jour',
     analyseGame: 'Analyser une partie',
-    importOnline: 'Depuis Chess.com / Lichess',
     stats: 'Statistiques',
     myProfile: 'Mon profil',
 
@@ -75,7 +74,6 @@ export const fr = {
     puzzleRushHint: 'le plus possible, en temps limité',
     dailyChallengeHint: 'la même position pour tous',
     analyseGameHint: 'coup par coup, avec les raisons',
-    importOnlineHint: 'ton pseudo suffit',
     studiesHint: 'tes positions annotées',
     editorHint: 'composer une position',
   },
@@ -434,7 +432,6 @@ export const en: Dictionary = {
     puzzleRush: 'Puzzle rush',
     dailyChallenge: 'Daily challenge',
     analyseGame: 'Analyse a game',
-    importOnline: 'From Chess.com / Lichess',
     stats: 'Statistics',
     myProfile: 'My profile',
 
@@ -452,7 +449,6 @@ export const en: Dictionary = {
     puzzleRushHint: 'as many as you can, against the clock',
     dailyChallengeHint: 'the same position for everyone',
     analyseGameHint: 'move by move, with reasons',
-    importOnlineHint: 'your username is enough',
     studiesHint: 'your annotated positions',
     editorHint: 'compose a position',
   },

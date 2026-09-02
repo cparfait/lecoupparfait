@@ -28,15 +28,23 @@ import {
 
 export function ImportEnLigne({
   onChoisir,
+  serviceInitial = 'chesscom',
 }: {
   /** Appelé au clic sur une partie : PGN à analyser et camp du joueur. */
   onChoisir: (pgn: string, camp: Color) => void
+  /** Service présélectionné : celui de la fiche, ou celui dont on a le pseudo. */
+  serviceInitial?: SourceEnLigne
 }) {
   const chesscomUsername = usePreferences((state) => state.chesscomUsername)
   const lichessUsername = usePreferences((state) => state.lichessUsername)
   const set = usePreferences((state) => state.set)
+  // Les pseudos mémorisés n'arrivent qu'après le premier rendu.
+  const prefsHydratees = usePreferences((state) => state.hydrated)
 
-  const [source, setSource] = useState<SourceEnLigne>('chesscom')
+  const [source, setSource] = useState<SourceEnLigne>(serviceInitial)
+  // Le service demandé par la page peut n'être connu qu'après montage
+  // (adresse lue dans un effet, pseudos relus du stockage).
+  useEffect(() => setSource(serviceInitial), [serviceInitial])
   const [parties, setParties] = useState<PartieImportee[] | null>(null)
   const [chargement, setChargement] = useState(false)
   const [erreur, setErreur] = useState<string | null>(null)
@@ -79,10 +87,12 @@ export function ImportEnLigne({
     reste pour recharger, ou après avoir tapé un pseudo.
   */
   useEffect(() => {
+    if (!prefsHydratees) return
     void charger()
-    // Au changement de service seulement : pas à chaque lettre du pseudo.
+    // Au changement de service, et une fois les pseudos relus : pas à chaque
+    // lettre tapée.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [source])
+  }, [source, prefsHydratees])
 
   return (
     <div className="space-y-3">
@@ -135,19 +145,14 @@ export function ImportEnLigne({
 
       {parties && parties.length > 0 && (
         <>
-          {/* Assez haut pour montrer une dizaine de parties.
-          
-              Le plafond était de 288 px, soit cinq lignes sur les trente que la
-              route rapporte. On ne voyait donc pas la partie qu'on venait de
-              jouer si l'on avait joué depuis, et retrouver une partie d'avant-
-              hier demandait de faire défiler un cadre haut comme trois lignes,
-              à l'intérieur d'une page qui défile elle-même.
-          
-              Deux défilements imbriqués sont toujours une faute : la molette ne
-              sait pas lequel des deux on visait. On garde le cadre — trente
-              parties déroulées feraient une page interminable — mais assez haut
-              pour qu'on n'ait presque jamais à s'en servir. */}
-          <ul className="max-h-[34rem] space-y-1 overflow-y-auto pr-1">
+          {/* Trois parties visibles, le reste au défilement.
+
+              La liste montrait jusqu'à trente lignes : sur téléphone, le
+              réglage de profondeur et le bouton de lancement passaient loin
+              sous le bord, et l'on ne savait plus où en était l'écran. On
+              vient le plus souvent chercher la dernière partie jouée, ou
+              l'une des deux d'avant ; au-delà, on fait défiler le cadre. */}
+          <ul className="max-h-[10.5rem] space-y-1 overflow-y-auto overscroll-contain pr-1">
             {parties.map((partie) => (
               <li key={partie.id}>
                 <LignePartie partie={partie} onChoisir={onChoisir} />
