@@ -63,6 +63,7 @@ import { listerAnalyses, type AnalyseEnregistree } from '@/lib/analysis/enregist
 import { chargerPartieEnCours, type PartieEnCours } from '@/lib/game/partieEnCours.ts'
 import { jourLocal, queteFaite } from '@/lib/daily/quotidien.ts'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
+import { DemandesDAmi } from '@/components/social/DemandesDAmi.tsx'
 import { Aujourdhui, type TrancheDefi } from './Aujourdhui.tsx'
 import { Maintenant } from './Maintenant.tsx'
 import { prochainesChoses, type EtatAccueil } from './prochainesChoses.ts'
@@ -250,6 +251,13 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
           )}
         </div>
       </header>
+
+      {/* ── 0. Quelqu'un demande à te connaître ────────────────────────
+          Avant « Maintenant », et c'est le seul bloc qui a le droit de passer
+          devant : une personne attend une réponse, et elle l'attendait
+          jusqu'ici dans une page qu'on n'ouvre jamais sans raison. Rien ne
+          s'affiche quand il n'y a aucune demande. */}
+      <DemandesDAmi className="mb-4" />
 
       {/* ── 1. Maintenant ─────────────────────────────────────────────── */}
       <Maintenant choses={choses} chargement={chargement} />

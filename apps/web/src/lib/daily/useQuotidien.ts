@@ -18,8 +18,10 @@
 
 import { useCallback, useEffect, useSyncExternalStore } from 'react'
 import { toast } from '@/components/ui/Toast.tsx'
+import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import {
   avancerQuete,
+  definirCompte,
   etatDuJour,
   instantane,
   reprendreDepuisLeServeur,
@@ -41,15 +43,39 @@ const instantaneServeur = () => null
 
 export function useQuotidien(): JourneeCourante {
   const etat = useSyncExternalStore(souscrire, instantane, instantaneServeur)
+  const identite = useIdentite()
+  /*
+    Le pseudo, et non l'objet.
+
+    `useIdentite` reconstruit son objet à chaque navigation — c'est ainsi
+    qu'il détecte une connexion. S'en servir comme dépendance rejouerait tout
+    l'effet à chaque page, donc une requête `/api/quotidien` par page visitée,
+    pour une réponse qui ne change pas. On ne réagit qu'à ce qui compte ici :
+    qui est connecté.
+  */
+  const pseudo = identite === undefined ? undefined : (identite?.username ?? null)
 
   useEffect(() => {
     // Première lecture après l'hydratation : la faire pendant le rendu ferait
     // diverger l'HTML envoyé par le serveur et celui que React reconstruit.
     etatDuJour()
+  }, [])
+
+  useEffect(() => {
+    // `undefined` : on ne sait pas encore qui est là. Trancher maintenant
+    // afficherait la série d'un anonyme à quelqu'un de connecté, le temps
+    // d'une requête — exactement le clignotement que `useIdentite` existe pour
+    // éviter. On garde donc ce qui est déjà à l'écran.
+    if (pseudo === undefined) return
+
+    // La journée appartient à un compte, et pas au navigateur : changer de
+    // compte change de journée, série comprise.
+    definirCompte(pseudo)
+
     // Puis on complète avec ce que le serveur sait, s'il sait quelque chose :
     // la série peut venir d'un autre appareil.
     void reprendreDepuisLeServeur()
-  }, [])
+  }, [pseudo])
 
   const marquer = useCallback((id: QueteId, pas = 1) => {
     const resultat = avancerQuete(id, pas)

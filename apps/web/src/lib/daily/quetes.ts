@@ -18,6 +18,15 @@ export interface Quete {
   xp: number
   /** Nombre d'occurrences nécessaires. 1 pour la plupart. */
   objectif: number
+  /**
+   * Où l'on va pour la faire.
+   *
+   * Une liste de choses à faire dont aucune ligne ne mène nulle part est une
+   * liste de reproches. Elle s'affichait ainsi : cinq intitulés inertes sous
+   * le défi du jour, et il fallait retrouver soi-même, dans les menus, l'écran
+   * correspondant à « Enchaîner 3 puzzles ». Chaque quête nomme donc sa porte.
+   */
+  lien: string
 }
 
 /**
@@ -29,17 +38,21 @@ export interface Quete {
  * plutôt qu'à répéter la plus facile.
  */
 export const QUETES: Quete[] = [
-  { id: 'defi', label: 'Résoudre le défi du jour', xp: 25, objectif: 1 },
-  { id: 'partie', label: 'Jouer une partie', xp: 10, objectif: 1 },
-  { id: 'victoire', label: 'Gagner une partie', xp: 15, objectif: 1 },
+  { id: 'defi', label: 'Résoudre le défi du jour', xp: 25, objectif: 1, lien: '/puzzles?defi=1' },
+  // « Jouer » et « gagner » mènent à l'ordinateur plutôt qu'au sommaire des
+  // façons de jouer : la quête se compte en parties finies, et c'est le seul
+  // adversaire disponible à la seconde où on clique.
+  { id: 'partie', label: 'Jouer une partie', xp: 10, objectif: 1, lien: '/jouer/ordinateur' },
+  { id: 'victoire', label: 'Gagner une partie', xp: 15, objectif: 1, lien: '/jouer/ordinateur' },
   {
     id: 'puzzles',
     label: 'Enchaîner 3 puzzles',
     detail: 'trois résolus dans la journée',
     xp: 20,
     objectif: 3,
+    lien: '/puzzles',
   },
-  { id: 'analyse', label: 'Analyser une partie', xp: 10, objectif: 1 },
+  { id: 'analyse', label: 'Analyser une partie', xp: 10, objectif: 1, lien: '/analyse' },
 ]
 
 export const XP_TOTAL = QUETES.reduce((somme, quete) => somme + quete.xp, 0)

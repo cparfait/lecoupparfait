@@ -26,11 +26,10 @@
 
 import Link from 'next/link'
 import { Check, Swords } from 'lucide-react'
-import clsx from 'clsx'
 import { tranchesAuDessus } from '@coupparfait/core'
 import { Card } from '@/components/ui/index.tsx'
-import { QUETES, XP_TOTAL } from '@/lib/daily/quetes.ts'
-import { queteFaite } from '@/lib/daily/quotidien.ts'
+import { ListeDesQuetes } from '@/components/daily/ListeDesQuetes.tsx'
+import { XP_TOTAL } from '@/lib/daily/quetes.ts'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 
 export interface TrancheDefi {
@@ -103,37 +102,8 @@ export function Aujourdhui({
           </p>
         )}
 
-        <ul className="space-y-1">
-          {QUETES.map((quete) => {
-            const faite = etat ? queteFaite(etat, quete.id) : false
-            const avancement = etat?.avancement[quete.id] ?? 0
-            return (
-              <li
-                key={quete.id}
-                className={clsx(
-                  'flex items-center gap-2 text-[13px]',
-                  faite ? 'text-faint line-through' : 'text-muted',
-                )}
-              >
-                <span
-                  aria-hidden
-                  className={clsx(
-                    'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
-                    faite ? 'border-[var(--q-best)] bg-[var(--q-best)] text-white' : 'border-line',
-                  )}
-                >
-                  {faite && <Check size={11} />}
-                </span>
-                <span className="min-w-0 flex-1 truncate">{quete.label}</span>
-                {!faite && quete.objectif > 1 && (
-                  <span className="shrink-0 text-[11px] tabular-nums text-faint">
-                    {avancement} / {quete.objectif}
-                  </span>
-                )}
-              </li>
-            )
-          })}
-        </ul>
+        {/* Cinq lignes, cinq destinations : voir `ListeDesQuetes`. */}
+        <ListeDesQuetes etat={etat} />
 
         {/* Les tranches plus dures, discrètes : c'est un écart qu'on prend
             certains jours, pas une consigne. Elles restent affichées même une

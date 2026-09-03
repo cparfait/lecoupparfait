@@ -281,6 +281,34 @@ export default function LiveGamePage() {
     if (fil) fil.scrollTop = fil.scrollHeight
   }, [chat, chatOpen])
 
+  /**
+   * Ouvrir le tchat doit *emmener* au tchat.
+   *
+   * Sur téléphone, le bouton « Tchat » se trouve dans la barre d'actions,
+   * juste sous l'échiquier ; le panneau qu'il déplie est tout en bas de la
+   * colonne, derrière la liste des coups. On appuyait, rien ne semblait se
+   * passer — le panneau s'ouvrait bien, à un écran et demi plus bas. Il faut
+   * donc y aller, et poser le curseur dans la zone de saisie : on appuie sur
+   * « Tchat » pour écrire, pas pour relire.
+   *
+   * Sur grand écran, le panneau est déjà là en permanence et le bouton
+   * n'existe pas : rien à faire défiler.
+   */
+  const cadreDuChat = useRef<HTMLElement>(null)
+  const saisieDuChat = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (!chatOpen || grandEcran) return
+    // Après le rendu qui l'affiche : avant, le cadre est encore `hidden` et
+    // n'a donc aucune position à rejoindre.
+    const image = requestAnimationFrame(() => {
+      cadreDuChat.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      // `preventScroll` : le défilement est déjà en cours, et le focus le
+      // ferait sauter à la fin d'un coup sec.
+      saisieDuChat.current?.focus({ preventScroll: true })
+    })
+    return () => cancelAnimationFrame(image)
+  }, [chatOpen, grandEcran])
+
   // ── Coups légaux ────────────────────────────────────────────────────────
   // Hors de son tour, aucun : le serveur reste maître, mais autant ne pas
   // laisser croire le contraire au plateau.
@@ -746,6 +774,7 @@ export default function LiveGamePage() {
             n'est plus un tchat mais une fente.
           */}
           <Card
+            ref={cadreDuChat}
             className={clsx(
               'flex h-56 shrink-0 flex-col overflow-hidden',
               // Le bouton « Tchat » ne commande plus que le tchat : c'est ce
@@ -782,6 +811,7 @@ export default function LiveGamePage() {
               }}
             >
               <input
+                ref={saisieDuChat}
                 value={chatDraft}
                 onChange={(event) => setChatDraft(event.target.value)}
                 placeholder="Message…"

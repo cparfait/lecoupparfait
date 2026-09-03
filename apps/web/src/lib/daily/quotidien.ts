@@ -27,6 +27,47 @@ export { QUETES, XP_TOTAL, type Quete, type QueteId } from './quetes.ts'
 
 const STORAGE_KEY = 'coupparfait.quotidien'
 
+/**
+ * À qui appartient la journée en cours ?
+ *
+ * `undefined` tant qu'on ne sait pas, `null` pour un visiteur sans compte.
+ *
+ * ── Pourquoi ce champ existe ──────────────────────────────────────────────
+ *
+ * La journée vivait dans une clé unique du stockage local, sans le moindre
+ * rapport avec le compte connecté. Sur un navigateur qui avait déjà servi,
+ * créer un compte tout neuf affichait donc « 5 jours d'affilée » : la série
+ * était celle du navigateur, pas celle de la personne. Et comme la reprise
+ * depuis le serveur garde le plus grand des deux (voir plus bas), le compte
+ * neuf poussait ensuite cette série mensongère en base, où elle devenait
+ * vraie.
+ *
+ * Chaque compte a donc sa propre clé, et les visiteurs anonymes la leur. Ce
+ * qui a été fait sans compte ne suit pas dans un compte — c'est le prix, et
+ * il est bien plus faible que celui d'un compteur auquel on ne peut pas
+ * croire.
+ */
+let compte: string | null | undefined = undefined
+
+function cleDuStockage(): string {
+  return compte ? `${STORAGE_KEY}:${compte}` : STORAGE_KEY
+}
+
+/**
+ * Déclare de quel compte est la journée qu'on affiche.
+ *
+ * Appelée par `useQuotidien` dès que l'identité est connue, et à chaque fois
+ * qu'elle change — connexion, déconnexion, changement de compte. L'état en
+ * mémoire est jeté et relu sous la nouvelle clé, ce qui rafraîchit du même
+ * coup tous les abonnés.
+ */
+export function definirCompte(pseudo: string | null): void {
+  if (compte === pseudo) return
+  compte = pseudo
+  courant = null
+  etatDuJour()
+}
+
 export interface EtatQuotidien {
   /** Jour concerné, au format `AAAA-MM-JJ` en heure locale. */
   jour: string
@@ -65,7 +106,7 @@ function etatVierge(jour: string): EtatQuotidien {
 function lire(): EtatQuotidien | null {
   if (typeof window === 'undefined') return null
   try {
-    const brut = window.localStorage.getItem(STORAGE_KEY)
+    const brut = window.localStorage.getItem(cleDuStockage())
     if (!brut) return null
     const parse = JSON.parse(brut) as EtatQuotidien
     return typeof parse?.jour === 'string' ? parse : null
@@ -108,7 +149,7 @@ function ecrire(etat: EtatQuotidien): void {
 
   if (typeof window === 'undefined') return
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(etat))
+    window.localStorage.setItem(cleDuStockage(), JSON.stringify(etat))
   } catch {
     // Sans stockage, la journée fonctionne quand même — elle ne survit
     // simplement pas au rechargement. Ce n'est pas une raison de tout casser.

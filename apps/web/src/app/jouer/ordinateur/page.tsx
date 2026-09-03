@@ -2312,7 +2312,16 @@ function GameScreen({
               onDesactiver={couperLeCommentaire}
             />
           ) : classee ? null : (
-            <PourquoiPanel move={lastPlayed} book={book} openingName={opening?.name ?? null} />
+            /* En revue, la question porte sur le coup qu'on regarde — pas sur
+               le dernier de la partie. Sans quoi le panneau expliquait une
+               position qui n'était plus à l'écran. Revenu au départ, il n'y a
+               aucun coup à expliquer : le panneau s'efface. */
+            <PourquoiPanel
+              move={reviewing ? reviewedMove : lastPlayed}
+              enRevue={reviewing}
+              book={book}
+              openingName={opening?.name ?? null}
+            />
           )}
 
           <ApprofondirCoup

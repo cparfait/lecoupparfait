@@ -9,7 +9,13 @@
  */
 
 import { forwardRef } from 'react'
-import type { ButtonHTMLAttributes, CSSProperties, InputHTMLAttributes, ReactNode } from 'react'
+import type {
+  ButtonHTMLAttributes,
+  CSSProperties,
+  InputHTMLAttributes,
+  ReactNode,
+  Ref,
+} from 'react'
 import Link from 'next/link'
 import clsx from 'clsx'
 
@@ -160,14 +166,28 @@ export function Card({
   className,
   glow,
   as: Tag = 'div',
+  ref,
 }: {
   children: ReactNode
   className?: string
   /** Ajoute le contour dégradé caractéristique du thème. */
   glow?: boolean
   as?: 'div' | 'section' | 'article' | 'aside'
+  /**
+   * Accès à l'élément, pour ce qui a besoin de le mesurer ou d'y aller.
+   *
+   * Le tchat d'une partie s'ouvre par un bouton posé sous l'échiquier alors
+   * que le panneau vit tout en bas de la colonne : il faut pouvoir le faire
+   * défiler jusque sous les yeux. React 19 passe `ref` comme une propriété
+   * ordinaire, aucun `forwardRef` n'est nécessaire.
+   */
+  ref?: Ref<HTMLElement>
 }) {
-  return <Tag className={clsx('glass', glow && 'gradient-ring', className)}>{children}</Tag>
+  return (
+    <Tag ref={ref as never} className={clsx('glass', glow && 'gradient-ring', className)}>
+      {children}
+    </Tag>
+  )
 }
 
 export function SectionTitle({

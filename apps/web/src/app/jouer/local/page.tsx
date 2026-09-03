@@ -304,7 +304,14 @@ export default function LocalGamePage() {
           ) : (
             // Le mode commenté est éteint : on ne dit rien de soi-même, mais on
             // laisse la porte ouverte à qui bloque sur un coup précis.
-            <PourquoiPanel move={lastMove} book={book} openingName={opening?.name ?? null} />
+            <PourquoiPanel
+              // En revue — on a cliqué un coup de la liste —, la question porte
+              // sur le coup consulté, pas sur le dernier joué.
+              move={state.isLive ? lastMove : (state.moves[state.cursor] ?? null)}
+              enRevue={!state.isLive}
+              book={book}
+              openingName={opening?.name ?? null}
+            />
           )}
 
           <PhysicalBoardPanel state={physicalBoard} />

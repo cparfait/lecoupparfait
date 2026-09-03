@@ -22,9 +22,10 @@ import { Card, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import { queteFaite, jourLocal } from '@/lib/daily/quotidien.ts'
 import { FlammeSerie } from './FlammeSerie.tsx'
+import { ListeDesQuetes } from './ListeDesQuetes.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { toast } from '@/components/ui/Toast.tsx'
-import { QUETES, XP_TOTAL } from '@/lib/daily/quetes.ts'
+import { XP_TOTAL } from '@/lib/daily/quetes.ts'
 import { tranchesAuDessus } from '@coupparfait/core'
 
 interface DefiPuzzle {
@@ -130,37 +131,8 @@ export function DefiDuJour({ className }: { className?: string }) {
           />
         </div>
 
-        <ul className="space-y-1">
-          {QUETES.map((quete) => {
-            const faite = etat ? queteFaite(etat, quete.id) : false
-            const avancement = etat?.avancement[quete.id] ?? 0
-            return (
-              <li
-                key={quete.id}
-                className={clsx(
-                  'flex items-center gap-2 text-[13px]',
-                  faite ? 'text-faint line-through' : 'text-muted',
-                )}
-              >
-                <span
-                  aria-hidden
-                  className={clsx(
-                    'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
-                    faite ? 'border-[var(--q-best)] bg-[var(--q-best)] text-white' : 'border-line',
-                  )}
-                >
-                  {faite && <Check size={11} />}
-                </span>
-                <span className="min-w-0 flex-1 truncate">{quete.label}</span>
-                {!faite && quete.objectif > 1 && (
-                  <span className="shrink-0 text-[11px] tabular-nums text-faint">
-                    {avancement} / {quete.objectif}
-                  </span>
-                )}
-              </li>
-            )
-          })}
-        </ul>
+        {/* Cinq lignes, cinq destinations : voir `ListeDesQuetes`. */}
+        <ListeDesQuetes etat={etat} />
       </div>
     </Card>
   )
