@@ -656,3 +656,47 @@ n'y est pas reproductible. À refaire sur le serveur.
 observé : « sessions expirées : 0 · évaluations de plus de 90 jours : 1 ·
 salons périmés : 0 », puis silence au tour suivant — elle ne passe qu'une fois
 par jour. `position_evals` n'est pas purgée, c'est dit dans le commentaire.
+
+### Lot B — 3 septembre 2026
+
+**Les deux chiffres.** Mesure prise avec un compteur de rendus posé dans le
+corps de `GameScreen` et de `Board2D`, sur dix secondes de partie en cours
+sans jouer de coup. Compteur, et non l'onglet *Profiler* : il n'est pas
+pilotable depuis le navigateur intégré, et il rend le même nombre.
+
+| | avant | après |
+|---|---|---|
+| `GameScreen` | 200 | **0** |
+| `Board2D` | 0 | **0** |
+
+Les 200 sont bien 100 battements : le mode strict de React rend deux fois en
+développement. L'objectif du document — moins de quinze — est donc dépassé de
+loin, puisqu'il n'en reste aucun : l'écran ne se rend plus qu'au coup.
+
+**B2 et B3 : mesure impossible sur cet écran, correction faite quand même.**
+`Board2D` est resté à zéro dans toutes les configurations essayées, y compris
+en retirant le `memo` de `ChessBoard` **et** en rendant `verdictDuCoup` à
+nouveau littéral, mode commenté activé. Son propre `memo` tenait. Les deux
+corrections restent justes — un littéral d'objet en prop et un tableau neuf en
+dépendance de `useMemo` sont des défauts qu'on lit dans le code —, mais elles
+n'ont pas de « avant » chiffré à opposer, et le commentaire de `Board2D` a été
+réécrit pour ne pas prétendre le contraire.
+
+**Recette.** Partie 3 minutes contre le niveau 1, sans jouer, jusqu'à la chute
+du drapeau. Relevé de l'affichage toutes les 200 ms : `0:12`, `0:11`, `0:10`,
+puis `9.0`, `8.8`, `8.6`… jusqu'à `0.0`, puis « Défaite au temps ». Le passage
+à la seconde près et le passage aux dixièmes se font au bon seuil, et le
+minuteur à échéance calculée tombe à l'heure. Aucune erreur de console
+imputable à l'application — deux `503` sur le serveur d'analyse, qui ne
+tournait pas.
+
+*Trouvé en passant, non traité :* `jouer/partie/[slug]` a exactement le même
+défaut de pendule et passe encore par `timeMs`. `PlayerBar` accepte désormais
+les deux formes, la bascule ne coûtera que quelques lignes — mais c'est un
+autre écran, donc un autre lot.
+
+*Ajouté au passage :* `usePreferencesDe(...cles)` dans le store, qui
+enveloppe `useShallow`. Les six lectures sans sélecteur passent par lui.
+Attention en l'utilisant : une lecture **indirecte** compte aussi, et l'oubli
+ne se voit pas toujours au typage — `resolvePieceColours` lit trois champs
+dans `Board3D` qui n'étaient pas dans la liste.
