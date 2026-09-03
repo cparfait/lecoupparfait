@@ -253,10 +253,7 @@ export async function authenticate(
   const valid = await verifyPassword(password, user.passwordHash)
   if (!valid) return { ok: false, error: 'invalidCredentials' }
 
-  await database
-    .update(users)
-    .set({ lastSeenAt: new Date() })
-    .where(eq(users.id, user.id))
+  await database.update(users).set({ lastSeenAt: new Date() }).where(eq(users.id, user.id))
 
   return { ok: true, user }
 }
@@ -438,8 +435,7 @@ export async function startPasswordReset(
 }
 
 export type ResetPasswordResult =
-  | { ok: true; username: string }
-  | { ok: false; reason: 'invalid' | 'weakPassword' }
+  { ok: true; username: string } | { ok: false; reason: 'invalid' | 'weakPassword' }
 
 /**
  * Pose le nouveau mot de passe.
@@ -452,10 +448,7 @@ export type ResetPasswordResult =
  * Un lien expiré et un lien inconnu donnent la même réponse : distinguer les
  * deux apprendrait à qui essaie qu'un jeton a existé.
  */
-export async function resetPassword(
-  token: string,
-  password: string,
-): Promise<ResetPasswordResult> {
+export async function resetPassword(token: string, password: string): Promise<ResetPasswordResult> {
   const database = getDb()
   if (!token) return { ok: false, reason: 'invalid' }
 
@@ -525,7 +518,9 @@ export async function createSession(
 }
 
 /** Résout un jeton en identité, ou `null` s'il est invalide ou expiré. */
-export async function resolveSession(token: string | undefined | null): Promise<SessionIdentity | null> {
+export async function resolveSession(
+  token: string | undefined | null,
+): Promise<SessionIdentity | null> {
   if (!token) return null
 
   try {

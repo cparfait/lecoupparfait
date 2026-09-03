@@ -267,23 +267,20 @@ export const games = pgTable(
  * parties ne seront jamais analysées, et charger la liste des parties d'un
  * joueur ne doit pas traîner des mégaoctets d'évaluations.
  */
-export const gameAnalyses = pgTable(
-  'game_analyses',
-  {
-    gameId: uuid('game_id')
-      .primaryKey()
-      .references(() => games.id, { onDelete: 'cascade' }),
-    /** Profondeur atteinte par le moteur. */
-    depth: smallint('depth').notNull(),
-    /** Rapport complet sérialisé (coups analysés, motifs, explications). */
-    report: jsonb('report').$type<Record<string, unknown>>().notNull(),
-    accuracyWhite: real('accuracy_white'),
-    accuracyBlack: real('accuracy_black'),
-    acplWhite: integer('acpl_white'),
-    acplBlack: integer('acpl_black'),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  },
-)
+export const gameAnalyses = pgTable('game_analyses', {
+  gameId: uuid('game_id')
+    .primaryKey()
+    .references(() => games.id, { onDelete: 'cascade' }),
+  /** Profondeur atteinte par le moteur. */
+  depth: smallint('depth').notNull(),
+  /** Rapport complet sérialisé (coups analysés, motifs, explications). */
+  report: jsonb('report').$type<Record<string, unknown>>().notNull(),
+  accuracyWhite: real('accuracy_white'),
+  accuracyBlack: real('accuracy_black'),
+  acplWhite: integer('acpl_white'),
+  acplBlack: integer('acpl_black'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
 
 /**
  * Analyses conservées dans un compte.
@@ -458,7 +455,10 @@ export const puzzles = pgTable(
     popularity: smallint('popularity').notNull().default(0),
     plays: integer('plays').notNull().default(0),
     /** Thèmes tactiques, ex. `fork`, `pin`, `mateIn2`. */
-    themes: text('themes').array().notNull().default(sql`'{}'::text[]`),
+    themes: text('themes')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     /** Ouverture d'où provient la position, si connue. */
     openingTags: text('opening_tags').array(),
     gameUrl: text('game_url'),
@@ -535,10 +535,7 @@ export const openings = pgTable(
     uci: text('uci').notNull(),
     ply: smallint('ply').notNull(),
   },
-  (table) => [
-    index('openings_eco_idx').on(table.eco),
-    index('openings_ply_idx').on(table.ply),
-  ],
+  (table) => [index('openings_eco_idx').on(table.eco), index('openings_ply_idx').on(table.ply)],
 )
 
 /**
@@ -618,20 +615,17 @@ export const challenges = pgTable(
  * — quelles parties, quels résultats — est déjà dans la table des parties : le
  * dupliquer ici ne servirait qu'à le désynchroniser.
  */
-export const botProgress = pgTable(
-  'bot_progress',
-  {
-    userId: uuid('user_id')
-      .primaryKey()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    /** Plus haut niveau battu, 0 si aucun. */
-    defeated: smallint('defeated').notNull().default(0),
-    /** Parties jouées contre l'ordinateur, toutes issues confondues. */
-    attempts: integer('attempts').notNull().default(0),
-    wins: integer('wins').notNull().default(0),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-  },
-)
+export const botProgress = pgTable('bot_progress', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  /** Plus haut niveau battu, 0 si aucun. */
+  defeated: smallint('defeated').notNull().default(0),
+  /** Parties jouées contre l'ordinateur, toutes issues confondues. */
+  attempts: integer('attempts').notNull().default(0),
+  wins: integer('wins').notNull().default(0),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
 
 /**
  * Avancement dans le mode carrière.

@@ -15,12 +15,7 @@ import { Chess } from 'chess.js'
 import type { Color } from 'chess.js'
 import { gamePhase } from './board.ts'
 import { classifyMove, countQualities, findTurningPoints } from './classify.ts'
-import {
-  averageCentipawnLoss,
-  estimateElo,
-  gameAccuracy,
-  winPercent,
-} from './eval.ts'
+import { averageCentipawnLoss, estimateElo, gameAccuracy, winPercent } from './eval.ts'
 import { explainMove } from './explain.ts'
 import type { Locale, MoveExplanation } from './explain.ts'
 import type { OpeningBook } from './openings.ts'
@@ -176,7 +171,7 @@ export async function analyseGame(options: AnalyseGameOptions): Promise<FullGame
 
     const topLine = before.lines.find((l) => l.multipv === 1) ?? before.lines[0]
     const bestUci = topLine?.pv[0] ?? before.bestMove ?? null
-    const bestSan = bestUci ? uciLineToSan(fenBefore, [bestUci])[0] ?? null : null
+    const bestSan = bestUci ? (uciLineToSan(fenBefore, [bestUci])[0] ?? null) : null
     const bestLine = topLine ? uciLineToSan(fenBefore, topLine.pv.slice(0, 6)) : []
     const playedLine = after.lines[0] ? uciLineToSan(fenAfter, after.lines[0].pv.slice(0, 5)) : []
 
@@ -191,7 +186,9 @@ export async function analyseGame(options: AnalyseGameOptions): Promise<FullGame
         if (!uci) return []
         const san = uciLineToSan(fenBefore, [uci])[0]
         if (!san) return []
-        return [{ uci, san, score: ligne.score, line: uciLineToSan(fenBefore, ligne.pv.slice(0, 5)) }]
+        return [
+          { uci, san, score: ligne.score, line: uciLineToSan(fenBefore, ligne.pv.slice(0, 5)) },
+        ]
       })
 
     const opening = book?.lookup(fenAfter, locale) ?? null
@@ -526,7 +523,7 @@ function buildFocus(input: {
       : 'Work on short calculation: two moves ahead, every time, would avoid most of these.'
   }
   return fr
-    ? "Continue comme ça, et ajoute quelques puzzles tactiques quotidiens pour aiguiser la vision."
+    ? 'Continue comme ça, et ajoute quelques puzzles tactiques quotidiens pour aiguiser la vision.'
     : 'Keep it up, and add a few daily tactics puzzles to sharpen your vision.'
 }
 

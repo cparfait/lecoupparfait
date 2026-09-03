@@ -19,15 +19,7 @@
  * et signale une intention de coup. C'est l'appelant qui décide.
  */
 
-import {
-  Fragment,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import clsx from 'clsx'
@@ -306,7 +298,10 @@ export const Board2D = memo(function Board2D({
     // donc X × 8 % ici.
     noeudsDesPieces.current
       .get(id)
-      ?.style.setProperty('--saisie', `translate(${(x - 6.25) * 8}%, ${(y - 6.25) * 8}%) scale(1.16)`)
+      ?.style.setProperty(
+        '--saisie',
+        `translate(${(x - 6.25) * 8}%, ${(y - 6.25) * 8}%) scale(1.16)`,
+      )
   }, [])
   /**
    * Promotion en cours d'arbitrage.
@@ -337,8 +332,7 @@ export const Board2D = memo(function Board2D({
   // Le réglage de l'utilisateur reste la référence ; une durée imposée ne peut
   // que l'allonger. Quelqu'un qui a choisi « instantané » l'a voulu.
   const preferred = prefs.animationMs
-  const animationMs =
-    instant || preferred === 0 ? 0 : Math.max(preferred, animationOverride ?? 0)
+  const animationMs = instant || preferred === 0 ? 0 : Math.max(preferred, animationOverride ?? 0)
 
   // ── Utilitaires ───────────────────────────────────────────────────────────
 
@@ -547,7 +541,9 @@ export const Board2D = memo(function Board2D({
       // millimètre parcouru.
       if (draft) {
         const square = squareAt(point.x, point.y, orientation)
-        setDraft((current) => (current && current.to !== square ? { ...current, to: square } : current))
+        setDraft((current) =>
+          current && current.to !== square ? { ...current, to: square } : current,
+        )
         return
       }
 
@@ -556,7 +552,10 @@ export const Board2D = memo(function Board2D({
       }
 
       const depart = departAppuiLong.current
-      if (depart && Math.hypot(event.clientX - depart.x, event.clientY - depart.y) > SEUIL_GLISSER_PX) {
+      if (
+        depart &&
+        Math.hypot(event.clientX - depart.x, event.clientY - depart.y) > SEUIL_GLISSER_PX
+      ) {
         annulerAppuiLong()
       }
 
@@ -761,7 +760,11 @@ export const Board2D = memo(function Board2D({
         <div className="pointer-events-none absolute inset-0">
           {prefs.highlightLastMove && lastMove && (
             <>
-              <SquareOverlay square={lastMove.from} orientation={orientation} color={skin.lastMove} />
+              <SquareOverlay
+                square={lastMove.from}
+                orientation={orientation}
+                color={skin.lastMove}
+              />
               <SquareOverlay square={lastMove.to} orientation={orientation} color={skin.lastMove} />
               {/* Le sillage se rejoue à chaque coup grâce à la clé : React
                   remonte l'élément, et l'animation CSS repart de zéro. */}
@@ -779,8 +782,16 @@ export const Board2D = memo(function Board2D({
 
           {premove && (
             <>
-              <SquareOverlay square={premove.from} orientation={orientation} color="rgba(90,140,255,.45)" />
-              <SquareOverlay square={premove.to} orientation={orientation} color="rgba(90,140,255,.45)" />
+              <SquareOverlay
+                square={premove.from}
+                orientation={orientation}
+                color="rgba(90,140,255,.45)"
+              />
+              <SquareOverlay
+                square={premove.to}
+                orientation={orientation}
+                color="rgba(90,140,255,.45)"
+              />
             </>
           )}
 
@@ -789,7 +800,12 @@ export const Board2D = memo(function Board2D({
           )}
 
           {focusVisible && (
-            <SquareOverlay square={focusSquare} orientation={orientation} color="var(--accent)" ring />
+            <SquareOverlay
+              square={focusSquare}
+              orientation={orientation}
+              color="var(--accent)"
+              ring
+            />
           )}
 
           {hoverSquare && drag && selectedTargets.includes(hoverSquare) && (
@@ -847,9 +863,7 @@ export const Board2D = memo(function Board2D({
         </div>
 
         {/* ── Coordonnées ───────────────────────────────────────────────── */}
-        {prefs.showCoordinates && (
-          <Coordinates orientation={orientation} skin={skin} />
-        )}
+        {prefs.showCoordinates && <Coordinates orientation={orientation} skin={skin} />}
 
         {/* ── Pièces ────────────────────────────────────────────────────── */}
         {/* La clé sur l'orientation remonte toutes les pièces quand on
@@ -900,7 +914,10 @@ export const Board2D = memo(function Board2D({
                     />
                   ) : (
                     <span
-                      className={clsx('block rounded-full', colour ? 'h-[38%] w-[38%]' : 'h-[30%] w-[30%]')}
+                      className={clsx(
+                        'block rounded-full',
+                        colour ? 'h-[38%] w-[38%]' : 'h-[30%] w-[30%]',
+                      )}
                       style={{
                         background: colour ?? skin.hint,
                         boxShadow: colour ? '0 0 0 2px rgb(0 0 0 / .25)' : undefined,
@@ -1014,7 +1031,10 @@ const Piece = memo(function Piece({
   pixelisee: boolean
   enregistrer: (id: string, noeud: HTMLDivElement | null) => void
 }) {
-  const ref = useCallback((noeud: HTMLDivElement | null) => enregistrer(id, noeud), [enregistrer, id])
+  const ref = useCallback(
+    (noeud: HTMLDivElement | null) => enregistrer(id, noeud),
+    [enregistrer, id],
+  )
   return (
     <div
       ref={ref}

@@ -73,9 +73,7 @@ function AuthForm() {
    * L'avatar voyage avec le pseudo : il vient d'être tiré au sort par le
    * serveur, et la première étape le montre plutôt que de le redemander.
    */
-  const [bienvenue, setBienvenue] = useState<{ pseudo: string; avatar: string | null } | null>(
-    null,
-  )
+  const [bienvenue, setBienvenue] = useState<{ pseudo: string; avatar: string | null } | null>(null)
 
   /*
     Une fois connecté, on va à l'accueil — et non à son profil.
@@ -199,9 +197,7 @@ function AuthForm() {
         router.push(destination)
         router.refresh()
       } catch {
-        setError(
-          'Le service de comptes est injoignable. Tu peux continuer à jouer sans compte.',
-        )
+        setError('Le service de comptes est injoignable. Tu peux continuer à jouer sans compte.')
       } finally {
         setBusy(false)
       }
@@ -247,9 +243,7 @@ function AuthForm() {
                 <Swords size={17} />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold leading-snug">
-                  {referrer} t’invite à jouer
-                </p>
+                <p className="text-sm font-semibold leading-snug">{referrer} t’invite à jouer</p>
                 <p className="mt-0.5 text-[13px] leading-relaxed text-muted">
                   Choisis un pseudo et entre dans la partie. Pas besoin de compte.
                 </p>
@@ -282,8 +276,8 @@ function AuthForm() {
                 </form>
 
                 <p className="mt-2.5 text-[12px] leading-relaxed text-faint">
-                  Ou crée un compte ci-dessous : {referrer} entrera dans ton carnet, et tu
-                  garderas ton classement d’une partie à l’autre.
+                  Ou crée un compte ci-dessous : {referrer} entrera dans ton carnet, et tu garderas
+                  ton classement d’une partie à l’autre.
                 </p>
               </div>
             </div>
@@ -328,7 +322,9 @@ function AuthForm() {
               minLength={3}
               maxLength={20}
               hint={
-                mode === 'signup' ? '3 à 20 caractères : lettres, chiffres, tiret, souligné.' : undefined
+                mode === 'signup'
+                  ? '3 à 20 caractères : lettres, chiffres, tiret, souligné.'
+                  : undefined
               }
             />
 
@@ -341,7 +337,11 @@ function AuthForm() {
               autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
               required
               minLength={8}
-              hint={mode === 'signup' ? '8 caractères minimum. La longueur compte plus que les symboles.' : undefined}
+              hint={
+                mode === 'signup'
+                  ? '8 caractères minimum. La longueur compte plus que les symboles.'
+                  : undefined
+              }
             />
 
             {/* À la connexion seulement : proposer « oublié » pendant qu'on
@@ -450,10 +450,9 @@ function AuthForm() {
             un autre — et celui-là coûte des inscriptions.
           */}
           <p className="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-faint">
-            Jouer, apprendre, résoudre des puzzles et analyser tes parties fonctionne
-            entièrement sans inscription. Le compte ajoute le mode carrière, tes analyses
-            conservées, le défi du jour, ta série, ton classement par cadence et
-            l’historique de tes parties.
+            Jouer, apprendre, résoudre des puzzles et analyser tes parties fonctionne entièrement
+            sans inscription. Le compte ajoute le mode carrière, tes analyses conservées, le défi du
+            jour, ta série, ton classement par cadence et l’historique de tes parties.
           </p>
         </div>
       </div>

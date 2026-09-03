@@ -78,13 +78,7 @@ function construireMotif(termes: Terme[]): RegExp {
 
 let motif: RegExp | null = null
 
-export function TexteAvecTermes({
-  texte,
-  className,
-}: {
-  texte: string
-  className?: string
-}) {
+export function TexteAvecTermes({ texte, className }: { texte: string; className?: string }) {
   const morceaux = useMemo(() => decouper(texte), [texte])
 
   return (
@@ -116,9 +110,7 @@ export function TexteAvecTermes({
 }
 
 /** Découpe un texte en morceaux bruts et en termes reconnus. */
-function decouper(
-  texte: string,
-): Array<string | { mot: string; definition: string }> {
+function decouper(texte: string): Array<string | { mot: string; definition: string }> {
   dictionnaire ??= construireDictionnaire()
   motif ??= construireMotif(dictionnaire)
 

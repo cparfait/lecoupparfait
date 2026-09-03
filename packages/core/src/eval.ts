@@ -96,9 +96,7 @@ export function outcomeProbabilities(
   phase: 'opening' | 'middlegame' | 'endgame' = 'middlegame',
 ): { win: number; draw: number; loss: number } {
   if (score.type === 'mate') {
-    return score.value > 0
-      ? { win: 100, draw: 0, loss: 0 }
-      : { win: 0, draw: 0, loss: 100 }
+    return score.value > 0 ? { win: 100, draw: 0, loss: 0 } : { win: 0, draw: 0, loss: 100 }
   }
   const cp = clampCp(score.value)
   // Les finales sont plus « nulleuses » à avantage égal, les ouvertures moins.
@@ -167,8 +165,7 @@ export function gameAccuracy(accuracies: number[], winPercents: number[]): numbe
 function standardDeviation(values: number[]): number {
   if (values.length < 2) return 0.5
   const mean = values.reduce((a, b) => a + b, 0) / values.length
-  const variance =
-    values.reduce((acc, v) => acc + (v - mean) ** 2, 0) / values.length
+  const variance = values.reduce((acc, v) => acc + (v - mean) ** 2, 0) / values.length
   return Math.sqrt(variance)
 }
 

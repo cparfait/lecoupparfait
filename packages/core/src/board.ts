@@ -124,10 +124,7 @@ export function squareShade(square: Square): 'light' | 'dark' {
 
 /** Distance de Tchebychev : nombre de coups de roi entre deux cases. */
 export function kingDistance(a: Square, b: Square): number {
-  return Math.max(
-    Math.abs(fileIndex(a) - fileIndex(b)),
-    Math.abs(rankIndex(a) - rankIndex(b)),
-  )
+  return Math.max(Math.abs(fileIndex(a) - fileIndex(b)), Math.abs(rankIndex(a) - rankIndex(b)))
 }
 
 /**
@@ -662,10 +659,22 @@ export function undevelopedPieces(chess: Chess, color: Color): Square[] {
 
 const CENTRE_SQUARES: Square[] = ['d4', 'd5', 'e4', 'e5']
 const EXTENDED_CENTRE: Square[] = [
-  'c3', 'c4', 'c5', 'c6',
-  'd3', 'd4', 'd5', 'd6',
-  'e3', 'e4', 'e5', 'e6',
-  'f3', 'f4', 'f5', 'f6',
+  'c3',
+  'c4',
+  'c5',
+  'c6',
+  'd3',
+  'd4',
+  'd5',
+  'd6',
+  'e3',
+  'e4',
+  'e5',
+  'e6',
+  'f3',
+  'f4',
+  'f5',
+  'f6',
 ]
 
 /** Score de contrôle du centre : cases centrales attaquées ou occupées. */

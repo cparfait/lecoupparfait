@@ -368,7 +368,13 @@ function buildHistory(_startFen: string, verbose: Move[]): PlayedMove[] {
 export function groupMoves(
   moves: PlayedMove[],
   startFen: string = START_FEN,
-): Array<{ number: number; white: PlayedMove | null; black: PlayedMove | null; whitePly: number; blackPly: number }> {
+): Array<{
+  number: number
+  white: PlayedMove | null
+  black: PlayedMove | null
+  whitePly: number
+  blackPly: number
+}> {
   const startsWithBlack = startFen.split(' ')[1] === 'b'
   const firstNumber = Number(startFen.split(' ')[5] ?? '1')
   const rows: Array<{

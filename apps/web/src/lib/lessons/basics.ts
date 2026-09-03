@@ -32,11 +32,11 @@ export const basicsChapter: Chapter = {
         {
           kind: 'show',
           fen: '8/8/8/8/8/8/8/8 w - - 0 1',
-          say: "Voici un échiquier. Soixante-quatre cases, huit colonnes et huit rangées. Une règle avant tout : la case en bas à droite doit toujours être claire.",
+          say: 'Voici un échiquier. Soixante-quatre cases, huit colonnes et huit rangées. Une règle avant tout : la case en bas à droite doit toujours être claire.',
         },
         {
           kind: 'show',
-          say: "Les colonnes portent des lettres, de a à h, en partant de la gauche. Les rangées portent des chiffres, de 1 à 8, en partant du bas.",
+          say: 'Les colonnes portent des lettres, de a à h, en partant de la gauche. Les rangées portent des chiffres, de 1 à 8, en partant du bas.',
           highlight: ['a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'],
         },
         {
@@ -53,7 +53,7 @@ export const basicsChapter: Chapter = {
         {
           kind: 'show',
           fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-          say: "Voici la position de départ. Les Blancs en bas, les Noirs en haut. Petit truc pour ne jamais se tromper : la dame se place sur une case de sa couleur. Dame blanche sur case claire, dame noire sur case sombre.",
+          say: 'Voici la position de départ. Les Blancs en bas, les Noirs en haut. Petit truc pour ne jamais se tromper : la dame se place sur une case de sa couleur. Dame blanche sur case claire, dame noire sur case sombre.',
           highlight: ['d1', 'd8'],
         },
       ],
@@ -82,7 +82,7 @@ export const basicsChapter: Chapter = {
         },
         {
           kind: 'play',
-          say: "À toi. Déplace la tour tout en haut de sa colonne, sur la case d8.",
+          say: 'À toi. Déplace la tour tout en haut de sa colonne, sur la case d8.',
           instruction: 'Joue la tour en d8',
           answers: ['Rd8+'],
           hint: 'Prends la tour et fais-la glisser vers le haut, jusqu’à la case d8.',
@@ -96,7 +96,7 @@ export const basicsChapter: Chapter = {
         },
         {
           kind: 'play',
-          say: "Capture ce pion. Pour prendre une pièce, on pose simplement la sienne à sa place.",
+          say: 'Capture ce pion. Pour prendre une pièce, on pose simplement la sienne à sa place.',
           instruction: 'Capture le pion en g4',
           answers: ['Rxg4'],
           hint: 'Glisse la tour de d4 jusqu’en g4, sur le pion.',
@@ -141,14 +141,14 @@ export const basicsChapter: Chapter = {
         {
           kind: 'play',
           fen: '7k/8/5p2/8/3B4/8/8/K7 w - - 0 1',
-          say: "À toi. Capture le pion noir en f6.",
+          say: 'À toi. Capture le pion noir en f6.',
           instruction: 'Capture le pion en f6',
           answers: ['Bxf6'],
           hint: 'Suis la diagonale vers le haut à droite : d4, e5, f6.',
         },
         {
           kind: 'show',
-          say: "Le fou vaut environ trois pions, comme le cavalier. En position ouverte, avec peu de pions au centre, il est souvent le plus fort des deux.",
+          say: 'Le fou vaut environ trois pions, comme le cavalier. En position ouverte, avec peu de pions au centre, il est souvent le plus fort des deux.',
         },
       ],
     },
@@ -192,7 +192,7 @@ export const basicsChapter: Chapter = {
         },
         {
           kind: 'show',
-          say: "Une erreur très courante chez les débutants : sortir la dame dès les premiers coups. Elle se fait alors chasser par des pièces adverses moins précieuses, et on perd du temps à la sauver. Sors-la tard.",
+          say: 'Une erreur très courante chez les débutants : sortir la dame dès les premiers coups. Elle se fait alors chasser par des pièces adverses moins précieuses, et on perd du temps à la sauver. Sors-la tard.',
         },
       ],
     },
@@ -209,7 +209,7 @@ export const basicsChapter: Chapter = {
         {
           kind: 'show',
           fen: '7k/8/8/8/3N4/8/8/K7 w - - 0 1',
-          say: "Le cavalier se déplace en L : deux cases dans une direction, puis une case perpendiculairement. Depuis d4, il peut atteindre huit cases.",
+          say: 'Le cavalier se déplace en L : deux cases dans une direction, puis une case perpendiculairement. Depuis d4, il peut atteindre huit cases.',
           highlight: ['b3', 'b5', 'c2', 'c6', 'e2', 'e6', 'f3', 'f5'],
         },
         {
@@ -230,14 +230,14 @@ export const basicsChapter: Chapter = {
         },
         {
           kind: 'play',
-          say: "À toi. Fais-le sortir de ce mur : joue le cavalier en c6, par-dessus les pions.",
+          say: 'À toi. Fais-le sortir de ce mur : joue le cavalier en c6, par-dessus les pions.',
           instruction: 'Joue le cavalier en c6',
           answers: ['Nc6', 'Ne6', 'Nb5', 'Nf5'],
           hint: 'Deux cases vers le haut, une vers la gauche. Le cavalier passe par-dessus tout.',
         },
         {
           kind: 'show',
-          say: "Le cavalier vaut trois pions. Il est excellent dans les positions fermées, encombrées de pions, là où les fous et les tours étouffent.",
+          say: 'Le cavalier vaut trois pions. Il est excellent dans les positions fermées, encombrées de pions, là où les fous et les tours étouffent.',
         },
       ],
     },
@@ -272,13 +272,13 @@ export const basicsChapter: Chapter = {
         {
           kind: 'show',
           fen: '7k/8/8/8/2p1p3/8/3P4/K7 w - - 0 1',
-          say: "Voici ce qui déroute tout le monde au début : le pion avance tout droit, mais il capture **en diagonale**. Ces deux pions noirs sont à sa portée.",
+          say: 'Voici ce qui déroute tout le monde au début : le pion avance tout droit, mais il capture **en diagonale**. Ces deux pions noirs sont à sa portée.',
           highlight: ['c3', 'e3'],
         },
         {
           kind: 'show',
           fen: '7k/8/8/8/8/2p1p3/3P4/K7 w - - 0 1',
-          say: "Regarde : le pion blanc en d2 peut capturer en c3 ou en e3, mais il ne peut pas capturer une pièce qui serait juste devant lui en d3. Elle le bloquerait, tout simplement.",
+          say: 'Regarde : le pion blanc en d2 peut capturer en c3 ou en e3, mais il ne peut pas capturer une pièce qui serait juste devant lui en d3. Elle le bloquerait, tout simplement.',
           arrows: [
             { from: 'd2', to: 'c3', color: 'green' },
             { from: 'd2', to: 'e3', color: 'green' },
@@ -325,7 +325,7 @@ export const basicsChapter: Chapter = {
         {
           kind: 'show',
           fen: '7k/5K2/8/8/8/8/8/8 w - - 0 1',
-          say: "Dernière règle : deux rois ne peuvent jamais se toucher. Ils doivent toujours garder au moins une case entre eux, sans quoi ils se mettraient mutuellement en échec.",
+          say: 'Dernière règle : deux rois ne peuvent jamais se toucher. Ils doivent toujours garder au moins une case entre eux, sans quoi ils se mettraient mutuellement en échec.',
           highlight: ['g8', 'g7', 'g6', 'f6', 'e6', 'e7', 'e8'],
         },
       ],
@@ -347,7 +347,7 @@ export const basicsChapter: Chapter = {
         },
         {
           kind: 'show',
-          say: "Le petit roque, du côté du roi : le roi fait deux pas vers la tour, et la tour saute par-dessus lui pour se poser juste à côté. Regarde.",
+          say: 'Le petit roque, du côté du roi : le roi fait deux pas vers la tour, et la tour saute par-dessus lui pour se poser juste à côté. Regarde.',
           arrows: [
             { from: 'e1', to: 'g1', color: 'green' },
             { from: 'h1', to: 'f1', color: 'blue' },
@@ -355,14 +355,14 @@ export const basicsChapter: Chapter = {
         },
         {
           kind: 'play',
-          say: "Fais le petit roque. Prends le roi et amène-le sur la case g1 : la tour suivra toute seule.",
+          say: 'Fais le petit roque. Prends le roi et amène-le sur la case g1 : la tour suivra toute seule.',
           instruction: 'Joue le petit roque',
           answers: ['O-O'],
           hint: 'Attrape le roi en e1 et pose-le en g1.',
         },
         {
           kind: 'show',
-          say: "Parfait. Ton roi est maintenant derrière trois pions intacts, et ta tour est sortie de son coin. Deux problèmes réglés en un coup.",
+          say: 'Parfait. Ton roi est maintenant derrière trois pions intacts, et ta tour est sortie de son coin. Deux problèmes réglés en un coup.',
           highlight: ['g1', 'f1', 'f2', 'g2', 'h2'],
         },
         {
@@ -393,7 +393,7 @@ export const basicsChapter: Chapter = {
         },
         {
           kind: 'play',
-          say: "Ton pion en e5 capture donc en d6, et le pion noir disparaît de d5. Essaie.",
+          say: 'Ton pion en e5 capture donc en d6, et le pion noir disparaît de d5. Essaie.',
           instruction: 'Capture en passant : joue le pion en d6',
           answers: ['exd6'],
           hint: 'Pose ton pion e5 sur la case d6, juste derrière le pion noir.',
@@ -513,7 +513,7 @@ export const basicsChapter: Chapter = {
         },
         {
           kind: 'show',
-          say: "Voilà toute la beauté du jeu : le matériel est une boussole, pas une loi. Tu apprendras à savoir quand la suivre et quand la trahir.",
+          say: 'Voilà toute la beauté du jeu : le matériel est une boussole, pas une loi. Tu apprendras à savoir quand la suivre et quand la trahir.',
         },
       ],
     },

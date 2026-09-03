@@ -36,9 +36,24 @@ interface Puzzle {
 type Mode = '3min' | '5min' | 'survie'
 
 const MODES: Array<{ id: Mode; label: string; seconds: number | null; hint: string }> = [
-  { id: '3min', label: '3 minutes', seconds: 180, hint: 'La plus tendue. On ne réfléchit plus, on reconnaît.' },
-  { id: '5min', label: '5 minutes', seconds: 300, hint: 'De quoi trouver son rythme avant que ça morde.' },
-  { id: 'survie', label: 'Survie', seconds: null, hint: 'Pas de chronomètre. Trois erreurs, et c’est fini.' },
+  {
+    id: '3min',
+    label: '3 minutes',
+    seconds: 180,
+    hint: 'La plus tendue. On ne réfléchit plus, on reconnaît.',
+  },
+  {
+    id: '5min',
+    label: '5 minutes',
+    seconds: 300,
+    hint: 'De quoi trouver son rythme avant que ça morde.',
+  },
+  {
+    id: 'survie',
+    label: 'Survie',
+    seconds: null,
+    hint: 'Pas de chronomètre. Trois erreurs, et c’est fini.',
+  },
 ]
 
 /** Nombre d'erreurs qui arrête la manche. */
@@ -269,8 +284,8 @@ export default function RushPage() {
         </Button>
 
         <p className="mt-4 text-center text-xs text-faint">
-          Les puzzles ordinaires apprennent à trouver ; celui-ci apprend à reconnaître. C’est ce
-          qui manque le plus en partie rapide.{' '}
+          Les puzzles ordinaires apprennent à trouver ; celui-ci apprend à reconnaître. C’est ce qui
+          manque le plus en partie rapide.{' '}
           <Link href="/puzzles" className="text-accent hover:underline">
             Revenir aux puzzles
           </Link>
@@ -297,7 +312,12 @@ export default function RushPage() {
             <p className="mt-3 text-[13px] text-faint">Ton record reste à {best}.</p>
           )}
           <div className="mt-5 space-y-1.5">
-            <Button variant="primary" fullWidth icon={<RotateCcw size={15} />} onClick={() => void start()}>
+            <Button
+              variant="primary"
+              fullWidth
+              icon={<RotateCcw size={15} />}
+              onClick={() => void start()}
+            >
               Rejouer
             </Button>
             <Button variant="ghost" fullWidth onClick={() => setPhase('choix')}>
@@ -317,7 +337,10 @@ export default function RushPage() {
         <span className="font-display text-2xl font-bold tabular-nums">{solved}</span>
         <span className="text-[13px] text-muted">résolus</span>
 
-        <span className="ml-auto flex items-center gap-1" aria-label={`${errors} erreurs sur ${MAX_ERRORS}`}>
+        <span
+          className="ml-auto flex items-center gap-1"
+          aria-label={`${errors} erreurs sur ${MAX_ERRORS}`}
+        >
           {Array.from({ length: MAX_ERRORS }, (_, i) => (
             <X
               key={i}

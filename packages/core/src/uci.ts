@@ -101,7 +101,9 @@ export function parseInfoLine(line: string): ParsedInfo | null {
 }
 
 /** Analyse la ligne `bestmove e2e4 ponder e7e5`. */
-export function parseBestMove(line: string): { best: UciMove | null; ponder: UciMove | null } | null {
+export function parseBestMove(
+  line: string,
+): { best: UciMove | null; ponder: UciMove | null } | null {
   if (!line.startsWith('bestmove')) return null
   const tokens = line.split(/\s+/)
   const best = tokens[1] && tokens[1] !== '(none)' ? tokens[1] : null

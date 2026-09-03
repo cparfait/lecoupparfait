@@ -187,7 +187,9 @@ async function readLichessEval(
     // numérote donc simplement à la suite.
     const lines: EngineLine[] = [principale]
     for (const autre of row.altLines ?? []) {
-      const suite = String(autre?.line ?? '').split(' ').filter(Boolean)
+      const suite = String(autre?.line ?? '')
+        .split(' ')
+        .filter(Boolean)
       if (suite.length === 0) continue
       lines.push({
         multipv: lines.length + 1,
@@ -296,7 +298,9 @@ function decodeLine(entry: unknown, fallbackDepth: number): EngineLine | null {
   if (typeof entry !== 'object' || entry === null) return null
   const raw = entry as Record<string, unknown>
 
-  const pv = Array.isArray(raw.pv) ? raw.pv.filter((move): move is string => typeof move === 'string') : []
+  const pv = Array.isArray(raw.pv)
+    ? raw.pv.filter((move): move is string => typeof move === 'string')
+    : []
   // Une variante sans coup ne sert à rien : c'est justement le coup qu'on vient
   // y chercher pour la liste des alternatives.
   if (pv.length === 0) return null

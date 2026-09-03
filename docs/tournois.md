@@ -1,7 +1,7 @@
 # Tournois — étude préalable
 
-*Rédigé le 28 août 2026. Rien n'est implémenté : ce document sert à décider,
-et à ne pas redécouvrir les mêmes questions dans six mois.*
+_Rédigé le 28 août 2026. Rien n'est implémenté : ce document sert à décider,
+et à ne pas redécouvrir les mêmes questions dans six mois._
 
 ## Ce qu'on veut, et ce qu'on ne veut pas
 

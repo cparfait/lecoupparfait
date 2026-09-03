@@ -21,18 +21,7 @@
  */
 
 import { NextResponse } from 'next/server'
-import {
-  count,
-  desc,
-  eq,
-  games,
-  getDb,
-  ilike,
-  or,
-  ratings,
-  sql,
-  users,
-} from '@coupparfait/db'
+import { count, desc, eq, games, getDb, ilike, or, ratings, sql, users } from '@coupparfait/db'
 import { destroyAllSessions, hashPassword, validatePassword } from '@coupparfait/db/auth'
 import { getAdmin } from '@/lib/server/admin.ts'
 
@@ -72,11 +61,7 @@ export async function GET(request: Request) {
         )`,
       })
       .from(users)
-      .where(
-        recherche
-          ? or(ilike(users.username, motif), ilike(users.email, motif))
-          : sql`true`,
-      )
+      .where(recherche ? or(ilike(users.username, motif), ilike(users.email, motif)) : sql`true`)
       .orderBy(desc(users.lastSeenAt))
       .limit(PAR_PAGE)
 

@@ -32,13 +32,7 @@ interface I18nValue {
 
 const I18nContext = createContext<I18nValue | null>(null)
 
-export function I18nProvider({
-  locale,
-  children,
-}: {
-  locale: Locale
-  children: ReactNode
-}) {
+export function I18nProvider({ locale, children }: { locale: Locale; children: ReactNode }) {
   const dictionary = dictionaries[locale] ?? dictionaries[DEFAULT_LOCALE]
 
   const t = useCallback(

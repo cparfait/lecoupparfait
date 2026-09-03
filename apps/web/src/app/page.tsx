@@ -33,11 +33,51 @@ import type { BoardStyleId, ThemeId } from '@/lib/store/preferences.ts'
  * cherche à faire comprendre.
  */
 const IMMORTAL = [
-  'e4', 'e5', 'f4', 'exf4', 'Bc4', 'Qh4+', 'Kf1', 'b5', 'Bxb5', 'Nf6',
-  'Nf3', 'Qh6', 'd3', 'Nh5', 'Nh4', 'Qg5', 'Nf5', 'c6', 'g4', 'Nf6',
-  'Rg1', 'cxb5', 'h4', 'Qg6', 'h5', 'Qg5', 'Qf3', 'Ng8', 'Bxf4', 'Qf6',
-  'Nc3', 'Bc5', 'Nd5', 'Qxb2', 'Bd6', 'Bxg1', 'e5', 'Qxa1+', 'Ke2', 'Na6',
-  'Nxg7+', 'Kd8', 'Qf6+', 'Nxf6', 'Be7#',
+  'e4',
+  'e5',
+  'f4',
+  'exf4',
+  'Bc4',
+  'Qh4+',
+  'Kf1',
+  'b5',
+  'Bxb5',
+  'Nf6',
+  'Nf3',
+  'Qh6',
+  'd3',
+  'Nh5',
+  'Nh4',
+  'Qg5',
+  'Nf5',
+  'c6',
+  'g4',
+  'Nf6',
+  'Rg1',
+  'cxb5',
+  'h4',
+  'Qg6',
+  'h5',
+  'Qg5',
+  'Qf3',
+  'Ng8',
+  'Bxf4',
+  'Qf6',
+  'Nc3',
+  'Bc5',
+  'Nd5',
+  'Qxb2',
+  'Bd6',
+  'Bxg1',
+  'e5',
+  'Qxa1+',
+  'Ke2',
+  'Na6',
+  'Nxg7+',
+  'Kd8',
+  'Qf6+',
+  'Nxf6',
+  'Be7#',
 ]
 
 /**
@@ -210,11 +250,14 @@ function Hero() {
             Aucune inscription nécessaire pour jouer ou apprendre.
             <br />
             Un compte —{' '}
-            <Link href="/connexion" className="font-semibold text-muted hover:text-ink hover:underline">
+            <Link
+              href="/connexion"
+              className="font-semibold text-muted hover:text-ink hover:underline"
+            >
               gratuit, un pseudo et un mot de passe
             </Link>{' '}
-            — ajoute le défi du jour, ta série, ton classement par cadence et l’historique de
-            tes parties.
+            — ajoute le défi du jour, ta série, ton classement par cadence et l’historique de tes
+            parties.
           </p>
         </div>
 

@@ -70,7 +70,8 @@ services:
     # `docker compose exec db psql` passe par le conteneur et ne laisse rien
     # d'ouvert derrière lui.
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-coupparfait} -d ${POSTGRES_DB:-coupparfait}']
+      test:
+        ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-coupparfait} -d ${POSTGRES_DB:-coupparfait}']
       interval: 10s
       timeout: 5s
       retries: 10
@@ -225,7 +226,13 @@ services:
     # ports:
     #   - '127.0.0.1:3001:3001'
     healthcheck:
-      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -284,7 +291,13 @@ services:
     # ports:
     #   - '127.0.0.1:3000:3000'
     healthcheck:
-      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3

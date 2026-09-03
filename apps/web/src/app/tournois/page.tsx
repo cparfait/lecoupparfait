@@ -118,8 +118,8 @@ export default function TournamentsPage() {
                 Tournoi contre l’ordinateur
               </p>
               <p className="text-[13px] text-muted">
-                Tu es le seul humain. Trois à sept adversaires, de force choisie ou variée,
-                et un classement aux points.
+                Tu es le seul humain. Trois à sept adversaires, de force choisie ou variée, et un
+                classement aux points.
               </p>
             </div>
             <span className="shrink-0 text-muted" aria-hidden>
@@ -209,8 +209,8 @@ export default function TournamentsPage() {
 
       <p className="mt-5 flex items-start gap-1.5 text-xs leading-relaxed text-faint">
         <Timer size={13} className="mt-0.5 shrink-0" aria-hidden />
-        Une arène n’a d’intérêt qu’à plusieurs : à trois joueurs, c’est un salon d’attente
-        déguisé. Préviens tes amis avant d’en lancer une.
+        Une arène n’a d’intérêt qu’à plusieurs : à trois joueurs, c’est un salon d’attente déguisé.
+        Préviens tes amis avant d’en lancer une.
       </p>
     </div>
   )

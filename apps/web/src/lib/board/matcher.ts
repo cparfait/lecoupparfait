@@ -129,7 +129,9 @@ export function matchSnapshot(chess: Chess, snapshot: Occupancy): BoardMatch {
   // qui ne détecte que la présence, et le joueur qui pousse son pion à dame
   // sans avoir de dame sous la main — il pose le pion, la carte annonce un
   // pion sur la huitième rangée, aucune promotion ne correspond.
-  const loose = legal.filter((move) => sameOccupancy(occupancyAfter(expected, move), snapshot, true))
+  const loose = legal.filter((move) =>
+    sameOccupancy(occupancyAfter(expected, move), snapshot, true),
+  )
   const looseResolved = resolve(loose)
   if (looseResolved) return looseResolved
 
@@ -141,7 +143,8 @@ export function matchSnapshot(chess: Chess, snapshot: Occupancy): BoardMatch {
     const now = snapshot[index] ?? null
     if (before !== null && now === null) lifted.push(SQUARES[index] as string)
     else if (before === null && now !== null) extra = true
-    else if (before !== null && now !== null && now !== UNKNOWN_PIECE && before !== now) extra = true
+    else if (before !== null && now !== null && now !== UNKNOWN_PIECE && before !== now)
+      extra = true
   }
   if (!extra && lifted.length > 0) return { kind: 'lifted', squares: lifted }
 

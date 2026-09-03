@@ -52,7 +52,6 @@ function createDatabase(connectionString: string) {
 }
 
 declare global {
-   
   var __coupParfaitDb: Database | undefined
 }
 

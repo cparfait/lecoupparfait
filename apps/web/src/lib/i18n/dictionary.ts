@@ -123,9 +123,11 @@ export const fr = {
     watchGame: 'Regarder une partie',
     watchBlurb: 'Suis en direct les parties commencées par d’autres, coup par coup.',
     correspondence: 'Par correspondance',
-    correspondenceBlurb: 'Un coup quand tu peux, sur des jours. Personne n’attend devant son écran.',
+    correspondenceBlurb:
+      'Un coup quand tu peux, sur des jours. Personne n’attend devant son écran.',
     arena: 'Arène',
-    arenaBlurb: 'Un tournoi où l’on arrive et repart quand on veut, réapparié à chaque fin de partie.',
+    arenaBlurb:
+      'Un tournoi où l’on arrive et repart quand on veut, réapparié à chaque fin de partie.',
     quickPairing: 'Partie rapide',
     level: 'Niveau',
     difficulty: 'Difficulté',

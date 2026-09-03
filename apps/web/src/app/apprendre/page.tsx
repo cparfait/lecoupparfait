@@ -104,9 +104,7 @@ export default function LearnPage() {
   const allCollapsed = CHAPTERS.every((chapter) => collapsed[chapter.id])
   const toggleAll = useCallback(() => {
     setCollapsed(() => {
-      const next = Object.fromEntries(
-        CHAPTERS.map((chapter) => [chapter.id, !allCollapsed]),
-      )
+      const next = Object.fromEntries(CHAPTERS.map((chapter) => [chapter.id, !allCollapsed]))
       try {
         localStorage.setItem(COLLAPSED_KEY, JSON.stringify(next))
       } catch {
@@ -124,9 +122,9 @@ export default function LearnPage() {
         Apprendre les échecs
       </h1>
       <p className="mt-2 max-w-2xl text-muted">
-        {CURRICULUM_STATS.lessons} leçons guidées, {CURRICULUM_STATS.steps} étapes, une voix
-        qui explique chaque coup. Tu peux commencer sans rien connaître — la première leçon
-        part de l’échiquier vide.
+        {CURRICULUM_STATS.lessons} leçons guidées, {CURRICULUM_STATS.steps} étapes, une voix qui
+        explique chaque coup. Tu peux commencer sans rien connaître — la première leçon part de
+        l’échiquier vide.
       </p>
 
       {/* ── Progression globale ──────────────────────────────────────── */}
@@ -183,8 +181,7 @@ export default function LearnPage() {
                 <div
                   className="mb-6 h-px w-full"
                   style={{
-                    background:
-                      'linear-gradient(90deg, var(--border-strong), transparent 70%)',
+                    background: 'linear-gradient(90deg, var(--border-strong), transparent 70%)',
                   }}
                   aria-hidden
                 />
@@ -204,7 +201,8 @@ export default function LearnPage() {
                       height: '3.25rem',
                       width: '3.25rem',
                       background: 'color-mix(in oklab, var(--accent) 16%, transparent)',
-                      boxShadow: 'inset 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent)',
+                      boxShadow:
+                        'inset 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent)',
                     }}
                     aria-hidden
                   >
@@ -275,9 +273,7 @@ export default function LearnPage() {
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold leading-snug">{lesson.title}</p>
-                        <p className="mt-1 text-xs leading-relaxed text-muted">
-                          {lesson.summary}
-                        </p>
+                        <p className="mt-1 text-xs leading-relaxed text-muted">{lesson.summary}</p>
                         <p className="mt-2 flex items-center gap-2 text-[11px] text-faint">
                           <Clock size={11} aria-hidden />
                           {lesson.minutes} min
@@ -313,8 +309,8 @@ export default function LearnPage() {
       </div>
 
       <p className="mt-10 text-center text-xs text-faint">
-        Environ {Math.round(CURRICULUM_STATS.minutes / 60)} heures de contenu au total.
-        Aucune leçon n’est verrouillée : va où tu veux, dans l’ordre que tu veux.
+        Environ {Math.round(CURRICULUM_STATS.minutes / 60)} heures de contenu au total. Aucune leçon
+        n’est verrouillée : va où tu veux, dans l’ordre que tu veux.
       </p>
 
       <AutresDeLaSection section="apprendre" />

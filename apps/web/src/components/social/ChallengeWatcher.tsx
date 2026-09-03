@@ -174,10 +174,7 @@ export function ChallengeWatcher() {
     // `top-[4.25rem]` : l'en-tête est collant et mesure 57 px — le bandeau se
     // pose juste dessous, jamais derrière. Et au-dessus de lui (`z-[95]` contre
     // `z-50`), sans quoi le menu mobile déplié le recouvrirait.
-    <div
-      className="fixed inset-x-0 top-[4.25rem] z-[95] flex justify-center px-4"
-      role="alert"
-    >
+    <div className="fixed inset-x-0 top-[4.25rem] z-[95] flex justify-center px-4" role="alert">
       <div className="animate-slide-down popover flex w-full max-w-md items-center gap-3 p-3 shadow-[var(--shadow-lg)]">
         <span
           className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent/15 text-accent"

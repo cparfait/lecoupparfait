@@ -145,28 +145,25 @@ export function Menu({
    * bouton** — sans ce retour, on se retrouve projeté en haut du document et il
    * faut retraverser toute la page à la tabulation pour revenir où l'on était.
    */
-  const surToucheDuPanneau = useCallback(
-    (evenement: React.KeyboardEvent<HTMLDivElement>) => {
-      if (evenement.key === 'Escape') {
-        setOuvert(false)
-        boutonRef.current?.focus()
-        return
-      }
-      if (evenement.key !== 'ArrowDown' && evenement.key !== 'ArrowUp') return
+  const surToucheDuPanneau = useCallback((evenement: React.KeyboardEvent<HTMLDivElement>) => {
+    if (evenement.key === 'Escape') {
+      setOuvert(false)
+      boutonRef.current?.focus()
+      return
+    }
+    if (evenement.key !== 'ArrowDown' && evenement.key !== 'ArrowUp') return
 
-      const cibles = Array.from(
-        evenement.currentTarget.querySelectorAll<HTMLElement>('a[href], button:not([disabled])'),
-      )
-      if (cibles.length === 0) return
-      evenement.preventDefault()
+    const cibles = Array.from(
+      evenement.currentTarget.querySelectorAll<HTMLElement>('a[href], button:not([disabled])'),
+    )
+    if (cibles.length === 0) return
+    evenement.preventDefault()
 
-      const courant = cibles.indexOf(document.activeElement as HTMLElement)
-      const pas = evenement.key === 'ArrowDown' ? 1 : -1
-      const suivant = (courant + pas + cibles.length) % cibles.length
-      cibles[suivant]?.focus()
-    },
-    [],
-  )
+    const courant = cibles.indexOf(document.activeElement as HTMLElement)
+    const pas = evenement.key === 'ArrowDown' ? 1 : -1
+    const suivant = (courant + pas + cibles.length) % cibles.length
+    cibles[suivant]?.focus()
+  }, [])
 
   return (
     <div ref={conteneur} className={clsx('relative', className)}>

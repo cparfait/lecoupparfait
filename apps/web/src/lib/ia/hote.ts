@@ -25,7 +25,10 @@
  * public peut parfaitement pointer vers une adresse privée.
  */
 export function estHoteLocal(hostname: string): boolean {
-  const hote = hostname.trim().toLowerCase().replace(/^\[|\]$/g, '')
+  const hote = hostname
+    .trim()
+    .toLowerCase()
+    .replace(/^\[|\]$/g, '')
 
   if (hote === 'localhost' || hote.endsWith('.localhost')) return true
   if (hote === '::1' || hote === '0.0.0.0' || hote === '::') return true
@@ -42,7 +45,10 @@ export function estHoteLocal(hostname: string): boolean {
  * obtenues par résolution DNS côté serveur.
  */
 export function estAdresseLocale(adresse: string): boolean {
-  const valeur = adresse.trim().toLowerCase().replace(/^\[|\]$/g, '')
+  const valeur = adresse
+    .trim()
+    .toLowerCase()
+    .replace(/^\[|\]$/g, '')
 
   // IPv6 : bouclage, lien-local (fe80::/10) et adresses uniques locales
   // (fc00::/7, c'est-à-dire les préfixes fc et fd).

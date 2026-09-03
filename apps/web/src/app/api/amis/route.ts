@@ -70,11 +70,7 @@ export async function POST(request: Request) {
     }
 
     case 'respond': {
-      const done = await respondToRequest(
-        me.userId,
-        String(body.id ?? ''),
-        body.accept === true,
-      )
+      const done = await respondToRequest(me.userId, String(body.id ?? ''), body.accept === true)
       if (!done) {
         return NextResponse.json({ error: 'Demande introuvable.' }, { status: 404 })
       }

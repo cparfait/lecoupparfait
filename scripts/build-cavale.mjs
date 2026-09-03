@@ -219,8 +219,7 @@ const THEMES = {
     // d'autres pour un modèle de diffusion, c'est un puits. Le premier tirage
     // est sorti d'un cavalier noir au museau jaune — exactement l'inverse de la
     // consigne, et la règle des 10 % appliquée à la mauvaise des deux teintes.
-    matiere:
-      '(pure vivid yellow #ffe600 lacquer:1.35), flat and saturated, hard glossy finish',
+    matiere: '(pure vivid yellow #ffe600 lacquer:1.35), flat and saturated, hard glossy finish',
     criniere: 'deep matte black',
     negatifSup: 'black body, dark body, yellow face, painted mask, cartoon face, smiling,',
     lumiere:
@@ -682,7 +681,10 @@ function graphe({
         denoise: 1,
       },
     },
-    decode: { class_type: 'VAEDecode', inputs: { samples: ['echantillon', 0], vae: ['modele', 2] } },
+    decode: {
+      class_type: 'VAEDecode',
+      inputs: { samples: ['echantillon', 0], vae: ['modele', 2] },
+    },
   }
 
   // Le miroir, et pourquoi il vient ici plutôt qu'à la fin.
@@ -700,7 +702,10 @@ function graphe({
   }
 
   if (!cutout) {
-    g.sortie = { class_type: 'SaveImage', inputs: { images: [image, 0], filename_prefix: 'cavale' } }
+    g.sortie = {
+      class_type: 'SaveImage',
+      inputs: { images: [image, 0], filename_prefix: 'cavale' },
+    }
     return g
   }
 
@@ -712,7 +717,10 @@ function graphe({
   // `cv2.erode`, et certaines installations de ComfyUI ont un OpenCV amputé —
   // typiquement quand `opencv-python` et `opencv-python-headless` cohabitent.
   // `main()` retombe alors sur le masque brut, très correct sur fond uni.
-  g.birefnet = { class_type: 'LayerMask: LoadBiRefNetModelV2', inputs: { version: 'BiRefNet-General' } }
+  g.birefnet = {
+    class_type: 'LayerMask: LoadBiRefNetModelV2',
+    inputs: { version: 'BiRefNet-General' },
+  }
   g.detourage = {
     class_type: 'LayerMask: BiRefNetUltraV2',
     inputs: {
@@ -976,7 +984,9 @@ async function main() {
   const options = lireOptions(process.argv.slice(2))
 
   if (!['tout', 'banniere', 'adversaires', 'logo'].includes(options.cible)) {
-    console.error(`Cible inconnue : ${options.cible}. Au choix : tout, banniere, adversaires, logo.`)
+    console.error(
+      `Cible inconnue : ${options.cible}. Au choix : tout, banniere, adversaires, logo.`,
+    )
     process.exit(1)
   }
   if (options.theme && !THEMES[options.theme]) {
@@ -990,7 +1000,9 @@ async function main() {
     process.exit(1)
   }
   if (options.qui && !ADVERSAIRES[options.qui]) {
-    console.error(`Adversaire inconnu : ${options.qui}. Au choix : ${Object.keys(ADVERSAIRES).join(', ')}.`)
+    console.error(
+      `Adversaire inconnu : ${options.qui}. Au choix : ${Object.keys(ADVERSAIRES).join(', ')}.`,
+    )
     process.exit(1)
   }
 
@@ -1000,7 +1012,7 @@ async function main() {
   } catch {
     console.error(
       `ComfyUI ne répond pas sur ${COMFY}.\n` +
-        "Lance-le, puis relance ce script. Si le port diffère, passe-le par COMFY_URL.",
+        'Lance-le, puis relance ce script. Si le port diffère, passe-le par COMFY_URL.',
     )
     process.exit(1)
   }

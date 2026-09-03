@@ -24,10 +24,7 @@ import { usePreferences } from '@/lib/store/preferences.ts'
 
 /** Ignore accents et casse : on cherche « echec » et on trouve « échec ». */
 function normalise(value: string): string {
-  return value
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+  return value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
 }
 
 /** Rend le gras `**mot**` des définitions. */
@@ -62,8 +59,7 @@ export default function GlossaryPage() {
     if (needle.length < 2) return entries
     return entries.filter(
       (entry) =>
-        normalise(entry.name).includes(needle) ||
-        normalise(entry.definition).includes(needle),
+        normalise(entry.name).includes(needle) || normalise(entry.definition).includes(needle),
     )
   }, [entries, query])
 
@@ -81,13 +77,11 @@ export default function GlossaryPage() {
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:py-14">
-      <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-        Glossaire
-      </h1>
+      <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">Glossaire</h1>
       <p className="mt-2 max-w-2xl text-muted">
-        {entries.length} termes définis en français clair — les règles, le matériel, les
-        phases de la partie, et les {motifGlossary(locale).length} motifs que le coach sait
-        reconnaître et nommer dans tes parties.
+        {entries.length} termes définis en français clair — les règles, le matériel, les phases de
+        la partie, et les {motifGlossary(locale).length} motifs que le coach sait reconnaître et
+        nommer dans tes parties.
       </p>
 
       {/* ── Recherche ────────────────────────────────────────────────── */}

@@ -305,9 +305,7 @@ function FriendsBook() {
             {incoming.map((request) => (
               <div key={request.id} className="flex items-center gap-2.5">
                 <Avatar friend={request.user} />
-                <span className="min-w-0 flex-1 truncate font-medium">
-                  {request.user.username}
-                </span>
+                <span className="min-w-0 flex-1 truncate font-medium">{request.user.username}</span>
                 <Button
                   size="sm"
                   variant="primary"
@@ -428,8 +426,8 @@ function FriendsBook() {
           </div>
         ) : friends.length === 0 ? (
           <p className="px-1 py-3 text-[13px] leading-relaxed text-faint">
-            Personne pour l’instant. Envoie le lien d’invitation à quelqu’un, ou cherche son
-            pseudo s’il est déjà inscrit.
+            Personne pour l’instant. Envoie le lien d’invitation à quelqu’un, ou cherche son pseudo
+            s’il est déjà inscrit.
           </p>
         ) : (
           <div className="space-y-1">
@@ -486,7 +484,8 @@ function FriendsBook() {
 
         {outgoing.length > 0 && (
           <p className="mt-3 border-t border-line/60 pt-2.5 text-[12px] text-faint">
-            Demandes d’ami en attente : {outgoing.map((request) => request.user.username).join(', ')}.
+            Demandes d’ami en attente :{' '}
+            {outgoing.map((request) => request.user.username).join(', ')}.
           </p>
         )}
       </Card>
@@ -566,7 +565,11 @@ function Countdown({ until }: { until: string }) {
   if (left <= 0) return <>expirée</>
   const minutes = Math.floor(left / 60_000)
   const seconds = Math.floor((left % 60_000) / 1000)
-  return <>expire dans {minutes}:{String(seconds).padStart(2, '0')}</>
+  return (
+    <>
+      expire dans {minutes}:{String(seconds).padStart(2, '0')}
+    </>
+  )
 }
 
 /** Pastille de présence collée à l'avatar : savoir qui est là évite d'attendre. */

@@ -55,9 +55,8 @@ export default function CarrierePage() {
           Douze chapitres, un chemin
         </h1>
         <p className="mt-2 max-w-prose text-sm text-muted">
-          De « savoir bouger les pièces » à « une partie entière sans filet ». Chaque
-          chapitre a une leçon, cinq puzzles et un adversaire choisi pour ce qu’il
-          t’oblige à travailler.
+          De « savoir bouger les pièces » à « une partie entière sans filet ». Chaque chapitre a une
+          leçon, cinq puzzles et un adversaire choisi pour ce qu’il t’oblige à travailler.
         </p>
       </header>
 
@@ -92,10 +91,9 @@ function SansCompte() {
       <Card className="mb-4 p-4">
         <p className="text-sm font-medium">La carrière garde ta place.</p>
         <p className="mt-1 text-[13px] leading-relaxed text-muted">
-          C’est la seule rubrique qui demande un compte, et pour une raison simple :
-          une progression sur douze chapitres n’a aucun sens si elle disparaît en
-          fermant l’onglet. Le compte est gratuit — un pseudo, un mot de passe, et
-          rien d’autre.
+          C’est la seule rubrique qui demande un compte, et pour une raison simple : une progression
+          sur douze chapitres n’a aucun sens si elle disparaît en fermant l’onglet. Le compte est
+          gratuit — un pseudo, un mot de passe, et rien d’autre.
         </p>
         {/*
           Un seul bouton, et c'est celui qui mène quelque part.
@@ -166,8 +164,8 @@ function Parcours({ progression }: { progression: Progression }) {
           <p className="text-4xl">👑</p>
           <p className="mt-2 font-display text-xl font-bold">Carrière terminée.</p>
           <p className="mt-1 text-sm text-muted">
-            Les douze chapitres sont derrière toi. La suite se joue contre des
-            humains — c’est là que les vraies surprises commencent.
+            Les douze chapitres sont derrière toi. La suite se joue contre des humains — c’est là
+            que les vraies surprises commencent.
           </p>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             <ButtonLink href="/jouer/ami" variant="primary" size="sm">
@@ -229,9 +227,7 @@ function Bandeau({
           {rang.rang.emoji}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate font-display text-lg font-bold leading-tight">
-            {rang.rang.nom}
-          </p>
+          <p className="truncate font-display text-lg font-bold leading-tight">{rang.rang.nom}</p>
           <p className="text-[11px] text-faint">
             {rang.suivant
               ? `${rang.acquis} / ${rang.requis} points avant ${rang.suivant.nom}`
@@ -324,8 +320,8 @@ function CoupDeMain({ chapitre, progression }: { chapitre: Chapitre; progression
       </p>
       <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
         L’adversaire passe à <strong className="font-semibold text-ink">{elo} Elo</strong> pour
-        cette tentative, le temps de reprendre pied. Revoir la leçon aide souvent plus
-        qu’une partie de plus : c’est là qu’est expliqué ce qui te coûte des points.
+        cette tentative, le temps de reprendre pied. Revoir la leçon aide souvent plus qu’une partie
+        de plus : c’est là qu’est expliqué ce qui te coûte des points.
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         <ButtonLink
@@ -335,7 +331,11 @@ function CoupDeMain({ chapitre, progression }: { chapitre: Chapitre; progression
         >
           Revoir la leçon
         </ButtonLink>
-        <ButtonLink href={`/jouer/ordinateur?carriere=${chapitre.numero}`} size="sm" variant="ghost">
+        <ButtonLink
+          href={`/jouer/ordinateur?carriere=${chapitre.numero}`}
+          size="sm"
+          variant="ghost"
+        >
           Rejouer quand même
         </ButtonLink>
       </div>
@@ -431,7 +431,10 @@ function LigneRepliee({
       ) : (
         <span className="shrink-0 text-sm" aria-label={`${etoiles} étoiles sur 3`}>
           {[1, 2, 3].map((rang) => (
-            <span key={rang} className={rang <= etoiles ? 'text-[var(--q-inaccuracy)]' : 'opacity-20'}>
+            <span
+              key={rang}
+              className={rang <= etoiles ? 'text-[var(--q-inaccuracy)]' : 'opacity-20'}
+            >
               ★
             </span>
           ))}

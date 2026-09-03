@@ -27,7 +27,19 @@ const HEADER = [0x01, 0x24] as const
 
 /** Table des pièces : l'indice est la valeur du quartet. */
 const PIECES: readonly (string | null)[] = [
-  null, 'q', 'k', 'b', 'p', 'n', 'R', 'P', 'r', 'B', 'N', 'Q', 'K',
+  null,
+  'q',
+  'k',
+  'b',
+  'p',
+  'n',
+  'R',
+  'P',
+  'r',
+  'B',
+  'N',
+  'Q',
+  'K',
 ]
 
 /**

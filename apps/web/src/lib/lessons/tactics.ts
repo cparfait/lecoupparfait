@@ -34,7 +34,7 @@ export const matesChapter: Chapter = {
         },
         {
           kind: 'play',
-          say: "Une tour qui arrive sur cette rangée fait mat immédiatement. Vas-y.",
+          say: 'Une tour qui arrive sur cette rangée fait mat immédiatement. Vas-y.',
           instruction: 'Trouve le mat en un coup',
           answers: ['Ra8#'],
           hint: 'La tour monte tout en haut de sa colonne.',
@@ -107,7 +107,7 @@ export const matesChapter: Chapter = {
         {
           kind: 'show',
           fen: '8/8/8/4k3/8/8/8/3QK3 w - - 0 1',
-          say: "Roi et dame contre roi seul. La méthode : on rétrécit la cage autour du roi adverse avec la dame, puis on amène son propre roi pour donner le coup final.",
+          say: 'Roi et dame contre roi seul. La méthode : on rétrécit la cage autour du roi adverse avec la dame, puis on amène son propre roi pour donner le coup final.',
         },
         {
           // Le texte disait « place ta dame » sur une étape où rien n'est
@@ -201,7 +201,7 @@ export const tacticsChapter: Chapter = {
         },
         {
           kind: 'show',
-          say: "Regarde : si le cavalier atteint la case c7, il attaque en même temps le roi en e8 et la tour en a8.",
+          say: 'Regarde : si le cavalier atteint la case c7, il attaque en même temps le roi en e8 et la tour en a8.',
           highlight: ['c7'],
           arrows: [
             { from: 'c7', to: 'e8', color: 'red' },
@@ -254,7 +254,7 @@ export const tacticsChapter: Chapter = {
         },
         {
           kind: 'play',
-          say: "Joue le fou en g5. Il vise le cavalier f6, et juste derrière ce cavalier se trouve la dame noire en d8.",
+          say: 'Joue le fou en g5. Il vise le cavalier f6, et juste derrière ce cavalier se trouve la dame noire en d8.',
           instruction: 'Joue le fou en g5',
           answers: ['Bg5'],
           hint: 'Le fou de c1 monte en diagonale : d2, e3, f4, g5.',
@@ -267,7 +267,7 @@ export const tacticsChapter: Chapter = {
         {
           kind: 'show',
           fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/2N5/PPPP1PPP/R1BQKBNR b KQkq - 0 2',
-          say: "Il existe deux sortes de clouages. Le clouage **relatif**, comme celui du cavalier devant la dame : la pièce peut légalement bouger, mais ça coûte cher.",
+          say: 'Il existe deux sortes de clouages. Le clouage **relatif**, comme celui du cavalier devant la dame : la pièce peut légalement bouger, mais ça coûte cher.',
         },
         {
           kind: 'show',
@@ -277,7 +277,7 @@ export const tacticsChapter: Chapter = {
         },
         {
           kind: 'show',
-          say: "Réflexe à acquérir : quand une pièce adverse est clouée, attaque-la une fois de plus. Elle ne peut pas fuir, elle finira par tomber.",
+          say: 'Réflexe à acquérir : quand une pièce adverse est clouée, attaque-la une fois de plus. Elle ne peut pas fuir, elle finira par tomber.',
         },
       ],
     },
@@ -297,7 +297,7 @@ export const tacticsChapter: Chapter = {
         {
           kind: 'show',
           fen: '3rk3/8/8/8/8/8/8/3RK3 w - - 0 1',
-          say: "Ici, roi noir en e8 et tour noire en d8, tous deux sur la même rangée. Une tour blanche qui arrive sur cette rangée donne échec au roi… et vise la tour derrière.",
+          say: 'Ici, roi noir en e8 et tour noire en d8, tous deux sur la même rangée. Une tour blanche qui arrive sur cette rangée donne échec au roi… et vise la tour derrière.',
         },
         {
           kind: 'show',
@@ -321,7 +321,7 @@ export const tacticsChapter: Chapter = {
         {
           kind: 'show',
           fen: '4k3/8/8/4N3/8/8/8/4RK2 w - - 0 1',
-          say: "Regarde cet alignement : la tour blanche en e1, le cavalier en e5, et le roi noir en e8. Tous les trois sur la colonne e.",
+          say: 'Regarde cet alignement : la tour blanche en e1, le cavalier en e5, et le roi noir en e8. Tous les trois sur la colonne e.',
           arrows: [{ from: 'e1', to: 'e8', color: 'blue' }],
         },
         {
@@ -330,7 +330,7 @@ export const tacticsChapter: Chapter = {
         },
         {
           kind: 'play',
-          say: "Fais partir le cavalier en c6 : il donne échec par découverte tout en attaquant depuis sa nouvelle case.",
+          say: 'Fais partir le cavalier en c6 : il donne échec par découverte tout en attaquant depuis sa nouvelle case.',
           instruction: 'Joue le cavalier en c6',
           answers: ['Nc6+', 'Nd7+', 'Nf7+', 'Ng6+', 'Nc4+', 'Nd3+', 'Nf3+', 'Ng4+'],
           hint: 'N’importe quel déplacement du cavalier libère la colonne. Choisis-en un.',
@@ -357,7 +357,7 @@ export const tacticsChapter: Chapter = {
         {
           kind: 'show',
           fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4',
-          say: "Le pion e5 est défendu par le cavalier c6. On ne peut donc pas simplement le prendre. Mais que se passe-t-il si ce cavalier disparaît ?",
+          say: 'Le pion e5 est défendu par le cavalier c6. On ne peut donc pas simplement le prendre. Mais que se passe-t-il si ce cavalier disparaît ?',
           highlight: ['e5', 'c6'],
           arrows: [{ from: 'c6', to: 'e5', color: 'green' }],
         },

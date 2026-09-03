@@ -33,14 +33,14 @@ export const openingChapter: Chapter = {
         },
         {
           kind: 'play',
-          say: "Premier principe : le centre. Avance un pion central de deux cases. Joue e4.",
+          say: 'Premier principe : le centre. Avance un pion central de deux cases. Joue e4.',
           instruction: 'Joue le pion en e4',
           answers: ['e4', 'd4'],
           hint: 'Le pion e2 avance de deux cases.',
         },
         {
           kind: 'show',
-          say: "Excellent. Ce pion contrôle d5 et f5, et il libère la diagonale de ton fou et celle de ta dame. Un seul coup, trois bénéfices.",
+          say: 'Excellent. Ce pion contrôle d5 et f5, et il libère la diagonale de ton fou et celle de ta dame. Un seul coup, trois bénéfices.',
           arrows: [
             { from: 'e4', to: 'd5', color: 'green' },
             { from: 'e4', to: 'f5', color: 'green' },
@@ -49,7 +49,7 @@ export const openingChapter: Chapter = {
         },
         {
           kind: 'play',
-          say: "Deuxième principe : le développement. Sors une pièce mineure vers le centre. Le cavalier en f3 est le coup le plus naturel — il attaque déjà le pion e5.",
+          say: 'Deuxième principe : le développement. Sors une pièce mineure vers le centre. Le cavalier en f3 est le coup le plus naturel — il attaque déjà le pion e5.',
           instruction: 'Joue le cavalier en f3',
           answers: ['Nf3'],
           hint: 'Le cavalier de g1 saute en f3.',
@@ -57,7 +57,7 @@ export const openingChapter: Chapter = {
         },
         {
           kind: 'play',
-          say: "Continue : sors ton fou. En c4 il vise f7, le point le plus faible du camp noir en début de partie.",
+          say: 'Continue : sors ton fou. En c4 il vise f7, le point le plus faible du camp noir en début de partie.',
           instruction: 'Joue le fou en c4',
           answers: ['Bc4', 'Bb5'],
           hint: 'Le fou de f1 sort en diagonale.',
@@ -65,7 +65,7 @@ export const openingChapter: Chapter = {
         },
         {
           kind: 'play',
-          say: "Troisième principe : la sécurité. Tes deux pièces du côté roi sont sorties, tu peux roquer. Fais-le maintenant.",
+          say: 'Troisième principe : la sécurité. Tes deux pièces du côté roi sont sorties, tu peux roquer. Fais-le maintenant.',
           instruction: 'Joue le petit roque',
           answers: ['O-O'],
           hint: 'Attrape le roi et pose-le en g1.',
@@ -92,31 +92,31 @@ export const openingChapter: Chapter = {
         {
           kind: 'show',
           fen: 'rnbqkbnr/pppp1ppp/8/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2',
-          say: "Les Blancs jouent la dame en h5. Elle menace le mat en f7 — mais les Noirs parent facilement, et ensuite ils vont la chasser en développant leurs pièces avec gain de temps.",
+          say: 'Les Blancs jouent la dame en h5. Elle menace le mat en f7 — mais les Noirs parent facilement, et ensuite ils vont la chasser en développant leurs pièces avec gain de temps.',
         },
         {
           kind: 'show',
           fen: 'r1bqkbnr/pppp1ppp/2n5/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR w KQkq - 2 3',
-          say: "Les Noirs sortent leur cavalier en défendant. Ils développent, les Blancs non. Chaque coup qui chasse la dame fait gagner un temps aux Noirs.",
+          say: 'Les Noirs sortent leur cavalier en défendant. Ils développent, les Blancs non. Chaque coup qui chasse la dame fait gagner un temps aux Noirs.',
         },
         {
           kind: 'show',
           fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2',
-          say: "Erreur numéro deux : bouger deux fois la même pièce en ouverture. Chaque coup devrait sortir une pièce **nouvelle**. Il y a huit pièces à développer et seulement une dizaine de coups pour le faire.",
+          say: 'Erreur numéro deux : bouger deux fois la même pièce en ouverture. Chaque coup devrait sortir une pièce **nouvelle**. Il y a huit pièces à développer et seulement une dizaine de coups pour le faire.',
         },
         {
           kind: 'show',
           fen: 'rnbqkbnr/pppppppp/8/8/8/P6P/1PPPPPP1/RNBQKBNR b KQkq - 0 2',
-          say: "Erreur numéro trois : les coups de pions inutiles sur les ailes. a3 et h3 ne développent rien, ne prennent pas le centre, et affaiblissent légèrement la position. Deux coups perdus.",
+          say: 'Erreur numéro trois : les coups de pions inutiles sur les ailes. a3 et h3 ne développent rien, ne prennent pas le centre, et affaiblissent légèrement la position. Deux coups perdus.',
         },
         {
           kind: 'show',
           fen: 'rnbqkbnr/ppp2ppp/3p4/4p3/4P3/8/PPPPKPPP/RNBQ1BNR b kq - 1 3',
-          say: "Erreur numéro quatre : bouger le roi. Non seulement il reste au centre, mais il perd définitivement le droit de roquer. La partie sera très inconfortable.",
+          say: 'Erreur numéro quatre : bouger le roi. Non seulement il reste au centre, mais il perd définitivement le droit de roquer. La partie sera très inconfortable.',
         },
         {
           kind: 'show',
-          say: "Retiens simplement : une pièce nouvelle à chaque coup, vers le centre, et le roque avant le dixième coup. Tu éviteras déjà quatre-vingts pour cent des mauvaises ouvertures.",
+          say: 'Retiens simplement : une pièce nouvelle à chaque coup, vers le centre, et le roque avant le dixième coup. Tu éviteras déjà quatre-vingts pour cent des mauvaises ouvertures.',
         },
       ],
     },
@@ -154,7 +154,7 @@ export const middlegameChapter: Chapter = {
         },
         {
           kind: 'show',
-          say: "Le principe se prolonge : deux tours doublées sur la même colonne ouverte sont presque irrésistibles. Et une tour qui atteint la septième rangée y dévore les pions.",
+          say: 'Le principe se prolonge : deux tours doublées sur la même colonne ouverte sont presque irrésistibles. Et une tour qui atteint la septième rangée y dévore les pions.',
         },
         {
           kind: 'show',
@@ -178,7 +178,7 @@ export const middlegameChapter: Chapter = {
         },
         {
           kind: 'show',
-          say: "Le cavalier en e5 est ici sur un avant-poste : aucun pion noir ne pourra jamais venir le chasser, parce que les pions d et f noirs sont déjà passés ou absents. Il restera là toute la partie.",
+          say: 'Le cavalier en e5 est ici sur un avant-poste : aucun pion noir ne pourra jamais venir le chasser, parce que les pions d et f noirs sont déjà passés ou absents. Il restera là toute la partie.',
           circles: [{ square: 'e5', color: 'green' }],
         },
         {
@@ -204,7 +204,7 @@ export const middlegameChapter: Chapter = {
         {
           kind: 'show',
           fen: 'r1bq1rk1/ppp2p1p/2n2np1/2bpp3/2B1P3/2NP1N2/PPP2PPP/R1BQ1RK1 w - - 0 1',
-          say: "Chaque pion qui avance devant le roi crée une faiblesse permanente. Ici g6 a affaibli les cases f6 et h6, et surtout la grande diagonale.",
+          say: 'Chaque pion qui avance devant le roi crée une faiblesse permanente. Ici g6 a affaibli les cases f6 et h6, et surtout la grande diagonale.',
           highlight: ['f6', 'h6'],
         },
         {
@@ -244,12 +244,12 @@ export const endgameChapter: Chapter = {
         {
           kind: 'show',
           fen: '8/8/8/3k4/8/8/8/4K3 w - - 0 1',
-          say: "En finale, le premier réflexe est toujours le même : centraliser son roi. Un roi au centre atteint les deux ailes ; un roi dans son coin arrive toujours trop tard.",
+          say: 'En finale, le premier réflexe est toujours le même : centraliser son roi. Un roi au centre atteint les deux ailes ; un roi dans son coin arrive toujours trop tard.',
           arrows: [{ from: 'e1', to: 'e4', color: 'green' }],
         },
         {
           kind: 'play',
-          say: "Avance ton roi vers le centre.",
+          say: 'Avance ton roi vers le centre.',
           instruction: 'Avance le roi',
           answers: ['Ke2', 'Kd2', 'Kf2', 'Kd1', 'Kf1'],
           hint: 'Le roi monte d’une case vers le centre.',
@@ -291,7 +291,7 @@ export const endgameChapter: Chapter = {
         },
         {
           kind: 'show',
-          say: "Retiens la formule : en finale de pions, le roi passe devant. Toujours.",
+          say: 'Retiens la formule : en finale de pions, le roi passe devant. Toujours.',
         },
       ],
     },
@@ -306,7 +306,7 @@ export const endgameChapter: Chapter = {
         {
           kind: 'show',
           fen: '8/8/8/8/7k/8/P7/K7 w - - 0 1',
-          say: "Ton pion en a2 veut aller à dame. Le roi noir en h4 est loin. Le rattrape-t-il ? Il existe une astuce pour répondre en une seconde, sans compter.",
+          say: 'Ton pion en a2 veut aller à dame. Le roi noir en h4 est loin. Le rattrape-t-il ? Il existe une astuce pour répondre en une seconde, sans compter.',
         },
         {
           kind: 'show',
@@ -323,7 +323,7 @@ export const endgameChapter: Chapter = {
         },
         {
           kind: 'show',
-          say: "Attention : le carré rétrécit à chaque poussée du pion, mais le pion qui part de sa deuxième rangée peut avancer de deux cases — le carré se compte alors depuis la troisième rangée.",
+          say: 'Attention : le carré rétrécit à chaque poussée du pion, mais le pion qui part de sa deuxième rangée peut avancer de deux cases — le carré se compte alors depuis la troisième rangée.',
         },
       ],
     },

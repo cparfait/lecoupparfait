@@ -88,9 +88,9 @@ export function PorteDuCompte({
         </ul>
 
         <p className="mt-4 rounded-[var(--radius-sm)] bg-surface-strong px-3 py-2 text-[12px] leading-relaxed text-muted">
-          Jouer, apprendre, résoudre des puzzles et analyser tes parties restent entièrement
-          libres, sans rien créer. Le compte est gratuit : un pseudo, un mot de passe, et
-          l’adresse est facultative.
+          Jouer, apprendre, résoudre des puzzles et analyser tes parties restent entièrement libres,
+          sans rien créer. Le compte est gratuit : un pseudo, un mot de passe, et l’adresse est
+          facultative.
         </p>
 
         <div className="mt-4 space-y-2">

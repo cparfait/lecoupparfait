@@ -32,17 +32,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import {
-  Check,
-  Copy,
-  Link2,
-  Loader2,
-  Mailbox,
-  Share2,
-  Swords,
-  UserPlus,
-  Users,
-} from 'lucide-react'
+import { Check, Copy, Link2, Loader2, Mailbox, Share2, Swords, UserPlus, Users } from 'lucide-react'
 import clsx from 'clsx'
 import { SPEED_LABELS, TIME_CONTROLS } from '@coupparfait/core'
 import { Button, Card, Chip, Input, SectionTitle, Spinner } from '@/components/ui/index.tsx'
@@ -330,9 +320,16 @@ export default function CreateFriendGamePage() {
             </SectionTitle>
             <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
               {TIME_CONTROLS.filter((tc) =>
-                ['180+0', '180+2', '300+0', '300+3', '600+0', '600+5', '900+10', '1800+20'].includes(
-                  tc.id,
-                ),
+                [
+                  '180+0',
+                  '180+2',
+                  '300+0',
+                  '300+3',
+                  '600+0',
+                  '600+5',
+                  '900+10',
+                  '1800+20',
+                ].includes(tc.id),
               ).map((tc) => (
                 <button
                   key={tc.id}
@@ -500,9 +497,7 @@ export default function CreateFriendGamePage() {
                         </span>
 
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-medium">
-                            {ami.username}
-                          </span>
+                          <span className="block truncate text-sm font-medium">{ami.username}</span>
                           <span className="block text-[11px] text-faint">
                             {ami.rating != null && `${ami.rating} · `}
                             {ami.online ? 'en ligne' : 'hors ligne'}
@@ -549,13 +544,11 @@ export default function CreateFriendGamePage() {
           <Card className={clsx('mt-4 p-4 sm:p-5', jours !== null && 'hidden')}>
             <SectionTitle>Ta couleur</SectionTitle>
             <div className="grid grid-cols-3 gap-1.5">
-              {(
-                [
-                  { valeur: 'random' as const, label: '🎲 Hasard' },
-                  { valeur: 'w' as const, label: '♔ Blancs' },
-                  { valeur: 'b' as const, label: '♚ Noirs' },
-                ]
-              ).map((choix) => (
+              {[
+                { valeur: 'random' as const, label: '🎲 Hasard' },
+                { valeur: 'w' as const, label: '♔ Blancs' },
+                { valeur: 'b' as const, label: '♚ Noirs' },
+              ].map((choix) => (
                 <button
                   key={choix.valeur}
                   type="button"
@@ -608,8 +601,8 @@ export default function CreateFriendGamePage() {
               <span>
                 <span className="block text-sm font-medium">Partie classée</span>
                 <span className="mt-0.5 block text-xs text-muted">
-                  Le classement des deux joueurs sera mis à jour. Nécessite que vous ayez tous
-                  les deux un compte.
+                  Le classement des deux joueurs sera mis à jour. Nécessite que vous ayez tous les
+                  deux un compte.
                 </span>
               </span>
             </label>
@@ -628,8 +621,8 @@ export default function CreateFriendGamePage() {
 
           <p className="mt-4 px-1 text-xs leading-relaxed text-muted">
             La catégorie se déduit de la durée qu’aurait une partie de quarante coups : moins de
-            trois minutes c’est du <strong className="font-semibold">bullet</strong>, moins de
-            huit du <strong className="font-semibold">blitz</strong>, moins de vingt-cinq du{' '}
+            trois minutes c’est du <strong className="font-semibold">bullet</strong>, moins de huit
+            du <strong className="font-semibold">blitz</strong>, moins de vingt-cinq du{' '}
             <strong className="font-semibold">rapide</strong>, au-delà du{' '}
             <strong className="font-semibold">classique</strong>. Chacune tient son propre
             classement : on peut voir clair en rapide et s’effondrer en blitz.
@@ -702,9 +695,7 @@ function RangeeAction({
             </span>
           )}
         </span>
-        <span className="mt-0.5 block text-[12px] leading-snug text-muted">
-          {raison ?? detail}
-        </span>
+        <span className="mt-0.5 block text-[12px] leading-snug text-muted">{raison ?? detail}</span>
       </span>
     </button>
   )
@@ -768,7 +759,10 @@ function PartiePrete({
 
         <div className="mt-5 flex flex-wrap justify-center gap-2">
           <Chip>
-            {SPEED_LABELS[TIME_CONTROLS.find((tc) => tc.id === timeControlId)?.category ?? 'rapid'].icon}{' '}
+            {
+              SPEED_LABELS[TIME_CONTROLS.find((tc) => tc.id === timeControlId)?.category ?? 'rapid']
+                .icon
+            }{' '}
             {TIME_CONTROLS.find((tc) => tc.id === timeControlId)?.label}
           </Chip>
           <Chip tone={rated ? 'accent' : 'neutral'}>{rated ? 'Classée' : 'Amicale'}</Chip>

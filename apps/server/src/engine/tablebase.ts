@@ -62,13 +62,10 @@ export async function probeTablebase(fen: string): Promise<PositionAnalysis | nu
     // Trois secondes : au-delà, le moteur aura répondu plus vite.
     const timeout = setTimeout(() => controller.abort(), 3000)
 
-    const response = await fetch(
-      `${BASE_URL}/standard?fen=${encodeURIComponent(fen)}`,
-      {
-        signal: controller.signal,
-        headers: { 'User-Agent': 'Le Coup Parfait (plateforme d’échecs libre)' },
-      },
-    )
+    const response = await fetch(`${BASE_URL}/standard?fen=${encodeURIComponent(fen)}`, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Le Coup Parfait (plateforme d’échecs libre)' },
+    })
     clearTimeout(timeout)
 
     if (!response.ok) {
@@ -179,10 +176,7 @@ function moveToScore(move: TablebaseMove, turn: 'w' | 'b'): Score {
 }
 
 /** Description lisible du verdict, pour l'affichage. */
-export function describeTablebaseCategory(
-  category: string,
-  locale: 'fr' | 'en' = 'fr',
-): string {
+export function describeTablebaseCategory(category: string, locale: 'fr' | 'en' = 'fr'): string {
   const table: Record<string, { fr: string; en: string }> = {
     win: { fr: 'Gain forcé', en: 'Forced win' },
     loss: { fr: 'Perte forcée', en: 'Forced loss' },

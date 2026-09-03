@@ -101,7 +101,6 @@ export default function ProfilePage() {
       .then((data) => setProfile(data))
       .catch(() => setProfile(null))
       .finally(() => setLoading(false))
-
   }, [params.username])
 
   // L'identité et l'état de son adresse voyagent dans la même réponse, et
@@ -445,9 +444,7 @@ export default function ProfilePage() {
                     {game.ratingDelta}
                   </span>
                 )}
-                <span className="shrink-0 text-[11px] text-faint">
-                  {formatDate(game.playedAt)}
-                </span>
+                <span className="shrink-0 text-[11px] text-faint">{formatDate(game.playedAt)}</span>
                 {/*
                   La porte de sortie de cette liste. Sans elle, l'historique ne
                   sert qu'à constater : on sait qu'on a perdu, jamais pourquoi.
@@ -519,7 +516,13 @@ function RatingChart({ history }: { history: Profile['history'] }) {
 
   return (
     <div>
-      <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-24 w-full" role="img" aria-label="Courbe de classement">
+      <svg
+        viewBox="0 0 100 30"
+        preserveAspectRatio="none"
+        className="h-24 w-full"
+        role="img"
+        aria-label="Courbe de classement"
+      >
         <path
           d={`M ${points} L 100,30 L 0,30 Z`}
           fill="color-mix(in oklab, var(--accent) 18%, transparent)"
@@ -545,8 +548,18 @@ function RatingChart({ history }: { history: Profile['history'] }) {
 function formatMonth(value: string): string {
   const [year, month] = value.split('-')
   const names = [
-    'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-    'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre',
+    'janvier',
+    'février',
+    'mars',
+    'avril',
+    'mai',
+    'juin',
+    'juillet',
+    'août',
+    'septembre',
+    'octobre',
+    'novembre',
+    'décembre',
   ]
   const index = Number(month) - 1
   return `${names[index] ?? ''} ${year}`

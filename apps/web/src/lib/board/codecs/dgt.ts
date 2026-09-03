@@ -41,7 +41,19 @@ export const DGT_MESSAGE = {
 
 /** Table des pièces DGT ; l'indice est le code renvoyé par la carte. */
 const PIECES: readonly (string | null)[] = [
-  null, 'P', 'R', 'N', 'B', 'K', 'Q', 'p', 'r', 'n', 'b', 'k', 'q',
+  null,
+  'P',
+  'R',
+  'N',
+  'B',
+  'K',
+  'Q',
+  'p',
+  'r',
+  'n',
+  'b',
+  'k',
+  'q',
 ]
 
 export interface DgtMessage {
@@ -132,5 +144,11 @@ export function encodeDgtBoardDump(occupancy: Occupancy): Uint8Array {
 export function encodeDgtFieldUpdate(square: string, piece: string | null): Uint8Array {
   const field = SQUARES.indexOf(square)
   const code = piece === null ? 0 : PIECES.indexOf(piece)
-  return Uint8Array.from([DGT_MESSAGE.fieldUpdate, 0, 5, field < 0 ? 0 : field, code < 0 ? 0 : code])
+  return Uint8Array.from([
+    DGT_MESSAGE.fieldUpdate,
+    0,
+    5,
+    field < 0 ? 0 : field,
+    code < 0 ? 0 : code,
+  ])
 }

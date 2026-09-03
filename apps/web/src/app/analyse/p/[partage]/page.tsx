@@ -30,11 +30,7 @@ interface AnalysePartagee {
   headers: Record<string, string>
 }
 
-export default function AnalysePartageePage({
-  params,
-}: {
-  params: Promise<{ partage: string }>
-}) {
+export default function AnalysePartageePage({ params }: { params: Promise<{ partage: string }> }) {
   const { partage } = use(params)
   const { locale } = usePreferencesDe('locale')
   const { book } = useOpeningBook()

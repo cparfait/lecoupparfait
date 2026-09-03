@@ -119,11 +119,7 @@ const instantaneCourrielServeur = () => undefined
  * l'afficher un instant de trop.
  */
 export function useCourrielDisponible(): boolean | undefined {
-  const valeur = useSyncExternalStore(
-    souscrire,
-    instantaneCourriel,
-    instantaneCourrielServeur,
-  )
+  const valeur = useSyncExternalStore(souscrire, instantaneCourriel, instantaneCourrielServeur)
   useEffect(() => {
     void rafraichirIdentite()
   }, [])
@@ -141,11 +137,7 @@ const instantaneAdresseServeur = () => undefined
  * même qu'il en a une — c'est la route qui s'en charge, pas cet appel.
  */
 export function useStatutCourriel(): StatutCourriel | null | undefined {
-  const valeur = useSyncExternalStore(
-    souscrire,
-    instantaneAdresse,
-    instantaneAdresseServeur,
-  )
+  const valeur = useSyncExternalStore(souscrire, instantaneAdresse, instantaneAdresseServeur)
   useEffect(() => {
     void rafraichirIdentite()
   }, [])

@@ -81,7 +81,11 @@ export function ArrowLegend({
       aria-label="Signification des flèches"
     >
       {items.map((item) => (
-        <li key={`${item.color}-${item.label}`} className="flex items-center gap-1.5" title={item.title}>
+        <li
+          key={`${item.color}-${item.label}`}
+          className="flex items-center gap-1.5"
+          title={item.title}
+        >
           {item.shape === 'dot' ? (
             <MiniDot colour={item.swatch ?? ANNOTATION_COLORS[item.color]} />
           ) : (
@@ -95,12 +99,24 @@ export function ArrowLegend({
 }
 
 /** Flèche miniature, dessinée comme celles de l'échiquier. */
-function MiniArrow({ color, weight }: { color: AnnotationColor; weight: 'thin' | 'normal' | 'bold' }) {
+function MiniArrow({
+  color,
+  weight,
+}: {
+  color: AnnotationColor
+  weight: 'thin' | 'normal' | 'bold'
+}) {
   const stroke = ANNOTATION_COLORS[color]
   const width = weight === 'bold' ? 3.4 : weight === 'normal' ? 2.4 : 1.6
 
   return (
-    <svg width="20" height="10" viewBox="0 0 20 10" aria-hidden className="shrink-0 overflow-visible">
+    <svg
+      width="20"
+      height="10"
+      viewBox="0 0 20 10"
+      aria-hidden
+      className="shrink-0 overflow-visible"
+    >
       <line
         x1="1"
         y1="5"

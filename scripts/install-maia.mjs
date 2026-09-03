@@ -108,7 +108,11 @@ async function installLc0Windows() {
   await rm(unpacked, { recursive: true, force: true })
   const result = spawnSync(
     'powershell',
-    ['-NoProfile', '-Command', `Expand-Archive -Path '${archive}' -DestinationPath '${unpacked}' -Force`],
+    [
+      '-NoProfile',
+      '-Command',
+      `Expand-Archive -Path '${archive}' -DestinationPath '${unpacked}' -Force`,
+    ],
     { stdio: 'inherit' },
   )
   if (result.status !== 0) throw new Error('Décompression impossible.')

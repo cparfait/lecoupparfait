@@ -49,7 +49,11 @@ test('l’espérance Elo suit la table de référence', () => {
 })
 
 test('l’espérance des deux camps fait toujours un', () => {
-  for (const [a, b] of [[1500, 1500], [2400, 1200], [1000, 1873]] as const) {
+  for (const [a, b] of [
+    [1500, 1500],
+    [2400, 1200],
+    [1000, 1873],
+  ] as const) {
     assert.ok(Math.abs(eloExpectedScore(a, b) + eloExpectedScore(b, a) - 1) < 1e-9)
   }
 })
@@ -96,10 +100,7 @@ test('l’exemple de l’article de Glickman est reproduit', () => {
     Math.abs(apres.rating - 1464.06) < 0.5,
     `classement attendu ≈ 1464,06, obtenu ${apres.rating.toFixed(2)}`,
   )
-  assert.ok(
-    Math.abs(apres.rd - 151.52) < 1,
-    `RD attendu ≈ 151,52, obtenu ${apres.rd.toFixed(2)}`,
-  )
+  assert.ok(Math.abs(apres.rd - 151.52) < 1, `RD attendu ≈ 151,52, obtenu ${apres.rd.toFixed(2)}`)
 })
 
 test('une période sans partie n’élève que l’incertitude', () => {

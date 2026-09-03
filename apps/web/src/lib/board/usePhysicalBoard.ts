@@ -16,12 +16,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Chess, PieceSymbol, Square } from 'chess.js'
-import {
-  detectFlip,
-  matchSnapshot,
-  occupancyFromFen,
-  type BoardMatch,
-} from './matcher.ts'
+import { detectFlip, matchSnapshot, occupancyFromFen, type BoardMatch } from './matcher.ts'
 import { rotateOccupancy, type BoardDriver, type Occupancy, type PhysicalBoard } from './types.ts'
 import { isUserCancellation } from './webapis.ts'
 
@@ -74,7 +69,9 @@ export function usePhysicalBoard(options: UsePhysicalBoardOptions): PhysicalBoar
   const [status, setStatus] = useState<BoardStatus>('idle')
   const [message, setMessage] = useState<string | null>(null)
   const [wrongSquares, setWrongSquares] = useState<string[]>([])
-  const [pendingPromotion, setPendingPromotion] = useState<{ from: string; to: string } | null>(null)
+  const [pendingPromotion, setPendingPromotion] = useState<{ from: string; to: string } | null>(
+    null,
+  )
   const [flipped, setFlipped] = useState(false)
 
   // Les événements de la carte arrivent hors du cycle de rendu : tout ce que
@@ -148,7 +145,7 @@ export function usePhysicalBoard(options: UsePhysicalBoardOptions): PhysicalBoar
         setWrongSquares(match.squares)
         setMessage(
           match.squares.length > 6
-            ? "Le plateau ne correspond pas à la partie. Remettez les pièces en place."
+            ? 'Le plateau ne correspond pas à la partie. Remettez les pièces en place.'
             : `À corriger sur le plateau : ${match.squares.join(', ')}.`,
         )
         showLights(match.squares)
@@ -279,6 +276,16 @@ export function usePhysicalBoard(options: UsePhysicalBoardOptions): PhysicalBoar
       disconnect,
       choosePromotion,
     }),
-    [board, status, message, wrongSquares, pendingPromotion, flipped, connect, disconnect, choosePromotion],
+    [
+      board,
+      status,
+      message,
+      wrongSquares,
+      pendingPromotion,
+      flipped,
+      connect,
+      disconnect,
+      choosePromotion,
+    ],
   )
 }

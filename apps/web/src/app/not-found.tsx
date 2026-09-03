@@ -26,8 +26,8 @@ export default function Introuvable() {
       <div>
         <h1 className="text-xl font-semibold">Cette page n’existe pas</h1>
         <p className="mt-2 text-sm text-muted">
-          L’adresse est peut-être ancienne, ou la partie, le profil ou l’étude
-          que tu cherches a été supprimé.
+          L’adresse est peut-être ancienne, ou la partie, le profil ou l’étude que tu cherches a été
+          supprimé.
         </p>
       </div>
 

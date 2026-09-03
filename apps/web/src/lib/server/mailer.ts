@@ -189,7 +189,9 @@ export async function readMailbox(): Promise<CapturedMail[]> {
     const mails = await Promise.all(
       files
         .filter((name) => name.endsWith('.json'))
-        .map(async (name) => JSON.parse(await readFile(join(MAILBOX, name), 'utf8')) as CapturedMail),
+        .map(
+          async (name) => JSON.parse(await readFile(join(MAILBOX, name), 'utf8')) as CapturedMail,
+        ),
     )
     return mails.sort((a, b) => b.sentAt.localeCompare(a.sentAt))
   } catch {

@@ -90,7 +90,11 @@ export function PlayerSearch({ className }: { className?: string }) {
           className="absolute right-2 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center rounded text-faint hover:text-ink"
           aria-label="Effacer"
         >
-          {searching ? <Loader2 size={13} className="animate-spin" aria-hidden /> : <X size={13} aria-hidden />}
+          {searching ? (
+            <Loader2 size={13} className="animate-spin" aria-hidden />
+          ) : (
+            <X size={13} aria-hidden />
+          )}
         </button>
       )}
 

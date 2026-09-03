@@ -40,8 +40,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
   outline:
     'border border-line-strong text-ink hover:bg-surface-hover hover:border-[color-mix(in_oklab,var(--accent)_45%,var(--border-strong))]',
   ghost: 'text-muted hover:text-ink hover:bg-surface-hover',
-  danger:
-    'bg-[var(--q-blunder)] text-white hover:brightness-110 active:brightness-95',
+  danger: 'bg-[var(--q-blunder)] text-white hover:brightness-110 active:brightness-95',
 }
 
 const SIZES: Record<ButtonSize, string> = {
@@ -59,7 +58,17 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'secondary', size = 'md', loading, icon, fullWidth, className, children, disabled, ...rest },
+  {
+    variant = 'secondary',
+    size = 'md',
+    loading,
+    icon,
+    fullWidth,
+    className,
+    children,
+    disabled,
+    ...rest
+  },
   ref,
 ) {
   return (
@@ -158,9 +167,7 @@ export function Card({
   glow?: boolean
   as?: 'div' | 'section' | 'article' | 'aside'
 }) {
-  return (
-    <Tag className={clsx('glass', glow && 'gradient-ring', className)}>{children}</Tag>
-  )
+  return <Tag className={clsx('glass', glow && 'gradient-ring', className)}>{children}</Tag>
 }
 
 export function SectionTitle({
@@ -211,10 +218,14 @@ export function Chip({
 }) {
   const tones = {
     neutral: 'bg-surface text-muted border-line',
-    accent: 'bg-[color-mix(in_oklab,var(--accent)_18%,transparent)] text-accent border-[color-mix(in_oklab,var(--accent)_35%,transparent)]',
-    success: 'bg-[color-mix(in_oklab,var(--q-best)_16%,transparent)] text-[var(--q-best)] border-[color-mix(in_oklab,var(--q-best)_32%,transparent)]',
-    warning: 'bg-[color-mix(in_oklab,var(--q-inaccuracy)_16%,transparent)] text-[var(--q-inaccuracy)] border-[color-mix(in_oklab,var(--q-inaccuracy)_32%,transparent)]',
-    danger: 'bg-[color-mix(in_oklab,var(--q-blunder)_16%,transparent)] text-[var(--q-blunder)] border-[color-mix(in_oklab,var(--q-blunder)_32%,transparent)]',
+    accent:
+      'bg-[color-mix(in_oklab,var(--accent)_18%,transparent)] text-accent border-[color-mix(in_oklab,var(--accent)_35%,transparent)]',
+    success:
+      'bg-[color-mix(in_oklab,var(--q-best)_16%,transparent)] text-[var(--q-best)] border-[color-mix(in_oklab,var(--q-best)_32%,transparent)]',
+    warning:
+      'bg-[color-mix(in_oklab,var(--q-inaccuracy)_16%,transparent)] text-[var(--q-inaccuracy)] border-[color-mix(in_oklab,var(--q-inaccuracy)_32%,transparent)]',
+    danger:
+      'bg-[color-mix(in_oklab,var(--q-blunder)_16%,transparent)] text-[var(--q-blunder)] border-[color-mix(in_oklab,var(--q-blunder)_32%,transparent)]',
   } as const
 
   const Tag = onClick ? 'button' : 'span'
@@ -241,43 +252,44 @@ export function Chip({
 //  Contrôles de formulaire
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { label?: string; hint?: string; error?: string }>(
-  function Input({ label, hint, error, className, id, ...rest }, ref) {
-    const inputId = id ?? rest.name
-    return (
-      <div className="w-full">
-        {label && (
-          <label htmlFor={inputId} className="mb-1.5 block text-sm font-medium">
-            {label}
-          </label>
+export const Input = forwardRef<
+  HTMLInputElement,
+  InputHTMLAttributes<HTMLInputElement> & { label?: string; hint?: string; error?: string }
+>(function Input({ label, hint, error, className, id, ...rest }, ref) {
+  const inputId = id ?? rest.name
+  return (
+    <div className="w-full">
+      {label && (
+        <label htmlFor={inputId} className="mb-1.5 block text-sm font-medium">
+          {label}
+        </label>
+      )}
+      <input
+        ref={ref}
+        id={inputId}
+        aria-invalid={!!error}
+        aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
+        className={clsx(
+          'h-11 w-full rounded-[var(--radius-sm)] border bg-surface px-3.5 text-sm',
+          'placeholder:text-faint transition-colors',
+          'focus:border-accent focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--accent)_35%,transparent)]',
+          error ? 'border-[var(--q-blunder)]' : 'border-line',
+          className,
         )}
-        <input
-          ref={ref}
-          id={inputId}
-          aria-invalid={!!error}
-          aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
-          className={clsx(
-            'h-11 w-full rounded-[var(--radius-sm)] border bg-surface px-3.5 text-sm',
-            'placeholder:text-faint transition-colors',
-            'focus:border-accent focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--accent)_35%,transparent)]',
-            error ? 'border-[var(--q-blunder)]' : 'border-line',
-            className,
-          )}
-          {...rest}
-        />
-        {error ? (
-          <p id={`${inputId}-error`} className="mt-1.5 text-xs text-[var(--q-blunder)]">
-            {error}
-          </p>
-        ) : hint ? (
-          <p id={`${inputId}-hint`} className="mt-1.5 text-xs text-faint">
-            {hint}
-          </p>
-        ) : null}
-      </div>
-    )
-  },
-)
+        {...rest}
+      />
+      {error ? (
+        <p id={`${inputId}-error`} className="mt-1.5 text-xs text-[var(--q-blunder)]">
+          {error}
+        </p>
+      ) : hint ? (
+        <p id={`${inputId}-hint`} className="mt-1.5 text-xs text-faint">
+          {hint}
+        </p>
+      ) : null}
+    </div>
+  )
+})
 
 export function Toggle({
   checked,
@@ -351,9 +363,7 @@ export function Slider({
     <div className="py-2">
       <div className="mb-1.5 flex items-baseline justify-between">
         <span className="text-sm font-medium">{label}</span>
-        <span className="text-xs tabular-nums text-muted">
-          {format ? format(value) : value}
-        </span>
+        <span className="text-xs tabular-nums text-muted">{format ? format(value) : value}</span>
       </div>
       <input
         type="range"
@@ -435,9 +445,7 @@ export function EmptyState({
       {icon && <div className="text-faint">{icon}</div>}
       <div>
         <p className="font-medium">{title}</p>
-        {description && (
-          <p className="mx-auto mt-1 max-w-sm text-sm text-muted">{description}</p>
-        )}
+        {description && <p className="mx-auto mt-1 max-w-sm text-sm text-muted">{description}</p>}
       </div>
       {action}
     </div>

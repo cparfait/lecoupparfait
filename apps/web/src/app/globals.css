@@ -21,13 +21,12 @@
 
 :root,
 [data-theme='aurora'] {
-
   /* ── Matière ──────────────────────────────────────────────────────────
      Ce qui sépare une surface d'un rectangle gris : un reflet en haut, un
      liseré interne, et un fond qui n'est pas parfaitement uni. */
   --sheen: rgb(255 255 255 / 0.06);
   --inner-edge: rgb(255 255 255 / 0.07);
-  --halo-1: rgb(124 92 255 / 0.10);
+  --halo-1: rgb(124 92 255 / 0.1);
   --halo-2: rgb(0 229 168 / 0.055);
   color-scheme: dark;
 
@@ -106,13 +105,12 @@
    ─────────────────────────────────────────────────────────────────────────── */
 
 [data-theme='club'] {
-
   /* ── Matière ──────────────────────────────────────────────────────────
      Ce qui sépare une surface d'un rectangle gris : un reflet en haut, un
      liseré interne, et un fond qui n'est pas parfaitement uni. */
   --sheen: rgb(255 246 224 / 0.055);
   --inner-edge: rgb(255 246 224 / 0.07);
-  --halo-1: rgb(201 162 39 / 0.10);
+  --halo-1: rgb(201 162 39 / 0.1);
   --halo-2: rgb(127 168 124 / 0.05);
   color-scheme: dark;
 
@@ -178,7 +176,6 @@
    ─────────────────────────────────────────────────────────────────────────── */
 
 [data-theme='clair'] {
-
   /* ── Matière ──────────────────────────────────────────────────────────
      Ce qui sépare une surface d'un rectangle gris : un reflet en haut, un
      liseré interne, et un fond qui n'est pas parfaitement uni. */
@@ -253,12 +250,11 @@
    ─────────────────────────────────────────────────────────────────────────── */
 
 [data-theme='contraste'] {
-
   /* ── Matière ──────────────────────────────────────────────────────────
      Ce qui sépare une surface d'un rectangle gris : un reflet en haut, un
      liseré interne, et un fond qui n'est pas parfaitement uni. */
   --sheen: rgb(255 255 255 / 0.05);
-  --inner-edge: rgb(255 255 255 / 0.10);
+  --inner-edge: rgb(255 255 255 / 0.1);
   --halo-1: rgb(255 230 0 / 0.05);
   --halo-2: rgb(255 255 255 / 0.03);
   color-scheme: dark;
@@ -481,7 +477,10 @@ body {
   overscroll-behavior-y: none;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: var(--font-display);
   letter-spacing: -0.02em;
   font-weight: 600;
@@ -504,8 +503,13 @@ h1, h2, h3, h4 {
   scrollbar-width: thin;
   scrollbar-color: var(--border-strong) transparent;
 }
-*::-webkit-scrollbar { width: 9px; height: 9px; }
-*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
 *::-webkit-scrollbar-thumb {
   background: var(--border-strong);
   border-radius: 99px;
@@ -527,8 +531,7 @@ h1, h2, h3, h4 {
   background:
     radial-gradient(80ch 60ch at 15% -10%, var(--aurora-1), transparent 65%),
     radial-gradient(70ch 55ch at 90% 5%, var(--aurora-2), transparent 60%),
-    radial-gradient(60ch 60ch at 50% 105%, var(--aurora-3), transparent 60%),
-    var(--bg);
+    radial-gradient(60ch 60ch at 50% 105%, var(--aurora-3), transparent 60%), var(--bg);
 }
 
 /* Grain de film : casse les dégradés en bandes et donne de la matière. */
@@ -563,9 +566,7 @@ h1, h2, h3, h4 {
    * Les teintes viennent des jetons de thème : le thème clair pose du blanc
    * franc là où les thèmes sombres posent un voile à 6 %.
    */
-  background:
-    linear-gradient(180deg, var(--sheen), transparent 46%),
-    var(--surface);
+  background: linear-gradient(180deg, var(--sheen), transparent 46%), var(--surface);
   backdrop-filter: blur(var(--blur)) saturate(150%);
   -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
   border: 1px solid var(--border);
@@ -692,36 +693,74 @@ button.gradient-ring:hover::before {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-9px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
 }
 
 @keyframes shimmer {
-  from { background-position: -200% 0; }
-  to { background-position: 200% 0; }
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
 }
 
 @keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 55%, transparent); }
-  70% { box-shadow: 0 0 0 14px transparent; }
-  100% { box-shadow: 0 0 0 0 transparent; }
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 55%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 14px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
 }
 
 @keyframes piece-drop {
-  0% { transform: scale(1.22); filter: brightness(1.3); }
-  60% { transform: scale(0.97); }
-  100% { transform: scale(1); filter: brightness(1); }
+  0% {
+    transform: scale(1.22);
+    filter: brightness(1.3);
+  }
+  60% {
+    transform: scale(0.97);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
 }
 
 @keyframes square-flash {
-  0% { opacity: 0; transform: scale(0.7); }
-  35% { opacity: 1; transform: scale(1.05); }
-  100% { opacity: 0; transform: scale(1.35); }
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Hauteur de la barre supérieure, bordure comprise : ce que retranche
@@ -734,13 +773,25 @@ button.gradient-ring:hover::before {
    `slide-up` remonte de 14 px : appliqué à un bandeau collé sous l'en-tête, il
    le faisait sortir de dessous la barre au lieu d'y entrer. */
 @keyframes slide-down {
-  from { opacity: 0; transform: translateY(-14px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.animate-slide-up { animation: slide-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.animate-slide-down { animation: slide-down 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.animate-piece-drop { animation: piece-drop 0.24s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.animate-slide-up {
+  animation: slide-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-slide-down {
+  animation: slide-down 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-piece-drop {
+  animation: piece-drop 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 
 /* Échec et mat.
    La partie s'arrête sur ce coup-là, et jusqu'ici rien ne le distinguait d'un
@@ -748,23 +799,47 @@ button.gradient-ring:hover::before {
    du roi maté et se dissipent — assez pour qu'on comprenne que c'est fini,
    assez bref pour ne pas cacher la position qu'on veut justement regarder. */
 @keyframes mate-ring {
-  0%   { transform: scale(0.35); opacity: 0; }
-  25%  { opacity: 0.85; }
-  100% { transform: scale(2.6); opacity: 0; }
+  0% {
+    transform: scale(0.35);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
 }
 
 @keyframes mate-glow {
-  0%   { opacity: 0; }
-  20%  { opacity: 1; }
-  100% { opacity: 0.55; }
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.55;
+  }
 }
 
-.animate-mate-ring { animation: mate-ring 1.5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards; }
-.animate-mate-glow { animation: mate-glow 0.8s ease-out forwards; }
+.animate-mate-ring {
+  animation: mate-ring 1.5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+.animate-mate-glow {
+  animation: mate-glow 0.8s ease-out forwards;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-mate-ring { animation: none; opacity: 0; }
-  .animate-mate-glow { animation: none; opacity: 0.7; }
+  .animate-mate-ring {
+    animation: none;
+    opacity: 0;
+  }
+  .animate-mate-glow {
+    animation: none;
+    opacity: 0.7;
+  }
 }
 
 /* Sillage du coup qui vient d'être joué.
@@ -772,10 +847,21 @@ button.gradient-ring:hover::before {
    vient, ce que deux cases colorées seules ne racontent pas. Il se dessine de
    la case de départ vers celle d'arrivée grâce au tracé pointillé animé. */
 @keyframes move-trail {
-  0%   { opacity: 0;    stroke-dashoffset: var(--trail-length); }
-  18%  { opacity: 0.55; }
-  55%  { opacity: 0.45; stroke-dashoffset: 0; }
-  100% { opacity: 0;    stroke-dashoffset: 0; }
+  0% {
+    opacity: 0;
+    stroke-dashoffset: var(--trail-length);
+  }
+  18% {
+    opacity: 0.55;
+  }
+  55% {
+    opacity: 0.45;
+    stroke-dashoffset: 0;
+  }
+  100% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+  }
 }
 
 .animate-move-trail {
@@ -784,7 +870,10 @@ button.gradient-ring:hover::before {
 
 /* Les personnes qui demandent moins d'animations n'ont pas à subir celle-ci. */
 @media (prefers-reduced-motion: reduce) {
-  .animate-move-trail { animation: none; opacity: 0; }
+  .animate-move-trail {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -800,7 +889,9 @@ button.gradient-ring:hover::before {
   background: var(--bg-elev);
 }
 
-[data-effects='low'] .gradient-ring::before { display: none; }
+[data-effects='low'] .gradient-ring::before {
+  display: none;
+}
 
 [data-effects='low'] * {
   box-shadow: none !important;
@@ -999,12 +1090,18 @@ button.gradient-ring:hover::before {
 }
 
 /* Zone sûre des téléphones à encoche. */
-.safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
-.safe-top { padding-top: max(env(safe-area-inset-top), 0.5rem); }
+.safe-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+}
+.safe-top {
+  padding-top: max(env(safe-area-inset-top), 0.5rem);
+}
 
 /* En mode application installée, on masque tout ce qui rappelle un navigateur. */
 @media (display-mode: standalone) {
-  .browser-only { display: none; }
+  .browser-only {
+    display: none;
+  }
 }
 
 /* Une cible de toucher de quarante-quatre points sans changer la mise en
@@ -1070,8 +1167,12 @@ select option:hover {
 
 /* Le chemin se trace de haut en bas au chargement de la carte. */
 @keyframes carriere-trace {
-  from { stroke-dashoffset: var(--trace-length); }
-  to   { stroke-dashoffset: 0; }
+  from {
+    stroke-dashoffset: var(--trace-length);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 .animate-carriere-trace {
@@ -1080,8 +1181,13 @@ select option:hover {
 
 /* L'étape en cours respire, pour que l'œil la trouve sans la chercher. */
 @keyframes carriere-halo {
-  0%, 100% { box-shadow: 0 0 0 0 var(--halo); }
-  50%      { box-shadow: 0 0 0 12px transparent; }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--halo);
+  }
+  50% {
+    box-shadow: 0 0 0 12px transparent;
+  }
 }
 
 .animate-carriere-halo {
@@ -1090,9 +1196,18 @@ select option:hover {
 
 /* Une étoile décrochée arrive en dépassant sa taille, puis se pose. */
 @keyframes carriere-etoile {
-  0%   { transform: scale(0) rotate(-140deg); opacity: 0; }
-  60%  { transform: scale(1.45) rotate(12deg); opacity: 1; }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  0% {
+    transform: scale(0) rotate(-140deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.45) rotate(12deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
 }
 
 .animate-carriere-etoile {
@@ -1101,8 +1216,14 @@ select option:hover {
 
 /* Le déverrouillage d'un chapitre : un anneau qui s'écarte et s'efface. */
 @keyframes carriere-onde {
-  from { transform: scale(0.6); opacity: 0.75; }
-  to   { transform: scale(2.6); opacity: 0; }
+  from {
+    transform: scale(0.6);
+    opacity: 0.75;
+  }
+  to {
+    transform: scale(2.6);
+    opacity: 0;
+  }
 }
 
 .animate-carriere-onde {
@@ -1113,8 +1234,14 @@ select option:hover {
    variables pour que chaque pièce tombe différemment sans multiplier les
    règles CSS. */
 @keyframes carriere-confetti {
-  0%   { transform: translate3d(0, -8vh, 0) rotate(0deg); opacity: 1; }
-  100% { transform: translate3d(var(--derive), 105vh, 0) rotate(var(--tour)); opacity: 0; }
+  0% {
+    transform: translate3d(0, -8vh, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--derive), 105vh, 0) rotate(var(--tour));
+    opacity: 0;
+  }
 }
 
 .animate-carriere-confetti {
@@ -1123,9 +1250,18 @@ select option:hover {
 
 /* Le bandeau de récompense entre en glissant et en grossissant légèrement. */
 @keyframes carriere-tampon {
-  0%   { transform: scale(0.82) translateY(14px); opacity: 0; }
-  55%  { transform: scale(1.04) translateY(0); opacity: 1; }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
+  0% {
+    transform: scale(0.82) translateY(14px);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.04) translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
 }
 
 .animate-carriere-tampon {
@@ -1157,9 +1293,15 @@ select option:hover {
   .animate-carriere-tampon {
     animation: none;
   }
-  .animate-carriere-trace { stroke-dashoffset: 0; }
-  .animate-carriere-confetti { display: none; }
-  .carriere-jauge { transition: none; }
+  .animate-carriere-trace {
+    stroke-dashoffset: 0;
+  }
+  .animate-carriere-confetti {
+    display: none;
+  }
+  .carriere-jauge {
+    transition: none;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

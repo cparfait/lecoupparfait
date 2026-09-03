@@ -43,13 +43,17 @@ export default function Erreur({
       <div>
         <h1 className="text-xl font-semibold">Quelque chose s’est mal passé</h1>
         <p className="mt-2 text-sm text-muted">
-          L’écran n’a pas pu s’afficher. Ce n’est pas de ta faute, et ce n’est
-          probablement pas définitif : réessayer suffit le plus souvent.
+          L’écran n’a pas pu s’afficher. Ce n’est pas de ta faute, et ce n’est probablement pas
+          définitif : réessayer suffit le plus souvent.
         </p>
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-2">
-        <Button variant="primary" icon={<RotateCcw size={15} aria-hidden />} onClick={() => retry()}>
+        <Button
+          variant="primary"
+          icon={<RotateCcw size={15} aria-hidden />}
+          onClick={() => retry()}
+        >
           Réessayer
         </Button>
         <ButtonLink href="/">Retour à l’accueil</ButtonLink>

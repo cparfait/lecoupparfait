@@ -208,7 +208,12 @@ process.stdout.write('\r' + ' '.repeat(80) + '\r')
  * données elles-mêmes. Le fichier est relu une fois au chargement, la forme
  * n'a pas besoin d'être agréable à l'œil.
  */
-const sortie = { format: 'coupparfait-opening-stats-v1', source: 'database.lichess.org (CC0)', plies: MAX_PLIES, bands: [] }
+const sortie = {
+  format: 'coupparfait-opening-stats-v1',
+  source: 'database.lichess.org (CC0)',
+  plies: MAX_PLIES,
+  bands: [],
+}
 
 for (const band of BANDS) {
   const table = stats.get(band.id)
@@ -230,7 +235,9 @@ for (const band of BANDS) {
   }
 
   sortie.bands.push({ id: band.id, label: band.label, positions: rows })
-  console.log(`  ${band.label.padEnd(18)} ${rows.length.toLocaleString('fr-FR').padStart(8)} positions`)
+  console.log(
+    `  ${band.label.padEnd(18)} ${rows.length.toLocaleString('fr-FR').padStart(8)} positions`,
+  )
 }
 
 const cible = join(root, 'apps', 'web', 'public', 'data')
@@ -239,6 +246,8 @@ const json = JSON.stringify(sortie)
 writeFileSync(join(cible, 'opening-stats.json'), json)
 
 console.log('')
-console.log(`✓ ${lus.toLocaleString('fr-FR')} parties lues, ${retenus.toLocaleString('fr-FR')} retenues`)
+console.log(
+  `✓ ${lus.toLocaleString('fr-FR')} parties lues, ${retenus.toLocaleString('fr-FR')} retenues`,
+)
 console.log(`  profondeur ${MAX_PLIES} demi-coups · minimum ${MIN_GAMES} parties par position`)
 console.log(`  → apps/web/public/data/opening-stats.json (${Math.round(json.length / 1024)} Ko)`)

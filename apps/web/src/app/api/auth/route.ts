@@ -107,7 +107,11 @@ export async function POST(request: Request) {
         { status: 400 },
       )
     }
-    return NextResponse.json({ ok: true, username: result.username, alreadyDone: result.alreadyDone })
+    return NextResponse.json({
+      ok: true,
+      username: result.username,
+      alreadyDone: result.alreadyDone,
+    })
   }
 
   // Demande de réinitialisation. La réponse est **toujours la même**, que
@@ -207,10 +211,7 @@ export async function POST(request: Request) {
   const password = String(body.password ?? '')
 
   if (!username || !password) {
-    return NextResponse.json(
-      { error: 'Pseudo et mot de passe sont requis.' },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: 'Pseudo et mot de passe sont requis.' }, { status: 400 })
   }
 
   // La clé de limitation mêle l'adresse et le pseudo : bloquer sur la seule
@@ -301,8 +302,7 @@ export async function POST(request: Request) {
     console.error('[auth]', error)
     return NextResponse.json(
       {
-        error:
-          'Le service de comptes est indisponible. Tu peux continuer à jouer sans compte.',
+        error: 'Le service de comptes est indisponible. Tu peux continuer à jouer sans compte.',
       },
       { status: 503 },
     )

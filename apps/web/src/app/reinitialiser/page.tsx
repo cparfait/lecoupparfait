@@ -99,7 +99,9 @@ function ResetForm() {
             <KeyRound size={22} />
           </span>
           <h1 className="font-display text-2xl font-bold tracking-tight">Nouveau mot de passe</h1>
-          <p className="mt-1.5 text-sm text-muted">Huit caractères au minimum. C’est la seule règle.</p>
+          <p className="mt-1.5 text-sm text-muted">
+            Huit caractères au minimum. C’est la seule règle.
+          </p>
         </div>
 
         <Card glow className="p-6">
@@ -136,8 +138,8 @@ function ResetForm() {
 
             <p className="flex items-start gap-1.5 text-xs leading-relaxed text-faint">
               <ShieldCheck size={13} className="mt-0.5 shrink-0" aria-hidden />
-              Toutes les sessions ouvertes seront fermées, y compris sur les autres appareils.
-              Tu devras te reconnecter partout.
+              Toutes les sessions ouvertes seront fermées, y compris sur les autres appareils. Tu
+              devras te reconnecter partout.
             </p>
 
             <Button type="submit" variant="primary" fullWidth disabled={busy}>

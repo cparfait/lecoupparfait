@@ -100,8 +100,8 @@ export function DefiDuJour({ className }: { className?: string }) {
         </>
       ) : (
         <p className="py-2 text-sm text-muted">
-          Le défi du jour n’est pas disponible — la base de puzzles n’est peut-être pas
-          encore importée.
+          Le défi du jour n’est pas disponible — la base de puzzles n’est peut-être pas encore
+          importée.
         </p>
       )}
 
@@ -146,9 +146,7 @@ export function DefiDuJour({ className }: { className?: string }) {
                   aria-hidden
                   className={clsx(
                     'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
-                    faite
-                      ? 'border-[var(--q-best)] bg-[var(--q-best)] text-white'
-                      : 'border-line',
+                    faite ? 'border-[var(--q-best)] bg-[var(--q-best)] text-white' : 'border-line',
                   )}
                 >
                   {faite && <Check size={11} />}

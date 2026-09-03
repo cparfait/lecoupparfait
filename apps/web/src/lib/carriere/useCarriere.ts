@@ -136,8 +136,7 @@ export async function recommencerCarriere(): Promise<boolean> {
  */
 export function chapitreDeLUrl(recherche: string | URLSearchParams | null): number | null {
   if (!recherche) return null
-  const params =
-    typeof recherche === 'string' ? new URLSearchParams(recherche) : recherche
+  const params = typeof recherche === 'string' ? new URLSearchParams(recherche) : recherche
   const brut = params.get('carriere')
   if (!brut) return null
   const numero = Number(brut)

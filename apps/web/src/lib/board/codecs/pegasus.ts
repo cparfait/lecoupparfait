@@ -188,5 +188,11 @@ export function encodePegasusBoardDump(occupancy: Occupancy): Uint8Array {
 /** Encode une pièce levée ou posée — pour le simulateur et les tests. */
 export function encodePegasusFieldUpdate(square: string, present: boolean): Uint8Array {
   const field = SQUARES.indexOf(square)
-  return Uint8Array.from([PEGASUS_MESSAGE.fieldUpdate, 0, 5, field < 0 ? 0 : field, present ? 1 : 0])
+  return Uint8Array.from([
+    PEGASUS_MESSAGE.fieldUpdate,
+    0,
+    5,
+    field < 0 ? 0 : field,
+    present ? 1 : 0,
+  ])
 }

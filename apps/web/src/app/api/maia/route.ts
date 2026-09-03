@@ -164,9 +164,6 @@ export async function POST(request: Request) {
     }
     return NextResponse.json({ ...data, source: 'maia' })
   } catch {
-    return NextResponse.json(
-      { error: 'Le serveur de jeu est injoignable.' },
-      { status: 503 },
-    )
+    return NextResponse.json({ error: 'Le serveur de jeu est injoignable.' }, { status: 503 })
   }
 }

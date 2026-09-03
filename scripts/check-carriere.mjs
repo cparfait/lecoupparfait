@@ -66,13 +66,20 @@ const lecons = new Set(ALL_LESSONS.map((l) => l.id))
 console.log('\n♟  Chapitres\n')
 
 check('douze chapitres', CHAPITRES.length === 12, `${CHAPITRES.length} trouvés`)
-check('numérotation continue de 1 à 12', CHAPITRES.every((c, i) => c.numero === i + 1))
+check(
+  'numérotation continue de 1 à 12',
+  CHAPITRES.every((c, i) => c.numero === i + 1),
+)
 check('carrière terminée = 13', CARRIERE_TERMINEE === 13)
 
 for (const c of CHAPITRES) {
   const prefixe = `chapitre ${String(c.numero).padStart(2)} · ${c.titre}`
   check(`${prefixe} — leçon « ${c.lecon} »`, lecons.has(c.lecon), 'aucune leçon de cet identifiant')
-  check(`${prefixe} — thème « ${c.theme} »`, THEMES.has(c.theme), 'thème inconnu de l’écran des puzzles')
+  check(
+    `${prefixe} — thème « ${c.theme} »`,
+    THEMES.has(c.theme),
+    'thème inconnu de l’écran des puzzles',
+  )
   check(`${prefixe} — niveau ${c.niveau}`, c.niveau >= 1 && c.niveau <= BOT_LEVELS.length)
   check(`${prefixe} — adversaire`, Boolean(BOT_PERSONALITIES[c.adversaire]), c.adversaire)
   check(`${prefixe} — objectif rédigé`, c.objectif.length > 20 && c.objectif.endsWith('.'))
@@ -112,7 +119,12 @@ check(
 // c'est l'échelle entière qui l'est.
 const xpParfaite = CHAPITRES.reduce(
   (somme, c) =>
-    somme + XP.lecon + XP.puzzle * c.puzzles + XP.victoire * c.victoires + XP.chapitre + XP.etoile * 3,
+    somme +
+    XP.lecon +
+    XP.puzzle * c.puzzles +
+    XP.victoire * c.victoires +
+    XP.chapitre +
+    XP.etoile * 3,
   0,
 )
 const xpMinimale = xpParfaite - CHAPITRES.length * XP.etoile * 2
@@ -141,10 +153,7 @@ check('deux défaites : une étoile', etoilesPour({ aides: 0, defaites: 2 }) ===
 check('jamais zéro étoile', etoilesPour({ aides: 99, defaites: 99 }) >= 1)
 
 check('onze hauts faits', HAUTS_FAITS.length === 11)
-check(
-  'identifiants uniques',
-  new Set(HAUTS_FAITS.map((h) => h.id)).size === HAUTS_FAITS.length,
-)
+check('identifiants uniques', new Set(HAUTS_FAITS.map((h) => h.id)).size === HAUTS_FAITS.length)
 check(
   'chaque haut fait annonce sa condition',
   HAUTS_FAITS.every((h) => h.condition.length > 10),
@@ -167,7 +176,10 @@ check('puis le duel', prochaineEtape(premier, apresPuzzles)?.cle === 'duel')
 
 const fini = { ...apresPuzzles, winsInChapter: premier.victoires }
 check('puis plus rien à faire', prochaineEtape(premier, fini) === null)
-check('les trois étapes sont alors terminées', etapesDe(premier, fini).every((e) => e.termine))
+check(
+  'les trois étapes sont alors terminées',
+  etapesDe(premier, fini).every((e) => e.termine),
+)
 
 console.log(
   failures === 0

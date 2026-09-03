@@ -108,10 +108,7 @@ export function classifyMove(input: ClassifyInput): Classification {
   // Marge du « coup unique » : de combien la meilleure ligne devance la suivante.
   const onlyMoveMargin =
     topLine && secondLine
-      ? Math.max(
-          0,
-          winPercentFor(topLine.score, mover) - winPercentFor(secondLine.score, mover),
-        )
+      ? Math.max(0, winPercentFor(topLine.score, mover) - winPercentFor(secondLine.score, mover))
       : 0
 
   // Matériel abandonné : ce que l'adversaire peut rafler après le coup.
@@ -182,11 +179,9 @@ function decideQuality(input: QualityInput): MoveQuality {
   const hadMate = input.scoreBefore.type === 'mate'
   const stillMate = input.scoreAfter.type === 'mate'
   const mateWasOurs =
-    hadMate &&
-    (input.mover === 'w' ? input.scoreBefore.value > 0 : input.scoreBefore.value < 0)
+    hadMate && (input.mover === 'w' ? input.scoreBefore.value > 0 : input.scoreBefore.value < 0)
   const mateStillOurs =
-    stillMate &&
-    (input.mover === 'w' ? input.scoreAfter.value > 0 : input.scoreAfter.value < 0)
+    stillMate && (input.mover === 'w' ? input.scoreAfter.value > 0 : input.scoreAfter.value < 0)
   if (mateWasOurs && !mateStillOurs) return 'miss'
 
   // Gain décisif laissé filer : on était gagnant, on ne l'est plus du tout.
@@ -266,7 +261,7 @@ export const QUALITY_STYLES: Record<MoveQuality, QualityStyle> = {
     nag: '!!',
     label: { fr: 'Brillant', en: 'Brilliant' },
     description: {
-      fr: "Un sacrifice sain : du matériel donné, et la position le rend au centuple.",
+      fr: 'Un sacrifice sain : du matériel donné, et la position le rend au centuple.',
       en: 'A sound sacrifice: material given up, and the position pays it back.',
     },
   },
@@ -286,7 +281,7 @@ export const QUALITY_STYLES: Record<MoveQuality, QualityStyle> = {
     nag: '',
     label: { fr: 'Meilleur coup', en: 'Best move' },
     description: {
-      fr: "Le premier choix du moteur.",
+      fr: 'Le premier choix du moteur.',
       en: 'The engine’s first choice.',
     },
   },
@@ -296,7 +291,7 @@ export const QUALITY_STYLES: Record<MoveQuality, QualityStyle> = {
     nag: '',
     label: { fr: 'Excellent', en: 'Excellent' },
     description: {
-      fr: "Aussi bon que le meilleur, à un écart imperceptible.",
+      fr: 'Aussi bon que le meilleur, à un écart imperceptible.',
       en: 'As good as the best, by an imperceptible margin.',
     },
   },
@@ -306,7 +301,7 @@ export const QUALITY_STYLES: Record<MoveQuality, QualityStyle> = {
     nag: '',
     label: { fr: 'Bon coup', en: 'Good' },
     description: {
-      fr: "Un coup correct, qui ne coûte presque rien.",
+      fr: 'Un coup correct, qui ne coûte presque rien.',
       en: 'A sound move that costs almost nothing.',
     },
   },
@@ -366,7 +361,7 @@ export const QUALITY_STYLES: Record<MoveQuality, QualityStyle> = {
     nag: '?',
     label: { fr: 'Occasion manquée', en: 'Missed win' },
     description: {
-      fr: "Une occasion manquée : un gain ou un mat était à portée.",
+      fr: 'Une occasion manquée : un gain ou un mat était à portée.',
       en: 'A missed chance: a win or a mate was available.',
     },
   },
@@ -374,9 +369,10 @@ export const QUALITY_STYLES: Record<MoveQuality, QualityStyle> = {
 
 /** Compte les coups par qualité, pour le tableau de bord d'après-partie. */
 export function countQualities(moves: AnalysedMove[], color: Color): Record<MoveQuality, number> {
-  const counts = Object.fromEntries(
-    Object.keys(QUALITY_STYLES).map((k) => [k, 0]),
-  ) as Record<MoveQuality, number>
+  const counts = Object.fromEntries(Object.keys(QUALITY_STYLES).map((k) => [k, 0])) as Record<
+    MoveQuality,
+    number
+  >
   for (const move of moves) {
     if (move.color !== color) continue
     counts[move.quality] += 1

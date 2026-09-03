@@ -69,7 +69,9 @@ export function Aujourdhui({
             Défi du jour relevé
           </p>
         ) : (
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">Aujourd’hui</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
+            Aujourd’hui
+          </p>
         )}
         <p className="text-[11px] tabular-nums text-muted">
           {xp} / {XP_TOTAL} points du jour

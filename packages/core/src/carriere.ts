@@ -389,13 +389,38 @@ export interface HautFait {
  */
 export const HAUTS_FAITS: readonly HautFait[] = [
   { id: 'premier-pas', nom: 'Premier pas', condition: 'Terminer le chapitre 1', emoji: '🌱' },
-  { id: 'sans-faute', nom: 'Sans faute', condition: 'Décrocher trois étoiles sur un chapitre', emoji: '⭐' },
-  { id: 'triplette', nom: 'Triplette', condition: 'Trois étoiles sur trois chapitres', emoji: '✨' },
+  {
+    id: 'sans-faute',
+    nom: 'Sans faute',
+    condition: 'Décrocher trois étoiles sur un chapitre',
+    emoji: '⭐',
+  },
+  {
+    id: 'triplette',
+    nom: 'Triplette',
+    condition: 'Trois étoiles sur trois chapitres',
+    emoji: '✨',
+  },
   { id: 'tacticien', nom: 'Tacticien', condition: 'Réussir 25 puzzles en carrière', emoji: '⚡' },
   { id: 'erudit', nom: 'Érudit', condition: 'Voir les douze leçons de la carrière', emoji: '📚' },
-  { id: 'revanche', nom: 'Revanche', condition: 'Gagner après trois défaites d’affilée', emoji: '🔥' },
-  { id: 'expeditif', nom: 'Expéditif', condition: 'Gagner une partie en moins de 25 coups', emoji: '💨' },
-  { id: 'chirurgien', nom: 'Chirurgien', condition: 'Gagner un duel sans avoir demandé d’aide', emoji: '🎯' },
+  {
+    id: 'revanche',
+    nom: 'Revanche',
+    condition: 'Gagner après trois défaites d’affilée',
+    emoji: '🔥',
+  },
+  {
+    id: 'expeditif',
+    nom: 'Expéditif',
+    condition: 'Gagner une partie en moins de 25 coups',
+    emoji: '💨',
+  },
+  {
+    id: 'chirurgien',
+    nom: 'Chirurgien',
+    condition: 'Gagner un duel sans avoir demandé d’aide',
+    emoji: '🎯',
+  },
   { id: 'mi-chemin', nom: 'À mi-chemin', condition: 'Atteindre le chapitre 7', emoji: '🧗' },
   { id: 'sans-filet', nom: 'Sans filet', condition: 'Terminer le chapitre 12', emoji: '🜛' },
   { id: 'couronne', nom: 'La couronne', condition: 'Terminer la carrière entière', emoji: '👑' },
@@ -506,7 +531,10 @@ export function prochaineEtape(
     const reste = chapitre.puzzles - progression.puzzlesDone
     return {
       cle: 'puzzles',
-      libelle: reste === chapitre.puzzles ? 'Passer aux puzzles' : `Encore ${reste} puzzle${reste > 1 ? 's' : ''}`,
+      libelle:
+        reste === chapitre.puzzles
+          ? 'Passer aux puzzles'
+          : `Encore ${reste} puzzle${reste > 1 ? 's' : ''}`,
       /*
         La cote du chapitre voyage avec le thème.
 

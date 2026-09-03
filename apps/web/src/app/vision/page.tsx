@@ -142,9 +142,9 @@ export default function VisionPage() {
     <div className="mx-auto w-full max-w-[1100px] px-4 py-8 sm:px-6 lg:py-12">
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">Vision</h1>
       <p className="mt-2 max-w-2xl text-muted">
-        Une case est annoncée, tu cliques dessus. Trente secondes. Tant qu’il faut réfléchir
-        pour trouver « f6 », ce temps-là est pris sur le calcul — c’est le réflexe le plus
-        rentable à installer quand on débute.
+        Une case est annoncée, tu cliques dessus. Trente secondes. Tant qu’il faut réfléchir pour
+        trouver « f6 », ce temps-là est pris sur le calcul — c’est le réflexe le plus rentable à
+        installer quand on débute.
       </p>
 
       <div className="mt-7 grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -203,9 +203,7 @@ export default function VisionPage() {
                         cases trouvées · {accuracy} % de réussite
                       </p>
                       {found > 0 && found >= best && (
-                        <p className="mt-2 text-sm font-semibold text-accent">
-                          Nouveau record !
-                        </p>
+                        <p className="mt-2 text-sm font-semibold text-accent">Nouveau record !</p>
                       )}
                     </>
                   )}
@@ -238,9 +236,7 @@ export default function VisionPage() {
               </>
             ) : (
               <p className="py-6 text-sm text-muted">
-                {phase === 'fini'
-                  ? 'Manche terminée.'
-                  : 'Prêt ? La première case s’affichera ici.'}
+                {phase === 'fini' ? 'Manche terminée.' : 'Prêt ? La première case s’affichera ici.'}
               </p>
             )}
           </Card>
@@ -278,9 +274,9 @@ export default function VisionPage() {
           </Card>
 
           <p className="text-xs leading-relaxed text-faint">
-            Une erreur ne coûte pas de temps : l’objectif est d’installer un réflexe, pas de
-            se mettre la pression. Vise trente cases en trente secondes — à ce rythme, tu ne
-            cherches plus, tu vois.
+            Une erreur ne coûte pas de temps : l’objectif est d’installer un réflexe, pas de se
+            mettre la pression. Vise trente cases en trente secondes — à ce rythme, tu ne cherches
+            plus, tu vois.
           </p>
         </div>
       </div>

@@ -137,8 +137,8 @@ export default function CreditsPage() {
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:py-14">
       <h1 className="font-display text-3xl font-bold tracking-tight">Crédits &amp; licences</h1>
       <p className="mt-3 max-w-2xl leading-relaxed text-muted">
-        Le Coup Parfait n’aurait pas pu exister sans le travail libre d’autres personnes. Tout ce qui
-        suit est réutilisé dans le respect de sa licence — et cette page en fait partie :
+        Le Coup Parfait n’aurait pas pu exister sans le travail libre d’autres personnes. Tout ce
+        qui suit est réutilisé dans le respect de sa licence — et cette page en fait partie :
         plusieurs de ces licences exigent explicitement l’attribution.
       </p>
 
@@ -151,19 +151,18 @@ export default function CreditsPage() {
         <p className="mt-2 text-sm leading-relaxed text-muted">
           Le Coup Parfait est publié sous licence{' '}
           <strong className="text-ink">GNU Affero General Public License v3 ou ultérieure</strong>.
-          Ce choix n’est pas arbitraire : Stockfish est sous GPL, et toute œuvre qui l’intègre
-          doit adopter une licence compatible. L’AGPL ajoute une clause décisive pour un
-          service en ligne — quiconque héberge une version modifiée doit en publier le code
-          source.
+          Ce choix n’est pas arbitraire : Stockfish est sous GPL, et toute œuvre qui l’intègre doit
+          adopter une licence compatible. L’AGPL ajoute une clause décisive pour un service en ligne
+          — quiconque héberge une version modifiée doit en publier le code source.
         </p>
         <p className="mt-2 text-sm leading-relaxed text-muted">
-          Concrètement : tu peux l’utiliser, le modifier, l’héberger pour tes amis, le
-          redistribuer. La seule obligation est de laisser les suivants faire pareil.
+          Concrètement : tu peux l’utiliser, le modifier, l’héberger pour tes amis, le redistribuer.
+          La seule obligation est de laisser les suivants faire pareil.
         </p>
         <p className="mt-3 text-xs text-faint">
           Les jeux de pièces publiés sous licence <span className="font-mono">CC BY-NC-SA</span>{' '}
-          (usage non commercial) ont été délibérément écartés du projet, aussi beaux
-          soient-ils : leur clause rendrait la redistribution libre impossible.
+          (usage non commercial) ont été délibérément écartés du projet, aussi beaux soient-ils :
+          leur clause rendrait la redistribution libre impossible.
         </p>
       </Card>
 

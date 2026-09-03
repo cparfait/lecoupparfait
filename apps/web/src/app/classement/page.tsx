@@ -80,8 +80,8 @@ export default function LeaderboardPage() {
         Classement
       </h1>
       <p className="mt-2 text-sm text-muted">
-        Classement Glicko-2, comme sur les grandes plateformes. Il faut au moins {minGames}{' '}
-        parties pour y figurer.
+        Classement Glicko-2, comme sur les grandes plateformes. Il faut au moins {minGames} parties
+        pour y figurer.
       </p>
 
       {/*
@@ -161,9 +161,7 @@ export default function LeaderboardPage() {
                   </span>
 
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-semibold">
-                      {player.username}
-                    </span>
+                    <span className="block truncate text-sm font-semibold">{player.username}</span>
                     <span className="block text-[11px] text-faint">
                       {player.games} parties · {player.winRate} % de victoires
                     </span>
@@ -190,13 +188,13 @@ export default function LeaderboardPage() {
         <p className="mt-2 text-[13px] leading-relaxed text-muted">
           Le tri ne se fait pas sur le classement brut mais sur un classement{' '}
           <strong className="text-ink">conservateur</strong> : on retranche deux écarts-types.
-          Concrètement, un joueur qui vient de gagner trois parties a une incertitude énorme
-          sur son vrai niveau, et n’occupe donc pas la première place pour autant. Il faut
-          jouer régulièrement pour que l’incertitude descende — et donc pour monter.
+          Concrètement, un joueur qui vient de gagner trois parties a une incertitude énorme sur son
+          vrai niveau, et n’occupe donc pas la première place pour autant. Il faut jouer
+          régulièrement pour que l’incertitude descende — et donc pour monter.
         </p>
         <p className="mt-2 text-[13px] leading-relaxed text-muted">
-          Le point d’interrogation à côté d’un classement signifie qu’il est encore
-          provisoire : moins d’une trentaine de parties, l’estimation bouge beaucoup.
+          Le point d’interrogation à côté d’un classement signifie qu’il est encore provisoire :
+          moins d’une trentaine de parties, l’estimation bouge beaucoup.
         </p>
       </Card>
     </div>

@@ -78,11 +78,7 @@ export type Notation = 'lettres' | 'figurine'
  * commentaires, analyse, explorateur. Ajouter un style ici le rend disponible
  * partout, sans rien oublier.
  */
-export function localiseSan(
-  san: string,
-  locale: Locale,
-  notation: Notation = 'lettres',
-): string {
+export function localiseSan(san: string, locale: Locale, notation: Notation = 'lettres'): string {
   if (notation === 'figurine') return sanToFigurine(san)
   return locale === 'fr' ? sanToFrench(san) : san
 }
@@ -161,9 +157,7 @@ export function pourquoiCeCoup(fenBefore: string, uci: string, locale: Locale): 
       : `${majuscule(sujet)} attacks ${deux[0]} and ${deux[1]} at once: one of them falls.`
   } else {
     const seul = nomme(vises[0]!.type, vises[0]!.square)
-    phrase = fr
-      ? `${majuscule(sujet)} attaque ${seul}.`
-      : `${majuscule(sujet)} attacks ${seul}.`
+    phrase = fr ? `${majuscule(sujet)} attaque ${seul}.` : `${majuscule(sujet)} attacks ${seul}.`
   }
 
   // Ce qui couvre la case d'arrivée. C'est la question suivante — « et il ne se
@@ -204,8 +198,7 @@ export function sanToSpeech(san: string, locale: Locale): string {
   // Chercher d'abord les lettres françaises faisait lire « Cf3 » à un « Nf3 »
   // qui n'y ressemble pas — aucune lettre ne correspondait, et tous les coups
   // de pièce étaient annoncés « pion ».
-  const found =
-    matchPiece(san, SAN_LETTER_EN) ?? (fr ? matchPiece(san, SAN_LETTER_FR) : null)
+  const found = matchPiece(san, SAN_LETTER_EN) ?? (fr ? matchPiece(san, SAN_LETTER_FR) : null)
 
   let rest = san
   let spoken = ''
@@ -467,9 +460,20 @@ function quiA(m: DetectedMotif, ctx: ExplainContext): string {
  * voulue, et la fonction rend la troisième personne correspondante quand le
  * motif ne profite pas au lecteur.
  */
-const TROISIEME: Record<string, string> = { ton: 'son', ta: 'sa', tes: 'ses', Ton: 'Son', Ta: 'Sa', Tes: 'Ses' }
+const TROISIEME: Record<string, string> = {
+  ton: 'son',
+  ta: 'sa',
+  tes: 'ses',
+  Ton: 'Son',
+  Ta: 'Sa',
+  Tes: 'Ses',
+}
 
-function possessif(m: DetectedMotif, ctx: ExplainContext, forme: 'ton' | 'ta' | 'tes' | 'Ton' | 'Ta' | 'Tes'): string {
+function possessif(
+  m: DetectedMotif,
+  ctx: ExplainContext,
+  forme: 'ton' | 'ta' | 'tes' | 'Ton' | 'Ta' | 'Tes',
+): string {
   if (ctx.locale !== 'fr') return pourLeJoueur(m, ctx) ? 'your' : 'their'
   return pourLeJoueur(m, ctx) ? forme : TROISIEME[forme]!
 }
@@ -691,8 +695,7 @@ const MOTIFS_FR: Partial<Record<MotifId, MotifCopy>> = {
   },
   promotion: {
     name: 'Promotion',
-    definition:
-      'Un pion qui atteint la dernière rangée se transforme, presque toujours en dame.',
+    definition: 'Un pion qui atteint la dernière rangée se transforme, presque toujours en dame.',
     sentence: (m) => `Le pion arrive en ${m.squares[0]} et devient dame.`,
   },
   underPromotion: {
@@ -760,8 +763,7 @@ const MOTIFS_FR: Partial<Record<MotifId, MotifCopy>> = {
   },
   badBishop: {
     name: 'Mauvais fou',
-    definition:
-      'Un fou bloqué par ses propres pions, tous placés sur des cases de sa couleur.',
+    definition: 'Un fou bloqué par ses propres pions, tous placés sur des cases de sa couleur.',
     sentence: (m, ctx) =>
       `Mauvais fou en ${m.squares[0]} : ${possessif(m, ctx, 'tes')} pions occupent les cases de sa couleur et l'étouffent.`,
   },
@@ -969,7 +971,8 @@ const MOTIFS_EN: Partial<Record<MotifId, MotifCopy>> = {
     name: 'Rook on the seventh',
     definition:
       'A rook on the 7th rank eats pawns and traps the king. Two rooks there often win on their own.',
-    sentence: (m) => `Rook on the seventh from ${m.squares[0]} — it rakes pawns and cages the king.`,
+    sentence: (m) =>
+      `Rook on the seventh from ${m.squares[0]} — it rakes pawns and cages the king.`,
   },
   exposedKing: {
     name: 'Exposed king',
@@ -985,7 +988,9 @@ export function motifCopy(id: MotifId, locale: Locale): MotifCopy | null {
 }
 
 /** Glossaire complet, pour la page « Motifs » de l'application. */
-export function motifGlossary(locale: Locale): Array<{ id: MotifId; name: string; definition: string }> {
+export function motifGlossary(
+  locale: Locale,
+): Array<{ id: MotifId; name: string; definition: string }> {
   const table = locale === 'en' ? { ...MOTIFS_FR, ...MOTIFS_EN } : MOTIFS_FR
   return (Object.entries(table) as Array<[MotifId, MotifCopy]>)
     .map(([id, copy]) => ({ id, name: copy.name, definition: copy.definition }))
@@ -1140,9 +1145,7 @@ export function explainMove(input: MoveExplanationInput): MoveExplanation {
   const highlights = new Set<Square>()
 
   // On ne garde que les motifs saillants : trois suffisent à comprendre.
-  const relevant = input.motifs
-    .filter((m) => m.weight >= 0.3)
-    .slice(0, 3)
+  const relevant = input.motifs.filter((m) => m.weight >= 0.3).slice(0, 3)
 
   for (const m of relevant) {
     const copy = motifCopy(m.id, input.locale)
@@ -1419,12 +1422,8 @@ function buildEvaluationSentence(input: MoveExplanationInput, fr: boolean): stri
   // comprend sans explication.
   if (score.type === 'mate') {
     const moves = Math.abs(score.value)
-    const detail = fr
-      ? `mat en ${moves} coup${moves > 1 ? 's' : ''}`
-      : `mate in ${moves}`
-    return fr
-      ? `Après ce coup, ${phrase} — ${detail}.`
-      : `After this move, ${phrase} — ${detail}.`
+    const detail = fr ? `mat en ${moves} coup${moves > 1 ? 's' : ''}` : `mate in ${moves}`
+    return fr ? `Après ce coup, ${phrase} — ${detail}.` : `After this move, ${phrase} — ${detail}.`
   }
 
   if (label === 'egal') {
@@ -1433,7 +1432,6 @@ function buildEvaluationSentence(input: MoveExplanationInput, fr: boolean): stri
 
   return fr ? `Après ce coup, ${phrase}.` : `After this move, ${phrase}.`
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Description d'un coup calme
@@ -1709,10 +1707,7 @@ function buildSpeech(
 }
 
 function stripMarkup(text: string): string {
-  return text
-    .replace(/\*\*/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
+  return text.replace(/\*\*/g, '').replace(/\s+/g, ' ').trim()
 }
 
 function capitalise(text: string): string {
@@ -1808,9 +1803,7 @@ export interface RecommendedExplanationInput {
  * Rend `null` si le coup est incohérent avec la position. Un remède sans
  * justification vaut mieux qu'une justification fabriquée.
  */
-export function explainRecommendedMove(
-  input: RecommendedExplanationInput,
-): MoveExplanation | null {
+export function explainRecommendedMove(input: RecommendedExplanationInput): MoveExplanation | null {
   let board: Chess
   let played: ReturnType<Chess['history']>[number] | undefined
   try {

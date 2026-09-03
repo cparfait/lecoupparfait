@@ -24,18 +24,18 @@ lot, et chaque lot est constaté à l'écran avant d'être déclaré fait.
 
 Monorepo npm workspaces, Node ≥ 22.
 
-| | |
-|---|---|
-| Interface | `apps/web` — Next.js 16.3 (App Router), React 19.2 |
-| Styles | Tailwind CSS 4.3 (`@tailwindcss/postcss`), un seul fichier `apps/web/src/app/globals.css` (~990 lignes) |
-| Échiquier 2D | `apps/web/src/components/board/Board2D.tsx` (~43 Ko) |
-| Échiquier 3D | `apps/web/src/components/board/Board3D.tsx` (~28 Ko) + `pieceGeometry.ts`, sur three 0.185 / @react-three/fiber 9.7 / @react-three/drei 10.7 |
-| Aiguillage | `apps/web/src/components/board/ChessBoard.tsx` |
-| HUD de partie | `apps/web/src/components/game/` — `EvalBar`, `PlayerBar`, `MoveList`, `RubanCoups`, `GameNav`, `TurnIndicator`, `OpeningBanner`, `GameOverDialog`, `LiveCommentary` (~47 Ko), `PourquoiPanel` |
-| Autre board | `PromotionPicker`, `ArrowLegend`, `PhysicalBoardPanel`, `boardKit.ts`, `moveSafety.ts` |
-| État | Zustand (`apps/web/src/lib/store/`) |
-| Icônes | lucide-react |
-| Pages | ~40 routes sous `apps/web/src/app/` : accueil, `jouer/{ordinateur,ami,local,partie,regarder}`, `puzzles`, `puzzles/rush`, `apprendre/[lessonId]`, `carriere`, `analyse`, `etudes`, `ouvertures`, `finales`, `tournois`, `classement`, `profil`, `statistiques`, `preferences`, `editeur`, `vision`, `glossaire`, `amis`, `correspondance`, `admin`… |
+|               |                                                                                                                                                                                                                                                                                                                                                     |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Interface     | `apps/web` — Next.js 16.3 (App Router), React 19.2                                                                                                                                                                                                                                                                                                  |
+| Styles        | Tailwind CSS 4.3 (`@tailwindcss/postcss`), un seul fichier `apps/web/src/app/globals.css` (~990 lignes)                                                                                                                                                                                                                                             |
+| Échiquier 2D  | `apps/web/src/components/board/Board2D.tsx` (~43 Ko)                                                                                                                                                                                                                                                                                                |
+| Échiquier 3D  | `apps/web/src/components/board/Board3D.tsx` (~28 Ko) + `pieceGeometry.ts`, sur three 0.185 / @react-three/fiber 9.7 / @react-three/drei 10.7                                                                                                                                                                                                        |
+| Aiguillage    | `apps/web/src/components/board/ChessBoard.tsx`                                                                                                                                                                                                                                                                                                      |
+| HUD de partie | `apps/web/src/components/game/` — `EvalBar`, `PlayerBar`, `MoveList`, `RubanCoups`, `GameNav`, `TurnIndicator`, `OpeningBanner`, `GameOverDialog`, `LiveCommentary` (~47 Ko), `PourquoiPanel`                                                                                                                                                       |
+| Autre board   | `PromotionPicker`, `ArrowLegend`, `PhysicalBoardPanel`, `boardKit.ts`, `moveSafety.ts`                                                                                                                                                                                                                                                              |
+| État          | Zustand (`apps/web/src/lib/store/`)                                                                                                                                                                                                                                                                                                                 |
+| Icônes        | lucide-react                                                                                                                                                                                                                                                                                                                                        |
+| Pages         | ~40 routes sous `apps/web/src/app/` : accueil, `jouer/{ordinateur,ami,local,partie,regarder}`, `puzzles`, `puzzles/rush`, `apprendre/[lessonId]`, `carriere`, `analyse`, `etudes`, `ouvertures`, `finales`, `tournois`, `classement`, `profil`, `statistiques`, `preferences`, `editeur`, `vision`, `glossaire`, `amis`, `correspondance`, `admin`… |
 
 ### Le système de design existant — à respecter, pas à réinventer
 
@@ -64,7 +64,7 @@ touches :
   piège : `slide-up` en `fill-mode: both` laissait la page vide).
 
 Le fichier est abondamment commenté, en français, et les commentaires
-expliquent *pourquoi* chaque choix a été fait. Lis-les avant de modifier une
+expliquent _pourquoi_ chaque choix a été fait. Lis-les avant de modifier une
 règle : plusieurs sont des corrections de bugs déjà rencontrés, et les défaire
 serait une régression.
 
@@ -255,6 +255,7 @@ Le sujet est trop large pour être tenu de tête. Tu procèdes ainsi :
 Le travail est fini quand **tous** ces points sont vrais et constatés :
 
 **Mise en page**
+
 - [ ] Aucun défilement horizontal sur aucune page, à 360, 390, 430, 768 et
       1024 px de large, dans les deux orientations.
 - [ ] Aucun contenu masqué par l'encoche, la Dynamic Island ou la barre de
@@ -267,6 +268,7 @@ Le travail est fini quand **tous** ces points sont vrais et constatés :
       (CLS < 0,1).
 
 **Échiquier**
+
 - [ ] Le plateau est parfaitement carré et pavé sans liseré parasite à
       n'importe quelle largeur et à `devicePixelRatio` 1, 2 et 3.
 - [ ] Une pièce qui bouge est animée par `transform` seul ; aucune propriété de
@@ -279,6 +281,7 @@ Le travail est fini quand **tous** ces points sont vrais et constatés :
       taille, y compris les flèches.
 
 **Performance**
+
 - [ ] 2D : 60 images par seconde tenues pendant une animation de coup sur un
       appareil milieu de gamme (profil « 4× slowdown » des outils de
       développement).
@@ -291,6 +294,7 @@ Le travail est fini quand **tous** ces points sont vrais et constatés :
       en 3D.
 
 **Thèmes et accessibilité**
+
 - [ ] Les quatre thèmes rendent correctement chaque écran touché — aucune
       couleur littérale introduite.
 - [ ] `prefers-reduced-motion: reduce` : aucune animation décorative, et aucun
@@ -299,6 +303,7 @@ Le travail est fini quand **tous** ces points sont vrais et constatés :
 - [ ] Cibles interactives ≥ 44 × 44 px sur mobile.
 
 **Non-régression**
+
 - [ ] `npm run typecheck` passe.
 - [ ] `npm test` passe.
 - [ ] `npm run build` passe, sans avertissement nouveau.

@@ -254,10 +254,7 @@ export const ChessBoard = memo(function ChessBoard({
   return (
     <div
       ref={containerRef}
-      className={clsx(
-        'relative w-full',
-        fullscreen && 'grid place-items-center bg-[var(--bg)]',
-      )}
+      className={clsx('relative w-full', fullscreen && 'grid place-items-center bg-[var(--bg)]')}
       // En plein écran, le conteneur occupe tout l'écran et centre le plateau.
       style={fullscreen ? { width: '100dvw', height: '100dvh' } : undefined}
     >
@@ -381,9 +378,7 @@ export function ViewToggle({
           ) : (
             <Maximize2 size={15} strokeWidth={2.2} aria-hidden />
           )}
-          <span className="sr-only">
-            {fullscreen ? 'Quitter le plein écran' : 'Plein écran'}
-          </span>
+          <span className="sr-only">{fullscreen ? 'Quitter le plein écran' : 'Plein écran'}</span>
         </button>
       )}
     </div>

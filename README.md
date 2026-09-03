@@ -12,19 +12,19 @@ eux — fourchette, clouage, mat du couloir — et il te le dit à voix haute.
 
 ## Ce que ça fait
 
-| | |
-|---|---|
-| **Jouer** | 25 niveaux d'ordinateur (250 → 3200 Elo) avec 7 personnalités distinctes · parties entre amis en temps réel via un simple lien · partie locale à deux sur un écran |
-| **Mode commenté** | après **chaque** coup, les trois meilleures options avec leur évaluation et la raison de chacune, le coup proposé fléché sur l'échiquier, et l'explication lue à voix haute — réécoutable |
-| **Apprendre** | 36 leçons guidées en 7 chapitres, de « voici un échiquier » au répertoire d'ouvertures, avec un coach qui parle et un échiquier interactif |
-| **S'entraîner** | jusqu'à 6 057 356 puzzles tactiques notés et étiquetés, avec classement Glicko-2 dédié |
-| **Finales** | 3 568 positions classées en 8 familles : on donne l'objectif — gagner ou tenir la nulle — et l'ordinateur défend au mieux |
-| **Analyser** | Stockfish 18 natif côté serveur · chaque coup classé (brillant → gaffe), meilleur coup fléché, **explication rédigée** |
-| **Importer** | tes parties Chess.com et Lichess, à partir du seul pseudo : rien à installer, aucun compte à créer, et rien n'est conservé |
-| **Explorer** | 3 810 ouvertures nommées, reconnues même par transposition |
-| **Progresser** | comptes, classement Glicko-2 par cadence, Elo classique affiché en parallèle, courbe de progression |
-| **Revenir** | un défi du jour, **le même pour tout le monde**, cinq quêtes courtes et une série de jours consécutifs — sans compte, si l'on veut |
-| **Être prévenu** | une notification quand un ami t'invite — un défi expire en cinq minutes — et un rappel du défi du jour, à ton heure. Rien d'autre, et les deux se coupent séparément. Voir [`docs/notifications.md`](docs/notifications.md) |
+|                   |                                                                                                                                                                                                                             |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Jouer**         | 25 niveaux d'ordinateur (250 → 3200 Elo) avec 7 personnalités distinctes · parties entre amis en temps réel via un simple lien · partie locale à deux sur un écran                                                          |
+| **Mode commenté** | après **chaque** coup, les trois meilleures options avec leur évaluation et la raison de chacune, le coup proposé fléché sur l'échiquier, et l'explication lue à voix haute — réécoutable                                   |
+| **Apprendre**     | 36 leçons guidées en 7 chapitres, de « voici un échiquier » au répertoire d'ouvertures, avec un coach qui parle et un échiquier interactif                                                                                  |
+| **S'entraîner**   | jusqu'à 6 057 356 puzzles tactiques notés et étiquetés, avec classement Glicko-2 dédié                                                                                                                                      |
+| **Finales**       | 3 568 positions classées en 8 familles : on donne l'objectif — gagner ou tenir la nulle — et l'ordinateur défend au mieux                                                                                                   |
+| **Analyser**      | Stockfish 18 natif côté serveur · chaque coup classé (brillant → gaffe), meilleur coup fléché, **explication rédigée**                                                                                                      |
+| **Importer**      | tes parties Chess.com et Lichess, à partir du seul pseudo : rien à installer, aucun compte à créer, et rien n'est conservé                                                                                                  |
+| **Explorer**      | 3 810 ouvertures nommées, reconnues même par transposition                                                                                                                                                                  |
+| **Progresser**    | comptes, classement Glicko-2 par cadence, Elo classique affiché en parallèle, courbe de progression                                                                                                                         |
+| **Revenir**       | un défi du jour, **le même pour tout le monde**, cinq quêtes courtes et une série de jours consécutifs — sans compte, si l'on veut                                                                                          |
+| **Être prévenu**  | une notification quand un ami t'invite — un défi expire en cinq minutes — et un rappel du défi du jour, à ton heure. Rien d'autre, et les deux se coupent séparément. Voir [`docs/notifications.md`](docs/notifications.md) |
 
 Et côté forme : quatre thèmes commutables, dix jeux de pièces, huit damiers,
 un échiquier **2D et 3D** interchangeable en pleine partie avec mode plein
@@ -33,13 +33,13 @@ entièrement navigable au clavier.
 
 ### Les aides à l'apprentissage — toutes désactivables
 
-| Aide | Ce qu'elle fait |
-|---|---|
-| **Coups colorés** | à la sélection d'une pièce, chaque case d'arrivée se colore : vert si la pièce y est en sécurité, rouge si elle serait perdue, doré si le coup gagne du matériel. Le verdict vient d'un échange statique complet, pas d'un simple test « case attaquée ». |
-| **Nom de l'ouverture** | affiché et mis à jour à chaque coup pendant la partie, y compris par transposition. On retient les noms parce qu'on les voit sur ses propres parties. |
-| **Mode commenté** | l'analyse après chaque coup, avec les alternatives et le coup proposé. |
-| **Pourquoi ce coup ?** | l'inverse du mode commenté : rien ne s'affiche tant qu'on ne demande pas. Même moteur, même explication — seul le déclencheur change. |
-| **Voix du coach** | narration de toutes les explications, avec réécoute. Voix neuronale Piper si elle est installée, sinon celle du navigateur. |
+| Aide                   | Ce qu'elle fait                                                                                                                                                                                                                                           |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Coups colorés**      | à la sélection d'une pièce, chaque case d'arrivée se colore : vert si la pièce y est en sécurité, rouge si elle serait perdue, doré si le coup gagne du matériel. Le verdict vient d'un échange statique complet, pas d'un simple test « case attaquée ». |
+| **Nom de l'ouverture** | affiché et mis à jour à chaque coup pendant la partie, y compris par transposition. On retient les noms parce qu'on les voit sur ses propres parties.                                                                                                     |
+| **Mode commenté**      | l'analyse après chaque coup, avec les alternatives et le coup proposé.                                                                                                                                                                                    |
+| **Pourquoi ce coup ?** | l'inverse du mode commenté : rien ne s'affiche tant qu'on ne demande pas. Même moteur, même explication — seul le déclencheur change.                                                                                                                     |
+| **Voix du coach**      | narration de toutes les explications, avec réécoute. Voix neuronale Piper si elle est installée, sinon celle du navigateur.                                                                                                                               |
 
 Chacune se coupe d'un clic depuis les préférences ou depuis la partie. C'est
 le but : on s'en sert le temps d'acquérir le réflexe, puis on s'en passe.
@@ -50,7 +50,7 @@ Tout ce qui précède fonctionne **sans le moindre appel à un service
 extérieur** : les explications sont écrites par l'application, pas par un
 modèle de langue. C'est un choix de fond, et il ne change pas.
 
-Reste une chose qu'un texte pré-rédigé ne saura jamais faire : répondre à *ta*
+Reste une chose qu'un texte pré-rédigé ne saura jamais faire : répondre à _ta_
 question. « Et si j'avais joué autre chose ? », « pourquoi cette case est
 faible ? ». Pour ça, et seulement pour ça, tu peux brancher ton propre compte
 chez un fournisseur d'IA — OpenAI, Anthropic, Google, Mistral, DeepSeek,
@@ -102,12 +102,12 @@ Autant le dire ici plutôt que de le laisser découvrir.
 
 ### Prérequis
 
-| | Version | Pour quoi faire |
-|---|---|---|
-| **Node.js** | 22 ou plus | l'application ; le serveur exécute du TypeScript directement, sans compilation |
-| **Docker** | récent | PostgreSQL. Une base installée à la main convient aussi |
-| **Git** | — | récupérer le dépôt |
-| **Espace disque** | ~1,5 Go | dont 1 Go de dépendances npm et 330 Mo de jeux de données |
+|                   | Version    | Pour quoi faire                                                                |
+| ----------------- | ---------- | ------------------------------------------------------------------------------ |
+| **Node.js**       | 22 ou plus | l'application ; le serveur exécute du TypeScript directement, sans compilation |
+| **Docker**        | récent     | PostgreSQL. Une base installée à la main convient aussi                        |
+| **Git**           | —          | récupérer le dépôt                                                             |
+| **Espace disque** | ~1,5 Go    | dont 1 Go de dépendances npm et 330 Mo de jeux de données                      |
 
 Aucune clé d'API, aucun compte à créer nulle part : tout ce que l'application
 utilise est libre et se télécharge sans identification. L'assistant IA est la
@@ -179,10 +179,10 @@ En Docker, les deux sont déjà dans l'image : rien à faire.
 ### En production (Docker)
 
 **Le dépôt est privé : il faut d'abord donner au serveur le moyen de le lire.**
-Une *clé de déploiement*, c'est-à-dire une paire SSH rattachée à ce dépôt-là et
+Une _clé de déploiement_, c'est-à-dire une paire SSH rattachée à ce dépôt-là et
 à aucun autre, en lecture seule.
 
-Pas de jeton personnel dans l'URL de clonage : il donne accès à *tous* vos
+Pas de jeton personnel dans l'URL de clonage : il donne accès à _tous_ vos
 dépôts, apparaît en clair dans `git remote -v` et dans les journaux, et expire —
 un matin, le `git pull` du serveur échoue sans qu'on comprenne pourquoi.
 
@@ -191,7 +191,7 @@ ssh-keygen -t ed25519 -C "vps-coupparfait" -f ~/.ssh/coupparfait_deploy -N ""
 cat ~/.ssh/coupparfait_deploy.pub
 ```
 
-Sur GitHub : dépôt → **Settings** → **Deploy keys** → *Add deploy key*, coller
+Sur GitHub : dépôt → **Settings** → **Deploy keys** → _Add deploy key_, coller
 la clé publique. **Ne pas cocher « Allow write access »** : le serveur n'a jamais
 à écrire, et une clé en lecture seule qui fuite ne permet pas de pousser du code
 sur ce qui sera déployé.
@@ -283,28 +283,28 @@ construction.
 
 Derrière **Nginx Proxy Manager**, créer deux hôtes mandataires :
 
-| Domaine | Forward Hostname | Port | WebSocket |
-|---|---|---|---|
-| `coupparfait.mondomaine.fr` | `coupparfait-web` | 3000 | oui |
+| Domaine                         | Forward Hostname  | Port | WebSocket         |
+| ------------------------------- | ----------------- | ---- | ----------------- |
+| `coupparfait.mondomaine.fr`     | `coupparfait-web` | 3000 | oui               |
 | `coupparfait-api.mondomaine.fr` | `coupparfait-api` | 3001 | **indispensable** |
 
 Ce sont les alias déclarés sur la façade, et non les noms de service `web` et
 `server` : NPM voit passer toutes les applications du serveur, où « web » et
 « server » ne désigneraient rien. Le conteneur NPM doit être branché sur
-`web-coupparfait` — dans son interface, onglet *Networks*, ou par
+`web-coupparfait` — dans son interface, onglet _Networks_, ou par
 `docker network connect web-coupparfait <conteneur-npm>`.
 
 Puis renseigner `NEXT_PUBLIC_APP_URL` et `NEXT_PUBLIC_SERVER_URL` dans `.env`.
 
 ### Si quelque chose cloche
 
-| Symptôme | Cause probable |
-|---|---|
-| « moteur d'analyse : indisponible » au démarrage | Stockfish natif absent — normal en local. `npm run engine:install`, ou ignorer : le navigateur prend le relais |
-| L'analyse tourne sans fin | Serveur d'analyse injoignable. Il refuse désormais en quelques millisecondes ; si le symptôme revient, vérifier que le port 3001 répond |
-| La voix reste celle du navigateur | Piper absent ou serveur muet. Préférences → « Tester la voix » annonce qui a parlé |
+| Symptôme                                              | Cause probable                                                                                                                                        |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| « moteur d'analyse : indisponible » au démarrage      | Stockfish natif absent — normal en local. `npm run engine:install`, ou ignorer : le navigateur prend le relais                                        |
+| L'analyse tourne sans fin                             | Serveur d'analyse injoignable. Il refuse désormais en quelques millisecondes ; si le symptôme revient, vérifier que le port 3001 répond               |
+| La voix reste celle du navigateur                     | Piper absent ou serveur muet. Préférences → « Tester la voix » annonce qui a parlé                                                                    |
 | Tout échoue en local après avoir copié `.env.example` | `INTERNAL_SERVER_URL` et `STOCKFISH_PATH` doivent rester **commentés** : ce sont les chemins internes à Docker, `docker compose` les fournit lui-même |
-| Le port 3000 est déjà pris | Un serveur d'une session précédente. `npm run dev` arrête proprement toute sa descendance, mais un lancement manuel peut laisser un processus |
+| Le port 3000 est déjà pris                            | Un serveur d'une session précédente. `npm run dev` arrête proprement toute sa descendance, mais un lancement manuel peut laisser un processus         |
 
 ---
 
@@ -324,15 +324,15 @@ gambit/
 
 ### Les deux moteurs
 
-| | Navigateur | Serveur |
-|---|---|---|
-| Version | Stockfish 18 Lite (WebAssembly, 7 Mo) | Stockfish 18 natif, NNUE complet |
-| Rôle | avis instantané, adversaires artificiels, repli | analyse de partie en profondeur |
-| Profondeur | 14–18 | 20–30 |
-| Confidentialité | rien ne sort du navigateur | requêtes via l'API interne |
+|                 | Navigateur                                      | Serveur                          |
+| --------------- | ----------------------------------------------- | -------------------------------- |
+| Version         | Stockfish 18 Lite (WebAssembly, 7 Mo)           | Stockfish 18 natif, NNUE complet |
+| Rôle            | avis instantané, adversaires artificiels, repli | analyse de partie en profondeur  |
+| Profondeur      | 14–18                                           | 20–30                            |
+| Confidentialité | rien ne sort du navigateur                      | requêtes via l'API interne       |
 
 Le navigateur charge par défaut la variante **mono-fil** : la variante
-multi-fils est plus rapide mais repose sur des *workers* imbriqués que plusieurs
+multi-fils est plus rapide mais repose sur des _workers_ imbriqués que plusieurs
 environnements refusent de créer. Elle reste activable, avec repli automatique.
 
 ### Comment les explications sont produites
@@ -361,26 +361,26 @@ positions de contrôle, y compris les attaques en rayon X.
 
 ## Commandes
 
-| Commande | Effet |
-|---|---|
-| `npm run setup` | installation complète après un clone |
-| `npm run dev` | démarre les deux serveurs de développement ensemble |
-| `npm run dev:web` / `npm run dev:server` | n'en démarrer qu'un seul |
-| `npm run build` | construction de production |
-| `npm run typecheck` | vérification des types sur tout le dépôt |
-| `npm run check:lessons` | **valide les 149 étapes de leçons** : positions légales, coups jouables |
-| `npm run test:realtime` | test de bout en bout du serveur de parties |
-| `npm run db:push` | applique le schéma à PostgreSQL, en développement |
-| `npm run db:generate` | fabrique un fichier de migration à partir du schéma |
-| `node scripts/migrate.mjs` | rejoue les migrations — c'est la voie de la production |
-| `npm run data:openings` | importe les ouvertures en base |
-| `npm run data:puzzles` | importe les puzzles (`PUZZLE_IMPORT_LIMIT=0` pour les 6 millions) |
-| `npm run data:endgames` | compile les 3 568 positions de finales |
-| `npm run data:opening-stats` | calcule ce que les joueurs jouent vraiment, depuis un mois de parties |
-| `npm run data:evals` | importe les évaluations pré-calculées de Lichess |
-| `npm run voice:install` | installe la voix neuronale Piper en local (facultatif) |
-| `npm run engine:install` | installe Stockfish natif en local (facultatif) |
-| `npm run vapid` | fabrique la paire de clés des notifications (facultatif) |
+| Commande                                 | Effet                                                                   |
+| ---------------------------------------- | ----------------------------------------------------------------------- |
+| `npm run setup`                          | installation complète après un clone                                    |
+| `npm run dev`                            | démarre les deux serveurs de développement ensemble                     |
+| `npm run dev:web` / `npm run dev:server` | n'en démarrer qu'un seul                                                |
+| `npm run build`                          | construction de production                                              |
+| `npm run typecheck`                      | vérification des types sur tout le dépôt                                |
+| `npm run check:lessons`                  | **valide les 149 étapes de leçons** : positions légales, coups jouables |
+| `npm run test:realtime`                  | test de bout en bout du serveur de parties                              |
+| `npm run db:push`                        | applique le schéma à PostgreSQL, en développement                       |
+| `npm run db:generate`                    | fabrique un fichier de migration à partir du schéma                     |
+| `node scripts/migrate.mjs`               | rejoue les migrations — c'est la voie de la production                  |
+| `npm run data:openings`                  | importe les ouvertures en base                                          |
+| `npm run data:puzzles`                   | importe les puzzles (`PUZZLE_IMPORT_LIMIT=0` pour les 6 millions)       |
+| `npm run data:endgames`                  | compile les 3 568 positions de finales                                  |
+| `npm run data:opening-stats`             | calcule ce que les joueurs jouent vraiment, depuis un mois de parties   |
+| `npm run data:evals`                     | importe les évaluations pré-calculées de Lichess                        |
+| `npm run voice:install`                  | installe la voix neuronale Piper en local (facultatif)                  |
+| `npm run engine:install`                 | installe Stockfish natif en local (facultatif)                          |
+| `npm run vapid`                          | fabrique la paire de clés des notifications (facultatif)                |
 
 ---
 
@@ -389,16 +389,16 @@ positions de contrôle, y compris les attaques en rayon X.
 Tout se règle dans `.env` à la racine (voir `.env.example`). Les variables qui
 comptent :
 
-| Variable | Rôle |
-|---|---|
-| `DATABASE_URL` | connexion PostgreSQL |
-| `AUTH_SECRET` | secret de session — **à changer**, généré par `npm run setup` |
-| `NEXT_PUBLIC_SERVER_URL` | adresse publique du serveur temps réel |
-| `STOCKFISH_PATH` | chemin du binaire Stockfish |
-| `ENGINE_POOL_SIZE` / `ENGINE_THREADS` | processus moteur et fils par processus |
-| `ENGINE_MAX_DEPTH` | profondeur maximale autorisée (protège le processeur) |
-| `PUZZLE_IMPORT_LIMIT` | nombre de puzzles à importer (`0` = tous) |
-| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | notifications — sans elles, le réglage n'apparaît pas |
+| Variable                                 | Rôle                                                          |
+| ---------------------------------------- | ------------------------------------------------------------- |
+| `DATABASE_URL`                           | connexion PostgreSQL                                          |
+| `AUTH_SECRET`                            | secret de session — **à changer**, généré par `npm run setup` |
+| `NEXT_PUBLIC_SERVER_URL`                 | adresse publique du serveur temps réel                        |
+| `STOCKFISH_PATH`                         | chemin du binaire Stockfish                                   |
+| `ENGINE_POOL_SIZE` / `ENGINE_THREADS`    | processus moteur et fils par processus                        |
+| `ENGINE_MAX_DEPTH`                       | profondeur maximale autorisée (protège le processeur)         |
+| `PUZZLE_IMPORT_LIMIT`                    | nombre de puzzles à importer (`0` = tous)                     |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | notifications — sans elles, le réglage n'apparaît pas         |
 
 ---
 

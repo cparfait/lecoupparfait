@@ -85,8 +85,7 @@ export function stripPzstdMarkers() {
         }
 
         // Le contenu du marqueur est la taille de la frame qui suit.
-        remaining =
-          contentSize >= 4 ? buffer.readUInt32LE(8) : 0
+        remaining = contentSize >= 4 ? buffer.readUInt32LE(8) : 0
         buffer = buffer.subarray(8 + contentSize)
 
         // Marqueur sans taille exploitable : on ne peut plus segmenter, on

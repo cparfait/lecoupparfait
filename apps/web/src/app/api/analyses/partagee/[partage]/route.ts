@@ -19,10 +19,7 @@ import { eq, getDb, savedAnalyses } from '@coupparfait/db'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function GET(
-  _request: Request,
-  context: { params: Promise<{ partage: string }> },
-) {
+export async function GET(_request: Request, context: { params: Promise<{ partage: string }> }) {
   const { partage } = await context.params
   // Une chaîne vide correspondrait à toutes les analyses non partagées, dont
   // la colonne vaut `null` — la comparaison échouerait, mais on ne fait même

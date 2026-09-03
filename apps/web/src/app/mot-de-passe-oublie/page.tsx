@@ -87,12 +87,12 @@ export default function ForgotPasswordPage() {
               </span>
               <p className="text-sm font-semibold">Pas encore possible ici</p>
               <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
-                Ce serveur n’envoie pas de courriel pour le moment : il n’y a donc aucun moyen
-                de t’envoyer un lien de réinitialisation.
+                Ce serveur n’envoie pas de courriel pour le moment : il n’y a donc aucun moyen de
+                t’envoyer un lien de réinitialisation.
               </p>
               <p className="mt-2 text-xs leading-relaxed text-faint">
-                Écris à la personne qui héberge cette instance — elle peut redonner la main à
-                ton compte directement. Ton mot de passe, lui, n’a pas changé.
+                Écris à la personne qui héberge cette instance — elle peut redonner la main à ton
+                compte directement. Ton mot de passe, lui, n’a pas changé.
               </p>
               <Link href="/connexion" className="mt-4 block">
                 <Button variant="secondary" fullWidth>
@@ -110,8 +110,8 @@ export default function ForgotPasswordPage() {
               </span>
               <p className="text-sm font-semibold">C’est envoyé</p>
               <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
-                Si un compte utilise cette adresse <strong>et qu’elle a été confirmée</strong>,
-                un lien vient d’y être envoyé. Il est valable une heure.
+                Si un compte utilise cette adresse <strong>et qu’elle a été confirmée</strong>, un
+                lien vient d’y être envoyé. Il est valable une heure.
               </p>
               <p className="mt-2 text-xs leading-relaxed text-faint">
                 Rien reçu ? L’adresse n’est peut-être pas celle du compte, ou n’a jamais été
@@ -153,8 +153,8 @@ export default function ForgotPasswordPage() {
         </Card>
 
         <p className="mt-4 text-center text-xs text-faint">
-          Pas d’adresse sur ton compte ? Un compte sans adresse confirmée ne peut pas être
-          récupéré — c’est le prix de ne rien demander à l’inscription.
+          Pas d’adresse sur ton compte ? Un compte sans adresse confirmée ne peut pas être récupéré
+          — c’est le prix de ne rien demander à l’inscription.
         </p>
       </div>
     </div>

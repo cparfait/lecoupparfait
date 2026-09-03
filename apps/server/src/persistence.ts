@@ -108,9 +108,7 @@ export async function persistFinishedGame(room: GameRoom): Promise<void> {
  * suffirait avec un `IN`, mais la boucle s'arrête généralement au premier essai
  * pour les parties longues, où la théorie est dépassée depuis longtemps.
  */
-async function identifyOpening(
-  sanMoves: string[],
-): Promise<{ eco: string; name: string } | null> {
+async function identifyOpening(sanMoves: string[]): Promise<{ eco: string; name: string } | null> {
   try {
     const database = getDb()
     const board = new Chess()

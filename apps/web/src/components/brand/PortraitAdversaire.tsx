@@ -49,11 +49,7 @@ export interface PortraitAdversaireProps {
  */
 const LARGEUR = 0.78
 
-export function PortraitAdversaire({
-  personality,
-  size = 48,
-  className,
-}: PortraitAdversaireProps) {
+export function PortraitAdversaire({ personality, size = 48, className }: PortraitAdversaireProps) {
   const [manquant, setManquant] = useState(false)
   const largeur = Math.round(size * LARGEUR)
 

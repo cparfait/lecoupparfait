@@ -253,8 +253,10 @@ export function points(duels: Duel[], id: string): number {
   let total = 0
   for (const duel of duels) {
     if (duel.resultat === '*') continue
-    if (duel.blancs === id) total += duel.resultat === '1-0' ? 1 : duel.resultat === '1/2-1/2' ? 0.5 : 0
-    else if (duel.noirs === id) total += duel.resultat === '0-1' ? 1 : duel.resultat === '1/2-1/2' ? 0.5 : 0
+    if (duel.blancs === id)
+      total += duel.resultat === '1-0' ? 1 : duel.resultat === '1/2-1/2' ? 0.5 : 0
+    else if (duel.noirs === id)
+      total += duel.resultat === '0-1' ? 1 : duel.resultat === '1/2-1/2' ? 0.5 : 0
   }
   return total
 }
@@ -295,9 +297,8 @@ export function classement(tournoi: TournoiSolo): Ligne[] {
 /** Le prochain duel du joueur, `null` quand le tournoi est fini. */
 export function prochainDuel(tournoi: TournoiSolo): Duel | null {
   return (
-    tournoi.duels.find(
-      (d) => d.resultat === '*' && (d.blancs === HUMAIN || d.noirs === HUMAIN),
-    ) ?? null
+    tournoi.duels.find((d) => d.resultat === '*' && (d.blancs === HUMAIN || d.noirs === HUMAIN)) ??
+    null
   )
 }
 
@@ -327,9 +328,7 @@ export function enregistrer(
   tirage: () => number = Math.random,
 ): TournoiSolo {
   const duels = tournoi.duels.map((d) => ({ ...d }))
-  const mien = duels.find(
-    (d) => d.resultat === '*' && (d.blancs === HUMAIN || d.noirs === HUMAIN),
-  )
+  const mien = duels.find((d) => d.resultat === '*' && (d.blancs === HUMAIN || d.noirs === HUMAIN))
   if (!mien) return tournoi
 
   mien.resultat = resultat

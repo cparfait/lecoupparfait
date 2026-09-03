@@ -24,7 +24,8 @@ export const repertoireChapter: Chapter = {
     {
       id: 'italienne',
       title: 'La partie italienne',
-      summary: 'La plus ancienne, la plus naturelle. Toutes les pièces vers le centre, sans détour.',
+      summary:
+        'La plus ancienne, la plus naturelle. Toutes les pièces vers le centre, sans détour.',
       level: 'beginner',
       minutes: 6,
       icon: '🇮🇹',
@@ -36,14 +37,14 @@ export const repertoireChapter: Chapter = {
         },
         {
           kind: 'play',
-          say: "Commence par le pion roi.",
+          say: 'Commence par le pion roi.',
           instruction: 'Joue e4',
           answers: ['e4'],
           reply: 'e5',
         },
         {
           kind: 'play',
-          say: "Cavalier f3. Il attaque le pion e5 et vise le centre.",
+          say: 'Cavalier f3. Il attaque le pion e5 et vise le centre.',
           instruction: 'Joue le cavalier en f3',
           answers: ['Nf3'],
           reply: 'Nc6',
@@ -71,7 +72,7 @@ export const repertoireChapter: Chapter = {
         },
         {
           kind: 'show',
-          say: "Le piège à connaître : ne joue jamais la dame en h5 pour tenter un mat rapide. Les Noirs parent et chassent la dame en développant. Tu perds trois temps, ils en gagnent trois.",
+          say: 'Le piège à connaître : ne joue jamais la dame en h5 pour tenter un mat rapide. Les Noirs parent et chassent la dame en développant. Tu perds trois temps, ils en gagnent trois.',
         },
       ],
     },
@@ -92,7 +93,7 @@ export const repertoireChapter: Chapter = {
         },
         {
           kind: 'play',
-          say: "Joue le fou en b5. Il attaque le cavalier c6, qui défend le pion e5.",
+          say: 'Joue le fou en b5. Il attaque le cavalier c6, qui défend le pion e5.',
           instruction: 'Joue le fou en b5',
           answers: ['Bb5'],
           reply: 'a6',
@@ -133,7 +134,7 @@ export const repertoireChapter: Chapter = {
         {
           kind: 'show',
           fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1',
-          say: "Face à 1.e4, la sicilienne répond c5. Pas e5, qui donne une partie symétrique : c5, qui crée un déséquilibre immédiat.",
+          say: 'Face à 1.e4, la sicilienne répond c5. Pas e5, qui donne une partie symétrique : c5, qui crée un déséquilibre immédiat.',
         },
         {
           kind: 'play',
@@ -189,11 +190,11 @@ export const repertoireChapter: Chapter = {
         {
           kind: 'show',
           fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1',
-          say: "La française répond e6 à 1.e4. Un coup modeste, qui prépare d5 pour contester le centre immédiatement.",
+          say: 'La française répond e6 à 1.e4. Un coup modeste, qui prépare d5 pour contester le centre immédiatement.',
         },
         {
           kind: 'play',
-          say: "Joue e6. Un coup discret, mais qui prépare la vraie réponse au coup suivant.",
+          say: 'Joue e6. Un coup discret, mais qui prépare la vraie réponse au coup suivant.',
           instruction: 'Joue le pion en e6',
           answers: ['e6'],
           orientation: 'b',
@@ -201,7 +202,7 @@ export const repertoireChapter: Chapter = {
         },
         {
           kind: 'play',
-          say: "Et maintenant d5, le vrai coup de la française : les Noirs attaquent le centre blanc de front.",
+          say: 'Et maintenant d5, le vrai coup de la française : les Noirs attaquent le centre blanc de front.',
           instruction: 'Joue le pion en d5',
           answers: ['d5'],
           orientation: 'b',
@@ -267,7 +268,7 @@ export const repertoireChapter: Chapter = {
         },
         {
           kind: 'show',
-          say: "Le plan blanc dans toutes ces lignes est le même : Cc3, Cf3, Fg5 pour clouer, e3, Fd3, roque, puis pousser e4 au bon moment pour ouvrir le centre.",
+          say: 'Le plan blanc dans toutes ces lignes est le même : Cc3, Cf3, Fg5 pour clouer, e3, Fd3, roque, puis pousser e4 au bon moment pour ouvrir le centre.',
         },
         {
           kind: 'show',
@@ -300,7 +301,7 @@ export const repertoireChapter: Chapter = {
         },
         {
           kind: 'play',
-          say: "Puis g6, pour préparer le fianchetto du fou.",
+          say: 'Puis g6, pour préparer le fianchetto du fou.',
           instruction: 'Joue le pion en g6',
           answers: ['g6'],
           orientation: 'b',
@@ -323,7 +324,7 @@ export const repertoireChapter: Chapter = {
         {
           kind: 'show',
           orientation: 'b',
-          say: "Le plan noir classique : roquer, jouer d6, puis e5 pour frapper le centre. Si les Blancs ferment avec d5, les Noirs lancent f5, f4, g5 et attaquent le roi. Ce sont parmi les parties les plus violentes du jeu.",
+          say: 'Le plan noir classique : roquer, jouer d6, puis e5 pour frapper le centre. Si les Blancs ferment avec d5, les Noirs lancent f5, f4, g5 et attaquent le roi. Ce sont parmi les parties les plus violentes du jeu.',
           arrows: [
             { from: 'e7', to: 'e5', color: 'green' },
             { from: 'f7', to: 'f5', color: 'red' },

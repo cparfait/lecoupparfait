@@ -54,7 +54,6 @@ export default function OpeningsPage() {
   // ── Ouverture de la position courante ───────────────────────────────────
   const current = useMemo(() => book?.lookup(fen, locale) ?? null, [book, fen, locale])
 
-
   const deepest = useMemo(() => {
     if (!book || history.length === 0) return null
     return book.identify(history, locale)
@@ -196,12 +195,9 @@ export default function OpeningsPage() {
             d'échiquier ; elle reste partout ailleurs. */}
         <p className="mt-1.5 text-sm text-muted paysage:hidden">
           {book?.size.toLocaleString('fr-FR')} ouvertures répertoriées.{' '}
-          <strong className="font-semibold text-ink">
-            Tu joues les deux couleurs
-          </strong>{' '}
-          — personne ne répond à ta place : c’est un plateau d’étude, pas une partie. Avance
-          coup par coup, sur l’échiquier ou en cliquant dans les listes, et vois où mène
-          chaque branche.
+          <strong className="font-semibold text-ink">Tu joues les deux couleurs</strong> — personne
+          ne répond à ta place : c’est un plateau d’étude, pas une partie. Avance coup par coup, sur
+          l’échiquier ou en cliquant dans les listes, et vois où mène chaque branche.
         </p>
       </div>
 
@@ -220,10 +216,22 @@ export default function OpeningsPage() {
           </div>
 
           <div className="mt-2 flex gap-1.5">
-            <Button size="sm" variant="ghost" icon={<Undo2 size={14} />} onClick={undo} disabled={history.length === 0}>
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={<Undo2 size={14} />}
+              onClick={undo}
+              disabled={history.length === 0}
+            >
               Reculer
             </Button>
-            <Button size="sm" variant="ghost" icon={<RotateCcw size={14} />} onClick={reset} disabled={history.length === 0}>
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={<RotateCcw size={14} />}
+              onClick={reset}
+              disabled={history.length === 0}
+            >
               Position initiale
             </Button>
           </div>
@@ -278,14 +286,14 @@ export default function OpeningsPage() {
                 on croit avoir cassé quelque chose avant d'avoir joué un coup.
               */
               <p className="text-sm leading-relaxed text-muted">
-                Joue un premier coup sur l’échiquier, ou choisis une ouverture dans la liste.
-                Chaque branche porte son nom et son code&nbsp;: tu verras l’ouverture se
-                préciser à mesure que tu avances.
+                Joue un premier coup sur l’échiquier, ou choisis une ouverture dans la liste. Chaque
+                branche porte son nom et son code&nbsp;: tu verras l’ouverture se préciser à mesure
+                que tu avances.
               </p>
             ) : (
               <p className="text-sm text-muted">
-                Cette position n’est pas répertoriée. Joue un coup connu, ou choisis une
-                ouverture dans la liste.
+                Cette position n’est pas répertoriée. Joue un coup connu, ou choisis une ouverture
+                dans la liste.
               </p>
             )}
           </Card>
@@ -409,9 +417,7 @@ export default function OpeningsPage() {
                         <span className="block truncate text-[13px] font-medium">
                           {match.label}
                         </span>
-                        <span className="block truncate text-[11px] text-faint">
-                          {match.name}
-                        </span>
+                        <span className="block truncate text-[11px] text-faint">{match.name}</span>
                       </span>
                       <span className="shrink-0 text-[11px] tabular-nums text-faint">
                         {Math.ceil(match.ply / 2)} coups
@@ -426,8 +432,8 @@ export default function OpeningsPage() {
       </div>
 
       <p className="mt-6 text-center text-[11px] text-faint">
-        Jeu de données <span className="font-mono">lichess-org/chess-openings</span>, domaine
-        public (CC0).
+        Jeu de données <span className="font-mono">lichess-org/chess-openings</span>, domaine public
+        (CC0).
       </p>
     </div>
   )
@@ -515,13 +521,13 @@ function PopularMoves({
             <>
               Les statistiques couvrent les{' '}
               <strong className="font-semibold text-ink">{maxPlies / 2} premiers coups</strong>.
-              Au-delà, chaque position devient trop rare pour qu’un pourcentage veuille dire
-              quelque chose.
+              Au-delà, chaque position devient trop rare pour qu’un pourcentage veuille dire quelque
+              chose.
             </>
           ) : (
             <>
-              Moins de quarante parties à ce niveau depuis cette position : trop peu pour dire
-              quoi que ce soit d’honnête. Tu es déjà sorti des sentiers battus.
+              Moins de quarante parties à ce niveau depuis cette position : trop peu pour dire quoi
+              que ce soit d’honnête. Tu es déjà sorti des sentiers battus.
             </>
           )}
         </p>
@@ -582,8 +588,8 @@ function PopularMoves({
 
           <p className="border-t border-line/60 px-4 py-2 text-[11px] text-faint">
             {total.toLocaleString('fr-FR')} parties · coup {Math.floor(ply / 2) + 1} sur{' '}
-            {maxPlies / 2} couverts · le second pourcentage est le score du camp au trait,
-            nulle comptée pour un demi-point.
+            {maxPlies / 2} couverts · le second pourcentage est le score du camp au trait, nulle
+            comptée pour un demi-point.
           </p>
         </>
       )}

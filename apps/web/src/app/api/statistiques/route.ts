@@ -25,7 +25,10 @@ export async function GET(request: Request) {
   const me = await getCurrentUser()
   if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
 
-  const days = Math.min(3650, Math.max(7, Number(new URL(request.url).searchParams.get('jours') ?? 365)))
+  const days = Math.min(
+    3650,
+    Math.max(7, Number(new URL(request.url).searchParams.get('jours') ?? 365)),
+  )
   const since = new Date(Date.now() - days * 24 * 3600 * 1000)
   const db = getDb()
 

@@ -19,9 +19,7 @@ export interface CompactOpeningsFile {
   format: 'coupparfait-openings-v1' | 'coupparfait-openings-v2'
   source: string
   fields: string[]
-  rows: Array<
-    [epd: string, eco: string, name: string, nameFr: string, ply: number, uci?: string]
-  >
+  rows: Array<[epd: string, eco: string, name: string, nameFr: string, ply: number, uci?: string]>
 }
 
 export interface OpeningMatch {
@@ -243,12 +241,7 @@ export function toEpd(fen: string): string {
 }
 
 function normalise(value: string): string {
-  return value
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[’']/g, '')
-    .trim()
+  return value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, '').trim()
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

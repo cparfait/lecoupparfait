@@ -106,17 +106,18 @@ export function GameOverDialog({
 
   const won = playerColor !== null && result === (playerColor === 'w' ? '1-0' : '0-1')
   const drawn = result === '1/2-1/2'
-  const title = playerColor === null
-    ? drawn
-      ? 'Partie nulle'
-      : result === '1-0'
-        ? 'Les Blancs gagnent'
-        : 'Les Noirs gagnent'
-    : drawn
-      ? 'Partie nulle'
-      : won
-        ? 'Victoire !'
-        : 'Défaite'
+  const title =
+    playerColor === null
+      ? drawn
+        ? 'Partie nulle'
+        : result === '1-0'
+          ? 'Les Blancs gagnent'
+          : 'Les Noirs gagnent'
+      : drawn
+        ? 'Partie nulle'
+        : won
+          ? 'Victoire !'
+          : 'Défaite'
 
   const tone = drawn ? 'var(--q-forced)' : won ? 'var(--q-best)' : 'var(--q-blunder)'
 
@@ -221,9 +222,7 @@ export function GameOverDialog({
           </p>
         )}
 
-        <p className="mt-4 text-xs text-faint">
-          {moves.length} demi-coups joués
-        </p>
+        <p className="mt-4 text-xs text-faint">{moves.length} demi-coups joués</p>
 
         <div className="mt-6 space-y-2">
           {retour && (

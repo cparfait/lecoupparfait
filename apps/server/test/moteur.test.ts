@@ -69,7 +69,6 @@ test('un moteur qui obéit à stop rend son résultat sans être tué', async ()
   assert.equal(moteur.isBusy, false)
 })
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 //  La réserve
 // ─────────────────────────────────────────────────────────────────────────────

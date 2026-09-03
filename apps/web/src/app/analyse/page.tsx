@@ -286,19 +286,7 @@ function ImportScreen({
     } finally {
       abandonRef.current = null
     }
-  }, [
-    parsed,
-    depth,
-    book,
-    locale,
-    camp,
-    handedOver,
-    marquer,
-    onStart,
-    onProgress,
-    onDone,
-    onError,
-  ])
+  }, [parsed, depth, book, locale, camp, handedOver, marquer, onStart, onProgress, onDone, onError])
 
   /**
    * Rouvre une analyse déjà faite.
@@ -465,8 +453,8 @@ function ImportScreen({
           Coup par coup, ce qui a basculé et le meilleur coup, expliqué.
         </span>
         <span className="max-sm:hidden">
-          Colle une partie et découvre, coup par coup, ce qui a basculé — avec le meilleur
-          coup montré sur l’échiquier et la raison écrite en toutes lettres.
+          Colle une partie et découvre, coup par coup, ce qui a basculé — avec le meilleur coup
+          montré sur l’échiquier et la raison écrite en toutes lettres.
         </span>
       </p>
 
@@ -510,12 +498,15 @@ function ImportScreen({
         <Card className="mt-3 overflow-hidden p-5">
           <SectionTitle>Tes parties en ligne</SectionTitle>
           <p className="mt-1 text-xs text-muted">
-            Chess.com ou Lichess, à partir du seul pseudo. Aucun compte n’est nécessaire ici,
-            et rien n’est enregistré.
+            Chess.com ou Lichess, à partir du seul pseudo. Aucun compte n’est nécessaire ici, et
+            rien n’est enregistré.
           </p>
           <div className="mt-3">
             <ImportEnLigne
-              serviceInitial={serviceDemande ?? (chesscomUsername.trim() || !lichessUsername.trim() ? 'chesscom' : 'lichess')}
+              serviceInitial={
+                serviceDemande ??
+                (chesscomUsername.trim() || !lichessUsername.trim() ? 'chesscom' : 'lichess')
+              }
               onChoisir={(pgn, campImporte) => {
                 // Le camp du joueur cherché : c'est lui qui lira l'analyse.
                 setCamp(campImporte)
@@ -542,42 +533,42 @@ function ImportScreen({
             />
             <span className="font-medium">Partie à analyser</span>
             <span className="min-w-0 flex-1 truncate text-xs text-faint">
-              {parsed ? `${parsed.moves.length} demi-coups` : 'Colle un PGN, une liste de coups ou une FEN'}
+              {parsed
+                ? `${parsed.moves.length} demi-coups`
+                : 'Colle un PGN, une liste de coups ou une FEN'}
             </span>
           </summary>
-        <div className="px-5 pb-5">
-          <label htmlFor="pgn" className="sr-only">
-            Partie à analyser
-          </label>
-          <textarea
-            id="pgn"
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
-            rows={8}
-            spellCheck={false}
-            placeholder={
-              '1. e4 e5 2. Nf3 Nc6 3. Bb5 a6…\n\nou un PGN complet, ou une position FEN.'
-            }
-            className="w-full resize-y rounded-[var(--radius-sm)] border border-line bg-surface p-3 font-mono text-[13px] leading-relaxed placeholder:text-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--accent)_30%,transparent)]"
-          />
+          <div className="px-5 pb-5">
+            <label htmlFor="pgn" className="sr-only">
+              Partie à analyser
+            </label>
+            <textarea
+              id="pgn"
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              rows={8}
+              spellCheck={false}
+              placeholder={
+                '1. e4 e5 2. Nf3 Nc6 3. Bb5 a6…\n\nou un PGN complet, ou une position FEN.'
+              }
+              className="w-full resize-y rounded-[var(--radius-sm)] border border-line bg-surface p-3 font-mono text-[13px] leading-relaxed placeholder:text-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--accent)_30%,transparent)]"
+            />
 
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <Button size="sm" variant="ghost" icon={<ClipboardPaste size={14} />} onClick={paste}>
-              Coller
-            </Button>
-            {parsed && (
-              <Chip tone="success">
-                {parsed.moves.length} demi-coups reconnus
-                {parsed.headers.White && parsed.headers.Black
-                  ? ` · ${parsed.headers.White} – ${parsed.headers.Black}`
-                  : ''}
-              </Chip>
-            )}
-            {input.trim() && !parsed && (
-              <Chip tone="danger">Format non reconnu</Chip>
-            )}
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <Button size="sm" variant="ghost" icon={<ClipboardPaste size={14} />} onClick={paste}>
+                Coller
+              </Button>
+              {parsed && (
+                <Chip tone="success">
+                  {parsed.moves.length} demi-coups reconnus
+                  {parsed.headers.White && parsed.headers.Black
+                    ? ` · ${parsed.headers.White} – ${parsed.headers.Black}`
+                    : ''}
+                </Chip>
+              )}
+              {input.trim() && !parsed && <Chip tone="danger">Format non reconnu</Chip>}
+            </div>
           </div>
-        </div>
         </details>
 
         {/* Qui es-tu dans cette partie ?
@@ -599,13 +590,11 @@ function ImportScreen({
           <div className="border-t border-line/60 px-5 py-4">
             <p className="mb-2 text-sm font-medium">Tu joues quel camp&nbsp;?</p>
             <div className="grid grid-cols-3 gap-1.5">
-              {(
-                [
-                  { valeur: 'w' as const, label: parsed.headers.White },
-                  { valeur: 'b' as const, label: parsed.headers.Black },
-                  { valeur: null, label: 'Ni l’un ni l’autre' },
-                ]
-              ).map((choix) => (
+              {[
+                { valeur: 'w' as const, label: parsed.headers.White },
+                { valeur: 'b' as const, label: parsed.headers.Black },
+                { valeur: null, label: 'Ni l’un ni l’autre' },
+              ].map((choix) => (
                 <button
                   key={choix.label}
                   type="button"
@@ -623,8 +612,7 @@ function ImportScreen({
               ))}
             </div>
             <p className="mt-2 text-xs text-faint">
-              Les explications s’adresseront à ce joueur, y compris sur les coups de son
-              adversaire.
+              Les explications s’adresseront à ce joueur, y compris sur les coups de son adversaire.
             </p>
           </div>
         )}
@@ -647,8 +635,8 @@ function ImportScreen({
             }}
           />
           <p className="mt-1.5 text-xs text-faint">
-            Plus profond = plus fiable, mais plus long. 18 suffit pour repérer toutes les
-            fautes d’un joueur de club ; 24 pour départager deux bons coups.
+            Plus profond = plus fiable, mais plus long. 18 suffit pour repérer toutes les fautes
+            d’un joueur de club ; 24 pour départager deux bons coups.
           </p>
         </div>
 
@@ -658,8 +646,8 @@ function ImportScreen({
               d'où il sort ni ce qu'on attend de nous. */}
           {handedOver && !running && parsed && parsed.moves.length > 0 && (
             <p className="mb-2.5 text-[13px] leading-relaxed text-muted">
-              Ta partie est prête, avec ton camp déjà retenu. Règle la profondeur si tu veux,
-              puis lance l’analyse.
+              Ta partie est prête, avec ton camp déjà retenu. Règle la profondeur si tu veux, puis
+              lance l’analyse.
             </p>
           )}
 
@@ -690,10 +678,10 @@ function ImportScreen({
               transforme une lenteur inexpliquée en choix assumé. */}
           {running && (
             <p className="mt-3 text-xs leading-relaxed text-faint">
-              Le moteur analyse chaque position à la profondeur demandée, sur un serveur
-              partagé — comptez une trentaine de secondes pour une partie complète. C’est le
-              prix du service gratuit&nbsp;: aucune limite de nombre, aucune formule payante,
-              mais une seule machine.
+              Le moteur analyse chaque position à la profondeur demandée, sur un serveur partagé —
+              comptez une trentaine de secondes pour une partie complète. C’est le prix du service
+              gratuit&nbsp;: aucune limite de nombre, aucune formule payante, mais une seule
+              machine.
             </p>
           )}
 
@@ -729,8 +717,8 @@ function ImportScreen({
       </Card>
 
       <p className="mt-4 text-center text-xs text-faint">
-        L’analyse tourne d’abord sur le Stockfish natif du serveur. S’il est indisponible,
-        elle se poursuit dans ton navigateur, un peu moins profondément.
+        L’analyse tourne d’abord sur le Stockfish natif du serveur. S’il est indisponible, elle se
+        poursuit dans ton navigateur, un peu moins profondément.
       </p>
 
       <AutresDeLaSection section="analyser" />
@@ -966,7 +954,8 @@ export function ReviewScreen({
     if (!demo) return
     const last = demo.at >= demo.frames.length - 1
     const timer = setTimeout(
-      () => setDemo((current) => (current ? (last ? null : { ...current, at: current.at + 1 }) : null)),
+      () =>
+        setDemo((current) => (current ? (last ? null : { ...current, at: current.at + 1 }) : null)),
       last ? 1400 : 850,
     )
     return () => clearTimeout(timer)
@@ -1209,58 +1198,53 @@ export function ReviewScreen({
    * l'une des deux oublie une correction apportée à l'autre.
    */
   const echiquier = (
-            <ChessBoard
-              fitParentHeight
-              fen={
-                // Pendant la question, on remonte d'un coup : c'est la position
-                // où le choix se posait, pas celle qui a suivi.
-                etatEnigme === 'ouverte' && move
-                  ? move.fenBefore
-                  : (demo?.frames[demo.at]?.fen ??
-                    move?.fenAfter ??
-                    report.moves[0]?.fenBefore ??
-                    '')
+    <ChessBoard
+      fitParentHeight
+      fen={
+        // Pendant la question, on remonte d'un coup : c'est la position
+        // où le choix se posait, pas celle qui a suivi.
+        etatEnigme === 'ouverte' && move
+          ? move.fenBefore
+          : (demo?.frames[demo.at]?.fen ?? move?.fenAfter ?? report.moves[0]?.fenBefore ?? '')
+      }
+      orientation={orientation}
+      playable={etatEnigme === 'ouverte' && move ? move.color : null}
+      legalMoves={coupsLegaux}
+      onMove={etatEnigme === 'ouverte' ? repondre : undefined}
+      lastMove={
+        demo || etatEnigme === 'ouverte'
+          ? null
+          : move
+            ? {
+                from: move.uci.slice(0, 2) as never,
+                to: move.uci.slice(2, 4) as never,
               }
-              orientation={orientation}
-              playable={etatEnigme === 'ouverte' && move ? move.color : null}
-              legalMoves={coupsLegaux}
-              onMove={etatEnigme === 'ouverte' ? repondre : undefined}
-              lastMove={
-                demo || etatEnigme === 'ouverte'
-                  ? null
-                  : move
-                    ? {
-                        from: move.uci.slice(0, 2) as never,
-                        to: move.uci.slice(2, 4) as never,
-                      }
-                    : null
-              }
-              checkSquare={demo || etatEnigme === 'ouverte' ? null : checkSquare}
-              checkmate={!demo && etatEnigme !== 'ouverte' && check.mate}
-              highlights={
-                demo || etatEnigme === 'ouverte'
-                  ? []
-                  : (report.explanations[cursor]?.highlights ?? [])
-              }
-              /* Le verdict sur la case d'arrivée, sauf pendant la
+            : null
+      }
+      checkSquare={demo || etatEnigme === 'ouverte' ? null : checkSquare}
+      checkmate={!demo && etatEnigme !== 'ouverte' && check.mate}
+      highlights={
+        demo || etatEnigme === 'ouverte' ? [] : (report.explanations[cursor]?.highlights ?? [])
+      }
+      /* Le verdict sur la case d'arrivée, sauf pendant la
                  démonstration d'une suite : les coups qu'on y déroule n'ont
                  pas été joués, les juger n'aurait aucun sens. */
-              verdict={
-                // Le verdict nomme la faute : l'afficher pendant qu'on cherche
-                // reviendrait à désigner la case où elle a été commise.
-                demo || !move || etatEnigme === 'ouverte'
-                  ? null
-                  : { square: move.uci.slice(2, 4) as Square, quality: move.quality }
-              }
-              arrows={arrows}
-              // Cliquer la flèche bleue déroule la suite recommandée : c'est
-              // la question qu'elle pose et à laquelle elle ne répondait pas.
-              onArrowClick={(arrow) => {
-                if (arrow.color === 'blue') showBestLine()
-                else if (explanation) speak(explanation.speech)
-              }}
-              instant={!demo}
-            />
+      verdict={
+        // Le verdict nomme la faute : l'afficher pendant qu'on cherche
+        // reviendrait à désigner la case où elle a été commise.
+        demo || !move || etatEnigme === 'ouverte'
+          ? null
+          : { square: move.uci.slice(2, 4) as Square, quality: move.quality }
+      }
+      arrows={arrows}
+      // Cliquer la flèche bleue déroule la suite recommandée : c'est
+      // la question qu'elle pose et à laquelle elle ne répondait pas.
+      onArrowClick={(arrow) => {
+        if (arrow.color === 'blue') showBestLine()
+        else if (explanation) speak(explanation.speech)
+      }}
+      instant={!demo}
+    />
   )
 
   const exportPgn = useCallback(() => {
@@ -1346,15 +1330,11 @@ export function ReviewScreen({
             title="Résultat de la partie"
           >
             <Trophy size={11} aria-hidden />
-            <span className={issue === 'w' ? 'font-bold' : 'opacity-70'}>
-              {noms.w ?? 'Blancs'}
-            </span>
+            <span className={issue === 'w' ? 'font-bold' : 'opacity-70'}>{noms.w ?? 'Blancs'}</span>
             <span className="tabular-nums opacity-90">
               {issue === 'w' ? '1–0' : issue === 'b' ? '0–1' : '½–½'}
             </span>
-            <span className={issue === 'b' ? 'font-bold' : 'opacity-70'}>
-              {noms.b ?? 'Noirs'}
-            </span>
+            <span className={issue === 'b' ? 'font-bold' : 'opacity-70'}>{noms.b ?? 'Noirs'}</span>
           </Chip>
         )}
         {/* `flex-wrap`, et il manquait.
@@ -1433,19 +1413,16 @@ export function ReviewScreen({
           onReveler={reveler}
         />
       ) : (
-      <div className="grille-analyse">
-        {/* ── Échiquier ────────────────────────────────────────────── */}
+        <div className="grille-analyse">
+          {/* ── Échiquier ────────────────────────────────────────────── */}
           <div className="[grid-area:plateau] flex min-h-0 min-w-0 gap-2">
             <EvalBar
               score={move?.scoreAfter ?? null}
               orientation={orientation}
               className="hidden sm:block"
             />
-            <div className="min-w-0 flex-1">
-              {echiquier}
-            </div>
+            <div className="min-w-0 flex-1">{echiquier}</div>
           </div>
-
 
           {/* La courbe passe à la ligne sur téléphone.
 
@@ -1510,164 +1487,164 @@ export function ReviewScreen({
             ))}
           </div>
 
-        {/* ── Panneau latéral ──────────────────────────────────────── */}
-        <div className="[grid-area:aside] mt-4 flex min-h-0 flex-col gap-3 lg:mt-0 paysage:mt-0 paysage:overflow-y-auto paysage:overscroll-contain">
-          {/*
+          {/* ── Panneau latéral ──────────────────────────────────────── */}
+          <div className="[grid-area:aside] mt-4 flex min-h-0 flex-col gap-3 lg:mt-0 paysage:mt-0 paysage:overflow-y-auto paysage:overscroll-contain">
+            {/*
             Le bilan détaillé est sous l'échiquier, donc hors de l'écran : on
             ne voyait qu'une liste de coups, et l'analyse passait pour absente.
             Ce résumé la met là où le regard se pose.
           */}
-          <AccuracySummary report={report} noms={noms} issue={issue} />
+            <AccuracySummary report={report} noms={noms} issue={issue} />
 
-          {/*
+            {/*
             Une partie ne se perd pas partout : elle se perd à deux ou trois
             endroits. Les nommer vaut mieux que de laisser dérouler vingt coups
             pour les retrouver.
           */}
-          <KeyMoments report={report} format={format} onSeek={setCursor} />
+            <KeyMoments report={report} format={format} onSeek={setCursor} />
 
-          {/* Verdict du coup courant */}
-          {move && style && explanation && (
-            <Card glow className="overflow-hidden">
-              <div
-                className="h-1"
-                style={{ background: `var(--q-${style.token})` }}
-                aria-hidden
-              />
-              <div className="p-4">
-                <div className="flex items-start gap-3">
-                  <span
-                    className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-bold"
-                    style={{
-                      background: `color-mix(in oklab, var(--q-${style.token}) 20%, transparent)`,
-                      color: `var(--q-${style.token})`,
-                    }}
-                    aria-hidden
-                    title={`${style.label.fr} — ${style.description.fr}`}
-                  >
-                    {style.glyph}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold leading-snug">{explanation.headline}</p>
-                    <p className="mt-0.5 text-xs tabular-nums text-faint">
-                      Coup {move.moveNumber} · {move.color === 'w' ? 'Blancs' : 'Noirs'} ·{' '}
-                      {formatScore(move.scoreBefore)} → {formatScore(move.scoreAfter)}
-                      {/* Même seuil que la flèche et que le texte : sous
+            {/* Verdict du coup courant */}
+            {move && style && explanation && (
+              <Card glow className="overflow-hidden">
+                <div
+                  className="h-1"
+                  style={{ background: `var(--q-${style.token})` }}
+                  aria-hidden
+                />
+                <div className="p-4">
+                  <div className="flex items-start gap-3">
+                    <span
+                      className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-bold"
+                      style={{
+                        background: `color-mix(in oklab, var(--q-${style.token}) 20%, transparent)`,
+                        color: `var(--q-${style.token})`,
+                      }}
+                      aria-hidden
+                      title={`${style.label.fr} — ${style.description.fr}`}
+                    >
+                      {style.glyph}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold leading-snug">{explanation.headline}</p>
+                      <p className="mt-0.5 text-xs tabular-nums text-faint">
+                        Coup {move.moveNumber} · {move.color === 'w' ? 'Blancs' : 'Noirs'} ·{' '}
+                        {formatScore(move.scoreBefore)} → {formatScore(move.scoreAfter)}
+                        {/* Même seuil que la flèche et que le texte : sous
                           `SEUIL_MEILLEUR_COUP`, on ne présente pas les
                           préférences du moteur comme une perte. */}
-                      {meriteUnMeilleurCoup(move.quality, move.winLoss) &&
-                        ` · −${move.winLoss.toFixed(0)} pts de victoire`}
-                    </p>
+                        {meriteUnMeilleurCoup(move.quality, move.winLoss) &&
+                          ` · −${move.winLoss.toFixed(0)} pts de victoire`}
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="mt-3 space-y-1.5">
-                  {explanation.body.map((paragraph, index) => (
-                    <TexteAvecTermes
-                      key={index}
-                      texte={paragraph}
-                      className="text-[13px] leading-relaxed text-muted"
-                    />
-                  ))}
-                </div>
-
-                {explanation.motifs.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {explanation.motifs.map((motif) => (
-                      <Chip key={motif.id} tone="accent" title={motif.definition}>
-                        {motif.name}
-                      </Chip>
+                  <div className="mt-3 space-y-1.5">
+                    {explanation.body.map((paragraph, index) => (
+                      <TexteAvecTermes
+                        key={index}
+                        texte={paragraph}
+                        className="text-[13px] leading-relaxed text-muted"
+                      />
                     ))}
                   </div>
-                )}
 
-                {move.bestLine && move.bestLine.length > 0 && move.bestMove && (
-                  <div className="mt-3 rounded-[var(--radius-sm)] bg-surface p-2.5">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-                        Suite recommandée
-                      </p>
-                      <span className="flex shrink-0 items-center gap-3">
-                        {/* Deux gestes, et ils ne demandent pas la même chose.
+                  {explanation.motifs.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {explanation.motifs.map((motif) => (
+                        <Chip key={motif.id} tone="accent" title={motif.definition}>
+                          {motif.name}
+                        </Chip>
+                      ))}
+                    </div>
+                  )}
+
+                  {move.bestLine && move.bestLine.length > 0 && move.bestMove && (
+                    <div className="mt-3 rounded-[var(--radius-sm)] bg-surface p-2.5">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
+                          Suite recommandée
+                        </p>
+                        <span className="flex shrink-0 items-center gap-3">
+                          {/* Deux gestes, et ils ne demandent pas la même chose.
                             « Montrer » déplace les pièces — pour qui n'arrive
                             pas à lire une ligne en notation. « Pourquoi »
                             explique — pour qui la lit très bien mais ne voit
                             pas ce qu'elle apporte. */}
-                        <button
-                          type="button"
-                          onClick={() => setPourquoiOuvert((ouvert) => !ouvert)}
-                          aria-expanded={pourquoiOuvert}
-                          className="text-[11px] font-semibold text-accent transition-colors hover:underline"
-                        >
-                          {pourquoiOuvert ? 'Masquer' : 'Pourquoi ?'}
-                        </button>
-                        {/* Lire « Cf3 Cc6 d4 exd4 » suppose de déplacer les
+                          <button
+                            type="button"
+                            onClick={() => setPourquoiOuvert((ouvert) => !ouvert)}
+                            aria-expanded={pourquoiOuvert}
+                            className="text-[11px] font-semibold text-accent transition-colors hover:underline"
+                          >
+                            {pourquoiOuvert ? 'Masquer' : 'Pourquoi ?'}
+                          </button>
+                          {/* Lire « Cf3 Cc6 d4 exd4 » suppose de déplacer les
                             pièces dans sa tête. On les déplace pour de vrai. */}
-                        <button
-                          type="button"
-                          onClick={showBestLine}
-                          className="text-[11px] font-semibold text-accent transition-colors hover:underline"
-                        >
-                          {demo ? `${demo.at + 1} / ${demo.frames.length}` : '▶ Montrer'}
-                        </button>
-                      </span>
-                    </div>
-                    <p className="mt-1 font-mono text-[13px]">
-                      {move.bestLine.map((san, index) => (
-                        <span
-                          key={index}
-                          className={clsx(
-                            'mr-2 rounded px-0.5',
-                            demo && index === demo.at && 'bg-accent/25 text-ink',
-                          )}
-                        >
-                          {format(san)}
+                          <button
+                            type="button"
+                            onClick={showBestLine}
+                            className="text-[11px] font-semibold text-accent transition-colors hover:underline"
+                          >
+                            {demo ? `${demo.at + 1} / ${demo.frames.length}` : '▶ Montrer'}
+                          </button>
                         </span>
-                      ))}
-                    </p>
+                      </div>
+                      <p className="mt-1 font-mono text-[13px]">
+                        {move.bestLine.map((san, index) => (
+                          <span
+                            key={index}
+                            className={clsx(
+                              'mr-2 rounded px-0.5',
+                              demo && index === demo.at && 'bg-accent/25 text-ink',
+                            )}
+                          >
+                            {format(san)}
+                          </span>
+                        ))}
+                      </p>
 
-                    {/* L'explication du coup du moteur, écrite par la même
+                      {/* L'explication du coup du moteur, écrite par la même
                         machinerie que celle du coup joué — verdict, cause,
                         conséquence. Le liseré à gauche dit qu'elle porte sur le
                         coup recommandé et non sur celui de la partie : sans lui,
                         deux explications se suivraient sans qu'on sache laquelle
                         parle de quoi. */}
-                    {pourquoiOuvert &&
-                      (pourquoi ? (
-                        <div className="mt-2.5 border-l-2 border-accent/50 pl-3">
-                          <p className="text-[13px] font-semibold leading-snug">
-                            {pourquoi.headline}
-                          </p>
-                          <div className="mt-1 space-y-1">
-                            {pourquoi.body.map((paragraphe, index) => (
-                              <p key={index} className="text-[13px] leading-relaxed text-muted">
-                                {paragraphe}
-                              </p>
-                            ))}
-                          </div>
-                          {pourquoi.motifs.length > 0 && (
-                            <div className="mt-2 flex flex-wrap gap-1.5">
-                              {pourquoi.motifs.map((motif) => (
-                                <Chip key={motif.id} tone="accent" title={motif.definition}>
-                                  {motif.name}
-                                </Chip>
+                      {pourquoiOuvert &&
+                        (pourquoi ? (
+                          <div className="mt-2.5 border-l-2 border-accent/50 pl-3">
+                            <p className="text-[13px] font-semibold leading-snug">
+                              {pourquoi.headline}
+                            </p>
+                            <div className="mt-1 space-y-1">
+                              {pourquoi.body.map((paragraphe, index) => (
+                                <p key={index} className="text-[13px] leading-relaxed text-muted">
+                                  {paragraphe}
+                                </p>
                               ))}
                             </div>
-                          )}
-                        </div>
-                      ) : (
-                        // `explainRecommendedMove` rend `null` quand le coup du
-                        // moteur ne se rejoue pas sur la position. On le dit
-                        // plutôt que de laisser un bouton qui n'ouvre rien.
-                        <p className="mt-2.5 text-[13px] leading-relaxed text-faint">
-                          Ce coup ne se rejoue pas sur cette position : impossible de
-                          l’expliquer sans risquer d’inventer.
-                        </p>
-                      ))}
-                  </div>
-                )}
+                            {pourquoi.motifs.length > 0 && (
+                              <div className="mt-2 flex flex-wrap gap-1.5">
+                                {pourquoi.motifs.map((motif) => (
+                                  <Chip key={motif.id} tone="accent" title={motif.definition}>
+                                    {motif.name}
+                                  </Chip>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          // `explainRecommendedMove` rend `null` quand le coup du
+                          // moteur ne se rejoue pas sur la position. On le dit
+                          // plutôt que de laisser un bouton qui n'ouvre rien.
+                          <p className="mt-2.5 text-[13px] leading-relaxed text-faint">
+                            Ce coup ne se rejoue pas sur cette position : impossible de l’expliquer
+                            sans risquer d’inventer.
+                          </p>
+                        ))}
+                    </div>
+                  )}
 
-                {/* Ce qu'on avait sous la main, classé par le moteur.
+                  {/* Ce qu'on avait sous la main, classé par le moteur.
                 
                     La relecture ne montrait que la suite recommandée : un seul
                     coup, présenté comme *le* bon. C'est insuffisant pour
@@ -1681,124 +1658,130 @@ export function ReviewScreen({
                     La partie commentée le montrait déjà pendant la partie. Il
                     n'y avait aucune raison que la relecture, qui est le moment
                     où l'on prend le temps de comprendre, en montre moins. */}
-                {move.alternatives && move.alternatives.length > 1 && (
-                  <div className="mt-3 overflow-hidden rounded-[var(--radius-sm)] border border-line/60">
-                    <p className="border-b border-line/60 bg-surface px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
-                      Ce que tu pouvais jouer
-                    </p>
-                    <ul>
-                      {move.alternatives.map((option, rang) => {
-                        const joue = option.uci === move.uci
-                        // Mêmes teintes que les flèches de l'échiquier, et
-                        // prises dans la même table : `ANNOTATION_COLORS`. Les
-                        // recopier en dur ici les ferait diverger le jour où
-                        // l'une des deux bougerait — c'est exactement ainsi que
-                        // le rang 1 s'était retrouvé vert face à une flèche
-                        // bleue.
-                        const teinte = joue
-                          ? ANNOTATION_COLORS.green
-                          : rang === 0
-                            ? ANNOTATION_COLORS.blue
-                            : null
-                        return (
-                          <li
-                            key={option.uci}
-                            className="flex items-center gap-2.5 border-l-2 px-3 py-1.5"
-                            style={{
-                              borderLeftColor: teinte ?? 'transparent',
-                              background: teinte
-                                ? `color-mix(in oklab, ${teinte} 9%, transparent)`
-                                : undefined,
-                            }}
-                          >
-                            <span
-                              className={clsx(
-                                'grid h-5 w-5 shrink-0 place-items-center rounded text-[10px] font-bold',
-                                !teinte && 'bg-surface-strong text-faint',
+                  {move.alternatives && move.alternatives.length > 1 && (
+                    <div className="mt-3 overflow-hidden rounded-[var(--radius-sm)] border border-line/60">
+                      <p className="border-b border-line/60 bg-surface px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
+                        Ce que tu pouvais jouer
+                      </p>
+                      <ul>
+                        {move.alternatives.map((option, rang) => {
+                          const joue = option.uci === move.uci
+                          // Mêmes teintes que les flèches de l'échiquier, et
+                          // prises dans la même table : `ANNOTATION_COLORS`. Les
+                          // recopier en dur ici les ferait diverger le jour où
+                          // l'une des deux bougerait — c'est exactement ainsi que
+                          // le rang 1 s'était retrouvé vert face à une flèche
+                          // bleue.
+                          const teinte = joue
+                            ? ANNOTATION_COLORS.green
+                            : rang === 0
+                              ? ANNOTATION_COLORS.blue
+                              : null
+                          return (
+                            <li
+                              key={option.uci}
+                              className="flex items-center gap-2.5 border-l-2 px-3 py-1.5"
+                              style={{
+                                borderLeftColor: teinte ?? 'transparent',
+                                background: teinte
+                                  ? `color-mix(in oklab, ${teinte} 9%, transparent)`
+                                  : undefined,
+                              }}
+                            >
+                              <span
+                                className={clsx(
+                                  'grid h-5 w-5 shrink-0 place-items-center rounded text-[10px] font-bold',
+                                  !teinte && 'bg-surface-strong text-faint',
+                                )}
+                                style={
+                                  teinte
+                                    ? {
+                                        background: `color-mix(in oklab, ${teinte} 25%, transparent)`,
+                                        color: teinte,
+                                      }
+                                    : undefined
+                                }
+                                aria-hidden
+                                title={`Coup classé ${rang + 1} sur ${move.alternatives!.length} par le moteur`}
+                              >
+                                {rang + 1}
+                              </span>
+                              <span
+                                className="w-16 shrink-0 font-mono text-[13px] font-semibold"
+                                title="Le coup, en notation d'échecs"
+                              >
+                                {format(option.san)}
+                              </span>
+                              <span
+                                className="w-12 shrink-0 text-xs tabular-nums text-muted"
+                                title="Évaluation de la position après ce coup, en pions. Positif : les Blancs sont mieux."
+                              >
+                                {formatScore(option.score)}
+                              </span>
+                              <span
+                                className="min-w-0 flex-1 truncate text-[12px] text-faint"
+                                title={`Suite prévue par le moteur : ${option.line
+                                  .slice(1, 6)
+                                  .map((san) => format(san))
+                                  .join(' ')}`}
+                              >
+                                {option.line
+                                  .slice(1, 4)
+                                  .map((san) => format(san))
+                                  .join(' ')}
+                              </span>
+                              {joue && (
+                                <Chip
+                                  className="shrink-0 border-transparent"
+                                  title="Le coup que tu as joué dans la partie"
+                                >
+                                  joué
+                                </Chip>
                               )}
-                              style={
-                                teinte
-                                  ? {
-                                      background: `color-mix(in oklab, ${teinte} 25%, transparent)`,
-                                      color: teinte,
-                                    }
-                                  : undefined
-                              }
-                              aria-hidden
-                              title={`Coup classé ${rang + 1} sur ${move.alternatives!.length} par le moteur`}
-                            >
-                              {rang + 1}
-                            </span>
-                            <span
-                              className="w-16 shrink-0 font-mono text-[13px] font-semibold"
-                              title="Le coup, en notation d'échecs"
-                            >
-                              {format(option.san)}
-                            </span>
-                            <span
-                              className="w-12 shrink-0 text-xs tabular-nums text-muted"
-                              title="Évaluation de la position après ce coup, en pions. Positif : les Blancs sont mieux."
-                            >
-                              {formatScore(option.score)}
-                            </span>
-                            <span
-                              className="min-w-0 flex-1 truncate text-[12px] text-faint"
-                              title={`Suite prévue par le moteur : ${option.line.slice(1, 6).map((san) => format(san)).join(' ')}`}
-                            >
-                              {option.line.slice(1, 4).map((san) => format(san)).join(' ')}
-                            </span>
-                            {joue && (
-                              <Chip
-                                className="shrink-0 border-transparent"
-                                title="Le coup que tu as joué dans la partie"
-                              >
-                                joué
-                              </Chip>
-                            )}
-                            {!joue && rang === 0 && (
-                              <Chip
-                                className="shrink-0 border-transparent"
-                                title="Le premier choix du moteur dans cette position — celui qu'il fallait jouer"
-                              >
-                                meilleur
-                              </Chip>
-                            )}
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  </div>
-                )}
+                              {!joue && rang === 0 && (
+                                <Chip
+                                  className="shrink-0 border-transparent"
+                                  title="Le premier choix du moteur dans cette position — celui qu'il fallait jouer"
+                                >
+                                  meilleur
+                                </Chip>
+                              )}
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    </div>
+                  )}
 
-                {/* L'explication ci-dessus est complète et vérifiée. Ce qui
+                  {/* L'explication ci-dessus est complète et vérifiée. Ce qui
                     suit permet d'aller au-delà quand elle ne répond pas à la
                     question qu'on se pose — et n'apparaît que si l'assistant
                     a été configuré. */}
-                <QuestionLibre
-                  contexte={contexteDuCoupAnalyse(move, explanation, {
-                    locale,
-                    notation,
-                    ouverture: report.opening?.name ?? null,
-                  })}
-                  questionParDefaut={questionApprofondir(locale)}
-                />
-              </div>
-            </Card>
-          )}
+                  <QuestionLibre
+                    contexte={contexteDuCoupAnalyse(move, explanation, {
+                      locale,
+                      notation,
+                      ouverture: report.opening?.name ?? null,
+                    })}
+                    questionParDefaut={questionApprofondir(locale)}
+                  />
+                </div>
+              </Card>
+            )}
 
-          <Card className="flex min-h-[240px] flex-1 flex-col overflow-hidden">
-            <MoveList
-              moves={playedMoves}
-              cursor={cursor}
-              onSeek={(ply) => setCursor(Math.max(0, Math.min(report.moves.length - 1, ply)))}
-              qualities={qualities}
-              autoplay={autoplay}
-              onToggleAutoplay={() => setAutoplay((value) => !value)}
-              className="min-h-0 flex-1"
-            />
-          </Card>
+            <Card className="flex min-h-[240px] flex-1 flex-col overflow-hidden">
+              <MoveList
+                moves={playedMoves}
+                cursor={cursor}
+                onSeek={(ply) => setCursor(Math.max(0, Math.min(report.moves.length - 1, ply)))}
+                qualities={qualities}
+                autoplay={autoplay}
+                onToggleAutoplay={() => setAutoplay((value) => !value)}
+                className="min-h-0 flex-1"
+              />
+            </Card>
+          </div>
         </div>
-      </div>
       )}
     </div>
   )
@@ -1835,7 +1818,9 @@ function AccuracySummary({
             <span
               className={clsx(
                 'h-2.5 w-2.5 shrink-0 rounded-full',
-                colour === 'w' ? 'bg-[var(--eval-white)]' : 'bg-[var(--eval-black)] ring-1 ring-line',
+                colour === 'w'
+                  ? 'bg-[var(--eval-white)]'
+                  : 'bg-[var(--eval-black)] ring-1 ring-line',
               )}
               aria-hidden
             />
@@ -1901,8 +1886,7 @@ function KeyMoments({
     return (
       <Card className="p-3">
         <p className="text-[13px] leading-snug text-muted">
-          Aucun coup n’a fait basculer la partie : l’avantage n’a jamais changé de camp
-          brutalement.
+          Aucun coup n’a fait basculer la partie : l’avantage n’a jamais changé de camp brutalement.
         </p>
       </Card>
     )

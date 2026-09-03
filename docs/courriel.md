@@ -72,12 +72,12 @@ Rien dans les journaux, aucun fichier dans le volume ? C'est que
 et n'échoue nulle part. C'est le pire des cas — tout paraît fonctionner, et les
 messages sont jetés à l'arrivée.
 
-| Sous-domaine | Type | Valeur |
-|---|---|---|
-| `mail` | A | l'IP publique du serveur |
-| `@` | TXT | `v=spf1 ip4:<ton-IP> -all` |
-| `mail._domainkey` | TXT | la clé relevée ci-dessus |
-| `_dmarc` | TXT | `v=DMARC1; p=none; rua=mailto:postmaster@coupparfait.example` |
+| Sous-domaine      | Type | Valeur                                                        |
+| ----------------- | ---- | ------------------------------------------------------------- |
+| `mail`            | A    | l'IP publique du serveur                                      |
+| `@`               | TXT  | `v=spf1 ip4:<ton-IP> -all`                                    |
+| `mail._domainkey` | TXT  | la clé relevée ci-dessus                                      |
+| `_dmarc`          | TXT  | `v=DMARC1; p=none; rua=mailto:postmaster@coupparfait.example` |
 
 Et un cinquième, qui ne se pose pas dans la zone : le **PTR** (DNS inverse) de
 l'IP doit pointer sur `mail.coupparfait.example`. Il se règle chez l'hébergeur,

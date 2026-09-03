@@ -34,7 +34,7 @@ cinq points prévus :
    ```
 
    Le premier onglet garde le sien, déjà lu à la connexion. Résultat : `1. e4
-   e5` où `e5` était posé d'avance, parti à la seconde où le coup adverse est
+e5` où `e5` était posé d'avance, parti à la seconde où le coup adverse est
    arrivé. Et hors de son tour, rien ne part : la liste des coups reste vide
    pendant que les deux cases sont bleues.
 

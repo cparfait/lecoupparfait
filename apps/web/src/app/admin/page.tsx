@@ -322,7 +322,9 @@ function LigneCompte({
                 size="sm"
                 variant="ghost"
                 disabled={occupe}
-                onClick={() => onAgir(compte, compte.role === 'admin' ? 'retrograder' : 'promouvoir')}
+                onClick={() =>
+                  onAgir(compte, compte.role === 'admin' ? 'retrograder' : 'promouvoir')
+                }
               >
                 {compte.role === 'admin' ? 'Rétrograder' : 'Promouvoir'}
               </Button>
@@ -355,9 +357,8 @@ function LigneCompte({
       {ouvert === 'motDePasse' && (
         <div className="mt-3 border-t border-line/60 pt-3">
           <p className="text-[12px] leading-relaxed text-muted">
-            Choisis un mot de passe provisoire et transmets-le à la personne. Toutes ses
-            sessions se ferment. C’est la porte de secours quand la messagerie n’est pas
-            configurée.
+            Choisis un mot de passe provisoire et transmets-le à la personne. Toutes ses sessions se
+            ferment. C’est la porte de secours quand la messagerie n’est pas configurée.
           </p>
           <div className="mt-2 flex items-end gap-2">
             <div className="min-w-0 flex-1">
@@ -390,9 +391,9 @@ function LigneCompte({
           <p className="flex items-start gap-2 text-[12px] leading-relaxed text-[var(--q-blunder)]">
             <AlertTriangle size={14} className="mt-0.5 shrink-0" aria-hidden />
             <span>
-              Le pseudo, l’adresse et le mot de passe sont effacés sans retour possible. Les
-              parties restent — elles appartiennent aussi aux adversaires, et les retirer
-              creuserait des trous dans leur historique.
+              Le pseudo, l’adresse et le mot de passe sont effacés sans retour possible. Les parties
+              restent — elles appartiennent aussi aux adversaires, et les retirer creuserait des
+              trous dans leur historique.
             </span>
           </p>
           <div className="mt-2 flex items-end gap-2">
@@ -500,9 +501,7 @@ function OngletContenus() {
                   variant="ghost"
                   disabled={partie.rated}
                   title={
-                    partie.rated
-                      ? 'Partie classée : non supprimable'
-                      : 'Supprimer cette partie'
+                    partie.rated ? 'Partie classée : non supprimable' : 'Supprimer cette partie'
                   }
                   icon={<Trash2 size={13} />}
                   onClick={() => void supprimer(`partie=${encodeURIComponent(partie.slug)}`)}
@@ -628,10 +627,26 @@ function OngletSysteme() {
   return (
     <div className="space-y-5">
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        <Mesure titre="Comptes" valeur={sante.base.comptes} note={`+${sante.base.inscritsCetteSemaine ?? 0} cette semaine`} />
-        <Mesure titre="Parties" valeur={sante.base.parties} note={`+${sante.base.parties24h ?? 0} depuis hier`} />
-        <Mesure titre="Vus depuis 24 h" valeur={sante.base.vus24h} note={`${sante.base.sessionsActives ?? 0} sessions ouvertes`} />
-        <Mesure titre="Analyses conservées" valeur={sante.base.analysesConservees} note={`${(sante.base.puzzles ?? 0).toLocaleString('fr-FR')} puzzles`} />
+        <Mesure
+          titre="Comptes"
+          valeur={sante.base.comptes}
+          note={`+${sante.base.inscritsCetteSemaine ?? 0} cette semaine`}
+        />
+        <Mesure
+          titre="Parties"
+          valeur={sante.base.parties}
+          note={`+${sante.base.parties24h ?? 0} depuis hier`}
+        />
+        <Mesure
+          titre="Vus depuis 24 h"
+          valeur={sante.base.vus24h}
+          note={`${sante.base.sessionsActives ?? 0} sessions ouvertes`}
+        />
+        <Mesure
+          titre="Analyses conservées"
+          valeur={sante.base.analysesConservees}
+          note={`${(sante.base.puzzles ?? 0).toLocaleString('fr-FR')} puzzles`}
+        />
       </div>
 
       <Card className="p-4">
@@ -705,8 +720,8 @@ function OngletSysteme() {
             <>
               <code className="text-ink">ADMIN_USERNAMES</code> désigne{' '}
               <strong>{sante.administration.pseudosPrivilegies.join(', ')}</strong>. Ces comptes
-              restent administrateurs quoi qu’il arrive en base — c’est ce qui empêche de
-              s’enfermer dehors après une restauration de sauvegarde.
+              restent administrateurs quoi qu’il arrive en base — c’est ce qui empêche de s’enfermer
+              dehors après une restauration de sauvegarde.
             </>
           ) : (
             <>
@@ -730,15 +745,7 @@ function OngletSysteme() {
   )
 }
 
-function Mesure({
-  titre,
-  valeur,
-  note,
-}: {
-  titre: string
-  valeur: number | null
-  note: string
-}) {
+function Mesure({ titre, valeur, note }: { titre: string; valeur: number | null; note: string }) {
   return (
     <Card className="p-3">
       <p className="text-[11px] uppercase tracking-wide text-faint">{titre}</p>

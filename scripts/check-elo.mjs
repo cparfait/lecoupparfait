@@ -51,7 +51,9 @@ for (const { acpl, accuracy, elo } of ELO_ANCHORS) {
     `obtenu ${obtenu}, écart de ${ecart}`,
   )
   if (ecart <= TOLERANCE) {
-    console.log(`  ✓ ${String(acpl).padStart(3)} cp · ${String(accuracy).padStart(2)} % → ${obtenu} Elo (visé ${elo})`)
+    console.log(
+      `  ✓ ${String(acpl).padStart(3)} cp · ${String(accuracy).padStart(2)} % → ${obtenu} Elo (visé ${elo})`,
+    )
   }
 }
 

@@ -14,14 +14,7 @@
 
 import { useEffect, useRef } from 'react'
 import clsx from 'clsx'
-import {
-  ChevronFirst,
-  ChevronLast,
-  ChevronLeft,
-  ChevronRight,
-  Pause,
-  Play,
-} from 'lucide-react'
+import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
 import type { MoveQuality } from '@coupparfait/core'
 import { QUALITY_STYLES } from '@coupparfait/core'
 import { groupMoves, type PlayedMove } from '@/lib/game/useChessGame.ts'
@@ -265,7 +258,6 @@ export function MoveList({
           </ol>
         )}
       </div>
-
     </div>
   )
 }
@@ -300,10 +292,7 @@ const MoveCell = function MoveCell({
   // Les coups ordinaires ne méritent pas de pastille : on ne signale que ce qui
   // sort de l'ordinaire, sinon la liste devient un sapin de Noël illisible.
   const worthShowing =
-    style &&
-    quality !== 'excellent' &&
-    quality !== 'good' &&
-    quality !== 'forced'
+    style && quality !== 'excellent' && quality !== 'good' && quality !== 'forced'
 
   return (
     <button
@@ -317,7 +306,9 @@ const MoveCell = function MoveCell({
         // Au doigt, la ligne s'épaissit jusqu'à la taille d'un pouce ; la
         // liste s'allonge d'autant, mais elle défile.
         'flex items-center gap-1 px-2 py-1.5 text-left font-medium transition-colors pointer-coarse:py-3',
-        active ? 'bg-accent/18 text-ink ring-1 ring-inset ring-accent/40' : 'hover:bg-surface-hover',
+        active
+          ? 'bg-accent/18 text-ink ring-1 ring-inset ring-accent/40'
+          : 'hover:bg-surface-hover',
       )}
       aria-current={active ? 'true' : undefined}
     >

@@ -50,7 +50,10 @@ export async function GET(request: Request) {
       )
       // Le pseudo exact d'abord, puis par ordre alphabétique : celui qu'on
       // cherche est presque toujours celui qu'on a tapé en entier.
-      .orderBy(sql`case when ${users.usernameLower} = ${query.toLowerCase()} then 0 else 1 end`, asc(users.usernameLower))
+      .orderBy(
+        sql`case when ${users.usernameLower} = ${query.toLowerCase()} then 0 else 1 end`,
+        asc(users.usernameLower),
+      )
       .limit(LIMIT)
 
     return NextResponse.json({ players: rows })

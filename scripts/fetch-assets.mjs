@@ -27,8 +27,18 @@ const RAW = 'https://raw.githubusercontent.com/lichess-org/lila/master/public'
 
 /** Jeux de pièces retenus, avec leur licence et leur auteur. */
 const PIECE_SETS = [
-  { id: 'staunton', source: 'cburnett', author: 'Colin M. L. Burnett', licence: 'GPL-2.0-or-later' },
-  { id: 'merida', source: 'merida', author: 'Armando Hernandez Marroquin', licence: 'GPL-2.0-or-later' },
+  {
+    id: 'staunton',
+    source: 'cburnett',
+    author: 'Colin M. L. Burnett',
+    licence: 'GPL-2.0-or-later',
+  },
+  {
+    id: 'merida',
+    source: 'merida',
+    author: 'Armando Hernandez Marroquin',
+    licence: 'GPL-2.0-or-later',
+  },
   { id: 'alpha', source: 'alpha', author: 'les auteurs de lila', licence: 'AGPL-3.0-or-later' },
   { id: 'chessnut', source: 'chessnut', author: 'Alexis Luengas', licence: 'Apache-2.0' },
   { id: 'fantasy', source: 'fantasy', author: 'Maurizio Monge', licence: 'MIT' },

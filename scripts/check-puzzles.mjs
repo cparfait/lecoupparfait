@@ -175,7 +175,9 @@ const [{ n: total }] = await sql`select count(*)::int as n from puzzles`
 const aExaminer = LIMITE === 0 ? Math.max(0, total - DEPART) : Math.min(LIMITE, total - DEPART)
 
 console.log(`\n♟  Contrôle des puzzles\n`)
-console.log(`   ${total.toLocaleString('fr-FR')} en base, ${aExaminer.toLocaleString('fr-FR')} à examiner.\n`)
+console.log(
+  `   ${total.toLocaleString('fr-FR')} en base, ${aExaminer.toLocaleString('fr-FR')} à examiner.\n`,
+)
 
 const rejets = []
 const parRaison = new Map()
@@ -214,7 +216,9 @@ const invalides = [...parRaison.values()].reduce((a, b) => a + b, 0)
 if (invalides === 0) {
   console.log('   ✓ Aucun puzzle invalide.\n')
 } else {
-  console.log(`   ✗ ${invalides.toLocaleString('fr-FR')} puzzles invalides sur ${vus.toLocaleString('fr-FR')}.\n`)
+  console.log(
+    `   ✗ ${invalides.toLocaleString('fr-FR')} puzzles invalides sur ${vus.toLocaleString('fr-FR')}.\n`,
+  )
   for (const [raison, compte] of [...parRaison].sort((a, b) => b[1] - a[1])) {
     console.log(`     ${String(compte).padStart(7)} · ${raison}`)
   }

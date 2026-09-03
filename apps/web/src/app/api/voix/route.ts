@@ -181,7 +181,10 @@ async function synthesise(
  * lecteurs audio. Toute autre forme est ignorée, ce qui revient à servir le
  * fichier entier : correct, simplement moins efficace.
  */
-function parseRange(header: string | null | undefined, total: number): { start: number; end: number } | null {
+function parseRange(
+  header: string | null | undefined,
+  total: number,
+): { start: number; end: number } | null {
   if (!header) return null
 
   const match = /^bytes=(\d*)-(\d*)$/.exec(header.trim())

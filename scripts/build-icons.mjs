@@ -237,9 +237,7 @@ const { width: li, height: hi } = await sharp(insigne).metadata()
 await sharp({
   create: { width: 96, height: 96, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
 })
-  .composite([
-    { input: insigne, left: Math.round((96 - li) / 2), top: Math.round((96 - hi) / 2) },
-  ])
+  .composite([{ input: insigne, left: Math.round((96 - li) / 2), top: Math.round((96 - hi) / 2) }])
   .png({ compressionLevel: 9 })
   .toFile(join(iconsDir, 'badge-96.png'))
 console.log('  ✓ badge-96.png')
@@ -268,7 +266,9 @@ const card = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" 
   <text x="90" y="386" font-family="Georgia, serif" font-size="86" font-weight="700" fill="#9b83ff">enfin expliqués.</text>
   <text x="94" y="452" font-family="Helvetica, Arial, sans-serif" font-size="30" fill="#a9a7bd">Le Coup Parfait — libre, gratuit, sans publicité</text>
 </svg>`
-await sharp(Buffer.from(card)).png().toFile(join(root, 'apps', 'web', 'public', 'og-image.png'))
+await sharp(Buffer.from(card))
+  .png()
+  .toFile(join(root, 'apps', 'web', 'public', 'og-image.png'))
 console.log('  ✓ og-image.png')
 
 writeFileSync(

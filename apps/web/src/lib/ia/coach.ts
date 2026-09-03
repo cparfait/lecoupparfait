@@ -28,7 +28,9 @@ export function messageErreur(erreur: unknown): string {
   // Modèle inconnu, retiré, ou hors du périmètre de la clé. Les fournisseurs
   // répondent 404, parfois 400 avec un libellé explicite. Sans ce cas, rien
   // n'indique qu'il faut simplement changer de modèle.
-  if (/no longer available|not found for API version|model.*(not found|does not exist)/i.test(message)) {
+  if (
+    /no longer available|not found for API version|model.*(not found|does not exist)/i.test(message)
+  ) {
     return 'Ce modèle n’est pas disponible pour ta clé. Choisis-en un autre dans la liste.'
   }
 
@@ -69,10 +71,7 @@ export async function demander(options: {
   maxTokens: number
 }): Promise<string> {
   const { provider, model, apiKey, locale, messages, maxTokens } = options
-  const complet: AIMessage[] = [
-    { role: 'system', content: systemPrompt(locale) },
-    ...messages,
-  ]
+  const complet: AIMessage[] = [{ role: 'system', content: systemPrompt(locale) }, ...messages]
   const brut = await appelChat(
     provider,
     provider.chatUrl(model, apiKey),
@@ -99,10 +98,7 @@ export async function demanderEnFlux(options: {
   onFragment: (texte: string) => void
 }): Promise<string> {
   const { provider, model, apiKey, locale, messages, maxTokens, onFragment } = options
-  const complet: AIMessage[] = [
-    { role: 'system', content: systemPrompt(locale) },
-    ...messages,
-  ]
+  const complet: AIMessage[] = [{ role: 'system', content: systemPrompt(locale) }, ...messages]
   return appelChatFlux(
     provider,
     provider.streamChatUrl(model, apiKey),
@@ -136,11 +132,7 @@ export async function testerConnexion(options: {
       provider,
       provider.chatUrl(model, apiKey),
       provider.buildHeaders(apiKey),
-      provider.buildBody(
-        [{ role: 'user', content: 'Réponds par le seul mot : OK' }],
-        model,
-        16,
-      ),
+      provider.buildBody([{ role: 'user', content: 'Réponds par le seul mot : OK' }], model, 16),
     )
     return { ok: true }
   } catch (erreur) {

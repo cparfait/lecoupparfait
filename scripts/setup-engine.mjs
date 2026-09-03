@@ -78,4 +78,6 @@ writeFileSync(
   ].join('\n'),
 )
 
-console.log(`\n✓ Moteur installé (${(totalBytes / 1024 / 1024).toFixed(1)} Mo) → apps/web/public/engine/`)
+console.log(
+  `\n✓ Moteur installé (${(totalBytes / 1024 / 1024).toFixed(1)} Mo) → apps/web/public/engine/`,
+)

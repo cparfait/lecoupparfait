@@ -80,9 +80,7 @@ export function contexteDuCoup(coup: CoupCommente, options: ContexteOptions): st
   }
 
   lignes.push(
-    fr
-      ? `Coup joué : ${san(coup.san)} par ${camp}.`
-      : `Move played: ${san(coup.san)} by ${camp}.`,
+    fr ? `Coup joué : ${san(coup.san)} par ${camp}.` : `Move played: ${san(coup.san)} by ${camp}.`,
   )
   lignes.push(
     fr
@@ -99,7 +97,11 @@ export function contexteDuCoup(coup: CoupCommente, options: ContexteOptions): st
     lignes.push(fr ? `Ouverture : ${options.ouverture}.` : `Opening: ${options.ouverture}.`)
   }
 
-  lignes.push(fr ? `Position après le coup (FEN) : ${coup.fenAfter}` : `Position after the move (FEN): ${coup.fenAfter}`)
+  lignes.push(
+    fr
+      ? `Position après le coup (FEN) : ${coup.fenAfter}`
+      : `Position after the move (FEN): ${coup.fenAfter}`,
+  )
 
   const options_ = coup.alternatives.filter((entry) => !entry.played).slice(0, 3)
   if (options_.length > 0) {
@@ -115,7 +117,9 @@ export function contexteDuCoup(coup: CoupCommente, options: ContexteOptions): st
   }
 
   lignes.push('')
-  lignes.push(fr ? 'Explication déjà donnée au joueur :' : 'Explanation already shown to the player:')
+  lignes.push(
+    fr ? 'Explication déjà donnée au joueur :' : 'Explanation already shown to the player:',
+  )
   lignes.push(coup.headline)
   for (const phrase of coup.body) lignes.push(phrase)
 

@@ -65,9 +65,7 @@ export async function POST(request: Request) {
 
   try {
     const parties =
-      source === 'chesscom'
-        ? await chargerChessCom(pseudo, max)
-        : await chargerLichess(pseudo, max)
+      source === 'chesscom' ? await chargerChessCom(pseudo, max) : await chargerLichess(pseudo, max)
     return NextResponse.json({ parties })
   } catch (erreur) {
     const message = erreur instanceof Error ? erreur.message : 'Récupération impossible.'

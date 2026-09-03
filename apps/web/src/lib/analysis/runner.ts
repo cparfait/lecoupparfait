@@ -249,10 +249,10 @@ async function analyseOnServer(options: {
         startFen: options.startFen,
         depth: options.depth,
         // Trois lignes et non plus deux : la deuxième suffisait à classer le coup
-    // joué, il en faut une de plus pour montrer au lecteur ce qu'il avait
-    // d'autre sous la main. Le surcoût est réel mais modéré — le moteur
-    // explore le même arbre, il en rapporte seulement davantage.
-    multiPv: 3,
+        // joué, il en faut une de plus pour montrer au lecteur ce qu'il avait
+        // d'autre sous la main. Le surcoût est réel mais modéré — le moteur
+        // explore le même arbre, il en rapporte seulement davantage.
+        multiPv: 3,
       }),
       signal: guard.signal,
     })

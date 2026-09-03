@@ -27,9 +27,7 @@ export type Fen = string
  * Blancs** une fois normalisé (les moteurs, eux, parlent du point de vue du
  * trait — la normalisation est faite à la lecture).
  */
-export type Score =
-  | { type: 'cp'; value: number }
-  | { type: 'mate'; value: number }
+export type Score = { type: 'cp'; value: number } | { type: 'mate'; value: number }
 
 /** Une variante analysée par le moteur (une ligne de MultiPV). */
 export interface EngineLine {
@@ -288,12 +286,7 @@ export interface TimeControl {
 }
 
 export type SpeedCategory =
-  | 'ultraBullet'
-  | 'bullet'
-  | 'blitz'
-  | 'rapid'
-  | 'classical'
-  | 'correspondence'
+  'ultraBullet' | 'bullet' | 'blitz' | 'rapid' | 'classical' | 'correspondence'
 
 export type GameResult = '1-0' | '0-1' | '1/2-1/2' | '*'
 
@@ -352,13 +345,7 @@ export interface BotLevel {
 }
 
 export type BotPersonalityId =
-  | 'novice'
-  | 'prudent'
-  | 'fonceur'
-  | 'tacticien'
-  | 'positionnel'
-  | 'gambiteur'
-  | 'machine'
+  'novice' | 'prudent' | 'fonceur' | 'tacticien' | 'positionnel' | 'gambiteur' | 'machine'
 
 export interface BotEngineConfig {
   /** Utilise `UCI_LimitStrength` + `UCI_Elo` (Stockfish accepte 1320..3190). */

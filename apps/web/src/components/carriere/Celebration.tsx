@@ -136,7 +136,10 @@ export function Celebration({
         <h2 className="mt-1 font-display text-2xl font-bold leading-tight">{titre}</h2>
 
         {gains.etoiles > 0 && (
-          <div className="mt-4 flex justify-center gap-2" aria-label={`${gains.etoiles} étoiles sur 3`}>
+          <div
+            className="mt-4 flex justify-center gap-2"
+            aria-label={`${gains.etoiles} étoiles sur 3`}
+          >
             {[1, 2, 3].map((rang) => (
               <span
                 key={rang}

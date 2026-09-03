@@ -26,40 +26,40 @@ export default function AboutPage() {
 
       <div className="mt-6 space-y-5 leading-relaxed text-muted">
         <p>
-          Le Coup Parfait est une plateforme d’échecs conçue pour <strong className="text-ink">apprendre</strong>,
-          pas seulement pour jouer. La différence tient en une chose : quand tu fais une
-          erreur, l’outil ne se contente pas d’afficher un nombre — il te dit ce que tu as
-          raté, avec les mots que les joueurs d’échecs utilisent entre eux.
+          Le Coup Parfait est une plateforme d’échecs conçue pour{' '}
+          <strong className="text-ink">apprendre</strong>, pas seulement pour jouer. La différence
+          tient en une chose : quand tu fais une erreur, l’outil ne se contente pas d’afficher un
+          nombre — il te dit ce que tu as raté, avec les mots que les joueurs d’échecs utilisent
+          entre eux.
         </p>
 
         <h2 className="pt-2 font-display text-xl font-semibold tracking-tight text-ink">
           Pourquoi c’est gratuit
         </h2>
         <p>
-          Parce que rien ici ne coûte cher. Le moteur — Stockfish — est libre et gratuit. Les
-          jeux de données d’ouvertures et de puzzles sont dans le domaine public, offerts par
-          Lichess. Les pièces et les sons sont sous licence libre. La synthèse vocale est
-          celle de ton système d’exploitation, elle ne passe par aucun service payant.
+          Parce que rien ici ne coûte cher. Le moteur — Stockfish — est libre et gratuit. Les jeux
+          de données d’ouvertures et de puzzles sont dans le domaine public, offerts par Lichess.
+          Les pièces et les sons sont sous licence libre. La synthèse vocale est celle de ton
+          système d’exploitation, elle ne passe par aucun service payant.
         </p>
         <p>
-          Il ne reste que l’hébergement, et cette application est faite pour tourner sur une
-          machine modeste. Il n’y a donc aucune fonctionnalité payante, aucun abonnement,
-          aucune limite quotidienne — et rien de tout cela n’est prévu pour plus tard.
+          Il ne reste que l’hébergement, et cette application est faite pour tourner sur une machine
+          modeste. Il n’y a donc aucune fonctionnalité payante, aucun abonnement, aucune limite
+          quotidienne — et rien de tout cela n’est prévu pour plus tard.
         </p>
 
         <h2 className="pt-2 font-display text-xl font-semibold tracking-tight text-ink">
           Ce qu’il advient de tes données
         </h2>
         <p>
-          Aucun traqueur, aucune publicité, aucun outil d’analyse d’audience. Aucune requête
-          n’est envoyée à un domaine tiers : même les polices de caractères sont servies
-          depuis ce serveur, précisément pour que ton adresse IP ne parte pas ailleurs.
+          Aucun traqueur, aucune publicité, aucun outil d’analyse d’audience. Aucune requête n’est
+          envoyée à un domaine tiers : même les polices de caractères sont servies depuis ce
+          serveur, précisément pour que ton adresse IP ne parte pas ailleurs.
         </p>
         <p>
-          Tes préférences vivent dans ton navigateur. Si tu crées un compte, on stocke un
-          pseudo, une empreinte de mot de passe, tes classements et tes parties — rien
-          d’autre. L’adresse e-mail est facultative et ne sert qu’à récupérer un mot de passe
-          oublié.
+          Tes préférences vivent dans ton navigateur. Si tu crées un compte, on stocke un pseudo,
+          une empreinte de mot de passe, tes classements et tes parties — rien d’autre. L’adresse
+          e-mail est facultative et ne sert qu’à récupérer un mot de passe oublié.
         </p>
 
         <h2 className="pt-2 font-display text-xl font-semibold tracking-tight text-ink">
@@ -67,27 +67,30 @@ export default function AboutPage() {
         </h2>
         <p>
           Deux moteurs travaillent ensemble. Dans ton navigateur, une version WebAssembly de
-          Stockfish donne un avis instantané après chaque coup, sans rien envoyer nulle part.
-          Sur le serveur, une version native tourne à pleine puissance pour les analyses de
-          partie complètes.
+          Stockfish donne un avis instantané après chaque coup, sans rien envoyer nulle part. Sur le
+          serveur, une version native tourne à pleine puissance pour les analyses de partie
+          complètes.
         </p>
         <p>
           Les explications, elles, ne viennent pas d’un modèle de langue mais d’un{' '}
-          <strong className="text-ink">analyseur géométrique</strong> écrit pour ce projet :
-          il reconnaît sur l’échiquier les fourchettes, clouages, enfilades, pions passés,
-          avant-postes — une quarantaine de motifs — et rédige à partir de là. Conséquence
-          directe : ce qu’il affirme est toujours vérifiable sur l’échiquier, et la même
-          position produit toujours la même explication.
+          <strong className="text-ink">analyseur géométrique</strong> écrit pour ce projet : il
+          reconnaît sur l’échiquier les fourchettes, clouages, enfilades, pions passés, avant-postes
+          — une quarantaine de motifs — et rédige à partir de là. Conséquence directe : ce qu’il
+          affirme est toujours vérifiable sur l’échiquier, et la même position produit toujours la
+          même explication.
         </p>
 
         <h2 className="pt-2 font-display text-xl font-semibold tracking-tight text-ink">
           Héberge-le toi-même
         </h2>
         <p>
-          Le code est sous licence AGPL. Tu peux le télécharger, le modifier et le faire
-          tourner chez toi — un <code className="rounded bg-surface px-1.5 py-0.5 font-mono text-[13px]">docker compose up</code>{' '}
-          suffit. C’est même l’usage prévu : une instance pour toi et tes amis, sans dépendre
-          de personne.
+          Le code est sous licence AGPL. Tu peux le télécharger, le modifier et le faire tourner
+          chez toi — un{' '}
+          <code className="rounded bg-surface px-1.5 py-0.5 font-mono text-[13px]">
+            docker compose up
+          </code>{' '}
+          suffit. C’est même l’usage prévu : une instance pour toi et tes amis, sans dépendre de
+          personne.
         </p>
       </div>
 

@@ -35,8 +35,8 @@ export function ComptesAilleurs() {
     <div className="mt-4 border-t border-line/60 pt-4">
       <p className="text-sm font-medium">Tes comptes ailleurs</p>
       <p className="mt-0.5 text-xs leading-relaxed text-muted">
-        L’analyse retrouve tes parties Chess.com et Lichess à partir du pseudo. Note-les
-        ici une fois ; tu pourras toujours en chercher un autre sur le moment.
+        L’analyse retrouve tes parties Chess.com et Lichess à partir du pseudo. Note-les ici une
+        fois ; tu pourras toujours en chercher un autre sur le moment.
       </p>
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         {SERVICES.map((service) => (

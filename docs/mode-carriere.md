@@ -51,21 +51,21 @@ Ce n'est donc pas une couche de récompenses posée sur l'existant. C'est un
 Presque tout existe. C'est le principal argument en faveur de ce mode : il
 assemble, il n'invente pas.
 
-| Brique | Où | État |
-|---|---|---|
-| 25 niveaux d'adversaires, 250 → 3200 Elo | `packages/core/src/bots.ts` | fait |
-| 7 personnalités avec biais de style et portrait | `BOT_PERSONALITIES` | fait |
-| Adversaire à erreurs humaines (Maia) | `apps/web/src/lib/engine` | fait |
-| Plus haut niveau battu, tentatives, victoires | table `bot_progress` | fait |
-| Leçons (bases, tactique, stratégie, répertoire) | `apps/web/src/lib/lessons/` | fait |
-| Progression de leçon | table `lesson_progress` | fait |
-| Puzzles et tentatives | tables `puzzles`, `puzzle_attempts` | fait |
-| Finales à 7 pièces, résolues parfaitement | `/finales` | fait |
-| 331 ouvertures répertoriées | `packages/core/src/openings.ts` | fait |
-| Analyse expliquée, motifs tactiques nommés | `packages/core/src/explain.ts` | fait |
-| Quêtes du jour et série | table `daily_progress`, `useQuotidien` | fait |
-| Historique des parties | table `games` | fait |
-| Analyses conservées | table `saved_analyses` | fait |
+| Brique                                          | Où                                     | État |
+| ----------------------------------------------- | -------------------------------------- | ---- |
+| 25 niveaux d'adversaires, 250 → 3200 Elo        | `packages/core/src/bots.ts`            | fait |
+| 7 personnalités avec biais de style et portrait | `BOT_PERSONALITIES`                    | fait |
+| Adversaire à erreurs humaines (Maia)            | `apps/web/src/lib/engine`              | fait |
+| Plus haut niveau battu, tentatives, victoires   | table `bot_progress`                   | fait |
+| Leçons (bases, tactique, stratégie, répertoire) | `apps/web/src/lib/lessons/`            | fait |
+| Progression de leçon                            | table `lesson_progress`                | fait |
+| Puzzles et tentatives                           | tables `puzzles`, `puzzle_attempts`    | fait |
+| Finales à 7 pièces, résolues parfaitement       | `/finales`                             | fait |
+| 331 ouvertures répertoriées                     | `packages/core/src/openings.ts`        | fait |
+| Analyse expliquée, motifs tactiques nommés      | `packages/core/src/explain.ts`         | fait |
+| Quêtes du jour et série                         | table `daily_progress`, `useQuotidien` | fait |
+| Historique des parties                          | table `games`                          | fait |
+| Analyses conservées                             | table `saved_analyses`                 | fait |
 
 **Ce qui manque est uniquement : la structure de saison, la règle de
 déblocage, l'écran de carte, et le lien entre une faiblesse mesurée et le
@@ -116,20 +116,20 @@ délibérée : on doit savoir à quoi s'attendre sans relire les règles.
 
 ### Découpage proposé
 
-| # | Titre | Adversaire | Elo | Ce qu'on y apprend |
-|---|---|---|---|---|
-| 1 | Les pièces et leur route | Pion 🐣 | 250 | déplacements, échec et mat élémentaire |
-| 2 | Ne rien laisser en prise | Pion 🐣 | 400 | pièces défendues, prises gratuites |
-| 3 | Sortir ses pièces | Rempart 🛡️ | 550 | développement, roque, centre |
-| 4 | La fourchette et le clouage | Éclair ⚡ | 700 | motifs tactiques de base |
-| 5 | Mater avec la dame et la tour | Rempart 🛡️ | 850 | mats élémentaires, opposition |
-| 6 | Tenir face à une attaque | Brasier 🔥 | 1000 | défense, contre-attaque au centre |
-| 7 | Compter le matériel | Éclair ⚡ | 1150 | échanges, valeur des pièces |
-| 8 | Une ouverture à soi | Boussole 🧭 | 1300 | un répertoire minimal, blancs et noirs |
-| 9 | Accepter ou refuser un gambit | Mirage 🎭 | 1450 | initiative contre matériel |
-| 10 | Les finales de pions | Boussole 🧭 | 1600 | opposition, pion passé, carré |
-| 11 | Le plan, pas le coup | Boussole 🧭 | 1750 | jeu positionnel, faiblesses |
-| 12 | Sans filet | Oracle 🜛 | 1900 | sans indice, sans commentaire |
+| #   | Titre                         | Adversaire  | Elo  | Ce qu'on y apprend                     |
+| --- | ----------------------------- | ----------- | ---- | -------------------------------------- |
+| 1   | Les pièces et leur route      | Pion 🐣     | 250  | déplacements, échec et mat élémentaire |
+| 2   | Ne rien laisser en prise      | Pion 🐣     | 400  | pièces défendues, prises gratuites     |
+| 3   | Sortir ses pièces             | Rempart 🛡️  | 550  | développement, roque, centre           |
+| 4   | La fourchette et le clouage   | Éclair ⚡   | 700  | motifs tactiques de base               |
+| 5   | Mater avec la dame et la tour | Rempart 🛡️  | 850  | mats élémentaires, opposition          |
+| 6   | Tenir face à une attaque      | Brasier 🔥  | 1000 | défense, contre-attaque au centre      |
+| 7   | Compter le matériel           | Éclair ⚡   | 1150 | échanges, valeur des pièces            |
+| 8   | Une ouverture à soi           | Boussole 🧭 | 1300 | un répertoire minimal, blancs et noirs |
+| 9   | Accepter ou refuser un gambit | Mirage 🎭   | 1450 | initiative contre matériel             |
+| 10  | Les finales de pions          | Boussole 🧭 | 1600 | opposition, pion passé, carré          |
+| 11  | Le plan, pas le coup          | Boussole 🧭 | 1750 | jeu positionnel, faiblesses            |
+| 12  | Sans filet                    | Oracle 🜛    | 1900 | sans indice, sans commentaire          |
 
 Les adversaires ne suivent pas l'ordre du barème : le style sert la leçon.
 On affronte **Brasier** au chapitre « tenir face à une attaque » parce qu'il
@@ -184,7 +184,9 @@ journal : ce qui a été joué vit déjà dans `games`, `puzzle_attempts` et
 
 ```ts
 export const careerProgress = pgTable('career_progress', {
-  userId: uuid('user_id').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
   /** Chapitre en cours, 1 à 12. 13 = carrière terminée. */
   chapter: smallint('chapter').notNull().default(1),
   /** Étapes du chapitre courant déjà validées. */
@@ -255,14 +257,14 @@ déjà la légalité des coups.
 
 ## 9. Découpage
 
-| Lot | Contenu | Estimation |
-|---|---|---|
-| 1 | `carriere.ts` : les 12 chapitres, typés, avec un contrôle automatique que chaque leçon et chaque thème de puzzle référencés existent | 0,5 j |
-| 2 | Table, migration, les trois routes d'API | 0,5 j |
-| 3 | Écran `/carriere` : la carte, l'étape courante, le bouton unique | 1,5 j |
-| 4 | Branchements : leçon, puzzles et partie renvoient à la carrière et valident l'étape | 1 j |
-| 5 | Filet de sécurité : détection des cinq défaites, désignation de la faute dominante, proposition | 0,5 j |
-| 6 | Entrée dans la navigation, état anonyme, reprise, fin de carrière | 0,5 j |
+| Lot | Contenu                                                                                                                              | Estimation |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| 1   | `carriere.ts` : les 12 chapitres, typés, avec un contrôle automatique que chaque leçon et chaque thème de puzzle référencés existent | 0,5 j      |
+| 2   | Table, migration, les trois routes d'API                                                                                             | 0,5 j      |
+| 3   | Écran `/carriere` : la carte, l'étape courante, le bouton unique                                                                     | 1,5 j      |
+| 4   | Branchements : leçon, puzzles et partie renvoient à la carrière et valident l'étape                                                  | 1 j        |
+| 5   | Filet de sécurité : détection des cinq défaites, désignation de la faute dominante, proposition                                      | 0,5 j      |
+| 6   | Entrée dans la navigation, état anonyme, reprise, fin de carrière                                                                    | 0,5 j      |
 
 **Environ 4,5 jours**, en s'appuyant sur l'existant. Le lot 3 est le plus
 lourd et le seul entièrement neuf.

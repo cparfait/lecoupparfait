@@ -196,10 +196,7 @@ const SEVEN_TAG_ROSTER = ['Event', 'Site', 'Date', 'Round', 'White', 'Black', 'R
  * commentaires vont entre accolades, les symboles suivent immédiatement le
  * coup. N'importe quel logiciel d'échecs saura le relire.
  */
-export function toPgn(
-  moves: AnalysedMove[],
-  options: PgnExportOptions = {},
-): string {
+export function toPgn(moves: AnalysedMove[], options: PgnExportOptions = {}): string {
   const headers: PgnHeaders = {
     Event: 'Partie Le Coup Parfait',
     Site: 'Le Coup Parfait',
@@ -302,10 +299,7 @@ export function formatPgnDate(date: Date): string {
 }
 
 /** Résultat lisible pour l'interface. */
-export function describeResult(
-  result: GameResult,
-  locale: 'fr' | 'en' = 'fr',
-): string {
+export function describeResult(result: GameResult, locale: 'fr' | 'en' = 'fr'): string {
   const table: Record<GameResult, { fr: string; en: string }> = {
     '1-0': { fr: 'Les Blancs gagnent', en: 'White wins' },
     '0-1': { fr: 'Les Noirs gagnent', en: 'Black wins' },

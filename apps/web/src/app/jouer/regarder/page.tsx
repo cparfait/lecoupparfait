@@ -102,8 +102,8 @@ export default function WatchPage() {
                         )}
                       </span>
                       <span className="mt-0.5 block text-[12px] text-faint">
-                        {SPEED_LABELS[speed]?.icon} {SPEED_LABELS[speed]?.fr} ·{' '}
-                        {game.moves} demi-coup{game.moves > 1 ? 's' : ''}
+                        {SPEED_LABELS[speed]?.icon} {SPEED_LABELS[speed]?.fr} · {game.moves}{' '}
+                        demi-coup{game.moves > 1 ? 's' : ''}
                         {game.rated ? ' · classée' : ''}
                       </span>
                     </span>

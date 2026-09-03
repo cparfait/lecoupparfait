@@ -286,7 +286,10 @@ export default function LiveGamePage() {
   // laisser croire le contraire au plateau.
   const legalMoves = useLegalMoves(
     snapshot?.fen,
-    Boolean(snapshot) && Boolean(color) && snapshot?.turn === color && snapshot?.status === 'playing',
+    Boolean(snapshot) &&
+      Boolean(color) &&
+      snapshot?.turn === color &&
+      snapshot?.status === 'playing',
   )
 
   const checkSquare = useMemo(() => {
@@ -441,11 +444,7 @@ export default function LiveGamePage() {
             Le service temps réel ne répond pas. Vérifie qu’il est démarré, ou joue contre
             l’ordinateur en attendant — cela fonctionne entièrement dans ton navigateur.
           </p>
-          <Button
-            variant="secondary"
-            className="mt-5"
-            onClick={() => window.location.reload()}
-          >
+          <Button variant="secondary" className="mt-5" onClick={() => window.location.reload()}>
             Réessayer
           </Button>
         </Card>
@@ -470,8 +469,8 @@ export default function LiveGamePage() {
 
     Le serveur, lui, sait : c'est lui qui tient les pendules.
   */
-  const timeControl =
-    snapshot.timeControl ?? parseTimeControl(timeControlId) ?? { initial: 600, increment: 5 }
+  const timeControl = snapshot.timeControl ??
+    parseTimeControl(timeControlId) ?? { initial: 600, increment: 5 }
   const drawOfferedToMe =
     snapshot.drawOfferFrom !== null && color !== null && snapshot.drawOfferFrom !== color
 
@@ -501,55 +500,53 @@ export default function LiveGamePage() {
         />
 
         <div className="[grid-area:plateau] flex min-h-0 min-w-0 flex-col">
-        <div className="my-1.5 flex min-h-0 flex-1 items-center justify-center">
-          <ChessBoard
-            fitParentHeight
-            reservedHeight={9}
-            fen={revue?.fen ?? snapshot.fen}
-            orientation={orientation}
-            playable={
-              revue === null && color !== null && snapshot.status === 'playing'
-                ? color
-                : null
-            }
-            legalMoves={legalMoves}
-            onMove={handleMove}
-            onPremove={enregistrer}
-            onPremoveCancel={annuler}
-            premove={precoup}
-            lastMove={revue ? revue.lastMove : snapshot.lastMove}
-            dernierCoupSan={snapshot.moves[snapshot.moves.length - 1] ?? null}
-            checkSquare={revue ? revue.checkSquare : checkSquare}
-            // Cinq autres pages l'annonçaient, celle-ci non : le mat qu'on
-            // vient de porter à un ami passait donc inaperçu, alors que
-            // c'est le seul moment de la partie qui mérite une animation.
-            checkmate={snapshot.status === 'checkmate'}
-          />
-        </div>
+          <div className="my-1.5 flex min-h-0 flex-1 items-center justify-center">
+            <ChessBoard
+              fitParentHeight
+              reservedHeight={9}
+              fen={revue?.fen ?? snapshot.fen}
+              orientation={orientation}
+              playable={
+                revue === null && color !== null && snapshot.status === 'playing' ? color : null
+              }
+              legalMoves={legalMoves}
+              onMove={handleMove}
+              onPremove={enregistrer}
+              onPremoveCancel={annuler}
+              premove={precoup}
+              lastMove={revue ? revue.lastMove : snapshot.lastMove}
+              dernierCoupSan={snapshot.moves[snapshot.moves.length - 1] ?? null}
+              checkSquare={revue ? revue.checkSquare : checkSquare}
+              // Cinq autres pages l'annonçaient, celle-ci non : le mat qu'on
+              // vient de porter à un ami passait donc inaperçu, alors que
+              // c'est le seul moment de la partie qui mérite une animation.
+              checkmate={snapshot.status === 'checkmate'}
+            />
+          </div>
 
-        {/* Le retour au direct, en clair et à portée de pouce : sans lui, on
+          {/* Le retour au direct, en clair et à portée de pouce : sans lui, on
             se retrouve devant un échiquier qui refuse les coups sans dire
             pourquoi — et l'adversaire attend. */}
-        {revue !== null && (
-          <div className="mb-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2 text-[13px]">
-            <Eye size={15} className="shrink-0 text-accent" aria-hidden />
-            <span className="min-w-0 flex-1 leading-snug text-muted">
-              {/* La pendule ne tourne plus quand la partie est finie :
+          {revue !== null && (
+            <div className="mb-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2 text-[13px]">
+              <Eye size={15} className="shrink-0 text-accent" aria-hidden />
+              <span className="min-w-0 flex-1 leading-snug text-muted">
+                {/* La pendule ne tourne plus quand la partie est finie :
                   l'écrire quand même ferait courir un temps qui n'existe
                   pas, et presserait quelqu'un qui a tout le sien. */}
-              {over
-                ? 'Tu revois un coup passé. La partie est terminée, rien ne presse.'
-                : 'Tu revois un coup passé. La pendule, elle, continue.'}
-            </span>
-            <button
-              type="button"
-              onClick={() => setRevu(null)}
-              className="shrink-0 rounded-[var(--radius-sm)] bg-accent px-2.5 py-1 text-xs font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
-            >
-              Revenir au direct
-            </button>
-          </div>
-        )}
+                {over
+                  ? 'Tu revois un coup passé. La partie est terminée, rien ne presse.'
+                  : 'Tu revois un coup passé. La pendule, elle, continue.'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setRevu(null)}
+                className="shrink-0 rounded-[var(--radius-sm)] bg-accent px-2.5 py-1 text-xs font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
+              >
+                Revenir au direct
+              </button>
+            </div>
+          )}
         </div>
 
         <PlayerBar
@@ -681,8 +678,7 @@ export default function LiveGamePage() {
                 <Eye size={15} className="shrink-0 text-accent" aria-hidden />
                 <span>
                   Tu regardes cette partie.{' '}
-                  {snapshot.spectators > 1 &&
-                    `Vous êtes ${snapshot.spectators} à la suivre. `}
+                  {snapshot.spectators > 1 && `Vous êtes ${snapshot.spectators} à la suivre. `}
                   Tu peux écrire dans le tchat, mais pas jouer.
                 </span>
               </p>
@@ -718,9 +714,7 @@ export default function LiveGamePage() {
             {opening && <Chip>{opening.eco}</Chip>}
           </div>
 
-          {opening && (
-            <p className="-mt-1 truncate text-xs text-muted">{opening.name}</p>
-          )}
+          {opening && <p className="-mt-1 truncate text-xs text-muted">{opening.name}</p>}
 
           {/* La liste cède la place : c'est elle qui peut se réduire, pas le
               tchat — deux lignes de coups restent lisibles, deux lignes de

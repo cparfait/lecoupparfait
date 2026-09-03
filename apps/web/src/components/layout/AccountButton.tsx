@@ -100,12 +100,7 @@ export function AccountButton({ variant = 'header' }: { variant?: 'header' | 'me
       </span>
       {/* Le pseudo saute le premier quand la place manque : la pastille répond
           déjà à « suis-je connecté ? », qui est la question. */}
-      <span
-        className={clsx(
-          'max-w-[10rem] truncate',
-          variant === 'header' && 'hidden sm:inline',
-        )}
-      >
+      <span className={clsx('max-w-[10rem] truncate', variant === 'header' && 'hidden sm:inline')}>
         {me.username}
       </span>
     </Link>

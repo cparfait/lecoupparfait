@@ -25,10 +25,7 @@ import {
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function GET(
-  _request: Request,
-  context: { params: Promise<{ username: string }> },
-) {
+export async function GET(_request: Request, context: { params: Promise<{ username: string }> }) {
   const { username } = await context.params
 
   try {
@@ -164,9 +161,6 @@ export async function GET(
     })
   } catch (error) {
     console.error('[profil]', error)
-    return NextResponse.json(
-      { error: 'Le service de profils est indisponible.' },
-      { status: 503 },
-    )
+    return NextResponse.json({ error: 'Le service de profils est indisponible.' }, { status: 503 })
   }
 }

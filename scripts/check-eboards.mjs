@@ -14,9 +14,8 @@
 
 import { Chess } from 'chess.js'
 
-const { encodeChessnutFrame, decodeChessnutFrame, encodeChessnutLights } = await import(
-  '../apps/web/src/lib/board/codecs/chessnut.ts'
-)
+const { encodeChessnutFrame, decodeChessnutFrame, encodeChessnutLights } =
+  await import('../apps/web/src/lib/board/codecs/chessnut.ts')
 const {
   millenniumCommand,
   stripParity,
@@ -25,8 +24,14 @@ const {
   decodeMillenniumStatus,
   encodeMillenniumLights,
 } = await import('../apps/web/src/lib/board/codecs/millennium.ts')
-const { DgtParser, DGT_MESSAGE, encodeDgtBoardDump, decodeDgtBoardDump, encodeDgtFieldUpdate, applyDgtFieldUpdate } =
-  await import('../apps/web/src/lib/board/codecs/dgt.ts')
+const {
+  DgtParser,
+  DGT_MESSAGE,
+  encodeDgtBoardDump,
+  decodeDgtBoardDump,
+  encodeDgtFieldUpdate,
+  applyDgtFieldUpdate,
+} = await import('../apps/web/src/lib/board/codecs/dgt.ts')
 const {
   PegasusParser,
   PEGASUS_MESSAGE,
@@ -45,9 +50,8 @@ const {
   encodeCertaboOccupancy,
   encodeCertaboLights,
 } = await import('../apps/web/src/lib/board/codecs/certabo.ts')
-const { occupancyFromFen, blurOccupancy, matchSnapshot, detectFlip } = await import(
-  '../apps/web/src/lib/board/matcher.ts'
-)
+const { occupancyFromFen, blurOccupancy, matchSnapshot, detectFlip } =
+  await import('../apps/web/src/lib/board/matcher.ts')
 const { rotateOccupancy, squareIndex, SQUARES } = await import('../apps/web/src/lib/board/types.ts')
 
 const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
@@ -63,7 +67,11 @@ function check(name, condition, detail) {
 }
 
 function same(name, actual, expected) {
-  check(name, JSON.stringify(actual) === JSON.stringify(expected), `attendu ${JSON.stringify(expected)}, reçu ${JSON.stringify(actual)}`)
+  check(
+    name,
+    JSON.stringify(actual) === JSON.stringify(expected),
+    `attendu ${JSON.stringify(expected)}, reçu ${JSON.stringify(actual)}`,
+  )
 }
 
 function hex(bytes) {
@@ -90,7 +98,11 @@ console.log('\n♟  Chessnut')
   same('aller-retour position de départ', decodeChessnutFrame(frame), start)
 
   const middlegame = after(START, ['e4', 'c5', 'Nf3', 'd6'])
-  same('aller-retour milieu de partie', decodeChessnutFrame(encodeChessnutFrame(middlegame)), middlegame)
+  same(
+    'aller-retour milieu de partie',
+    decodeChessnutFrame(encodeChessnutFrame(middlegame)),
+    middlegame,
+  )
 
   check('trame trop courte rejetée', decodeChessnutFrame(new Uint8Array([1, 0x24])) === null)
   check('en-tête inconnu rejeté', decodeChessnutFrame(new Uint8Array(38)) === null)
@@ -132,12 +144,20 @@ console.log('\n♟  Millennium ChessLink')
   check('81 LEDs adressées', lights.length === 3 + 162, `reçu ${lights.length}`)
   // a8 : les LEDs 1, 2, 10 et 11 — le coin haut-gauche et ses trois voisines.
   const codes = lights.slice(3).match(/.{2}/g)
-  same('coins de a8 allumés', [0, 1, 9, 10].map((index) => codes[index]), ['FF', 'FF', 'FF', 'FF'])
+  same(
+    'coins de a8 allumés',
+    [0, 1, 9, 10].map((index) => codes[index]),
+    ['FF', 'FF', 'FF', 'FF'],
+  )
   same('h1 éteint', codes[80], '00')
   same('LEDs éteintes ailleurs', codes.filter((code) => code === 'FF').length, 4)
 
   const h1 = encodeMillenniumLights(['h1']).slice(3).match(/.{2}/g)
-  same('coins de h1 allumés', [70, 71, 79, 80].map((index) => h1[index]), ['FF', 'FF', 'FF', 'FF'])
+  same(
+    'coins de h1 allumés',
+    [70, 71, 79, 80].map((index) => h1[index]),
+    ['FF', 'FF', 'FF', 'FF'],
+  )
 }
 
 // ── DGT ─────────────────────────────────────────────────────────────────────
@@ -176,7 +196,11 @@ console.log('\n♟  DGT Pegasus')
   // dont on a effacé le type des pièces.
   const start = blurOccupancy(occupancyFromFen(START))
   const dump = encodePegasusBoardDump(occupancyFromFen(START))
-  check('en-tête du message', dump[0] === PEGASUS_MESSAGE.boardDump && dump[1] === 0 && dump[2] === 67, hex(dump.slice(0, 3)))
+  check(
+    'en-tête du message',
+    dump[0] === PEGASUS_MESSAGE.boardDump && dump[1] === 0 && dump[2] === 67,
+    hex(dump.slice(0, 3)),
+  )
 
   const parser = new PegasusParser()
   const messages = [...parser.push(dump.slice(0, 7)), ...parser.push(dump.slice(7))]
@@ -185,7 +209,10 @@ console.log('\n♟  DGT Pegasus')
 
   // Sans clé de développeur, la carte répond 0x7F partout : ce n'est pas une
   // position, et la prendre pour telle afficherait un plateau imaginaire.
-  check('carte verrouillée détectée', decodePegasusBoardDump(new Uint8Array(64).fill(0x7f)) === null)
+  check(
+    'carte verrouillée détectée',
+    decodePegasusBoardDump(new Uint8Array(64).fill(0x7f)) === null,
+  )
 
   const lifted = parser.push(encodePegasusFieldUpdate('e2', false))
   const posed = parser.push(encodePegasusFieldUpdate('e4', true))
@@ -195,8 +222,16 @@ console.log('\n♟  DGT Pegasus')
   same('e2-e4 par changements de case', occupancy, blurOccupancy(after(START, ['e4'])))
 
   // Les deux exemples chiffrés de la documentation du protocole.
-  same('LED c8, un éclat', [...encodePegasusLights(['c8'], { once: true })], [96, 6, 5, 7, 1, 1, 2, 0])
-  same('LEDs a8-a7, pulsation', [...encodePegasusLights(['a8', 'a7'])], [96, 7, 5, 7, 0, 1, 0, 8, 0])
+  same(
+    'LED c8, un éclat',
+    [...encodePegasusLights(['c8'], { once: true })],
+    [96, 6, 5, 7, 1, 1, 2, 0],
+  )
+  same(
+    'LEDs a8-a7, pulsation',
+    [...encodePegasusLights(['a8', 'a7'])],
+    [96, 7, 5, 7, 0, 1, 0, 8, 0],
+  )
   same('LEDs éteintes', [...encodePegasusLights([])], [96, 2, 0, 0])
 
   // Une commande doit tenir dans un paquet BLE : on borne le nombre de cases.
@@ -215,7 +250,11 @@ console.log('\n♟  Certabo')
   const text = encodeCertaboIds(ids)
   const bytes = Uint8Array.from([...text].map((character) => character.charCodeAt(0)))
   const frames = [...parser.push(bytes.slice(0, 100)), ...parser.push(bytes.slice(100))]
-  check('trame de puces reconstituée', frames.length === 1 && frames[0].kind === 'ids', JSON.stringify(frames.length))
+  check(
+    'trame de puces reconstituée',
+    frames.length === 1 && frames[0].kind === 'ids',
+    JSON.stringify(frames.length),
+  )
   same('puces relues dans l’ordre', frames[0].ids, ids)
 
   const calibration = calibrate(frames[0].ids)
@@ -225,7 +264,10 @@ console.log('\n♟  Certabo')
   // Une puce inconnue reste « occupée, type inconnu » — le rapprochement sait
   // faire avec, c'est le cas ordinaire du Sentio.
   const partial = occupancyFromIds(ids, {})
-  check('puces inconnues signalées', partial.every((square) => square === null || square === '?'))
+  check(
+    'puces inconnues signalées',
+    partial.every((square) => square === null || square === '?'),
+  )
 
   check('étalonnage refusé hors position de départ', calibrate(new Array(64).fill('')) === null)
 
@@ -235,7 +277,10 @@ console.log('\n♟  Certabo')
   const sentioFrames = sentio.push(
     Uint8Array.from([...sentioText].map((character) => character.charCodeAt(0))),
   )
-  check('trame de présence reconnue', sentioFrames.length === 1 && sentioFrames[0].kind === 'occupancy')
+  check(
+    'trame de présence reconnue',
+    sentioFrames.length === 1 && sentioFrames[0].kind === 'occupancy',
+  )
   same('présence relue', sentioFrames[0].squares, blurOccupancy(start))
 
   same('LEDs a1', [...encodeCertaboLights(['a1'])], [128, 0, 0, 0, 0, 0, 0, 0])

@@ -43,9 +43,7 @@ export interface CoupDuRuban {
  * Le numéro se déduit du rang : c'est vrai de toute partie commencée à la
  * position initiale, ce qui est le cas de tous les écrans qui s'en servent.
  */
-export function rubanDepuisLesCoups(
-  coups: Array<{ san: string; color: Color }>,
-): CoupDuRuban[] {
+export function rubanDepuisLesCoups(coups: Array<{ san: string; color: Color }>): CoupDuRuban[] {
   return coups.map((coup, index) => ({
     san: coup.san,
     color: coup.color,
@@ -135,7 +133,9 @@ export function RubanCoups({
               aria-current={courant ? 'true' : undefined}
               className={clsx(
                 'flex min-w-0 items-center gap-1 rounded-[var(--radius-sm)] px-2 py-1.5 text-[13px] transition-colors pointer-coarse:min-h-11',
-                courant ? 'bg-surface-strong font-bold text-ink' : 'text-muted hover:bg-surface-hover',
+                courant
+                  ? 'bg-surface-strong font-bold text-ink'
+                  : 'text-muted hover:bg-surface-hover',
               )}
             >
               {/* Le numéro n'apparaît que sur les coups des Blancs et sur le

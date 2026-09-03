@@ -705,61 +705,63 @@ export default function PuzzlesPage() {
   return (
     <div className="etude mx-auto w-full max-w-[1100px] px-3 py-4 sm:px-5 lg:py-8">
       <div className="etude-tete">
-      {/* ── Filtres et score ───────────────────────────────────────── */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        {/* Le titre dit où l'on est.
+        {/* ── Filtres et score ───────────────────────────────────────── */}
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          {/* Le titre dit où l'on est.
 
             Il affichait « Puzzles » dans les deux cas, et proposait juste à
             côté une manche chronométrée : rien ne distinguait le défi du jour
             — une position unique, partagée, qui compte pour la série — d'une
             séance d'entraînement libre. C'est ce qui rendait « Puzzle suivant »
             crédible là où il n'y a pas de suivant. */}
-        <h1 className="font-display text-xl font-bold tracking-tight">
-          {modeDefi ? 'Défi du jour' : 'Puzzles'}
-        </h1>
-        {modeDefi ? (
-          <Chip tone={defiDejaFait ? 'success' : 'accent'}>
-            {defiDejaFait ? <Check size={11} aria-hidden /> : <Swords size={11} aria-hidden />}
-            {defiDejaFait ? 'déjà relevé aujourd’hui' : 'une seule position'}
-          </Chip>
-        ) : (
-          /* L'autre façon de travailler les mêmes puzzles : vite, et à la
+          <h1 className="font-display text-xl font-bold tracking-tight">
+            {modeDefi ? 'Défi du jour' : 'Puzzles'}
+          </h1>
+          {modeDefi ? (
+            <Chip tone={defiDejaFait ? 'success' : 'accent'}>
+              {defiDejaFait ? <Check size={11} aria-hidden /> : <Swords size={11} aria-hidden />}
+              {defiDejaFait ? 'déjà relevé aujourd’hui' : 'une seule position'}
+            </Chip>
+          ) : (
+            /* L'autre façon de travailler les mêmes puzzles : vite, et à la
              chaîne. Elle entraîne la reconnaissance là où celle-ci entraîne la
              recherche. */
-          <Link
-            href="/puzzles/rush"
-            className="flex h-7 items-center gap-1.5 rounded-full bg-accent/15 px-2.5 text-[12px] font-semibold text-accent transition-colors hover:bg-accent/25"
-          >
-            <Timer size={12} aria-hidden />
-            Manche chronométrée
-          </Link>
-        )}
-        {playerRating !== null && (
-          <Chip tone="accent">
-            <Target size={11} aria-hidden />
-            {playerRating}
-            {ratingDelta !== null && (
-              <span className={ratingDelta >= 0 ? 'text-[var(--q-best)]' : 'text-[var(--q-blunder)]'}>
-                {ratingDelta >= 0 ? ' +' : ' '}
-                {ratingDelta}
-              </span>
-            )}
-          </Chip>
-        )}
-        {streak > 1 && (
-          <Chip tone="warning">
-            <Flame size={11} aria-hidden />
-            série de {streak}
-          </Chip>
-        )}
+            <Link
+              href="/puzzles/rush"
+              className="flex h-7 items-center gap-1.5 rounded-full bg-accent/15 px-2.5 text-[12px] font-semibold text-accent transition-colors hover:bg-accent/25"
+            >
+              <Timer size={12} aria-hidden />
+              Manche chronométrée
+            </Link>
+          )}
+          {playerRating !== null && (
+            <Chip tone="accent">
+              <Target size={11} aria-hidden />
+              {playerRating}
+              {ratingDelta !== null && (
+                <span
+                  className={ratingDelta >= 0 ? 'text-[var(--q-best)]' : 'text-[var(--q-blunder)]'}
+                >
+                  {ratingDelta >= 0 ? ' +' : ' '}
+                  {ratingDelta}
+                </span>
+              )}
+            </Chip>
+          )}
+          {streak > 1 && (
+            <Chip tone="warning">
+              <Flame size={11} aria-hidden />
+              série de {streak}
+            </Chip>
+          )}
 
-        {/* La voix annonce la position et lit la solution. Le bouton est ici,
+          {/* La voix annonce la position et lit la solution. Le bouton est ici,
             à côté de ce qu'il fait taire, et non dans la barre de navigation
             où un haut-parleur ne dit pas ce qu'il coupe. */}
-        <VoiceQuickToggle className="ml-auto" />
-      </div>
+          <VoiceQuickToggle className="ml-auto" />
+        </div>
 
-      {/* ── Les thèmes, sur une seule rangée ─────────────────────────────
+        {/* ── Les thèmes, sur une seule rangée ─────────────────────────────
           Douze pastilles qui se replient, cela fait quatre rangées sur un
           téléphone : trois cent quarante points, soit 42 % de l'écran, avant
           d'apercevoir l'échiquier. On vient pourtant ici pour la position, et
@@ -769,36 +771,35 @@ export default function PuzzlesPage() {
           voulu et se manipule au doigt, ce qui n'est pas la même chose qu'une
           page qui déborde. Les marges négatives font courir la bande d'un bord
           à l'autre, pour qu'on voie qu'elle continue. */}
-      {/* Masqués dans le défi du jour : le filtre de thème n'y change rien,
+        {/* Masqués dans le défi du jour : le filtre de thème n'y change rien,
           la position est tirée par la date et la tranche de niveau. Douze
           pastilles qui ne font rien se cliquent quand même, une fois. */}
-      <div
-        className={clsx(
-          '-mx-3 mb-4 flex gap-1.5 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0',
-          modeDefi && 'hidden',
-        )}
-      >
-        {THEMES.map((entry) => (
-          <button
-            key={entry.id}
-            type="button"
-            onClick={() => setTheme(entry.id)}
-            /* `min-h-9` : les pastilles mesuraient 26 points de haut, soit
+        <div
+          className={clsx(
+            '-mx-3 mb-4 flex gap-1.5 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0',
+            modeDefi && 'hidden',
+          )}
+        >
+          {THEMES.map((entry) => (
+            <button
+              key={entry.id}
+              type="button"
+              onClick={() => setTheme(entry.id)}
+              /* `min-h-9` : les pastilles mesuraient 26 points de haut, soit
                presque moitié moins que le pouce qui les vise. On ne les
                agrandit pas en typographie — elles resteraient discrètes, ce
                qui est leur rôle — mais en zone touchable. */
-            className={clsx(
-              'inline-flex min-h-9 shrink-0 items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors',
-              theme === entry.id
-                ? 'border-accent bg-accent/15 text-ink'
-                : 'border-line text-muted hover:bg-surface-hover',
-            )}
-          >
-            {entry.label}
-          </button>
-        ))}
-      </div>
-
+              className={clsx(
+                'inline-flex min-h-9 shrink-0 items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+                theme === entry.id
+                  ? 'border-accent bg-accent/15 text-ink'
+                  : 'border-line text-muted hover:bg-surface-hover',
+              )}
+            >
+              {entry.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── La catégorie de ce puzzle ────────────────────────────────────
@@ -833,9 +834,7 @@ export default function PuzzlesPage() {
                 aria-hidden
               />
               {orientation === 'w' ? 'Les Blancs jouent' : 'Les Noirs jouent'}
-              <span className="truncate font-normal text-muted">
-                — trouve le meilleur coup
-              </span>
+              <span className="truncate font-normal text-muted">— trouve le meilleur coup</span>
               <CategorieDuPuzzle
                 puzzle={puzzle}
                 filtre={theme}
@@ -848,22 +847,22 @@ export default function PuzzlesPage() {
           )}
 
           <div className="etude-cadre">
-          {status === 'loading' ? (
-            <div className="grid aspect-square w-full place-items-center rounded-[var(--radius)] glass">
-              <Spinner size={26} />
-            </div>
-          ) : (
-            <ChessBoard
-              fitParentHeight
-              fen={fen}
-              orientation={orientation}
-              playable={status === 'playing' && !repliqueEnCours ? orientation : null}
-              legalMoves={legalMoves}
-              onMove={handleMove}
-              lastMove={lastMove}
-              allowAnnotations
-            />
-          )}
+            {status === 'loading' ? (
+              <div className="grid aspect-square w-full place-items-center rounded-[var(--radius)] glass">
+                <Spinner size={26} />
+              </div>
+            ) : (
+              <ChessBoard
+                fitParentHeight
+                fen={fen}
+                orientation={orientation}
+                playable={status === 'playing' && !repliqueEnCours ? orientation : null}
+                legalMoves={legalMoves}
+                onMove={handleMove}
+                lastMove={lastMove}
+                allowAnnotations
+              />
+            )}
           </div>
         </div>
 
@@ -895,10 +894,7 @@ export default function PuzzlesPage() {
                 )}
                 {revealedSan && (
                   <p className="mt-2 rounded-[var(--radius-sm)] bg-surface px-2.5 py-2 text-[13px]">
-                    Solution :{' '}
-                    <strong className="text-accent">
-                      {format(revealedSan)}
-                    </strong>
+                    Solution : <strong className="text-accent">{format(revealedSan)}</strong>
                   </p>
                 )}
               </>
@@ -985,9 +981,7 @@ export default function PuzzlesPage() {
                   {motifCopy(puzzle.themes[0] as MotifId, locale)?.definition}
                 </p>
               )}
-              <p className="mt-3 text-[11px] text-faint">
-                Niveau du puzzle : {puzzle.rating}
-              </p>
+              <p className="mt-3 text-[11px] text-faint">Niveau du puzzle : {puzzle.rating}</p>
             </Card>
           )}
 
@@ -1103,7 +1097,6 @@ export default function PuzzlesPage() {
 // ─────────────────────────────────────────────────────────────────────────────
 //  Aides
 // ─────────────────────────────────────────────────────────────────────────────
-
 
 /** Notation algébrique d'un coup UCI dans une position, ou `null`. */
 function sanOf(fen: string, uci: string | undefined): string | null {

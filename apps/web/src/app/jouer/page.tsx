@@ -12,15 +12,7 @@
  */
 
 import Link from 'next/link'
-import {
-  ArrowRight,
-  Cpu,
-  Eye,
-  Footprints,
-  MonitorSmartphone,
-  Trophy,
-  Users,
-} from 'lucide-react'
+import { ArrowRight, Cpu, Eye, Footprints, MonitorSmartphone, Trophy, Users } from 'lucide-react'
 import { BOT_PERSONALITIES } from '@coupparfait/core'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
@@ -91,8 +83,8 @@ export default function PlayLobbyPage() {
         {t('play.title')}
       </h1>
       <p className="mt-2 max-w-xl text-muted">
-        Contre la machine pour t’entraîner à ton rythme, contre un ami pour le plaisir, ou à
-        deux sur le même écran.
+        Contre la machine pour t’entraîner à ton rythme, contre un ami pour le plaisir, ou à deux
+        sur le même écran.
       </p>
 
       {/* ── Les six portes ───────────────────────────────────────────────
@@ -167,8 +159,8 @@ export default function PlayLobbyPage() {
           Tes adversaires artificiels
         </h2>
         <p className="mt-1.5 text-sm text-muted">
-          Chacun a un style de jeu réellement différent — ce n’est pas qu’un habillage : leur
-          façon de choisir un coup est biaisée en faveur de ce qu’ils aiment.
+          Chacun a un style de jeu réellement différent — ce n’est pas qu’un habillage : leur façon
+          de choisir un coup est biaisée en faveur de ce qu’ils aiment.
         </p>
 
         {/* Sans carte, et c'est le point : sept encadrés côte à côte sous

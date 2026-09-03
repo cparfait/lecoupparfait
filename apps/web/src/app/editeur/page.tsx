@@ -67,7 +67,10 @@ export default function EditorPage() {
       }
     }
     if (/[pP]/.test((placed.split('/')[0] ?? '') + (placed.split('/')[7] ?? ''))) {
-      return { ok: false, message: 'Un pion ne peut pas être sur la première ni la dernière rangée.' }
+      return {
+        ok: false,
+        message: 'Un pion ne peut pas être sur la première ni la dernière rangée.',
+      }
     }
     try {
       board.load(fen)
@@ -138,15 +141,15 @@ export default function EditorPage() {
       <div className="etude-corps grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="etude-plateau min-w-0">
           <div className="etude-cadre">
-          <ChessBoard
-            fitParentHeight
-            fen={fen}
-            orientation={orientation}
-            playable={null}
-            onSquareClick={place}
-            showViewToggle={false}
-            reservedHeight={14}
-          />
+            <ChessBoard
+              fitParentHeight
+              fen={fen}
+              orientation={orientation}
+              playable={null}
+              onSquareClick={place}
+              showViewToggle={false}
+              reservedHeight={14}
+            />
           </div>
         </div>
 
@@ -169,7 +172,9 @@ export default function EditorPage() {
                       aria-pressed={active}
                       className={clsx(
                         'grid h-9 flex-1 place-items-center rounded-[var(--radius-sm)] text-2xl leading-none transition-colors',
-                        active ? 'bg-accent/20 ring-2 ring-inset ring-accent' : 'hover:bg-surface-hover',
+                        active
+                          ? 'bg-accent/20 ring-2 ring-inset ring-accent'
+                          : 'hover:bg-surface-hover',
                       )}
                     >
                       <span aria-hidden>{colour === 'w' ? piece.white : piece.black}</span>
@@ -184,7 +189,9 @@ export default function EditorPage() {
               aria-pressed={brush === null}
               className={clsx(
                 'mt-1 flex w-full items-center justify-center gap-1.5 rounded-[var(--radius-sm)] py-1.5 text-[13px] font-medium transition-colors',
-                brush === null ? 'bg-accent/20 ring-2 ring-inset ring-accent' : 'hover:bg-surface-hover',
+                brush === null
+                  ? 'bg-accent/20 ring-2 ring-inset ring-accent'
+                  : 'hover:bg-surface-hover',
               )}
             >
               <Eraser size={14} aria-hidden />

@@ -42,7 +42,6 @@ interface Game {
   deadline: string | null
 }
 
-
 /** Reste avant de perdre par dépassement, dit en clair. */
 function remaining(deadline: string | null): string {
   if (!deadline) return ''
@@ -65,7 +64,9 @@ export default function CorrespondencePage() {
     }
     const data: { games: Game[] } = await response.json()
     setGames(data.games ?? [])
-    setCurrent((slug) => slug ?? data.games?.find((g) => g.yourTurn)?.slug ?? data.games?.[0]?.slug ?? null)
+    setCurrent(
+      (slug) => slug ?? data.games?.find((g) => g.yourTurn)?.slug ?? data.games?.[0]?.slug ?? null,
+    )
   }, [])
 
   // Le carnet d'amis était chargé ici pour la création de partie, qui a
@@ -93,7 +94,6 @@ export default function CorrespondencePage() {
     },
     [game, refresh],
   )
-
 
   if (games === undefined) {
     return (

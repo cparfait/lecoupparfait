@@ -184,7 +184,12 @@ export class GameRoom {
   private idleTimer: ReturnType<typeof setTimeout> | null = null
   private readonly abandonAt: number
 
-  constructor(options: { slug: string; timeControl: TimeControl; rated: boolean; startFen?: string }) {
+  constructor(options: {
+    slug: string
+    timeControl: TimeControl
+    rated: boolean
+    startFen?: string
+  }) {
     this.slug = options.slug
     this.timeControl = options.timeControl
     this.rated = options.rated
@@ -387,9 +392,7 @@ export class GameRoom {
   }
 
   get isEmpty(): boolean {
-    return (
-      (this.players.w?.sockets.size ?? 0) === 0 && (this.players.b?.sockets.size ?? 0) === 0
-    )
+    return (this.players.w?.sockets.size ?? 0) === 0 && (this.players.b?.sockets.size ?? 0) === 0
   }
 
   get isFinished(): boolean {

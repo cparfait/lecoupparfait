@@ -107,15 +107,15 @@ part de ce serveur vers cet appareil, et c'est tout ce qu'ils sauront jamais.
 
 ## Où c'est écrit
 
-| Rôle | Fichier |
-| --- | --- |
-| Travailleur de service (réception, clic) | `apps/web/public/sw.js` |
-| Abonnement, côté navigateur | `apps/web/src/lib/notifications.ts` |
-| Réglage dans les préférences | `apps/web/src/components/settings/ReglageNotifications.tsx` |
-| API d'abonnement | `apps/web/src/app/api/notifications/route.ts` |
-| Envoi d'une invitation | `apps/web/src/lib/server/push.ts` |
-| Rappel du défi du jour | `apps/server/src/rappels.ts` |
-| Table des abonnements | `packages/db/src/push.ts` |
+| Rôle                                     | Fichier                                                     |
+| ---------------------------------------- | ----------------------------------------------------------- |
+| Travailleur de service (réception, clic) | `apps/web/public/sw.js`                                     |
+| Abonnement, côté navigateur              | `apps/web/src/lib/notifications.ts`                         |
+| Réglage dans les préférences             | `apps/web/src/components/settings/ReglageNotifications.tsx` |
+| API d'abonnement                         | `apps/web/src/app/api/notifications/route.ts`               |
+| Envoi d'une invitation                   | `apps/web/src/lib/server/push.ts`                           |
+| Rappel du défi du jour                   | `apps/server/src/rappels.ts`                                |
+| Table des abonnements                    | `packages/db/src/push.ts`                                   |
 
 Le rappel quotidien vit dans le **serveur temps réel** et non dans
 l'application web : il doit partir vers quelqu'un qui n'est justement pas venu,

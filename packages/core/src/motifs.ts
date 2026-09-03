@@ -267,10 +267,7 @@ export function findDiscoveredAttacks(
       const between = squaresBetween(slider.square, target.square)
       if (!between || !between.includes(vacated)) continue
       // Ne retenir que les cibles qui valent la peine.
-      if (
-        target.type !== 'k' &&
-        staticExchange(after.fen(), target.square, side) <= 0
-      ) {
+      if (target.type !== 'k' && staticExchange(after.fen(), target.square, side) <= 0) {
         continue
       }
       out.push({
@@ -603,10 +600,7 @@ export function hasWrongRookBishop(chess: Chess, color: Color): boolean {
 export function kingActivityScore(chess: Chess, color: Color): number {
   const king = kingSquare(chess, color)
   if (!king) return 0
-  const centreDistance = Math.max(
-    Math.abs(fileIndex(king) - 3.5),
-    Math.abs(rankIndex(king) - 3.5),
-  )
+  const centreDistance = Math.max(Math.abs(fileIndex(king) - 3.5), Math.abs(rankIndex(king) - 3.5))
   const enemyPawns = listPieces(chess, opposite(color)).filter((p) => p.type === 'p')
   const nearestPawn = enemyPawns.length
     ? Math.min(...enemyPawns.map((p) => kingDistance(king, p.square)))
@@ -631,10 +625,7 @@ export interface MotifOptions {
  * Tous les motifs présents dans une position, pour les deux camps.
  * Triés par poids décroissant : les plus parlants d'abord.
  */
-export function detectPositionMotifs(
-  chess: Chess,
-  options: MotifOptions = {},
-): DetectedMotif[] {
+export function detectPositionMotifs(chess: Chess, options: MotifOptions = {}): DetectedMotif[] {
   const { minWeight = 0.15, limit = 24, tacticsOnly = false } = options
   const out: DetectedMotif[] = []
 
@@ -930,9 +921,7 @@ export function detectMoveMotifs(context: MoveContext): DetectedMotif[] {
 
   // Élimination d'un défenseur : la capture faisait tomber un défenseur clé.
   if (context.captured) {
-    const wasDefending = before
-      .attackers(context.to, side)
-      .length
+    const wasDefending = before.attackers(context.to, side).length
     const defendedByCaptured = listPieces(before, enemy).filter((p) =>
       before.attackers(p.square, enemy).includes(context.to),
     )
@@ -942,12 +931,7 @@ export function detectMoveMotifs(context: MoveContext): DetectedMotif[] {
       )
       if (nowHanging.length > 0) {
         out.push(
-          motif(
-            'removingTheDefender',
-            side,
-            [context.to, ...nowHanging.map((p) => p.square)],
-            0.6,
-          ),
+          motif('removingTheDefender', side, [context.to, ...nowHanging.map((p) => p.square)], 0.6),
         )
       }
     }

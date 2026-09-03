@@ -31,10 +31,7 @@ export function toSquare(file: number, rank: number): Square | null {
  * Position d'une case en pourcentage du côté de l'échiquier.
  * `orientation` retourne le plateau : les Noirs voient `h8` en bas à gauche.
  */
-export function squarePosition(
-  square: Square,
-  orientation: Color,
-): { left: number; top: number } {
+export function squarePosition(square: Square, orientation: Color): { left: number; top: number } {
   const file = fileOf(square)
   const rank = rankOf(square)
   const x = orientation === 'w' ? file : 7 - file
@@ -43,11 +40,7 @@ export function squarePosition(
 }
 
 /** Case sous un point, exprimé en coordonnées relatives au conteneur (0–1). */
-export function squareAt(
-  x: number,
-  y: number,
-  orientation: Color,
-): Square | null {
+export function squareAt(x: number, y: number, orientation: Color): Square | null {
   if (x < 0 || x > 1 || y < 0 || y > 1) return null
   const column = Math.floor(x * 8)
   const row = Math.floor(y * 8)
@@ -129,8 +122,7 @@ export const BOARD_SKINS: Record<BoardStyleId, BoardSkin> = {
   noyer: {
     light: '#e9dbc3',
     dark: '#9c6f43',
-    texture:
-      'repeating-linear-gradient(101deg, rgb(0 0 0 / 0.05) 0 2px, transparent 2px 7px)',
+    texture: 'repeating-linear-gradient(101deg, rgb(0 0 0 / 0.05) 0 2px, transparent 2px 7px)',
     frame: '#3d2c1b',
     coordLight: 'rgb(120 86 51 / 0.85)',
     coordDark: 'rgb(233 219 195 / 0.8)',
@@ -143,8 +135,7 @@ export const BOARD_SKINS: Record<BoardStyleId, BoardSkin> = {
   marbre: {
     light: '#eef1f5',
     dark: '#78818f',
-    texture:
-      'radial-gradient(60% 90% at 30% 20%, rgb(255 255 255 / 0.14), transparent 60%)',
+    texture: 'radial-gradient(60% 90% at 30% 20%, rgb(255 255 255 / 0.14), transparent 60%)',
     frame: 'rgb(120 129 143 / 0.5)',
     coordLight: 'rgb(120 129 143 / 0.85)',
     coordDark: 'rgb(238 241 245 / 0.85)',
@@ -184,8 +175,7 @@ export const BOARD_SKINS: Record<BoardStyleId, BoardSkin> = {
   papier: {
     light: '#f6f1e6',
     dark: '#c6b9a2',
-    texture:
-      'repeating-linear-gradient(45deg, rgb(0 0 0 / 0.02) 0 1px, transparent 1px 4px)',
+    texture: 'repeating-linear-gradient(45deg, rgb(0 0 0 / 0.02) 0 1px, transparent 1px 4px)',
     frame: 'rgb(198 185 162 / 0.7)',
     coordLight: 'rgb(150 135 110 / 0.9)',
     coordDark: 'rgb(90 78 60 / 0.7)',
@@ -288,10 +278,7 @@ export function arrowPath(
 
   if (isKnightMove) {
     // Coude : on parcourt d'abord le grand côté, puis le petit.
-    const corner =
-      dx === 1
-        ? { x: a.x, y: b.y }
-        : { x: b.x, y: a.y }
+    const corner = dx === 1 ? { x: a.x, y: b.y } : { x: b.x, y: a.y }
     const angle = Math.atan2(b.y - corner.y, b.x - corner.x)
     const tip = {
       x: b.x - Math.cos(angle) * shorten,
@@ -438,7 +425,8 @@ export function reconduireIdentites(
 
   const restantes: BoardPiece[] = []
   for (const piece of enAttente) {
-    const origine = dernierCoup && piece.square === dernierCoup.to ? parCase.get(dernierCoup.from) : null
+    const origine =
+      dernierCoup && piece.square === dernierCoup.to ? parCase.get(dernierCoup.from) : null
     if (origine && libres.has(origine) && origine.color === piece.color) {
       reprendre(piece, origine)
     } else {

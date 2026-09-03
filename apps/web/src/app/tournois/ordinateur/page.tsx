@@ -136,8 +136,8 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
         Tournoi contre l’ordinateur
       </h1>
       <p className="mt-2 max-w-prose text-muted">
-        Tu es le seul humain. Tu affrontes chaque adversaire une fois, et le classement se
-        fait aux points — comme dans un vrai toutes rondes.
+        Tu es le seul humain. Tu affrontes chaque adversaire une fois, et le classement se fait aux
+        points — comme dans un vrai toutes rondes.
       </p>
 
       <Card className="mt-6 p-5">
@@ -209,9 +209,7 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
 
         <label className="mt-4 block">
           <span className="mb-1.5 flex items-baseline justify-between text-sm">
-            <span className="font-medium">
-              {aleatoire ? 'Autour du niveau' : 'Niveau'}
-            </span>
+            <span className="font-medium">{aleatoire ? 'Autour du niveau' : 'Niveau'}</span>
             <span className="text-muted">
               {niveau} · {palier.elo} Elo
             </span>
@@ -277,13 +275,7 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
 //  Le tableau du tournoi
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Tableau({
-  tournoi,
-  onAbandonner,
-}: {
-  tournoi: TournoiSolo
-  onAbandonner: () => void
-}) {
+function Tableau({ tournoi, onAbandonner }: { tournoi: TournoiSolo; onAbandonner: () => void }) {
   const router = useRouter()
   const table = classement(tournoi)
   const duel = prochainDuel(tournoi)
@@ -524,7 +516,10 @@ function Resultats({ tournoi }: { tournoi: TournoiSolo }) {
                 return (
                   <p
                     key={index}
-                    className={clsx('flex items-center gap-2 py-0.5 text-[13px]', !mien && 'text-muted')}
+                    className={clsx(
+                      'flex items-center gap-2 py-0.5 text-[13px]',
+                      !mien && 'text-muted',
+                    )}
                   >
                     <span className="min-w-0 flex-1 truncate">
                       {blancs?.nom} — {noirs?.nom}

@@ -22,15 +22,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  Eye,
-  RotateCcw,
-  Volume2,
-  VolumeX,
-} from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Eye, RotateCcw, Volume2, VolumeX } from 'lucide-react'
 import clsx from 'clsx'
 import { Chess } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
@@ -376,69 +368,70 @@ export default function LessonPage() {
   return (
     <div className="etude mx-auto w-full max-w-[1200px] px-3 py-4 sm:px-5 lg:py-8">
       <div className="etude-tete">
-      {/* ── En-tête ────────────────────────────────────────────────── */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <Link
-          href="/apprendre"
-          className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
-        >
-          <ArrowLeft size={15} aria-hidden />
-          Programme
-        </Link>
-        <span className="text-faint" aria-hidden>
-          /
-        </span>
-        <span className="text-sm font-medium">
-          {lesson.icon} {lesson.title}
-        </span>
-        <Chip className="ml-auto">
-          Étape {stepIndex + 1} / {lesson.steps.length}
-        </Chip>
-        <button
-          type="button"
-          onClick={() => {
-            if (voiceEnabled) stopSpeaking()
-            setPreference('voiceEnabled', !voiceEnabled)
-          }}
-          className={clsx(
-            'grid h-8 w-8 place-items-center rounded-[var(--radius-sm)] transition-colors',
-            voiceEnabled ? 'text-accent hover:bg-surface-hover' : 'text-faint hover:bg-surface-hover',
-          )}
-          aria-label={voiceEnabled ? 'Couper la voix' : 'Activer la voix'}
-        >
-          {voiceEnabled ? <Volume2 size={15} aria-hidden /> : <VolumeX size={15} aria-hidden />}
-        </button>
-      </div>
+        {/* ── En-tête ────────────────────────────────────────────────── */}
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <Link
+            href="/apprendre"
+            className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
+          >
+            <ArrowLeft size={15} aria-hidden />
+            Programme
+          </Link>
+          <span className="text-faint" aria-hidden>
+            /
+          </span>
+          <span className="text-sm font-medium">
+            {lesson.icon} {lesson.title}
+          </span>
+          <Chip className="ml-auto">
+            Étape {stepIndex + 1} / {lesson.steps.length}
+          </Chip>
+          <button
+            type="button"
+            onClick={() => {
+              if (voiceEnabled) stopSpeaking()
+              setPreference('voiceEnabled', !voiceEnabled)
+            }}
+            className={clsx(
+              'grid h-8 w-8 place-items-center rounded-[var(--radius-sm)] transition-colors',
+              voiceEnabled
+                ? 'text-accent hover:bg-surface-hover'
+                : 'text-faint hover:bg-surface-hover',
+            )}
+            aria-label={voiceEnabled ? 'Couper la voix' : 'Activer la voix'}
+          >
+            {voiceEnabled ? <Volume2 size={15} aria-hidden /> : <VolumeX size={15} aria-hidden />}
+          </button>
+        </div>
 
-      <div className="mb-4 h-1 overflow-hidden rounded-full bg-surface-strong">
-        <div
-          className="h-full rounded-full bg-accent transition-[width] duration-400"
-          style={{ width: `${((stepIndex + 1) / lesson.steps.length) * 100}%` }}
-        />
-      </div>
-
+        <div className="mb-4 h-1 overflow-hidden rounded-full bg-surface-strong">
+          <div
+            className="h-full rounded-full bg-accent transition-[width] duration-400"
+            style={{ width: `${((stepIndex + 1) / lesson.steps.length) * 100}%` }}
+          />
+        </div>
       </div>
 
       <div className="etude-corps grid gap-4 lg:grid-cols-[minmax(0,1fr)_400px]">
         {/* ── Échiquier ────────────────────────────────────────────── */}
         <div className="etude-plateau min-w-0">
           <div className="etude-cadre">
-          <ChessBoard
-            fitParentHeight
-            fen={fen}
-            orientation={orientation}
-            playable={needsAction && !solved ? orientation : null}
-            legalMoves={legalMoves}
-            onMove={handleMove}
-            lastMove={lastMove}
-            highlights={spokenSquares}
-            arrows={arrows}
-            circles={circles}
-            spotlight={step.spotlight}
-            checkSquare={mate}
-            checkmate={mate !== null}
-            allowAnnotations={false}
-          />
+            <ChessBoard
+              fitParentHeight
+              fen={fen}
+              orientation={orientation}
+              playable={needsAction && !solved ? orientation : null}
+              legalMoves={legalMoves}
+              onMove={handleMove}
+              lastMove={lastMove}
+              highlights={spokenSquares}
+              arrows={arrows}
+              circles={circles}
+              spotlight={step.spotlight}
+              checkSquare={mate}
+              checkmate={mate !== null}
+              allowAnnotations={false}
+            />
           </div>
 
           <ArrowLegend

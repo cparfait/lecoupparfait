@@ -105,7 +105,13 @@ export function BienvenueCompte({
       liste.push('installation')
     }
     return liste
-  }, [ios, notifications.etat, installation.installee, installation.possible, installation.manuelle])
+  }, [
+    ios,
+    notifications.etat,
+    installation.installee,
+    installation.possible,
+    installation.manuelle,
+  ])
 
   const [index, setIndex] = useState(0)
   const etape = etapes[Math.min(index, etapes.length - 1)]
@@ -153,9 +159,7 @@ export function BienvenueCompte({
             <Check size={18} strokeWidth={2.6} />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="font-display text-lg font-bold leading-tight">
-              Bienvenue, {pseudo}.
-            </p>
+            <p className="font-display text-lg font-bold leading-tight">Bienvenue, {pseudo}.</p>
             <p className="text-[13px] text-muted">
               Ton compte est créé. Quelques réglages, et tu joues.
             </p>
@@ -232,24 +236,27 @@ function EtapeAvatar({ depart }: { depart: string | null }) {
   })
   const active = AVATAR_FAMILIES[famille]!
 
-  const choisir = useCallback(async (emoji: string) => {
-    const avant = choisi
-    setChoisi(emoji)
-    try {
-      const reponse = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ action: 'avatar', avatar: emoji }),
-      })
-      if (!reponse.ok) {
+  const choisir = useCallback(
+    async (emoji: string) => {
+      const avant = choisi
+      setChoisi(emoji)
+      try {
+        const reponse = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ action: 'avatar', avatar: emoji }),
+        })
+        if (!reponse.ok) {
+          setChoisi(avant)
+          toast.error('Changement impossible.')
+        }
+      } catch {
         setChoisi(avant)
-        toast.error('Changement impossible.')
+        toast.error('Le serveur est injoignable.')
       }
-    } catch {
-      setChoisi(avant)
-      toast.error('Le serveur est injoignable.')
-    }
-  }, [choisi])
+    },
+    [choisi],
+  )
 
   return (
     <Etage
@@ -326,11 +333,36 @@ function EtapeAvatar({ depart }: { depart: string | null }) {
  * personne ne vérifie n'a rien à faire dans un tableau.
  */
 const REPERES: Array<{ id: string; label: string; detail: string; elo: number | null }> = [
-  { id: 'debut', label: 'Je débute', detail: 'Je découvre, ou je connais juste les règles.', elo: 250 },
-  { id: 'occasionnel', label: 'Je joue de temps en temps', detail: 'En famille, entre amis, sans travailler.', elo: 900 },
-  { id: 'regulier', label: 'Je joue régulièrement', detail: 'En ligne, je gagne à peu près une partie sur deux.', elo: 1300 },
-  { id: 'club', label: 'Je joue en club', detail: 'J’ai des ouvertures, je vois les tactiques courantes.', elo: 1700 },
-  { id: 'fort', label: 'Je suis un joueur fort', detail: 'Classé, ou l’équivalent en ligne.', elo: 2100 },
+  {
+    id: 'debut',
+    label: 'Je débute',
+    detail: 'Je découvre, ou je connais juste les règles.',
+    elo: 250,
+  },
+  {
+    id: 'occasionnel',
+    label: 'Je joue de temps en temps',
+    detail: 'En famille, entre amis, sans travailler.',
+    elo: 900,
+  },
+  {
+    id: 'regulier',
+    label: 'Je joue régulièrement',
+    detail: 'En ligne, je gagne à peu près une partie sur deux.',
+    elo: 1300,
+  },
+  {
+    id: 'club',
+    label: 'Je joue en club',
+    detail: 'J’ai des ouvertures, je vois les tactiques courantes.',
+    elo: 1700,
+  },
+  {
+    id: 'fort',
+    label: 'Je suis un joueur fort',
+    detail: 'Classé, ou l’équivalent en ligne.',
+    elo: 2100,
+  },
 ]
 
 function EtapeNiveau() {
@@ -553,8 +585,8 @@ function EtapeNotifications({
           {etat === 'refuse' && (
             <p className="mt-2 flex items-start gap-2 text-[12px] leading-relaxed text-muted">
               <BellOff size={14} className="mt-0.5 shrink-0" aria-hidden />
-              Ton navigateur les a refusées pour ce site et ne redemandera pas. Ça se
-              réautorise à côté de l’adresse du site.
+              Ton navigateur les a refusées pour ce site et ne redemandera pas. Ça se réautorise à
+              côté de l’adresse du site.
             </p>
           )}
         </>

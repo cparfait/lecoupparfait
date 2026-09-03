@@ -36,7 +36,8 @@ export function TurnIndicator({
           turn === 'w' ? 'bg-[var(--eval-white)]' : 'bg-[var(--eval-black)] ring-1 ring-line',
           // La pulsation anime une ombre, donc repeint en boucle : on la coupe
           // en mode « performance », comme les autres.
-          yours && 'animate-[pulse-ring_1.8s_ease-in-out_infinite] [[data-effects=low]_&]:animate-none',
+          yours &&
+            'animate-[pulse-ring_1.8s_ease-in-out_infinite] [[data-effects=low]_&]:animate-none',
         )}
         aria-hidden
       />

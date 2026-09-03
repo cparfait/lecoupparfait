@@ -49,8 +49,8 @@ export function ReglageNotifications() {
           {iosSansInstallation() ? (
             <>
               Sur iPhone et iPad, les notifications ne fonctionnent qu’une fois l’application
-              installée. Touche le bouton de partage, puis «&nbsp;Sur l’écran d’accueil&nbsp;»,
-              et reviens ici depuis l’icône.
+              installée. Touche le bouton de partage, puis «&nbsp;Sur l’écran d’accueil&nbsp;», et
+              reviens ici depuis l’icône.
             </>
           ) : (
             <>Ce navigateur ne sait pas recevoir de notifications.</>
@@ -62,8 +62,8 @@ export function ReglageNotifications() {
         </p>
       ) : etat === 'refuse' ? (
         <p className="text-sm leading-relaxed text-muted">
-          Les notifications ont été refusées pour ce site. Le navigateur ne redemandera pas —
-          il faut les réautoriser dans ses réglages, à côté de l’adresse du site.
+          Les notifications ont été refusées pour ce site. Le navigateur ne redemandera pas — il
+          faut les réautoriser dans ses réglages, à côté de l’adresse du site.
         </p>
       ) : etat === 'actif' ? (
         <>
@@ -111,8 +111,8 @@ export function ReglageNotifications() {
       ) : (
         <>
           <p className="text-sm leading-relaxed text-muted">
-            Être prévenu quand un ami t’invite à jouer, et rappelé du défi du jour. Rien
-            d’autre : ni actualités, ni relances.
+            Être prévenu quand un ami t’invite à jouer, et rappelé du défi du jour. Rien d’autre :
+            ni actualités, ni relances.
           </p>
           <Button
             className="mt-3"

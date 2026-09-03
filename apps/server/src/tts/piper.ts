@@ -319,9 +319,7 @@ function conditionAudio(wav: Buffer): Buffer {
  * ou `fact` peut s'intercaler, et écrire au mauvais endroit transformerait la
  * parole en bruit.
  */
-function findDataChunk(
-  wav: Buffer,
-): { offset: number; length: number; sampleRate: number } | null {
+function findDataChunk(wav: Buffer): { offset: number; length: number; sampleRate: number } | null {
   if (wav.length < 44 || wav.toString('latin1', 0, 4) !== 'RIFF') return null
   if (wav.toString('latin1', 8, 12) !== 'WAVE') return null
 

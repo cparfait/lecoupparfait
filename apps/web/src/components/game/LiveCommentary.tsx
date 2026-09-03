@@ -555,7 +555,10 @@ export function CommentaryPanel({
       // Le coup du moteur ne se rejoue pas sur cette position : on le dit
       // plutôt que de rester muet sur un bouton qu'on vient de presser.
       if (!explication) {
-        toast.warning('Ce coup ne se rejoue pas sur cette position.', 'Impossible de l’expliquer sans risquer d’inventer.')
+        toast.warning(
+          'Ce coup ne se rejoue pas sur cette position.',
+          'Impossible de l’expliquer sans risquer d’inventer.',
+        )
         return
       }
       /*
@@ -651,8 +654,8 @@ export function CommentaryPanel({
         <div className="flex items-start gap-2.5 text-sm text-faint">
           <MessageSquareText size={16} className="mt-0.5 shrink-0" aria-hidden />
           <p className="min-w-0 flex-1 leading-relaxed">
-            Mode commenté actif. Après chaque coup, tu verras ce que tu aurais pu jouer, avec
-            les trois meilleures options et la raison de chacune.
+            Mode commenté actif. Après chaque coup, tu verras ce que tu aurais pu jouer, avec les
+            trois meilleures options et la raison de chacune.
           </p>
           {onDesactiver && <BoutonDesactiver onClick={onDesactiver} />}
         </div>
@@ -672,7 +675,8 @@ export function CommentaryPanel({
         <div className="flex items-center gap-2 border-b border-line bg-surface-strong px-3 py-1.5 text-[11px] text-faint">
           <History size={12} className="shrink-0" aria-hidden />
           <span className="min-w-0 flex-1 leading-snug">
-            Porte sur ton coup <strong className="font-semibold text-muted">{san(commentary.san)}</strong> — la
+            Porte sur ton coup{' '}
+            <strong className="font-semibold text-muted">{san(commentary.san)}</strong> — la
             position a changé depuis.
           </span>
           {onReview && (
@@ -755,82 +759,88 @@ export function CommentaryPanel({
               titre qui passe sur deux lignes reste lu, un vide ne se lit
               jamais. */}
           <div className="flex shrink-0 items-center gap-0.5">
-          {/* Rien à couper dans une partie sans commentaire : le bouton
+            {/* Rien à couper dans une partie sans commentaire : le bouton
               proposerait d'activer une voix qui resterait muette. */}
-          {voix && (
-            <button
-              type="button"
-              onClick={() => {
-                if (voixPreferee) stopSpeaking()
-                setPreference('voiceEnabled', !voixPreferee)
-              }}
-              title={voixPreferee ? 'Couper la voix' : 'Activer la voix'}
-              aria-label={voixPreferee ? 'Couper la voix' : 'Activer la voix'}
-              className={clsx(
-                'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors',
-                voixPreferee ? 'text-accent hover:bg-surface-hover' : 'text-faint hover:bg-surface-hover',
-              )}
-            >
-              {voixPreferee ? <Volume2 size={14} aria-hidden /> : <VolumeX size={14} aria-hidden />}
-            </button>
-          )}
+            {voix && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (voixPreferee) stopSpeaking()
+                  setPreference('voiceEnabled', !voixPreferee)
+                }}
+                title={voixPreferee ? 'Couper la voix' : 'Activer la voix'}
+                aria-label={voixPreferee ? 'Couper la voix' : 'Activer la voix'}
+                className={clsx(
+                  'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors',
+                  voixPreferee
+                    ? 'text-accent hover:bg-surface-hover'
+                    : 'text-faint hover:bg-surface-hover',
+                )}
+              >
+                {voixPreferee ? (
+                  <Volume2 size={14} aria-hidden />
+                ) : (
+                  <VolumeX size={14} aria-hidden />
+                )}
+              </button>
+            )}
 
-          {commentary && voiceEnabled && (
-            <button
-              type="button"
-              onClick={replay}
-              title="Réécouter l’explication complète"
-              aria-label="Réécouter l’explication"
-              className={clsx(
-                'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
-                speaking ? 'text-accent' : 'text-faint hover:text-ink',
-              )}
-            >
-              <span className="text-sm font-bold leading-none" aria-hidden>
-                ↻
-              </span>
-            </button>
-          )}
+            {commentary && voiceEnabled && (
+              <button
+                type="button"
+                onClick={replay}
+                title="Réécouter l’explication complète"
+                aria-label="Réécouter l’explication"
+                className={clsx(
+                  'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
+                  speaking ? 'text-accent' : 'text-faint hover:text-ink',
+                )}
+              >
+                <span className="text-sm font-bold leading-none" aria-hidden>
+                  ↻
+                </span>
+              </button>
+            )}
 
-          {onToggleBestMove && (
-            <button
-              type="button"
-              onClick={onToggleBestMove}
-              aria-pressed={showBestMove}
-              title={
-                showBestMove
-                  ? 'Masquer le coup proposé sur l’échiquier'
-                  : 'Montrer le coup proposé sur l’échiquier'
-              }
-              aria-label="Afficher le coup proposé"
-              className={clsx(
-                'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
-                showBestMove ? 'text-accent' : 'text-faint hover:text-ink',
-              )}
-            >
-              {showBestMove ? <Eye size={14} aria-hidden /> : <EyeOff size={14} aria-hidden />}
-            </button>
-          )}
+            {onToggleBestMove && (
+              <button
+                type="button"
+                onClick={onToggleBestMove}
+                aria-pressed={showBestMove}
+                title={
+                  showBestMove
+                    ? 'Masquer le coup proposé sur l’échiquier'
+                    : 'Montrer le coup proposé sur l’échiquier'
+                }
+                aria-label="Afficher le coup proposé"
+                className={clsx(
+                  'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
+                  showBestMove ? 'text-accent' : 'text-faint hover:text-ink',
+                )}
+              >
+                {showBestMove ? <Eye size={14} aria-hidden /> : <EyeOff size={14} aria-hidden />}
+              </button>
+            )}
 
-          {onTogglePause && (
-            <button
-              type="button"
-              onClick={onTogglePause}
-              title={paused ? 'Reprendre la partie' : 'Mettre en pause pour lire'}
-              aria-label={paused ? 'Reprendre' : 'Pause'}
-              className={clsx(
-                'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
-                paused ? 'text-accent' : 'text-faint hover:text-ink',
-              )}
-            >
-              {paused ? <Play size={14} aria-hidden /> : <Pause size={14} aria-hidden />}
-            </button>
-          )}
+            {onTogglePause && (
+              <button
+                type="button"
+                onClick={onTogglePause}
+                title={paused ? 'Reprendre la partie' : 'Mettre en pause pour lire'}
+                aria-label={paused ? 'Reprendre' : 'Pause'}
+                className={clsx(
+                  'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
+                  paused ? 'text-accent' : 'text-faint hover:text-ink',
+                )}
+              >
+                {paused ? <Play size={14} aria-hidden /> : <Pause size={14} aria-hidden />}
+              </button>
+            )}
 
-          {/* En dernier, et seul de sa catégorie : les trois précédents règlent
+            {/* En dernier, et seul de sa catégorie : les trois précédents règlent
               le commentaire, celui-ci le fait disparaître. */}
-          {onDesactiver && <BoutonDesactiver onClick={onDesactiver} />}
-            </div>
+            {onDesactiver && <BoutonDesactiver onClick={onDesactiver} />}
+          </div>
         </div>
 
         {commentary && commentary.body.length > 0 && (
@@ -904,18 +914,12 @@ export function CommentaryPanel({
                       que l'étiquette, le liseré, la pastille du rang et la
                       flèche sur l'échiquier ne fassent qu'une seule couleur. */}
                   {alternative.played && (
-                    <Chip
-                      className="shrink-0 border-transparent"
-                      style={teinteDeRang(alternative)}
-                    >
+                    <Chip className="shrink-0 border-transparent" style={teinteDeRang(alternative)}>
                       joué
                     </Chip>
                   )}
                   {!alternative.played && alternative.rank === 1 && (
-                    <Chip
-                      className="shrink-0 border-transparent"
-                      style={teinteDeRang(alternative)}
-                    >
+                    <Chip className="shrink-0 border-transparent" style={teinteDeRang(alternative)}>
                       meilleur
                     </Chip>
                   )}
@@ -1064,7 +1068,11 @@ export function commentaryLegend(
     return [
       hovered.played
         ? { ...LEGEND.played, label: `${hovered.san} — ton coup` }
-        : { ...LEGEND.best, label: `${hovered.san} — à la place de ton coup`, weight: 'bold' as const },
+        : {
+            ...LEGEND.best,
+            label: `${hovered.san} — à la place de ton coup`,
+            weight: 'bold' as const,
+          },
     ]
   }
 
@@ -1084,7 +1092,11 @@ export function commentaryLegend(
     commentary?.quality === 'great'
 
   const joue = irreprochable
-    ? { ...LEGEND.played, label: 'Ton coup — le meilleur', title: 'Le moteur n’avait rien de mieux.' }
+    ? {
+        ...LEGEND.played,
+        label: 'Ton coup — le meilleur',
+        title: 'Le moteur n’avait rien de mieux.',
+      }
     : LEGEND.played
 
   // `LEGEND.best` n'est plus proposé : la flèche bleue existe toujours sur

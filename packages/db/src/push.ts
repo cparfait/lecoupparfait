@@ -122,10 +122,7 @@ export async function abonnementsPour(
  */
 export async function abonnementsDefiEnAttente(): Promise<PushSubscriptionRow[]> {
   const database = getDb()
-  return database
-    .select()
-    .from(pushSubscriptions)
-    .where(eq(pushSubscriptions.defiDuJour, true))
+  return database.select().from(pushSubscriptions).where(eq(pushSubscriptions.defiDuJour, true))
 }
 
 /**
@@ -141,10 +138,7 @@ export async function abonnementsDefiEnAttente(): Promise<PushSubscriptionRow[]>
  * C'est le bon sens du compromis : mieux vaut un rappel de trop qu'un rappel
  * manqué, et le cas est rare.
  */
-export async function defisDejaFaits(
-  userIds: string[],
-  jours: string[],
-): Promise<Set<string>> {
+export async function defisDejaFaits(userIds: string[], jours: string[]): Promise<Set<string>> {
   if (userIds.length === 0 || jours.length === 0) return new Set()
 
   const database = getDb()

@@ -138,7 +138,9 @@ export async function POST(request: Request) {
       )
     }
 
-    const name = String(body.name ?? '').trim().slice(0, 20)
+    const name = String(body.name ?? '')
+      .trim()
+      .slice(0, 20)
     if (name.length < 2) {
       return NextResponse.json({ error: 'Choisis un pseudo.' }, { status: 400 })
     }

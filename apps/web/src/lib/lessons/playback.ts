@@ -99,7 +99,14 @@ export function positionAtStep(
 export function applyReply(
   fen: string,
   reply: string | undefined,
-): { fen: string; from: Square; to: Square; capture: boolean; check: boolean; mate: boolean } | null {
+): {
+  fen: string
+  from: Square
+  to: Square
+  capture: boolean
+  check: boolean
+  mate: boolean
+} | null {
   if (!reply) return null
   const board = new Chess(fen, { skipValidation: true })
   try {

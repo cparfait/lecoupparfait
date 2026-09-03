@@ -94,8 +94,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   // Les pages de partie masquent la navigation mobile pour libérer l'écran.
   // Seulement celles où l'on joue : le choix d'une cadence et la liste des
   // parties à regarder sont des écrans de navigation, qui la perdaient aussi.
-  const immersive =
-    /^\/(jouer\/(ordinateur|local|partie)|puzzles\/rush|apprendre\/[^/]+)/.test(pathname)
+  const immersive = /^\/(jouer\/(ordinateur|local|partie)|puzzles\/rush|apprendre\/[^/]+)/.test(
+    pathname,
+  )
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -143,7 +144,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               source de défilement horizontal de tout le site. En dessous, la
               barre du bas et le menu font le travail, et ils sont faits pour
               le doigt. */}
-          <nav className="ml-2 hidden items-center gap-0.5 lg:flex" aria-label="Navigation principale">
+          <nav
+            className="ml-2 hidden items-center gap-0.5 lg:flex"
+            aria-label="Navigation principale"
+          >
             {SECTIONS.map((section) => (
               <MenuSection
                 key={section.id}
@@ -227,7 +231,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main
         className={clsx(
           'flex-1 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]',
-          immersive ? 'pb-[env(safe-area-inset-bottom)]' : 'pb-20 lg:pb-0 paysage:pb-[env(safe-area-inset-bottom)]',
+          immersive
+            ? 'pb-[env(safe-area-inset-bottom)]'
+            : 'pb-20 lg:pb-0 paysage:pb-[env(safe-area-inset-bottom)]',
         )}
       >
         {children}
@@ -347,11 +353,7 @@ function MenuSection({
               )}
             </span>
             {reservee && (
-              <Lock
-                size={12}
-                className="mt-1 shrink-0 text-faint"
-                aria-label="demande un compte"
-              />
+              <Lock size={12} className="mt-1 shrink-0 text-faint" aria-label="demande un compte" />
             )}
           </Link>
         )
@@ -485,9 +487,7 @@ function MobileMenu({
                 <Icone size={17} style={{ color: section.teinte }} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-ink">
-                  {t(section.labelKey)}
-                </span>
+                <span className="block text-sm font-semibold text-ink">{t(section.labelKey)}</span>
                 <span className="block truncate text-[11px] text-faint">
                   {section.entrees
                     .slice(0, 3)

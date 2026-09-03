@@ -50,12 +50,16 @@ export default function ArenaPage() {
   const slug = String(useParams().slug ?? '')
   const router = useRouter()
 
-  const [data, setData] = useState<{
-    tournament: Tournament
-    standings: Standing[]
-    game: string | null
-    joined: boolean
-  } | null | undefined>(undefined)
+  const [data, setData] = useState<
+    | {
+        tournament: Tournament
+        standings: Standing[]
+        game: string | null
+        joined: boolean
+      }
+    | null
+    | undefined
+  >(undefined)
   const [me, setMe] = useState<string | null>(null)
 
   const refresh = useCallback(async () => {
@@ -188,7 +192,12 @@ export default function ArenaPage() {
                 ? 'En file d’attente. Dès qu’un adversaire est libre, tu es apparié.'
                 : 'Inscrit. L’arène démarrera à l’heure prévue.'}
             </p>
-            <Button size="sm" variant="ghost" icon={<Pause size={14} />} onClick={() => void act('leave')}>
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={<Pause size={14} />}
+              onClick={() => void act('leave')}
+            >
               Faire une pause
             </Button>
           </div>
@@ -197,7 +206,12 @@ export default function ArenaPage() {
             <p className="min-w-0 flex-1 text-[13px] text-muted">
               En pause. Tes points sont conservés — reviens quand tu veux.
             </p>
-            <Button size="sm" variant="primary" icon={<Play size={14} />} onClick={() => void act('join')}>
+            <Button
+              size="sm"
+              variant="primary"
+              icon={<Play size={14} />}
+              onClick={() => void act('join')}
+            >
               Reprendre
             </Button>
           </div>
@@ -226,9 +240,7 @@ export default function ArenaPage() {
                 </span>
                 <span className="min-w-0 flex-1 truncate text-[13px] font-medium">
                   {player.username}
-                  <span className="ml-1.5 text-[11px] font-normal text-faint">
-                    {player.rating}
-                  </span>
+                  <span className="ml-1.5 text-[11px] font-normal text-faint">{player.rating}</span>
                 </span>
                 {/* Une série en cours vaut le double : la signaler, c'est dire
                     à tout le monde qui est dangereux en ce moment. */}
@@ -259,8 +271,8 @@ export default function ArenaPage() {
         )}
 
         <p className="mt-2.5 border-t border-line/60 pt-2.5 text-[11px] leading-relaxed text-faint">
-          Deux points par victoire, un par nulle. À partir de la deuxième victoire d’affilée,
-          les points doublent — c’est ce qui rend l’arène rattrapable jusqu’au bout.
+          Deux points par victoire, un par nulle. À partir de la deuxième victoire d’affilée, les
+          points doublent — c’est ce qui rend l’arène rattrapable jusqu’au bout.
         </p>
       </Card>
     </div>

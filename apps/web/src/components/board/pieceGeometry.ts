@@ -286,7 +286,10 @@ function mergeGeometries(geometries: THREE.BufferGeometry[]): THREE.BufferGeomet
  */
 const cache = new Map<string, THREE.BufferGeometry>()
 
-export function pieceGeometry(type: Piece3DType, quality: 'high' | 'low' = 'high'): THREE.BufferGeometry {
+export function pieceGeometry(
+  type: Piece3DType,
+  quality: 'high' | 'low' = 'high',
+): THREE.BufferGeometry {
   const key = `${type}-${quality}`
   const cached = cache.get(key)
   if (cached) return cached

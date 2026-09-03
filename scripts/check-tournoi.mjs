@@ -71,7 +71,13 @@ check(
   'en aléatoire, les niveaux restent dans le barème',
   varie.slice(1).every((c) => c.niveau >= 1 && c.niveau <= BOT_LEVELS.length),
 )
-console.log('  ✓ plateau aléatoire :', varie.slice(1).map((c) => `${c.nom} ${c.elo}`).join(' · '))
+console.log(
+  '  ✓ plateau aléatoire :',
+  varie
+    .slice(1)
+    .map((c) => `${c.nom} ${c.elo}`)
+    .join(' · '),
+)
 
 console.log('\n♟  Calendrier\n')
 
@@ -136,7 +142,9 @@ for (const adversaires of [3, 4, 5, 6, 7]) {
     `${n} concurrents — les parties du joueur se jouent`,
     duels.filter((d) => d.blancs === HUMAIN || d.noirs === HUMAIN).every((d) => !d.simule),
   )
-  console.log(`  ✓ ${n} concurrents · ${duels.length} parties · ${nombreDeRondes({ duels })} rondes`)
+  console.log(
+    `  ✓ ${n} concurrents · ${duels.length} parties · ${nombreDeRondes({ duels })} rondes`,
+  )
 }
 
 console.log('\n♟  Tirage entre robots\n')
@@ -160,7 +168,9 @@ for (const [fort, faible, esperance] of [
     Math.abs(obtenu - esperance) < 0.03,
     `obtenu ${obtenu.toFixed(3)}`,
   )
-  console.log(`  ✓ ${fort} vs ${faible} : score moyen ${obtenu.toFixed(3)} (théorie ${esperance.toFixed(3)})`)
+  console.log(
+    `  ✓ ${fort} vs ${faible} : score moyen ${obtenu.toFixed(3)} (théorie ${esperance.toFixed(3)})`,
+  )
 }
 
 console.log('\n♟  Déroulement\n')
@@ -174,7 +184,10 @@ let tournoi = {
   commenceLe: '2026-08-30',
 }
 
-check('au départ, rien n’est joué', tournoi.duels.every((d) => d.resultat === '*'))
+check(
+  'au départ, rien n’est joué',
+  tournoi.duels.every((d) => d.resultat === '*'),
+)
 check('au départ, le joueur a un duel', prochainDuel(tournoi) !== null)
 
 const de = des(21)
@@ -185,7 +198,10 @@ while (prochainDuel(tournoi) && tours < 20) {
 }
 check('le joueur a disputé ses cinq parties', tours === 5, `${tours} parties`)
 check('le tournoi est terminé', estTermine(tournoi))
-check('plus aucun duel en attente', tournoi.duels.every((d) => d.resultat !== '*'))
+check(
+  'plus aucun duel en attente',
+  tournoi.duels.every((d) => d.resultat !== '*'),
+)
 
 // Le total des points doit égaler le nombre de parties : chacune en distribue un.
 const total = tournoi.concurrents.reduce((s, c) => s + points(tournoi.duels, c.id), 0)
@@ -197,7 +213,10 @@ check(
 
 const table = classement(tournoi)
 check('le classement contient tout le monde', table.length === tournoi.concurrents.length)
-check('les rangs vont de 1 à n', table.every((l, i) => l.rang === i + 1))
+check(
+  'les rangs vont de 1 à n',
+  table.every((l, i) => l.rang === i + 1),
+)
 check(
   'le classement est décroissant en points',
   table.every((l, i) => i === 0 || table[i - 1].points >= l.points),

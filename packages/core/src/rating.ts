@@ -70,13 +70,9 @@ export function updateElo(
  * ce score contre ces adversaires. Sert à afficher « tu as joué comme un 1650 »
  * après un tournoi ou une série.
  */
-export function performanceRating(
-  opponentRatings: number[],
-  scoreTotal: number,
-): number {
+export function performanceRating(opponentRatings: number[], scoreTotal: number): number {
   if (opponentRatings.length === 0) return 1500
-  const avg =
-    opponentRatings.reduce((a, b) => a + b, 0) / opponentRatings.length
+  const avg = opponentRatings.reduce((a, b) => a + b, 0) / opponentRatings.length
   const p = scoreTotal / opponentRatings.length
   // Table FIDE approchée par sa forme analytique, bornée pour éviter ±∞.
   const clamped = Math.max(0.005, Math.min(0.995, p))
@@ -271,10 +267,7 @@ function expectation(mu: number, muJ: number, phiJ: number): number {
  * ligne on l'applique partie par partie (lot de taille 1), ce que fait aussi
  * Lichess : c'est légèrement moins précis mais permet un classement en direct.
  */
-export function updateGlicko(
-  player: GlickoRating,
-  opponents: GlickoOpponent[],
-): GlickoRating {
+export function updateGlicko(player: GlickoRating, opponents: GlickoOpponent[]): GlickoRating {
   // Aucune partie : seule l'incertitude augmente (le joueur « rouille »).
   if (opponents.length === 0) {
     return {
@@ -322,9 +315,7 @@ export function updateGlicko(
   // 7. Retour à l'échelle Elo, avec bornes de sécurité.
   return {
     rating: Math.round(GLICKO_DEFAULT_RATING + GLICKO_SCALE * muPrime),
-    rd: Math.round(
-      Math.max(GLICKO_MIN_RD, Math.min(GLICKO_MAX_RD, GLICKO_SCALE * phiPrime)),
-    ),
+    rd: Math.round(Math.max(GLICKO_MIN_RD, Math.min(GLICKO_MAX_RD, GLICKO_SCALE * phiPrime))),
     volatility: Number(sigmaPrime.toFixed(6)),
   }
 }
@@ -334,12 +325,7 @@ export function updateGlicko(
  * Converge en une poignée d'itérations ; le garde-fou à 100 tours n'est là que
  * pour rendre la fonction totale.
  */
-function solveVolatility(
-  sigma: number,
-  phi: number,
-  v: number,
-  delta: number,
-): number {
+function solveVolatility(sigma: number, phi: number, v: number, delta: number): number {
   const a = Math.log(sigma * sigma)
   const epsilon = 0.000001
   const tauSq = GLICKO_TAU * GLICKO_TAU
@@ -395,9 +381,7 @@ export function decayGlicko(rating: GlickoRating, days: number): GlickoRating {
   const phiDecayed = Math.sqrt(phi * phi + periods * rating.volatility ** 2)
   return {
     ...rating,
-    rd: Math.round(
-      Math.max(GLICKO_MIN_RD, Math.min(GLICKO_MAX_RD, GLICKO_SCALE * phiDecayed)),
-    ),
+    rd: Math.round(Math.max(GLICKO_MIN_RD, Math.min(GLICKO_MAX_RD, GLICKO_SCALE * phiDecayed))),
   }
 }
 
@@ -411,10 +395,7 @@ export function isProvisional(rating: GlickoRating): boolean {
  * C'est ce qu'on montre au joueur : « ton niveau est entre 1420 et 1680 ».
  */
 export function ratingInterval(rating: GlickoRating): [number, number] {
-  return [
-    Math.round(rating.rating - 2 * rating.rd),
-    Math.round(rating.rating + 2 * rating.rd),
-  ]
+  return [Math.round(rating.rating - 2 * rating.rd), Math.round(rating.rating + 2 * rating.rd)]
 }
 
 /**
@@ -452,10 +433,7 @@ export function ratingTitle(rating: number): { fr: string; en: string; tier: num
  * Prédit le résultat d'une confrontation, en pourcentages.
  * Sert à afficher les cotes avant une partie entre amis.
  */
-export function matchOdds(
-  a: number,
-  b: number,
-): { win: number; draw: number; loss: number } {
+export function matchOdds(a: number, b: number): { win: number; draw: number; loss: number } {
   const expected = eloExpectedScore(a, b)
   // Probabilité de nulle décroissante avec l'écart de niveau.
   const draw = 0.34 * Math.exp(-(((a - b) / 500) ** 2))

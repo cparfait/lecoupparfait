@@ -80,7 +80,12 @@ export default function MailboxPage() {
         hint="Les messages ne partent pas : ils sont écrits sur le disque, dans data/courriels."
         action={
           <div className="flex gap-1.5">
-            <Button size="sm" variant="ghost" icon={<RefreshCw size={14} />} onClick={() => void refresh()}>
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={<RefreshCw size={14} />}
+              onClick={() => void refresh()}
+            >
               Actualiser
             </Button>
             <Button

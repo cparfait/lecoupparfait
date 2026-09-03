@@ -23,11 +23,7 @@ import type { ThreeEvent } from '@react-three/fiber'
 import { ContactShadows, OrbitControls, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 import type { Color, PieceSymbol, Square } from 'chess.js'
-import {
-  MATERIALS,
-  pieceGeometry,
-  type Piece3DType,
-} from './pieceGeometry.ts'
+import { MATERIALS, pieceGeometry, type Piece3DType } from './pieceGeometry.ts'
 import {
   BOARD_SKINS,
   isLightSquare,
@@ -146,8 +142,7 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
       setSelected(null)
       return
     }
-    const allowed =
-      playable === 'both' || (playable !== null && piece.color === playable)
+    const allowed = playable === 'both' || (playable !== null && piece.color === playable)
     setSelected(allowed ? square : null)
   }
 
@@ -292,10 +287,10 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
       className={`relative aspect-square w-full overflow-hidden rounded-[var(--radius)] ${className ?? ''}`}
     >
       {size > 0 && !webglAbsent && (
-      <Canvas
-        key={reprise}
-        style={{ width: size, height: size }}
-        /*
+        <Canvas
+          key={reprise}
+          style={{ width: size, height: size }}
+          /*
           Rendu à la demande, et non soixante images par seconde en continu.
 
           Un échiquier immobile rendait en boucle : deux cent soixante appels
@@ -306,64 +301,64 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
           mouvement, et les pièces elles-mêmes tant qu'elles glissent — voir
           `Piece3D`.
         */
-        frameloop="demand"
-        shadows={quality === 'high'}
-        dpr={quality === 'high' ? [1, 2] : 1}
-        gl={{
-          antialias: quality === 'high',
-          // `high-performance` réclame la carte dédiée quand il y en a une ;
-          // sur un téléphone il n'y en a qu'une, et l'exiger n'apporte rien
-          // qu'un contexte plus vite refusé quand la mémoire manque.
-          powerPreference: quality === 'high' ? 'high-performance' : 'default',
-          alpha: true,
-        }}
-        onCreated={({ gl }) => {
-          const toile = gl.domElement
-          // `preventDefault` est ce qui autorise le navigateur à rendre le
-          // contexte plus tard : sans lui, la perte est définitive.
-          toile.addEventListener('webglcontextlost', (event) => {
-            event.preventDefault()
-            setContextePerdu(true)
-          })
-          toile.addEventListener('webglcontextrestored', () => setContextePerdu(false))
-        }}
-        camera={{ position: fittedCameraPosition(), fov: CAMERA_FOV, near: 0.1, far: 80 }}
-        // `offsetSize` mesure la boîte de disposition plutôt que le rectangle
-        // de rendu, et l'anti-rebond désactivé évite de perdre la toute
-        // première mesure — sans quoi le canevas resterait à sa taille par
-        // défaut de 300 × 150 jusqu'au premier redimensionnement de fenêtre.
-        resize={{ offsetSize: true, debounce: 0, scroll: false }}
-      >
-        <CanvasSizer size={size} />
-        <Suspense fallback={null}>
-          <Scene
-            pieces={pieces}
-            orientation={orientation}
-            selected={selected}
-            targets={targets}
-            lastMove={lastMove ?? null}
-            checkSquare={checkSquare ?? null}
-            highlights={highlights}
-            quality={quality}
-            onSquareClick={handleSquareClick}
-          />
-        </Suspense>
+          frameloop="demand"
+          shadows={quality === 'high'}
+          dpr={quality === 'high' ? [1, 2] : 1}
+          gl={{
+            antialias: quality === 'high',
+            // `high-performance` réclame la carte dédiée quand il y en a une ;
+            // sur un téléphone il n'y en a qu'une, et l'exiger n'apporte rien
+            // qu'un contexte plus vite refusé quand la mémoire manque.
+            powerPreference: quality === 'high' ? 'high-performance' : 'default',
+            alpha: true,
+          }}
+          onCreated={({ gl }) => {
+            const toile = gl.domElement
+            // `preventDefault` est ce qui autorise le navigateur à rendre le
+            // contexte plus tard : sans lui, la perte est définitive.
+            toile.addEventListener('webglcontextlost', (event) => {
+              event.preventDefault()
+              setContextePerdu(true)
+            })
+            toile.addEventListener('webglcontextrestored', () => setContextePerdu(false))
+          }}
+          camera={{ position: fittedCameraPosition(), fov: CAMERA_FOV, near: 0.1, far: 80 }}
+          // `offsetSize` mesure la boîte de disposition plutôt que le rectangle
+          // de rendu, et l'anti-rebond désactivé évite de perdre la toute
+          // première mesure — sans quoi le canevas resterait à sa taille par
+          // défaut de 300 × 150 jusqu'au premier redimensionnement de fenêtre.
+          resize={{ offsetSize: true, debounce: 0, scroll: false }}
+        >
+          <CanvasSizer size={size} />
+          <Suspense fallback={null}>
+            <Scene
+              pieces={pieces}
+              orientation={orientation}
+              selected={selected}
+              targets={targets}
+              lastMove={lastMove ?? null}
+              checkSquare={checkSquare ?? null}
+              highlights={highlights}
+              quality={quality}
+              onSquareClick={handleSquareClick}
+            />
+          </Suspense>
 
-        <OrbitControls
-          enablePan={false}
-          enableDamping
-          dampingFactor={0.08}
-          rotateSpeed={0.55}
-          // On ne peut pas s'approcher au point de perdre le plateau de vue,
-          // ni s'éloigner au point de ne plus distinguer les pièces.
-          minDistance={10}
-          maxDistance={26}
-          // Ni sous le plateau, ni complètement à plat : on doit voir pour jouer.
-          minPolarAngle={0.18}
-          maxPolarAngle={Math.PI / 2.35}
-          target={[0, 0, 0]}
-        />
-      </Canvas>
+          <OrbitControls
+            enablePan={false}
+            enableDamping
+            dampingFactor={0.08}
+            rotateSpeed={0.55}
+            // On ne peut pas s'approcher au point de perdre le plateau de vue,
+            // ni s'éloigner au point de ne plus distinguer les pièces.
+            minDistance={10}
+            maxDistance={26}
+            // Ni sous le plateau, ni complètement à plat : on doit voir pour jouer.
+            minPolarAngle={0.18}
+            maxPolarAngle={Math.PI / 2.35}
+            target={[0, 0, 0]}
+          />
+        </Canvas>
       )}
 
       {webglAbsent && (
@@ -371,8 +366,8 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
           <div>
             <p className="text-sm font-semibold">La vue 3D n’est pas disponible ici</p>
             <p className="mx-auto mt-1.5 max-w-xs text-[13px] leading-relaxed text-muted">
-              Ce navigateur n’offre pas l’accélération graphique dont elle a besoin. La
-              vue 2D joue exactement la même partie.
+              Ce navigateur n’offre pas l’accélération graphique dont elle a besoin. La vue 2D joue
+              exactement la même partie.
             </p>
             <div className="mt-4 flex justify-center">
               <button
@@ -395,8 +390,7 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
           <div>
             <p className="text-sm font-semibold">La vue 3D s’est interrompue</p>
             <p className="mx-auto mt-1.5 max-w-xs text-[13px] leading-relaxed text-muted">
-              Ton appareil a repris la mémoire graphique. La partie continue : rien n’est
-              perdu.
+              Ton appareil a repris la mémoire graphique. La partie continue : rien n’est perdu.
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               <button
@@ -559,13 +553,14 @@ function Scene({
       <pointLight position={[0, 4, -7]} intensity={18} distance={18} color="#ffd9a0" />
 
       {/* ── Cadre du plateau ──────────────────────────────────────────── */}
-      <RoundedBox args={[9.4, 0.4, 9.4]} radius={0.12} smoothness={4} position={[0, -0.24, 0]} receiveShadow>
-        <meshPhysicalMaterial
-          color={skin.dark}
-          roughness={0.55}
-          metalness={0.15}
-          clearcoat={0.4}
-        />
+      <RoundedBox
+        args={[9.4, 0.4, 9.4]}
+        radius={0.12}
+        smoothness={4}
+        position={[0, -0.24, 0]}
+        receiveShadow
+      >
+        <meshPhysicalMaterial color={skin.dark} roughness={0.55} metalness={0.15} clearcoat={0.4} />
       </RoundedBox>
 
       {/* ── Cases ─────────────────────────────────────────────────────── */}

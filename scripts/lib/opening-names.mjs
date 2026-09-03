@@ -23,8 +23,8 @@ const FAMILIES = {
   // ── Ouvertures ouvertes (1.e4 e5) ─────────────────────────────────────────
   'Ruy Lopez': 'Partie espagnole',
   'Italian Game': 'Partie italienne',
-  'Scotch Game': "Partie écossaise",
-  'Scotch Opening': "Ouverture écossaise",
+  'Scotch Game': 'Partie écossaise',
+  'Scotch Opening': 'Ouverture écossaise',
   'Four Knights Game': 'Partie des quatre cavaliers',
   'Three Knights Opening': 'Partie des trois cavaliers',
   "Bishop's Opening": 'Ouverture du fou',
@@ -116,7 +116,7 @@ const FAMILIES = {
   'Amar Opening': 'Ouverture Amar',
   'Barnes Opening': 'Ouverture Barnes',
   'Hungarian Opening': 'Ouverture hongroise',
-  'Formation': 'Formation',
+  Formation: 'Formation',
   'Australian Defense': 'Défense australienne',
   'Lasker Simul Special': 'Spéciale de simultanée Lasker',
   'Global Opening': 'Ouverture globale',
@@ -127,7 +127,7 @@ const FAMILIES = {
   'Crab Opening': 'Ouverture du crabe',
   'Gedult Opening': 'Ouverture Gedult',
   'Mikenas Opening': 'Ouverture Mikenas',
-  'System': 'Système',
+  System: 'Système',
 }
 
 /**

@@ -25,12 +25,7 @@ import { getDb } from './index.ts'
 import { ratingHistory, ratings, type Rating } from './schema.ts'
 
 export type RatingCategory =
-  | 'bullet'
-  | 'blitz'
-  | 'rapid'
-  | 'classical'
-  | 'correspondence'
-  | 'puzzle'
+  'bullet' | 'blitz' | 'rapid' | 'classical' | 'correspondence' | 'puzzle'
 
 /** Lit un classement, en le créant au besoin. */
 export async function getRating(userId: string, category: RatingCategory): Promise<Rating> {
@@ -108,10 +103,7 @@ export async function applyGameResult(options: {
   const current = await getRating(options.userId, options.category)
 
   // Inactivité depuis la dernière partie.
-  const daysIdle = Math.max(
-    0,
-    (Date.now() - current.updatedAt.getTime()) / (24 * 60 * 60 * 1000),
-  )
+  const daysIdle = Math.max(0, (Date.now() - current.updatedAt.getTime()) / (24 * 60 * 60 * 1000))
   const decayed: GlickoRating = decayGlicko(
     {
       rating: current.rating,

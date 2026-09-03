@@ -24,7 +24,15 @@ try {
 
 import { Chess } from 'chess.js'
 import { createUser } from '@coupparfait/db/auth'
-import { getDb, games, ratingHistory, ratings, users, friendships, challenges } from '@coupparfait/db'
+import {
+  getDb,
+  games,
+  ratingHistory,
+  ratings,
+  users,
+  friendships,
+  challenges,
+} from '@coupparfait/db'
 import { eq, inArray, like } from 'drizzle-orm'
 
 const SUFFIXE = '_demo'
@@ -61,44 +69,68 @@ const JOUEURS = [
  */
 const PARTIES = [
   {
-    eco: 'C57', nom: 'Deux cavaliers, attaque Fried Liver',
-    coups: 'e4 e5 Nf3 Nc6 Bc4 Nf6 Ng5 d5 exd5 Nxd5 Nxf7 Kxf7 Qf3+ Ke6 Nc3 Ncb4 Qe4 c6 a3 Na6 d4 Nac7 Bxd5+ cxd5 Qxd5+ Ke7 Bg5+ Kd6 Qxd8+',
-    resultat: '1-0', fin: 'resign',
+    eco: 'C57',
+    nom: 'Deux cavaliers, attaque Fried Liver',
+    coups:
+      'e4 e5 Nf3 Nc6 Bc4 Nf6 Ng5 d5 exd5 Nxd5 Nxf7 Kxf7 Qf3+ Ke6 Nc3 Ncb4 Qe4 c6 a3 Na6 d4 Nac7 Bxd5+ cxd5 Qxd5+ Ke7 Bg5+ Kd6 Qxd8+',
+    resultat: '1-0',
+    fin: 'resign',
   },
   {
-    eco: 'C50', nom: 'Partie italienne',
-    coups: 'e4 e5 Nf3 Nc6 Bc4 Bc5 c3 Nf6 d4 exd4 cxd4 Bb4+ Bd2 Bxd2+ Nbxd2 d5 exd5 Nxd5 Qb3 Nce7 O-O O-O Rfe1 c6 a4 Qb6 Qxb6 axb6',
-    resultat: '1/2-1/2', fin: 'agreement',
+    eco: 'C50',
+    nom: 'Partie italienne',
+    coups:
+      'e4 e5 Nf3 Nc6 Bc4 Bc5 c3 Nf6 d4 exd4 cxd4 Bb4+ Bd2 Bxd2+ Nbxd2 d5 exd5 Nxd5 Qb3 Nce7 O-O O-O Rfe1 c6 a4 Qb6 Qxb6 axb6',
+    resultat: '1/2-1/2',
+    fin: 'agreement',
   },
   {
-    eco: 'B01', nom: 'Défense scandinave',
-    coups: 'e4 d5 exd5 Qxd5 Nc3 Qa5 d4 Nf6 Nf3 c6 Bc4 Bf5 Bd2 e6 Qe2 Bb4 O-O-O Nbd7 a3 O-O-O axb4 Qxa1+ Nb1 Qxb1+ Kd2 Qxd1+',
-    resultat: '0-1', fin: 'resign',
+    eco: 'B01',
+    nom: 'Défense scandinave',
+    coups:
+      'e4 d5 exd5 Qxd5 Nc3 Qa5 d4 Nf6 Nf3 c6 Bc4 Bf5 Bd2 e6 Qe2 Bb4 O-O-O Nbd7 a3 O-O-O axb4 Qxa1+ Nb1 Qxb1+ Kd2 Qxd1+',
+    resultat: '0-1',
+    fin: 'resign',
   },
   {
-    eco: 'D02', nom: 'Système London',
-    coups: 'd4 Nf6 Bf4 d5 Nf3 Bf5 e3 Nc6 Nc3 Nh5 Bb5 e6 O-O Nxf4 exf4 Bd6 g3 O-O Ne5 Qh4 Nxc6 bxc6 Bxc6 Rab8 Bxd5 exd5 Qxd5',
-    resultat: '1-0', fin: 'timeout',
+    eco: 'D02',
+    nom: 'Système London',
+    coups:
+      'd4 Nf6 Bf4 d5 Nf3 Bf5 e3 Nc6 Nc3 Nh5 Bb5 e6 O-O Nxf4 exf4 Bd6 g3 O-O Ne5 Qh4 Nxc6 bxc6 Bxc6 Rab8 Bxd5 exd5 Qxd5',
+    resultat: '1-0',
+    fin: 'timeout',
   },
   {
-    eco: 'C00', nom: 'Défense française',
-    coups: 'e4 e6 d4 d5 Nc3 Nf6 Bg5 Be7 e5 Nfd7 Bxe7 Qxe7 f4 O-O Nf3 c5 Qd2 Nc6 dxc5 Qxc5 O-O-O a6 Kb1 b5 Nd4 Nxd4 Qxd4 Qxd4 Rxd4',
-    resultat: '1/2-1/2', fin: 'agreement',
+    eco: 'C00',
+    nom: 'Défense française',
+    coups:
+      'e4 e6 d4 d5 Nc3 Nf6 Bg5 Be7 e5 Nfd7 Bxe7 Qxe7 f4 O-O Nf3 c5 Qd2 Nc6 dxc5 Qxc5 O-O-O a6 Kb1 b5 Nd4 Nxd4 Qxd4 Qxd4 Rxd4',
+    resultat: '1/2-1/2',
+    fin: 'agreement',
   },
   {
-    eco: 'B20', nom: 'Défense sicilienne',
-    coups: 'e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6 Be3 e5 Nb3 Be6 f3 Be7 Qd2 O-O O-O-O Nbd7 g4 b5 g5 b4 Ne2 Ne8 f4 a5',
-    resultat: '0-1', fin: 'checkmate',
+    eco: 'B20',
+    nom: 'Défense sicilienne',
+    coups:
+      'e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6 Be3 e5 Nb3 Be6 f3 Be7 Qd2 O-O O-O-O Nbd7 g4 b5 g5 b4 Ne2 Ne8 f4 a5',
+    resultat: '0-1',
+    fin: 'checkmate',
   },
   {
-    eco: 'A40', nom: 'Ouverture du pion dame',
-    coups: 'd4 e6 c4 b6 Nc3 Bb7 e4 Bb4 Bd3 f5 Qh5+ g6 Qe2 Nf6 exf5 gxf5 Bg5 O-O O-O-O Bxc3 bxc3 Qe8',
-    resultat: '1-0', fin: 'resign',
+    eco: 'A40',
+    nom: 'Ouverture du pion dame',
+    coups:
+      'd4 e6 c4 b6 Nc3 Bb7 e4 Bb4 Bd3 f5 Qh5+ g6 Qe2 Nf6 exf5 gxf5 Bg5 O-O O-O-O Bxc3 bxc3 Qe8',
+    resultat: '1-0',
+    fin: 'resign',
   },
   {
-    eco: 'C41', nom: 'Défense Philidor',
-    coups: 'e4 e5 Nf3 d6 d4 Bg4 dxe5 Bxf3 Qxf3 dxe5 Bc4 Nf6 Qb3 Qe7 Nc3 c6 Bg5 b5 Nxb5 cxb5 Bxb5+ Nbd7 O-O-O Rd8 Rxd7 Rxd7 Rd1 Qe6 Bxd7+ Nxd7 Qb8+ Nxb8 Rd8#',
-    resultat: '1-0', fin: 'checkmate',
+    eco: 'C41',
+    nom: 'Défense Philidor',
+    coups:
+      'e4 e5 Nf3 d6 d4 Bg4 dxe5 Bxf3 Qxf3 dxe5 Bc4 Nf6 Qb3 Qe7 Nc3 c6 Bg5 b5 Nxb5 cxb5 Bxb5+ Nbd7 O-O-O Rd8 Rxd7 Rxd7 Rd1 Qe6 Bxd7+ Nxd7 Qb8+ Nxb8 Rd8#',
+    resultat: '1-0',
+    fin: 'checkmate',
   },
 ]
 
@@ -241,7 +273,14 @@ async function semer(db) {
         increment: cadence.increment,
         moves: board.history().join(' '),
         pgn: board.pgn(),
-        status: modele.fin === 'checkmate' ? 'checkmate' : modele.fin === 'timeout' ? 'timeout' : modele.fin === 'agreement' ? 'draw' : 'resigned',
+        status:
+          modele.fin === 'checkmate'
+            ? 'checkmate'
+            : modele.fin === 'timeout'
+              ? 'timeout'
+              : modele.fin === 'agreement'
+                ? 'draw'
+                : 'resigned',
         result: modele.resultat,
         winner: gagnant,
         eco: modele.eco,
@@ -329,18 +368,33 @@ async function semer(db) {
 
   // ── Carnet d'adresses de chris_demo ─────────────────────────────────────
   const chris = crees.find((j) => j.pseudo === 'chris' + SUFFIXE)
-  const amis = crees.filter((j) => ['julien', 'margaux', 'theo', 'salome', 'amina', 'ines'].includes(j.pseudo.replace(SUFFIXE, '')))
+  const amis = crees.filter((j) =>
+    ['julien', 'margaux', 'theo', 'salome', 'amina', 'ines'].includes(
+      j.pseudo.replace(SUFFIXE, ''),
+    ),
+  )
   for (const ami of amis) {
     await db
       .insert(friendships)
-      .values({ requesterId: chris.id, addresseeId: ami.id, status: 'accepted', respondedAt: new Date() })
+      .values({
+        requesterId: chris.id,
+        addresseeId: ami.id,
+        status: 'accepted',
+        respondedAt: new Date(),
+      })
       .onConflictDoNothing()
   }
   // Une demande reçue et une envoyée, pour voir les deux états.
   const nordine = crees.find((j) => j.pseudo === 'nordine' + SUFFIXE)
   const lucas = crees.find((j) => j.pseudo === 'lucas' + SUFFIXE)
-  await db.insert(friendships).values({ requesterId: nordine.id, addresseeId: chris.id }).onConflictDoNothing()
-  await db.insert(friendships).values({ requesterId: chris.id, addresseeId: lucas.id }).onConflictDoNothing()
+  await db
+    .insert(friendships)
+    .values({ requesterId: nordine.id, addresseeId: chris.id })
+    .onConflictDoNothing()
+  await db
+    .insert(friendships)
+    .values({ requesterId: chris.id, addresseeId: lucas.id })
+    .onConflictDoNothing()
   console.log(`Carnet de chris${SUFFIXE} : ${amis.length} amis, 1 demande reçue, 1 envoyée.`)
 
   // Un défi qui attend, pour voir la notification au premier chargement.

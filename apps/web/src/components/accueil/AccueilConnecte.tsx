@@ -259,11 +259,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
           question à deux échelles — « où j'en suis ? ». Ils s'empilent sous
           `md`, la journée d'abord : c'est elle qui expire. */}
       <div className="mt-4 grid gap-4 md:grid-cols-2">
-        <Aujourdhui
-          defiFait={defiFait === true}
-          tranche={defi.tranche}
-          niveauDefi={defi.niveau}
-        />
+        <Aujourdhui defiFait={defiFait === true} tranche={defi.tranche} niveauDefi={defi.niveau} />
 
         {progression === undefined ? (
           <Skeleton className="h-48 w-full" />

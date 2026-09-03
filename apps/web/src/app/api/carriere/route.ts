@@ -236,11 +236,7 @@ export async function DELETE() {
 }
 
 /** Ajoute un haut fait s'il n'est pas déjà acquis, et le signale à l'écran. */
-function debloquer(
-  progression: Progression,
-  gains: { badges: string[] },
-  id: string,
-): void {
+function debloquer(progression: Progression, gains: { badges: string[] }, id: string): void {
   if (progression.badges.includes(id)) return
   if (!HAUTS_FAITS.some((h) => h.id === id)) return
   progression.badges.push(id)

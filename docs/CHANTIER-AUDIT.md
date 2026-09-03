@@ -172,7 +172,7 @@ découvre un salon vide au retour.
    salle. Un salon dont le drapeau est tombé pendant l'arrêt se termine au
    temps au premier `join`.
 4. `shutdown()` n'annule plus : il envoie `Le serveur redémarre, la partie
-   reprend dans un instant` et laisse la persistance faire. Le client
+reprend dans un instant` et laisse la persistance faire. Le client
    (`useLiveGame.ts`) se reconnecte déjà, il retrouvera son salon.
 5. Supprimer la ligne de `active_games` quand la partie se termine, en même
    temps que `persistFinishedGame`.
@@ -227,7 +227,7 @@ documentée, lire le journal, compter dans `db:studio`.
 
 Tout ce lot tient dans `apps/web/src/app/jouer/ordinateur/page.tsx` et les
 deux composants d'échiquier. Il se mesure au profileur React, onglet
-*Profiler*, en enregistrant dix secondes de partie sans jouer de coup :
+_Profiler_, en enregistrant dix secondes de partie sans jouer de coup :
 **avant**, on doit voir `GameScreen` et `Board2D` se rendre environ cent
 fois ; **après**, `GameScreen` moins de quinze fois et `Board2D` zéro.
 
@@ -517,8 +517,8 @@ croire.
 **À faire.** Décider. Si l'on veut un hors-ligne, il est modeste et il se
 limite à ce qui ne change pas : la coque, les pièces, les sons, le moteur
 WebAssembly, les leçons, la page `/jouer/ordinateur` et `/jouer/local`.
-Stratégie *cache first* sur `/engine/*`, `/pieces/*`, `/sounds/*` ; *network
-first* avec repli sur la coque ; jamais sur `/api/*`. Une page `/hors-ligne`
+Stratégie _cache first_ sur `/engine/*`, `/pieces/*`, `/sounds/*` ; _network
+first_ avec repli sur la coque ; jamais sur `/api/*`. Une page `/hors-ligne`
 comme repli. Si on ne veut pas, retirer la phrase de `next.config.ts` et
 l'ajouter en toutes lettres dans le README, rubrique « Ce que ça ne fait
 pas ». Dans les deux cas, ce point se ferme.
@@ -567,16 +567,16 @@ qu'il faut écrire.
 
 ## Ordre, et ce que ça coûte
 
-| Lot | Contenu | Ordre de grandeur |
-|---|---|---|
-| A | Intégrité et robustesse serveur | 2 à 3 jours, A4 en fait la moitié |
-| B | Écran de jeu | 1 jour, mesures comprises |
-| C | Dédoublonnage | 1 jour |
-| E1 | Tests du cœur | 2 jours, le SEE et les motifs prennent le temps |
-| D | Next : erreurs, métadonnées, fetch, cache | 1 jour |
-| F | Annonce, dialogues, FEN, partage, hors-ligne | 2 à 3 jours selon F5 |
-| E2, E3 | Lint et CI | ½ journée |
-| G | Documentation et poids | ½ journée |
+| Lot    | Contenu                                      | Ordre de grandeur                               |
+| ------ | -------------------------------------------- | ----------------------------------------------- |
+| A      | Intégrité et robustesse serveur              | 2 à 3 jours, A4 en fait la moitié               |
+| B      | Écran de jeu                                 | 1 jour, mesures comprises                       |
+| C      | Dédoublonnage                                | 1 jour                                          |
+| E1     | Tests du cœur                                | 2 jours, le SEE et les motifs prennent le temps |
+| D      | Next : erreurs, métadonnées, fetch, cache    | 1 jour                                          |
+| F      | Annonce, dialogues, FEN, partage, hors-ligne | 2 à 3 jours selon F5                            |
+| E2, E3 | Lint et CI                                   | ½ journée                                       |
+| G      | Documentation et poids                       | ½ journée                                       |
 
 A avant tout : c'est le seul lot où quelque chose de faux peut s'inscrire en
 base. B et C ensuite, parce qu'ils touchent les mêmes fichiers et qu'on ne
@@ -606,7 +606,7 @@ qui ne prive personne de son historique. `scripts/check-partie-terminee.mjs`,
 quatorze vérifications, dans `npm test`. Le limiteur des trois routes est
 maintenant unique (`apps/web/src/lib/server/limiteur.ts`).
 
-*Trouvé en passant, non traité :* le client peut changer de niveau en cours de
+_Trouvé en passant, non traité :_ le client peut changer de niveau en cours de
 partie (`setLevel`), et c'est le dernier niveau choisi qui part à l'archivage.
 Ça ne se voit pas dans une partie classée — les aides sont retirées — mais la
 valeur envoyée n'est pas rigoureusement « le niveau joué ».
@@ -624,7 +624,7 @@ Avec `TRUST_PROXY=1`, deux adresses forgées ont bien deux compteurs. Part de
 file par adresse : six analyses profondes simultanées → quatre servies, deux
 refusées en 429. `npm run test:realtime` vert.
 
-*Le piège, à ne pas réintroduire :* les analyses du navigateur passent par la
+_Le piège, à ne pas réintroduire :_ les analyses du navigateur passent par la
 passerelle `/api/analyse`, donc arrivent toutes de la même adresse. Sans les
 en-têtes de relais (`apps/web/src/lib/server/passerelle.ts`) et sans
 `TRUST_PROXY=1`, le quota d'une route se partage entre tous les joueurs.
@@ -638,11 +638,11 @@ brutalement, relancé. Position identique, statut `playing`, pendules 185,0 s /
 125,0 s contre 185,0 s / 183,0 s avant l'arrêt — les 58 secondes de coupure
 décomptées au camp au trait, comme voulu. Sixième coup accepté.
 
-*Trouvé et traité en passant :* un salon repris que personne ne rejoint ne
+_Trouvé et traité en passant :_ un salon repris que personne ne rejoint ne
 finissait jamais (ses joueurs n'ont pas d'horodatage de déconnexion, exprès).
 Le ramassage périodique le relâche au-delà de deux heures.
 
-*Trouvé et corrigé :* `purgerSalonsPerimes` liait sa date par un fragment `sql`
+_Trouvé et corrigé :_ `purgerSalonsPerimes` liait sa date par un fragment `sql`
 brut, que le pilote refusait à l'exécution — invisible au typage. Repassé par
 `lt()`.
 
@@ -661,13 +661,13 @@ par jour. `position_evals` n'est pas purgée, c'est dit dans le commentaire.
 
 **Les deux chiffres.** Mesure prise avec un compteur de rendus posé dans le
 corps de `GameScreen` et de `Board2D`, sur dix secondes de partie en cours
-sans jouer de coup. Compteur, et non l'onglet *Profiler* : il n'est pas
+sans jouer de coup. Compteur, et non l'onglet _Profiler_ : il n'est pas
 pilotable depuis le navigateur intégré, et il rend le même nombre.
 
-| | avant | après |
-|---|---|---|
-| `GameScreen` | 200 | **0** |
-| `Board2D` | 0 | **0** |
+|              | avant | après |
+| ------------ | ----- | ----- |
+| `GameScreen` | 200   | **0** |
+| `Board2D`    | 0     | **0** |
 
 Les 200 sont bien 100 battements : le mode strict de React rend deux fois en
 développement. L'objectif du document — moins de quinze — est donc dépassé de
@@ -690,12 +690,12 @@ minuteur à échéance calculée tombe à l'heure. Aucune erreur de console
 imputable à l'application — deux `503` sur le serveur d'analyse, qui ne
 tournait pas.
 
-*Trouvé en passant, non traité :* `jouer/partie/[slug]` a exactement le même
+_Trouvé en passant, non traité :_ `jouer/partie/[slug]` a exactement le même
 défaut de pendule et passe encore par `timeMs`. `PlayerBar` accepte désormais
 les deux formes, la bascule ne coûtera que quelques lignes — mais c'est un
 autre écran, donc un autre lot.
 
-*Ajouté au passage :* `usePreferencesDe(...cles)` dans le store, qui
+_Ajouté au passage :_ `usePreferencesDe(...cles)` dans le store, qui
 enveloppe `useShallow`. Les six lectures sans sélecteur passent par lui.
 Attention en l'utilisant : une lecture **indirecte** compte aussi, et l'oubli
 ne se voit pas toujours au typage — `resolvePieceColours` lit trois champs
@@ -712,13 +712,13 @@ plutôt que depuis la position. La garde `isGameOver()` qu'elle portait était
 redondante : un mat ne rend aucun coup légal de toute façon.
 
 **C2.** `playMoveFor(move)` et `playMoveForSan(san)` dans `sound.ts`, huit
-copies supprimées. *Écart trouvé entre copies* : celle des ouvertures posait
+copies supprimées. _Écart trouvé entre copies_ : celle des ouvertures posait
 `isCheckmate: false` en dur, si bien qu'un mat joué dans une ligne du livre
 faisait le bruit d'un coup ordinaire. Les autres se partageaient entre lire
 l'échec dans `board.inCheck()` et le lire dans le SAN — même résultat, deux
 façons de l'obtenir.
 
-*Corrigé au passage :* `PlayedMove` gagne `isPromotion`, ce qui le rend
+_Corrigé au passage :_ `PlayedMove` gagne `isPromotion`, ce qui le rend
 directement acceptable par `playMoveSound`. Le typage a alors désigné deux
 autres endroits qui reconstruisaient un `PlayedMove` à la main ; `toPlayedMove`
 est exportée et l'un des deux la réutilise.
@@ -745,13 +745,13 @@ sans clignoter. Aucune erreur de console imputable à l'application.
 Cinquante-six vérifications dans `packages/core/test/`, branchées **en tête**
 de `npm test` comme demandé, plus six dans `apps/server/test/`.
 
-| fichier | ce qu'il couvre |
-|---|---|
-| `board.test.ts` | l'échange statique, rayon X compris |
+| fichier          | ce qu'il couvre                                            |
+| ---------------- | ---------------------------------------------------------- |
+| `board.test.ts`  | l'échange statique, rayon X compris                        |
 | `motifs.test.ts` | clouage, enfilade, fourchette, mats, couloir, pièce piégée |
 | `rating.test.ts` | Elo contre la table, Glicko-2 contre l'article de Glickman |
-| `pgn.test.ts` | import tolérant, aller-retour, `resultatImpose` |
-| `clock.test.ts` | barème, décompte, drapeau, affichage |
+| `pgn.test.ts`    | import tolérant, aller-retour, `resultatImpose`            |
+| `clock.test.ts`  | barème, décompte, drapeau, affichage                       |
 
 **Le filet tient.** Vérifié comme le document le demande : en remplaçant le
 `Math.max(0, …)` de l'échange statique par `Math.max(-1, …)`, `npm test`
@@ -774,13 +774,13 @@ la règle du chantier, une découverte va au journal et non dans le commit :
    l'ordinateur, donc dans deux catégories de classement différentes. Le test
    fige la formule du cœur, qui est la bonne.
 
-*Ajouté au passage, et assumé :* `EngineProcess` puis `EnginePool` acceptent
+_Ajouté au passage, et assumé :_ `EngineProcess` puis `EnginePool` acceptent
 des `args`. C'est la seule façon de lancer un faux moteur écrit en JavaScript
 sur les trois systèmes — un script à shebang ne se lance pas sous Windows, et
 Node refuse un `.cmd` sans interpréteur. Sans ça, ni A2 ni E1 n'auraient de
 preuve exécutable ailleurs que sous Linux.
 
-*Corrigé au passage :* `packages/core/tsconfig.json` avait un `rootDir` sur
+_Corrigé au passage :_ `packages/core/tsconfig.json` avait un `rootDir` sur
 `src` qui rendait le dossier `test/` intypable. Il ne servait à rien —
 `noEmit` est posé, il n'y a pas de sortie à cadrer.
 
@@ -790,13 +790,13 @@ preuve exécutable ailleurs que sous Linux.
 `app/`. Aucun `loading.tsx`, conformément au document : aucune page n'attend
 de données côté serveur.
 
-*Écart nécessaire, dû à la version :* le document dit « bouton réessayer qui
+_Écart nécessaire, dû à la version :_ le document dit « bouton réessayer qui
 appelle `reset()` ». Next 16 a renommé la prop en **`retry`**, qui refait la
-requête *et* le rendu ; `reset` existe encore mais se contente de vider l'état
+requête _et_ le rendu ; `reset` existe encore mais se contente de vider l'état
 de la frontière, ce qui ne répare rien ici. Vérifié dans
 `node_modules/next/dist/docs/…/error.md`, comme l'impose `apps/web/AGENTS.md`.
 
-*Point non fait, et pourquoi :* « appeler `notFound()` dans `profil/[username]`
+_Point non fait, et pourquoi :_ « appeler `notFound()` dans `profil/[username]`
 et `jouer/partie/[slug]` ». Les deux pages sont des composants **client**, et
 la documentation de Next 16 est explicite : `notFound()` s'appelle depuis un
 composant serveur, une fonction serveur ou un gestionnaire de route, et « dans
@@ -819,24 +819,24 @@ contre l'ordinateur y passent ; le quatrième (`:268`, la progression de
 carrière) n'est pas un appel de montage mais une action déclenchée par un
 choix, avec un enchaînement de rappels — le migrer n'aurait rien apporté.
 
-**D4.** *Écart de méthode assumé.* Le document dit de poser l'en-tête sur les
+**D4.** _Écart de méthode assumé._ Le document dit de poser l'en-tête sur les
 routes. C'est ce qui a été fait d'abord, et **ça ne marche pas** : les en-têtes
 de `next.config.ts` écrasent ceux de la réponse. Mesuré — `/api/classement`
 rendait toujours `private, no-store`. Tout est donc dans la configuration, où
 la **dernière** règle qui correspond l'emporte :
 
-| routes | valeur |
-|---|---|
-| `/api/*` (défaut) | `private, no-store` |
+| routes                           | valeur                                            |
+| -------------------------------- | ------------------------------------------------- |
+| `/api/*` (défaut)                | `private, no-store`                               |
 | `classement`, `joueurs`, `sante` | `public, s-maxage=60, stale-while-revalidate=300` |
-| `profil/:username` | idem |
-| `parties` | `public, s-maxage=15, stale-while-revalidate=60` |
+| `profil/:username`               | idem                                              |
+| `parties`                        | `public, s-maxage=15, stale-while-revalidate=60`  |
 
 Le défaut est le prudent : le risque n'est pas le gaspillage, c'est qu'un
 relais partagé garde une réponse personnelle et la ressorte à quelqu'un
 d'autre. Vérifié au `curl` sur les neuf routes, publiques et privées.
 
-*`/api/ouvertures` n'existe pas* — le document la cite, le livre d'ouvertures
+_`/api/ouvertures` n'existe pas_ — le document la cite, le livre d'ouvertures
 est servi en statique.
 
 ### Lot F — 3 septembre 2026
@@ -848,7 +848,7 @@ au navigateur : après le premier coup de l'ordinateur, la région contient
 Son et voix. Deux gardes : on ne relit pas le même coup deux fois, et on
 n'annonce pas le coup **déjà présent** à l'arrivée sur l'écran.
 
-*Une prop en plus :* `dernierCoupSan`. `lastMove` ne porte que deux cases, de
+_Une prop en plus :_ `dernierCoupSan`. `lastMove` ne porte que deux cases, de
 quoi flécher mais pas de quoi dire « cavalier f3 ». Les trois écrans de jeu la
 passent ; les autres n'annoncent rien, ce qui est correct.
 
@@ -869,7 +869,7 @@ le presse-papiers, et le message le dit sans prétendre avoir copié.
 base, lien ouvert **sans compte**, rapport complet affiché — échiquier,
 explications, précision, navigation. Lien inconnu : `404`.
 
-*Un import entre pages, le seul du projet :* `ReviewScreen` est exportée depuis
+_Un import entre pages, le seul du projet :_ `ReviewScreen` est exportée depuis
 `analyse/page.tsx`. La sortir dans `components/` demanderait de déplacer sept
 cents lignes et tous les fragments avec lesquels elle partage ce fichier, pour
 un gain de rangement seul.
@@ -886,4 +886,3 @@ serveur temps réel, et la triche contre soi-même en partie solo.
 
 Le manifeste PWA, lui, ne promettait rien : il déclare `display: standalone`,
 ce qui n'est pas une promesse de hors-ligne.
-

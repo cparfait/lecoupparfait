@@ -79,7 +79,9 @@ export function MesAnalyses({
         toast.error('Retrait impossible.', 'Réessaie dans un instant.')
         return
       }
-      setAnalyses((liste) => liste?.map((a) => (a.id === id ? { ...a, partage: null } : a)) ?? liste)
+      setAnalyses(
+        (liste) => liste?.map((a) => (a.id === id ? { ...a, partage: null } : a)) ?? liste,
+      )
       toast.info('Lien retiré', 'L’analyse n’est plus accessible par ce lien.')
       return
     }
@@ -124,8 +126,7 @@ export function MesAnalyses({
       <ul className="max-h-[22rem] space-y-1.5 overflow-y-auto pr-1">
         {analyses.map((analyse) => {
           const marque = PROVENANCE[analyse.source] ?? PROVENANCE.pgn
-          const precision =
-            analyse.lecteur === 'b' ? analyse.accuracyBlack : analyse.accuracyWhite
+          const precision = analyse.lecteur === 'b' ? analyse.accuracyBlack : analyse.accuracyWhite
 
           return (
             <li key={analyse.id}>
@@ -199,10 +200,10 @@ export function MesAnalyses({
                     <button
                       type="button"
                       onClick={() => void oublier(analyse.id)}
-                    title="Oublier cette analyse"
-                    aria-label={`Oublier l'analyse ${analyse.whiteName ?? 'Blancs'} – ${analyse.blackName ?? 'Noirs'}`}
-                    className="shrink-0 rounded-[var(--radius-sm)] p-1 text-faint transition-colors hover:bg-surface-strong hover:text-[var(--q-blunder)]"
-                  >
+                      title="Oublier cette analyse"
+                      aria-label={`Oublier l'analyse ${analyse.whiteName ?? 'Blancs'} – ${analyse.blackName ?? 'Noirs'}`}
+                      className="shrink-0 rounded-[var(--radius-sm)] p-1 text-faint transition-colors hover:bg-surface-strong hover:text-[var(--q-blunder)]"
+                    >
                       <Trash2 size={13} aria-hidden />
                     </button>
                   </>

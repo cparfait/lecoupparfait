@@ -13,7 +13,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { BrainCircuit, Check, Plus, RefreshCw, Trash2, TriangleAlert, X } from 'lucide-react'
 import clsx from 'clsx'
-import { Button, Card, Chip, Input, SectionTitle, Slider, Spinner, Toggle } from '@/components/ui/index.tsx'
+import {
+  Button,
+  Card,
+  Chip,
+  Input,
+  SectionTitle,
+  Slider,
+  Spinner,
+  Toggle,
+} from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { allProviders, getProvider, PROVIDERS } from '@/lib/ia/providers/index.ts'
@@ -116,10 +125,10 @@ export function PanneauIA() {
       </SectionTitle>
 
       <p className="mb-3 text-sm text-muted">
-        Les explications de chaque coup sont écrites par l’application, hors ligne et sans
-        clé. En branchant ton propre compte, tu ajoutes une chose de plus :{' '}
-        <strong className="text-ink">pouvoir poser une question de suivi</strong> — « et si
-        j’avais joué autre chose ? », « pourquoi cette case est faible ? ».
+        Les explications de chaque coup sont écrites par l’application, hors ligne et sans clé. En
+        branchant ton propre compte, tu ajoutes une chose de plus :{' '}
+        <strong className="text-ink">pouvoir poser une question de suivi</strong> — « et si j’avais
+        joué autre chose ? », « pourquoi cette case est faible ? ».
       </p>
 
       <Toggle
@@ -149,7 +158,11 @@ export function PanneauIA() {
                 >
                   <span className="block truncate font-medium">{entry.name}</span>
                   <span className="mt-0.5 block text-[11px] text-faint">
-                    {entry.local ? 'sur ta machine' : entry.needsKey ? 'clé requise' : 'clé facultative'}
+                    {entry.local
+                      ? 'sur ta machine'
+                      : entry.needsKey
+                        ? 'clé requise'
+                        : 'clé facultative'}
                   </span>
                 </button>
               ))}
@@ -166,7 +179,11 @@ export function PanneauIA() {
                   label="Clé d’API"
                   autoComplete="off"
                   spellCheck={false}
-                  placeholder={provider.needsKey ? 'Colle ta clé ici' : 'Laisse vide si le service n’en demande pas'}
+                  placeholder={
+                    provider.needsKey
+                      ? 'Colle ta clé ici'
+                      : 'Laisse vide si le service n’en demande pas'
+                  }
                   value={cle}
                   onChange={(event) => {
                     setCleLocale(event.target.value)
@@ -226,8 +243,8 @@ export function PanneauIA() {
                 {retire && (
                   <p className="mt-1.5 flex items-start gap-1.5 text-xs text-[var(--q-inaccuracy)]">
                     <TriangleAlert size={13} className="mt-px shrink-0" aria-hidden />
-                    Ce modèle appartient à une génération retirée. Il échouera au premier
-                    appel — choisis-en un plus récent.
+                    Ce modèle appartient à une génération retirée. Il échouera au premier appel —
+                    choisis-en un plus récent.
                   </p>
                 )}
 
@@ -283,17 +300,18 @@ export function PanneauIA() {
                   <>
                     Ta clé est enregistrée dans ce navigateur, et elle n’est envoyée qu’à{' '}
                     {provider.name}. Comme les navigateurs interdisent d’appeler ces services
-                    directement, la requête <strong className="text-ink">transite par ce
-                    serveur</strong>, qui la recopie sans rien en conserver. Sur une instance
-                    que tu n’héberges pas toi-même, cela suppose de faire confiance à
-                    l’hébergeur — un service local n’a pas cet inconvénient.
+                    directement, la requête{' '}
+                    <strong className="text-ink">transite par ce serveur</strong>, qui la recopie
+                    sans rien en conserver. Sur une instance que tu n’héberges pas toi-même, cela
+                    suppose de faire confiance à l’hébergeur — un service local n’a pas cet
+                    inconvénient.
                   </>
                 ) : (
                   <>
-                    Ce service tourne sur ta machine : ton navigateur lui parle directement,
-                    et <strong className="text-ink">rien ne passe par nos serveurs</strong>.
-                    Si l’appel échoue, c’est en général qu’il faut l’autoriser à répondre aux
-                    pages web (variable <code>OLLAMA_ORIGINS</code> pour Ollama).
+                    Ce service tourne sur ta machine : ton navigateur lui parle directement, et{' '}
+                    <strong className="text-ink">rien ne passe par nos serveurs</strong>. Si l’appel
+                    échoue, c’est en général qu’il faut l’autoriser à répondre aux pages web
+                    (variable <code>OLLAMA_ORIGINS</code> pour Ollama).
                   </>
                 )}
               </p>
@@ -364,7 +382,11 @@ function FournisseursPersonnalises({
     }
     onChange([
       ...defs,
-      { id: newCustomProviderId(), name: nom.trim() || 'Service compatible OpenAI', baseUrl: adresse },
+      {
+        id: newCustomProviderId(),
+        name: nom.trim() || 'Service compatible OpenAI',
+        baseUrl: adresse,
+      },
     ])
     setNom('')
     setUrl('')
@@ -427,7 +449,12 @@ function FournisseursPersonnalises({
           </div>
         </div>
       ) : (
-        <Button size="sm" variant="ghost" icon={<Plus size={14} aria-hidden />} onClick={() => setOuvert(true)}>
+        <Button
+          size="sm"
+          variant="ghost"
+          icon={<Plus size={14} aria-hidden />}
+          onClick={() => setOuvert(true)}
+        >
           Ajouter un service compatible OpenAI
         </Button>
       )}

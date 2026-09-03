@@ -173,7 +173,7 @@ export const TERMS: Term[] = [
     name: 'Elo',
     family: 'Évaluation et jeu',
     definition:
-      "Le classement des joueurs. Battre plus fort que soi en rapporte beaucoup, perdre contre plus faible en coûte autant. Un débutant tourne autour de 400 à 800, un joueur de club vers 1600, un grand maître au-delà de 2500.",
+      'Le classement des joueurs. Battre plus fort que soi en rapporte beaucoup, perdre contre plus faible en coûte autant. Un débutant tourne autour de 400 à 800, un joueur de club vers 1600, un grand maître au-delà de 2500.',
   },
   {
     name: 'Glicko-2',

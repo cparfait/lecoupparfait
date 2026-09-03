@@ -90,8 +90,7 @@ export function MesParties({
     <div className="space-y-2">
       <SectionTitle>Tes parties</SectionTitle>
       <p className="text-xs text-muted">
-        Celles que tu as jouées ici. Un clic la charge&nbsp;; il ne reste qu’à lancer
-        l’analyse.
+        Celles que tu as jouées ici. Un clic la charge&nbsp;; il ne reste qu’à lancer l’analyse.
       </p>
 
       <ul className="max-h-[22rem] space-y-1.5 overflow-y-auto pr-1">

@@ -123,15 +123,11 @@ export function QuestionLibre({
               </button>
             )}
           </div>
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted">
-            {reponse || '…'}
-          </p>
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted">{reponse || '…'}</p>
         </div>
       )}
 
-      {erreur && (
-        <p className="mt-2 text-xs text-[var(--q-blunder)]">{erreur}</p>
-      )}
+      {erreur && <p className="mt-2 text-xs text-[var(--q-blunder)]">{erreur}</p>}
 
       {suggestions.length > 0 && !encours && (
         <div className="mt-2 flex flex-wrap gap-1.5">

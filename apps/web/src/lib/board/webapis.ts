@@ -72,7 +72,9 @@ export interface SerialPortLike {
 }
 
 export interface SerialApi {
-  requestPort(options?: { filters?: Array<{ usbVendorId: number; usbProductId?: number }> }): Promise<SerialPortLike>
+  requestPort(options?: {
+    filters?: Array<{ usbVendorId: number; usbProductId?: number }>
+  }): Promise<SerialPortLike>
 }
 
 // ── WebHID ───────────────────────────────────────────────────────────────────
@@ -92,7 +94,9 @@ export interface HidDeviceLike {
 }
 
 export interface HidApi {
-  requestDevice(options: { filters: Array<{ vendorId?: number; productId?: number }> }): Promise<HidDeviceLike[]>
+  requestDevice(options: {
+    filters: Array<{ vendorId?: number; productId?: number }>
+  }): Promise<HidDeviceLike[]>
 }
 
 // ── Accès ────────────────────────────────────────────────────────────────────

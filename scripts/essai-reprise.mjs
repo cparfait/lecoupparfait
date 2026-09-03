@@ -67,7 +67,9 @@ if (action === 'jouer') {
   console.log(`slug          ${slug}`)
   console.log(`coups         ${s.moves.join(' ')}`)
   console.log(`position      ${s.fen}`)
-  console.log(`pendules      b ${(s.clock.w / 1000).toFixed(1)} s · n ${(s.clock.b / 1000).toFixed(1)} s`)
+  console.log(
+    `pendules      b ${(s.clock.w / 1000).toFixed(1)} s · n ${(s.clock.b / 1000).toFixed(1)} s`,
+  )
   console.log(`\nCoupe le serveur, relance-le, puis :`)
   console.log(`  node scripts/essai-reprise.mjs relire ${url} ${slug}`)
 } else {
@@ -75,7 +77,9 @@ if (action === 'jouer') {
   console.log(`coups         ${s.moves.join(' ')}`)
   console.log(`position      ${s.fen}`)
   console.log(`statut        ${s.status}`)
-  console.log(`pendules      b ${(s.clock.w / 1000).toFixed(1)} s · n ${(s.clock.b / 1000).toFixed(1)} s`)
+  console.log(
+    `pendules      b ${(s.clock.w / 1000).toFixed(1)} s · n ${(s.clock.b / 1000).toFixed(1)} s`,
+  )
   console.log(`couleurs      Alice ${alice.couleur} · Bob ${bob.couleur}`)
 
   // Le sixième coup doit passer : la partie est bien reprise, pas seulement

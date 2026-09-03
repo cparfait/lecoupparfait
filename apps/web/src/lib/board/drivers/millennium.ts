@@ -28,12 +28,7 @@ import {
   type Occupancy,
   type PhysicalBoard,
 } from '../types.ts'
-import {
-  getBluetooth,
-  getSerial,
-  toBytes,
-  type BleCharacteristic,
-} from '../webapis.ts'
+import { getBluetooth, getSerial, toBytes, type BleCharacteristic } from '../webapis.ts'
 import { openSerialLink } from './serial.ts'
 
 /** Ce qu'il faut au protocole, quel que soit le fil. */
@@ -79,8 +74,7 @@ async function openMillenniumBoard(
     onSnapshot: snapshots.on,
     onClose: closed.on,
     setLights(squares) {
-      const command =
-        squares.length === 0 ? MILLENNIUM_LIGHTS_OFF : encodeMillenniumLights(squares)
+      const command = squares.length === 0 ? MILLENNIUM_LIGHTS_OFF : encodeMillenniumLights(squares)
       void transport.send(millenniumCommand(command)).catch(() => {})
     },
     async close() {

@@ -48,9 +48,9 @@ export async function enregistrerSalon(
  * abandonnée depuis deux heures n'attend plus personne. Ce sont ces lignes-là
  * que la purge de la reprise efface.
  */
-export async function salonsAReprendre(ageMaxMs = 2 * 60 * 60 * 1000): Promise<
-  Array<{ slug: string; salon: Record<string, unknown>; updatedAt: Date }>
-> {
+export async function salonsAReprendre(
+  ageMaxMs = 2 * 60 * 60 * 1000,
+): Promise<Array<{ slug: string; salon: Record<string, unknown>; updatedAt: Date }>> {
   try {
     return await getDb()
       .select()

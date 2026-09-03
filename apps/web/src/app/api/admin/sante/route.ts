@@ -15,7 +15,17 @@
  */
 
 import { NextResponse } from 'next/server'
-import { count, gt, getDb, games, puzzles, savedAnalyses, sessions, sql, users } from '@coupparfait/db'
+import {
+  count,
+  gt,
+  getDb,
+  games,
+  puzzles,
+  savedAnalyses,
+  sessions,
+  sql,
+  users,
+} from '@coupparfait/db'
 import { getAdmin } from '@/lib/server/admin.ts'
 
 export const runtime = 'nodejs'

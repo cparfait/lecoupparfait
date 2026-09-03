@@ -239,9 +239,7 @@ const httpServer = createServer(async (request, response) => {
           // sans raison : ce compteur nomme la raison.
           restarts: pool.stats.restarts,
           averageMs:
-            pool.stats.searches > 0
-              ? Math.round(pool.stats.totalMs / pool.stats.searches)
-              : 0,
+            pool.stats.searches > 0 ? Math.round(pool.stats.totalMs / pool.stats.searches) : 0,
         },
         rooms: rooms.size,
         maia: maiaAvailable(),
@@ -629,9 +627,7 @@ io.on('connection', (socket) => {
   socket.on('requestTakeback', () =>
     withRoom(currentSlug, (room) => room.requestTakeback(socket.id)),
   )
-  socket.on('acceptTakeback', () =>
-    withRoom(currentSlug, (room) => room.acceptTakeback(socket.id)),
-  )
+  socket.on('acceptTakeback', () => withRoom(currentSlug, (room) => room.acceptTakeback(socket.id)))
   socket.on('chat', (payload: { text?: string }) =>
     withRoom(currentSlug, (room) => room.sendChat(socket.id, String(payload?.text ?? ''))),
   )
@@ -658,7 +654,10 @@ function sanitiseClientId(clientId: string | undefined): string | null {
 /** Nettoie un pseudo d'invité : pas de balises, pas de longueur déraisonnable. */
 function sanitiseName(name: string | undefined): string | null {
   if (!name) return null
-  const cleaned = name.replace(/[<>&"'`]/g, '').trim().slice(0, 20)
+  const cleaned = name
+    .replace(/[<>&"'`]/g, '')
+    .trim()
+    .slice(0, 20)
   return cleaned.length >= 2 ? cleaned : null
 }
 

@@ -26,7 +26,13 @@ interface Stats {
     white: { games: number; rate: number }
     black: { games: number; rate: number }
   }
-  openings: Array<{ eco: string | null; name: string | null; games: number; asWhite: number; rate: number }>
+  openings: Array<{
+    eco: string | null
+    name: string | null
+    games: number
+    asWhite: number
+    rate: number
+  }>
   speeds: Array<{ speed: string; games: number; rate: number }>
   hours: Array<{ hour: number; games: number; rate: number }>
   endings: Array<{ status: string; games: number; won: number }>
@@ -50,7 +56,8 @@ function Bar({ rate }: { rate: number }) {
         className="absolute inset-y-0 left-0 rounded-full"
         style={{
           width: `${Math.max(2, rate)}%`,
-          background: rate >= 50 ? 'var(--q-best)' : rate >= 35 ? 'var(--q-inaccuracy)' : 'var(--q-blunder)',
+          background:
+            rate >= 50 ? 'var(--q-best)' : rate >= 35 ? 'var(--q-inaccuracy)' : 'var(--q-blunder)',
         }}
       />
     </span>
@@ -151,8 +158,16 @@ export default function StatsPage() {
       <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
         {[
           { label: 'Toutes parties', value: stats.totals.rate, games: stats.totals.games },
-          { label: 'Avec les Blancs', value: stats.totals.white.rate, games: stats.totals.white.games },
-          { label: 'Avec les Noirs', value: stats.totals.black.rate, games: stats.totals.black.games },
+          {
+            label: 'Avec les Blancs',
+            value: stats.totals.white.rate,
+            games: stats.totals.white.games,
+          },
+          {
+            label: 'Avec les Noirs',
+            value: stats.totals.black.rate,
+            games: stats.totals.black.games,
+          },
         ].map((entry) => (
           <Card key={entry.label} className="p-3">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
@@ -174,11 +189,15 @@ export default function StatsPage() {
       {worst && worst.games >= 3 && (
         <Card className="mt-3 p-3">
           <p className="flex items-start gap-2 text-[13px] leading-relaxed">
-            <TrendingDown size={15} className="mt-0.5 shrink-0 text-[var(--q-blunder)]" aria-hidden />
+            <TrendingDown
+              size={15}
+              className="mt-0.5 shrink-0 text-[var(--q-blunder)]"
+              aria-hidden
+            />
             <span>
               Ton point faible : <strong className="font-semibold">{worst.name}</strong> — tu y
-              marques {worst.rate} % sur {worst.games} parties. C’est la ligne qui rapporte le
-              plus à travailler.
+              marques {worst.rate} % sur {worst.games} parties. C’est la ligne qui rapporte le plus
+              à travailler.
             </span>
           </p>
         </Card>
@@ -274,8 +293,8 @@ export default function StatsPage() {
             {worstHour.hour} h.
           </p>
           <p className="mt-1 text-[11px] leading-relaxed text-faint">
-            Heure du serveur, et non la tienne : le fuseau des joueurs n’est pas enregistré.
-            L’écart reste parlant, l’heure exacte moins.
+            Heure du serveur, et non la tienne : le fuseau des joueurs n’est pas enregistré. L’écart
+            reste parlant, l’heure exacte moins.
           </p>
         </Card>
       )}

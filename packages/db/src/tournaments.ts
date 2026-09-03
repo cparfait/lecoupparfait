@@ -147,10 +147,7 @@ export async function getTournament(
 }
 
 /** La partie en cours d'un joueur, s'il en a une. C'est elle qui l'y emmène. */
-export async function currentPairing(
-  tournamentId: string,
-  userId: string,
-): Promise<string | null> {
+export async function currentPairing(tournamentId: string, userId: string): Promise<string | null> {
   const db = getDb()
   const [row] = await db
     .select({ slug: tournamentPairings.gameSlug })
@@ -242,12 +239,7 @@ export async function leaveTournament(slug: string, userId: string): Promise<boo
   await db
     .update(tournamentPlayers)
     .set({ active: false })
-    .where(
-      and(
-        eq(tournamentPlayers.tournamentId, row.id),
-        eq(tournamentPlayers.userId, userId),
-      ),
-    )
+    .where(and(eq(tournamentPlayers.tournamentId, row.id), eq(tournamentPlayers.userId, userId)))
   return true
 }
 
@@ -303,10 +295,7 @@ export interface NewPairing {
  */
 export async function pairWaiting(): Promise<NewPairing[]> {
   const db = getDb()
-  const running = await db
-    .select()
-    .from(tournaments)
-    .where(eq(tournaments.status, 'running'))
+  const running = await db.select().from(tournaments).where(eq(tournaments.status, 'running'))
 
   const created: NewPairing[] = []
 
@@ -397,17 +386,12 @@ export async function recordResult(gameSlug: string, result: string): Promise<bo
   const [pairing] = await db
     .select()
     .from(tournamentPairings)
-    .where(
-      and(eq(tournamentPairings.gameSlug, gameSlug), eq(tournamentPairings.result, '*')),
-    )
+    .where(and(eq(tournamentPairings.gameSlug, gameSlug), eq(tournamentPairings.result, '*')))
     .limit(1)
 
   if (!pairing) return false
 
-  await db
-    .update(tournamentPairings)
-    .set({ result })
-    .where(eq(tournamentPairings.id, pairing.id))
+  await db.update(tournamentPairings).set({ result }).where(eq(tournamentPairings.id, pairing.id))
 
   const outcomes: Array<{ userId: string; outcome: 'win' | 'draw' | 'loss' }> = [
     {
@@ -476,7 +460,11 @@ export async function releaseStuck(maxAgeMs: number): Promise<number> {
     .update(tournamentPairings)
     .set({ result: 'void' })
     .where(and(eq(tournamentPairings.result, '*'), lt(tournamentPairings.createdAt, stale)))
-    .returning({ tournamentId: tournamentPairings.tournamentId, white: tournamentPairings.whiteId, black: tournamentPairings.blackId })
+    .returning({
+      tournamentId: tournamentPairings.tournamentId,
+      white: tournamentPairings.whiteId,
+      black: tournamentPairings.blackId,
+    })
 
   for (const row of abandoned) {
     // Même raison pour le `in` : `inArray` connaît le type de la colonne.

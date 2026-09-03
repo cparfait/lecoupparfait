@@ -68,12 +68,9 @@ export function usePrecoup({ fen, couleur, actif, jouer }: UsePrecoupOptions): E
 
   const annuler = useCallback(() => setPrecoup(null), [])
 
-  const enregistrer = useCallback(
-    (from: Square, to: Square, promotion?: PieceSymbol) => {
-      setPrecoup({ from, to, promotion })
-    },
-    [],
-  )
+  const enregistrer = useCallback((from: Square, to: Square, promotion?: PieceSymbol) => {
+    setPrecoup({ from, to, promotion })
+  }, [])
 
   /*
     Le départ.

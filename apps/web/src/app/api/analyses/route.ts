@@ -50,7 +50,10 @@ const SOURCES = new Set(['local', 'chesscom', 'lichess', 'pgn'])
  * seconde qui ne serait qu'une version périmée de la première.
  */
 function empreinte(startFen: string | null, moves: string): string {
-  return createHash('sha256').update(`${startFen ?? ''}|${moves}`).digest('hex').slice(0, 64)
+  return createHash('sha256')
+    .update(`${startFen ?? ''}|${moves}`)
+    .digest('hex')
+    .slice(0, 64)
 }
 
 export async function GET() {

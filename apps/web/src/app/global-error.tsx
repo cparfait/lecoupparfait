@@ -44,8 +44,8 @@ export default function ErreurGlobale({
             Le Coup Parfait n’a pas pu démarrer
           </h1>
           <p style={{ margin: '0 0 1.25rem', opacity: 0.75, maxWidth: '32rem' }}>
-            L’application elle-même a rencontré un problème. Réessayer relance
-            le chargement complet.
+            L’application elle-même a rencontré un problème. Réessayer relance le chargement
+            complet.
           </p>
           <button
             type="button"

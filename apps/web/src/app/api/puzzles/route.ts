@@ -11,7 +11,18 @@
  */
 
 import { NextResponse } from 'next/server'
-import { and, arrayOverlaps, eq, getDb, gte, lte, notInArray, puzzleAttempts, puzzles, sql } from '@coupparfait/db'
+import {
+  and,
+  arrayOverlaps,
+  eq,
+  getDb,
+  gte,
+  lte,
+  notInArray,
+  puzzleAttempts,
+  puzzles,
+  sql,
+} from '@coupparfait/db'
 import { applyPuzzleResult, getRating } from '@coupparfait/db/ratings'
 import { getCurrentUser } from '@/lib/server/session.ts'
 
@@ -91,10 +102,7 @@ export async function GET(request: Request) {
       excluded = [...excluded, ...done.map((row) => row.puzzleId)]
     }
 
-    const conditions = [
-      gte(puzzles.rating, target - WINDOW),
-      lte(puzzles.rating, target + WINDOW),
-    ]
+    const conditions = [gte(puzzles.rating, target - WINDOW), lte(puzzles.rating, target + WINDOW)]
     if (theme && theme !== 'all') conditions.push(arrayOverlaps(puzzles.themes, [theme]))
     if (excluded.length > 0) conditions.push(notInArray(puzzles.id, excluded))
 
@@ -134,9 +142,7 @@ export async function GET(request: Request) {
         .select()
         .from(puzzles)
         .where(
-          excluded.length > 0
-            ? and(filtreTheme, notInArray(puzzles.id, excluded))
-            : filtreTheme,
+          excluded.length > 0 ? and(filtreTheme, notInArray(puzzles.id, excluded)) : filtreTheme,
         )
         .orderBy(sql`random()`)
         .limit(1)
@@ -156,8 +162,7 @@ export async function GET(request: Request) {
     if (!puzzle) {
       return NextResponse.json(
         {
-          error:
-            'Aucun puzzle en base. Lance l’import :  node scripts/import-puzzles.mjs',
+          error: 'Aucun puzzle en base. Lance l’import :  node scripts/import-puzzles.mjs',
         },
         { status: 404 },
       )
@@ -177,10 +182,7 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('[puzzles]', error)
-    return NextResponse.json(
-      { error: 'Le service de puzzles est indisponible.' },
-      { status: 503 },
-    )
+    return NextResponse.json({ error: 'Le service de puzzles est indisponible.' }, { status: 503 })
   }
 }
 

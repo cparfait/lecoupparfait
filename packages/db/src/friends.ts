@@ -96,10 +96,7 @@ export async function listFriends(userId: string): Promise<Friend[]> {
         and(eq(friendships.addresseeId, userId), eq(users.id, friendships.requesterId)),
       ),
     )
-    .leftJoin(
-      ratings,
-      and(eq(ratings.userId, users.id), eq(ratings.category, RATING_CATEGORY)),
-    )
+    .leftJoin(ratings, and(eq(ratings.userId, users.id), eq(ratings.category, RATING_CATEGORY)))
     .where(
       and(
         eq(friendships.status, 'accepted'),
@@ -127,10 +124,7 @@ export async function listIncomingRequests(userId: string): Promise<PendingReque
     })
     .from(friendships)
     .innerJoin(users, eq(users.id, friendships.requesterId))
-    .leftJoin(
-      ratings,
-      and(eq(ratings.userId, users.id), eq(ratings.category, RATING_CATEGORY)),
-    )
+    .leftJoin(ratings, and(eq(ratings.userId, users.id), eq(ratings.category, RATING_CATEGORY)))
     .where(and(eq(friendships.addresseeId, userId), eq(friendships.status, 'pending')))
     .orderBy(desc(friendships.createdAt))
 
@@ -157,10 +151,7 @@ export async function listOutgoingRequests(userId: string): Promise<PendingReque
     })
     .from(friendships)
     .innerJoin(users, eq(users.id, friendships.addresseeId))
-    .leftJoin(
-      ratings,
-      and(eq(ratings.userId, users.id), eq(ratings.category, RATING_CATEGORY)),
-    )
+    .leftJoin(ratings, and(eq(ratings.userId, users.id), eq(ratings.category, RATING_CATEGORY)))
     .where(and(eq(friendships.requesterId, userId), eq(friendships.status, 'pending')))
     .orderBy(desc(friendships.createdAt))
 
@@ -198,7 +189,11 @@ export async function addFriend(userId: string, username: string): Promise<AddFr
   if (target.id === userId) return { ok: false, reason: 'self' }
 
   const [existing] = await db
-    .select({ id: friendships.id, status: friendships.status, requesterId: friendships.requesterId })
+    .select({
+      id: friendships.id,
+      status: friendships.status,
+      requesterId: friendships.requesterId,
+    })
     .from(friendships)
     .where(
       or(
@@ -315,10 +310,7 @@ export async function searchUsers(userId: string, query: string): Promise<Friend
       rating: ratings.rating,
     })
     .from(users)
-    .leftJoin(
-      ratings,
-      and(eq(ratings.userId, users.id), eq(ratings.category, RATING_CATEGORY)),
-    )
+    .leftJoin(ratings, and(eq(ratings.userId, users.id), eq(ratings.category, RATING_CATEGORY)))
     .where(
       and(
         ilike(users.usernameLower, `${needle.toLowerCase()}%`),
@@ -430,7 +422,10 @@ export async function createGuestChallenge(options: {
     .select({ id: users.id })
     .from(users)
     .where(
-      and(eq(users.usernameLower, options.toUsername.trim().toLowerCase()), eq(users.disabled, false)),
+      and(
+        eq(users.usernameLower, options.toUsername.trim().toLowerCase()),
+        eq(users.disabled, false),
+      ),
     )
     .limit(1)
 
@@ -590,7 +585,13 @@ export async function respondToChallenge(
   userId: string,
   challengeId: string,
   accept: boolean,
-): Promise<{ ok: boolean; slug?: string; initialTime?: number; increment?: number; rated?: boolean }> {
+): Promise<{
+  ok: boolean
+  slug?: string
+  initialTime?: number
+  increment?: number
+  rated?: boolean
+}> {
   const db = getDb()
 
   const [row] = await db

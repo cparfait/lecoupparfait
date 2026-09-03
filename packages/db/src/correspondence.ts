@@ -145,11 +145,7 @@ export async function getCorrespondence(
     .limit(1)
 
   if (!row) return null
-  return toGame(
-    row.game,
-    userId,
-    row.game.whiteId === userId ? row.blackName : row.whiteName,
-  )
+  return toGame(row.game, userId, row.game.whiteId === userId ? row.blackName : row.whiteName)
 }
 
 /**

@@ -78,9 +78,6 @@ export async function POST(request: Request) {
     })
     return NextResponse.json(await response.json(), { status: response.status })
   } catch {
-    return NextResponse.json(
-      { error: 'Le serveur de parties est injoignable.' },
-      { status: 503 },
-    )
+    return NextResponse.json({ error: 'Le serveur de parties est injoignable.' }, { status: 503 })
   }
 }

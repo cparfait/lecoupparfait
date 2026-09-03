@@ -65,13 +65,7 @@ export function rotateOccupancy(occupancy: Occupancy): Occupancy {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type BoardDriverId =
-  | 'chessnut'
-  | 'chessnut-usb'
-  | 'millennium'
-  | 'millennium-usb'
-  | 'pegasus'
-  | 'dgt'
-  | 'certabo'
+  'chessnut' | 'chessnut-usb' | 'millennium' | 'millennium-usb' | 'pegasus' | 'dgt' | 'certabo'
 
 /** Le mécanisme du navigateur par lequel on parle à la carte. */
 export type BoardTransport = 'bluetooth' | 'serial' | 'hid'

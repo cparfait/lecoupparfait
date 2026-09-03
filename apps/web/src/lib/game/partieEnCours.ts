@@ -129,9 +129,7 @@ export interface VariationClassement {
  * Silencieux et sans blocage, pour la même raison qu'au-dessus : le résultat
  * est déjà affiché, l'archivage n'a pas à s'inviter dans ce moment-là.
  */
-export async function archiverPartie(
-  partie: PartieTerminee,
-): Promise<VariationClassement | null> {
+export async function archiverPartie(partie: PartieTerminee): Promise<VariationClassement | null> {
   if (partie.moves.length === 0) return null
   try {
     const reponse = await fetch('/api/parties/terminee', {

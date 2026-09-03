@@ -259,9 +259,14 @@ for (const family of families) {
 
 console.log(`✓ ${kept} positions de finale compilées`)
 if (rejected) console.log(`  ${rejected} positions écartées (illégales ou déjà terminées)`)
-console.log(`  ${families.length} familles · ${families.reduce((a, f) => a + f.groups.length, 0)} configurations`)
+console.log(
+  `  ${families.length} familles · ${families.reduce((a, f) => a + f.groups.length, 0)} configurations`,
+)
 console.log(`  objectifs : ${byTarget.checkmate} à gagner · ${byTarget.draw} à tenir en nulle`)
 console.log(
-  `  difficulté : ${byDifficulty.slice(1).map((n, i) => `${i + 1}★=${n}`).join('  ')}`,
+  `  difficulté : ${byDifficulty
+    .slice(1)
+    .map((n, i) => `${i + 1}★=${n}`)
+    .join('  ')}`,
 )
 console.log(`  → apps/web/public/data/endgames.json (${Math.round(size / 1024)} Ko)`)

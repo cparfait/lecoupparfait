@@ -240,7 +240,15 @@ export default function StudyPage() {
             size="sm"
             variant="ghost"
             className="ml-auto"
-            icon={copied ? <Check size={14} /> : study.visibility === 'unlisted' ? <Link2 size={14} /> : <Lock size={14} />}
+            icon={
+              copied ? (
+                <Check size={14} />
+              ) : study.visibility === 'unlisted' ? (
+                <Link2 size={14} />
+              ) : (
+                <Lock size={14} />
+              )
+            }
             onClick={() => void share()}
           >
             {copied ? 'Lien copié' : 'Partager'}
@@ -345,8 +353,11 @@ export default function StudyPage() {
                     title={chapter.comments[String(index)] ? 'Ce coup est commenté' : undefined}
                     className={clsx(
                       'rounded px-1.5 py-0.5 text-[13px] transition-colors',
-                      index === cursor ? 'bg-accent/20 font-semibold text-ink' : 'hover:bg-surface-hover',
-                      chapter.comments[String(index)] && 'underline decoration-accent decoration-dotted underline-offset-2',
+                      index === cursor
+                        ? 'bg-accent/20 font-semibold text-ink'
+                        : 'hover:bg-surface-hover',
+                      chapter.comments[String(index)] &&
+                        'underline decoration-accent decoration-dotted underline-offset-2',
                     )}
                   >
                     {index % 2 === 0 && (

@@ -20,14 +20,70 @@ export const CERTABO_BAUD = 38400
 
 /** Position de départ, dans l'ordre FEN — référence de l'étalonnage. */
 const START_PIECES: readonly (string | null)[] = [
-  'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r',
-  'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p',
-  null, null, null, null, null, null, null, null,
-  null, null, null, null, null, null, null, null,
-  null, null, null, null, null, null, null, null,
-  null, null, null, null, null, null, null, null,
-  'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P',
-  'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R',
+  'r',
+  'n',
+  'b',
+  'q',
+  'k',
+  'b',
+  'n',
+  'r',
+  'p',
+  'p',
+  'p',
+  'p',
+  'p',
+  'p',
+  'p',
+  'p',
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  'P',
+  'P',
+  'P',
+  'P',
+  'P',
+  'P',
+  'P',
+  'P',
+  'R',
+  'N',
+  'B',
+  'Q',
+  'K',
+  'B',
+  'N',
+  'R',
 ]
 
 /** Identifiant d'une puce RFID, ou `''` pour une case vide. */
@@ -37,8 +93,7 @@ export type PieceId = string
 export type CertaboCalibration = Readonly<Record<PieceId, string>>
 
 export type CertaboFrame =
-  | { kind: 'ids'; ids: PieceId[] }
-  | { kind: 'occupancy'; squares: Occupancy }
+  { kind: 'ids'; ids: PieceId[] } | { kind: 'occupancy'; squares: Occupancy }
 
 /** Indice dans l'ordre FEN d'une case lue dans l'ordre Certabo (`a1` en tête). */
 function toFenIndex(order: number): number {
@@ -91,7 +146,8 @@ function parseLine(line: string): CertaboFrame | null {
       const value = Number(parts[row])
       for (let column = 0; column < 8; column++) {
         // Le bit de poids fort porte la colonne `a`.
-        if ((value & (1 << (7 - column))) !== 0) squares[toFenIndex(row * 8 + column)] = UNKNOWN_PIECE
+        if ((value & (1 << (7 - column))) !== 0)
+          squares[toFenIndex(row * 8 + column)] = UNKNOWN_PIECE
       }
     }
     return { kind: 'occupancy', squares }

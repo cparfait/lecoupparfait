@@ -72,7 +72,7 @@ for (const volume of volumes) {
   const path = join(sourceDir, `${volume}.tsv`)
   if (!existsSync(path)) {
     console.error(`✗ Fichier manquant : ${path}`)
-    console.error('  Lance d\'abord :  npm run data:openings:fetch')
+    console.error("  Lance d'abord :  npm run data:openings:fetch")
     process.exit(1)
   }
   for (const row of parseTsv(readFileSync(path, 'utf8'))) {
@@ -118,10 +118,7 @@ mkdirSync(webDataDir, { recursive: true })
 writeFileSync(join(webDataDir, 'openings.json'), JSON.stringify(compact))
 
 // ── Version complète pour la base de données ─────────────────────────────────
-writeFileSync(
-  join(sourceDir, 'openings.compiled.json'),
-  JSON.stringify(entries, null, 0),
-)
+writeFileSync(join(sourceDir, 'openings.compiled.json'), JSON.stringify(entries, null, 0))
 
 const maxPly = Math.max(...entries.map((e) => e.ply))
 const byVolume = {}
@@ -131,7 +128,11 @@ for (const e of entries) {
 }
 
 console.log(`✓ ${entries.length} ouvertures compilées`)
-console.log(`  par volume ECO : ${Object.entries(byVolume).map(([k, v]) => `${k}=${v}`).join('  ')}`)
+console.log(
+  `  par volume ECO : ${Object.entries(byVolume)
+    .map(([k, v]) => `${k}=${v}`)
+    .join('  ')}`,
+)
 console.log(`  profondeur maximale : ${maxPly} demi-coups`)
 if (skipped) console.log(`  ${skipped} lignes ignorées (PGN illisible)`)
 console.log(`  → apps/web/public/data/openings.json`)

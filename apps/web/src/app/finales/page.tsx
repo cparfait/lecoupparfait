@@ -427,17 +427,17 @@ function EndgameTrainer({
       <div className="etude-corps grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="etude-plateau min-w-0">
           <div className="etude-cadre">
-          <ChessBoard
-            fitParentHeight
-            fen={state.fen}
-            orientation={playerColor}
-            playable={outcome === 'playing' && !state.isGameOver ? playerColor : null}
-            legalMoves={state.legalMoves}
-            onMove={play}
-            lastMove={state.lastMove}
-            checkSquare={state.checkSquare}
-            checkmate={state.status === 'checkmate'}
-          />
+            <ChessBoard
+              fitParentHeight
+              fen={state.fen}
+              orientation={playerColor}
+              playable={outcome === 'playing' && !state.isGameOver ? playerColor : null}
+              legalMoves={state.legalMoves}
+              onMove={play}
+              lastMove={state.lastMove}
+              checkSquare={state.checkSquare}
+              checkmate={state.status === 'checkmate'}
+            />
           </div>
         </div>
 
@@ -460,7 +460,15 @@ function EndgameTrainer({
               maximum de ses moyens — il ne te fera aucun cadeau.
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">
-              <Chip tone={position.difficulty >= 4 ? 'danger' : position.difficulty >= 3 ? 'warning' : 'success'}>
+              <Chip
+                tone={
+                  position.difficulty >= 4
+                    ? 'danger'
+                    : position.difficulty >= 3
+                      ? 'warning'
+                      : 'success'
+                }
+              >
                 {'★'.repeat(position.difficulty)}
                 {'☆'.repeat(5 - position.difficulty)}
               </Chip>
@@ -493,8 +501,7 @@ function EndgameTrainer({
                   <p
                     className="text-sm font-semibold"
                     style={{
-                      color:
-                        outcome === 'lost' ? 'var(--q-blunder)' : 'var(--q-best)',
+                      color: outcome === 'lost' ? 'var(--q-blunder)' : 'var(--q-best)',
                     }}
                   >
                     {outcome === 'won'
@@ -528,11 +535,7 @@ function EndgameTrainer({
                 >
                   Recommencer
                 </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => undo(2)}
-                  disabled={state.moves.length < 2}
-                >
+                <Button variant="ghost" onClick={() => undo(2)} disabled={state.moves.length < 2}>
                   Annuler
                 </Button>
               </>
@@ -553,8 +556,8 @@ function EndgameTrainer({
           </div>
 
           <p className="text-[11px] leading-relaxed text-faint">
-            La règle des cinquante coups s’applique : si tu n’avances pas, la partie sera
-            déclarée nulle — ce qui est une défaite quand l’objectif est de gagner.
+            La règle des cinquante coups s’applique : si tu n’avances pas, la partie sera déclarée
+            nulle — ce qui est une défaite quand l’objectif est de gagner.
           </p>
         </div>
       </div>

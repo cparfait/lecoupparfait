@@ -57,7 +57,7 @@ neuf en e5. Le réglage « durée d'animation » des préférences et le
 annonce que l'animation « est gérée séparément, en connaissant le coup joué » ;
 ce code n'existe pas.
 
-Conséquence : on ne voit pas *quelle* pièce a bougé, seulement que la
+Conséquence : on ne voit pas _quelle_ pièce a bougé, seulement que la
 position a changé — exactement ce que l'auteur du réglage voulait éviter.
 
 Correction prévue : donner aux pièces une identité stable d'une position à
@@ -82,10 +82,10 @@ pièces, les surlignages, la couche SVG. `relativePoint`
 
 **Mesuré** sur `/puzzles` à 390×844, 60 `pointermove` espacés d'une tâche :
 
-| | |
-|---|---|
-| coût par `pointermove`, processeur de bureau non ralenti | 5,1 ms |
-| budget d'une image à 60 i/s | 16,7 ms |
+|                                                          |         |
+| -------------------------------------------------------- | ------- |
+| coût par `pointermove`, processeur de bureau non ralenti | 5,1 ms  |
+| budget d'une image à 60 i/s                              | 16,7 ms |
 
 À 4× de ralentissement, on dépasse le budget : le glisser saccade sur un
 milieu de gamme. Le même chemin sert au tracé de flèche (`setDraft`,
@@ -109,10 +109,10 @@ La mesure est circulaire : le plateau peut rétrécir, jamais regrandir.
 
 **Constaté** :
 
-| fenêtre | plateau | page |
-|---|---|---|
-| 844×390 (paysage téléphone) | 344–384 px | hauteur défilable 902 px : le plateau sort de l'écran |
-| 768×1024, après passage par 1024×768 | 466 px sur 752 disponibles | le plateau est resté à la taille du paysage |
+| fenêtre                              | plateau                    | page                                                  |
+| ------------------------------------ | -------------------------- | ----------------------------------------------------- |
+| 844×390 (paysage téléphone)          | 344–384 px                 | hauteur défilable 902 px : le plateau sort de l'écran |
+| 768×1024, après passage par 1024×768 | 466 px sur 752 disponibles | le plateau est resté à la taille du paysage           |
 
 En paysage, le repli `calc(100dvh - reservedHeight - toggleRow)` donnerait
 206 px, sous le plancher `MIN_BOARD_PX = 260` (`ChessBoard.tsx:77`) : même
@@ -224,7 +224,7 @@ sont stables tant que la position ne change pas.
 - `Board2D.tsx:578` : `role="grid"` sans `role="row"` autour des cellules.
   Structure ARIA incomplète ; ne bloque rien.
 - `ChessBoard.tsx:184` et `:201` : `100vh`/`100vw` en plein écran. Dans
-  l'API plein écran, l'élément *est* la fenêtre et il n'y a pas de barre
+  l'API plein écran, l'élément _est_ la fenêtre et il n'y a pas de barre
   d'adresse : `vh` y est juste. `dvh` ne coûte rien et évite un faux positif
   aux recherches futures.
 - `globals.css` ne définit nulle part `-webkit-tap-highlight-color` : sur
@@ -234,7 +234,7 @@ sont stables tant que la position ne change pas.
 - `PromotionPicker.tsx:387` et `:437` : `slide-up` en `fill-mode: both`, en
   ligne. Sous `prefers-reduced-motion`, la règle globale
   (`globals.css:790-799`) ramène la durée à 0,01 ms, et l'animation
-  *finit* visible : pas le piège documenté. Rien à faire.
+  _finit_ visible : pas le piège documenté. Rien à faire.
 
 ### Ce qui a été cherché et non trouvé
 
@@ -412,14 +412,14 @@ d'appareil) ; corrigé dans la coque, remonté du lot 4.
 
 ### Journal du lot 3
 
-| # | commit | constaté |
-|---|---|---|
-| D1 | `EvalBar` en `transform` | `scaleY(0.5)`, origine en bas, transition sur `transform` seul (1024×768, évaluation affichée) |
-| D4 | pastille du trait sans pulsation en mode léger | `animation-name: none` sous `data-effects='low'` |
-| D5 | zones sûres dans la coque (en-tête, côtés, bas des écrans immersifs) | `env()` vaut 0 dans le volet : sans régression, à voir sur iPhone |
-| D3 | cibles ≥ 44 px au pointeur grossier (ruban, liste, navigation, barre du pouce, panneau électronique) | 360×640 : plus rien sous 44 px dans la page de partie, hors en-tête |
-| D2 | `.grille-partie` (zones nommées, hauteurs calées bordure comprise) sur `jouer/ordinateur` | 844×390 : plateau 273 px entier, page 390 ; 1024×768 : page 768 (777 avant) |
-| D2 | même grille sur `jouer/local` et `jouer/partie/[slug]` | 844×390 : plateau 297 px entier, page 390 ; 1024×768 : 768 |
+| #   | commit                                                                                               | constaté                                                                                       |
+| --- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| D1  | `EvalBar` en `transform`                                                                             | `scaleY(0.5)`, origine en bas, transition sur `transform` seul (1024×768, évaluation affichée) |
+| D4  | pastille du trait sans pulsation en mode léger                                                       | `animation-name: none` sous `data-effects='low'`                                               |
+| D5  | zones sûres dans la coque (en-tête, côtés, bas des écrans immersifs)                                 | `env()` vaut 0 dans le volet : sans régression, à voir sur iPhone                              |
+| D3  | cibles ≥ 44 px au pointeur grossier (ruban, liste, navigation, barre du pouce, panneau électronique) | 360×640 : plus rien sous 44 px dans la page de partie, hors en-tête                            |
+| D2  | `.grille-partie` (zones nommées, hauteurs calées bordure comprise) sur `jouer/ordinateur`            | 844×390 : plateau 273 px entier, page 390 ; 1024×768 : page 768 (777 avant)                    |
+| D2  | même grille sur `jouer/local` et `jouer/partie/[slug]`                                               | 844×390 : plateau 297 px entier, page 390 ; 1024×768 : 768                                     |
 
 Ce que ces corrections ont pu casser, revérifié : portrait 390×844 inchangé
 sur les trois pages (plateau 374 px, tout empilé) ; la bascule 2D / 3D
@@ -565,18 +565,18 @@ traité avant le lot 4, sitôt le lot 1 fermé.
 Dix commits sur `main`, `cebffe4` → `289f3e0`, non poussés. Chacun passe
 `npm run typecheck` et `npm test` (71 vérifications).
 
-| # | commit | constaté |
-|---|---|---|
-| B1 | `cebffe4` — identité des pièces reconduite (`reconduireIdentites`, `boardKit.ts`) | même nœud DOM avant et après e2-e4, matrice calculée qui glisse de 280,5 à 187 px |
-| B2 | `d749c0f` — pièce traînée hors de l'état React, cases/pièces/couches mémoïsées | 1,0 ms par `pointermove` au lieu de 5,1 ; 0,4 ms pour une flèche ; glisser-déposer complet joué (2. d4) |
-| B3 | `12e8204` — mesure du parent seulement s'il impose sa hauteur | 1024×768 → 466 px, 768×1024 → 726 px, 844×390 → 260 px, 390×844 → 374 px |
-| B4 | `5c47065` — bascule 44 px au pointeur grossier | 44 × 44 px mesurés en émulation tactile à 390×844 |
-| B5 | `d4a6b44` — plein écran caché si `fullscreenEnabled` est faux ; `dvh`/`dvw` | 3 boutons puis 2 après forçage de `fullscreenEnabled` à faux |
-| B10 | `a233360` — coordonnées sous les pièces (`z-[5]`) | `z-index` calculé à 5, pièces à 10 |
-| B8 | `656a440` — anneau de focus clavier | focus programmatique sans anneau, deux flèches → anneau sur la case |
-| B6 | `5c2f753` — `will-change` sur la seule pièce tenue, pulsation en mode spectaculaire seulement, voile de promotion sans flou en mode léger | `will-change: auto` × 32, `backdrop-filter: none` sous `data-effects='low'` |
-| B12 | `f7afcf8` — `-webkit-tap-highlight-color: transparent` sur `html` | valeur calculée `rgba(0, 0, 0, 0)` |
-| B7 | `289f3e0` — appui long → flèches jaunes vers les coups légaux | 450 ms sur e7 : deux flèches vers e6 et e5, pièce non soulevée ; glisser franc : aucune flèche, e5 joué |
+| #   | commit                                                                                                                                    | constaté                                                                                                |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| B1  | `cebffe4` — identité des pièces reconduite (`reconduireIdentites`, `boardKit.ts`)                                                         | même nœud DOM avant et après e2-e4, matrice calculée qui glisse de 280,5 à 187 px                       |
+| B2  | `d749c0f` — pièce traînée hors de l'état React, cases/pièces/couches mémoïsées                                                            | 1,0 ms par `pointermove` au lieu de 5,1 ; 0,4 ms pour une flèche ; glisser-déposer complet joué (2. d4) |
+| B3  | `12e8204` — mesure du parent seulement s'il impose sa hauteur                                                                             | 1024×768 → 466 px, 768×1024 → 726 px, 844×390 → 260 px, 390×844 → 374 px                                |
+| B4  | `5c47065` — bascule 44 px au pointeur grossier                                                                                            | 44 × 44 px mesurés en émulation tactile à 390×844                                                       |
+| B5  | `d4a6b44` — plein écran caché si `fullscreenEnabled` est faux ; `dvh`/`dvw`                                                               | 3 boutons puis 2 après forçage de `fullscreenEnabled` à faux                                            |
+| B10 | `a233360` — coordonnées sous les pièces (`z-[5]`)                                                                                         | `z-index` calculé à 5, pièces à 10                                                                      |
+| B8  | `656a440` — anneau de focus clavier                                                                                                       | focus programmatique sans anneau, deux flèches → anneau sur la case                                     |
+| B6  | `5c2f753` — `will-change` sur la seule pièce tenue, pulsation en mode spectaculaire seulement, voile de promotion sans flou en mode léger | `will-change: auto` × 32, `backdrop-filter: none` sous `data-effects='low'`                             |
+| B12 | `f7afcf8` — `-webkit-tap-highlight-color: transparent` sur `html`                                                                         | valeur calculée `rgba(0, 0, 0, 0)`                                                                      |
+| B7  | `289f3e0` — appui long → flèches jaunes vers les coups légaux                                                                             | 450 ms sur e7 : deux flèches vers e6 et e5, pièce non soulevée ; glisser franc : aucune flèche, e5 joué |
 
 Ce que ces corrections ont pu casser, et ce qui a été revérifié :
 
@@ -603,6 +603,7 @@ passent sur la pointe, sans avertissement.
 ### Critères d'acceptation — état
 
 **Mise en page**
+
 - Défilement horizontal : **aucun** sur 25 routes à 360, sur les pages
   vérifiées à 390, 430, 768, 844 et 1024 (l'en-tête qui débordait entre 768
   et 900 est corrigé).
@@ -616,6 +617,7 @@ passent sur la pointe, sans avertissement.
 - CLS : 0 mesuré sur `/puzzles` ; non mesuré ailleurs.
 
 **Échiquier**
+
 - Pavage sans liseré : rien vu à dpr 2 ; dpr 3 **à constater** sur
   appareil.
 - Pièce animée par `transform` seul : **vrai**, et désormais elle glisse
@@ -627,6 +629,7 @@ passent sur la pointe, sans avertissement.
 - Couches alignées : **vrai**, par construction et vu à cinq largeurs.
 
 **Performance**
+
 - 2D à 60 i/s en 4× : non mesuré au profil (le volet n'a pas de ralentisseur
   CPU) ; 1,0 ms par mouvement de glisser sur processeur de bureau.
 - 3D : **0 rendu au repos**, constaté ; ≥ 30 i/s **à constater** sur
@@ -638,6 +641,7 @@ passent sur la pointe, sans avertissement.
   en 3D (déjà en place, vérifié).
 
 **Thèmes et accessibilité**
+
 - Quatre thèmes : page de partie revue dans les quatre ; aucune couleur
   littérale nouvelle hors le jaune des annotations tactiles.
 - `prefers-reduced-motion` : rien d'ajouté qui ne soit couvert par la règle

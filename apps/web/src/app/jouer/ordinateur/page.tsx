@@ -283,7 +283,13 @@ export default function PlayComputerPage() {
       .catch(() => demarrerDuel(chapitre.niveau))
 
     function demarrerDuel(niveau: number) {
-      setSetup({ level: niveau, color: 'random', timeControlId: '600+5', human: false, classee: false })
+      setSetup({
+        level: niveau,
+        color: 'random',
+        timeControlId: '600+5',
+        human: false,
+        classee: false,
+      })
       setResolvedColor(Math.random() < 0.5 ? 'w' : 'b')
       setCoupsRepris(undefined)
       setHorlogeReprise(null)
@@ -292,7 +298,6 @@ export default function PlayComputerPage() {
       setPhase('playing')
       playSound('start')
     }
-     
   }, [])
 
   /**
@@ -339,7 +344,11 @@ export default function PlayComputerPage() {
     }
 
     setFenImposee(position)
-    setSetup((actuel) => ({ ...actuel, color: position.split(' ')[1] === 'b' ? 'b' : 'w', classee: false }))
+    setSetup((actuel) => ({
+      ...actuel,
+      color: position.split(' ')[1] === 'b' ? 'b' : 'w',
+      classee: false,
+    }))
     setResolvedColor(position.split(' ')[1] === 'b' ? 'b' : 'w')
     setCoupsRepris(undefined)
     setHorlogeReprise(null)
@@ -363,9 +372,7 @@ export default function PlayComputerPage() {
   const start = useCallback((next: Setup) => {
     niveauArbitre.current = true
     setSetup(next)
-    setResolvedColor(
-      next.color === 'random' ? (Math.random() < 0.5 ? 'w' : 'b') : next.color,
-    )
+    setResolvedColor(next.color === 'random' ? (Math.random() < 0.5 ? 'w' : 'b') : next.color)
     // Commencer une partie remplace celle qu'on gardait : on ne conserve que la
     // dernière, et la nouvelle l'écrasera de toute façon au premier coup.
     setCoupsRepris(undefined)
@@ -648,13 +655,17 @@ function SetupScreen({
             <p className="font-display text-lg font-semibold">Tu as une partie en cours</p>
             <p className="mt-0.5 text-sm text-muted">
               Contre {reprise.human ? 'Maia' : 'Stockfish'}, niveau {reprise.level} · avec les{' '}
-              {reprise.playerColor === 'w' ? 'Blancs' : 'Noirs'} · {reprise.moves.length}{' '}
-              demi-coups joués, {depuis(reprise.enregistreLe)}.
+              {reprise.playerColor === 'w' ? 'Blancs' : 'Noirs'} · {reprise.moves.length} demi-coups
+              joués, {depuis(reprise.enregistreLe)}.
             </p>
           </div>
           {/* Une ligne à eux sur téléphone, leur place à droite au-delà. */}
           <div className="flex w-full gap-2 sm:w-auto">
-            <Button variant="primary" icon={<Play size={16} />} onClick={() => onReprendre(reprise)}>
+            <Button
+              variant="primary"
+              icon={<Play size={16} />}
+              onClick={() => onReprendre(reprise)}
+            >
               Reprendre
             </Button>
             <Button
@@ -691,75 +702,75 @@ function SetupScreen({
           sous son dernier réglage, là où il passe pour de la marge. C'est le
           même vide, et il ne se voit plus. */}
       <div className="mt-5 grid gap-4 [@media(max-height:820px)]:mt-3 [@media(max-height:820px)]:gap-3 lg:grid-cols-2">
-      <Card glow className="overflow-hidden">
-        <div className="flex items-center gap-4 p-5 [@media(max-height:820px)]:p-3">
-          <span
-            className="grid h-16 w-16 shrink-0 place-items-center rounded-[var(--radius)]"
-            style={{
-              background: 'color-mix(in oklab, var(--accent) 15%, transparent)',
-              boxShadow: 'var(--glow)',
-            }}
-            aria-hidden
-          >
-            <PortraitAdversaire personality={personality} size={56} />
-          </span>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-baseline gap-2">
-              <h2 className="font-display text-xl font-semibold">{personality.name.fr}</h2>
-              <Chip tone="accent">≈ {bot.elo} Elo</Chip>
-              <Chip>Niveau {bot.level}</Chip>
+        <Card glow className="overflow-hidden">
+          <div className="flex items-center gap-4 p-5 [@media(max-height:820px)]:p-3">
+            <span
+              className="grid h-16 w-16 shrink-0 place-items-center rounded-[var(--radius)]"
+              style={{
+                background: 'color-mix(in oklab, var(--accent) 15%, transparent)',
+                boxShadow: 'var(--glow)',
+              }}
+              aria-hidden
+            >
+              <PortraitAdversaire personality={personality} size={56} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-baseline gap-2">
+                <h2 className="font-display text-xl font-semibold">{personality.name.fr}</h2>
+                <Chip tone="accent">≈ {bot.elo} Elo</Chip>
+                <Chip>Niveau {bot.level}</Chip>
+              </div>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted">{personality.blurb.fr}</p>
             </div>
-            <p className="mt-1.5 text-sm leading-relaxed text-muted">{personality.blurb.fr}</p>
           </div>
-        </div>
 
-        {/*
+          {/*
           Les vingt-cinq niveaux s'offraient tous d'emblée : un débutant
           choisissait au hasard, tombait sur trop fort, et en concluait qu'il
           était mauvais. On montre donc où il en est, et jusqu'où il peut
           monter — sans rien interdire, la barre reste entière.
         */}
-        {/*
+          {/*
           Le choix de l'adversaire, et non une case à cocher.
           
           « Qui vais-je affronter » est une question à deux réponses, pas une
           option à activer : une case laisse croire à un réglage accessoire
           alors que c'est ce qui change tout dans la partie.
         */}
-        {maiaReady && (
-          <div className="border-t border-line/60 px-5 py-4 [@media(max-height:820px)]:py-2.5">
-            <p className="mb-2 text-sm font-medium">Adversaire</p>
-            <div className="grid gap-1.5 sm:grid-cols-2">
-              {[
-                {
-                  id: true,
-                  nom: 'Maia',
-                  resume: 'Joue comme un humain',
-                  detail:
-                    'Réseau entraîné sur des millions de parties réelles. Il se trompe comme on se trompe vraiment à ce niveau.',
-                },
-                {
-                  id: false,
-                  nom: 'Stockfish',
-                  resume: 'Le moteur classique',
-                  detail:
-                    'Le plus fort du monde, bridé au niveau voulu. Joue juste, puis lâche un coup faible d’un coup.',
-                },
-              ].map((choix) => {
-                // Maia écartée par le niveau reste affichée, mais éteinte et
-                // non cochée : la faire disparaître laisserait croire que le
-                // choix n'a jamais existé, et cocher un adversaire qui ne
-                // jouera pas serait un mensonge de plus.
-                const indisponible = choix.id === true && !maiaPossible
-                const actif = humainRetenu === choix.id && !indisponible
-                return (
-                  <button
-                    key={choix.nom}
-                    type="button"
-                    onClick={() => setHuman(choix.id)}
-                    disabled={indisponible}
-                    aria-pressed={actif}
-                    /*
+          {maiaReady && (
+            <div className="border-t border-line/60 px-5 py-4 [@media(max-height:820px)]:py-2.5">
+              <p className="mb-2 text-sm font-medium">Adversaire</p>
+              <div className="grid gap-1.5 sm:grid-cols-2">
+                {[
+                  {
+                    id: true,
+                    nom: 'Maia',
+                    resume: 'Joue comme un humain',
+                    detail:
+                      'Réseau entraîné sur des millions de parties réelles. Il se trompe comme on se trompe vraiment à ce niveau.',
+                  },
+                  {
+                    id: false,
+                    nom: 'Stockfish',
+                    resume: 'Le moteur classique',
+                    detail:
+                      'Le plus fort du monde, bridé au niveau voulu. Joue juste, puis lâche un coup faible d’un coup.',
+                  },
+                ].map((choix) => {
+                  // Maia écartée par le niveau reste affichée, mais éteinte et
+                  // non cochée : la faire disparaître laisserait croire que le
+                  // choix n'a jamais existé, et cocher un adversaire qui ne
+                  // jouera pas serait un mensonge de plus.
+                  const indisponible = choix.id === true && !maiaPossible
+                  const actif = humainRetenu === choix.id && !indisponible
+                  return (
+                    <button
+                      key={choix.nom}
+                      type="button"
+                      onClick={() => setHuman(choix.id)}
+                      disabled={indisponible}
+                      aria-pressed={actif}
+                      /*
                       L'état choisi se voyait à peine : une bordure d'un pixel
                       et un fond à 10 % d'accent sur une surface déjà sombre.
                       Entre deux cartes côte à côte, l'écart tenait dans
@@ -772,87 +783,87 @@ function SetupScreen({
                       repose sur la seule teinte, ce qui laisse le choix
                       lisible en vision daltonienne comme en plein soleil.
                     */
-                    className={clsx(
-                      'rounded-[var(--radius-sm)] border p-3 text-left transition-colors',
-                      actif
-                        ? 'border-accent bg-accent/20 ring-1 ring-accent'
-                        : 'border-line hover:bg-surface-hover',
-                      indisponible && 'cursor-not-allowed opacity-45 hover:bg-transparent',
-                    )}
-                  >
-                    <span className="flex items-baseline gap-2">
-                      <span
-                        className={clsx(
-                          'text-sm font-semibold',
-                          actif ? 'text-accent' : 'text-ink',
-                        )}
-                      >
-                        {choix.nom}
-                      </span>
-                      <span className="text-[11px] text-faint">{choix.resume}</span>
-                      {/* La quatrième marque, et la seule qui se lise sans
-                          comparer les deux cartes entre elles. */}
-                      {actif && (
-                        <span className="ml-auto flex shrink-0 items-center gap-1 text-[11px] font-semibold text-accent">
-                          <Check size={12} aria-hidden />
-                          choisi
-                        </span>
+                      className={clsx(
+                        'rounded-[var(--radius-sm)] border p-3 text-left transition-colors',
+                        actif
+                          ? 'border-accent bg-accent/20 ring-1 ring-accent'
+                          : 'border-line hover:bg-surface-hover',
+                        indisponible && 'cursor-not-allowed opacity-45 hover:bg-transparent',
                       )}
-                    </span>
-                    <span className="mt-1 block text-xs leading-relaxed text-muted">
-                      {choix.detail}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
+                    >
+                      <span className="flex items-baseline gap-2">
+                        <span
+                          className={clsx(
+                            'text-sm font-semibold',
+                            actif ? 'text-accent' : 'text-ink',
+                          )}
+                        >
+                          {choix.nom}
+                        </span>
+                        <span className="text-[11px] text-faint">{choix.resume}</span>
+                        {/* La quatrième marque, et la seule qui se lise sans
+                          comparer les deux cartes entre elles. */}
+                        {actif && (
+                          <span className="ml-auto flex shrink-0 items-center gap-1 text-[11px] font-semibold text-accent">
+                            <Check size={12} aria-hidden />
+                            choisi
+                          </span>
+                        )}
+                      </span>
+                      <span className="mt-1 block text-xs leading-relaxed text-muted">
+                        {choix.detail}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
 
-            {/* Pourquoi Maia est éteinte, dit au moment où on le constate. */}
-            {!maiaPossible && (
-              <p className="mt-2 text-xs leading-relaxed text-muted">
-                Maia a appris sur des parties humaines de {MAIA_MIN_ELO} à {MAIA_MAX_ELO} Elo,
-                et ne sait rien jouer en dehors. Au niveau {bot.level} ({bot.elo} Elo), c’est
-                donc <strong className="font-semibold text-ink">Stockfish</strong> qui joue —
-                lui se règle sur n’importe quelle force. Pour affronter Maia, choisis un niveau
-                entre {premierNiveauMaia} et {dernierNiveauMaia}.
-              </p>
-            )}
-          </div>
-        )}
-
-        {progress && progress.tracked && (
-          <div className="border-t border-line/60 px-5 py-3">
-            <div className="flex flex-wrap items-center gap-2 text-[13px]">
-              <Trophy size={15} className="shrink-0 text-accent" aria-hidden />
-              {progress.defeated === 0 ? (
-                <span className="text-muted">
-                  Aucun niveau battu pour l’instant. Commence par le premier — il apprend en
-                  même temps que toi.
-                </span>
-              ) : (
-                <span className="text-muted">
-                  Plus haut niveau battu :{' '}
-                  <strong className="font-semibold text-ink">{progress.defeated}</strong>{' '}
-                  ({botLevel(progress.defeated).elo} Elo) · {progress.wins} victoire
-                  {progress.wins > 1 ? 's' : ''} sur {progress.attempts} parties
-                </span>
+              {/* Pourquoi Maia est éteinte, dit au moment où on le constate. */}
+              {!maiaPossible && (
+                <p className="mt-2 text-xs leading-relaxed text-muted">
+                  Maia a appris sur des parties humaines de {MAIA_MIN_ELO} à {MAIA_MAX_ELO} Elo, et
+                  ne sait rien jouer en dehors. Au niveau {bot.level} ({bot.elo} Elo), c’est donc{' '}
+                  <strong className="font-semibold text-ink">Stockfish</strong> qui joue — lui se
+                  règle sur n’importe quelle force. Pour affronter Maia, choisis un niveau entre{' '}
+                  {premierNiveauMaia} et {dernierNiveauMaia}.
+                </p>
               )}
             </div>
-            {progress.defeated < BOT_LEVELS.length && (
-              <button
-                type="button"
-                onClick={() => choisirNiveau(Math.min(BOT_LEVELS.length, progress.defeated + 1))}
-                className="mt-1.5 text-[12px] font-semibold text-accent hover:underline"
-              >
-                Affronter le niveau {Math.min(BOT_LEVELS.length, progress.defeated + 1)} — le
-                prochain à battre
-              </button>
-            )}
-          </div>
-        )}
+          )}
 
-        <div className="border-t border-line/60 px-5 py-4 [@media(max-height:820px)]:py-2.5">
-          {/* ── Qui l'on choisit, à côté du curseur ──────────────────────
+          {progress && progress.tracked && (
+            <div className="border-t border-line/60 px-5 py-3">
+              <div className="flex flex-wrap items-center gap-2 text-[13px]">
+                <Trophy size={15} className="shrink-0 text-accent" aria-hidden />
+                {progress.defeated === 0 ? (
+                  <span className="text-muted">
+                    Aucun niveau battu pour l’instant. Commence par le premier — il apprend en même
+                    temps que toi.
+                  </span>
+                ) : (
+                  <span className="text-muted">
+                    Plus haut niveau battu :{' '}
+                    <strong className="font-semibold text-ink">{progress.defeated}</strong> (
+                    {botLevel(progress.defeated).elo} Elo) · {progress.wins} victoire
+                    {progress.wins > 1 ? 's' : ''} sur {progress.attempts} parties
+                  </span>
+                )}
+              </div>
+              {progress.defeated < BOT_LEVELS.length && (
+                <button
+                  type="button"
+                  onClick={() => choisirNiveau(Math.min(BOT_LEVELS.length, progress.defeated + 1))}
+                  className="mt-1.5 text-[12px] font-semibold text-accent hover:underline"
+                >
+                  Affronter le niveau {Math.min(BOT_LEVELS.length, progress.defeated + 1)} — le
+                  prochain à battre
+                </button>
+              )}
+            </div>
+          )}
+
+          <div className="border-t border-line/60 px-5 py-4 [@media(max-height:820px)]:py-2.5">
+            {/* ── Qui l'on choisit, à côté du curseur ──────────────────────
               Le portrait, le nom et l'Elo sont en tête de cette carte ; le
               curseur, lui, est tout en bas, après le choix de l'adversaire et
               le rappel de progression. Sur un téléphone, les deux ne tiennent
@@ -864,48 +875,48 @@ function SetupScreen({
               On répète donc l'identité ici, en petit. Masqué à partir de `lg`,
               où la carte tient entière dans l'écran et où répéter reviendrait
               à dire deux fois la même chose à dix centimètres d'intervalle. */}
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <label htmlFor="level" className="block text-sm font-medium">
-              Niveau de difficulté
-            </label>
-            <span className="flex items-center gap-1.5 lg:hidden">
-              <PortraitAdversaire personality={personality} size={22} />
-              <span className="text-[12px] font-semibold text-ink">{personality.name.fr}</span>
-              <span className="text-[12px] tabular-nums text-accent">≈ {bot.elo} Elo</span>
-              <span className="text-[12px] text-faint">n°{bot.level}</span>
-            </span>
-          </div>
-          <input
-            id="level"
-            type="range"
-            min={1}
-            max={BOT_LEVELS.length}
-            step={1}
-            value={level}
-            onChange={(event) => choisirNiveau(Number(event.target.value))}
-            /* La barre reste fine, la zone touchable ne l'est plus.
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <label htmlFor="level" className="block text-sm font-medium">
+                Niveau de difficulté
+              </label>
+              <span className="flex items-center gap-1.5 lg:hidden">
+                <PortraitAdversaire personality={personality} size={22} />
+                <span className="text-[12px] font-semibold text-ink">{personality.name.fr}</span>
+                <span className="text-[12px] tabular-nums text-accent">≈ {bot.elo} Elo</span>
+                <span className="text-[12px] text-faint">n°{bot.level}</span>
+              </span>
+            </div>
+            <input
+              id="level"
+              type="range"
+              min={1}
+              max={BOT_LEVELS.length}
+              step={1}
+              value={level}
+              onChange={(event) => choisirNiveau(Number(event.target.value))}
+              /* La barre reste fine, la zone touchable ne l'est plus.
 
                Le champ faisait huit points de haut : c'est la hauteur du rail,
                et c'était aussi toute la surface qu'on pouvait viser du pouce.
                On lui donne trente-deux points et l'on repeint le rail au
                centre, sans le grossir — `background-size` borne le dégradé à
                huit points de haut, `center` le pose au milieu. */
-            className="h-8 w-full cursor-pointer appearance-none bg-transparent"
-            style={{
-              backgroundImage: `linear-gradient(to right, var(--accent) ${((level - 1) / (BOT_LEVELS.length - 1)) * 100}%, var(--surface-strong) ${((level - 1) / (BOT_LEVELS.length - 1)) * 100}%)`,
-              backgroundSize: '100% 8px',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              borderRadius: '9999px',
-            }}
-          />
-          <div className="mt-1.5 flex justify-between text-[11px] text-faint">
-            <span>1 · débutant complet (100)</span>
-            <span>25 · surhumain (3200)</span>
-          </div>
+              className="h-8 w-full cursor-pointer appearance-none bg-transparent"
+              style={{
+                backgroundImage: `linear-gradient(to right, var(--accent) ${((level - 1) / (BOT_LEVELS.length - 1)) * 100}%, var(--surface-strong) ${((level - 1) / (BOT_LEVELS.length - 1)) * 100}%)`,
+                backgroundSize: '100% 8px',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                borderRadius: '9999px',
+              }}
+            />
+            <div className="mt-1.5 flex justify-between text-[11px] text-faint">
+              <span>1 · débutant complet (100)</span>
+              <span>25 · surhumain (3200)</span>
+            </div>
 
-          <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
-            {/* « Je débute » vaut 1, et non 3.
+            <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
+              {/* « Je débute » vaut 1, et non 3.
 
                 Il valait 3, c'est-à-dire 550 Elo, sur une échelle qui annonce
                 100 tout en bas. Quelqu'un qui se déclare débutant appuie sur ce
@@ -914,32 +925,32 @@ function SetupScreen({
                 « je débute », donc on le croit sur parole et l'on ne touche
                 plus au curseur. Un préréglage nommé d'après le joueur doit
                 désigner le bout de l'échelle qui lui correspond. */}
-            {[
-              { label: 'Je débute', level: 1 },
-              { label: 'Occasionnel', level: 7 },
-              { label: 'Club', level: 12 },
-              { label: 'Fort', level: 18 },
-              { label: 'Sans pitié', level: 25 },
-            ].map((preset) => (
-              <button
-                key={preset.label}
-                type="button"
-                onClick={() => choisirNiveau(preset.level)}
-                className={clsx(
-                  'rounded-[var(--radius-sm)] border px-2 py-2 text-xs font-medium transition-colors',
-                  level === preset.level
-                    ? 'border-accent bg-accent/15 text-ink'
-                    : 'border-line text-muted hover:bg-surface-hover',
-                )}
-              >
-                {preset.label}
-              </button>
-            ))}
+              {[
+                { label: 'Je débute', level: 1 },
+                { label: 'Occasionnel', level: 7 },
+                { label: 'Club', level: 12 },
+                { label: 'Fort', level: 18 },
+                { label: 'Sans pitié', level: 25 },
+              ].map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => choisirNiveau(preset.level)}
+                  className={clsx(
+                    'rounded-[var(--radius-sm)] border px-2 py-2 text-xs font-medium transition-colors',
+                    level === preset.level
+                      ? 'border-accent bg-accent/15 text-ink'
+                      : 'border-line text-muted hover:bg-surface-hover',
+                  )}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
 
-      {/* ── Les réglages de la partie, dans une seule carte ──────────────
+        {/* ── Les réglages de la partie, dans une seule carte ──────────────
       
           Ils occupaient quatre cartes empilées — couleur, commentaires, cadence
           — dans une grille à deux colonnes. Chaque carte se défendait ; leur
@@ -951,63 +962,65 @@ function SetupScreen({
           disparaissent ne portaient aucune information : elles séparaient des
           réglages que rien ne sépare, puisqu'on les remplit tous avant de
           cliquer sur le même bouton. */}
-      <Card className="divide-y divide-line/60 p-0">
-        <div className="p-4 [@media(max-height:820px)]:p-2">
-          <SectionTitle>Ta couleur</SectionTitle>
-          <SegmentedControl
-            value={color}
-            onChange={setColor}
-            label="Couleur"
-            options={[
-              { value: 'w' as const, label: '♔ Blancs' },
-              { value: 'b' as const, label: '♚ Noirs' },
-              { value: 'random' as const, label: '🎲 Hasard' },
-            ]}
-          />
-          <p className="mt-2 text-xs text-faint">Les Blancs commencent. Pour apprendre, alterne.</p>
-        </div>
+        <Card className="divide-y divide-line/60 p-0">
+          <div className="p-4 [@media(max-height:820px)]:p-2">
+            <SectionTitle>Ta couleur</SectionTitle>
+            <SegmentedControl
+              value={color}
+              onChange={setColor}
+              label="Couleur"
+              options={[
+                { value: 'w' as const, label: '♔ Blancs' },
+                { value: 'b' as const, label: '♚ Noirs' },
+                { value: 'random' as const, label: '🎲 Hasard' },
+              ]}
+            />
+            <p className="mt-2 text-xs text-faint">
+              Les Blancs commencent. Pour apprendre, alterne.
+            </p>
+          </div>
 
-        <div className="p-4 [@media(max-height:820px)]:p-2">
-          <SectionTitle>Cadence</SectionTitle>
-          {/* Récupéré de `/jouer`, où la même liste s'affichait sans être
+          <div className="p-4 [@media(max-height:820px)]:p-2">
+            <SectionTitle>Cadence</SectionTitle>
+            {/* Récupéré de `/jouer`, où la même liste s'affichait sans être
               cliquable : une explication sert au moment du choix, pas dans un
               catalogue qu'on traverse. */}
-          {/* Ramenée à un exemple. La règle générale — « le premier nombre est
+            {/* Ramenée à un exemple. La règle générale — « le premier nombre est
               le temps de départ, le second ce que chaque coup rapporte » — se
               déduit de l'exemple, et prenait trois lignes pour le dire. */}
-          <p className="-mt-1 mb-2 text-xs leading-relaxed text-muted">
-            « 5 | 3 » : cinq minutes au départ, trois secondes gagnées à chaque coup.
-          </p>
-          {/* Quatre colonnes plutôt que trois : les huit cadences tiennent alors
+            <p className="-mt-1 mb-2 text-xs leading-relaxed text-muted">
+              « 5 | 3 » : cinq minutes au départ, trois secondes gagnées à chaque coup.
+            </p>
+            {/* Quatre colonnes plutôt que trois : les huit cadences tiennent alors
               sur deux rangées pleines au lieu de trois dont une à moitié vide. */}
-          <div className="grid grid-cols-4 gap-1.5">
-            {TIME_CONTROLS.filter((tc) =>
-              ['180+0', '300+0', '300+3', '600+0', '600+5', '900+10', '1800+0', '0+0'].includes(
-                tc.id,
-              ),
-            ).map((tc) => (
-              <button
-                key={tc.id}
-                type="button"
-                onClick={() => setTimeControlId(tc.id)}
-                className={clsx(
-                  'rounded-[var(--radius-sm)] border px-2 py-2 text-xs font-medium transition-colors',
-                  timeControlId === tc.id
-                    ? 'border-accent bg-accent/15 text-ink'
-                    : 'border-line text-muted hover:bg-surface-hover',
-                )}
-              >
-                <span className="block">{SPEED_LABELS[tc.category].icon}</span>
-                {tc.label}
-              </button>
-            ))}
+            <div className="grid grid-cols-4 gap-1.5">
+              {TIME_CONTROLS.filter((tc) =>
+                ['180+0', '300+0', '300+3', '600+0', '600+5', '900+10', '1800+0', '0+0'].includes(
+                  tc.id,
+                ),
+              ).map((tc) => (
+                <button
+                  key={tc.id}
+                  type="button"
+                  onClick={() => setTimeControlId(tc.id)}
+                  className={clsx(
+                    'rounded-[var(--radius-sm)] border px-2 py-2 text-xs font-medium transition-colors',
+                    timeControlId === tc.id
+                      ? 'border-accent bg-accent/15 text-ink'
+                      : 'border-line text-muted hover:bg-surface-hover',
+                  )}
+                >
+                  <span className="block">{SPEED_LABELS[tc.category].icon}</span>
+                  {tc.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div className="p-4 [@media(max-height:820px)]:p-2">
-          <SectionTitle>Pendant la partie</SectionTitle>
+          <div className="p-4 [@media(max-height:820px)]:p-2">
+            <SectionTitle>Pendant la partie</SectionTitle>
 
-          {/* ── Partie classée ────────────────────────────────────────────
+            {/* ── Partie classée ────────────────────────────────────────────
               En tête des réglages de partie, parce qu'elle commande les deux
               autres : cochée, elle retire le mode commenté, l'indice et
               l'annulation. Ce n'est pas une punition, c'est ce qui rend le
@@ -1016,53 +1029,52 @@ function SetupScreen({
 
               Elle est éteinte par défaut : on vient d'abord s'entraîner, et
               s'entraîner suppose de pouvoir revenir en arrière. */}
-          <Toggle
-            label="Partie classée"
-            description={
-              connecte === false
-                ? 'Demande un compte : c’est lui qui porte le classement.'
-                : 'Le résultat met à jour ton classement dans cette cadence. En échange, pas d’annulation, pas d’indice, pas de commentaires.'
-            }
-            checked={classee && connecte !== false}
-            disabled={connecte === false}
-            onChange={setClassee}
-          />
+            <Toggle
+              label="Partie classée"
+              description={
+                connecte === false
+                  ? 'Demande un compte : c’est lui qui porte le classement.'
+                  : 'Le résultat met à jour ton classement dans cette cadence. En échange, pas d’annulation, pas d’indice, pas de commentaires.'
+              }
+              checked={classee && connecte !== false}
+              disabled={connecte === false}
+              onChange={setClassee}
+            />
 
-          <div className="mt-3.5 border-t border-line/60 pt-3.5">
-          {/* Descriptions resserrées. Elles faisaient trois lignes chacune et
+            <div className="mt-3.5 border-t border-line/60 pt-3.5">
+              {/* Descriptions resserrées. Elles faisaient trois lignes chacune et
               expliquaient le mode commenté deux fois — une fois pour l'activer,
               une fois pour l'étendre. Un réglage qu'on lit plus longtemps qu'on
               ne met à le comprendre est mal écrit. */}
-            <Toggle
-              label="Commenter chaque coup"
-              description={
-                classee
-                  ? 'Indisponible en partie classée : le commentaire montre le meilleur coup.'
-                  : 'Ce que vaut ton coup, les meilleures options et leur raison, lus à voix haute. Recommandé pour débuter.'
-              }
-              checked={commentaryMode && !classee}
-              disabled={classee}
-              onChange={(valeur) => setPreference('commentaryMode', valeur)}
-            />
+              <Toggle
+                label="Commenter chaque coup"
+                description={
+                  classee
+                    ? 'Indisponible en partie classée : le commentaire montre le meilleur coup.'
+                    : 'Ce que vaut ton coup, les meilleures options et leur raison, lus à voix haute. Recommandé pour débuter.'
+                }
+                checked={commentaryMode && !classee}
+                disabled={classee}
+                onChange={(valeur) => setPreference('commentaryMode', valeur)}
+              />
 
-          {/* Subordonné : il n'apparaît qu'une fois le mode commenté actif.
+              {/* Subordonné : il n'apparaît qu'une fois le mode commenté actif.
               Le proposer avant reviendrait à offrir le détail d'une chose qu'on
               n'a pas encore choisie. */}
-          {commentaryMode && !classee && (
-            <div className="mt-3.5 border-t border-line/60 pt-3.5">
-              <Toggle
-                label="Commenter aussi l’adversaire"
-                description="Deux fois plus de commentaires. Pour décortiquer une partie plutôt que la jouer."
-                checked={commentaryOpponent}
-                onChange={(valeur) => setPreference('commentaryOpponent', valeur)}
-              />
+              {commentaryMode && !classee && (
+                <div className="mt-3.5 border-t border-line/60 pt-3.5">
+                  <Toggle
+                    label="Commenter aussi l’adversaire"
+                    description="Deux fois plus de commentaires. Pour décortiquer une partie plutôt que la jouer."
+                    checked={commentaryOpponent}
+                    onChange={(valeur) => setPreference('commentaryOpponent', valeur)}
+                  />
+                </div>
+              )}
             </div>
-          )}
           </div>
-        </div>
-      </Card>
+        </Card>
       </div>
-
 
       <Button
         variant="primary"
@@ -1142,7 +1154,9 @@ function GameScreen({
 
   const timeControl = useMemo<TimeControl>(() => {
     const found = TIME_CONTROLS.find((tc) => tc.id === timeControlId)
-    return found ? { initial: found.initial, increment: found.increment } : { initial: 600, increment: 5 }
+    return found
+      ? { initial: found.initial, increment: found.increment }
+      : { initial: 600, increment: 5 }
   }, [timeControlId])
   const timed = timeControl.initial > 0
 
@@ -1213,9 +1227,7 @@ function GameScreen({
       playMoveSound(move)
       setHintArrow(null)
       if (timed) {
-        setClock((current) =>
-          applyMove(current, move.color, Date.now(), current.running === null),
-        )
+        setClock((current) => applyMove(current, move.color, Date.now(), current.running === null))
       }
     },
     onGameOver: (status, result) => {
@@ -1297,7 +1309,11 @@ function GameScreen({
 
   // Le mode commenté analyse la position **d'avant** le coup en MultiPV : c'est
   // là que se trouvent les options qu'on avait et qu'on n'a pas vues.
-  const { commentary, loading: coachLoading, history: commentaryHistory } = useLiveCommentary({
+  const {
+    commentary,
+    loading: coachLoading,
+    history: commentaryHistory,
+  } = useLiveCommentary({
     move: lastPlayerMove,
     lecteur: playerColor,
     // Le niveau de l'adversaire choisi sert de repère pour savoir s'il faut
@@ -1438,7 +1454,11 @@ function GameScreen({
     après case, c'est la moitié du temps passé à regarder l'échiquier ne rien
     faire.
   */
-  const { precoup, enregistrer: enregistrerPrecoup, annuler: annulerPrecoup } = usePrecoup({
+  const {
+    precoup,
+    enregistrer: enregistrerPrecoup,
+    annuler: annulerPrecoup,
+  } = usePrecoup({
     fen: state.currentFen,
     couleur: playerColor,
     // `gameOver` n'est calculé que plus bas ; ses deux composantes, elles, sont
@@ -1607,7 +1627,6 @@ function GameScreen({
   const reviewedMove = reviewing ? (state.moves[state.cursor] ?? null) : null
   const formatMove = useSan()
 
-
   // Un commentaire reste lisible longtemps après le coup qu'il décrit, mais ses
   // flèches, elles, deviennent fausses dès le coup suivant : elles pointeraient
   // des cases qui ont changé. On les efface donc quand la partie a avancé, sans
@@ -1623,9 +1642,7 @@ function GameScreen({
     commentary != null &&
     commentary.fenAfter === lastPlayerMove?.after &&
     (studyPause ? awaitingReview : true)
-  const reviewedCommentary = reviewedMove
-    ? (commentaryHistory[reviewedMove.after] ?? null)
-    : null
+  const reviewedCommentary = reviewedMove ? (commentaryHistory[reviewedMove.after] ?? null) : null
 
   // Le commentaire porte-t-il encore sur ce qu'on a sous les yeux ? Sans la
   // pause d'étude, l'adversaire répond avant qu'on ait fini de lire, et le
@@ -1699,9 +1716,7 @@ function GameScreen({
     (arrow: Arrow) => {
       const source = reviewedMove ? reviewedCommentary : commentary
       const uci = `${arrow.from}${arrow.to}`
-      const alternative = source?.alternatives.find((candidate) =>
-        candidate.uci.startsWith(uci),
-      )
+      const alternative = source?.alternatives.find((candidate) => candidate.uci.startsWith(uci))
       if (!alternative) return
 
       const san = prefs.locale === 'fr' ? sanToFrench(alternative.san) : alternative.san
@@ -1829,7 +1844,9 @@ function GameScreen({
           active={state.turn === botColor && !gameOver}
           captured={state.material[botColor]}
           materialLead={
-            botColor === 'w' ? Math.max(0, state.material.balance) : Math.max(0, -state.material.balance)
+            botColor === 'w'
+              ? Math.max(0, state.material.balance)
+              : Math.max(0, -state.material.balance)
           }
           status={
             botPlayer.loading
@@ -1856,7 +1873,6 @@ function GameScreen({
           )}
 
           <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-
             <div className="my-1.5 flex min-h-0 flex-1 items-center justify-center">
               <ChessBoard
                 // La colonne a une hauteur imposée : c'est elle qui borne
@@ -1911,7 +1927,17 @@ function GameScreen({
               <div className="mb-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2 text-[13px]">
                 <Eye size={15} className="shrink-0 text-accent" aria-hidden />
                 <span className="min-w-0 flex-1 leading-snug text-muted">
-                  Tu revois la partie{reviewedMove ? <> — coup <strong className="font-semibold text-ink">{formatMove(reviewedMove.san)}</strong></> : null}. Rien n’est effacé.
+                  Tu revois la partie
+                  {reviewedMove ? (
+                    <>
+                      {' '}
+                      — coup{' '}
+                      <strong className="font-semibold text-ink">
+                        {formatMove(reviewedMove.san)}
+                      </strong>
+                    </>
+                  ) : null}
+                  . Rien n’est effacé.
                 </span>
                 <button
                   type="button"
@@ -2049,18 +2075,18 @@ function GameScreen({
                 et une case cochée avant la partie vaut mieux qu'un bouton
                 grisé qu'on regarde pendant toute la partie. */}
             {!classee && (
-            <Button
-              size="sm"
-              variant="ghost"
-              icon={<Undo2 size={14} />}
-              onClick={handleUndo}
-              disabled={state.moves.length === 0}
-              // « Reprendre » est le terme du jeu, mais il se lit aussi
-              // « reprendre la partie ». On dit donc ce que fait le bouton.
-              title="Annule ton dernier coup et la réponse de l’ordinateur"
-            >
-              <span className="max-sm:hidden">Annuler</span>
-            </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={<Undo2 size={14} />}
+                onClick={handleUndo}
+                disabled={state.moves.length === 0}
+                // « Reprendre » est le terme du jeu, mais il se lit aussi
+                // « reprendre la partie ». On dit donc ce que fait le bouton.
+                title="Annule ton dernier coup et la réponse de l’ordinateur"
+              >
+                <span className="max-sm:hidden">Annuler</span>
+              </Button>
             )}
 
             {/* Ne restent au menu que les gestes rares ou définitifs.
@@ -2144,12 +2170,7 @@ function GameScreen({
               <ViewToggle className="ml-auto" />
             </div>
 
-            <RubanCoups
-              coups={rubanCoups}
-              cursor={state.cursor}
-              onSeek={goTo}
-              className="mt-1"
-            />
+            <RubanCoups coups={rubanCoups} cursor={state.cursor} onSeek={goTo} className="mt-1" />
 
             <div className="mt-1 flex items-stretch justify-around gap-1 border-t border-line/60 pt-1">
               <Menu
@@ -2254,7 +2275,7 @@ function GameScreen({
               « classée » vient de garantir. */}
           {commentaryMode ? (
             <CommentaryPanel
-                legende={arrowLegend}
+              legende={arrowLegend}
               voix={commentaryMode}
               // En revue, on montre le commentaire du coup consulté plutôt que
               // celui du dernier coup joué : sinon le texte et l'échiquier
@@ -2272,11 +2293,7 @@ function GameScreen({
               onDesactiver={couperLeCommentaire}
             />
           ) : classee ? null : (
-            <PourquoiPanel
-              move={lastPlayed}
-              book={book}
-              openingName={opening?.name ?? null}
-            />
+            <PourquoiPanel move={lastPlayed} book={book} openingName={opening?.name ?? null} />
           )}
 
           <ApprofondirCoup
@@ -2433,10 +2450,7 @@ function LegendeDuVerdict({
 
   return (
     <div className="mb-1.5">
-      <p
-        className="flex items-baseline gap-1.5 text-[13px] leading-snug"
-        style={{ color: teinte }}
-      >
+      <p className="flex items-baseline gap-1.5 text-[13px] leading-snug" style={{ color: teinte }}>
         <span aria-hidden>{style.glyph}</span>
         <span className="font-semibold">{style.label.fr}</span>
         <span className="hidden min-w-0 flex-1 truncate font-normal text-muted sm:inline">

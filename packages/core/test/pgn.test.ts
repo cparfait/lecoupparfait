@@ -117,9 +117,7 @@ test('écrire puis relire rend exactement les mêmes coups', () => {
 test('le roque traverse l’aller-retour', () => {
   // Le roque est le coup qui casse le plus souvent les analyseurs maison :
   // `O-O` avec la lettre O, `0-0` avec le chiffre, et deux longueurs.
-  const partie = parsePgn(
-    `[Result "*"]\n\n1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. O-O Nf6 5. Nc3 O-O *`,
-  )
+  const partie = parsePgn(`[Result "*"]\n\n1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. O-O Nf6 5. Nc3 O-O *`)
   assert.ok(partie)
   assert.ok(partie.moves.includes('O-O'))
   assert.equal(partie.moves.filter((san) => san === 'O-O').length, 2)

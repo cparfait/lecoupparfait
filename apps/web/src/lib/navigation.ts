@@ -85,11 +85,21 @@ export const SECTIONS: SectionNav[] = [
       // D'abord les deux façons de jouer une partie tout de suite : contre la
       // machine, contre quelqu'un. Ce sont elles qu'on vient chercher, et elles
       // ne demandent rien.
-      { href: '/jouer/ordinateur', labelKey: 'nav.vsComputer', icon: Monitor, hintKey: 'nav.vsComputerHint' },
+      {
+        href: '/jouer/ordinateur',
+        labelKey: 'nav.vsComputer',
+        icon: Monitor,
+        hintKey: 'nav.vsComputerHint',
+      },
       // « Contre quelqu'un » couvre les deux rythmes : le lien en temps réel et
       // la correspondance sur plusieurs jours. Ils étaient séparés, ce qui
       // faisait choisir le mécanisme avant la cadence.
-      { href: '/jouer/ami', labelKey: 'nav.vsFriend', icon: Handshake, hintKey: 'nav.vsFriendHint' },
+      {
+        href: '/jouer/ami',
+        labelKey: 'nav.vsFriend',
+        icon: Handshake,
+        hintKey: 'nav.vsFriendHint',
+      },
       // Puis la carrière, et non plus en tête.
       //
       // Elle y était au motif qu'elle répond à « par quoi je commence ? ». Ce
@@ -99,7 +109,12 @@ export const SECTIONS: SectionNav[] = [
       // projet, où l'essentiel s'utilise sans rien créer. Elle passe donc
       // derrière les deux façons de jouer une partie tout de suite.
       { href: '/carriere', labelKey: 'nav.career', icon: Trophy, hintKey: 'nav.careerHint' },
-      { href: '/jouer/local', labelKey: 'nav.localGame', icon: Users, hintKey: 'nav.localGameHint' },
+      {
+        href: '/jouer/local',
+        labelKey: 'nav.localGame',
+        icon: Users,
+        hintKey: 'nav.localGameHint',
+      },
       { href: '/tournois', labelKey: 'nav.tournaments', icon: Trophy },
       { href: '/jouer/regarder', labelKey: 'nav.watch', icon: Eye, hintKey: 'nav.watchHint' },
     ],
@@ -111,11 +126,26 @@ export const SECTIONS: SectionNav[] = [
     icon: GraduationCap,
     sommaire: '/apprendre',
     entrees: [
-      { href: '/apprendre', labelKey: 'nav.lessons', icon: GraduationCap, hintKey: 'nav.lessonsHint' },
-      { href: '/ouvertures', labelKey: 'nav.openings', icon: BookOpen, hintKey: 'nav.openingsHint' },
+      {
+        href: '/apprendre',
+        labelKey: 'nav.lessons',
+        icon: GraduationCap,
+        hintKey: 'nav.lessonsHint',
+      },
+      {
+        href: '/ouvertures',
+        labelKey: 'nav.openings',
+        icon: BookOpen,
+        hintKey: 'nav.openingsHint',
+      },
       { href: '/finales', labelKey: 'nav.endgames', icon: Crown, hintKey: 'nav.endgamesHint' },
       { href: '/vision', labelKey: 'nav.vision', icon: Eye, hintKey: 'nav.visionHint' },
-      { href: '/glossaire', labelKey: 'nav.glossary', icon: BookMarked, hintKey: 'nav.glossaryHint' },
+      {
+        href: '/glossaire',
+        labelKey: 'nav.glossary',
+        icon: BookMarked,
+        hintKey: 'nav.glossaryHint',
+      },
     ],
   },
   {
@@ -126,8 +156,18 @@ export const SECTIONS: SectionNav[] = [
     sommaire: '/puzzles',
     entrees: [
       { href: '/puzzles', labelKey: 'nav.puzzles', icon: Puzzle, hintKey: 'nav.puzzlesHint' },
-      { href: '/puzzles/rush', labelKey: 'nav.puzzleRush', icon: Timer, hintKey: 'nav.puzzleRushHint' },
-      { href: '/puzzles?defi=1', labelKey: 'nav.dailyChallenge', icon: Zap, hintKey: 'nav.dailyChallengeHint' },
+      {
+        href: '/puzzles/rush',
+        labelKey: 'nav.puzzleRush',
+        icon: Timer,
+        hintKey: 'nav.puzzleRushHint',
+      },
+      {
+        href: '/puzzles?defi=1',
+        labelKey: 'nav.dailyChallenge',
+        icon: Zap,
+        hintKey: 'nav.dailyChallengeHint',
+      },
     ],
   },
   {
@@ -137,7 +177,12 @@ export const SECTIONS: SectionNav[] = [
     icon: Gauge,
     sommaire: '/analyse',
     entrees: [
-      { href: '/analyse', labelKey: 'nav.analyseGame', icon: Gauge, hintKey: 'nav.analyseGameHint' },
+      {
+        href: '/analyse',
+        labelKey: 'nav.analyseGame',
+        icon: Gauge,
+        hintKey: 'nav.analyseGameHint',
+      },
       { href: '/etudes', labelKey: 'nav.studies', icon: BookMarked, hintKey: 'nav.studiesHint' },
       { href: '/editeur', labelKey: 'nav.editor', icon: Grid3x3, hintKey: 'nav.editorHint' },
     ],
@@ -153,7 +198,12 @@ export const SECTIONS: SectionNav[] = [
       // La boîte des correspondances : une liste d'obligations, pas un mode de
       // jeu. Elle est ici parce qu'elle concerne des gens, pas une façon de
       // jouer — et un compteur la signale dans l'en-tête quand c'est ton tour.
-      { href: '/correspondance', labelKey: 'nav.correspondence', icon: Mail, hintKey: 'nav.correspondenceHint' },
+      {
+        href: '/correspondance',
+        labelKey: 'nav.correspondence',
+        icon: Mail,
+        hintKey: 'nav.correspondenceHint',
+      },
       { href: '/statistiques', labelKey: 'nav.stats', icon: BarChart3 },
     ],
   },

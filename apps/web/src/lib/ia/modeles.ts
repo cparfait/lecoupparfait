@@ -53,7 +53,11 @@ export async function fetchModels(provider: AIProvider, apiKey: string): Promise
   }
 
   try {
-    const brut = await appelModeles(provider, provider.modelsUrl(apiKey), provider.buildHeaders(apiKey))
+    const brut = await appelModeles(
+      provider,
+      provider.modelsUrl(apiKey),
+      provider.buildHeaders(apiKey),
+    )
     const modeles = trierParRecence(provider.parseModels(brut))
     if (modeles.length > 0) {
       ecrireCache(provider.id, modeles)

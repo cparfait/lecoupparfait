@@ -61,12 +61,7 @@ export interface AIProvider {
   /** En-têtes HTTP (Authorization, Content-Type, etc.). */
   buildHeaders(apiKey: string): Array<[string, string]>
   /** Corps JSON de la requête chat. `stream` active le flux côté fournisseur. */
-  buildBody(
-    messages: AIMessage[],
-    model: string,
-    maxTokens: number,
-    stream?: boolean,
-  ): unknown
+  buildBody(messages: AIMessage[], model: string, maxTokens: number, stream?: boolean): unknown
 
   /** Extrait le texte de la réponse chat (hors flux). */
   parseResponse(raw: unknown): string

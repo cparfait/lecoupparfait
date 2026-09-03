@@ -67,13 +67,7 @@ export interface UseLiveGameOptions {
   token?: string | null
 }
 
-export function useLiveGame({
-  slug,
-  guestName,
-  timeControl,
-  rated,
-  token,
-}: UseLiveGameOptions) {
+export function useLiveGame({ slug, guestName, timeControl, rated, token }: UseLiveGameOptions) {
   const socketRef = useRef<Socket | null>(null)
   const [connection, setConnection] = useState<ConnectionState>('connecting')
   const [color, setColor] = useState<Color | null>(null)

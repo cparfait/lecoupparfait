@@ -119,13 +119,13 @@ function pickVoice(locale: 'fr' | 'en', preferred: string | null): SpeechSynthes
   }
 
   const prefix = locale === 'fr' ? 'fr' : 'en'
-  const candidates = cachedVoices.filter((voice) =>
-    voice.lang.toLowerCase().startsWith(prefix),
-  )
+  const candidates = cachedVoices.filter((voice) => voice.lang.toLowerCase().startsWith(prefix))
   if (candidates.length === 0) return null
 
   return (
-    candidates.find((voice) => voice.localService && /premium|enhanced|neural|natural/i.test(voice.name)) ??
+    candidates.find(
+      (voice) => voice.localService && /premium|enhanced|neural|natural/i.test(voice.name),
+    ) ??
     candidates.find((voice) => voice.localService) ??
     candidates[0]!
   )
@@ -496,7 +496,10 @@ function fetchClip(text: string): Promise<string> {
   if (clips.size > CLIP_CACHE) {
     const oldest = clips.keys().next().value
     if (oldest !== undefined) {
-      void clips.get(oldest)?.then((url) => URL.revokeObjectURL(url)).catch(() => undefined)
+      void clips
+        .get(oldest)
+        ?.then((url) => URL.revokeObjectURL(url))
+        .catch(() => undefined)
       clips.delete(oldest)
     }
   }
@@ -673,8 +676,6 @@ export async function testVoice(
     engine: 'system',
     voice: fallback?.name ?? 'voix par défaut du système',
     reason:
-      prefs.voiceEngine === 'neural'
-        ? 'Le serveur de voix neuronale ne répond pas.'
-        : undefined,
+      prefs.voiceEngine === 'neural' ? 'Le serveur de voix neuronale ne répond pas.' : undefined,
   }
 }

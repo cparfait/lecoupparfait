@@ -24,9 +24,8 @@
  * Usage :  node scripts/check-cadences.mjs
  */
 
-const { TIME_CONTROLS, normalizeTimeControlId, parseTimeControl } = await import(
-  '../packages/core/src/clock.ts'
-)
+const { TIME_CONTROLS, normalizeTimeControlId, parseTimeControl } =
+  await import('../packages/core/src/clock.ts')
 
 let checks = 0
 let failures = 0

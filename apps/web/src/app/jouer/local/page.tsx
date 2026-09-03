@@ -218,7 +218,7 @@ export default function LocalGamePage() {
             lastMove={state.lastMove}
             dernierCoupSan={state.moves[state.moves.length - 1]?.san ?? null}
             checkSquare={state.checkSquare}
-                checkmate={state.status === 'checkmate'}
+            checkmate={state.status === 'checkmate'}
             arrows={arrows}
             highlights={commentaryMode ? (commentary?.highlights ?? []) : []}
           />

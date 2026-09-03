@@ -99,11 +99,7 @@ console.log('\nValidation des coups')
 second.errors.length = 0
 second.socket.emit('move', { from: 'e7', to: 'e5' })
 await wait(400)
-check(
-  'un coup joué hors de son tour est refusé',
-  second.errors.length > 0,
-  second.errors[0],
-)
+check('un coup joué hors de son tour est refusé', second.errors.length > 0, second.errors[0])
 
 first.errors.length = 0
 first.socket.emit('move', { from: 'e2', to: 'e9' })
@@ -135,7 +131,11 @@ check(
   `${finalSnapshot?.moves.length} coups : ${finalSnapshot?.moves.join(' ')}`,
 )
 check('la partie est déclarée matée', finalSnapshot?.status === 'checkmate', finalSnapshot?.status)
-check('le résultat est une victoire des Blancs', finalSnapshot?.result === '1-0', finalSnapshot?.result)
+check(
+  'le résultat est une victoire des Blancs',
+  finalSnapshot?.result === '1-0',
+  finalSnapshot?.result,
+)
 
 // ── Pendules ────────────────────────────────────────────────────────────────
 console.log('\nPendules')
@@ -152,10 +152,7 @@ if (clock) {
 
 // ── Les deux joueurs voient la même chose ───────────────────────────────────
 console.log('\nSynchronisation')
-check(
-  'les deux joueurs partagent la même position',
-  first.snapshot?.fen === second.snapshot?.fen,
-)
+check('les deux joueurs partagent la même position', first.snapshot?.fen === second.snapshot?.fen)
 check(
   'les deux joueurs voient le même résultat',
   first.snapshot?.result === second.snapshot?.result,
@@ -164,5 +161,7 @@ check(
 white.socket.disconnect()
 black.socket.disconnect()
 
-console.log(`\n${failures === 0 ? '✓ Tout est conforme.' : `✗ ${failures} vérification(s) en échec.`}`)
+console.log(
+  `\n${failures === 0 ? '✓ Tout est conforme.' : `✗ ${failures} vérification(s) en échec.`}`,
+)
 process.exit(failures === 0 ? 0 : 1)
