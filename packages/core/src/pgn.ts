@@ -13,7 +13,6 @@
 
 import { Chess } from 'chess.js'
 import { QUALITY_STYLES } from './classify.ts'
-import { formatScore } from './eval.ts'
 import { sanToFrench } from './explain.ts'
 import type { AnalysedMove, GameResult, TimeControl } from './types.ts'
 

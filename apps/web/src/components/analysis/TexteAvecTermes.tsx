@@ -17,7 +17,7 @@
  * fois se transformerait en champ de liens, et l'on cesserait de lire.
  */
 
-import { useMemo, type ReactNode } from 'react'
+import { useMemo } from 'react'
 import { motifGlossary } from '@coupparfait/core'
 import { TERMS } from '@/lib/glossaire.ts'
 

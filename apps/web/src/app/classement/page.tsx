@@ -16,7 +16,7 @@ import { Medal, Trophy } from 'lucide-react'
 import clsx from 'clsx'
 import { PlayerSearch } from '@/components/social/PlayerSearch.tsx'
 import { SPEED_LABELS } from '@coupparfait/core'
-import { Card, Chip, EmptyState, Skeleton } from '@/components/ui/index.tsx'
+import { Card, EmptyState, Skeleton } from '@/components/ui/index.tsx'
 
 interface LeaderboardPlayer {
   rank: number

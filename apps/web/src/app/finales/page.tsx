@@ -14,8 +14,7 @@
  * Positions issues de supertorpe/chessendgametraining, sous licence GPL-3.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import Link from 'next/link'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ArrowLeft,
   Check,
@@ -27,8 +26,7 @@ import {
   Trophy,
 } from 'lucide-react'
 import clsx from 'clsx'
-import { Chess } from 'chess.js'
-import type { Color, PieceSymbol, Square } from 'chess.js'
+import type { Color } from 'chess.js'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, Card, Chip, EmptyState, Spinner } from '@/components/ui/index.tsx'
 import {

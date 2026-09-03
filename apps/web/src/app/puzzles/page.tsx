@@ -24,7 +24,6 @@ import {
   Flame,
   Home,
   Swords,
-  Loader2,
   RotateCcw,
   Target,
   Timer,

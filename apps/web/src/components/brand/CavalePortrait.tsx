@@ -30,7 +30,7 @@
  *     échiquier ; une sculpture en fond ne ferait que gêner la lecture.
  */
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
 import { usePreferences } from '@/lib/store/preferences.ts'
 

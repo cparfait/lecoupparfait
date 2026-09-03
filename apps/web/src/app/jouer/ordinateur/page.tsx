@@ -16,14 +16,12 @@ import {
   Check,
   Eye,
   Flag,
-  Handshake,
   LayoutGrid,
   Lightbulb,
   MoreHorizontal,
   Play,
   RefreshCw,
   Trophy,
-  RotateCcw,
   Undo2,
 } from 'lucide-react'
 import clsx from 'clsx'
@@ -49,7 +47,6 @@ import {
   normalizeTimeControlId,
   sanToFrench,
   remainingAt,
-  speedCategory,
   stopClock,
   type ClockState,
   type GameResult,
@@ -109,7 +106,6 @@ import {
 } from '@/lib/carriere/useCarriere.ts'
 import { deposerResultat } from '@/lib/game/tournoiSolo.ts'
 import {
-  CHAPITRES,
   QUALITY_STYLES,
   chapitre as chapitreCarriere,
   niveauEffectif,
@@ -296,7 +292,7 @@ export default function PlayComputerPage() {
       setPhase('playing')
       playSound('start')
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [])
 
   /**

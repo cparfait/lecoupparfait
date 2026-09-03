@@ -11,7 +11,7 @@
  */
 
 import { NextResponse } from 'next/server'
-import { desc, eq, getDb, gte, ratings, sql, users } from '@coupparfait/db'
+import { desc, eq, getDb, ratings, sql, users } from '@coupparfait/db'
 
 export const runtime = 'nodejs'
 export const revalidate = 60

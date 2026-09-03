@@ -16,7 +16,6 @@ import { Board2D } from '@/components/board/Board2D.tsx'
 import { PanneauIA } from '@/components/ia/PanneauIA.tsx'
 import { ReglageInstallation } from '@/components/settings/ReglageInstallation.tsx'
 import { ReglageNotifications } from '@/components/settings/ReglageNotifications.tsx'
-import { BOARD_SKINS } from '@/components/board/boardKit.ts'
 import {
   Button,
   Card,

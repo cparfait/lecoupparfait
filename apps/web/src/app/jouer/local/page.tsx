@@ -28,7 +28,7 @@
 const PAUSE_AVANT_ROTATION = 900
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Flag, RefreshCw, RotateCcw, Undo2 } from 'lucide-react'
+import { RefreshCw, RotateCcw, Undo2 } from 'lucide-react'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { ChessBoard, ViewToggle } from '@/components/board/ChessBoard.tsx'
 import { PhysicalBoardPanel } from '@/components/board/PhysicalBoardPanel.tsx'

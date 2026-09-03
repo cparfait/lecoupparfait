@@ -1,0 +1,10 @@
+node_modules
+.next
+dist
+data
+# Copies de travail d'un agent : des doubles du dépôt, pas des fichiers du dépôt.
+.claude
+apps/web/public
+packages/db/migrations
+packages/core/src/data
+package-lock.json

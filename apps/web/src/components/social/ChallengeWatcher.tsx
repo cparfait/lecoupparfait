@@ -199,7 +199,7 @@ export function ChallengeWatcher() {
               de tourner. On le dit avant, pas après. */}
           {enPartie && (
             <p className="mt-0.5 text-[12px] font-medium text-[var(--q-inaccuracy)]">
-              Tu joues une partie : accepter t'emmène ailleurs.
+              Tu joues une partie : accepter t’emmène ailleurs.
             </p>
           )}
         </div>

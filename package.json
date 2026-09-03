@@ -45,9 +45,17 @@
     "data:opening-stats": "node scripts/build-opening-stats.mjs",
     "data:evals": "node scripts/import-evals.mjs",
     "voice:install": "node scripts/install-piper.mjs",
-    "engine:install": "node scripts/install-stockfish.mjs"
+    "engine:install": "node scripts/install-stockfish.mjs",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "typescript": "5.9.3"
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.4",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "prettier": "^3.9.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.69.0"
   }
 }

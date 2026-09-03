@@ -22,7 +22,6 @@ import {
   LayoutGrid,
   Loader2,
   MessageSquare,
-  RotateCcw,
   Send,
   Swords,
   Undo2,

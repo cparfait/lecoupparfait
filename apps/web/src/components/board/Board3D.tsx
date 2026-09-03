@@ -25,7 +25,6 @@ import * as THREE from 'three'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import {
   MATERIALS,
-  PIECE_HEIGHTS,
   pieceGeometry,
   type Piece3DType,
 } from './pieceGeometry.ts'

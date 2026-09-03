@@ -13,12 +13,12 @@
  * Le jeu de données compte 3 810 ouvertures nommées, sous licence CC0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { BookOpen, RotateCcw, Search, Undo2 } from 'lucide-react'
 import clsx from 'clsx'
 import { Chess } from 'chess.js'
 import type { PieceSymbol, Square } from 'chess.js'
-import { ECO_VOLUMES, type OpeningMatch } from '@coupparfait/core'
+import { ECO_VOLUMES } from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, Card, Chip, EmptyState, Spinner } from '@/components/ui/index.tsx'
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'

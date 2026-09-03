@@ -13,7 +13,7 @@
  */
 
 import { NextResponse } from 'next/server'
-import type { PartieImportee, SourceEnLigne } from '@/lib/import/enligne.ts'
+import type { PartieImportee } from '@/lib/import/enligne.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

@@ -16,7 +16,7 @@
 
 import { randomBytes, scrypt as scryptCallback, timingSafeEqual, createHash } from 'node:crypto'
 import { promisify } from 'node:util'
-import { and, eq, gt, lt, sql } from 'drizzle-orm'
+import { and, eq, gt, lt } from 'drizzle-orm'
 import { getDb } from './index.ts'
 import { ratings, sessions, users, type User } from './schema.ts'
 

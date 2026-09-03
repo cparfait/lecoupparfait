@@ -145,6 +145,15 @@ export interface SpeakOptions {
   onStart?: () => void
 }
 
+/*
+  Cette référence n'est jamais relue, et elle doit exister quand même.
+
+  Chrome et Safari libèrent l'énoncé dès qu'il n'est plus référencé depuis le
+  script, ce qui coupe la phrase au milieu sur les textes longs — c'est le
+  défaut le plus connu de l'API de synthèse. La garder en vie est tout son
+  rôle. Un outil de relecture ne peut pas le deviner.
+*/
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let currentUtterance: SpeechSynthesisUtterance | null = null
 
 /**
@@ -401,7 +410,6 @@ export function isNeuralAvailable(): boolean {
  */
 async function speakNeural(text: string, options: SpeakOptions): Promise<void> {
   const token = speechToken
-  const prefs = getPreferences()
 
   if (neuralState !== 'ready') await loadNeuralVoices()
   if (token !== speechToken) return

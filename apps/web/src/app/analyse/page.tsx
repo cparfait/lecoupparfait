@@ -23,7 +23,6 @@ import {
   Gauge,
   Crown,
   Footprints,
-  Loader2,
   Sparkles,
   Trophy,
   Volume2,
@@ -38,9 +37,6 @@ import {
   explainRecommendedMove,
   formatPgnDate,
   formatScore,
-  gradePhases,
-  weakestPhase,
-  PHASE_LABELS,
   type FullGameReport,
   toPgn,
   type MoveQuality,
@@ -50,7 +46,7 @@ import { ANNOTATION_COLORS } from '@/components/board/boardKit.ts'
 import { EvalBar, EvalGraph } from '@/components/game/EvalBar.tsx'
 import { GameNav } from '@/components/game/GameNav.tsx'
 import { MoveList } from '@/components/game/MoveList.tsx'
-import { Button, ButtonLink, Card, Chip, SectionTitle, Spinner } from '@/components/ui/index.tsx'
+import { Button, ButtonLink, Card, Chip, SectionTitle } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import {
   parseAnalysisInput,
@@ -428,7 +424,9 @@ function ImportScreen({
   // Les réglages mémorisés n'arrivent qu'après le premier rendu : avant, les
   // pseudos sont vides et l'on croirait n'en connaître aucun.
   const prefsHydratees = usePreferences((state) => state.hydrated)
-  const [importOuvert, setImportOuvert] = useState(false)
+  // La valeur n'est lue nulle part — seul l'ouvrir a un effet, sur le volet
+  // qui se déplie tout seul quand un pseudo est déjà enregistré.
+  const [, setImportOuvert] = useState(false)
   const [serviceDemande, setServiceDemande] = useState<'chesscom' | 'lichess' | null>(null)
   useEffect(() => {
     if (!prefsHydratees) return
@@ -1821,7 +1819,6 @@ export function ReviewScreen({
 function AccuracySummary({
   report,
   noms,
-  issue,
 }: {
   report: FullGameReport
   noms: { w: string | null; b: string | null }

@@ -15,7 +15,7 @@
 
 import { createHash } from 'node:crypto'
 import { NextResponse } from 'next/server'
-import { and, desc, eq, getDb, savedAnalyses, sql } from '@coupparfait/db'
+import { desc, eq, getDb, savedAnalyses, sql } from '@coupparfait/db'
 import { getCurrentUser } from '@/lib/server/session.ts'
 
 export const runtime = 'nodejs'

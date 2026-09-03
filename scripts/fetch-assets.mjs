@@ -14,7 +14,7 @@
  * Usage :  node scripts/fetch-assets.mjs [--force]
  */
 
-import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync, existsSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 

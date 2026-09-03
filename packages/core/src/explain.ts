@@ -16,7 +16,6 @@
 import { Chess, SQUARES } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import {
-  COLOR_NAMES,
   PIECE_ARTICLE,
   PIECE_NAMES,
   opposite,
@@ -26,7 +25,7 @@ import {
 } from './board.ts'
 import { QUALITY_STYLES } from './classify.ts'
 import { detectMoveMotifs, detectPositionMotifs } from './motifs.ts'
-import { advantageLabel, formatScore } from './eval.ts'
+import { advantageLabel } from './eval.ts'
 import type { DetectedMotif, MotifId, MoveQuality, Score } from './types.ts'
 
 export type Locale = 'fr' | 'en'
@@ -353,14 +352,6 @@ export function spellSquare(square: string, locale: Locale): string {
   return locale === 'fr' ? `${file} ${rank}` : `${file} ${rank}`
 }
 
-function pieceName(type: PieceSymbol, locale: Locale): string {
-  return PIECE_NAMES[type][locale]
-}
-
-function colorName(color: Color, locale: Locale): string {
-  return COLOR_NAMES[color][locale]
-}
-
 /** « le cavalier », « la dame » — accord de l'article français. */
 function pieceWithArticle(type: PieceSymbol, locale: Locale): string {
   if (locale === 'en') return `the ${PIECE_NAMES[type].en}`
@@ -550,7 +541,7 @@ const MOTIFS_FR: Partial<Record<MotifId, MotifCopy>> = {
     name: 'Fourchette',
     definition:
       'Une seule pièce attaque simultanément deux cibles ou plus. Comme on ne peut sauver qu’une chose à la fois, on gagne l’autre.',
-    sentence: (m, ctx) => {
+    sentence: (m, _ctx) => {
       const type = (m.detail?.piece as PieceSymbol) ?? 'n'
       const count = Number(m.detail?.targetCount ?? 2)
       const targets = m.squares.slice(1).join(' et ')
@@ -597,7 +588,7 @@ const MOTIFS_FR: Partial<Record<MotifId, MotifCopy>> = {
     name: 'Élimination du défenseur',
     definition:
       'On capture ou on chasse la pièce qui défendait une cible, laquelle tombe au coup suivant.',
-    sentence: (m, ctx) =>
+    sentence: (m, _ctx) =>
       `Élimination du défenseur : la prise en ${m.squares[0]} retire le gardien de ${m.squares.slice(1).join(' et ')}, qui devient prenable.`,
   },
   overloadedPiece: {
@@ -1135,7 +1126,6 @@ export function explainMove(input: MoveExplanationInput): MoveExplanation {
   const fr = input.locale === 'fr'
   const board = new Chess(input.fenAfter, { skipValidation: true })
   const san = localiseSan(input.san, input.locale)
-  const style = QUALITY_STYLES[input.quality]
   const ctx: ExplainContext = {
     locale: input.locale,
     board,
