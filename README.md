@@ -296,6 +296,30 @@ Ce sont les alias déclarés sur la façade, et non les noms de service `web` et
 
 Puis renseigner `NEXT_PUBLIC_APP_URL` et `NEXT_PUBLIC_SERVER_URL` dans `.env`.
 
+### Mettre à jour
+
+Ce qui précède décrit l'installation initiale, qui n'a lieu qu'une fois. Pour
+les livraisons suivantes :
+
+```bash
+cd ~/docker/coupparfait
+./scripts/deployer.sh --web-seul     # une correction d'interface
+./scripts/deployer.sh                # web + serveur d'analyse
+./scripts/deployer.sh --migrer       # si la livraison contient des migrations
+```
+
+Le script sépare la construction — plusieurs minutes, pendant lesquelles
+l'ancienne version continue de servir — de la bascule, qui est la seule étape
+qui coupe, et qui dure quelques secondes. Il vérifie aussi ce qu'il a vraiment
+fait : un `git pull` qui ne ramène rien produit sinon un déploiement qui réussit
+sans rien déployer, en silence.
+
+`--web-seul` mérite d'être le réflexe : redémarrer `server` déconnecte toutes
+les parties en direct, puisque les salons vivent en mémoire.
+
+Détails, page d'attente pendant la bascule et règles sur les migrations :
+[`docs/deploiement.md`](docs/deploiement.md).
+
 ### Si quelque chose cloche
 
 | Symptôme                                              | Cause probable                                                                                                                                        |

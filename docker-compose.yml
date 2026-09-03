@@ -233,7 +233,15 @@ services:
           '-e',
           "fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
         ]
-      interval: 30s
+      # Dix secondes et non trente : `scripts/deployer.sh` attend la sonde pour
+      # déclarer la bascule terminée (`up -d --wait`), et l'attente ne peut pas
+      # être plus courte que l'intervalle. Une sonde qui coûte un `fetch` local
+      # peut se permettre d'être fréquente.
+      #
+      # `start_period` reste à 40s : le vivier Stockfish met un moment à
+      # s'ouvrir. Ce délai ne retarde rien — pendant cette fenêtre les échecs
+      # sont ignorés, mais un succès prend effet immédiatement.
+      interval: 10s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -297,7 +305,9 @@ services:
           '-e',
           "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
         ]
-      interval: 30s
+      # Même raison que pour `server` : c'est cette sonde qui dit à
+      # `scripts/deployer.sh` que la nouvelle version sert vraiment.
+      interval: 10s
       timeout: 10s
       retries: 3
       start_period: 30s

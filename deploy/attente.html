@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Cette page est servie SOUS l'adresse normale du site, avec un code 503.
+         Sans cette ligne, un moteur de recherche qui passe pendant les quelques
+         secondes d'une bascule retiendrait « Mise à jour en cours » comme étant
+         le contenu de la page d'accueil. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Le Coup Parfait — mise à jour en cours</title>
+
+    <!-- Aucune ressource externe : ni police distante, ni feuille de style, ni
+         image. Cette page est servie par Nginx Proxy Manager précisément quand
+         l'application ne répond plus ; elle ne peut donc dépendre de rien qui
+         vienne de l'application. Tout tient dans ce fichier. -->
+    <style>
+      :root {
+        --bg: #07070c;
+        --bg-elev: #0d0d17;
+        --border: rgb(255 255 255 / 0.09);
+        --text: #f2f1f8;
+        --text-muted: #a9a7bd;
+        --accent: #7c5cff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+        text-align: center;
+      }
+
+      .carte {
+        max-width: 34rem;
+        padding: 40px 32px;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        background: var(--bg-elev);
+        box-shadow:
+          0 0 0 1px rgb(124 92 255 / 0.25),
+          0 30px 80px -20px rgb(0 0 0 / 0.85);
+      }
+
+      .piece {
+        font-size: 56px;
+        line-height: 1;
+        display: block;
+        margin-bottom: 20px;
+        animation: bascule 2.4s ease-in-out infinite;
+      }
+
+      @keyframes bascule {
+        0%,
+        100% {
+          transform: translateY(0) rotate(-4deg);
+        }
+        50% {
+          transform: translateY(-10px) rotate(4deg);
+        }
+      }
+
+      /* Une animation permanente sur une page qu'on subit — on ne choisit pas
+         d'y arriver — est exactement le cas que ce réglage système existe pour
+         couvrir. */
+      @media (prefers-reduced-motion: reduce) {
+        .piece {
+          animation: none;
+        }
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(1.4rem, 4vw, 1.9rem);
+        font-weight: 650;
+        letter-spacing: -0.02em;
+      }
+
+      p {
+        margin: 0 0 8px;
+        color: var(--text-muted);
+      }
+
+      .detail {
+        margin-top: 24px;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        opacity: 0.75;
+      }
+
+      .point {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        margin-right: 7px;
+        border-radius: 50%;
+        background: var(--accent);
+        animation: pulse 1.4s ease-in-out infinite;
+        vertical-align: middle;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.35;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .point {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="carte">
+      <span class="piece" aria-hidden="true">♞</span>
+      <h1>Mise à jour en cours</h1>
+      <p>Le site revient dans quelques secondes.</p>
+      <p>Cette page se rechargera toute seule — inutile de l'actualiser.</p>
+
+      <p class="detail" role="status">
+        <span class="point" aria-hidden="true"></span>
+        <span id="etat">Nouvelle vérification dans un instant…</span>
+      </p>
+    </main>
+
+    <!-- Sans JavaScript, on retombe sur le rechargement périodique du
+         navigateur. Moins agréable — la page clignote toutes les cinq
+         secondes — mais l'attente se termine quand même toute seule. -->
+    <noscript>
+      <meta http-equiv="refresh" content="5" />
+    </noscript>
+
+    <script>
+      // On interroge une adresse légère plutôt que de recharger la page en
+      // boucle : tant que l'application ne répond pas, cela ne coûte rien, et
+      // le rechargement n'a lieu qu'UNE fois, quand elle répond vraiment.
+      //
+      // `cache: 'no-store'` n'est pas une précaution de principe : le
+      // navigateur a très envie de resservir la réponse en échec qu'il vient
+      // de mettre en cache, et la page attendrait alors indéfiniment.
+      const etat = document.getElementById('etat')
+      let essais = 0
+
+      async function verifier() {
+        essais++
+        try {
+          const reponse = await fetch('/api/health', { cache: 'no-store' })
+          if (reponse.ok) {
+            etat.textContent = 'De retour — rechargement…'
+            location.reload()
+            return
+          }
+        } catch {
+          // L'application ne répond pas encore : c'est le cas normal ici.
+        }
+        etat.textContent = `Toujours en cours (essai ${essais})…`
+        // On espace progressivement, sans jamais dépasser dix secondes : une
+        // bascule dure quelques secondes, mais si la mise à jour tourne mal,
+        // cette page peut rester ouverte longtemps sur beaucoup d'onglets.
+        setTimeout(verifier, Math.min(1000 + essais * 500, 10000))
+      }
+
+      setTimeout(verifier, 1500)
+    </script>
+  </body>
+</html>
