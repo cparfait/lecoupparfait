@@ -24,6 +24,7 @@ import {
 } from '@coupparfait/db/auth'
 import { avatarAuHasard, isKnownAvatar } from '@/lib/avatars.ts'
 import { courrielDisponible, resetMail, sendMail, verificationMail } from '@/lib/server/mailer.ts'
+import { estAdministrateur } from '@/lib/server/admin.ts'
 import { creerLimiteur } from '@/lib/server/limiteur.ts'
 import { endSession, getCurrentUser, startSession } from '@/lib/server/session.ts'
 
@@ -68,7 +69,15 @@ export async function GET() {
   // publique d'un joueur ne doit jamais laisser voir son adresse, ni même
   // qu'il en a une.
   const email = await emailStatus(user.userId)
-  return NextResponse.json({ user, email, courriel })
+
+  // `admin` sert à décider si l'en-tête montre la porte de l'administration.
+  // Il ne dit rien à personne d'autre : la réponse ne concerne que soi, et un
+  // visiteur ordinaire reçoit `false` — jamais la liste de ceux qui l'ont.
+  //
+  // Ce drapeau n'autorise rien. Chaque route d'administration revérifie de son
+  // côté et répond 404 : un champ JSON se retouche depuis la console du
+  // navigateur, et l'on ferait apparaître un menu, pas un droit.
+  return NextResponse.json({ user, email, courriel, admin: estAdministrateur(user) })
 }
 
 export async function POST(request: Request) {

@@ -51,6 +51,16 @@ let courriel: boolean | undefined = undefined
  * L'écran de profil refaisait la requête entière pour ce seul champ.
  */
 let adresse: StatutCourriel | null | undefined = undefined
+/**
+ * Le compte courant ouvre-t-il l'administration ?
+ *
+ * Rangé ici pour la troisième fois la même raison : `/api/auth` le renvoie
+ * déjà, et le demander ailleurs referait la requête entière. `false` par défaut
+ * plutôt qu'`undefined` — on n'affiche pas une porte réservée le temps de
+ * savoir, et la voir apparaître un instant chez un visiteur ordinaire suffirait
+ * à lui apprendre qu'elle existe.
+ */
+let administrateur = false
 let enCours: Promise<void> | null = null
 const abonnes = new Set<() => void>()
 
@@ -73,11 +83,19 @@ export function rafraichirIdentite(): Promise<void> {
   if (enCours) return enCours
   enCours = fetch('/api/auth')
     .then((reponse) => reponse.json())
-    .then((donnees: { user: Identite | null; courriel?: boolean; email?: StatutCourriel }) => {
-      identite = donnees.user
-      courriel = donnees.courriel ?? false
-      adresse = donnees.email ?? null
-    })
+    .then(
+      (donnees: {
+        user: Identite | null
+        courriel?: boolean
+        email?: StatutCourriel
+        admin?: boolean
+      }) => {
+        identite = donnees.user
+        courriel = donnees.courriel ?? false
+        adresse = donnees.email ?? null
+        administrateur = donnees.admin ?? false
+      },
+    )
     .catch(() => {
       // Serveur injoignable : on considère qu'il n'y a pas de session plutôt
       // que de rester indéfiniment dans l'état « on ne sait pas », qui
@@ -87,6 +105,7 @@ export function rafraichirIdentite(): Promise<void> {
       // courriel auprès d'un serveur qu'on ne joint pas.
       courriel = false
       adresse = null
+      administrateur = false
     })
     .finally(() => {
       enCours = null
@@ -138,6 +157,32 @@ const instantaneAdresseServeur = () => undefined
  */
 export function useStatutCourriel(): StatutCourriel | null | undefined {
   const valeur = useSyncExternalStore(souscrire, instantaneAdresse, instantaneAdresseServeur)
+  useEffect(() => {
+    void rafraichirIdentite()
+  }, [])
+  return valeur
+}
+
+const instantaneAdministrateur = () => administrateur
+/** Le serveur ne connaît pas la session au rendu : rien de réservé n'apparaît. */
+const instantaneAdministrateurServeur = () => false
+
+/**
+ * Le compte courant ouvre-t-il l'administration ?
+ *
+ * Sert à décider si la porte s'affiche, jamais à ouvrir quoi que ce soit :
+ * chaque route d'administration revérifie de son côté et répond 404. Forcer ce
+ * booléen dans la console ferait apparaître un lien, et rien derrière.
+ *
+ * Pas de troisième valeur ici, contrairement à l'identité : `false` tant qu'on
+ * ne sait pas. Le doute doit se résoudre du côté où l'on ne montre rien.
+ */
+export function useEstAdmin(): boolean {
+  const valeur = useSyncExternalStore(
+    souscrire,
+    instantaneAdministrateur,
+    instantaneAdministrateurServeur,
+  )
   useEffect(() => {
     void rafraichirIdentite()
   }, [])

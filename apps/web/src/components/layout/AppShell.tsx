@@ -29,6 +29,7 @@ import {
   Menu as MenuIcon,
   Scale,
   Settings,
+  ShieldCheck,
   X,
 } from 'lucide-react'
 import clsx from 'clsx'
@@ -41,7 +42,7 @@ import { Menu } from '@/components/ui/Menu.tsx'
 import { PorteDuCompte } from '@/components/compte/PorteDuCompte.tsx'
 import type { ReactNode } from 'react'
 import { useT } from '@/lib/i18n/index.tsx'
-import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { useEstAdmin, useIdentite } from '@/lib/auth/useIdentite.ts'
 import { avantagePour, type AvantageCompte } from '@/lib/compte/avantages.ts'
 import { RACCOURCIS_MOBILES, SECTIONS, sectionActive } from '@/lib/navigation.ts'
 
@@ -64,6 +65,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const t = useT()
   const [menuOpen, setMenuOpen] = useState(false)
   const identite = useIdentite()
+  const estAdmin = useEstAdmin()
   const [porte, setPorte] = useState<{ avantage: AvantageCompte; href: string } | null>(null)
 
   const intercepter = useCallback<Intercepteur>(
@@ -177,6 +179,30 @@ export function AppShell({ children }: { children: ReactNode }) {
                 et nommé. Deux chemins pour un choix qu'on fait une fois — et
                 celui-ci occupait une des cinq places de la barre sur
                 téléphone, là où elles se disputent la largeur. */}
+            {/* La porte de l'administration.
+
+                Elle n'apparaît que pour qui l'ouvre : `useEstAdmin` vaut `false`
+                tant qu'on ne sait pas, si bien qu'elle ne clignote jamais chez
+                un visiteur ordinaire. C'est la même règle que la page elle-même,
+                qui répond « cette page n'existe pas » plutôt que « tu n'as pas
+                le droit » — montrer une porte fermée apprend qu'il y en a une.
+
+                Elle ne donne aucun droit : chaque route revérifie, et forcer le
+                booléen depuis la console ferait apparaître un lien vers une page
+                introuvable. */}
+            {estAdmin && (
+              <Link
+                href="/admin"
+                // Masquée sous 640 px : la barre y tient déjà la pastille de
+                // série, l'engrenage et le compte, et le menu du bas porte la
+                // même entrée, nommée en toutes lettres.
+                className="hidden h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt sm:grid"
+                aria-label="Administration"
+                title="Administration"
+              >
+                <ShieldCheck size={17} aria-hidden />
+              </Link>
+            )}
             <Link
               href="/preferences"
               className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
@@ -401,6 +427,7 @@ function MobileMenu({
   onPorte: (porte: { avantage: AvantageCompte; href: string }) => void
 }) {
   const t = useT()
+  const estAdmin = useEstAdmin()
 
   return (
     <div className="animate-slide-up max-h-[70dvh] overflow-y-auto border-t border-line bg-[var(--bg-elev)] lg:hidden">
@@ -511,6 +538,10 @@ function MobileMenu({
           <div className="grid grid-cols-2 gap-1.5">
             {[
               { href: '/preferences', label: t('nav.settings'), icon: Settings },
+              // Sur téléphone, l'en-tête n'a pas la place d'une commande de
+              // plus : sans cette entrée, l'administration ne s'atteindrait
+              // qu'en écrivant l'adresse. Elle n'apparaît que pour qui l'ouvre.
+              ...(estAdmin ? [{ href: '/admin', label: 'Administration', icon: ShieldCheck }] : []),
               { href: '/a-propos', label: 'À propos', icon: Info },
               { href: '/credits', label: 'Crédits', icon: Scale },
             ].map((page) => {

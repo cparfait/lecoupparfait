@@ -24,7 +24,6 @@ import 'server-only'
  * la casse exacte de son propre pseudo serait une farce.
  */
 
-import { eq, getDb, users } from '@coupparfait/db'
 import type { SessionIdentity } from '@coupparfait/db/auth'
 import { getCurrentUser } from './session.ts'
 
@@ -44,6 +43,27 @@ export interface Administrateur extends SessionIdentity {
 }
 
 /**
+ * Une identité déjà résolue est-elle administratrice ?
+ *
+ * Sans requête, et c'est ce qui permet à `/api/auth` de le dire à chaque
+ * navigation sans rien coûter : le menu d'administration n'a pas à se payer un
+ * aller-retour en base à chaque page tournée.
+ *
+ * **Le rôle porté par l'identité est de confiance.** `resolveSession` ne le lit
+ * pas dans le cookie mais le relit dans `users` à chaque requête, par une
+ * jointure — et écarte au passage les comptes désactivés. Un rôle en cache
+ * pendant les trente jours d'une session resterait « admin » trente jours après
+ * une rétrogradation ; ce n'est pas le cas ici, et c'est pourquoi cette
+ * fonction peut se passer d'une seconde lecture.
+ */
+export function estAdministrateur(utilisateur: SessionIdentity | null): boolean {
+  if (!utilisateur) return false
+  return (
+    pseudosPrivilegies().has(utilisateur.username.toLowerCase()) || utilisateur.role === 'admin'
+  )
+}
+
+/**
  * L'administrateur courant, ou `null`.
  *
  * `null` couvre les trois cas — pas de session, session ordinaire, compte
@@ -54,26 +74,12 @@ export interface Administrateur extends SessionIdentity {
  */
 export async function getAdmin(): Promise<Administrateur | null> {
   const utilisateur = await getCurrentUser()
-  if (!utilisateur) return null
+  if (!utilisateur || !estAdministrateur(utilisateur)) return null
 
-  const privilegies = pseudosPrivilegies()
-  if (privilegies.has(utilisateur.username.toLowerCase())) {
-    return { ...utilisateur, parEnvironnement: true }
+  return {
+    ...utilisateur,
+    parEnvironnement: pseudosPrivilegies().has(utilisateur.username.toLowerCase()),
   }
-
-  // La session ne porte pas le rôle : on le relit, plutôt que de l'y ajouter.
-  // Un rôle mis en cache dans une session de trente jours resterait « admin »
-  // trente jours après une rétrogradation, ce qui est exactement le genre de
-  // délai qu'on ne veut pas sur un privilège.
-  const lignes = await getDb()
-    .select({ role: users.role, disabled: users.disabled })
-    .from(users)
-    .where(eq(users.id, utilisateur.userId))
-    .limit(1)
-
-  const ligne = lignes[0]
-  if (!ligne || ligne.disabled || ligne.role !== 'admin') return null
-  return { ...utilisateur, parEnvironnement: false }
 }
 
 /** Y a-t-il au moins un administrateur possible ? Sert au diagnostic. */
