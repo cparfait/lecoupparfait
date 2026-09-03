@@ -784,3 +784,58 @@ preuve exécutable ailleurs que sous Linux.
 `src` qui rendait le dossier `test/` intypable. Il ne servait à rien —
 `noEmit` est posé, il n'y a pas de sortie à cadrer.
 
+### Lot D — 3 septembre 2026
+
+**D1.** `error.tsx`, `not-found.tsx` et `global-error.tsx` à la racine de
+`app/`. Aucun `loading.tsx`, conformément au document : aucune page n'attend
+de données côté serveur.
+
+*Écart nécessaire, dû à la version :* le document dit « bouton réessayer qui
+appelle `reset()` ». Next 16 a renommé la prop en **`retry`**, qui refait la
+requête *et* le rendu ; `reset` existe encore mais se contente de vider l'état
+de la frontière, ce qui ne répare rien ici. Vérifié dans
+`node_modules/next/dist/docs/…/error.md`, comme l'impose `apps/web/AGENTS.md`.
+
+*Point non fait, et pourquoi :* « appeler `notFound()` dans `profil/[username]`
+et `jouer/partie/[slug]` ». Les deux pages sont des composants **client**, et
+la documentation de Next 16 est explicite : `notFound()` s'appelle depuis un
+composant serveur, une fonction serveur ou un gestionnaire de route, et « dans
+le chemin de rendu » — un appel depuis un `.then()` lève là où rien ne
+l'attrape, et aucune interface d'introuvable ne s'affiche. Le faire supposerait
+de convertir les deux écrans en composants serveur, ce qui déborde largement du
+lot. À noter aussi : l'écran de profil affiche **déjà** un état distinct et
+plus précis (« Aucun compte au pseudo « X » »), le constat du document est en
+partie périmé.
+
+**D2.** Trente-quatre mises en page d'une ligne. Piège rencontré et corrigé :
+les cinq dossiers qui ont des pages en dessous d'eux — `jouer`, `apprendre`,
+`puzzles`, `etudes`, `tournois` — ne peuvent pas poser un `title` en chaîne.
+Elle consomme le gabarit de la racine sans en reposer aucun, et l'onglet de
+`/jouer/ordinateur` s'appelait « Contre l'ordinateur » tout court. Ils
+déclarent donc `{ default, template }`. Vérifié route par route au `curl`.
+
+**D3.** `lib/useFetchJson.ts`. Trois des quatre appels de montage de l'écran
+contre l'ordinateur y passent ; le quatrième (`:268`, la progression de
+carrière) n'est pas un appel de montage mais une action déclenchée par un
+choix, avec un enchaînement de rappels — le migrer n'aurait rien apporté.
+
+**D4.** *Écart de méthode assumé.* Le document dit de poser l'en-tête sur les
+routes. C'est ce qui a été fait d'abord, et **ça ne marche pas** : les en-têtes
+de `next.config.ts` écrasent ceux de la réponse. Mesuré — `/api/classement`
+rendait toujours `private, no-store`. Tout est donc dans la configuration, où
+la **dernière** règle qui correspond l'emporte :
+
+| routes | valeur |
+|---|---|
+| `/api/*` (défaut) | `private, no-store` |
+| `classement`, `joueurs`, `sante` | `public, s-maxage=60, stale-while-revalidate=300` |
+| `profil/:username` | idem |
+| `parties` | `public, s-maxage=15, stale-while-revalidate=60` |
+
+Le défaut est le prudent : le risque n'est pas le gaspillage, c'est qu'un
+relais partagé garde une réponse personnelle et la ressorte à quelqu'un
+d'autre. Vérifié au `curl` sur les neuf routes, publiques et privées.
+
+*`/api/ouvertures` n'existe pas* — le document la cite, le livre d'ouvertures
+est servi en statique.
+
