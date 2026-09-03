@@ -839,3 +839,51 @@ d'autre. Vérifié au `curl` sur les neuf routes, publiques et privées.
 *`/api/ouvertures` n'existe pas* — le document la cite, le livre d'ouvertures
 est servi en statique.
 
+### Lot F — 3 septembre 2026
+
+**F1.** Région `aria-live="polite"` dans `ChessBoard`, alimentée par
+`sanToSpeech` — la fonction qui produisait déjà ce texte pour la voix. Observé
+au navigateur : après le premier coup de l'ordinateur, la région contient
+« pion c 4 ». `announceMoves` est branchée et sa case posée dans Préférences →
+Son et voix. Deux gardes : on ne relit pas le même coup deux fois, et on
+n'annonce pas le coup **déjà présent** à l'arrivée sur l'écran.
+
+*Une prop en plus :* `dernierCoupSan`. `lastMove` ne porte que deux cases, de
+quoi flécher mais pas de quoi dire « cavalier f3 ». Les trois écrans de jeu la
+passent ; les autres n'annoncent rien, ce qui est correct.
+
+**F2.** `lib/useDialogue.ts`, appliqué au sélecteur de promotion, à la boîte de
+fin de partie et à la porte du compte. **Pas** à `Celebration` : elle n'a aucun
+élément focalisable — un piège à focus y serait vide — et elle gère déjà Échap,
+Entrée et Espace. Trois dialogues sur quatre, donc, et le quatrième n'en a pas
+besoin.
+
+**F3.** Bouton dans `GameNav`, séparé des flèches par un trait, plus
+`Ctrl+Maj+C`. Mesuré au navigateur : la FEN copiée est bien celle **affichée**.
+La branche d'échec a été observée pour de vrai — le navigateur piloté refuse
+le presse-papiers, et le message le dit sans prétendre avoir copié.
+
+**F4.** Colonne `partage varchar(12)` unique, migration `0005`, route publique
+`GET /api/analyses/partagee/[partage]` qui ne lit aucune session, page
+`/analyse/p/[partage]` en lecture seule. Recette : ligne posée à la main en
+base, lien ouvert **sans compte**, rapport complet affiché — échiquier,
+explications, précision, navigation. Lien inconnu : `404`.
+
+*Un import entre pages, le seul du projet :* `ReviewScreen` est exportée depuis
+`analyse/page.tsx`. La sortir dans `components/` demanderait de déplacer sept
+cents lignes et tous les fragments avec lesquels elle partage ce fichier, pour
+un gain de rangement seul.
+
+**F5. Décision prise : pas de hors-ligne, et on le dit.** Le document laissait
+le choix. `public/sw.js` argumente lui-même, longuement, pourquoi il ne met
+rien en cache — un moteur WebAssembly de plusieurs mégaoctets et des données
+qui doivent rester d'accord entre elles. Passer outre pour tenir une phrase de
+commentaire aurait été le mauvais sens de la correction. La phrase est donc
+retirée de `next.config.ts`, de `layout.tsx` et de `Board3D.tsx` — elle y était
+trois fois —, et le README gagne une rubrique **« Ce que ça ne fait pas »** qui
+l'énonce, avec deux autres limites tant qu'à faire : une seule instance du
+serveur temps réel, et la triche contre soi-même en partie solo.
+
+Le manifeste PWA, lui, ne promettait rien : il déclare `display: standalone`,
+ce qui n'est pas une promesse de hors-ligne.
+
