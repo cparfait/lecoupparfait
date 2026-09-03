@@ -58,7 +58,7 @@ import {
   evaluateMoveSafety,
   type SafetyVerdict,
 } from './moveSafety.ts'
-import { usePreferences } from '@/lib/store/preferences.ts'
+import { usePreferencesDe } from '@/lib/store/preferences.ts'
 import type { BoardStyleId } from '@/lib/store/preferences.ts'
 
 export interface Board2DProps {
@@ -207,7 +207,20 @@ export const Board2D = memo(function Board2D({
   skinId,
 }: Board2DProps) {
   const boardRef = useRef<HTMLDivElement>(null)
-  const prefs = usePreferences()
+  // Dix réglages nommés, et non tout le store : sans cela, changer le volume
+  // du son re-rendait l'échiquier. Voir `usePreferencesDe`.
+  const prefs = usePreferencesDe(
+    'animationMs',
+    'boardStyle',
+    'effects',
+    'highlightCheck',
+    'highlightLastMove',
+    'moveSafetyHints',
+    'pieceSet',
+    'premove',
+    'showCoordinates',
+    'showLegalMoves',
+  )
   // La surcharge ne sert qu'aux échiquiers de démonstration, qui illustrent
   // l'habillage courant plutôt que d'obéir au réglage du joueur. Partout
   // ailleurs `skinId` est absent et la préférence gagne.
@@ -658,14 +671,36 @@ export const Board2D = memo(function Board2D({
 
   // ── Rendu ─────────────────────────────────────────────────────────────────
 
-  const selectedTargets = selected ? targetsFor(selected) : []
+  /**
+   * Les cases d'arrivée de la pièce sélectionnée.
+   *
+   * Mémoïsées, faute de quoi c'est un **tableau neuf à chaque rendu** — et ce
+   * tableau est une dépendance du `useMemo` juste en dessous, qu'il invalidait
+   * donc systématiquement. `targetsFor` est stable (`useCallback` sur
+   * `legalMoves`), la mémoïsation tient.
+   */
+  const selectedTargets = useMemo(
+    () => (selected ? targetsFor(selected) : []),
+    [selected, targetsFor],
+  )
 
   /**
    * Verdict de sûreté de chaque case d'arrivée.
    *
    * Calculé seulement quand l'option est active et qu'une pièce est
-   * sélectionnée : une trentaine d'échanges statiques, imperceptibles, mais
-   * inutiles à faire en permanence.
+   * sélectionnée — et, depuis peu, seulement quand la sélection change.
+   *
+   * Le commentaire promettait déjà que le calcul était rare ; il ne l'était
+   * pas, et il suffit de suivre la dépendance pour s'en convaincre :
+   * `selectedTargets` était un tableau construit dans le corps du composant,
+   * donc une référence neuve à chaque rendu, donc un `useMemo` qui ne
+   * mémoïsait rien. `evaluateMoveSafety` — une trentaine d'échanges statiques
+   * — repartait à *chaque* rendu du plateau tant qu'une pièce était
+   * sélectionnée.
+   *
+   * Ce que ça coûtait dépendait entièrement de la fréquence de ces rendus, et
+   * elle était élevée : avant la pendule vivante, l'écran de jeu se rendait
+   * dix fois par seconde.
    */
   const safety = useMemo<Map<Square, SafetyVerdict>>(() => {
     if (!prefs.moveSafetyHints || !selected || selectedTargets.length === 0) {

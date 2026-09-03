@@ -8,8 +8,10 @@
  * connectés synchronisent ensuite ce même objet côté serveur.
  */
 
+import { useMemo } from 'react'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { useShallow } from 'zustand/react/shallow'
 import type { Notation } from '@coupparfait/core'
 import type { Locale } from '../i18n/dictionary.ts'
 import type { CustomProviderDef } from '../ia/providers/custom.ts'
@@ -341,6 +343,44 @@ export const usePreferences = create<PreferencesStore>()(
     },
   ),
 )
+
+/**
+ * Quelques réglages, et pas tout le store.
+ *
+ * `usePreferences()` sans sélecteur abonne le composant à **toute** la
+ * préférence : changer le volume re-rendait l'échiquier, et régler la
+ * profondeur du moteur re-rendait l'écran de jeu. Le store en compte une
+ * cinquantaine, dont l'immense majorité ne concerne pas celui qui lit.
+ *
+ * `useShallow` compare l'objet rendu champ par champ : deux lectures qui
+ * donnent les mêmes valeurs ne déclenchent pas de rendu, alors même que le
+ * sélecteur fabrique un objet neuf à chaque appel.
+ *
+ * Utilisation :
+ *
+ *     const { pieceSet, boardStyle } = usePreferencesDe('pieceSet', 'boardStyle')
+ *
+ * `set`, `patch` et `reset` se demandent comme les autres champs : ce sont des
+ * fonctions stables, elles ne provoquent jamais de rendu.
+ */
+export function usePreferencesDe<K extends keyof PreferencesStore>(
+  ...cles: K[]
+): Pick<PreferencesStore, K> {
+  // Les clés arrivent dans un tableau neuf à chaque rendu ; c'est sans
+  // conséquence, `useShallow` compare le **résultat**, pas le sélecteur. La
+  // jointure sert de dépendance stable pour la mémoïsation du sélecteur.
+  const empreinte = cles.join(',')
+  const selecteur = useMemo(
+    () =>
+      (state: PreferencesStore): Pick<PreferencesStore, K> => {
+        const extrait = {} as Pick<PreferencesStore, K>
+        for (const cle of empreinte.split(',') as K[]) extrait[cle] = state[cle]
+        return extrait
+      },
+    [empreinte],
+  )
+  return usePreferences(useShallow(selecteur))
+}
 
 /** Lecture hors composant React (sons, moteur, workers). */
 export function getPreferences(): Preferences {

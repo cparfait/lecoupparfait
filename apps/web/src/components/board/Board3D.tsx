@@ -38,7 +38,7 @@ import {
   type BoardPiece,
 } from './boardKit.ts'
 import { PromotionPicker } from './PromotionPicker.tsx'
-import { resolvePieceColours, usePreferences } from '@/lib/store/preferences.ts'
+import { resolvePieceColours, usePreferencesDe } from '@/lib/store/preferences.ts'
 import type { Board2DProps } from './Board2D.tsx'
 
 /**
@@ -90,7 +90,8 @@ function squareToWorld(square: Square, orientation: Color): [number, number] {
   pas ; c'est ce qui rend la mémoïsation efficace.
 */
 export const Board3D = memo(function Board3D(props: Board2DProps) {
-  const prefs = usePreferences()
+  // Trois réglages nommés, et non tout le store — voir `usePreferencesDe`.
+  const prefs = usePreferencesDe('effects', 'pieceSet', 'set')
   const {
     fen,
     orientation = 'w',
@@ -520,7 +521,7 @@ function Scene({
   quality,
   onSquareClick,
 }: SceneProps) {
-  const prefs = usePreferences()
+  const prefs = usePreferencesDe('boardStyle', 'pieceMaterial')
   const skin = BOARD_SKINS[prefs.boardStyle] ?? BOARD_SKINS.aurore
   const squares = useMemo(() => orderedSquares('w'), [])
   const { scene } = useThree()
@@ -676,7 +677,15 @@ function Piece3D({
   material: string
   onClick: () => void
 }) {
-  const prefs = usePreferences()
+  // Les trois derniers ne sont pas lus ici mais par `resolvePieceColours`,
+  // plus bas : une lecture indirecte reste une lecture.
+  const prefs = usePreferencesDe(
+    'boardStyle',
+    'animationMs',
+    'pieceColours',
+    'pieceWhiteCustom',
+    'pieceBlackCustom',
+  )
   const invalidate = useThree((state) => state.invalidate)
   const groupRef = useRef<THREE.Group>(null)
   const [x, z] = squareToWorld(piece.square, orientation)

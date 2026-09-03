@@ -119,7 +119,7 @@ import {
 } from '@coupparfait/core'
 import { useCurrentOpening, useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { playMoveSound, playResultSound, playSound } from '@/lib/sound.ts'
-import { usePreferences } from '@/lib/store/preferences.ts'
+import { usePreferences, usePreferencesDe } from '@/lib/store/preferences.ts'
 import { speak } from '@/lib/speech.ts'
 import type { Arrow } from '@/components/board/boardKit.ts'
 
@@ -1139,7 +1139,17 @@ function GameScreen({
   onNewGame: () => void
   onRematch: () => void
 }) {
-  const prefs = usePreferences()
+  // Sept réglages nommés, et non tout le store : régler la profondeur du
+  // moteur ou le volume re-rendait tout l'écran de jeu.
+  const prefs = usePreferencesDe(
+    'commentaryMode',
+    'commentaryOpponent',
+    'commentaryPauses',
+    'locale',
+    'set',
+    'showEvalDuringGame',
+    'whiteAlwaysBottom',
+  )
   const { book } = useOpeningBook()
   const botColor: Color = playerColor === 'w' ? 'b' : 'w'
 
@@ -1206,7 +1216,6 @@ function GameScreen({
     if (!initialClock) return depart
     return { ...depart, remaining: { w: initialClock.w, b: initialClock.b } }
   })
-  const [displayClock, setDisplayClock] = useState(() => remainingAt(clock, Date.now()))
 
   const game = useChessGame({
     // Une position composée remplace le départ ordinaire. `useChessGame` sait
@@ -1383,26 +1392,50 @@ function GameScreen({
     onMove: (from, to, promotion) => playRef.current(from, to, promotion),
   })
 
-  // ── Pendules ────────────────────────────────────────────────────────────
+  /*
+    ── Chute du drapeau ─────────────────────────────────────────────────────
+
+    Un rendez-vous, pas un sondage.
+
+    Cet effet partageait un `setInterval` à 100 ms avec l'affichage de la
+    pendule : dix fois par seconde, tout l'écran se re-rendait pour poser une
+    question dont la réponse est « non » pendant plusieurs minutes d'affilée.
+    L'affichage vit désormais dans `PenduleVive`, et il ne reste ici que la
+    chute — qui a une **date connue d'avance**, puisque la pendule est tenue en
+    horodatages absolus.
+
+    On arme donc un unique `setTimeout` sur cette date. Il se réarme au coup,
+    parce que `clock` change au coup. Une centaine de réveils par minute
+    remplacée par un par coup.
+  */
   useEffect(() => {
     if (!timed || state.isGameOver || outcome) return
-    const interval = setInterval(() => {
+    if (clock.running === null) return
+
+    const echeance = remainingAt(clock, Date.now())[clock.running]
+
+    const tomber = () => {
       const now = Date.now()
-      setDisplayClock(remainingAt(clock, now))
       const flagged = flaggedColor(clock, now)
-      if (flagged) {
-        setClock((current) => stopClock(current, now))
-        setOutcome({
-          status: 'timeout',
-          result: flagged === 'w' ? '0-1' : '1-0',
-        })
-        playResultSound(flagged === playerColor ? 'loss' : 'win')
-        // Gagner au temps compte comme une victoire : c'est une partie gagnée.
-        // Sauf depuis une position composée — même raison que ci-dessus.
-        if (!startFen) recordBotGame(level, flagged !== playerColor)
-      }
-    }, 100)
-    return () => clearInterval(interval)
+      // Le garde n'est pas superflu : un onglet mis en veille rend la main en
+      // retard, et un navigateur peut réveiller un minuteur un cheveu trop tôt.
+      if (!flagged) return
+      setClock((current) => stopClock(current, now))
+      setOutcome({
+        status: 'timeout',
+        result: flagged === 'w' ? '0-1' : '1-0',
+      })
+      playResultSound(flagged === playerColor ? 'loss' : 'win')
+      // Gagner au temps compte comme une victoire : c'est une partie gagnée.
+      // Sauf depuis une position composée — même raison que ci-dessus.
+      if (!startFen) recordBotGame(level, flagged !== playerColor)
+    }
+
+    // `+50` : on se réveille juste après l'échéance, jamais juste avant, sans
+    // quoi `flaggedColor` répondrait « personne » et la partie continuerait
+    // sans que plus rien ne la surveille.
+    const minuteur = setTimeout(tomber, Math.max(0, echeance) + 50)
+    return () => clearTimeout(minuteur)
   }, [clock, timed, state.isGameOver, outcome, playerColor, level, startFen])
 
   // ── Actions ─────────────────────────────────────────────────────────────
@@ -1738,11 +1771,25 @@ function GameScreen({
    *
    * Périmé, il ne s'affiche pas : il jugerait le coup précédent sur la case du
    * dernier — à la fois visible et faux.
+   *
+   * **Mémoïsé, et ce n'est pas du zèle.** C'était un littéral d'objet, donc un
+   * objet neuf à chaque rendu, passé en prop à `ChessBoard`. Une prop neuve à
+   * chaque rendu annule un `memo` : `Board2D` avait beau être mémoïsé, il se
+   * rendait en entier chaque fois que quoi que ce soit bougeait sur cette
+   * page. Le `useMemo` de `conseilDuCoup`, qui en dépend, ne servait à rien
+   * non plus pour la même raison.
    */
-  const verdictDuCoup =
-    commentaryMode && commentary && !commentaryStale && state.lastMove
-      ? { square: state.lastMove.to, quality: commentary.quality }
-      : null
+  const verdictDuCoup = useMemo(
+    () =>
+      commentaryMode && commentary && !commentaryStale && state.lastMove
+        ? { square: state.lastMove.to, quality: commentary.quality }
+        : null,
+    // Les deux champs lus, et non les deux objets : `commentary` et
+    // `lastMove` changent d'identité plus souvent que leur contenu, et
+    // dépendre d'eux redonnerait un objet neuf sans qu'il ait changé.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [commentaryMode, commentary?.quality, commentaryStale, state.lastMove?.to],
+  )
 
   /**
    * Le coup qu'il fallait jouer, écrit en toutes lettres.
@@ -1796,7 +1843,7 @@ function GameScreen({
           rating={bot.elo}
           color={botColor}
           avatar={personality.portrait}
-          timeMs={timed ? displayClock[botColor] : null}
+          clock={timed ? clock : null}
           timeControl={timeControl}
           active={state.turn === botColor && !gameOver}
           captured={state.material[botColor]}
@@ -1916,7 +1963,7 @@ function GameScreen({
           name="Toi"
           color={playerColor}
           avatar="🙂"
-          timeMs={timed ? displayClock[playerColor] : null}
+          clock={timed ? clock : null}
           timeControl={timeControl}
           active={state.turn === playerColor && !gameOver}
           captured={state.material[playerColor]}

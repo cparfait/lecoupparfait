@@ -28,7 +28,7 @@ import {
 } from '@/components/board/boardKit.ts'
 import { Button, Card, Chip, Toggle } from '@/components/ui/index.tsx'
 import { playSound } from '@/lib/sound.ts'
-import { usePreferences } from '@/lib/store/preferences.ts'
+import { usePreferencesDe } from '@/lib/store/preferences.ts'
 
 /** Durée d'une manche. Assez court pour se relancer, assez long pour chauffer. */
 const ROUND_SECONDS = 30
@@ -49,7 +49,7 @@ function randomSquare(exclude: Square | null): Square {
 }
 
 export default function VisionPage() {
-  const prefs = usePreferences()
+  const prefs = usePreferencesDe('boardStyle')
   const skin = BOARD_SKINS[prefs.boardStyle] ?? BOARD_SKINS.aurore
 
   const [phase, setPhase] = useState<Phase>('attente')

@@ -11,7 +11,8 @@
 import { memo } from 'react'
 import clsx from 'clsx'
 import type { Color, PieceSymbol } from 'chess.js'
-import { clockUrgency, formatClock, type TimeControl } from '@coupparfait/core'
+import { clockUrgency, formatClock, type ClockState, type TimeControl } from '@coupparfait/core'
+import { PenduleVive } from './PenduleVive.tsx'
 import { pieceUrl } from '@/components/board/boardKit.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
@@ -26,6 +27,18 @@ export interface PlayerBarProps {
   avatar?: string
   /** Temps restant en millisecondes, ou `null` si la partie n'est pas chronométrée. */
   timeMs?: number | null
+  /**
+   * Pendule vivante, qui bat toute seule.
+   *
+   * À préférer à `timeMs` : celui-ci oblige l'écran appelant à tenir le temps
+   * dans son état et à se re-rendre en entier à chaque dixième de seconde.
+   * Passée ici, la pendule ne fait battre que la pastille. L'état est figé —
+   * des horodatages absolus —, il ne change qu'au coup.
+   *
+   * Les deux coexistent : `timeMs` reste juste pour un temps qu'on ne
+   * décompte pas, comme celui d'une partie qu'on relit.
+   */
+  clock?: ClockState | null
   timeControl?: TimeControl
   /** Vrai si c'est à ce joueur de jouer. */
   active?: boolean
@@ -45,6 +58,7 @@ export const PlayerBar = memo(function PlayerBar({
   color,
   avatar,
   timeMs,
+  clock,
   timeControl,
   active,
   captured = [],
@@ -53,8 +67,31 @@ export const PlayerBar = memo(function PlayerBar({
   className,
 }: PlayerBarProps) {
   const pieceSet = usePreferences((state) => state.pieceSet)
-  const urgency =
-    timeMs != null && timeControl ? clockUrgency(timeMs, timeControl) : 'calm'
+
+  /**
+   * La pastille de la pendule.
+   *
+   * Sortie en fonction plutôt que dupliquée : elle est rendue soit avec un
+   * temps figé, soit à chaque battement de `PenduleVive`, et les deux doivent
+   * se ressembler au pixel près — l'urgence colore, l'inactivité éteint.
+   */
+  const pastille = (ms: number, texte: string) => {
+    const urgency = timeControl ? clockUrgency(ms, timeControl) : 'calm'
+    return (
+      <div
+        className={clsx(
+          'shrink-0 rounded-[var(--radius-sm)] px-2.5 py-1 font-mono text-lg font-semibold tabular-nums leading-none transition-colors',
+          active ? 'bg-surface-strong text-ink' : 'text-muted',
+          urgency === 'critical' && active && 'bg-[var(--q-blunder)] text-white animate-pulse',
+          urgency === 'low' && active && 'text-[var(--q-inaccuracy)]',
+        )}
+        role="timer"
+        aria-label={`Temps restant de ${name}`}
+      >
+        {texte}
+      </div>
+    )
+  }
 
   return (
     <div
@@ -130,19 +167,12 @@ export const PlayerBar = memo(function PlayerBar({
       </div>
 
       {/* Pendule */}
-      {timeMs != null && (
-        <div
-          className={clsx(
-            'shrink-0 rounded-[var(--radius-sm)] px-2.5 py-1 font-mono text-lg font-semibold tabular-nums leading-none transition-colors',
-            active ? 'bg-surface-strong text-ink' : 'text-muted',
-            urgency === 'critical' && active && 'bg-[var(--q-blunder)] text-white animate-pulse',
-            urgency === 'low' && active && 'text-[var(--q-inaccuracy)]',
-          )}
-          role="timer"
-          aria-label={`Temps restant de ${name}`}
-        >
-          {formatClock(timeMs)}
-        </div>
+      {clock ? (
+        <PenduleVive clock={clock} color={color}>
+          {pastille}
+        </PenduleVive>
+      ) : (
+        timeMs != null && pastille(timeMs, formatClock(timeMs))
       )}
     </div>
   )

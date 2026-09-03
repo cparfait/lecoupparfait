@@ -18,7 +18,7 @@
  * était donc à la fois invisible et injouable.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { Box, Grid2x2, Maximize2, Minimize2 } from 'lucide-react'
 import clsx from 'clsx'
@@ -91,7 +91,20 @@ const MIN_BOARD_PX = 260
 const TOGGLE_ROW_PX = 40
 const TOGGLE_ROW_TACTILE_PX = 52
 
-export function ChessBoard({
+/**
+ * Mémoïsé, et il fallait qu'il le soit.
+ *
+ * `Board2D` et `Board3D` le sont depuis longtemps, ce qui ne servait à rien :
+ * un parent qui se rend rend ses enfants, mémoïsés ou non, dès lors qu'il leur
+ * passe une prop neuve — et celui-ci passait tout ce qu'il recevait. La
+ * mémoïsation des plateaux ne s'appliquait donc jamais depuis les écrans de
+ * jeu ; c'est ici qu'elle se gagne ou se perd.
+ *
+ * La comparaison reste superficielle : elle ne vaut que si l'appelant tient
+ * ses props stables. Voir `verdictDuCoup` dans l'écran contre l'ordinateur,
+ * qui était le contre-exemple.
+ */
+export const ChessBoard = memo(function ChessBoard({
   showViewToggle = true,
   reservedHeight = 17,
   fitParentHeight = false,
@@ -280,7 +293,7 @@ export function ChessBoard({
       </div>
     </div>
   )
-}
+})
 
 /**
  * Bascule 2D / 3D et plein écran.
