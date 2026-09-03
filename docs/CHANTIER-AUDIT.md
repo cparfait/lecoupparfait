@@ -740,3 +740,47 @@ Puzzles : le plateau répond au premier clic — c'était le défaut du hook à
 `useState`. Tournois et « jouer contre quelqu'un » : l'état visiteur s'affiche
 sans clignoter. Aucune erreur de console imputable à l'application.
 
+### Lot E1 — 3 septembre 2026
+
+Cinquante-six vérifications dans `packages/core/test/`, branchées **en tête**
+de `npm test` comme demandé, plus six dans `apps/server/test/`.
+
+| fichier | ce qu'il couvre |
+|---|---|
+| `board.test.ts` | l'échange statique, rayon X compris |
+| `motifs.test.ts` | clouage, enfilade, fourchette, mats, couloir, pièce piégée |
+| `rating.test.ts` | Elo contre la table, Glicko-2 contre l'article de Glickman |
+| `pgn.test.ts` | import tolérant, aller-retour, `resultatImpose` |
+| `clock.test.ts` | barème, décompte, drapeau, affichage |
+
+**Le filet tient.** Vérifié comme le document le demande : en remplaçant le
+`Math.max(0, …)` de l'échange statique par `Math.max(-1, …)`, `npm test`
+échoue sur deux vérifications et sort en code 1. Le plafond restauré, tout
+repasse.
+
+**Ce que les tests ont appris sur le code, et qui n'a pas été corrigé** — c'est
+la règle du chantier, une découverte va au journal et non dans le commit :
+
+1. **`hasOpposition` teste la mauvaise parité.** Elle exige une distance
+   impaire entre les rois ; l'opposition directe — e4 contre e6, une case entre
+   les deux — est une distance de **2**. La fonction ne rend donc jamais vrai
+   pour le cas le plus courant. Le test existe, marqué `todo` : il ne fait pas
+   échouer la suite, il attend la correction.
+2. **Deux barèmes de cadence coexistent.** `speedCategory` dans le cœur suit la
+   formule de Lichess (`initial + 40 × incrément`, seuils 30/180/480/1500) ;
+   `cadence()` dans `api/parties/terminee` ne regarde que le temps initial
+   (seuils 180/600/1800). Entre 480 et 600 secondes ils divergent : une partie
+   de 8 minutes est classée « rapide » contre un ami et « blitz » contre
+   l'ordinateur, donc dans deux catégories de classement différentes. Le test
+   fige la formule du cœur, qui est la bonne.
+
+*Ajouté au passage, et assumé :* `EngineProcess` puis `EnginePool` acceptent
+des `args`. C'est la seule façon de lancer un faux moteur écrit en JavaScript
+sur les trois systèmes — un script à shebang ne se lance pas sous Windows, et
+Node refuse un `.cmd` sans interpréteur. Sans ça, ni A2 ni E1 n'auraient de
+preuve exécutable ailleurs que sous Linux.
+
+*Corrigé au passage :* `packages/core/tsconfig.json` avait un `rootDir` sur
+`src` qui rendait le dossier `test/` intypable. Il ne servait à rien —
+`noEmit` est posé, il n'y a pas de sortie à cadrer.
+
