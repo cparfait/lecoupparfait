@@ -700,3 +700,43 @@ enveloppe `useShallow`. Les six lectures sans sélecteur passent par lui.
 Attention en l'utilisant : une lecture **indirecte** compte aussi, et l'oubli
 ne se voit pas toujours au typage — `resolvePieceColours` lit trois champs
 dans `Board3D` qui n'étaient pas dans la liste.
+
+### Lot C — 3 septembre 2026
+
+Aucun changement de comportement **voulu**. Mais le dédoublonnage en a révélé
+un : les copies avaient divergé.
+
+**C1.** `useLegalMoves(fen, actif)` dans `lib/game/`, six copies supprimées —
+`useChessGame` comprise, qui construisait la carte depuis l'instance `chess`
+plutôt que depuis la position. La garde `isGameOver()` qu'elle portait était
+redondante : un mat ne rend aucun coup légal de toute façon.
+
+**C2.** `playMoveFor(move)` et `playMoveForSan(san)` dans `sound.ts`, huit
+copies supprimées. *Écart trouvé entre copies* : celle des ouvertures posait
+`isCheckmate: false` en dur, si bien qu'un mat joué dans une ligne du livre
+faisait le bruit d'un coup ordinaire. Les autres se partageaient entre lire
+l'échec dans `board.inCheck()` et le lire dans le SAN — même résultat, deux
+façons de l'obtenir.
+
+*Corrigé au passage :* `PlayedMove` gagne `isPromotion`, ce qui le rend
+directement acceptable par `playMoveSound`. Le typage a alors désigné deux
+autres endroits qui reconstruisaient un `PlayedMove` à la main ; `toPlayedMove`
+est exportée et l'un des deux la réutilise.
+
+**C3.** Les sept `fetch('/api/auth')` passent par `useIdentite`, qui savait
+déjà distinguer « chargement » (`undefined`) d'« anonyme » (`null`) — le
+document se demandait s'il fallait l'ajouter, c'était déjà fait. Le statut du
+courriel est rangé dans le même store : il voyage dans la même réponse, et
+l'écran de profil refaisait la requête entière pour ce seul champ. Mesuré :
+**un** appel par chargement de page.
+
+**C4.** `analyserAvecLeNavigateur` sort dans le `runner` ; `LiveCommentary` ne
+touche plus au moteur. Le `multiPv` à 3 que le document soupçonnait manquant
+n'était pas en cause : le commentaire calcule son propre nombre de variantes
+d'après le réglage « alternatives », et le passe en paramètre.
+
+**Recette.** Ouvertures : `e4` joué à la souris, ouverture identifiée, son émis.
+Puzzles : le plateau répond au premier clic — c'était le défaut du hook à
+`useState`. Tournois et « jouer contre quelqu'un » : l'état visiteur s'affiche
+sans clignoter. Aucune erreur de console imputable à l'application.
+
