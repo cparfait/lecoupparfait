@@ -1,0 +1,59 @@
+# Ce que la machine vérifie à chaque poussée.
+#
+# **Sans base de données, volontairement.** Ni les tests ni la construction n'en
+# ont besoin : le cœur ne fait aucune entrée-sortie, les scripts de contrôle
+# lisent des fichiers, et les tests du serveur tournent sur un faux moteur. Un
+# service PostgreSQL ajouterait une minute de démarrage à chaque exécution pour
+# ne rien couvrir de plus.
+#
+# Le dépôt est privé et le flux est court : les minutes offertes suffisent
+# largement.
+
+name: Contrôles
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Une poussée pendant qu'une exécution tourne annule la précédente : c'est la
+# dernière qui compte, et attendre la fin d'un contrôle périmé ne dit rien.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  controles:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          # Le dépôt exige Node 22 ou plus — voir `engines` dans package.json.
+          # Les tests s'appuient sur `--experimental-strip-types`, qui n'existe
+          # pas avant.
+          node-version: 22
+          cache: npm
+
+      # `npm ci` et non `npm install` : il installe exactement ce que le
+      # verrou décrit, et échoue si le verrou et le manifeste divergent.
+      - run: npm ci
+
+      - name: Typage
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Mise en forme
+        run: npm run format:check
+
+      - name: Tests
+        run: npm test
+
+      # En dernier : c'est l'étape la plus longue, et une erreur de typage ou
+      # un test rouge se voient plus vite sans elle.
+      - name: Construction
+        run: npm run build
