@@ -1011,6 +1011,56 @@ export const liveGames = pgTable('live_games', {
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
+//  Administration
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Le journal des actes d'administration.
+ *
+ * Les actions passaient jusqu'ici par `console.warn`, ce qui les confiait aux
+ * journaux du conteneur : lisibles pour qui a un accès SSH, illisibles pour qui
+ * administre depuis la page. Or la seule trace qu'on relit vraiment est celle
+ * qu'on voit sans quitter l'écran où l'on a agi — d'où cette table.
+ *
+ * **Elle ne référence pas sa cible.** `targetId` est une chaîne libre, sans
+ * clé étrangère : le journal doit survivre à ce qu'il raconte. Une ligne
+ * « partie supprimée » qui disparaîtrait en même temps que la partie ne
+ * documenterait plus rien, et c'est justement des suppressions qu'on veut
+ * garder la trace.
+ *
+ * **L'auteur est recopié en clair.** `actorName` fige le pseudo au moment de
+ * l'acte : un administrateur rétrogradé, renommé ou anonymisé ensuite reste
+ * nommé dans l'historique, et `actorId` passe à `null` sans emporter la ligne.
+ */
+export const adminAudit = pgTable(
+  'admin_audit',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    actorId: uuid('actor_id').references(() => users.id, { onDelete: 'set null' }),
+    actorName: varchar('actor_name', { length: 40 }).notNull(),
+    /** Le verbe, tel qu'il figure dans les routes : `desactiver`, `purge`… */
+    action: varchar('action', { length: 40 }).notNull(),
+    /** `compte`, `partie`, `analyse`, `systeme`. */
+    targetKind: varchar('target_kind', { length: 24 }),
+    targetId: varchar('target_id', { length: 64 }),
+    /** De quoi reconnaître la cible sans la retrouver : pseudo, slug… */
+    targetLabel: varchar('target_label', { length: 120 }),
+    /**
+     * Le détail utile, en JSON : nombre de lignes purgées, ancienne valeur.
+     *
+     * Jamais de mot de passe, jamais d'empreinte — un journal qu'on n'oserait
+     * pas montrer à la personne concernée est un journal de trop.
+     */
+    detail: jsonb('detail').$type<Record<string, unknown>>(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('admin_audit_created_idx').on(table.createdAt),
+    index('admin_audit_action_idx').on(table.action),
+  ],
+)
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  Relations
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1061,3 +1111,4 @@ export type DailyProgress = typeof dailyProgress.$inferSelect
 export type ActiveGame = typeof activeGames.$inferSelect
 export type LiveGame = typeof liveGames.$inferSelect
 export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect
+export type AdminAudit = typeof adminAudit.$inferSelect

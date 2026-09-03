@@ -6,10 +6,11 @@
  *                                   rétrograder, anonymiser, changer le mot
  *                                   de passe
  *
- * Toutes les actions sont journalisées sur la sortie standard, ce qui suffit
- * ici : elles sont rares, elles sont peu nombreuses, et `docker compose logs`
- * en garde la trace. Une table d'audit serait plus propre et personne ne la
- * relirait jamais.
+ * Toutes les actions sont journalisées deux fois : sur la sortie standard, qui
+ * survit à une base perdue, et dans `admin_audit`, que l'onglet « Journal »
+ * relit. La table a été ajoutée après coup, contre l'avis d'origine — « personne
+ * ne la relirait jamais ». C'était vrai tant que la relire demandait un accès
+ * SSH ; ça ne l'est plus depuis qu'elle s'affiche sur l'écran où l'on agit.
  *
  * **Ce qui n'existe pas, et pourquoi.** Aucune route ne rend un mot de passe,
  * aucune ne rend l'empreinte, et « changer le mot de passe » ne permet pas de
@@ -21,15 +22,59 @@
  */
 
 import { NextResponse } from 'next/server'
-import { count, desc, eq, games, getDb, ilike, or, ratings, sql, users } from '@coupparfait/db'
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  games,
+  getDb,
+  ilike,
+  or,
+  ratings,
+  sql,
+  users,
+} from '@coupparfait/db'
 import { destroyAllSessions, hashPassword, validatePassword } from '@coupparfait/db/auth'
 import { getAdmin } from '@/lib/server/admin.ts'
+import { journaliser } from '@/lib/server/audit.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-/** Au-delà, la liste ne se lit plus : c'est à la recherche de trier. */
-const PAR_PAGE = 50
+/** Au-delà, la liste ne se lit plus : c'est aux filtres et au tri de trancher. */
+const PAR_PAGE = 25
+
+/**
+ * Les tris proposés, et leur colonne.
+ *
+ * Une table de correspondance plutôt qu'un nom de colonne reçu tel quel : le
+ * paramètre vient de l'extérieur, et il finirait sinon dans la clause `order
+ * by`. C'est aussi ce qui garantit qu'un tri retiré du schéma casse ici, à la
+ * compilation, plutôt qu'en production.
+ */
+/**
+ * Les sous-requêtes de la liste sont écrites en SQL nu, colonnes qualifiées.
+ *
+ * Ce n'est pas une négligence : dans la **liste des colonnes** — et là seulement
+ * — drizzle rend `users.id` sans son préfixe, simplement `"id"`. À l'intérieur
+ * d'un `select … from games`, ce `"id"` désigne alors `games.id`, la corrélation
+ * disparaît, et le compte vaut zéro pour tout le monde. La requête reste valide,
+ * PostgreSQL ne dit rien, le typage non plus : le seul symptôme est un chiffre
+ * faux. On qualifie donc à la main.
+ *
+ * Dans un `where`, drizzle qualifie correctement — c'est pourquoi les purges de
+ * `api/admin/contenus`, elles, peuvent garder leurs interpolations.
+ */
+
+const TRIS = {
+  vu: users.lastSeenAt,
+  inscrit: users.createdAt,
+  pseudo: users.usernameLower,
+} as const
+
+type Tri = keyof typeof TRIS
 
 export async function GET(request: Request) {
   const admin = await getAdmin()
@@ -37,35 +82,76 @@ export async function GET(request: Request) {
 
   const parametres = new URL(request.url).searchParams
   const recherche = (parametres.get('q') ?? '').trim()
+  const filtre = parametres.get('filtre') ?? 'tous'
+  const demande = parametres.get('tri') ?? 'vu'
+  const tri: Tri = demande in TRIS ? (demande as Tri) : 'vu'
+  const sens = parametres.get('sens') === 'asc' ? asc : desc
+  const page = Math.max(0, Number(parametres.get('page') ?? 0) || 0)
 
   try {
     const base = getDb()
     const motif = `%${recherche}%`
 
-    const lignes = await base
-      .select({
-        id: users.id,
-        username: users.username,
-        email: users.email,
-        emailVerifiedAt: users.emailVerifiedAt,
-        role: users.role,
-        disabled: users.disabled,
-        createdAt: users.createdAt,
-        lastSeenAt: users.lastSeenAt,
-        // Le nombre de parties dit en un coup d'œil si un compte est vivant ou
-        // s'il a été créé puis abandonné — la distinction qu'on cherche quand
-        // on regarde une liste de comptes.
-        parties: sql<number>`(
-          select count(*) from ${games}
-          where ${games.whiteId} = ${users.id} or ${games.blackId} = ${users.id}
-        )`,
-      })
-      .from(users)
-      .where(recherche ? or(ilike(users.username, motif), ilike(users.email, motif)) : sql`true`)
-      .orderBy(desc(users.lastSeenAt))
-      .limit(PAR_PAGE)
+    // Chaque filtre décrit une question qu'on se pose vraiment devant une liste
+    // de comptes : qui est bloqué, qui a des droits, qui n'a jamais joué, qui
+    // ne pourra pas récupérer son mot de passe faute d'adresse confirmée.
+    const conditions = [
+      recherche ? or(ilike(users.username, motif), ilike(users.email, motif)) : undefined,
+      filtre === 'admins' ? eq(users.role, 'admin') : undefined,
+      filtre === 'desactives' ? eq(users.disabled, true) : undefined,
+      filtre === 'sansAdresse' ? sql`${users.emailVerifiedAt} is null` : undefined,
+      filtre === 'inactifs'
+        ? sql`not exists (select 1 from ${games}
+                           where ${games.whiteId} = ${users.id}
+                              or ${games.blackId} = ${users.id})`
+        : undefined,
+    ].filter((condition) => condition !== undefined)
 
-    const [total] = await base.select({ n: count() }).from(users)
+    const ou = conditions.length > 0 ? and(...conditions) : sql`true`
+
+    const [lignes, [total], [general]] = await Promise.all([
+      base
+        .select({
+          id: users.id,
+          username: users.username,
+          email: users.email,
+          emailVerifiedAt: users.emailVerifiedAt,
+          role: users.role,
+          disabled: users.disabled,
+          avatar: users.avatar,
+          countryCode: users.countryCode,
+          createdAt: users.createdAt,
+          lastSeenAt: users.lastSeenAt,
+          // Le nombre de parties dit en un coup d'œil si un compte est vivant ou
+          // s'il a été créé puis abandonné — la distinction qu'on cherche quand
+          // on regarde une liste de comptes.
+          parties: sql<number>`(
+            select count(*) from games
+            where games.white_id = users.id or games.black_id = users.id
+          )`,
+          // Le meilleur classement toutes cadences confondues : de quoi
+          // distinguer un joueur régulier d'un compte qui a fait trois parties
+          // amicales.
+          classement: sql<number | null>`(
+            select max(ratings.rating) from ratings
+            where ratings.user_id = users.id and ratings.games > 0
+          )`,
+          // Une session encore valide signale quelqu'un connecté en ce moment,
+          // ce qui change la lecture d'une désactivation : elle le déconnecte.
+          sessions: sql<number>`(
+            select count(*) from sessions
+            where sessions.user_id = users.id and sessions.expires_at > now()
+          )`,
+        })
+        .from(users)
+        .where(ou)
+        .orderBy(sens(TRIS[tri]))
+        .limit(PAR_PAGE)
+        .offset(page * PAR_PAGE),
+
+      base.select({ n: count() }).from(users).where(ou),
+      base.select({ n: count() }).from(users),
+    ])
 
     return NextResponse.json({
       comptes: lignes.map((ligne) => ({
@@ -78,12 +164,21 @@ export async function GET(request: Request) {
         emailVerifie: ligne.emailVerifiedAt !== null,
         role: ligne.role,
         disabled: ligne.disabled,
+        avatar: ligne.avatar,
+        pays: ligne.countryCode,
         parties: Number(ligne.parties),
+        classement: ligne.classement == null ? null : Number(ligne.classement),
+        sessions: Number(ligne.sessions),
         inscrit: ligne.createdAt.toISOString(),
         vu: ligne.lastSeenAt.toISOString(),
       })),
-      total: total?.n ?? 0,
-      affiches: lignes.length,
+      // Deux totaux, parce qu'ils répondent à deux questions : « combien pour
+      // cette recherche » et « combien en tout ». N'en montrer qu'un laisserait
+      // croire, après un filtre, que les autres comptes ont disparu.
+      total: Number(total?.n ?? 0),
+      totalGeneral: Number(general?.n ?? 0),
+      page,
+      parPage: PAR_PAGE,
       moi: admin.username,
     })
   } catch (error) {
@@ -140,6 +235,13 @@ export async function POST(request: Request) {
     )
   }
 
+  // Ce que le journal retiendra en plus du verbe. On note l'état *avant*, seule
+  // information que l'acte va détruire : « rétrogradé » se relit sans peine,
+  // « rétrogradé depuis admin » se vérifie.
+  const detail: Record<string, unknown> = {
+    avant: { role: compte.role, disabled: compte.disabled },
+  }
+
   try {
     switch (action) {
       case 'desactiver':
@@ -192,11 +294,17 @@ export async function POST(request: Request) {
       }
 
       case 'anonymiser':
-        await anonymiser(cible, compte.username)
+        detail.devenu = await anonymiser(cible, compte.username)
         break
     }
 
-    console.warn(`[admin] ${admin.username} → ${action} sur ${compte.username}`)
+    await journaliser(admin, {
+      action,
+      cible: 'compte',
+      cibleId: compte.id,
+      cibleNom: compte.username,
+      detail,
+    })
     return NextResponse.json({ ok: true })
   } catch (error) {
     console.error('[admin/comptes]', error)
@@ -220,8 +328,12 @@ export async function POST(request: Request) {
  * Les colonnes `whiteName` / `blackName` des parties sont réécrites aussi :
  * sans cela, le pseudo d'origine resterait lisible dans chaque partie, et
  * l'anonymisation ne serait qu'un mot.
+ *
+ * Rend le nouveau pseudo, que le journal conserve : sans lui, la ligne d'audit
+ * désignerait un compte qu'on ne peut plus retrouver, et l'on ne saurait plus
+ * répondre à quelqu'un qui réclame ses parties.
  */
-async function anonymiser(id: string, ancienPseudo: string): Promise<void> {
+async function anonymiser(id: string, ancienPseudo: string): Promise<string> {
   const base = getDb()
   const suffixe = crypto.randomUUID().slice(0, 8)
   const pseudo = `joueur-${suffixe}`
@@ -255,4 +367,5 @@ async function anonymiser(id: string, ancienPseudo: string): Promise<void> {
   await destroyAllSessions(id)
 
   console.warn(`[admin] ${ancienPseudo} anonymisé en ${pseudo}`)
+  return pseudo
 }

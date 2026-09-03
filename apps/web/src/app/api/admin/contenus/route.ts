@@ -32,6 +32,7 @@ import {
 } from '@coupparfait/db'
 import { pruneSessions } from '@coupparfait/db/auth'
 import { getAdmin } from '@/lib/server/admin.ts'
+import { journaliser } from '@/lib/server/audit.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -126,13 +127,23 @@ export async function DELETE(request: Request) {
           { status: 400 },
         )
       }
-      console.warn(`[admin] ${admin.username} → partie ${partie} supprimée`)
+      await journaliser(admin, {
+        action: 'supprimerPartie',
+        cible: 'partie',
+        cibleId: partie,
+        cibleNom: partie,
+      })
       return NextResponse.json({ ok: true })
     }
 
     if (analyse) {
       await getDb().delete(savedAnalyses).where(eq(savedAnalyses.id, analyse))
-      console.warn(`[admin] ${admin.username} → analyse ${analyse} supprimée`)
+      await journaliser(admin, {
+        action: 'supprimerAnalyse',
+        cible: 'analyse',
+        cibleId: analyse,
+        cibleNom: analyse,
+      })
       return NextResponse.json({ ok: true })
     }
 
@@ -166,7 +177,12 @@ export async function POST(request: Request) {
     if (corps.action === 'sessions') {
       // Les sessions expirées ne servent plus à rien et personne ne les relit.
       const retirees = await pruneSessions()
-      console.warn(`[admin] ${admin.username} → ${retirees} sessions expirées purgées`)
+      await journaliser(admin, {
+        action: 'purge',
+        cible: 'systeme',
+        cibleNom: 'sessions expirées',
+        detail: { retirees },
+      })
       return NextResponse.json({ ok: true, retirees, quoi: 'sessions expirées' })
     }
 
@@ -184,7 +200,12 @@ export async function POST(request: Request) {
         .delete(positionEvals)
         .where(lt(positionEvals.depth, 14))
         .returning({ epd: positionEvals.epd })
-      console.warn(`[admin] ${admin.username} → ${retirees.length} évaluations purgées`)
+      await journaliser(admin, {
+        action: 'purge',
+        cible: 'systeme',
+        cibleNom: 'évaluations peu profondes',
+        detail: { retirees: retirees.length },
+      })
       return NextResponse.json({
         ok: true,
         retirees: retirees.length,
@@ -215,7 +236,12 @@ export async function POST(request: Request) {
                 select 1 from ${savedAnalyses} where ${savedAnalyses.userId} = ${users.id})`,
         )
         .returning({ id: users.id })
-      console.warn(`[admin] ${admin.username} → ${retires.length} comptes vides retirés`)
+      await journaliser(admin, {
+        action: 'purge',
+        cible: 'systeme',
+        cibleNom: 'comptes vides et inactifs',
+        detail: { retirees: retires.length },
+      })
       return NextResponse.json({
         ok: true,
         retirees: retires.length,
