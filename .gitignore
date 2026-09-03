@@ -74,3 +74,8 @@ scripts/.tmp/
 zzsccreens/
 # Aperçu jetable produit par les scripts de marque, jamais référencé nulle part.
 /apercu.png
+
+# Sources des images de marque : des PNG en pleine résolution, convertis en
+# WebP par `npm run brand:images`. Ils pesaient 12 Mo dans le dépôt et dans
+# chaque image Docker, pour être affichés à quarante-huit pixels.
+data/brand-sources/

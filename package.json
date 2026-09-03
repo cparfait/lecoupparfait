@@ -48,7 +48,8 @@
     "engine:install": "node scripts/install-stockfish.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "brand:images": "node scripts/build-brand.mjs"
   },
   "devDependencies": {
     "eslint": "^9.39.5",

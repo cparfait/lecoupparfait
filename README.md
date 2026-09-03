@@ -222,7 +222,7 @@ cd ~/docker                              # là où vivent les applications
 git clone git@github-coupparfait:cparfait/lecoupparfait.git coupparfait
 cd coupparfait
 
-cp .env.example .env                     # renseigne POSTGRES_PASSWORD et AUTH_SECRET
+cp .env.example .env                     # renseigne POSTGRES_PASSWORD
 docker network create web-coupparfait    # la façade, une seule fois
 docker compose up -d --build
 docker compose exec web node scripts/migrate.mjs   # crée le schéma
@@ -389,16 +389,15 @@ positions de contrôle, y compris les attaques en rayon X.
 Tout se règle dans `.env` à la racine (voir `.env.example`). Les variables qui
 comptent :
 
-| Variable                                 | Rôle                                                          |
-| ---------------------------------------- | ------------------------------------------------------------- |
-| `DATABASE_URL`                           | connexion PostgreSQL                                          |
-| `AUTH_SECRET`                            | secret de session — **à changer**, généré par `npm run setup` |
-| `NEXT_PUBLIC_SERVER_URL`                 | adresse publique du serveur temps réel                        |
-| `STOCKFISH_PATH`                         | chemin du binaire Stockfish                                   |
-| `ENGINE_POOL_SIZE` / `ENGINE_THREADS`    | processus moteur et fils par processus                        |
-| `ENGINE_MAX_DEPTH`                       | profondeur maximale autorisée (protège le processeur)         |
-| `PUZZLE_IMPORT_LIMIT`                    | nombre de puzzles à importer (`0` = tous)                     |
-| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | notifications — sans elles, le réglage n'apparaît pas         |
+| Variable                                 | Rôle                                                  |
+| ---------------------------------------- | ----------------------------------------------------- |
+| `DATABASE_URL`                           | connexion PostgreSQL                                  |
+| `NEXT_PUBLIC_SERVER_URL`                 | adresse publique du serveur temps réel                |
+| `STOCKFISH_PATH`                         | chemin du binaire Stockfish                           |
+| `ENGINE_POOL_SIZE` / `ENGINE_THREADS`    | processus moteur et fils par processus                |
+| `ENGINE_MAX_DEPTH`                       | profondeur maximale autorisée (protège le processeur) |
+| `PUZZLE_IMPORT_LIMIT`                    | nombre de puzzles à importer (`0` = tous)             |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | notifications — sans elles, le réglage n'apparaît pas |
 
 ---
 

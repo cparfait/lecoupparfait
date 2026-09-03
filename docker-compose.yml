@@ -263,7 +263,6 @@ services:
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-coupparfait}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-coupparfait}
-      AUTH_SECRET: ${AUTH_SECRET:?génère un secret avec node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"}
       AUTH_SESSION_DAYS: ${AUTH_SESSION_DAYS:-30}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
       NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:-http://localhost:3001}

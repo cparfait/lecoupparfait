@@ -1,7 +1,14 @@
-# Tournois — étude préalable
+# Tournois — cahier des charges
 
-_Rédigé le 28 août 2026. Rien n'est implémenté : ce document sert à décider,
-et à ne pas redécouvrir les mêmes questions dans six mois._
+État : **l'arène est implémentée**, constaté le 3 septembre 2026.
+Ce document a d'abord été une étude préalable ; il décrit maintenant ce qui
+existe, et signale en fin de page ce qui a été tranché autrement que prévu.
+
+Ce qui tourne aujourd'hui : `packages/db/src/tournaments.ts` (création,
+inscription, appariement, points, classement), la boucle d'arènes du serveur
+temps réel (`apps/server/src/index.ts`, qui bat toutes les trois secondes), et
+trois écrans — `/tournois`, `/tournois/[slug]`, `/tournois/ordinateur`.
+`scripts/check-tournoi.mjs` couvre l'appariement et le barème de points.
 
 ## Ce qu'on veut, et ce qu'on ne veut pas
 
@@ -105,3 +112,43 @@ viennent de s'affronter et qu'il ne faut pas réapparier.
 fois, six joueurs connectés en même temps. Le jour où cela arrive, faire
 l'arène seule, sans le suisse, et sans classement dédié : les points du tournoi
 suffisent, inutile de toucher au Glicko.
+
+---
+
+## Ce qui a été tranché autrement
+
+Écrit après coup, en relisant le code qui tourne.
+
+1. **La recommandation d'attendre six joueurs n'a pas été suivie**, et c'est
+   sans regret : l'arène a été écrite avant, et elle est prête le jour où le
+   monde arrivera. L'avertissement reste vrai — une arène à trois joueurs est
+   un salon d'attente déguisé —, et l'écran le dit désormais lui-même, sous la
+   liste.
+
+2. **Le tournoi contre l'ordinateur n'était pas prévu du tout.** Il est né de
+   la même remarque prise à l'envers : puisqu'un tournoi entre humains demande
+   du monde, on en a fait un qui n'en demande pas. Trois à sept adversaires
+   artificiels, un calendrier, un classement — c'est aujourd'hui le seul
+   tournoi qu'on peut jouer seul, et de loin le plus joué. Il vit dans
+   `packages/core/src/tournoi-solo.ts`, hors de la base : rien à synchroniser.
+
+3. **Le format suisse n'est pas fait**, comme recommandé. Il reste hors
+   périmètre.
+
+4. **La boucle d'arènes suppose une seule instance du serveur.** Deux
+   processus créeraient deux fois les mêmes paires. Un verrou consultatif
+   PostgreSQL autour de l'appariement serait nécessaire avant toute mise à
+   l'échelle — c'est écrit dans le code, et c'est répété au README, rubrique
+   « Ce que ça ne fait pas ».
+
+5. **Le guetteur de défis a bien été étendu** plutôt que dupliqué, comme le
+   document le suggérait : `ChallengeWatcher` transporte vers sa partie aussi
+   bien un défi accepté qu'un appariement d'arène.
+
+Reste ouvert :
+
+- **la notification à l'ouverture du tournoi** n'est pas envoyée. Le mécanisme
+  existe pourtant — c'est celui des invitations —, il n'est simplement pas
+  branché sur le démarrage d'une arène ;
+- **pas de classement dédié aux tournois**, comme recommandé : les points de
+  l'arène suffisent, et le Glicko n'est pas touché.

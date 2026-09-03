@@ -43,7 +43,7 @@ export function CavalePortrait() {
   // document : on s'aligne dessus, sinon le serveur et le client rendraient
   // deux `src` différents.
   const actuel = hydrated ? theme : 'aurora'
-  const src = `/brand/cavale-${actuel}.png`
+  const src = `/brand/cavale-${actuel}.webp`
 
   if (manquants.includes(src)) return null
 

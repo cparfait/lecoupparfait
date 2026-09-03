@@ -1820,6 +1820,29 @@ function GameScreen({
     }
   }, [verdictDuCoup, commentary, formatMove])
 
+  /**
+   * Pièces prises et avantage matériel — ou rien du tout.
+   *
+   * Le décompte se fait **par rapport au départ standard** : dans une position
+   * composée, il annonçait donc une vingtaine de pièces prises avant même le
+   * premier coup, et un avantage matériel qui ne correspondait à rien. Rien ne
+   * cassait, mais les deux mentaient — et c'est pire, parce qu'on les croit.
+   *
+   * On les masque plutôt que de les recalculer sur la position de départ :
+   * « ce que tu as pris depuis cette position-là » est une notion qui n'a
+   * d'intérêt pour personne, et une barre vide se comprend toute seule.
+   */
+  const matiereAffichee = (couleur: Color) =>
+    startFen
+      ? {}
+      : {
+          captured: state.material[couleur],
+          materialLead:
+            couleur === 'w'
+              ? Math.max(0, state.material.balance)
+              : Math.max(0, -state.material.balance),
+        }
+
   return (
     <div className="mx-auto w-full max-w-[1500px] px-2 py-3 sm:px-4 lg:py-6">
       {/*
@@ -1842,12 +1865,7 @@ function GameScreen({
           clock={timed ? clock : null}
           timeControl={timeControl}
           active={state.turn === botColor && !gameOver}
-          captured={state.material[botColor]}
-          materialLead={
-            botColor === 'w'
-              ? Math.max(0, state.material.balance)
-              : Math.max(0, -state.material.balance)
-          }
+          {...matiereAffichee(botColor)}
           status={
             botPlayer.loading
               ? 'Chargement du moteur…'
@@ -1974,12 +1992,7 @@ function GameScreen({
           clock={timed ? clock : null}
           timeControl={timeControl}
           active={state.turn === playerColor && !gameOver}
-          captured={state.material[playerColor]}
-          materialLead={
-            playerColor === 'w'
-              ? Math.max(0, state.material.balance)
-              : Math.max(0, -state.material.balance)
-          }
+          {...matiereAffichee(playerColor)}
         />
 
         {/* ── Barre d'actions ──────────────────────────────────────── */}
@@ -2259,7 +2272,13 @@ function GameScreen({
 
         {/* ── Colonne latérale ─────────────────────────────────────── */}
         <div className="[grid-area:aside] mt-4 flex min-h-0 flex-col gap-3 lg:mt-0 paysage:mt-0 paysage:overflow-y-auto paysage:overscroll-contain">
-          <OpeningBanner opening={opening} moveCount={state.moves.length} />
+          {/*
+            Rien de tout cela ne veut dire quoi que ce soit dans une position
+            composée. Le bandeau reconnaissait une « Ouverture Clemenz » sur un
+            h3 joué dans une finale de pions : le livre compare des suites de
+            coups depuis le départ standard, et on ne part pas du départ.
+          */}
+          {!startFen && <OpeningBanner opening={opening} moveCount={state.moves.length} />}
 
           {/* ── Le coach, seulement si on l'a demandé ─────────────────────
               Le panneau était posé sans condition : mode commenté éteint et

@@ -74,7 +74,7 @@ export function LogoMark({ size = 32, className }: { size?: number; className?: 
       aria-hidden
     >
       <Image
-        src="/brand/cavale-piece.png"
+        src="/brand/cavale-piece.webp"
         alt=""
         width={size * 2}
         height={size * 2}

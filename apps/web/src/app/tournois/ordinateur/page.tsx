@@ -456,7 +456,7 @@ function VisageDuConcurrent({
   if (!concurrent.personnalite) {
     return (
       <Image
-        src="/brand/logo-cavale.png"
+        src="/brand/logo-cavale.webp"
         alt=""
         width={128}
         height={128}

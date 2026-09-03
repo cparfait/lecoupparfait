@@ -53,17 +53,18 @@ if (existsSync(envPath)) {
     // par de vraies valeurs aléatoires dès la première installation.
     let content = readFileSync(envPath, 'utf8')
     const password = randomBytes(18).toString('base64url')
-    const secret = randomBytes(48).toString('base64url')
+    // Plus de secret d'application à engendrer : `AUTH_SECRET` n'était lu par
+    // personne. Une session est un jeton aléatoire dont seule l'empreinte est
+    // en base — il n'y a rien à signer.
     content = content
       .replace(/^POSTGRES_PASSWORD=.*$/m, `POSTGRES_PASSWORD=${password}`)
       .replace(
         /^DATABASE_URL=.*$/m,
         `DATABASE_URL=postgresql://coupparfait:${password}@localhost:5432/coupparfait`,
       )
-      .replace(/^AUTH_SECRET=.*$/m, `AUTH_SECRET=${secret}`)
     writeFileSync(envPath, content)
 
-    console.log('  ✓ .env créé, avec des secrets engendrés aléatoirement')
+    console.log('  ✓ .env créé, avec un mot de passe de base engendré aléatoirement')
     steps.push({ label: 'Configuration', ok: true })
   } else {
     console.warn('  ⚠ .env.example introuvable')

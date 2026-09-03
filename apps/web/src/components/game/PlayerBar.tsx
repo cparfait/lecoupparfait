@@ -125,7 +125,16 @@ export const PlayerBar = memo(function PlayerBar({
               prétend faire 100 % de la ligne. Devant ce cercle, les navigateurs
               résolvent le pourcentage en `auto` — et l'image reprenait sa
               hauteur intrinsèque, sculpture débordant par-dessus le liseré. */}
+          {/*
+            `<img>` et non `next/image`, volontairement : un avatar peut être
+            n'importe quelle adresse, y compris hors du domaine. `next/image`
+            refuse un hôte qui n'est pas déclaré dans `remotePatterns`, et
+            déclarer « tous les hôtes » reviendrait à faire de notre serveur un
+            optimiseur d'images pour le reste du web. Trente-six pixels ne
+            valent pas ça.
+          */}
           {avatar && (avatar.startsWith('/') || avatar.startsWith('http')) ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img src={avatar} alt="" className="h-9 w-9 rounded-[inherit] object-contain" />
           ) : (
             <span aria-hidden>{avatar ?? (color === 'w' ? '♔' : '♚')}</span>

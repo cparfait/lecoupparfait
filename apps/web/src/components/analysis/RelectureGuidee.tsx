@@ -90,7 +90,7 @@ export function RelectureGuidee({
           sur n'importe quel fond.
         */}
         <Image
-          src="/brand/logo-cavale.png"
+          src="/brand/logo-cavale.webp"
           alt=""
           width={128}
           height={128}

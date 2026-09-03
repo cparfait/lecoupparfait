@@ -261,8 +261,16 @@ export default function PreferencesPage() {
                         : 'border-line hover:bg-surface-hover',
                     )}
                   >
+                    {/*
+                      `<img>` et non `next/image`, volontairement : `pieceUrl`
+                      rend un SVG, que l'optimiseur d'images ne touche pas — il
+                      redimensionne des pixels, un SVG n'en a pas. On y
+                      gagnerait un composant et zéro octet.
+                    */}
                     <span className="flex" aria-hidden>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={pieceUrl(entry.id, 'w', 'n')} alt="" className="h-7 w-7" />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={pieceUrl(entry.id, 'b', 'q')} alt="" className="h-7 w-7" />
                     </span>
                     <span className="text-[11px] font-medium">{entry.label}</span>
