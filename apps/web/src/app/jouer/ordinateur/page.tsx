@@ -123,6 +123,7 @@ import { usePreferences, usePreferencesDe } from '@/lib/store/preferences.ts'
 import { speak } from '@/lib/speech.ts'
 import type { Arrow } from '@/components/board/boardKit.ts'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { useFetchJson } from '@/lib/useFetchJson.ts'
 
 type Phase = 'setup' | 'playing'
 
@@ -520,22 +521,14 @@ function SetupScreen({
    * On ne propose pas un adversaire qu'on ne peut pas fournir : la case
    * n'apparaît que si le serveur a Lc0 et les poids.
    */
-  const [maiaReady, setMaiaReady] = useState(false)
-  useEffect(() => {
-    void fetch('/api/sante')
-      .then((response) => response.json())
-      .then((data: { maia?: boolean }) => setMaiaReady(data.maia === true))
-      .catch(() => setMaiaReady(false))
-  }, [])
+  // `useFetchJson` porte l'abandon au démontage : ces trois appels partaient
+  // au montage et posaient leur état sans se demander si l'écran existait
+  // encore. Voir `lib/useFetchJson.ts`.
+  const sante = useFetchJson<{ maia?: boolean }>('/api/sante')
+  const maiaReady = sante.data?.maia === true
 
   /** Où en est le joueur dans l'échelle. `null` tant qu'on ne sait pas. */
-  const [progress, setProgress] = useState<Progression | null>(null)
-  useEffect(() => {
-    void fetch('/api/progression')
-      .then((response) => response.json())
-      .then(setProgress)
-      .catch(() => setProgress(null))
-  }, [])
+  const { data: progress } = useFetchJson<Progression>('/api/progression')
 
   /**
    * Le curseur part du dernier niveau battu.

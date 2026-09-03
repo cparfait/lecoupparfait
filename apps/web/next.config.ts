@@ -85,6 +85,60 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        /*
+          Aucune réponse d'API n'est gardée par un relais, sauf demande contraire.
+
+          Six routes sur trente-six posaient un `Cache-Control` ; les trente
+          autres laissaient la question ouverte, et « ouvert » ne veut pas dire
+          « rien » — un relais sans consigne applique la sienne. Le risque n'est
+          pas le gaspillage, c'est qu'une réponse **personnelle** — un carnet
+          d'amis, une progression, un profil connecté — soit gardée par un cache
+          partagé puis resservie à quelqu'un d'autre.
+
+          On pose donc le défaut le plus prudent ici, en un seul endroit, plutôt
+          que de compter sur trente fichiers pour y penser.
+        */
+        source: '/api/:path*',
+        headers: [{ key: 'Cache-Control', value: 'private, no-store' }],
+      },
+      {
+        /*
+          Les exceptions : les routes qui servent la même chose à tout le monde.
+
+          Elles sont **après** le défaut, et c'est ce qui les fait gagner : à
+          clé égale, c'est la dernière règle qui correspond qui l'emporte. Et
+          c'est aussi pourquoi elles sont ici et non dans le corps des routes —
+          un en-tête posé sur la réponse se fait écraser par celui-ci, ce qui
+          est exactement le piège dans lequel on est tombé en l'écrivant.
+
+          Une minute de fraîcheur, cinq de sursis : passé la minute, le relais
+          sert la version périmée **et** va en chercher une neuve derrière.
+          Personne n'attend jamais un recalcul, et une base indisponible ne
+          vide pas l'écran pendant cinq minutes.
+
+          Aucune de ces routes ne lit de session : deux visiteurs qui posent la
+          même question reçoivent la même réponse. C'est la seule condition.
+        */
+        source: '/api/:route(classement|joueurs|sante)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' },
+        ],
+      },
+      {
+        // Une fiche publique. Le pseudo fait partie de l'adresse, donc de la clé.
+        source: '/api/profil/:username',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' },
+        ],
+      },
+      {
+        // Les parties en cours changent vite : quinze secondes, pas soixante.
+        source: '/api/parties',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=15, stale-while-revalidate=60' },
+        ],
+      },
+      {
         // Le moteur pèse plusieurs mégaoctets et ne change qu'avec la version :
         // on le met en cache pour un an.
         source: '/engine/:path*',
