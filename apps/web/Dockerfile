@@ -84,6 +84,29 @@ COPY --from=deps --chown=coupparfait:coupparfait /app/node_modules/drizzle-orm .
 
 USER coupparfait
 
+# La révision qui a produit cette image, gravée dedans.
+#
+# Sans elle, la seule façon de savoir ce qui tourne en production est de
+# comparer l'empreinte du conteneur à celle de l'image étiquetée — ce qui dit
+# « c'est bien la dernière construite », jamais « c'est bien le commit que je
+# crois ». Une image reconstruite fait disparaître la précédente du magasin, et
+# le conteneur qui en est issu devient alors littéralement inidentifiable :
+# `docker compose images` répond `<none>`, `0B`, `N/A`.
+#
+# C'est arrivé le 3 septembre 2026, et la question « qu'est-ce qui tourne ? »
+# est restée sans réponse une bonne demi-heure. Avec cette étiquette elle se
+# résout en une commande, y compris sur une image que plus rien n'étiquette :
+#
+#   docker inspect coupparfait-web-1 \
+#     --format '{{index .Config.Labels "org.opencontainers.image.revision"}}'
+#
+# `ARG` ici et non plus haut : une variable de construction n'existe que dans
+# l'étape qui la déclare. La valeur par défaut permet un `docker build` à la
+# main sans rien passer — c'est `scripts/deployer.sh` qui la renseigne.
+ARG GIT_REVISION=inconnue
+LABEL org.opencontainers.image.revision=$GIT_REVISION
+LABEL org.opencontainers.image.title="Le Coup Parfait — web"
+
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 EXPOSE 3000

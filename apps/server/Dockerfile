@@ -154,6 +154,13 @@ COPY apps/server ./apps/server
 
 USER coupparfait
 
+# La révision qui a produit cette image — voir la note détaillée dans
+# `apps/web/Dockerfile`. En deux mots : l'empreinte d'une image dit « c'est la
+# dernière construite », jamais « c'est le commit que je crois ».
+ARG GIT_REVISION=inconnue
+LABEL org.opencontainers.image.revision=$GIT_REVISION
+LABEL org.opencontainers.image.title="Le Coup Parfait — serveur"
+
 ENV NODE_ENV=production
 ENV SERVER_PORT=3001
 EXPOSE 3001

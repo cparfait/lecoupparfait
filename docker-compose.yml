@@ -183,6 +183,12 @@ services:
     build:
       context: .
       dockerfile: apps/server/Dockerfile
+      args:
+        # Renseigné par `scripts/deployer.sh`, qui y met `git rev-parse HEAD`.
+        # Une construction lancée à la main sans cette variable produit une
+        # image étiquetée « inconnue » — ce qui est la vérité, et ce que le
+        # script refuse ensuite de reconnaître comme un déploiement.
+        GIT_REVISION: ${GIT_REVISION:-inconnue}
     restart: unless-stopped
     depends_on:
       db:
@@ -264,6 +270,9 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      args:
+        # Voir la remarque du service `server`.
+        GIT_REVISION: ${GIT_REVISION:-inconnue}
     restart: unless-stopped
     depends_on:
       db:

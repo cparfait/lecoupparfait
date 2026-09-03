@@ -13,10 +13,12 @@ Depuis le VPS, dans `~/docker/coupparfait` :
 ./scripts/deployer.sh --web-seul     # une correction d'interface — le cas courant
 ./scripts/deployer.sh                # web + serveur d'analyse
 ./scripts/deployer.sh --migrer       # si la livraison contient des migrations
+./scripts/deployer.sh --etat         # ne rien déployer, dire ce qui tourne
 ```
 
-C'est tout. Le script récupère le dépôt, construit, bascule, et dit ce qu'il a
-réellement fait.
+C'est tout. Le script récupère le dépôt, construit, bascule, et **vérifie**.
+S'il se termine sans erreur, ce qui tourne est ce qui est commité ; s'il échoue,
+il dit où et ce qu'il reste à faire. Il n'a pas d'issue silencieuse.
 
 **`--web-seul` mérite d'être le réflexe.** Redémarrer `server` déconnecte
 toutes les parties en direct, les salons vivant en mémoire. La grande majorité
@@ -65,14 +67,39 @@ cas.
 
 ### Vérifier ce qui tourne vraiment
 
-**L'image du conteneur correspond-elle à la dernière construite ?** Deux
-empreintes différentes signifient qu'une image existe et n'a jamais été
-déployée — le conteneur tourne encore sur la précédente.
+```bash
+./scripts/deployer.sh --etat
+```
+
+Il affiche la révision que porte chaque conteneur, et celle du dépôt. Les deux
+doivent coïncider.
+
+**D'où vient cette révision.** Chaque image grave dans une étiquette le commit
+qui l'a produite (`GIT_REVISION` → `org.opencontainers.image.revision`), et le
+script la relit sur le conteneur :
 
 ```bash
-docker inspect --format 'conteneur : {{.Image}}' coupparfait-web-1
-docker image inspect --format 'latest    : {{.Id}}' coupparfait-web:latest
+docker inspect coupparfait-web-1 \
+  --format '{{index .Config.Labels "org.opencontainers.image.revision"}}'
 ```
+
+**Pourquoi pas l'empreinte de l'image**, qui semblerait plus naturelle : elle
+répond « c'est bien la dernière construite », jamais « c'est bien le commit que
+je crois ». Et elle s'évapore — une reconstruction fait disparaître du magasin
+l'image dont le conteneur est issu, qui devient alors littéralement
+inidentifiable :
+
+```
+$ docker compose images web
+CONTAINER           REPOSITORY   TAG      IMAGE ID       SIZE   CREATED
+coupparfait-web-1   <none>       <none>   2c64634a0d9a   0B     N/A
+```
+
+C'est l'état dans lequel la production s'est trouvée le 3 septembre 2026. Une
+étiquette, elle, voyage avec le conteneur et survit à la disparition de l'image.
+
+Une image construite hors du script porte `inconnue` — ce qui est la vérité, et
+ce que `--etat` signale.
 
 **Le code déployé contient-il ce que j'attends ?** L'image du serveur embarque
 les sources TypeScript telles quelles (`--experimental-strip-types`), donc on
@@ -81,6 +108,36 @@ peut y chercher directement un symbole qu'on vient d'ajouter :
 ```bash
 docker compose exec server grep -c <symbole> /app/apps/server/src/realtime/gameRoom.ts
 ```
+
+### Les trois garde-fous du script
+
+Ils existent tous les trois à cause du même incident, et le script s'arrête sur
+chacun plutôt que de laisser croire à une réussite.
+
+**Avant de construire — l'arbre est-il propre ?** Des modifications locales
+seraient cuites dans l'image sans laisser de trace : l'étiquette annoncerait un
+commit, l'image contiendrait autre chose, et l'écart ne serait retrouvable nulle
+part. Le script refuse, liste les fichiers, et propose `--arbre-sale` pour
+assumer explicitement.
+
+**Après la bascule — le conteneur porte-t-il la révision déployée ?** C'est la
+question à laquelle on ne savait pas répondre. Une image peut être construite
+sans que le conteneur suive, et `up -d` se termine alors sans un mot. En cas
+d'écart, le script donne la commande qui force :
+
+```bash
+docker compose up -d --force-recreate --no-build --wait web
+```
+
+**Après la bascule — le site répond-il vu de dehors ?** La sonde de santé
+n'interroge que l'intérieur du conteneur, sur sa boucle locale ; elle ne dit
+rien du chemin qui y mène. Le script interroge `NEXT_PUBLIC_APP_URL`, donc la
+chaîne complète : DNS, certificat, proxy, réseau de façade, conteneur. Un `503`
+signifie que la page d'attente est servie alors que le conteneur est sain —
+typiquement un conteneur débranché de `web-coupparfait`.
+
+Et si le script échoue **pendant** la bascule, il le dit explicitement plutôt
+que de laisser croire que la production n'a pas bougé.
 
 **La clé de déploiement répond-elle encore ?**
 
