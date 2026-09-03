@@ -1,0 +1,9 @@
+# Commits à ignorer dans « git blame » : ils ne changent que la mise en forme.
+#
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# GitHub lit ce fichier tout seul. En local, la ligne ci-dessus se pose une
+# fois et vaut pour toujours.
+
+# Prettier passe une fois sur tout le dépôt
+0f569c466595bd495351ffbe1ba2f95267230614
