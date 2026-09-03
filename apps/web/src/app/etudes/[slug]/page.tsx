@@ -309,6 +309,7 @@ export default function StudyPage() {
                   count={chapter.moves.length}
                   onSeek={setCursor}
                   min={-1}
+                  fen={board.fen()}
                 />
                 <p className="text-[12px] text-muted">
                   {own

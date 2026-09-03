@@ -22,6 +22,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { Box, Grid2x2, Maximize2, Minimize2 } from 'lucide-react'
 import clsx from 'clsx'
+import { AnnonceDuCoup } from './AnnonceDuCoup.tsx'
 import { Board2D, type Board2DProps } from './Board2D.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { useT } from '@/lib/i18n/index.tsx'
@@ -67,6 +68,15 @@ export interface ChessBoardProps extends Board2DProps {
    * retombe sur la borne en `dvh` — voir la mesure elle-même.
    */
   fitParentHeight?: boolean
+  /**
+   * Notation du dernier coup joué, pour l'annoncer.
+   *
+   * `lastMove` ne porte que deux cases : de quoi flécher, pas de quoi dire
+   * « cavalier f3 ». Les écrans qui connaissent la notation la passent ici ;
+   * les autres — l'éditeur, la vision — n'annoncent rien, ce qui est correct
+   * puisqu'il n'y a pas de partie en cours.
+   */
+  dernierCoupSan?: string | null
 }
 
 /**
@@ -108,6 +118,7 @@ export const ChessBoard = memo(function ChessBoard({
   showViewToggle = true,
   reservedHeight = 17,
   fitParentHeight = false,
+  dernierCoupSan,
   ...props
 }: ChessBoardProps) {
   const view = usePreferences((state) => state.view)
@@ -282,6 +293,9 @@ export const ChessBoard = memo(function ChessBoard({
         <div className="relative w-full" style={{ aspectRatio: '1 / 1' }}>
           {view === '3d' ? <Board3D {...props} /> : <Board2D {...props} />}
         </div>
+
+        {/* Invisible, et c'est tout l'intérêt : voir `AnnonceDuCoup`. */}
+        <AnnonceDuCoup san={dernierCoupSan} />
 
         {barreVisible && (
           <ViewToggle

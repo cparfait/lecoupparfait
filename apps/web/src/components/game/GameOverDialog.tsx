@@ -12,7 +12,8 @@
  * qu'on avait en tête.
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useDialogue } from '@/lib/useDialogue.ts'
 import Link from 'next/link'
 import { Gauge, LayoutGrid, RotateCcw, Swords, Trophy, X } from 'lucide-react'
 import type { Color } from 'chess.js'
@@ -84,14 +85,22 @@ export function GameOverDialog({
     return () => clearTimeout(timer)
   }, [])
 
-  // Échap referme, comme n'importe quelle boîte de dialogue.
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setDismissed(true)
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  /*
+    Échap refermait déjà ; le reste manquait.
+
+    Ici le focus initial compte plus qu'ailleurs : l'annonce de fin de partie
+    apparaît toute seule, sans qu'on ait cliqué quoi que ce soit, et le focus
+    restait sur le dernier bouton touché — souvent une case du plateau. « Rejouer »
+    demandait donc de retrouver le bouton à la souris.
+
+    `actif` : le dialogue ne se monte pas toujours, et un piège à focus armé
+    sur un conteneur absent piégerait le clavier dans le vide.
+  */
+  const boite = useRef<HTMLDivElement>(null)
+  useDialogue(boite, {
+    onFermer: () => setDismissed(true),
+    actif: !dismissed && revealed,
+  })
 
   if (dismissed || !revealed) return null
 
@@ -178,7 +187,10 @@ export function GameOverDialog({
       {/* Opaque, comme toute surface qui se superpose au contenu : à travers
           le verre, l'échiquier passait au milieu du texte et « Victoire ! » se
           lisait par-dessus un damier. */}
-      <div className="popover animate-slide-up relative w-full max-w-sm overflow-hidden p-6 text-center shadow-[var(--shadow-lg)]">
+      <div
+        ref={boite}
+        className="popover animate-slide-up relative w-full max-w-sm overflow-hidden p-6 text-center shadow-[var(--shadow-lg)]"
+      >
         <button
           type="button"
           onClick={() => setDismissed(true)}

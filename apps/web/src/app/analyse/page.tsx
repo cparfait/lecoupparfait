@@ -50,7 +50,7 @@ import { ANNOTATION_COLORS } from '@/components/board/boardKit.ts'
 import { EvalBar, EvalGraph } from '@/components/game/EvalBar.tsx'
 import { GameNav } from '@/components/game/GameNav.tsx'
 import { MoveList } from '@/components/game/MoveList.tsx'
-import { Button, Card, Chip, SectionTitle, Spinner } from '@/components/ui/index.tsx'
+import { Button, ButtonLink, Card, Chip, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import {
   parseAnalysisInput,
@@ -802,10 +802,19 @@ const PAUSE_APRES_VOIX = 2_000
 /** Au-delà, on considère que la synthèse ne répondra pas et on avance. */
 const SECOURS_LECTURE = 15_000
 
-function ReviewScreen({
+/**
+ * Exportée pour la page de lecture d'une analyse partagée.
+ *
+ * Elle vit ici et non dans `components/` : la sortir demanderait de déplacer
+ * sept cents lignes et tous les fragments avec lesquels elle partage ce
+ * fichier, pour un gain de rangement seul. On assume l'import entre pages, et
+ * on le dit — c'est le seul du projet.
+ */
+export function ReviewScreen({
   outcome,
   side,
   onReset,
+  lectureSeule = false,
 }: {
   outcome: AnalysisOutcome
   /**
@@ -817,6 +826,15 @@ function ReviewScreen({
    */
   side: Color | null
   onReset: () => void
+  /**
+   * Analyse ouverte par un lien de partage.
+   *
+   * On masque alors tout ce qui suppose que l'analyse est à soi : la
+   * conserver, la partager, l'oublier. Le reste — l'échiquier, les
+   * explications, la navigation — est exactement le même, et c'est bien le
+   * but : partager une analyse, c'est partager ce qu'on a vu.
+   */
+  lectureSeule?: boolean
 }) {
   const { report, coach, source } = outcome
   const locale = usePreferences((state) => state.locale)
@@ -1385,9 +1403,18 @@ function ReviewScreen({
           >
             PGN
           </Button>
-          <Button size="sm" variant="secondary" onClick={onReset}>
-            Autre partie
-          </Button>
+          {/* Une analyse ouverte par un lien n'a pas d'« autre partie » : il
+              n'y a pas d'écran d'import derrière, on est arrivé directement
+              ici. Le lien vers l'analyse prend sa place. */}
+          {lectureSeule ? (
+            <ButtonLink href="/analyse" size="sm" variant="secondary">
+              Analyser une partie
+            </ButtonLink>
+          ) : (
+            <Button size="sm" variant="secondary" onClick={onReset}>
+              Autre partie
+            </Button>
+          )}
         </div>
       </div>
 
@@ -1445,6 +1472,9 @@ function ReviewScreen({
               // L'analyse commente un coup : elle n'a rien à dire avant le
               // premier, et s'arrête donc au demi-coup 0.
               min={0}
+              // La position **affichée** : on recule jusqu'à l'endroit qui
+              // pose question, puis on copie ce qu'on a sous les yeux.
+              fen={move?.fenAfter ?? report.moves[0]?.fenBefore ?? null}
             />
             <Button
               size="sm"

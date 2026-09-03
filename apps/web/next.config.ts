@@ -55,7 +55,13 @@ loadRootEnv()
  *    en-tête CORP — ne coûte rien ici : les polices sont auto-hébergées et
  *    l'application ne charge rien d'autre depuis un autre domaine. C'est de
  *    toute façon préférable : aucune requête vers un tiers, donc aucune fuite
- *    de l'adresse IP des joueurs, et l'application fonctionne hors ligne.
+ *    de l'adresse IP des joueurs.
+ *
+ *    Cette phrase se terminait par « et l'application fonctionne hors ligne ».
+ *    C'était faux : `public/sw.js` ne met **rien** en cache, par choix qu'il
+ *    argumente lui-même. Auto-héberger ses polices évite une requête vers un
+ *    tiers, ce qui n'est pas la même chose que se passer du réseau. Voir le
+ *    README, rubrique « Ce que ça ne fait pas ».
  *
  * 2. **`transpilePackages`**. Le paquet `@coupparfait/core` est consommé sous forme
  *    de TypeScript source, sans étape de compilation intermédiaire. Next doit

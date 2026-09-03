@@ -519,6 +519,7 @@ export default function LiveGamePage() {
             onPremoveCancel={annuler}
             premove={precoup}
             lastMove={revue ? revue.lastMove : snapshot.lastMove}
+            dernierCoupSan={snapshot.moves[snapshot.moves.length - 1] ?? null}
             checkSquare={revue ? revue.checkSquare : checkSquare}
             // Cinq autres pages l'annonçaient, celle-ci non : le mat qu'on
             // vient de porter à un ami passait donc inaperçu, alors que

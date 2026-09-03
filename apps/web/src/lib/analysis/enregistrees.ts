@@ -35,6 +35,8 @@ export interface AnalyseEnregistree {
   accuracyBlack: number | null
   updatedAt: string
   coups: number | null
+  /** Identifiant public si l'analyse est partagée, `null` sinon. */
+  partage: string | null
 }
 
 /** Une analyse complète, telle qu'on la rejoue. */
@@ -134,6 +136,26 @@ export async function chargerAnalyse(id: string): Promise<AnalyseComplete | null
     if (!reponse.ok) return null
     const data = (await reponse.json()) as { analyse?: AnalyseComplete | null }
     return data.analyse ?? null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Partage une analyse, ou retire le partage.
+ *
+ * Rend l'identifiant public, ou `null` — pour un retrait comme pour un échec.
+ * L'appelant regarde donc ce qu'il a demandé pour savoir s'il a été entendu.
+ */
+export async function partagerAnalyse(id: string, partager: boolean): Promise<string | null> {
+  try {
+    const reponse = await fetch(`/api/analyses/${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ partager }),
+    })
+    const data = (await reponse.json()) as { ok?: boolean; partage?: string | null }
+    return data.ok === true ? (data.partage ?? null) : null
   } catch {
     return null
   }

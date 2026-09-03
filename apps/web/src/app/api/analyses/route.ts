@@ -74,6 +74,7 @@ export async function GET() {
         accuracyWhite: savedAnalyses.accuracyWhite,
         accuracyBlack: savedAnalyses.accuracyBlack,
         updatedAt: savedAnalyses.updatedAt,
+        partage: savedAnalyses.partage,
         // Le nombre de coups sans rapatrier les coups eux-mêmes.
         coups: sql<number>`array_length(string_to_array(${savedAnalyses.moves}, ' '), 1)`,
       })

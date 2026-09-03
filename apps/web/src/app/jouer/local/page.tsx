@@ -216,6 +216,7 @@ export default function LocalGamePage() {
             legalMoves={state.legalMoves}
             onMove={handleMove}
             lastMove={state.lastMove}
+            dernierCoupSan={state.moves[state.moves.length - 1]?.san ?? null}
             checkSquare={state.checkSquare}
                 checkmate={state.status === 'checkmate'}
             arrows={arrows}

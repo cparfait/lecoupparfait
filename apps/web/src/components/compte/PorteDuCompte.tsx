@@ -21,7 +21,8 @@
  * remplace précisément.
  */
 
-import { useEffect } from 'react'
+import { useRef } from 'react'
+import { useDialogue } from '@/lib/useDialogue.ts'
 import Link from 'next/link'
 import { Check, Lock, X } from 'lucide-react'
 import { Button, ButtonLink } from '@/components/ui/index.tsx'
@@ -37,14 +38,11 @@ export function PorteDuCompte({
   href: string
   onFermer: () => void
 }) {
-  // Échap referme, comme partout ailleurs.
-  useEffect(() => {
-    const auClavier = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onFermer()
-    }
-    document.addEventListener('keydown', auClavier)
-    return () => document.removeEventListener('keydown', auClavier)
-  }, [onFermer])
+  // Échap, focus initial, piège à Tab et retour du focus à la fermeture :
+  // les quatre gestes d'un dialogue modal, dans `useDialogue`. Seul le premier
+  // était fait ici.
+  const boite = useRef<HTMLDivElement>(null)
+  useDialogue(boite, { onFermer })
 
   return (
     <div
@@ -55,7 +53,10 @@ export function PorteDuCompte({
     >
       <div className="absolute inset-0 bg-black/45" onClick={onFermer} aria-hidden />
 
-      <div className="popover animate-slide-up relative w-full max-w-sm overflow-hidden p-6 shadow-[var(--shadow-lg)]">
+      <div
+        ref={boite}
+        className="popover animate-slide-up relative w-full max-w-sm overflow-hidden p-6 shadow-[var(--shadow-lg)]"
+      >
         <button
           type="button"
           onClick={onFermer}

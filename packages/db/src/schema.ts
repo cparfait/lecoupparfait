@@ -344,12 +344,29 @@ export const savedAnalyses = pgTable(
     accuracyWhite: real('accuracy_white'),
     accuracyBlack: real('accuracy_black'),
 
+    /**
+     * Identifiant public, ou `null` — l'analyse n'est alors partagée avec
+     * personne, ce qui est le défaut et le reste.
+     *
+     * **Le partage est un état, pas une copie.** Retirer le partage remet
+     * cette colonne à `null` et le lien cesse aussitôt de fonctionner : c'est
+     * la même mécanique que les études, volontairement, plutôt qu'une seconde
+     * inventée à côté.
+     *
+     * Douze caractères tirés au hasard dans un alphabet sans voyelles : un
+     * lien qui ne se devine pas, et aucun mot ne s'y forme par accident.
+     */
+    partage: varchar('partage', { length: 12 }),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
     uniqueIndex('saved_analyses_owner_idx').on(table.userId, table.fingerprint),
     index('saved_analyses_recent_idx').on(table.userId, table.updatedAt),
+    // Unique : c'est la clé d'accès publique, deux analyses ne peuvent pas la
+    // partager. L'index sert aussi à la lecture par lien, qui n'a rien d'autre.
+    uniqueIndex('saved_analyses_partage_idx').on(table.partage),
   ],
 )
 

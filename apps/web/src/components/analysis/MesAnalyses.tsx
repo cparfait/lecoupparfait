@@ -14,12 +14,14 @@
  */
 
 import { useCallback, useEffect, useState } from 'react'
-import { Loader2, Trash2 } from 'lucide-react'
+import clsx from 'clsx'
+import { Link2, Link2Off, Loader2, Trash2 } from 'lucide-react'
 import { SectionTitle } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import {
   listerAnalyses,
   oublierAnalyse,
+  partagerAnalyse,
   type AnalyseEnregistree,
 } from '@/lib/analysis/enregistrees.ts'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
@@ -57,6 +59,47 @@ export function MesAnalyses({
       vivant = false
     }
   }, [identite])
+
+  /**
+   * Partage, ou retire le partage.
+   *
+   * Le lien est copié dans la foulée : partager pour devoir ensuite aller
+   * chercher l'adresse ailleurs ferait deux gestes là où il en faut un. Sur un
+   * retrait, on ne copie rien — il n'y a plus de lien.
+   *
+   * Le partage est un **état** : retirer coupe le lien pour de bon, et
+   * repartager en engendre un nouveau. C'est la mécanique des études, reprise
+   * telle quelle.
+   */
+  const basculerLePartage = useCallback(async (id: string, partageActuel: string | null) => {
+    const partage = await partagerAnalyse(id, partageActuel === null)
+
+    if (partageActuel !== null) {
+      if (partage !== null) {
+        toast.error('Retrait impossible.', 'Réessaie dans un instant.')
+        return
+      }
+      setAnalyses((liste) => liste?.map((a) => (a.id === id ? { ...a, partage: null } : a)) ?? liste)
+      toast.info('Lien retiré', 'L’analyse n’est plus accessible par ce lien.')
+      return
+    }
+
+    if (!partage) {
+      toast.error('Partage impossible.', 'Réessaie dans un instant.')
+      return
+    }
+    setAnalyses((liste) => liste?.map((a) => (a.id === id ? { ...a, partage } : a)) ?? liste)
+
+    const lien = `${window.location.origin}/analyse/p/${partage}`
+    try {
+      await navigator.clipboard.writeText(lien)
+      toast.success('Lien copié', lien)
+    } catch {
+      // Le presse-papiers peut être refusé — contexte non sécurisé, permission
+      // absente. Le lien s'affiche alors, il reste sélectionnable à la main.
+      toast.info('Lien de partage', lien)
+    }
+  }, [])
 
   const oublier = useCallback(async (id: string) => {
     // Retrait immédiat de la liste : attendre le serveur pour faire disparaître
@@ -127,15 +170,42 @@ export function MesAnalyses({
                 {ouverture === analyse.id ? (
                   <Loader2 size={14} className="shrink-0 animate-spin text-muted" aria-hidden />
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => void oublier(analyse.id)}
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => void basculerLePartage(analyse.id, analyse.partage)}
+                      title={
+                        analyse.partage
+                          ? 'Retirer le partage : le lien cessera de fonctionner'
+                          : 'Partager par un lien, sans compte requis'
+                      }
+                      aria-label={
+                        analyse.partage
+                          ? `Retirer le partage de l'analyse ${analyse.whiteName ?? 'Blancs'} – ${analyse.blackName ?? 'Noirs'}`
+                          : `Partager l'analyse ${analyse.whiteName ?? 'Blancs'} – ${analyse.blackName ?? 'Noirs'}`
+                      }
+                      aria-pressed={analyse.partage !== null}
+                      className={clsx(
+                        'shrink-0 rounded-[var(--radius-sm)] p-1 transition-colors hover:bg-surface-strong',
+                        analyse.partage ? 'text-accent' : 'text-faint hover:text-ink',
+                      )}
+                    >
+                      {analyse.partage ? (
+                        <Link2Off size={13} aria-hidden />
+                      ) : (
+                        <Link2 size={13} aria-hidden />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void oublier(analyse.id)}
                     title="Oublier cette analyse"
                     aria-label={`Oublier l'analyse ${analyse.whiteName ?? 'Blancs'} – ${analyse.blackName ?? 'Noirs'}`}
                     className="shrink-0 rounded-[var(--radius-sm)] p-1 text-faint transition-colors hover:bg-surface-strong hover:text-[var(--q-blunder)]"
                   >
-                    <Trash2 size={13} aria-hidden />
-                  </button>
+                      <Trash2 size={13} aria-hidden />
+                    </button>
+                  </>
                 )}
               </div>
             </li>

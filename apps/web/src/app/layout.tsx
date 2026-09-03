@@ -8,10 +8,14 @@ import { AppShell } from '@/components/layout/AppShell.tsx'
  * Polices auto-hébergées.
  *
  * `next/font` télécharge les fichiers à la construction et les sert depuis
- * notre propre domaine. Trois bénéfices : aucune requête vers Google donc
- * aucune fuite d'adresse IP, aucun décalage de mise en page au chargement, et
- * une application qui fonctionne hors ligne. C'est aussi ce qui rend possible
- * l'en-tête `COEP: require-corp` dont Stockfish multi-fils a besoin.
+ * notre propre domaine. Deux bénéfices : aucune requête vers Google donc
+ * aucune fuite d'adresse IP, et aucun décalage de mise en page au chargement.
+ * C'est aussi ce qui rend possible l'en-tête `COEP: require-corp` dont
+ * Stockfish multi-fils a besoin.
+ *
+ * Il y en avait un troisième d'annoncé, « une application qui fonctionne hors
+ * ligne », et il était faux : rien n'est mis en cache. Ne dépendre d'aucun
+ * tiers n'est pas se passer du réseau. Voir le README, « Ce que ça ne fait pas ».
  */
 const inter = Inter({
   subsets: ['latin'],

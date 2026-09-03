@@ -9,7 +9,9 @@
  * sous-promotion existe et peut être décisive.
  */
 
+import { useRef } from 'react'
 import type { Color, PieceSymbol, Square } from 'chess.js'
+import { useDialogue } from '@/lib/useDialogue.ts'
 import { pieceUrl, squarePosition } from './boardKit.ts'
 
 /*
@@ -52,6 +54,21 @@ export function PromotionPicker({
   onSelect: (type: PieceSymbol) => void
   onCancel: () => void
 }) {
+  /*
+    Le dialogue au clavier.
+
+    Il se disait modal — `role="dialog" aria-modal="true"` — et ne l'était pas :
+    au clavier, on poussait son pion à la huitième rangée et le focus restait
+    sur la case du plateau. Tab s'en allait dans la barre de navigation, Entrée
+    ne choisissait rien, Échap ne fermait rien. Promouvoir demandait la souris.
+
+    La dame prend le focus, puisqu'elle est en tête et choisie dans plus de
+    99 % des cas : Entrée suffit alors, ce qui est le geste le plus rapide
+    possible. Échap annule le coup.
+  */
+  const boite = useRef<HTMLDivElement>(null)
+  useDialogue(boite, { onFermer: onCancel })
+
   const { left, top } = squarePosition(square, orientation)
   // Le menu se déroule vers le bas s'il y a la place, vers le haut sinon.
   const downwards = top < 50
@@ -72,6 +89,7 @@ export function PromotionPicker({
         <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] [[data-effects=low]_&]:backdrop-blur-none" />
 
         <div
+          ref={boite}
           className="popover relative flex gap-1 p-2 shadow-[var(--shadow-lg)]"
           onClick={(event) => event.stopPropagation()}
         >
@@ -115,6 +133,7 @@ export function PromotionPicker({
       <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] [[data-effects=low]_&]:backdrop-blur-none" />
 
       <div
+        ref={boite}
         className="absolute flex flex-col"
         style={{
           left: `${left}%`,

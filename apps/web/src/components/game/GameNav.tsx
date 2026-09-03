@@ -12,8 +12,17 @@
  */
 
 import { useEffect } from 'react'
-import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
+import {
+  ChevronFirst,
+  ChevronLast,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardCopy,
+  Pause,
+  Play,
+} from 'lucide-react'
 import clsx from 'clsx'
+import { toast } from '@/components/ui/Toast.tsx'
 
 export interface GameNavProps {
   /** Demi-coup affiché. `-1` = position de départ. */
@@ -32,6 +41,18 @@ export interface GameNavProps {
    * initial, où le curseur vaut `-1`.
    */
   min?: number
+  /**
+   * Position **affichée**, à copier.
+   *
+   * Affichée et non réelle : quand on remonte dans la liste des coups, c'est
+   * la position qu'on a sous les yeux qu'on veut poser ailleurs, pas celle où
+   * la partie en est. C'est d'ailleurs le geste principal — on recule jusqu'à
+   * l'endroit qui pose question, puis on copie.
+   *
+   * Omise, le bouton ne s'affiche pas : l'éditeur montre déjà la position en
+   * clair, il n'a pas besoin d'un second chemin.
+   */
+  fen?: string | null
   className?: string
 }
 
@@ -42,6 +63,7 @@ export function GameNav({
   autoplay,
   onToggleAutoplay,
   min = -1,
+  fen,
   className,
 }: GameNavProps) {
   const last = count - 1
@@ -52,7 +74,10 @@ export function GameNav({
   // les champs de saisie tranquilles, et les raccourcis système intacts.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey) return
+      // Ctrl+Maj+C est le seul raccourci à modificateur qu'on écoute ; tous
+      // les autres appartiennent au navigateur et au système.
+      const copieDeLaPosition = (event.ctrlKey || event.metaKey) && event.shiftKey
+      if ((event.metaKey || event.ctrlKey || event.altKey) && !copieDeLaPosition) return
       // La cible n'est pas toujours un élément : une touche pressée sans rien
       // de focalisé vise `document`, qui n'a pas de `closest`.
       const target = event.target
@@ -76,6 +101,13 @@ export function GameNav({
         case 'End':
           onSeek(last)
           break
+        // Ctrl+Maj+C : le raccourci de copie enrichi, qui ne prend la place
+        // d'aucun raccourci du navigateur — Ctrl+C copie la sélection, et
+        // c'est très bien ainsi.
+        case 'C':
+          if (!fen || !event.shiftKey) return
+          void copierLaPosition(fen)
+          break
         default:
           return
       }
@@ -83,7 +115,7 @@ export function GameNav({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [cursor, last, min, onSeek])
+  }, [cursor, last, min, onSeek, fen])
 
   return (
     /*
@@ -154,8 +186,42 @@ export function GameNav({
       <SeekButton onClick={() => onSeek(last)} disabled={atEnd} label="Dernier coup (Fin)">
         <ChevronLast size={16} aria-hidden />
       </SeekButton>
+
+      {fen && (
+        <>
+          {/* Un trait : copier n'est pas naviguer, et les deux ne doivent pas
+              se confondre sous le doigt. */}
+          <span className="mx-0.5 h-4 w-px bg-line" aria-hidden />
+          <SeekButton
+            onClick={() => void copierLaPosition(fen)}
+            label="Copier la position (Ctrl+Maj+C)"
+          >
+            <ClipboardCopy size={15} aria-hidden />
+          </SeekButton>
+        </>
+      )}
     </div>
   )
+}
+
+/**
+ * Copie une FEN dans le presse-papiers.
+ *
+ * La FEN est le premier geste quand on veut poser une question ailleurs — sur
+ * un forum, dans un message, à un logiciel d'analyse. Elle n'était visible que
+ * dans l'éditeur de position : depuis l'analyse ou une partie, il fallait la
+ * reconstruire à la main.
+ *
+ * `navigator.clipboard` demande un contexte sécurisé et n'existe pas partout ;
+ * l'échec se dit, plutôt que de laisser croire que c'est copié.
+ */
+async function copierLaPosition(fen: string): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(fen)
+    toast.success('Position copiée', fen)
+  } catch {
+    toast.error('Copie impossible', 'Le navigateur n’a pas autorisé l’accès au presse-papiers.')
+  }
 }
 
 /**

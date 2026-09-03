@@ -9,8 +9,8 @@
  * Choix techniques :
  *  - **Aucune ressource externe.** Pas d'environnement HDR téléchargé : la
  *    lumière vient de trois sources placées à la main et d'un dégradé de fond.
- *    L'application reste donc pleinement fonctionnelle hors ligne et
- *    auto-hébergée.
+ *    L'application reste donc entièrement auto-hébergeable — ce qui n'est pas
+ *    la même chose que de fonctionner hors ligne, qu'elle ne fait pas.
  *  - **Les pièces glissent, elles ne sautent pas.** Chaque déplacement est
  *    interpolé, avec un léger arc pour le cavalier — qui saute vraiment.
  *  - **La caméra reste dressée.** L'orbite est bridée : on ne peut ni passer

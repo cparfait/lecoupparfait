@@ -653,6 +653,21 @@ export default function PreferencesPage() {
                   format={(value) => `${(value / 100).toFixed(2)}×`}
                 />
 
+                {/*
+                  Le réglage existait dans le store depuis le début et n'était
+                  lu nulle part : la case manquait, donc rien ne pouvait
+                  l'activer. La région `aria-live` de l'échiquier, elle, est
+                  toujours posée — un lecteur d'écran est informé du coup
+                  adverse que cette case soit cochée ou non. Ici, c'est de la
+                  voix qu'il s'agit.
+                */}
+                <Toggle
+                  label="Annoncer chaque coup"
+                  description="Lit à voix haute le coup joué — « cavalier f3 », « prend en e5 », « échec ». Utile pour jouer sans regarder l’écran en permanence."
+                  checked={prefs.announceMoves}
+                  onChange={(value) => set('announceMoves', value)}
+                />
+
                 <Button
                   size="sm"
                   variant="secondary"

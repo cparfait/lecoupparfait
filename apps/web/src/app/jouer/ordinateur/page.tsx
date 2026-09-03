@@ -1877,6 +1877,7 @@ function GameScreen({
                 onPremoveCancel={annulerPrecoup}
                 premove={precoup}
                 lastMove={state.lastMove}
+                dernierCoupSan={state.moves[state.moves.length - 1]?.san ?? null}
                 checkSquare={state.checkSquare}
                 checkmate={state.status === 'checkmate'}
                 highlights={(commentaryMode ? commentary?.highlights : undefined) as never}
@@ -1987,7 +1988,12 @@ function GameScreen({
               </Chip>
             )}
 
-            <GameNav cursor={state.cursor} count={state.moves.length} onSeek={goTo} />
+            <GameNav
+              cursor={state.cursor}
+              count={state.moves.length}
+              onSeek={goTo}
+              fen={state.fen}
+            />
 
             {/* La bascule 2D / 3D, reprise ici sous `sm`.
                 Sous l'échiquier, elle occupait une rangée entière pour trois

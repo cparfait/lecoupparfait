@@ -76,6 +76,26 @@ Ce qu'il faut savoir avant de saisir une clé :
 Tout cela se règle dans **Préférences → Assistant IA**, et se désactive du même
 endroit. Par défaut, c'est éteint.
 
+### Ce que ça ne fait pas
+
+Autant le dire ici plutôt que de le laisser découvrir.
+
+- **Ça ne fonctionne pas hors ligne.** L'application s'installe sur l'écran
+  d'accueil et se comporte comme une application, mais elle a besoin du réseau :
+  `public/sw.js` ne met délibérément rien en cache. La raison est dans l'en-tête
+  de ce fichier — un moteur WebAssembly de plusieurs mégaoctets, des réseaux de
+  neurones et une base de puzzles, et un cache écrit à la légère finirait par
+  servir une version du plateau qui ne parle plus à une version du moteur. Un
+  hors-ligne modeste serait possible (la coque, les pièces, les sons, le moteur,
+  les leçons, les deux écrans de jeu solo) ; il n'est pas fait.
+- **Ça ne tient pas la charge à plusieurs instances.** Une seule instance du
+  serveur temps réel : la boucle des tournois créerait deux fois les mêmes
+  paires, et les limiteurs de rythme comptent chacun pour soi.
+- **Ça n'empêche pas quelqu'un de tricher contre lui-même.** Les parties contre
+  l'ordinateur se jouent dans le navigateur. Le résultat est recoupé avec la
+  position atteinte, ce qui ferme les cas faciles, mais quelqu'un de déterminé y
+  arrivera — sur une plateforme qu'il héberge lui-même.
+
 ---
 
 ## Installation
