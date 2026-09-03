@@ -41,6 +41,38 @@ RUN node scripts/setup-engine.mjs \
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+
+# L'adresse publique du serveur de parties, et il la faut ICI.
+#
+# `NEXT_PUBLIC_SERVER_URL` est lue par du code qui tourne dans le navigateur —
+# `useLiveGame`, qui ouvre le socket. Next remplace ces références par leur
+# valeur **au moment du `next build`** et la grave dans le lot JavaScript
+# envoyé au client ; la déclarer dans l'environnement du conteneur, comme le
+# fait `docker-compose.yml`, n'atteint que le rendu serveur.
+#
+# Sans elle, le client se rabattait sur `<protocole>//<hôte>:3001` : un port
+# que la pile ne publie volontairement pas, et qui n'est donc joignable de
+# nulle part. Les parties en direct affichaient « Serveur de parties
+# injoignable » en production, alors que le conteneur `server` était sain — il
+# n'a jamais reçu la moindre connexion.
+#
+# Conséquence assumée : l'image web est propre à un domaine. Changer l'adresse
+# du temps réel demande une reconstruction, pas un redémarrage.
+ARG NEXT_PUBLIC_SERVER_URL
+ENV NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL}
+
+# Refus franc plutôt qu'une image silencieusement cassée : l'oubli ne se voit
+# pas à la construction, ne se voit pas au démarrage, et ne se voit qu'au
+# moment où quelqu'un essaie de jouer.
+RUN test -n "$NEXT_PUBLIC_SERVER_URL" || { \
+      echo "✗ NEXT_PUBLIC_SERVER_URL est vide." >&2; \
+      echo "  Cette adresse est gravée dans le lot du navigateur : sans elle," >&2; \
+      echo "  les parties en direct ne se connecteront à rien." >&2; \
+      echo "  La renseigner dans .env — l'adresse PUBLIQUE du temps réel," >&2; \
+      echo "  p. ex. https://coupparfait-api.mondomaine.fr — puis reconstruire." >&2; \
+      exit 1; \
+    }
+
 RUN npm run build -w @coupparfait/web
 
 # ── Étape 3 : exécution ──────────────────────────────────────────────────────

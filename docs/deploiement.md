@@ -32,11 +32,11 @@ d'interrompre qui que ce soit.
 `docker compose up -d --build` fait deux choses très différentes à la suite,
 et une seule coupe le service :
 
-| Étape          | Durée      | Le site est…                                                  |
-| -------------- | ---------- | ------------------------------------------------------------- |
-| Construction   | 2 à 20 min | **debout** — l'ancienne version sert                           |
-| Bascule        | 2 à 5 s    | **coupé** — l'ancien conteneur s'arrête, le nouveau démarre     |
-| Sonde de santé | ~10 s      | debout — il sert déjà, on ne fait que le vérifier               |
+| Étape          | Durée      | Le site est…                                                |
+| -------------- | ---------- | ----------------------------------------------------------- |
+| Construction   | 2 à 20 min | **debout** — l'ancienne version sert                        |
+| Bascule        | 2 à 5 s    | **coupé** — l'ancien conteneur s'arrête, le nouveau démarre |
+| Sonde de santé | ~10 s      | debout — il sert déjà, on ne fait que le vérifier           |
 
 La construction ne coûte rien : Docker fabrique la nouvelle image pendant que
 l'ancienne tourne. La coupure, c'est le passage de l'une à l'autre.
@@ -109,16 +109,35 @@ peut y chercher directement un symbole qu'on vient d'ajouter :
 docker compose exec server grep -c <symbole> /app/apps/server/src/realtime/gameRoom.ts
 ```
 
-### Les trois garde-fous du script
+### Les garde-fous du script
 
-Ils existent tous les trois à cause du même incident, et le script s'arrête sur
-chacun plutôt que de laisser croire à une réussite.
+Le script s'arrête sur chacun plutôt que de laisser croire à une réussite.
+Trois d'entre eux viennent du même incident ; celui qui regarde le temps réel
+vient d'un autre.
 
 **Avant de construire — l'arbre est-il propre ?** Des modifications locales
 seraient cuites dans l'image sans laisser de trace : l'étiquette annoncerait un
 commit, l'image contiendrait autre chose, et l'écart ne serait retrouvable nulle
 part. Le script refuse, liste les fichiers, et propose `--arbre-sale` pour
 assumer explicitement.
+
+**Avant de construire — le temps réel pointe-t-il quelque part de public ?**
+`NEXT_PUBLIC_SERVER_URL` est lue par le navigateur, donc gravée dans le lot
+JavaScript pendant `next build` : la poser sur le conteneur, comme
+`docker-compose.yml` le faisait, n'atteint que le rendu serveur. Absente de la
+construction, elle laissait le client se rabattre sur `<domaine>:3001` — un port
+que la pile ne publie pas. L'image démarrait, répondait, passait toutes les
+sondes, et les parties en direct affichaient « Serveur de parties injoignable »
+en accusant un conteneur `server` qui n'y était pour rien : il n'avait jamais
+reçu la moindre connexion.
+
+Le script refuse donc de construire l'interface si le site est public alors que
+le temps réel pointe sur la machine du visiteur, et le `Dockerfile` refuse de
+construire sans la variable du tout. Elle doit valoir le second hôte mandataire,
+celui dont le WebSocket est activé — `https://coupparfait-api.mondomaine.fr`.
+
+Corollaire à retenir : **changer cette adresse demande une reconstruction de
+l'image web**, pas un redémarrage du conteneur.
 
 **Après la bascule — le conteneur porte-t-il la révision déployée ?** C'est la
 question à laquelle on ne savait pas répondre. Une image peut être construite

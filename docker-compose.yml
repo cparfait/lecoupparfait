@@ -273,6 +273,18 @@ services:
       args:
         # Voir la remarque du service `server`.
         GIT_REVISION: ${GIT_REVISION:-inconnue}
+        # L'adresse du temps réel est lue par le navigateur : Next la grave
+        # dans le lot JavaScript pendant `next build`, et la variable
+        # d'exécution déclarée plus bas ne l'atteint jamais. Elle doit donc
+        # traverser la construction — voir `apps/web/Dockerfile`, qui refuse
+        # de construire sans elle.
+        #
+        # Sans « :? », bien qu'elle soit obligatoire : Compose interpole ce
+        # fichier pour *toutes* les commandes, y compris `ps` et `logs`. Un
+        # garde-fou ici rendrait la pile inspectable seulement quand elle est
+        # bien configurée, ce qui est exactement l'inverse du besoin. Le refus
+        # a sa place à la construction, et il y est.
+        NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:-}
     restart: unless-stopped
     depends_on:
       db:
@@ -282,6 +294,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-coupparfait}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-coupparfait}
       AUTH_SESSION_DAYS: ${AUTH_SESSION_DAYS:-30}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      # Ici, elle ne sert plus qu'au rendu serveur : dernier recours des routes
+      # `/api/*` quand `INTERNAL_SERVER_URL` manque. Ce que voit le navigateur
+      # a été fixé à la construction, plus haut.
       NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:-http://localhost:3001}
       # Le chemin interne vers le serveur d'analyse, par le réseau de données :
       # les requêtes serveur-à-serveur n'ont aucune raison de ressortir sur

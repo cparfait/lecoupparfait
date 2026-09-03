@@ -81,6 +81,19 @@ export function useLiveGame({ slug, guestName, timeControl, rated, token }: UseL
 
   // ── Connexion ───────────────────────────────────────────────────────────
   useEffect(() => {
+    /*
+      L'adresse du serveur de parties.
+
+      Elle est fixée à la construction : ce code tourne dans le navigateur, et
+      Next remplace `process.env.NEXT_PUBLIC_*` par sa valeur pendant le
+      `next build`. Une variable posée sur le conteneur n'y change rien — c'est
+      ce qui a mis les parties en direct en panne en production, avec un
+      serveur parfaitement sain en face. Voir `apps/web/Dockerfile`, qui refuse
+      désormais de construire sans elle.
+
+      Le repli ne vaut donc que pour le développement, où le serveur écoute sur
+      la même machine.
+    */
     const url =
       process.env.NEXT_PUBLIC_SERVER_URL ??
       `${window.location.protocol}//${window.location.hostname}:3001`

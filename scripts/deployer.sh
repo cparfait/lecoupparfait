@@ -192,6 +192,44 @@ etat
 
 titre "2/5  Construction (aucune coupure — l'ancienne version continue de servir)"
 
+# GARDE-FOU — l'adresse du temps réel part avec l'image, pas avec le conteneur.
+#
+# `NEXT_PUBLIC_SERVER_URL` est gravée dans le lot JavaScript par `next build`.
+# Restée sur « localhost », elle produit une image qui démarre, répond, passe
+# toutes les sondes — et dont les parties en direct ne se connectent à rien.
+# La panne ne se voit qu'en essayant de jouer, et elle accuse le conteneur
+# `server`, qui n'y est pour rien.
+#
+# On ne teste que l'incohérence : un déploiement dont le site est public mais
+# dont le temps réel pointe sur la machine du visiteur.
+lire_env() { sed -n "s/^$1=//p" .env 2>/dev/null | head -1 | tr -d '"'"'"'[:space:]'; }
+
+if [[ " ${SERVICES[*]} " == *" web "* ]]; then
+  APP_URL="$(lire_env NEXT_PUBLIC_APP_URL)"
+  TEMPS_REEL="$(lire_env NEXT_PUBLIC_SERVER_URL)"
+
+  if [[ -z "$TEMPS_REEL" ]]; then
+    echec "NEXT_PUBLIC_SERVER_URL est absente de .env." \
+      "L'image web refusera de se construire : cette adresse est gravée" \
+      "dans le lot du navigateur, et sans elle personne ne peut jouer en direct."
+  fi
+
+  if [[ "$APP_URL" != *localhost* && "$TEMPS_REEL" == *localhost* ]]; then
+    echec "NEXT_PUBLIC_SERVER_URL pointe sur localhost." \
+      "site      : $APP_URL" \
+      "temps réel : $TEMPS_REEL" \
+      "" \
+      "Le navigateur du joueur composerait cette adresse, donc sa propre" \
+      "machine : les parties en direct annonceraient « Serveur de parties" \
+      "injoignable » alors que le conteneur « server » va très bien." \
+      "" \
+      "Y mettre l'hôte mandataire du temps réel (WebSocket activé)," \
+      "p. ex. https://coupparfait-api.mondomaine.fr, puis relancer."
+  fi
+
+  printf '     temps réel gravé dans l%simage : %s\n' "'" "$TEMPS_REEL"
+fi
+
 docker compose build "${SERVICES[@]}"
 
 # ── 3. Migrations, avant la bascule ──────────────────────────────────────────
