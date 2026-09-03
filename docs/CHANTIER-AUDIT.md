@@ -929,3 +929,86 @@ _À savoir :_ `next build` réécrit `apps/web/next-env.d.ts` sous une forme
 différente de celle qu'écrit `next dev`. Le fichier est versionné et bascule
 donc d'une commande à l'autre. Il a été exclu du commit ; si l'arbre paraît
 sale après une construction, c'est lui.
+
+### Lot G — 3 septembre 2026
+
+**`.env.example`.** Une vingtaine de variables ajoutées, chacune avec une ligne
+qui dit à quoi elle sert et sa valeur par défaut. Deux retirées, et vérifié
+par recherche qu'aucun fichier ne les lit :
+
+- **`AUTH_SECRET`** était **obligatoire** dans `docker-compose.yml` (`:?`),
+  engendré par `npm run setup`, cité deux fois au README — et lu par personne.
+  Cette authentification n'a pas de secret partagé : une session est un jeton
+  aléatoire dont seule l'empreinte est en base. Retirée des quatre endroits.
+- **`LICHESS_EXPLORER_URL`** : le livre d'ouvertures est embarqué, rien
+  n'appelle Lichess.
+
+**`docs/tournois.md`** : en-tête refait sur le modèle de `mode-carriere.md`, et
+une section « ce qui a été tranché autrement » — dont le **tournoi contre
+l'ordinateur**, qui n'était pas prévu du tout et qui est le plus joué. Reste
+ouvert et noté : la notification à l'ouverture d'une arène n'est pas branchée.
+
+**`RESTE-A-FAIRE.md` supprimé**, ses deux points vérifiés au compte de
+démonstration :
+
+- la **carte de carrière** s'affiche (douze chapitres, rang « Poulain »), et
+  le dépôt d'XP marche — `POST /api/carriere` fait passer l'XP de 0 à 100, une
+  victoire comptée, deux hauts faits attribués ;
+- la **progression après une position composée** ne bouge pas : mat joué
+  depuis un `?fen=…`, `defeated`, `attempts` et `wins` restent à zéro.
+
+_Méthode :_ pas de saisie de mot de passe. Forçage temporaire de l'identité
+dans `getCurrentUser`, puis retrait vérifié — `/api/progression` répond de
+nouveau `tracked: false`. Les comptes de démonstration sont purgés.
+
+_Deux recettes de ce fichier valaient d'être gardées, elles sont ici :_
+**jouer les deux côtés d'une partie en direct** demande un `clientId` distinct
+posé **avant** l'entrée du second onglet
+(`localStorage.setItem('coupparfait.clientId', '…')`) ; et le serveur temps réel
+n'autorise que l'origine `NEXT_PUBLIC_APP_URL`, si bien qu'un port 3000 occupé
+fait tourner l'interface sur un autre port mais **pas** les parties en direct.
+
+**Les deux affichages qui mentaient** sur une position composée sont masqués.
+Constaté sur une finale de pions : aucun bandeau d'ouverture, aucune pièce
+prise annoncée.
+
+**`public/brand` : 11,3 Mo → 0,2 Mo**, soit 98 % de moins. Sept portraits de
+536 × 960 étaient servis pour être affichés à quarante-huit pixels. Les sources
+sortent du dépôt (`data/brand-sources/`, ignoré) et `npm run brand:images` en
+tire des WebP à deux fois la taille d'affichage. Mesuré au navigateur : la page
+« Jouer » charge ses sept portraits en **11 ko**, aucune image cassée.
+
+_Écart au document :_ « remplacer les trois `<img>` bruts par `next/image` » n'a
+pas été fait, parce que ce n'en sont pas les bons. Deux servent des **SVG** de
+pièces à 28 px — l'optimiseur redimensionne des pixels, un SVG n'en a pas — et
+le troisième est un **avatar d'adresse libre**, que `next/image` refuserait
+faute d'hôte déclaré dans `remotePatterns` ; les déclarer tous ferait de ce
+serveur un optimiseur d'images pour le web entier. Les trois gardent un
+`eslint-disable` qui dit pourquoi.
+
+**Le dictionnaire** est séparé en `fr.ts` et `en.ts`. Le chargement de
+l'anglais par `import()` n'est **pas** fait, et c'est mesuré : il pèse **4 ko
+gzippés**. Le différer ferait afficher le français une fraction de seconde à
+qui a choisi l'anglais, pour 4 ko. À revoir le jour où un routage par langue
+permettra au serveur de savoir quoi servir.
+
+_`<html lang>` suivait déjà la préférence_, et même avant le premier rendu :
+le script d'amorçage du thème le pose depuis le stockage local. Vérifié à
+l'écran dans les deux sens.
+
+---
+
+## Le chantier est fini
+
+Les huit lots sont faits. Ce qui reste ouvert, dans l'ordre où je le
+reprendrais :
+
+1. **`hasOpposition` teste la mauvaise parité** (lot E1). Un test `todo`
+   l'attend. C'est le seul défaut de calcul connu restant.
+2. **Deux barèmes de cadence divergent** entre 8 et 10 minutes (lot E1) : une
+   partie change de catégorie de classement selon l'écran où elle a été jouée.
+3. **`jouer/partie/[slug]` a le même défaut de pendule** que l'écran contre
+   l'ordinateur (lot B). `PlayerBar` accepte déjà la bonne forme.
+4. **L'arrêt sur `SIGTERM` n'a pas été vérifié à l'exécution** (lot A5) : Node
+   sous Windows ne l'émet pas depuis `process.kill`. À refaire sur le serveur.
+5. **La notification d'ouverture d'arène** n'est pas branchée (lot G).
