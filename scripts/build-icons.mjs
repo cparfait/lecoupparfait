@@ -3,10 +3,16 @@
  * Compose la marque, puis en tire les icônes de l'application.
  *
  * La marque n'est pas un fichier qu'on dessine : elle est **assemblée** ici, à
- * partir du tirage de la bannière du thème `club` — `brand/cavale-club.png`, le
+ * partir du tirage de la bannière du thème `club` — `cavale-club.png`, le
  * cavalier de bois sculpté produit par `scripts/build-cavale.mjs`. On le
  * détoure au plus près, on le pose sur le champ violet de la marque, et le
- * résultat est écrit dans `brand/logo-cavale.png`.
+ * résultat est écrit dans `logo-cavale.png`.
+ *
+ * Ces trois-là vivent dans `data/brand-sources/`, hors du dépôt : ce sont des
+ * tirages en pleine résolution, dont l'application ne sert que des WebP taillés
+ * par `npm run brand:images`. Ce script est donc un outil d'atelier — on le
+ * lance quand la marque change, et l'on verse les icônes qu'il produit. Il n'a
+ * pas sa place dans une construction Docker, qui n'a pas les sources.
  *
  * Deux approches ont précédé celle-ci, et chacune a échoué à sa façon :
  *
@@ -33,7 +39,7 @@
  * lanceur, et sans cette marge le cavalier se ferait rogner.
  */
 
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
@@ -44,7 +50,40 @@ const iconsDir = join(root, 'apps', 'web', 'public', 'icons')
 
 mkdirSync(iconsDir, { recursive: true })
 const brandDir = join(root, 'apps', 'web', 'public', 'brand')
-const marque = join(brandDir, 'logo-cavale.png')
+
+/**
+ * Où déposer les tirages intermédiaires.
+ *
+ * `data/brand-sources/`, avec les autres, et non plus `public/brand` : ce sont
+ * des sources, pas des ressources servies. Deux mégaoctets de PNG atterrissaient
+ * dans le dossier public à chaque exécution — exactement ce qu'on venait d'en
+ * retirer. `npm run brand:images` les convertit en WebP, et ce sont ces WebP-là
+ * que l'application affiche (`LogoMark`, `RelectureGuidee`).
+ */
+const sourcesDir = join(root, 'data', 'brand-sources')
+mkdirSync(sourcesDir, { recursive: true })
+const marque = join(sourcesDir, 'logo-cavale.png')
+
+/**
+ * Le tirage dont tout part, où qu'il soit.
+ *
+ * Les sources en pleine résolution ont quitté `public/brand` pour
+ * `data/brand-sources/`, hors du dépôt : douze mégaoctets de PNG n'avaient
+ * rien à faire dans chaque image Docker. Ce script, lui, cherchait toujours à
+ * l'ancienne adresse et échouait sur un « Input file is missing » de `sharp`,
+ * qui ne dit ni quel fichier manque ni pourquoi. On regarde donc les deux
+ * emplacements, et l'on explique quand il n'y a ni l'un ni l'autre.
+ */
+const tirage = (nom) => {
+  for (const dossier of [sourcesDir, brandDir]) {
+    const chemin = join(dossier, nom)
+    if (existsSync(chemin)) return chemin
+  }
+  console.error(`✗ Tirage introuvable : ${nom}`)
+  console.error('  Attendu dans data/brand-sources/ — les sources de la marque sont hors')
+  console.error('  du dépôt, voir ATTRIBUTION.md. Les régénérer : npm run brand:cavale')
+  process.exit(1)
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  La marque : le cavalier de la bannière, posé sur le champ violet
@@ -98,7 +137,7 @@ const MARGE = 0.06
  * sans qu'on ait à revenir ici.
  */
 const sansSocle = async () => {
-  const source = join(brandDir, 'cavale-club.png')
+  const source = tirage('cavale-club.png')
   const { width, height } = await sharp(source).metadata()
   const { data } = await sharp(source).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
 
@@ -133,10 +172,11 @@ const sansSocle = async () => {
     .png({ compressionLevel: 9 })
     .toBuffer()
 
-  // Écrite aussi comme ressource : c'est elle que la marque affiche dans
-  // l'application, sur un fond composé en CSS pour suivre le thème.
-  await sharp(nette).toFile(join(brandDir, 'cavale-piece.png'))
-  console.log('  ✓ brand/cavale-piece.png')
+  // Écrite aussi comme source : `npm run brand:images` en tire le WebP que la
+  // marque affiche dans l'application, sur un fond composé en CSS pour suivre
+  // le thème.
+  await sharp(nette).toFile(join(sourcesDir, 'cavale-piece.png'))
+  console.log('  ✓ brand-sources/cavale-piece.png')
   return nette
 }
 
@@ -165,7 +205,7 @@ const composerMarque = async (marge) => {
 }
 
 await (await composerMarque(MARGE)).png({ compressionLevel: 9 }).toFile(marque)
-console.log('  ✓ brand/logo-cavale.png')
+console.log('  ✓ brand-sources/logo-cavale.png')
 
 /** Le masque d'arrondi, au rayon de 22 % — celui d'une icône d'application. */
 const arrondi = (taille) =>

@@ -26,9 +26,18 @@ COPY . .
 
 # Prépare les ressources qui ne sont pas versionnées : le moteur WebAssembly
 # (14 Mo copiés depuis node_modules) et l'index des ouvertures.
+#
+# `build-icons.mjs` n'est pas de la partie, et ne devrait jamais l'avoir été.
+# Il compose la marque à partir de `brand/cavale-club.png`, le tirage pleine
+# résolution de la sculpture — une source de travail, sortie du dépôt le jour
+# où l'on a cessé d'embarquer 12 Mo de PNG dans chaque image. La construction
+# s'arrêtait donc sur « Input file is missing ». Or ce qu'il produit — favicon,
+# icônes 192 et 512, insigne des notifications, image de partage — est
+# versionné : il n'y avait rien à régénérer ici. C'est un script d'atelier,
+# comme `build-cavale.mjs` et `build-brand.mjs` : on le lance à la main quand
+# la marque change, et l'on verse le résultat.
 RUN node scripts/setup-engine.mjs \
-    && node scripts/build-openings.mjs \
-    && node scripts/build-icons.mjs
+    && node scripts/build-openings.mjs
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production

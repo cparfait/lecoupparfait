@@ -1,0 +1,57 @@
+# Ce qui n'a rien à faire dans le contexte de construction.
+#
+# Il n'y avait aucun fichier ici, et les deux Dockerfile font `COPY . .` :
+# chaque `docker compose build` téléversait donc **vingt-huit gigaoctets** au
+# démon — les archives d'import de Lichess, les voix Piper, les binaires
+# Stockfish, `node_modules`, le cache de Next et l'historique Git. Un quart
+# d'heure avant la première instruction, à chaque fois, pour un contexte dont
+# la construction n'utilise que quelques mégaoctets.
+#
+# Tout ce qui suit est déjà couvert par `.gitignore` — ce sont des données de
+# travail locales, jamais des sources. Les deux listes se ressemblent, et c'est
+# normal : elles répondent à la même question.
+
+# ── Dépendances et sorties de construction ──────────────────────────────────
+# `node_modules` est réinstallé dans l'étape `deps` par `npm ci`, et le
+# standalone de Next est produit dans l'étape `builder`. Copier ceux de la
+# machine de développement serait au mieux inutile, au pire faux : les binaires
+# natifs (sharp, postgres) ne sont pas ceux de l'image.
+node_modules
+**/node_modules
+.next
+**/.next
+dist
+**/dist
+
+# ── Historique et outillage ─────────────────────────────────────────────────
+.git
+.gitignore
+.github
+.claude
+.vscode
+.idea
+
+# ── Données de travail, volumineuses et jamais nécessaires ──────────────────
+# `data/openings` et `data/endgames` restent : ils sont versionnés, et le
+# Dockerfile web copie le premier dans l'image finale.
+data/downloads/
+data/piper/
+data/stockfish/
+data/maia/
+data/brand-sources/
+backups/
+
+# ── Environnement local ─────────────────────────────────────────────────────
+# Jamais dans une image : les secrets d'une instance se passent au démarrage.
+.env
+.env.*
+!.env.example
+
+# ── Divers jetables ─────────────────────────────────────────────────────────
+*.log
+.tmp-probe/
+scripts/.tmp/
+.essais/
+zzsccreens/
+apercu.png
+essai-voix.wav
