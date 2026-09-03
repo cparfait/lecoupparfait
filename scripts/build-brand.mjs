@@ -6,7 +6,7 @@
  * dans l'image Docker et servis tels quels à chaque visiteur. Les sept
  * portraits d'adversaires en faisaient six à eux seuls — des tirages de 536 ×
  * 960, affichés à quarante-huit pixels de haut. On envoyait quatre-vingt-dix
- * mille pixels pour en montaire deux mille.
+ * mille pixels pour en montrer deux mille.
  *
  * **Ce qu'on fait.** Les sources restent des PNG en pleine résolution, mais
  * hors du dépôt : `data/brand-sources/`, que `.gitignore` couvre. Ce script en
