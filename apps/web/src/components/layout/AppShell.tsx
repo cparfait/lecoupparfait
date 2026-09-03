@@ -193,10 +193,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             {estAdmin && (
               <Link
                 href="/admin"
-                // Masquée sous 640 px : la barre y tient déjà la pastille de
-                // série, l'engrenage et le compte, et le menu du bas porte la
-                // même entrée, nommée en toutes lettres.
-                className="hidden h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt sm:grid"
+                // Sur téléphone aussi, et non plus à partir de 640 px : elle y
+                // était masquée au motif que le menu du bas portait la même
+                // entrée. Mais l'administration se surveille depuis le
+                // téléphone au moins autant que depuis le bureau, et l'ouvrir
+                // demandait alors deux gestes au lieu d'un. Les quatre
+                // commandes tiennent : le sélecteur de thème et la voix ont
+                // libéré la place, et l'écart se resserre déjà sous 360 px.
+                className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
                 aria-label="Administration"
                 title="Administration"
               >
