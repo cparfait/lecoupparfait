@@ -886,3 +886,46 @@ serveur temps réel, et la triche contre soi-même en partie solo.
 
 Le manifeste PWA, lui, ne promettait rien : il déclare `display: standalone`,
 ce qui n'est pas une promesse de hors-ligne.
+
+### Lots E2 et E3 — 3 septembre 2026
+
+**E2. Deux écarts au document, tous deux dus à la version des outils.**
+
+1. **Les nouvelles règles du compilateur React sont éteintes.**
+   `eslint-config-next` 16 embarque une famille écrite pour le compilateur —
+   `set-state-in-effect`, `refs`, `purity`, `immutability`,
+   `preserve-manual-memoization`, `react/use`. Elle signalait **195** endroits
+   d'un code qui fonctionne, essentiellement des `setState` dans un effet,
+   c'est-à-dire la façon ordinaire de déposer le résultat d'une requête. Ce
+   projet n'utilise pas le compilateur ; le jour où il le fera, on les
+   rallumera une par une.
+2. **`.claude/` est ignoré.** Il contient des copies de travail du dépôt :
+   sans cette exclusion, chaque avertissement comptait double (578 au lieu
+   de 202).
+
+Le document annonçait « une dizaine » de remontées, le compte final est de
+**zéro erreur et dix-neuf avertissements**, dont onze `exhaustive-deps` — les
+dix `eslint-disable` déjà commentés, plus trois dépendances superflues dans
+`useChessGame`, laissées telles quelles.
+
+_Corrigé au passage, parce que l'outil l'a désigné :_ une quarantaine
+d'imports morts (dont plusieurs laissés par le lot C), deux variables assignées
+et jamais relues, deux fonctions d'explication orphelines, une apostrophe
+droite. La référence à l'énoncé vocal est **gardée** avec un `eslint-disable`
+qui dit pourquoi : sans elle, Chrome coupe les phrases longues au milieu.
+
+_Le passage de Prettier est un commit à lui seul_, avec `.git-blame-ignore-revs`
+qui le désigne. 187 fichiers dont la seule différence est un retour à la ligne,
+mêlés à du vrai travail, rendraient les deux illisibles.
+
+_Piège rencontré :_ sans `endOfLine: auto`, Prettier voulait réécrire **515**
+fichiers sous Windows — l'intégralité du dépôt, pour cause de CRLF.
+
+**E3.** `.github/workflows/ci.yml` : `npm ci`, typage, lint, mise en forme,
+tests, construction. Sans base, comme prévu. `npm run build` a été lancé en
+local avant d'être demandé à la machine : il passe.
+
+_À savoir :_ `next build` réécrit `apps/web/next-env.d.ts` sous une forme
+différente de celle qu'écrit `next dev`. Le fichier est versionné et bascule
+donc d'une commande à l'autre. Il a été exclu du commit ; si l'arbre paraît
+sale après une construction, c'est lui.
