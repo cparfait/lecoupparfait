@@ -1,7 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "./src",
+    // Pas de `rootDir` : les tests vivent à côté de `src`, et `noEmit` rend
+    // la contrainte inutile — elle ne servait qu'à cadrer une sortie qu'on
+    // ne produit pas.
     "outDir": "./dist",
     "types": ["node"],
     "noEmit": true

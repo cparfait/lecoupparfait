@@ -14,6 +14,8 @@
  *   node faux-stockfish.mjs muet     ne rend jamais `bestmove`, mais obéit à `stop`
  *   node faux-stockfish.mjs sourd    n'obéit pas non plus à `stop` — il faut le tuer
  *   node faux-stockfish.mjs bavard   répond aussitôt : c'est le témoin
+ *   node faux-stockfish.mjs lent     répond au bout de 400 ms — de quoi occuper
+ *                                    la réserve et faire réellement une file
  *
  * Le mode passe par un argument et non par l'environnement : deux moteurs de
  * modes différents peuvent alors tourner dans le même processus de test.
@@ -22,8 +24,9 @@
 import { createInterface } from 'node:readline'
 
 const mode = process.argv[2] ?? 'muet'
-const muet = mode !== 'bavard'
+const muet = mode !== 'bavard' && mode !== 'lent'
 const sourdAuStop = mode === 'sourd'
+const lent = mode === 'lent'
 
 const dire = (ligne) => process.stdout.write(`${ligne}\n`)
 
@@ -47,6 +50,10 @@ createInterface({ input: process.stdin }).on('line', (brut) => {
     // Un peu d'`info` avant de se taire : sans elle, on testerait un moteur
     // mort plutôt qu'un moteur qui travaille et ne rend jamais son travail.
     dire('info depth 1 seldepth 1 multipv 1 score cp 21 nodes 20 pv e2e4')
+    if (lent) {
+      setTimeout(() => dire('bestmove e2e4'), 400)
+      return
+    }
     if (!muet) dire('bestmove e2e4')
     return
   }

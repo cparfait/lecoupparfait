@@ -27,6 +27,8 @@ const PRIORITY_ORDER: Record<Priority, number> = {
 
 export interface PoolOptions {
   binary: string
+  /** Arguments du binaire. Voir `EngineProcessOptions.args` : c'est pour les tests. */
+  args?: string[]
   size: number
   threadsPerProcess: number
   hashMb: number
@@ -104,6 +106,7 @@ export class EnginePool {
     for (let i = 0; i < this.options.size; i++) {
       const engine = new EngineProcess({
         binary: this.options.binary,
+        args: this.options.args,
         threads: this.options.threadsPerProcess,
         hashMb: this.options.hashMb,
       })
