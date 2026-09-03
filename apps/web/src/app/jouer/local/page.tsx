@@ -80,13 +80,7 @@ export default function LocalGamePage() {
 
   const game = useChessGame({
     onMove: (move) => {
-      playMoveSound({
-        isCapture: move.isCapture,
-        isCheck: move.isCheck,
-        isCheckmate: move.isCheckmate,
-        isCastle: move.isCastle,
-        isPromotion: !!move.promotion,
-      })
+      playMoveSound(move)
       if (!autoFlip) return
       // Le plateau reste du côté de celui qui vient de jouer, le temps qu'il
       // voie son coup — voir `PAUSE_AVANT_ROTATION`. Pendant cette pause,

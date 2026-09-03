@@ -18,6 +18,7 @@ import { Flame, LogOut, Pause, Play, Swords, Trophy } from 'lucide-react'
 import clsx from 'clsx'
 import { Button, Card, EmptyState, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { useIdentite } from '@/lib/auth/useIdentite.ts'
 
 interface Standing {
   userId: string
@@ -66,12 +67,13 @@ export default function ArenaPage() {
     setData(await response.json())
   }, [slug])
 
+  const identite = useIdentite()
+  useEffect(() => {
+    if (identite !== undefined) setMe(identite?.username ?? null)
+  }, [identite])
+
   useEffect(() => {
     void refresh().catch(() => setData(null))
-    void fetch('/api/auth')
-      .then((r) => r.json())
-      .then((d: { user: { username: string } | null }) => setMe(d.user?.username ?? null))
-      .catch(() => setMe(null))
     const timer = setInterval(() => void refresh().catch(() => {}), POLL_MS)
     return () => clearInterval(timer)
   }, [refresh])

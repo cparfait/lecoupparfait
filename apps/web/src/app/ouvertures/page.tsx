@@ -23,9 +23,10 @@ import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, Card, Chip, EmptyState, Spinner } from '@/components/ui/index.tsx'
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { useMoveStats, useOpeningStats, type StatsBand } from '@/lib/game/useOpeningStats.ts'
-import { playMoveSound } from '@/lib/sound.ts'
+import { playMoveFor } from '@/lib/sound.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { useMoveWords, useSan } from '@/lib/notation.ts'
+import { useLegalMoves } from '@/lib/game/useLegalMoves.ts'
 
 const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
@@ -66,16 +67,7 @@ export default function OpeningsPage() {
     return []
   }, [book, query, volume, locale])
 
-  const legalMoves = useMemo(() => {
-    const map = new Map<Square, Square[]>()
-    const board = new Chess(fen, { skipValidation: true })
-    for (const move of board.moves({ verbose: true })) {
-      const list = map.get(move.from) ?? []
-      if (!list.includes(move.to)) list.push(move.to)
-      map.set(move.from, list)
-    }
-    return map
-  }, [fen])
+  const legalMoves = useLegalMoves(fen)
 
   /**
    * Continuations théoriques depuis la position courante.
@@ -103,13 +95,7 @@ export default function OpeningsPage() {
         setFen(board.fen())
         setHistory((current) => [...current, move.san])
         setLastMove({ from: move.from, to: move.to })
-        playMoveSound({
-          isCapture: move.isCapture(),
-          isCheck: board.inCheck(),
-          isCheckmate: board.isCheckmate(),
-          isCastle: move.isKingsideCastle() || move.isQueensideCastle(),
-          isPromotion: !!move.promotion,
-        })
+        playMoveFor(move)
       } catch {
         // Coup illégal : l'échiquier ne le proposait pas, rien à faire.
       }
@@ -125,13 +111,10 @@ export default function OpeningsPage() {
         setFen(board.fen())
         setHistory((current) => [...current, move.san])
         setLastMove({ from: move.from, to: move.to })
-        playMoveSound({
-          isCapture: move.isCapture(),
-          isCheck: board.inCheck(),
-          isCheckmate: false,
-          isCastle: move.isKingsideCastle() || move.isQueensideCastle(),
-          isPromotion: !!move.promotion,
-        })
+        // `isCheckmate: false` en dur, ici, disait « une ligne d'ouverture ne
+        // mate pas » — c'est faux, le livre en contient. `playMoveFor` le lit
+        // dans le SAN comme partout ailleurs.
+        playMoveFor(move)
       } catch {
         // Ligne obsolète : on ignore plutôt que de casser l'exploration.
       }

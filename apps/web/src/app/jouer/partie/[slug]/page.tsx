@@ -49,11 +49,12 @@ import { toast } from '@/components/ui/Toast.tsx'
 import { useLiveGame } from '@/lib/game/useLiveGame.ts'
 import { oublierPartieEnLigne, retenirPartieEnLigne } from '@/lib/game/partieEnLigne.ts'
 import { usePrecoup } from '@/lib/game/usePrecoup.ts'
-import { playMoveSound, playResultSound, playSound } from '@/lib/sound.ts'
+import { playMoveForSan, playResultSound, playSound } from '@/lib/sound.ts'
 import { useCurrentOpening } from '@/lib/game/useOpeningBook.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import type { ChatMessage } from '@/lib/game/useLiveGame.ts'
-import type { PlayedMove } from '@/lib/game/useChessGame.ts'
+import { toPlayedMove, type PlayedMove } from '@/lib/game/useChessGame.ts'
+import { useLegalMoves } from '@/lib/game/useLegalMoves.ts'
 
 /**
  * De quoi reconnaître un message parmi les autres.
@@ -136,13 +137,7 @@ export default function LiveGamePage() {
         }
       }
       const last = snapshot.moves[snapshot.moves.length - 1] ?? ''
-      playMoveSound({
-        isCapture: last.includes('x'),
-        isCheck: last.includes('+'),
-        isCheckmate: last.includes('#'),
-        isCastle: last.startsWith('O-O'),
-        isPromotion: last.includes('='),
-      })
+      playMoveForSan(last)
     }
     lastMoveCount.current = snapshot.moves.length
   }, [snapshot])
@@ -288,23 +283,12 @@ export default function LiveGamePage() {
   }, [chat, chatOpen])
 
   // ── Coups légaux ────────────────────────────────────────────────────────
-  const legalMoves = useMemo(() => {
-    const map = new Map<Square, Square[]>()
-    if (!snapshot || !color || snapshot.turn !== color || snapshot.status !== 'playing') {
-      return map
-    }
-    try {
-      const board = new Chess(snapshot.fen, { skipValidation: true })
-      for (const move of board.moves({ verbose: true })) {
-        const list = map.get(move.from) ?? []
-        if (!list.includes(move.to)) list.push(move.to)
-        map.set(move.from, list)
-      }
-    } catch {
-      // Position inattendue : aucun coup proposé, le serveur reste maître.
-    }
-    return map
-  }, [snapshot, color])
+  // Hors de son tour, aucun : le serveur reste maître, mais autant ne pas
+  // laisser croire le contraire au plateau.
+  const legalMoves = useLegalMoves(
+    snapshot?.fen,
+    Boolean(snapshot) && Boolean(color) && snapshot?.turn === color && snapshot?.status === 'playing',
+  )
 
   const checkSquare = useMemo(() => {
     if (!snapshot) return null
@@ -323,24 +307,10 @@ export default function LiveGamePage() {
     const list: PlayedMove[] = []
     for (const san of snapshot.moves) {
       try {
-        const move = board.move(san)
-        list.push({
-          san: move.san,
-          uci: `${move.from}${move.to}${move.promotion ?? ''}`,
-          from: move.from,
-          to: move.to,
-          piece: move.piece,
-          captured: move.captured,
-          promotion: move.promotion,
-          color: move.color,
-          before: move.before,
-          after: move.after,
-          at: 0,
-          isCheck: move.san.includes('+'),
-          isCheckmate: move.san.includes('#'),
-          isCapture: move.isCapture(),
-          isCastle: move.isKingsideCastle() || move.isQueensideCastle(),
-        })
+        // `at` vaut l'heure de la reconstruction et non celle du coup : la
+        // liste est rebâtie depuis l'instantané du serveur, qui ne transporte
+        // pas les horodatages. Rien ici ne les lit.
+        list.push(toPlayedMove(board.move(san)))
       } catch {
         break
       }

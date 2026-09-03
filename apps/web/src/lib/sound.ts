@@ -13,6 +13,7 @@
  */
 
 import { getPreferences } from './store/preferences.ts'
+import type { Move } from 'chess.js'
 
 export type SoundId =
   | 'move'
@@ -182,6 +183,48 @@ export function playMoveSound(context: MoveSoundContext): void {
     return
   }
   playSound('move')
+}
+
+/**
+ * Bruitage d'un coup, à partir du coup lui-même.
+ *
+ * L'adaptateur vers `playMoveSound` — cinq booléens à extraire — était recopié
+ * **huit fois**, dans six écrans. Toutes les copies ne se ressemblaient pas :
+ * certaines lisaient l'échec dans `board.inCheck()`, d'autres dans le SAN,
+ * deux oubliaient le roque, une posait `isCheckmate: false` en dur. Le résultat
+ * est qu'un même coup ne faisait pas le même bruit selon l'écran.
+ *
+ * Tout se lit dans le coup, sans avoir besoin de l'échiquier : le SAN de
+ * chess.js porte déjà `+` et `#`, et `flags` porte le roque et la promotion.
+ * C'est aussi ce qui rend l'appel possible depuis la partie en direct, où l'on
+ * ne reçoit du serveur que le SAN.
+ */
+export function playMoveFor(move: Move): void {
+  playMoveSound({
+    isCapture: move.isCapture(),
+    isCheck: move.san.includes('+'),
+    isCheckmate: move.san.includes('#'),
+    isCastle: move.isKingsideCastle() || move.isQueensideCastle(),
+    isPromotion: Boolean(move.promotion),
+  })
+}
+
+/**
+ * Bruitage d'un coup dont on n'a que la notation.
+ *
+ * C'est le cas de la partie en direct : le serveur fait autorité et n'envoie
+ * que le SAN. Moins précis que `playMoveFor` sur un seul point — `O-O` et
+ * `O-O-O` se reconnaissent, mais une prise notée sans `x` n'existe pas en SAN,
+ * donc rien ne se perd en pratique.
+ */
+export function playMoveForSan(san: string): void {
+  playMoveSound({
+    isCapture: san.includes('x'),
+    isCheck: san.includes('+'),
+    isCheckmate: san.includes('#'),
+    isCastle: san.startsWith('O-O'),
+    isPromotion: san.includes('='),
+  })
 }
 
 /** Bruitage de fin de partie, selon le résultat du point de vue du joueur. */

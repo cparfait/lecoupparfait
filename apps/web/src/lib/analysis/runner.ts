@@ -351,6 +351,33 @@ function clientDepthFor(requested: number, positions: number): number {
   return Math.min(requested, 13)
 }
 
+/**
+ * Une analyse par le moteur du navigateur, débridée.
+ *
+ * Les trois gestes — démarrer, retirer le bridage, chercher — étaient écrits
+ * ici **et** dans le commentaire en direct, qui pilotait le moteur lui-même au
+ * lieu de passer par ce fichier. Deux endroits pour une séquence dont l'ordre
+ * compte, et dont l'un des deux aurait fini par oublier `Skill Level`.
+ *
+ * Le bridage est celui qu'un adversaire artificiel a pu laisser derrière lui :
+ * une analyse doit être aussi juste que possible, même quand elle sert à
+ * commenter la partie d'un débutant.
+ */
+export async function analyserAvecLeNavigateur(options: {
+  fen: string
+  depth: number
+  multiPv: number
+  signal?: AbortSignal
+}): Promise<PositionAnalysis> {
+  const engine = getEngine()
+  await engine.start()
+  engine.setOptions([
+    ['UCI_LimitStrength', false],
+    ['Skill Level', 20],
+  ])
+  return engine.analyse(options)
+}
+
 function makeClientAnalyser(
   depth: number,
   onProgress: ((progress: AnalysisProgress) => void) | undefined,
@@ -359,15 +386,7 @@ function makeClientAnalyser(
 ) {
   let done = 0
   return async (fen: string, multiPv: number): Promise<PositionAnalysis> => {
-    const engine = getEngine()
-    await engine.start()
-    // On retire tout bridage : une analyse doit être aussi juste que possible,
-    // même si elle sert à commenter la partie d'un débutant.
-    engine.setOptions([
-      ['UCI_LimitStrength', false],
-      ['Skill Level', 20],
-    ])
-    const analysis = await engine.analyse({ fen, depth, multiPv, signal })
+    const analysis = await analyserAvecLeNavigateur({ fen, depth, multiPv, signal })
     done++
     onProgress?.({ done, total, source: 'client', phase: 'positions' })
     return analysis

@@ -15,6 +15,7 @@ import { Chess } from 'chess.js'
 import type { Color, Move, PieceSymbol, Square } from 'chess.js'
 import { START_FEN, capturedPieces, SIMPLE_VALUES } from '@coupparfait/core'
 import type { GameResult, GameStatus } from '@coupparfait/core'
+import { useLegalMoves } from '@/lib/game/useLegalMoves.ts'
 
 export interface PlayedMove {
   san: string
@@ -35,6 +36,13 @@ export interface PlayedMove {
   isCheckmate: boolean
   isCapture: boolean
   isCastle: boolean
+  /**
+   * Redondant avec `promotion`, et c'est le but : les cinq drapeaux réunis
+   * forment exactement le `MoveSoundContext` du bruitage, si bien qu'un coup
+   * joué se passe tel quel à `playMoveSound`. Sans lui, chaque écran de jeu
+   * recopiait un adaptateur de six lignes pour ce seul champ.
+   */
+  isPromotion: boolean
 }
 
 export interface GameState {
@@ -99,18 +107,14 @@ export function useChessGame(options: UseChessGameOptions = {}) {
     return moves[cursor]?.after ?? currentFen
   }, [isLive, cursor, currentFen, moves, startFen])
 
-  /** Coups légaux de la position **réelle**, indexés par case de départ. */
-  const legalMoves = useMemo(() => {
-    const map = new Map<Square, Square[]>()
-    if (!isLive || chess.isGameOver()) return map
-    for (const move of chess.moves({ verbose: true })) {
-      const list = map.get(move.from) ?? []
-      // Les quatre promotions partagent la même case d'arrivée.
-      if (!list.includes(move.to)) list.push(move.to)
-      map.set(move.from, list)
-    }
-    return map
-  }, [chess, currentFen, isLive])
+  /**
+   * Coups légaux de la position **réelle**, indexés par case de départ.
+   *
+   * Depuis la position et non depuis l'instance `chess` : le résultat est le
+   * même — un mat ou un pat ne rendent aucun coup, la garde `isGameOver` était
+   * redondante — et cinq autres écrans partagent désormais le même calcul.
+   */
+  const legalMoves = useLegalMoves(currentFen, isLive)
 
   const status = useMemo<GameStatus>(() => {
     if (chess.isCheckmate()) return 'checkmate'
@@ -326,7 +330,14 @@ export function useChessGame(options: UseChessGameOptions = {}) {
 //  Aides
 // ─────────────────────────────────────────────────────────────────────────────
 
-function toPlayedMove(move: Move): PlayedMove {
+/**
+ * Convertit un coup de chess.js en coup joué.
+ *
+ * Exportée parce que deux écrans en avaient recopié le corps pour reconstruire
+ * une liste de coups à partir d'un PGN ou d'un instantané de serveur — et l'une
+ * des copies avait déjà divergé sur la détection du roque.
+ */
+export function toPlayedMove(move: Move): PlayedMove {
   return {
     san: move.san,
     uci: `${move.from}${move.to}${move.promotion ?? ''}`,
@@ -343,6 +354,7 @@ function toPlayedMove(move: Move): PlayedMove {
     isCheckmate: move.san.includes('#'),
     isCapture: move.isCapture(),
     isCastle: move.isKingsideCastle() || move.isQueensideCastle(),
+    isPromotion: Boolean(move.promotion),
   }
 }
 

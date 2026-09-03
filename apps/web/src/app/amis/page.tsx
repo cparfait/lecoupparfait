@@ -32,6 +32,7 @@ import clsx from 'clsx'
 import { SPEED_LABELS, TIME_CONTROLS } from '@coupparfait/core'
 import { Button, Card, EmptyState, Input, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { useIdentite } from '@/lib/auth/useIdentite.ts'
 
 interface Friend {
   id: string
@@ -105,12 +106,12 @@ function FriendsBook() {
   const [copied, setCopied] = useState(false)
 
   // ── Identité ────────────────────────────────────────────────────────────
+  const identite = useIdentite()
   useEffect(() => {
-    void fetch('/api/auth')
-      .then((response) => response.json())
-      .then((data: { user: { username: string } | null }) => setMe(data.user))
-      .catch(() => setMe(null))
-  }, [])
+    // `undefined` veut dire « on ne sait pas encore » : on ne l'écrase pas par
+    // `null`, qui voudrait dire « visiteur » et déclencherait l'écran d'invite.
+    if (identite !== undefined) setMe(identite)
+  }, [identite])
 
   // ── Carnet ──────────────────────────────────────────────────────────────
   const refresh = useCallback(async () => {

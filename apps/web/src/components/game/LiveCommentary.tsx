@@ -58,7 +58,7 @@ import {
 import { ANNOTATION_COLORS } from '@/components/board/boardKit.ts'
 import { Card, Chip } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
-import { getEngine } from '@/lib/engine/client.ts'
+import { analyserAvecLeNavigateur } from '@/lib/analysis/runner.ts'
 import { speak, stopSpeaking } from '@/lib/speech.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { useSan } from '@/lib/notation.ts'
@@ -202,21 +202,14 @@ export function useLiveCommentary({
 
     void (async () => {
       try {
-        const engine = getEngine()
-        await engine.start()
-        // Le mode commenté doit juger, pas jouer : on retire tout bridage
-        // qu'un adversaire artificiel aurait pu laisser.
-        engine.setOptions([
-          ['UCI_LimitStrength', false],
-          ['Skill Level', 20],
-        ])
-
         const searchDepth = depth ?? prefs.clientDepth
         const wanted = Math.max(2, Math.min(5, alternatives + 1))
 
         // Position **avant** le coup, en MultiPV : c'est là que sont les
         // options qu'on avait.
-        const before = await engine.analyse({
+        // Par le `runner` et non en pilotant le moteur ici : c'est lui qui
+        // sait le démarrer et le débrider, et il le savait déjà.
+        const before = await analyserAvecLeNavigateur({
           fen: move.before,
           depth: searchDepth,
           multiPv: wanted,
@@ -224,7 +217,7 @@ export function useLiveCommentary({
         })
         if (id !== requestId.current) return
 
-        const after = await engine.analyse({
+        const after = await analyserAvecLeNavigateur({
           fen: move.after,
           depth: searchDepth,
           multiPv: 1,

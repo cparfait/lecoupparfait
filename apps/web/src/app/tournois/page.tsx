@@ -15,6 +15,7 @@ import { Swords, Timer, Users } from 'lucide-react'
 import clsx from 'clsx'
 import { Button, Card, EmptyState, Input, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { useIdentite } from '@/lib/auth/useIdentite.ts'
 
 interface Tournament {
   slug: string
@@ -39,6 +40,11 @@ export default function TournamentsPage() {
   const [name, setName] = useState('')
   const [busy, setBusy] = useState(false)
 
+  const identite = useIdentite()
+  useEffect(() => {
+    if (identite !== undefined) setSignedIn(identite !== null)
+  }, [identite])
+
   const refresh = useCallback(async () => {
     const data: { tournaments: Tournament[] } = await (await fetch('/api/tournois')).json()
     setList(data.tournaments ?? [])
@@ -46,10 +52,6 @@ export default function TournamentsPage() {
 
   useEffect(() => {
     void refresh().catch(() => setList([]))
-    void fetch('/api/auth')
-      .then((r) => r.json())
-      .then((d: { user: unknown }) => setSignedIn(d.user != null))
-      .catch(() => setSignedIn(false))
     // Une arène démarre toute seule : la liste doit suivre sans qu'on
     // rafraîchisse la page.
     const timer = setInterval(() => void refresh().catch(() => {}), 10_000)

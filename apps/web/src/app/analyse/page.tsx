@@ -76,6 +76,7 @@ import { speak, stopSpeaking } from '@/lib/speech.ts'
 import { playSound } from '@/lib/sound.ts'
 import type { Arrow } from '@/components/board/boardKit.ts'
 import type { PlayedMove } from '@/lib/game/useChessGame.ts'
+import { useLegalMoves } from '@/lib/game/useLegalMoves.ts'
 
 export default function AnalysisPage() {
   const [outcome, setOutcome] = useState<AnalysisOutcome | null>(null)
@@ -1065,6 +1066,7 @@ function ReviewScreen({
         isCheckmate: analysed.san.includes('#'),
         isCapture: analysed.san.includes('x'),
         isCastle: analysed.san.startsWith('O-O'),
+        isPromotion: analysed.san.includes('='),
       })),
     [report.moves],
   )
@@ -1093,22 +1095,7 @@ function ReviewScreen({
   const etatEnigme = enigme ? (enigmes[enigme.ply] ?? 'ouverte') : null
 
   /** Coups légaux de la position d'avant la faute, pour l'échiquier jouable. */
-  const coupsLegaux = useMemo(() => {
-    const map = new Map<Square, Square[]>()
-    if (!enigme || etatEnigme !== 'ouverte' || !move) return map
-    try {
-      const board = new Chess(move.fenBefore, { skipValidation: true })
-      for (const coup of board.moves({ verbose: true })) {
-        const liste = map.get(coup.from) ?? []
-        if (!liste.includes(coup.to)) liste.push(coup.to)
-        map.set(coup.from, liste)
-      }
-    } catch {
-      // Position illisible : aucun coup proposé, la question s'affiche sans
-      // échiquier jouable plutôt que de faire échouer l'écran.
-    }
-    return map
-  }, [enigme, etatEnigme, move])
+  const coupsLegaux = useLegalMoves(move?.fenBefore, Boolean(enigme) && etatEnigme === 'ouverte')
 
   /**
    * Réponse du lecteur.

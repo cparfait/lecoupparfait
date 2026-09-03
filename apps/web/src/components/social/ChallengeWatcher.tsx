@@ -24,6 +24,7 @@ import { Check, Swords, X } from 'lucide-react'
 import { SPEED_LABELS, speedCategory } from '@coupparfait/core'
 import { playSound } from '@/lib/sound.ts'
 import { toast } from '@/components/ui/Toast.tsx'
+import { useIdentite } from '@/lib/auth/useIdentite.ts'
 
 interface Challenge {
   id: string
@@ -65,14 +66,8 @@ export function ChallengeWatcher() {
    * `null` tant qu'on n'a pas demandé, `false` pour un visiteur — auquel cas
    * on cesse définitivement d'interroger.
    */
-  const [signedIn, setSignedIn] = useState<boolean | null>(null)
-
-  useEffect(() => {
-    void fetch('/api/auth')
-      .then((response) => response.json())
-      .then((data: { user: unknown }) => setSignedIn(data.user != null))
-      .catch(() => setSignedIn(false))
-  }, [])
+  const identite = useIdentite()
+  const signedIn = identite === undefined ? null : identite !== null
 
   /**
    * Est-on en train de jouer contre quelqu'un ?

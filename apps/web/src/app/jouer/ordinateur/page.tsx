@@ -122,6 +122,7 @@ import { playMoveSound, playResultSound, playSound } from '@/lib/sound.ts'
 import { usePreferences, usePreferencesDe } from '@/lib/store/preferences.ts'
 import { speak } from '@/lib/speech.ts'
 import type { Arrow } from '@/components/board/boardKit.ts'
+import { useIdentite } from '@/lib/auth/useIdentite.ts'
 
 type Phase = 'setup' | 'playing'
 
@@ -482,13 +483,10 @@ function SetupScreen({
    * quelque part. `null` tant qu'on ne sait pas : on n'affiche pas une case
    * grisée à quelqu'un qui est peut-être connecté.
    */
-  const [connecte, setConnecte] = useState<boolean | null>(null)
-  useEffect(() => {
-    void fetch('/api/auth')
-      .then((reponse) => reponse.json())
-      .then((data: { user: unknown }) => setConnecte(data.user != null))
-      .catch(() => setConnecte(false))
-  }, [])
+  // `useIdentite` partage l'appel avec le reste de l'interface : l'en-tête, le
+  // guetteur de défis et cet écran en faisaient trois, à chaque navigation.
+  const identite = useIdentite()
+  const connecte = identite === undefined ? null : identite !== null
 
   // Le mode commenté n'est pas un réglage de la partie mais une préférence
   // durable : on le lit et on l'écrit là où il vit, pour que le bouton de la
@@ -1223,13 +1221,7 @@ function GameScreen({
     ...(startFen ? { startFen } : {}),
     initialMoves,
     onMove: (move) => {
-      playMoveSound({
-        isCapture: move.isCapture,
-        isCheck: move.isCheck,
-        isCheckmate: move.isCheckmate,
-        isCastle: move.isCastle,
-        isPromotion: !!move.promotion,
-      })
+      playMoveSound(move)
       setHintArrow(null)
       if (timed) {
         setClock((current) =>

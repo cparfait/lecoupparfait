@@ -48,6 +48,7 @@ import { SPEED_LABELS, TIME_CONTROLS } from '@coupparfait/core'
 import { Button, Card, Chip, Input, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { generateGameSlug, retenirSouhaitDeCouleur } from '@/lib/game/useLiveGame.ts'
+import { useIdentite } from '@/lib/auth/useIdentite.ts'
 
 /** Ce que le carnet renvoie d'une personne. */
 interface Ami {
@@ -98,13 +99,7 @@ export default function CreateFriendGamePage() {
    * `null` tant qu'on ne sait pas : on n'affiche ni le carnet ni l'invitation
    * avant la réponse, plutôt que de les faire apparaître puis disparaître.
    */
-  const [moi, setMoi] = useState<{ username: string } | null | undefined>(undefined)
-  useEffect(() => {
-    void fetch('/api/auth')
-      .then((response) => response.json())
-      .then((data: { user?: { username: string } | null }) => setMoi(data.user ?? null))
-      .catch(() => setMoi(null))
-  }, [])
+  const moi = useIdentite()
 
   // Le carnet, dès qu'on sait qu'il y a un compte pour le porter.
   const chargerAmis = useCallback(() => {

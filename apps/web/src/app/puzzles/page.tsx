@@ -37,7 +37,7 @@ import type { Color, PieceSymbol, Square } from 'chess.js'
 import { motifCopy, sanToFrench, type MotifId } from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, ButtonLink, Card, Chip, EmptyState, Spinner } from '@/components/ui/index.tsx'
-import { playMoveSound, playSound } from '@/lib/sound.ts'
+import { playMoveFor, playSound } from '@/lib/sound.ts'
 import { speak } from '@/lib/speech.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { useSan } from '@/lib/notation.ts'
@@ -54,6 +54,7 @@ import { chapitre as chapitreCarriereNumero } from '@coupparfait/core'
 import { useRouter } from 'next/navigation'
 import { jourLocal, queteFaite } from '@/lib/daily/quotidien.ts'
 import type { Locale } from '@/lib/i18n/dictionary.ts'
+import { useLegalMoves } from '@/lib/game/useLegalMoves.ts'
 
 interface Puzzle {
   id: string
@@ -534,13 +535,7 @@ export default function PuzzlesPage() {
       // Coup juste : on l'applique.
       const move = board.move({ from, to, promotion: promotion ?? 'q' })
       setLastMove({ from: move.from, to: move.to })
-      playMoveSound({
-        isCapture: move.isCapture(),
-        isCheck: board.inCheck(),
-        isCheckmate: board.isCheckmate(),
-        isCastle: move.isKingsideCastle() || move.isQueensideCastle(),
-        isPromotion: !!move.promotion,
-      })
+      playMoveFor(move)
 
       const nextIndex = moveIndex + 1
 
@@ -575,13 +570,7 @@ export default function PuzzlesPage() {
             promotion: (reply[4] as PieceSymbol) ?? undefined,
           })
           setLastMove({ from: replyMove.from, to: replyMove.to })
-          playMoveSound({
-            isCapture: replyMove.isCapture(),
-            isCheck: after.inCheck(),
-            isCheckmate: after.isCheckmate(),
-            isCastle: replyMove.isKingsideCastle() || replyMove.isQueensideCastle(),
-            isPromotion: !!replyMove.promotion,
-          })
+          playMoveFor(replyMove)
           setFen(after.fen())
           setMoveIndex(nextIndex + 1)
         } catch {
@@ -1116,30 +1105,6 @@ export default function PuzzlesPage() {
 //  Aides
 // ─────────────────────────────────────────────────────────────────────────────
 
-function useLegalMoves(fen: string, active: boolean) {
-  const [map, setMap] = useState<Map<Square, Square[]>>(new Map())
-
-  useEffect(() => {
-    if (!active || !fen) {
-      setMap(new Map())
-      return
-    }
-    const next = new Map<Square, Square[]>()
-    try {
-      const board = new Chess(fen, { skipValidation: true })
-      for (const move of board.moves({ verbose: true })) {
-        const list = next.get(move.from) ?? []
-        if (!list.includes(move.to)) list.push(move.to)
-        next.set(move.from, list)
-      }
-    } catch {
-      // Position inattendue : on n'autorise aucun coup plutôt que de planter.
-    }
-    setMap(next)
-  }, [fen, active])
-
-  return map
-}
 
 /** Notation algébrique d'un coup UCI dans une position, ou `null`. */
 function sanOf(fen: string, uci: string | undefined): string | null {

@@ -29,6 +29,7 @@ import { ComptesAilleurs } from '@/components/profile/ComptesAilleurs.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { effacerPartie } from '@/lib/game/partieEnCours.ts'
 import { useCourrielDisponible } from '@/lib/auth/useIdentite.ts'
+import { useIdentite, useStatutCourriel } from '@/lib/auth/useIdentite.ts'
 
 interface Profile {
   user: {
@@ -101,14 +102,19 @@ export default function ProfilePage() {
       .catch(() => setProfile(null))
       .finally(() => setLoading(false))
 
-    void fetch('/api/auth')
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => {
-        setMe(data?.user?.username ?? null)
-        setEmail(data?.email ?? null)
-      })
-      .catch(() => setMe(null))
   }, [params.username])
+
+  // L'identité et l'état de son adresse voyagent dans la même réponse, et
+  // `useIdentite` la partage déjà avec l'en-tête : cet écran en refaisait une
+  // deuxième à chaque ouverture de profil, y compris celui d'un autre joueur.
+  const identite = useIdentite()
+  const statutCourriel = useStatutCourriel()
+  useEffect(() => {
+    if (identite !== undefined) setMe(identite?.username ?? null)
+  }, [identite])
+  useEffect(() => {
+    if (statutCourriel !== undefined) setEmail(statutCourriel)
+  }, [statutCourriel])
 
   const signOut = useCallback(async () => {
     await fetch('/api/auth', {

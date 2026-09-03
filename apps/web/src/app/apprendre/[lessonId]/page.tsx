@@ -48,10 +48,11 @@ import {
   positionAtStep,
   type PlayedByStep,
 } from '@/lib/lessons/playback.ts'
-import { playMoveSound, playSound } from '@/lib/sound.ts'
+import { playMoveFor, playMoveSound, playSound } from '@/lib/sound.ts'
 import { prefetchSpeech, speak, stopSpeaking } from '@/lib/speech.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import type { Arrow, CircleMark } from '@/components/board/boardKit.ts'
+import { useLegalMoves } from '@/lib/game/useLegalMoves.ts'
 
 type Feedback = { kind: 'correct' | 'wrong' | 'revealed'; text: string } | null
 
@@ -202,21 +203,7 @@ export default function LessonPage() {
   }, [fen])
 
   // ── Coups légaux ──────────────────────────────────────────────────────────
-  const legalMoves = useMemo(() => {
-    const map = new Map<Square, Square[]>()
-    if (!step || !needsAction || solved || !fen) return map
-    try {
-      const board = new Chess(fen, { skipValidation: true })
-      for (const move of board.moves({ verbose: true })) {
-        const list = map.get(move.from) ?? []
-        if (!list.includes(move.to)) list.push(move.to)
-        map.set(move.from, list)
-      }
-    } catch {
-      // Position illustrative sans roi : aucun coup proposé, c'est normal.
-    }
-    return map
-  }, [fen, step, needsAction, solved])
+  const legalMoves = useLegalMoves(fen, Boolean(step) && needsAction && !solved)
 
   // ── Coup de l'apprenant ───────────────────────────────────────────────────
   const handleMove = useCallback(
@@ -248,13 +235,7 @@ export default function LessonPage() {
         return
       }
 
-      playMoveSound({
-        isCapture: move.isCapture(),
-        isCheck: board.inCheck(),
-        isCheckmate: board.isCheckmate(),
-        isCastle: move.isKingsideCastle() || move.isQueensideCastle(),
-        isPromotion: !!move.promotion,
-      })
+      playMoveFor(move)
 
       setPlayed((current) => ({ ...current, [stepIndex]: move.san }))
       setFen(board.fen())
