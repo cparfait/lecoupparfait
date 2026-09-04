@@ -783,6 +783,87 @@ button.gradient-ring:hover::before {
   }
 }
 
+/* La série, jour après jour.
+   Les jours du panneau de la flamme s'allument l'un après l'autre, de gauche à
+   droite : c'est ce qui fait comprendre en une seconde ce qu'est une série —
+   une suite, et non un score. Le décalage se règle par `--retard` sur chaque
+   case. L'état reste parfaitement lisible sans le mouvement, d'où la
+   neutralisation plus bas. */
+@keyframes flamme-jour {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-flamme-jour {
+  animation: flamme-jour 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: var(--retard, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-flamme-jour {
+    animation: none;
+  }
+}
+
+/* Une quête du jour vient d'être remplie.
+   La médaille arrive en rebondissant, deux étincelles la suivent. C'est le
+   seul moment de la journée où l'application félicite : l'annonce doit se voir
+   avant d'être lue. Tout est décoratif — le texte dit la même chose — d'où la
+   neutralisation sous `prefers-reduced-motion`. */
+@keyframes quete-medaille {
+  from {
+    opacity: 0;
+    transform: scale(0.3) rotate(-18deg);
+  }
+  65% {
+    transform: scale(1.12) rotate(4deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes quete-etincelle {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+}
+
+.animate-quete-medaille {
+  animation: quete-medaille 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-quete-etincelle {
+  animation: quete-etincelle 0.6s ease-out both;
+  animation-delay: var(--retard, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-quete-medaille,
+  .animate-quete-etincelle {
+    animation: none;
+  }
+}
+
 .animate-slide-up {
   animation: slide-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }

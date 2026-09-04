@@ -61,6 +61,7 @@ import { MoveList } from '@/components/game/MoveList.tsx'
 import { ApprofondirCoup } from '@/components/ia/ApprofondirCoup.tsx'
 import { Menu } from '@/components/ui/Menu.tsx'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
+import { useMission } from '@/lib/daily/useMission.ts'
 import { PlayerBar } from '@/components/game/PlayerBar.tsx'
 import { useQualitesDesCoups } from '@/lib/game/useQualitesDesCoups.ts'
 import { TurnIndicator } from '@/components/game/TurnIndicator.tsx'
@@ -1174,6 +1175,14 @@ function GameScreen({
 
   // Quêtes du jour : marquées à la fin de la partie, sans jamais interrompre.
   const { marquer } = useQuotidien()
+  /*
+    La quête qui a envoyé jouer, quand on arrive par `?quete=`.
+
+    Elle ne change rien à la partie : elle sert uniquement à la boîte de fin,
+    qui propose alors la bonne suite — rentrer voir sa journée si la quête est
+    remplie, enchaîner une partie s'il s'en faut encore d'une victoire.
+  */
+  const mission = useMission()
 
   // ── Mode commenté ───────────────────────────────────────────────────────
   // Déclaré ici, avant le pilote de l'adversaire artificiel : celui-ci consulte
@@ -2384,6 +2393,15 @@ function GameScreen({
           opponentName={personality.name.fr}
           moves={state.moves}
           ratingDelta={variationClassement}
+          quete={
+            mission.quete
+              ? {
+                  libelle: mission.quete.label,
+                  faite: mission.faite,
+                  restantes: mission.restantes,
+                }
+              : undefined
+          }
           onRematch={onRematch}
           onNewGame={onNewGame}
         />

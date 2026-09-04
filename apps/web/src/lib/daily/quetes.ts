@@ -8,6 +8,18 @@
  * divergeraient.
  */
 
+/*
+  `analyse` reste dans le type sans figurer dans la liste.
+
+  La quête « Analyser une partie » a été retirée : chaque analyse lance
+  Stockfish sur une partie entière, et en faire un devoir quotidien revenait à
+  programmer une pointe de charge sur le serveur tous les jours, pour la seule
+  raison qu'une liste de cinq lignes est plus jolie qu'une de quatre.
+
+  L'identifiant survit parce que l'écran d'analyse le signale toujours et que
+  d'anciennes journées en portent la trace dans le stockage local : `avancerQuete`
+  ignore proprement un identifiant sans quête, et rien n'est à nettoyer.
+*/
 export type QueteId = 'defi' | 'partie' | 'victoire' | 'puzzles' | 'analyse'
 
 export interface Quete {
@@ -32,27 +44,49 @@ export interface Quete {
 /**
  * Les quêtes du jour.
  *
- * Cinq, pas douze : une liste qu'on peut finir est une liste qu'on commence.
- * Elles couvrent les trois usages de la plateforme — jouer, résoudre,
- * comprendre — pour que « faire ses quêtes » revienne à travailler les trois
+ * Quatre, pas douze : une liste qu'on peut finir est une liste qu'on commence.
+ * Elles couvrent les deux usages qui ne coûtent rien à personne — jouer et
+ * résoudre — pour que « faire ses quêtes » revienne à travailler les deux
  * plutôt qu'à répéter la plus facile.
  */
 export const QUETES: Quete[] = [
-  { id: 'defi', label: 'Résoudre le défi du jour', xp: 25, objectif: 1, lien: '/puzzles?defi=1' },
+  {
+    id: 'defi',
+    label: 'Résoudre le défi du jour',
+    xp: 25,
+    objectif: 1,
+    lien: '/puzzles?defi=1&quete=defi',
+  },
   // « Jouer » et « gagner » mènent à l'ordinateur plutôt qu'au sommaire des
   // façons de jouer : la quête se compte en parties finies, et c'est le seul
   // adversaire disponible à la seconde où on clique.
-  { id: 'partie', label: 'Jouer une partie', xp: 10, objectif: 1, lien: '/jouer/ordinateur' },
-  { id: 'victoire', label: 'Gagner une partie', xp: 15, objectif: 1, lien: '/jouer/ordinateur' },
+  // `?quete=` n'est pas décoratif : l'écran de partie le lit, et sa boîte de
+  // fin propose alors la suite qui va avec — retourner aux quêtes si celle-ci
+  // vient d'être remplie, enchaîner une partie s'il s'en faut encore d'une
+  // victoire. Sans ce marqueur, on gagnait sa partie et l'on se retrouvait
+  // devant « Revanche » et « Analyser », sans savoir si la quête était faite.
+  {
+    id: 'partie',
+    label: 'Jouer une partie',
+    xp: 10,
+    objectif: 1,
+    lien: '/jouer/ordinateur?quete=partie',
+  },
+  {
+    id: 'victoire',
+    label: 'Gagner une partie',
+    xp: 15,
+    objectif: 1,
+    lien: '/jouer/ordinateur?quete=victoire',
+  },
   {
     id: 'puzzles',
     label: 'Enchaîner 3 puzzles',
     detail: 'trois résolus dans la journée',
     xp: 20,
     objectif: 3,
-    lien: '/puzzles',
+    lien: '/puzzles?quete=puzzles',
   },
-  { id: 'analyse', label: 'Analyser une partie', xp: 10, objectif: 1, lien: '/analyse' },
 ]
 
 export const XP_TOTAL = QUETES.reduce((somme, quete) => somme + quete.xp, 0)

@@ -43,6 +43,8 @@ import { useSan } from '@/lib/notation.ts'
 import { VoiceQuickToggle } from '@/components/layout/VoiceQuickToggle.tsx'
 import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
+import { useMission } from '@/lib/daily/useMission.ts'
+import { QueteTerminee } from '@/components/daily/QueteTerminee.tsx'
 import {
   chapitreDeLUrl,
   deposerGains,
@@ -227,6 +229,16 @@ export default function PuzzlesPage() {
   }, [])
 
   const { etat: journee, marquer } = useQuotidien()
+
+  /**
+   * La quête qui nous a envoyés ici, s'il y en a une.
+   *
+   * « Enchaîner 3 puzzles » se terminait sans que rien ne le dise : un bandeau
+   * passait, on continuait d'enchaîner sans savoir que c'était fait. La boîte
+   * ne s'ouvre qu'au passage — voir `useMission` — et laisse le choix entre
+   * continuer ici et rentrer voir sa journée.
+   */
+  const mission = useMission()
 
   const router = useRouter()
 
@@ -1090,6 +1102,25 @@ export default function PuzzlesPage() {
           <AutresDeLaSection section="entrainer" className="paysage:hidden" />
         </div>
       </div>
+
+      {/* La quête du jour vient d'être remplie — et elle seule ouvre cette
+          boîte : on ne félicite pas quelqu'un qui s'entraîne librement à
+          chaque troisième puzzle. */}
+      {mission.celebrer && mission.quete && (
+        <QueteTerminee
+          quete={mission.quete}
+          restantes={mission.restantes}
+          serie={journee?.serie}
+          libelleContinuer={mission.quete.id === 'defi' ? 'Continuer en libre' : 'Puzzle suivant'}
+          onContinuer={() => {
+            mission.fermer()
+            // Le défi du jour n'a pas de suivant : on sort vers les puzzles
+            // ordinaires, comme le fait le bouton de la barre d'actions.
+            if (mission.quete?.id === 'defi') quitterLeDefi()
+            else void load()
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -15,7 +15,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useDialogue } from '@/lib/useDialogue.ts'
 import Link from 'next/link'
-import { Gauge, LayoutGrid, RotateCcw, Swords, Trophy, X } from 'lucide-react'
+import { Check, Gauge, LayoutGrid, RotateCcw, Swords, Target, Trophy, X } from 'lucide-react'
+import clsx from 'clsx'
 import type { Color } from 'chess.js'
 import type { GameResult, GameStatus } from '@coupparfait/core'
 import { formatPgnDate, toPgn } from '@coupparfait/core'
@@ -47,6 +48,7 @@ export function GameOverDialog({
   onRematch,
   onNewGame,
   retour,
+  quete,
 }: {
   status: GameStatus
   result: GameResult
@@ -68,6 +70,18 @@ export function GameOverDialog({
    * partie », qui le renvoyait aux réglages qu'on lui avait justement épargnés.
    */
   retour?: { href: string; libelle: string }
+  /**
+   * La quête du jour qui a envoyé jouer, s'il y en a une.
+   *
+   * On arrivait ici par « Gagner une partie » depuis l'accueil, on gagnait, et
+   * la boîte proposait « Revanche » et « Analyser » — sans un mot sur la quête,
+   * ni sur ce qu'il restait à faire. Il fallait retourner à l'accueil pour
+   * savoir si ça avait compté.
+   *
+   * Deux issues, selon l'état : rentrer voir sa journée quand c'est fait,
+   * enchaîner une partie quand il s'en faut encore d'une victoire.
+   */
+  quete?: { libelle: string; faite: boolean; restantes: number }
 }) {
   const [dismissed, setDismissed] = useState(false)
 
@@ -224,7 +238,62 @@ export function GameOverDialog({
 
         <p className="mt-4 text-xs text-faint">{moves.length} demi-coups joués</p>
 
+        {/* ── La quête du jour ──────────────────────────────────────────
+            Elle est annoncée avant les boutons parce qu'elle décide lequel
+            d'entre eux est le bon. */}
+        {quete && (
+          <div
+            className={clsx(
+              'mt-4 rounded-[var(--radius-sm)] px-3 py-2.5 text-left',
+              quete.faite ? 'bg-[color-mix(in_oklab,var(--q-best)_14%,transparent)]' : 'bg-surface',
+            )}
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
+              Quête du jour
+            </p>
+            <p className="mt-0.5 flex items-center gap-1.5 text-[13px] font-semibold">
+              {quete.faite ? (
+                <Check size={14} className="shrink-0 text-[var(--q-best)]" aria-hidden />
+              ) : (
+                <Target size={14} className="shrink-0 text-faint" aria-hidden />
+              )}
+              {quete.libelle}
+              {quete.faite && <span className="text-[var(--q-best)]">— c’est fait</span>}
+            </p>
+            <p className="mt-1 text-[12px] leading-relaxed text-muted">
+              {quete.faite
+                ? quete.restantes === 0
+                  ? 'Toutes les quêtes du jour sont faites.'
+                  : `Il te reste ${quete.restantes} quête${quete.restantes > 1 ? 's' : ''} aujourd’hui.`
+                : 'Pas encore : il faut une victoire. Une autre partie, et c’est joué.'}
+            </p>
+          </div>
+        )}
+
         <div className="mt-6 space-y-2">
+          {/* Quête remplie : la sortie passe devant tout le reste. */}
+          {quete?.faite && !retour && (
+            <Link href="/" className="block">
+              <Button variant="primary" size="lg" fullWidth icon={<Trophy size={16} />}>
+                Retour aux quêtes du jour
+              </Button>
+            </Link>
+          )}
+          {/* Quête à finir : le bouton qui la finit, en premier. */}
+          {quete && !quete.faite && onRematch && (
+            <Button
+              variant="primary"
+              size="lg"
+              fullWidth
+              icon={<RotateCcw size={16} />}
+              onClick={() => {
+                setDismissed(true)
+                onRematch()
+              }}
+            >
+              Rejouer une partie
+            </Button>
+          )}
           {retour && (
             <Link href={retour.href} className="block">
               <Button variant="primary" size="lg" fullWidth icon={<Trophy size={16} />}>
@@ -238,7 +307,7 @@ export function GameOverDialog({
           {moves.length > 0 && (
             <Link href="/analyse" onClick={handOffForAnalysis} className="block">
               <Button
-                variant={retour ? 'secondary' : 'primary'}
+                variant={retour || quete ? 'secondary' : 'primary'}
                 size="lg"
                 fullWidth
                 icon={<Gauge size={16} />}
