@@ -30,6 +30,80 @@ function normalise(value: string): string {
   return value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
 }
 
+/**
+ * Une définition, en deux temps.
+ *
+ * Elles font entre trois et huit lignes, sans une respiration : sur un
+ * téléphone, une carte du glossaire était un pavé gris de dix lignes, et
+ * soixante-quatorze pavés à la suite ne se parcourent pas — on ne peut que les
+ * lire tous, ou aucun. Or on vient ici avec un mot en tête.
+ *
+ * La **première phrase est la définition** ; tout ce qui suit est le
+ * commentaire, l'exemple, l'erreur classique. C'est vrai des soixante-quatorze,
+ * parce qu'elles sont écrites ainsi. On la sort donc du bloc, en pleine
+ * couleur, et le reste attend qu'on le demande : trois lignes en aperçu, puis
+ * « Lire la suite ». La carte fait alors quatre lignes au lieu de dix, et la
+ * page redevient une liste qu'on balaie.
+ *
+ * Rien n'est perdu et rien n'est caché derrière un geste inutile : les
+ * définitions courtes — il y en a — s'affichent d'un bloc, sans bouton.
+ */
+function Definition({ texte }: { texte: string }) {
+  const [ouvert, setOuvert] = useState(false)
+  const { chapeau, suite } = couperEnDeux(texte)
+
+  return (
+    <dd className="mt-1.5">
+      <p className="text-[13px] leading-relaxed text-ink/90">{renderBold(chapeau)}</p>
+      {suite && (
+        <>
+          <p
+            className={clsx(
+              'mt-1.5 text-[13px] leading-relaxed text-muted',
+              !ouvert && 'line-clamp-3',
+            )}
+          >
+            {renderBold(suite)}
+          </p>
+          <button
+            type="button"
+            onClick={() => setOuvert((etat) => !etat)}
+            aria-expanded={ouvert}
+            className="mt-1 text-[12px] font-medium text-accent transition-colors hover:underline"
+          >
+            {ouvert ? 'Réduire' : 'Lire la suite'}
+          </button>
+        </>
+      )}
+    </dd>
+  )
+}
+
+/**
+ * Sépare la première phrase du reste.
+ *
+ * On coupe au premier point suivi d'une espace **et** d'une majuscule ou d'un
+ * guillemet : c'est ce qui distingue une fin de phrase d'un « 1.e4 » ou d'un
+ * « 3 | 2 », où le point n'est suivi de rien. En cas de doute — aucune coupure
+ * trouvée, phrase unique, ou coupure qui tomberait au milieu d'un `**gras**` —
+ * on rend le texte entier en chapeau : mieux vaut un pavé qu'une phrase
+ * tronquée au mauvais endroit.
+ */
+function couperEnDeux(texte: string): { chapeau: string; suite: string | null } {
+  const court = texte.length < 170
+  const coupure = texte.match(/^(.+?[.!?])\s+(?=[«"A-ZÀÂÇÉÈÊËÎÏÔÙÛÜ])/u)
+  const chapeau = coupure?.[1]
+  if (court || !chapeau || chapeau.length > texte.length - 30) {
+    return { chapeau: texte, suite: null }
+  }
+  // Un `**` orphelin voudrait dire qu'on a coupé au milieu d'un passage en
+  // gras : les astérisques se liraient alors à l'écran.
+  const paires = (chapeau.match(/\*\*/g) ?? []).length
+  if (paires % 2 !== 0) return { chapeau: texte, suite: null }
+
+  return { chapeau, suite: texte.slice(chapeau.length).trim() }
+}
+
 export default function GlossaryPage() {
   const locale = usePreferences((state) => state.locale)
   const [query, setQuery] = useState('')
@@ -146,9 +220,7 @@ export default function GlossaryPage() {
                         entry.name
                       )}
                     </dt>
-                    <dd className="mt-1.5 text-[13px] leading-relaxed text-muted">
-                      {renderBold(entry.definition)}
-                    </dd>
+                    <Definition texte={entry.definition} />
                   </Card>
                 )
               })}
