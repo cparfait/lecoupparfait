@@ -24,6 +24,7 @@ import { usePathname } from 'next/navigation'
 import {
   ChevronDown,
   ChevronRight,
+  House,
   Info,
   Lock,
   Menu as MenuIcon,
@@ -208,10 +209,31 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <ShieldCheck size={17} aria-hidden />
               </Link>
             )}
+            {/* Le retour à l'accueil, nommé.
+
+                Le nom du site, à gauche, y menait déjà — mais rien ne le dit :
+                c'est un mot, pas un bouton, et il faut avoir l'habitude du web
+                pour deviner qu'un titre est cliquable. Sur un écran de partie
+                c'était même la seule sortie, la barre du bas s'effaçant pour
+                rendre sa hauteur à l'échiquier.
+
+                Une maison, à côté de l'engrenage et du compte, ne demande
+                aucune habitude. Elle vaut sur les deux tailles d'écran :
+                l'accueil ne figure ni dans les cinq rubriques du haut, ni dans
+                les quatre raccourcis du bas. */}
+            <Link
+              href="/"
+              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
+              aria-label={t('nav.home')}
+              title={t('nav.home')}
+            >
+              <House size={17} aria-hidden />
+            </Link>
             <Link
               href="/preferences"
               className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
               aria-label={t('nav.settings')}
+              title={t('nav.settings')}
             >
               <Settings size={17} aria-hidden />
             </Link>

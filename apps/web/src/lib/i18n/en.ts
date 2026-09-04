@@ -24,6 +24,7 @@ export const en: Dictionary = {
   },
 
   nav: {
+    home: 'Home',
     play: 'Play',
     career: 'Career',
     careerHint: 'Twelve chapters, from first move to first clean win',

@@ -19,6 +19,7 @@ export const fr = {
   },
 
   nav: {
+    home: 'Accueil',
     play: 'Jouer',
     career: 'Carrière',
     careerHint: 'Douze chapitres, du premier coup à la première victoire nette',
