@@ -151,7 +151,7 @@ function FamilyList({
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
         Entraînement aux finales
       </h1>
-      <p className="mt-2 max-w-2xl text-muted">
+      <p className="mt-2 max-w-2xl text-muted max-lg:text-[13px] max-lg:leading-relaxed">
         {total.toLocaleString('fr-FR')} positions classées. On te donne un objectif — gagner ou
         tenir la nulle — et l’ordinateur défend au mieux. Il faut jouer jusqu’au bout : aucune
         solution à réciter.

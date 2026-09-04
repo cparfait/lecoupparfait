@@ -383,25 +383,16 @@ export default function LessonPage() {
           <span className="text-sm font-medium">
             {lesson.icon} {lesson.title}
           </span>
+          {/* Le haut-parleur n'est plus ici — il est dans le panneau du coach,
+              c'est-à-dire à côté du texte qu'il fait lire. Sur téléphone,
+              l'en-tête se replie : le fil d'Ariane prenait une ligne, le titre
+              une deuxième, et le bouton se retrouvait tout seul sur une
+              troisième, à gauche, sans rien pour dire ce qu'il coupait. Trois
+              lignes d'en-tête, c'est autant de pris sur l'échiquier et sur le
+              texte, qui sont toute la leçon. */}
           <Chip className="ml-auto">
             Étape {stepIndex + 1} / {lesson.steps.length}
           </Chip>
-          <button
-            type="button"
-            onClick={() => {
-              if (voiceEnabled) stopSpeaking()
-              setPreference('voiceEnabled', !voiceEnabled)
-            }}
-            className={clsx(
-              'grid h-8 w-8 place-items-center rounded-[var(--radius-sm)] transition-colors',
-              voiceEnabled
-                ? 'text-accent hover:bg-surface-hover'
-                : 'text-faint hover:bg-surface-hover',
-            )}
-            aria-label={voiceEnabled ? 'Couper la voix' : 'Activer la voix'}
-          >
-            {voiceEnabled ? <Volume2 size={15} aria-hidden /> : <VolumeX size={15} aria-hidden />}
-          </button>
         </div>
 
         <div className="mb-4 h-1 overflow-hidden rounded-full bg-surface-strong">
@@ -482,10 +473,33 @@ export default function LessonPage() {
               <span className="text-[11px] font-semibold uppercase tracking-wide text-faint">
                 Le coach
               </span>
+              {/* Couper la voix, à côté de ce qu'elle lit : un haut-parleur
+                  posé dans une barre ne dit pas ce qu'il fait taire — les
+                  pièces, la fin de partie, une musique ? Ici, il n'y a aucun
+                  doute. */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (voiceEnabled) stopSpeaking()
+                  setPreference('voiceEnabled', !voiceEnabled)
+                }}
+                className={clsx(
+                  'ml-auto grid h-8 w-8 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
+                  voiceEnabled ? 'text-accent' : 'text-faint',
+                )}
+                aria-label={voiceEnabled ? 'Couper la voix du coach' : 'Activer la voix du coach'}
+                title={voiceEnabled ? 'Couper la voix du coach' : 'Activer la voix du coach'}
+              >
+                {voiceEnabled ? (
+                  <Volume2 size={15} aria-hidden />
+                ) : (
+                  <VolumeX size={15} aria-hidden />
+                )}
+              </button>
               <button
                 type="button"
                 onClick={() => speak(step.say)}
-                className="ml-auto rounded p-1 text-faint transition-colors hover:text-ink"
+                className="grid h-8 w-8 place-items-center rounded-[var(--radius-sm)] text-faint transition-colors hover:bg-surface-hover hover:text-ink"
                 aria-label="Réécouter"
                 title="Réécouter"
               >

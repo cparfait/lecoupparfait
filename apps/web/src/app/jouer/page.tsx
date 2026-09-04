@@ -82,7 +82,7 @@ export default function PlayLobbyPage() {
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
         {t('play.title')}
       </h1>
-      <p className="mt-2 max-w-xl text-muted">
+      <p className="mt-2 max-w-xl text-muted max-lg:text-[13px] max-lg:leading-relaxed">
         Contre la machine pour t’entraîner à ton rythme, contre un ami pour le plaisir, ou à deux
         sur le même écran.
       </p>

@@ -136,7 +136,7 @@ export default function CreditsPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:py-14">
       <h1 className="font-display text-3xl font-bold tracking-tight">Crédits &amp; licences</h1>
-      <p className="mt-3 max-w-2xl leading-relaxed text-muted">
+      <p className="mt-3 max-w-2xl leading-relaxed text-muted max-lg:text-[13px]">
         Le Coup Parfait n’aurait pas pu exister sans le travail libre d’autres personnes. Tout ce
         qui suit est réutilisé dans le respect de sa licence — et cette page en fait partie :
         plusieurs de ces licences exigent explicitement l’attribution.

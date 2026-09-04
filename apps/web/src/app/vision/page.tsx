@@ -140,18 +140,47 @@ export default function VisionPage() {
 
   return (
     <div className="mx-auto w-full max-w-[1100px] px-4 py-8 sm:px-6 lg:py-12">
-      <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">Vision</h1>
-      <p className="mt-2 max-w-2xl text-muted">
+      {/* Sur téléphone, le titre est plus petit et la consigne disparaît pendant
+          la manche : chaque ligne gardée ici est prise sur l'échiquier, et la
+          consigne ne s'adresse qu'à celui qui n'a pas encore commencé. */}
+      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+        Vision
+      </h1>
+      <p
+        className={clsx(
+          'mt-2 max-w-2xl text-muted max-lg:text-[13px]',
+          phase === 'enCours' && 'max-lg:hidden',
+        )}
+      >
         Une case est annoncée, tu cliques dessus. Trente secondes. Tant qu’il faut réfléchir pour
         trouver « f6 », ce temps-là est pris sur le calcul — c’est le réflexe le plus rentable à
         installer quand on débute.
       </p>
 
-      <div className="mt-7 grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
+      {/* ── L'ordre des blocs, et il n'est pas le même sur les deux écrans ──
+          Sur grand écran, l'échiquier à gauche et le panneau à droite : on voit
+          la case demandée et l'échiquier d'un seul regard.
+
+          Sur téléphone, la colonne s'empilait dans l'ordre du code — échiquier
+          d'abord, panneau ensuite. La case à trouver s'affichait donc *sous*
+          un échiquier qui prend toute la largeur, c'est-à-dire hors de l'écran :
+          il fallait faire défiler pour lire « f6 », remonter pour cliquer, et
+          recommencer trente fois. L'exercice était inutilisable, et c'est ce
+          qu'on voyait comme un problème de dimensionnement.
+
+          `max-lg:contents` fait disparaître le panneau de la mise en page sous
+          `lg` : ses enfants deviennent des cases de la grille, et chacun prend
+          alors son rang — la case demandée et les compteurs avant l'échiquier,
+          les réglages après. */}
+      <div className="mt-5 grid gap-3 sm:mt-7 sm:gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
         {/* ── Échiquier ────────────────────────────────────────────── */}
-        <div className="min-w-0">
+        <div className="order-3 min-w-0 lg:order-none">
           <div
-            className="relative aspect-square w-full overflow-hidden rounded-[var(--radius)]"
+            /* La largeur est bornée par la hauteur restante : sur un écran
+               court — un téléphone en 16:9, ou n'importe quel appareil en
+               paysage —, un carré large comme l'écran dépasse forcément par le
+               bas, et l'on reperd la case demandée qu'on vient de remonter. */
+            className="relative mx-auto aspect-square w-full max-w-[min(100%,calc(100dvh-21rem))] overflow-hidden rounded-[var(--radius)] lg:max-w-none"
             style={{ boxShadow: `0 0 0 2px ${skin.frame}` }}
           >
             {squares.map((square) => {
@@ -223,25 +252,25 @@ export default function VisionPage() {
         </div>
 
         {/* ── Panneau ──────────────────────────────────────────────── */}
-        <div className="flex flex-col gap-3">
-          <Card glow className="p-5 text-center">
+        <div className="max-lg:contents lg:flex lg:flex-col lg:gap-3">
+          <Card glow className="order-1 p-4 text-center sm:p-5 lg:order-none">
             {phase === 'enCours' ? (
               <>
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
                   Clique sur
                 </p>
-                <p className="mt-1 font-display text-6xl font-bold tabular-nums text-accent">
+                <p className="mt-1 font-display text-5xl font-bold tabular-nums text-accent sm:text-6xl">
                   {target}
                 </p>
               </>
             ) : (
-              <p className="py-6 text-sm text-muted">
+              <p className="py-4 text-sm text-muted sm:py-6">
                 {phase === 'fini' ? 'Manche terminée.' : 'Prêt ? La première case s’affichera ici.'}
               </p>
             )}
           </Card>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="order-2 grid grid-cols-3 gap-2 lg:order-none">
             {[
               { label: 'Temps', value: `${remaining}s`, icon: Timer },
               { label: 'Trouvées', value: String(found), icon: null },
@@ -258,12 +287,12 @@ export default function VisionPage() {
           </div>
 
           {missed > 0 && (
-            <Chip tone="danger" className="self-start">
+            <Chip tone="danger" className="order-4 self-start lg:order-none">
               {missed} erreur{missed > 1 ? 's' : ''}
             </Chip>
           )}
 
-          <Card className="p-4">
+          <Card className="order-5 p-4 lg:order-none">
             <Toggle
               label="Voir depuis les Noirs"
               description="Un exercice différent, et celui qui manque le plus : on connaît son côté par cœur, jamais l’autre."
@@ -273,7 +302,7 @@ export default function VisionPage() {
             />
           </Card>
 
-          <p className="text-xs leading-relaxed text-faint">
+          <p className="order-6 text-xs leading-relaxed text-faint lg:order-none">
             Une erreur ne coûte pas de temps : l’objectif est d’installer un réflexe, pas de se
             mettre la pression. Vise trente cases en trente secondes — à ce rythme, tu ne cherches
             plus, tu vois.

@@ -135,7 +135,7 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
       <h1 className="font-display text-3xl font-bold tracking-tight">
         Tournoi contre l’ordinateur
       </h1>
-      <p className="mt-2 max-w-prose text-muted">
+      <p className="mt-2 max-w-prose text-muted max-lg:text-[13px] max-lg:leading-relaxed">
         Tu es le seul humain. Tu affrontes chaque adversaire une fois, et le classement se fait aux
         points — comme dans un vrai toutes rondes.
       </p>

@@ -8,7 +8,10 @@
 
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { BOT_LEVELS, BOT_PERSONALITIES, CHAPITRES, motifGlossary } from '@coupparfait/core'
 import { Card, Chip } from '@/components/ui/index.tsx'
+import { CURRICULUM_STATS } from '@/lib/lessons/index.ts'
+import { TERMS } from '@/lib/glossaire.ts'
 
 export const metadata: Metadata = {
   title: 'À propos',
@@ -96,12 +99,31 @@ export default function AboutPage() {
 
       <Card className="mt-8 p-5">
         <h2 className="font-display text-lg font-semibold">En quelques chiffres</h2>
+        {/* Les chiffres se comptent, ils ne se recopient pas.
+
+            « 30 leçons guidées » était écrit à la main, et le programme en
+            comptait déjà davantage : une page qui se veut franche sur ses
+            données ne peut pas se tromper sur les siennes. Tout ce qui vit dans
+            le code se lit donc à la source — leçons, niveaux, personnalités,
+            chapitres, vocabulaire — et ne peut plus vieillir. Restent en dur
+            les deux jeux de données extérieurs, ouvertures et puzzles, dont le
+            volume est fixé par l'import. */}
         <dl className="mt-3 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
           {[
             { value: '3 810', label: 'ouvertures nommées' },
             { value: '6 M', label: 'puzzles tactiques' },
-            { value: '30', label: 'leçons guidées' },
-            { value: '25', label: 'niveaux d’adversaires' },
+            { value: String(CURRICULUM_STATS.lessons), label: 'leçons guidées' },
+            { value: String(Object.keys(BOT_LEVELS).length), label: 'niveaux d’adversaires' },
+            {
+              value: String(Object.keys(BOT_PERSONALITIES).length),
+              label: 'personnalités, chacune son style',
+            },
+            { value: String(CHAPITRES.length), label: 'chapitres de carrière' },
+            {
+              value: String(TERMS.length + motifGlossary('fr').length),
+              label: 'mots définis en français clair',
+            },
+            { value: '7', label: 'pièces : les finales jouées à la perfection' },
           ].map((entry) => (
             <div key={entry.label}>
               <dt className="font-display text-xl font-bold tabular-nums text-ink">

@@ -65,28 +65,17 @@ export default function LearnPage() {
     }
 
     /*
-      Premier passage : tout replié sauf le chapitre en cours.
+      Premier passage : tout est ouvert.
 
-      Les sept chapitres s'ouvraient tous, et trente-six cartes de leçon
-      s'empilaient à la suite. Sur un téléphone, il fallait faire défiler cinq
-      écrans pour apercevoir le chapitre 2 : la page annonçait « 7 chapitres »
-      et n'en montrait jamais qu'un. Or c'est la liste qu'on vient voir — on
-      choisit un chapitre, puis une leçon, dans cet ordre.
-
-      Le chapitre en cours est le premier dont toutes les leçons ne sont pas
-      terminées : c'est là qu'on reprend. Tout fini, tout reste replié — il n'y
-      a plus rien à reprendre, et la liste seule répond mieux à « qu'est-ce que
-      j'ai fait ? ».
-
-      Ce n'est qu'un défaut : le choix de chacun est conservé dès qu'il en fait
-      un, et prime sur celui-ci.
+      Les chapitres arrivaient repliés, sauf celui en cours — au motif que sept
+      en-têtes tiennent dans un écran là où trente-six cartes en demandent
+      cinq. C'était échanger un défilement contre un mystère : la page annonçait
+      sept chapitres et ne montrait aucun cours, et rien ne dit qu'un titre
+      cache une liste. Les cours se déplient donc sous la progression, tous, et
+      celui qui veut refermer un chapitre fini le referme — son choix est
+      conservé, et prime sur celui-ci.
     */
-    const enCours = CHAPTERS.find((chapitre) =>
-      chapitre.lessons.some((lecon) => !suivi[lecon.id]?.completed),
-    )
-    setCollapsed(
-      Object.fromEntries(CHAPTERS.map((chapitre) => [chapitre.id, chapitre.id !== enCours?.id])),
-    )
+    setCollapsed({})
   }, [])
 
   const toggle = useCallback((id: string) => {
@@ -115,39 +104,56 @@ export default function LearnPage() {
   }, [allCollapsed])
 
   const overall = overallProgress(progress)
+  const termineesEnTout = CHAPTERS.reduce(
+    (total, chapitre) =>
+      total + chapitre.lessons.filter((lecon) => progress[lecon.id]?.completed).length,
+    0,
+  )
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:py-14">
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
         Apprendre les échecs
       </h1>
-      <p className="mt-2 max-w-2xl text-muted">
+      {/* La consigne, en petit.
+
+          Elle occupait trois lignes en corps courant, juste sous un titre de
+          trente-six pixels : deux blocs de texte avant la moindre leçon, et la
+          progression repoussée d'autant. Elle se lit une fois, à la première
+          visite ; ensuite on vient reprendre un cours. */}
+      <p className="mt-1.5 max-w-2xl text-[13px] leading-relaxed text-muted">
         {CURRICULUM_STATS.lessons} leçons guidées, {CURRICULUM_STATS.steps} étapes, une voix qui
         explique chaque coup. Tu peux commencer sans rien connaître — la première leçon part de
         l’échiquier vide.
       </p>
 
-      {/* ── Progression globale ──────────────────────────────────────── */}
-      {overall > 0 && (
-        <Card className="mt-6 p-4">
-          <div className="mb-2 flex items-baseline justify-between">
-            <span className="text-sm font-medium">Ta progression</span>
-            <span className="text-sm tabular-nums text-muted">{overall} %</span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-surface-strong">
-            <div
-              className="h-full rounded-full transition-[width] duration-500"
-              style={{
-                width: `${overall}%`,
-                background: 'linear-gradient(90deg, var(--accent), var(--accent-2))',
-              }}
-            />
-          </div>
-        </Card>
-      )}
+      {/* ── Progression globale ────────────────────────────────────────
+          Affichée même à zéro, et les cours se déplient dessous : c'est la
+          première chose qu'on vient voir, et une barre vide dit « tu n'as pas
+          commencé » bien mieux qu'une absence, qui ne dit rien du tout. */}
+      <Card className="mt-5 p-4">
+        <div className="mb-2 flex items-baseline justify-between">
+          <span className="text-sm font-medium">Ta progression</span>
+          <span className="text-sm tabular-nums text-muted">
+            {overall} %{' '}
+            <span className="text-faint">
+              · {termineesEnTout} / {CURRICULUM_STATS.lessons} leçons
+            </span>
+          </span>
+        </div>
+        <div className="h-2 overflow-hidden rounded-full bg-surface-strong">
+          <div
+            className="h-full rounded-full transition-[width] duration-500"
+            style={{
+              width: `${overall}%`,
+              background: 'linear-gradient(90deg, var(--accent), var(--accent-2))',
+            }}
+          />
+        </div>
+      </Card>
 
       {/* ── Chapitres ────────────────────────────────────────────────── */}
-      <div className="mt-10 flex items-baseline justify-between gap-4">
+      <div className="mt-8 flex items-baseline justify-between gap-4">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
           {CHAPTERS.length} chapitres
         </p>
