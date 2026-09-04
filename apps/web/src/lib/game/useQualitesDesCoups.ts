@@ -19,7 +19,14 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { classifyMove, type MoveQuality, type OpeningBook } from '@coupparfait/core'
+import {
+  classifyMove,
+  terminalScore,
+  type MoveQuality,
+  type OpeningBook,
+  type PositionAnalysis,
+  type Score,
+} from '@coupparfait/core'
 import type { PlayedMove } from '@/lib/game/useChessGame.ts'
 import { analyserAvecLeNavigateur } from '@/lib/analysis/runner.ts'
 
@@ -46,6 +53,31 @@ const LIGNES = 2
 /** Ce qui distingue un coup d'un autre, indépendamment de son rang. */
 function cle(move: PlayedMove): string {
   return `${move.before}|${move.uci}`
+}
+
+/**
+ * L'évaluation d'une position, y compris quand elle est finie.
+ *
+ * C'est ce qui manquait, et c'est ce qui donnait des couleurs fausses : **le
+ * mat était classé en gaffe**. Devant une position matée, le moteur ne renvoie
+ * aucune variante — il n'y a plus de coup à jouer —, la liste des lignes est
+ * donc vide, et le repli valait « zéro centipion », c'est-à-dire *position
+ * égale*. Vu du classificateur, le coup qui gagne la partie faisait chuter
+ * l'évaluation d'un avantage gagnant à l'égalité : la définition même d'une
+ * gaffe. Le plus beau coup de la partie s'affichait en rouge.
+ *
+ * Même chose, en plus discret, pour le pat et les nulles techniques.
+ *
+ * La position terminale a pourtant un verdict certain, et `terminalScore` le
+ * donne : mat pour celui qui vient de jouer, zéro pour une nulle. C'est
+ * exactement ce que fait l'analyse complète — voir `scoreOf` dans `report.ts` —
+ * et cette différence de traitement entre les deux chemins expliquait qu'un même
+ * coup soit vert dans l'analyse et rouge dans la liste de la partie.
+ */
+function scoreDe(analyse: PositionAnalysis, fen: string): Score {
+  const meilleure = analyse.lines.find((ligne) => ligne.multipv === 1) ?? analyse.lines[0]
+  if (meilleure?.score && meilleure.pv.length > 0) return meilleure.score
+  return terminalScore(fen) ?? meilleure?.score ?? { type: 'cp', value: 0 }
 }
 
 export function useQualitesDesCoups({
@@ -104,20 +136,25 @@ export function useQualitesDesCoups({
           multiPv: LIGNES,
           signal: controller.signal,
         })
-        const apres = await analyserAvecLeNavigateur({
-          fen: prochain.after,
-          depth: PROFONDEUR,
-          multiPv: 1,
-          signal: controller.signal,
-        })
+        // Position finie : le verdict est connu, on ne dérange pas le moteur —
+        // il n'a de toute façon aucune variante à proposer. Voir `scoreDe`.
+        const fin = terminalScore(prochain.after)
+        const apres = fin
+          ? null
+          : await analyserAvecLeNavigateur({
+              fen: prochain.after,
+              depth: PROFONDEUR,
+              multiPv: 1,
+              signal: controller.signal,
+            })
         if (controller.signal.aborted) return
 
         const { quality } = classifyMove({
           fenBefore: prochain.before,
           uci: prochain.uci,
           san: prochain.san,
-          before: { score: avant.lines[0]?.score ?? { type: 'cp', value: 0 }, lines: avant.lines },
-          after: { score: apres.lines[0]?.score ?? { type: 'cp', value: 0 } },
+          before: { score: scoreDe(avant, prochain.before), lines: avant.lines },
+          after: { score: fin ?? scoreDe(apres!, prochain.after) },
           inBook: book?.isInBook(prochain.after) ?? false,
         })
         setVerdicts((actuels) => ({ ...actuels, [clef]: quality }))
