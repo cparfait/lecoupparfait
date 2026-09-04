@@ -24,7 +24,7 @@ import { Check, Flame, RotateCcw, Timer, X } from 'lucide-react'
 import clsx from 'clsx'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, Card, SectionTitle, Spinner } from '@/components/ui/index.tsx'
-import { playSound } from '@/lib/sound.ts'
+import { playMoveFor, playSound } from '@/lib/sound.ts'
 
 interface Puzzle {
   id: string
@@ -91,11 +91,23 @@ export default function RushPage() {
   }, [])
 
   // ── Chronomètre ─────────────────────────────────────────────────────────
+  // Les dix dernières secondes s'entendent : le chiffre est en haut de l'écran,
+  // et les yeux sont sur l'échiquier. Une seule fois par manche — d'où la
+  // référence plutôt qu'un état, qui rejouerait le son à chaque battement.
+  const alerteTemps = useRef(false)
   useEffect(() => {
-    if (phase !== 'jeu' || deadline.current === null) return
+    if (phase !== 'jeu') {
+      alerteTemps.current = false
+      return
+    }
+    if (deadline.current === null) return
     const timer = setInterval(() => {
       const remaining = Math.max(0, Math.round((deadline.current! - Date.now()) / 1000))
       setLeft(remaining)
+      if (remaining <= 10 && remaining > 0 && !alerteTemps.current) {
+        alerteTemps.current = true
+        playSound('lowtime')
+      }
       if (remaining === 0) setPhase('fin')
     }, 250)
     return () => clearInterval(timer)
@@ -120,11 +132,21 @@ export default function RushPage() {
     const next = new Chess(puzzle.fen)
     const opening = puzzle.moves[0]
     if (opening) {
-      next.move({
+      const coup = next.move({
         from: opening.slice(0, 2) as Square,
         to: opening.slice(2, 4) as Square,
         promotion: opening.length > 4 ? (opening[4] as never) : undefined,
       })
+      /*
+        Le coup d'ouverture s'entend.
+
+        La manche était muette : seuls l'erreur et la réussite faisaient du
+        bruit, et les pièces se déplaçaient en silence — celles de l'adversaire
+        comme les siennes. Or c'est ici que le son sert le plus : on enchaîne
+        quarante positions les yeux sur l'échiquier, et le « clac » d'une prise
+        dit ce qui vient de se passer sans qu'on ait à relire la position.
+      */
+      playMoveFor(coup)
     }
     setBoard(next)
     setMoveIndex(1)
@@ -149,6 +171,9 @@ export default function RushPage() {
       const seconds = MODES.find((entry) => entry.id === mode)!.seconds
       deadline.current = seconds ? Date.now() + seconds * 1000 : null
       setLeft(seconds ?? 0)
+      // Le coup d'envoi. Il dit que le chronomètre part — et c'est le moment
+      // où l'on baisse les yeux sur l'échiquier.
+      playSound('start')
       setPhase('jeu')
     } catch {
       setPhase('choix')
@@ -208,7 +233,7 @@ export default function RushPage() {
       }
 
       const next = new Chess(board.fen())
-      next.move({ from, to, promotion: (promotion ?? 'q') as never })
+      playMoveFor(next.move({ from, to, promotion: (promotion ?? 'q') as never }))
       setBoard(next)
 
       const after = moveIndex + 1
@@ -225,11 +250,13 @@ export default function RushPage() {
       const reply = puzzle.moves[after]!
       setTimeout(() => {
         const withReply = new Chess(next.fen())
-        withReply.move({
-          from: reply.slice(0, 2) as Square,
-          to: reply.slice(2, 4) as Square,
-          promotion: reply.length > 4 ? (reply[4] as never) : undefined,
-        })
+        playMoveFor(
+          withReply.move({
+            from: reply.slice(0, 2) as Square,
+            to: reply.slice(2, 4) as Square,
+            promotion: reply.length > 4 ? (reply[4] as never) : undefined,
+          }),
+        )
         setBoard(withReply)
         setMoveIndex(after + 1)
       }, 180)
@@ -330,8 +357,32 @@ export default function RushPage() {
   }
 
   const turn: Color = board.turn()
+  const modeCourant = MODES.find((entry) => entry.id === mode)
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-4">
+      {/* ── L'en-tête de la manche ───────────────────────────────────
+          L'écran de jeu n'avait ni titre ni sortie : la barre du bas s'efface
+          ici — c'est un écran immersif —, et l'on se retrouvait devant un
+          échiquier, trois croix et un chronomètre, sans savoir sur quelle page
+          on était ni comment en partir autrement qu'en épuisant ses trois
+          erreurs. Une ligne suffit : ce qu'on fait, dans quel mode, et le
+          bouton pour s'arrêter. */}
+      <div className="mb-2 flex items-center gap-2">
+        <h1 className="font-display text-base font-bold tracking-tight">Manche chronométrée</h1>
+        {modeCourant && (
+          <span className="rounded-full bg-surface px-2 py-0.5 text-[11px] font-medium text-muted">
+            {modeCourant.label}
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={() => setPhase('fin')}
+          className="ml-auto rounded-[var(--radius-sm)] px-2 py-1 text-[12px] font-medium text-muted transition-colors hover:bg-surface-hover hover:text-ink"
+        >
+          Arrêter la manche
+        </button>
+      </div>
+
       {/* ── Compteurs ────────────────────────────────────────────── */}
       <div className="mb-2 flex items-center gap-3">
         <span className="font-display text-2xl font-bold tabular-nums">{solved}</span>
