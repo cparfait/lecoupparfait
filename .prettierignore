@@ -8,3 +8,9 @@ apps/web/public
 packages/db/migrations
 packages/core/src/data
 package-lock.json
+# Réécrit par `next dev` à chaque démarrage, guillemets doubles et points-virgules
+# compris — et il porte lui-même la mention « ne pas modifier ce fichier ». Le
+# mettre en forme ne tenait donc que jusqu'au prochain serveur de développement
+# lancé, après quoi l'étape « Mise en forme » virait au rouge sans que personne
+# n'ait touché à quoi que ce soit.
+apps/web/next-env.d.ts
