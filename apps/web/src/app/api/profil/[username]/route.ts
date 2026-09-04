@@ -137,6 +137,16 @@ export async function GET(_request: Request, context: { params: Promise<{ userna
           rated: game.rated,
           colour: playedWhite ? 'w' : 'b',
           opponent: playedWhite ? game.blackName : game.whiteName,
+          /*
+            L'adversaire a-t-il un compte ?
+
+            Le nom seul ne le dit pas : « Cavale » est une personnalité de
+            l'ordinateur, « cparfait » un joueur. La liste des parties rend
+            maintenant le nom cliquable vers son profil, et il fallait donc
+            savoir lesquels mènent quelque part — un lien vers le profil d'un
+            robot n'aurait annoncé qu'un « joueur introuvable ».
+          */
+          opponentIsMember: (playedWhite ? game.blackId : game.whiteId) !== null,
           outcome,
           status: game.status,
           eco: game.eco,

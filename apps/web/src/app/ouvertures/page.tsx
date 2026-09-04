@@ -13,7 +13,7 @@
  * Le jeu de données compte 3 810 ouvertures nommées, sous licence CC0.
  */
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { BookOpen, RotateCcw, Search, Undo2 } from 'lucide-react'
 import clsx from 'clsx'
 import { Chess } from 'chess.js'
@@ -50,6 +50,22 @@ export default function OpeningsPage() {
   const [lastMove, setLastMove] = useState<{ from: Square; to: Square } | null>(null)
   const [query, setQuery] = useState('')
   const [volume, setVolume] = useState<string | null>(null)
+
+  /*
+    Le nom demandé par l'adresse.
+
+    « Explorer cette ouverture », depuis les statistiques, envoie ici sur
+    `?q=Ouverture hongroise` : sans cette lecture, le lien ouvrait
+    l'explorateur à vide et il fallait retaper le nom qu'on venait de cliquer.
+
+    Lu dans un effet plutôt qu'avec `useSearchParams` : le paramètre ne sert
+    qu'au premier rendu, et cette forme évite d'imposer une frontière de
+    suspense à toute la page pour une chaîne de caractères.
+  */
+  useEffect(() => {
+    const demande = new URLSearchParams(window.location.search).get('q')
+    if (demande) setQuery(demande)
+  }, [])
 
   // ── Ouverture de la position courante ───────────────────────────────────
   const current = useMemo(() => book?.lookup(fen, locale) ?? null, [book, fen, locale])

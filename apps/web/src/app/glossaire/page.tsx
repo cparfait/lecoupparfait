@@ -20,24 +20,12 @@ import clsx from 'clsx'
 import { motifGlossary } from '@coupparfait/core'
 import { Card, Chip } from '@/components/ui/index.tsx'
 import { FAMILIES, TERMS } from '@/lib/glossaire.ts'
+import { renderBold } from '@/lib/gras.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
 /** Ignore accents et casse : on cherche « echec » et on trouve « échec ». */
 function normalise(value: string): string {
   return value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
-}
-
-/** Rend le gras `**mot**` des définitions. */
-function renderBold(text: string) {
-  return text.split(/(\*\*[^*]+\*\*)/g).map((chunk, index) =>
-    chunk.startsWith('**') && chunk.endsWith('**') ? (
-      <strong key={index} className="font-semibold text-accent-soft">
-        {chunk.slice(2, -2)}
-      </strong>
-    ) : (
-      <span key={index}>{chunk}</span>
-    ),
-  )
 }
 
 export default function GlossaryPage() {
@@ -78,7 +66,7 @@ export default function GlossaryPage() {
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:py-14">
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">Glossaire</h1>
-      <p className="mt-2 max-w-2xl text-muted">
+      <p className="mt-2 max-w-2xl text-muted max-lg:text-[13px] max-lg:leading-relaxed">
         {entries.length} termes définis en français clair — les règles, le matériel, les phases de
         la partie, et les {motifGlossary(locale).length} motifs que le coach sait reconnaître et
         nommer dans tes parties.

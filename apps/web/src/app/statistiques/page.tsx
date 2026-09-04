@@ -13,10 +13,11 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { BarChart3, TrendingDown } from 'lucide-react'
+import { BarChart3, HelpCircle, TrendingDown } from 'lucide-react'
 import clsx from 'clsx'
 import { SPEED_LABELS } from '@coupparfait/core'
 import { Button, Card, EmptyState, SectionTitle, Spinner } from '@/components/ui/index.tsx'
+import { BoiteExplication, type DemandeExplication } from '@/components/stats/BoiteExplication.tsx'
 
 interface Stats {
   days: number
@@ -64,9 +65,57 @@ function Bar({ rate }: { rate: number }) {
   )
 }
 
+/**
+ * Un libellé qui s'explique.
+ *
+ * Le point d'interrogation est **toujours visible**, jamais révélé au survol :
+ * il n'y a pas de survol sur un téléphone, et une aide qu'on ne découvre qu'en
+ * passant la souris dessus n'existe que pour ceux qui savaient déjà qu'elle
+ * était là. Il reste discret — de la couleur des mentions secondaires — et
+ * s'allume avec le libellé.
+ */
+function MotExplique({
+  onClick,
+  aide,
+  className,
+  children,
+}: {
+  onClick: () => void
+  /** Complément du nom accessible : « Ce que veut dire … ». */
+  aide: string
+  className?: string
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`Ce que veut dire ${aide}`}
+      className={clsx(
+        'group inline-flex min-w-0 max-w-full items-center gap-1 rounded-[var(--radius-sm)] text-left transition-colors hover:text-accent',
+        className,
+      )}
+    >
+      <span className="min-w-0 truncate group-hover:underline">{children}</span>
+      <HelpCircle
+        size={11}
+        className="shrink-0 text-faint transition-colors group-hover:text-accent"
+        aria-hidden
+      />
+    </button>
+  )
+}
+
 export default function StatsPage() {
   const [stats, setStats] = useState<Stats | null | undefined>(undefined)
   const [days, setDays] = useState(365)
+  /**
+   * Le mot dont on demande le sens, s'il y en a un.
+   *
+   * L'état vit dans la page et non dans chaque ligne : une seule boîte à la
+   * fois, et elle se referme d'elle-même quand on change de période.
+   */
+  const [explication, setExplication] = useState<DemandeExplication | null>(null)
 
   const load = useCallback(async (period: number) => {
     const response = await fetch(`/api/statistiques?jours=${period}`)
@@ -195,9 +244,25 @@ export default function StatsPage() {
               aria-hidden
             />
             <span>
-              Ton point faible : <strong className="font-semibold">{worst.name}</strong> — tu y
-              marques {worst.rate} % sur {worst.games} parties. C’est la ligne qui rapporte le plus
-              à travailler.
+              Ton point faible :{' '}
+              <MotExplique
+                aide={worst.name ?? 'cette ouverture'}
+                onClick={() =>
+                  setExplication({
+                    type: 'ouverture',
+                    eco: worst.eco,
+                    nom: worst.name ?? 'Ouverture non répertoriée',
+                    parties: worst.games,
+                    taux: worst.rate,
+                    blancs: worst.asWhite,
+                  })
+                }
+                className="align-baseline font-semibold"
+              >
+                {worst.name}
+              </MotExplique>{' '}
+              — tu y marques {worst.rate} % sur {worst.games} parties. C’est la ligne qui rapporte
+              le plus à travailler.
             </span>
           </p>
         </Card>
@@ -220,7 +285,22 @@ export default function StatsPage() {
                   {opening.eco ?? '—'}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px]">{opening.name}</span>
+                  <MotExplique
+                    aide={opening.name ?? 'cette ouverture'}
+                    onClick={() =>
+                      setExplication({
+                        type: 'ouverture',
+                        eco: opening.eco,
+                        nom: opening.name ?? 'Ouverture non répertoriée',
+                        parties: opening.games,
+                        taux: opening.rate,
+                        blancs: opening.asWhite,
+                      })
+                    }
+                    className="block text-[13px]"
+                  >
+                    {opening.name}
+                  </MotExplique>
                   <span className="mt-0.5 block">
                     <Bar rate={opening.rate} />
                   </span>
@@ -249,9 +329,20 @@ export default function StatsPage() {
           <div className="space-y-1.5">
             {stats.speeds.map((entry) => (
               <div key={entry.speed} className="flex items-center gap-2">
-                <span className="w-24 shrink-0 text-[13px]">
+                <MotExplique
+                  aide={SPEED_LABELS[entry.speed as keyof typeof SPEED_LABELS]?.fr ?? entry.speed}
+                  onClick={() =>
+                    setExplication({
+                      type: 'cadence',
+                      cle: entry.speed,
+                      parties: entry.games,
+                      taux: entry.rate,
+                    })
+                  }
+                  className="w-24 shrink-0 text-[13px]"
+                >
                   {SPEED_LABELS[entry.speed as keyof typeof SPEED_LABELS]?.fr ?? entry.speed}
-                </span>
+                </MotExplique>
                 <span className="min-w-0 flex-1">
                   <Bar rate={entry.rate} />
                 </span>
@@ -271,9 +362,20 @@ export default function StatsPage() {
           <div className="space-y-1">
             {stats.endings.map((entry) => (
               <div key={entry.status} className="flex items-center gap-2 text-[13px]">
-                <span className="min-w-0 flex-1 truncate">
+                <MotExplique
+                  aide={ENDING_LABELS[entry.status] ?? entry.status}
+                  onClick={() =>
+                    setExplication({
+                      type: 'fin',
+                      cle: entry.status,
+                      parties: entry.games,
+                      gagnees: entry.won,
+                    })
+                  }
+                  className="min-w-0 flex-1"
+                >
                   {ENDING_LABELS[entry.status] ?? entry.status}
-                </span>
+                </MotExplique>
                 <span className="shrink-0 tabular-nums text-faint">
                   {entry.games} · {entry.won} gagnée{entry.won > 1 ? 's' : ''}
                 </span>
@@ -297,6 +399,17 @@ export default function StatsPage() {
             reste parlant, l’heure exacte moins.
           </p>
         </Card>
+      )}
+
+      {/* Dit une fois, en bas : les points d'interrogation se voient, mais rien
+          n'annonce qu'ils ouvrent une définition plutôt qu'une infobulle. */}
+      <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-faint">
+        <HelpCircle size={11} aria-hidden />
+        Un nom d’ouverture, de cadence ou de fin de partie s’ouvre : on y trouve ce qu’il veut dire.
+      </p>
+
+      {explication && (
+        <BoiteExplication demande={explication} onFermer={() => setExplication(null)} />
       )}
     </div>
   )

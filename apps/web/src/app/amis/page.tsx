@@ -305,7 +305,7 @@ function FriendsBook() {
             {incoming.map((request) => (
               <div key={request.id} className="flex items-center gap-2.5">
                 <Avatar friend={request.user} />
-                <span className="min-w-0 flex-1 truncate font-medium">{request.user.username}</span>
+                <NomDuJoueur pseudo={request.user.username} />
                 <Button
                   size="sm"
                   variant="primary"
@@ -377,7 +377,7 @@ function FriendsBook() {
               results.map((person) => (
                 <div key={person.id} className="flex items-center gap-2.5">
                   <Avatar friend={person} />
-                  <span className="min-w-0 flex-1 truncate font-medium">{person.username}</span>
+                  <NomDuJoueur pseudo={person.username} />
                   {person.rating != null && (
                     <span className="shrink-0 text-[12px] tabular-nums text-faint">
                       {person.rating}
@@ -442,7 +442,7 @@ function FriendsBook() {
               return (
                 <div key={friend.id} className="flex items-center gap-2.5 py-0.5">
                   <Avatar friend={friend} />
-                  <span className="min-w-0 flex-1 truncate font-medium">{friend.username}</span>
+                  <NomDuJoueur pseudo={friend.username} />
                   {friend.rating != null && (
                     <span className="shrink-0 text-[12px] tabular-nums text-faint">
                       {friend.rating}
@@ -573,6 +573,27 @@ function Countdown({ until }: { until: string }) {
 }
 
 /** Pastille de présence collée à l'avatar : savoir qui est là évite d'attendre. */
+/**
+ * Le pseudo, cliquable.
+ *
+ * Il était posé en texte inerte à côté d'un bouton « Défier » : le carnet
+ * d'amis disait qui l'on connaît, et rien de plus. Or la première chose qu'on
+ * veut savoir d'un ami retrouvé, c'est où il en est — son classement, sa
+ * progression, ses dernières parties. Son profil dit tout cela, et il
+ * existait déjà : il ne s'atteignait qu'en tapant l'adresse à la main.
+ */
+function NomDuJoueur({ pseudo }: { pseudo: string }) {
+  return (
+    <Link
+      href={`/profil/${encodeURIComponent(pseudo)}`}
+      title={`Voir le profil de ${pseudo}`}
+      className="min-w-0 flex-1 truncate font-medium transition-colors hover:text-accent hover:underline"
+    >
+      {pseudo}
+    </Link>
+  )
+}
+
 function Avatar({ friend }: { friend: Friend }) {
   return (
     <span className="relative shrink-0">

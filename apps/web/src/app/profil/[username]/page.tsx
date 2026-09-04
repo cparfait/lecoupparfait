@@ -8,12 +8,14 @@
  * pays, date d'inscription — est secondaire et occupe donc peu de place.
  */
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
   BarChart3,
   CalendarDays,
+  ChevronDown,
+  ChevronUp,
   Gauge,
   LogOut,
   MailCheck,
@@ -57,6 +59,8 @@ interface Profile {
     rated: boolean
     colour: 'w' | 'b'
     opponent: string
+    /** L'adversaire a-t-il un compte ? Seul son nom mène alors à un profil. */
+    opponentIsMember: boolean
     outcome: 'win' | 'loss' | 'draw'
     status: string
     eco: string | null
@@ -69,6 +73,15 @@ interface Profile {
   }>
   history: Array<{ category: string; rating: number; at: string }>
 }
+
+/**
+ * Combien de parties on montre avant d'avoir à le demander.
+ *
+ * Trois : c'est ce qu'on vient voir — la dernière, et les deux d'avant pour
+ * savoir si c'est une série ou un accident. Le reste est un historique, et un
+ * historique se déplie.
+ */
+const PARTIES_VISIBLES = 3
 
 const CATEGORY_LABELS: Record<string, string> = {
   bullet: 'Bullet',
@@ -88,6 +101,8 @@ export default function ProfilePage() {
   const [email, setEmail] = useState<{ email: string | null; verified: boolean } | null>(null)
   /** Partie en cours d'envoi vers l'analyse : le temps d'aller chercher son PGN. */
   const [envoi, setEnvoi] = useState<string | null>(null)
+  /** La liste des parties est-elle dépliée ? Voir `PARTIES_VISIBLES`. */
+  const [toutesLesParties, setToutesLesParties] = useState(false)
 
   useEffect(() => {
     void fetch(`/api/profil/${encodeURIComponent(params.username)}`)
@@ -282,51 +297,37 @@ export default function ProfilePage() {
               Membre depuis {formatMonth(profile.user.memberSince)}
             </p>
           </div>
-          {isMe && (
-            <div className="flex w-full shrink-0 flex-wrap gap-1 border-t border-line/60 pt-3 sm:w-auto sm:border-0 sm:pt-0">
-              {/* Les statistiques ne concernent que soi : leur porte est ici. */}
-              <Link href="/statistiques">
-                <Button size="sm" variant="ghost" icon={<BarChart3 size={14} />}>
-                  Statistiques
-                </Button>
-              </Link>
-            </div>
-          )}
         </div>
-
-        {/* Chez soi seulement : ni l'adresse ni l'avatar des autres ne
-            regardent qui que ce soit. */}
-        {isMe && email?.email && <EmailStatus email={email} />}
-
-        {/* Ses pseudos d'ailleurs, pour que l'analyse les trouve remplis. */}
-        {isMe && <ComptesAilleurs />}
-
-        {/* ── Se déconnecter ────────────────────────────────────────
-            Elle était en haut, en bouton fantôme, coincée entre le pseudo et
-            « Statistiques » : trois mots gris dans une rangée d'actions, qu'on
-            ne trouvait pas en la cherchant. C'est pourtant la seule action de
-            cette page qu'on vienne y faire exprès — le reste s'y consulte.
-
-            En bas, à sa place : on descend la fiche, et elle ferme la visite.
-            Pleine largeur sur téléphone, où viser un bouton de trois mots dans
-            un coin n'a rien d'évident. */}
-        {isMe && (
-          <div className="mt-4 flex justify-end border-t border-line/60 pt-4">
-            <Button
-              variant="secondary"
-              icon={<LogOut size={15} />}
-              onClick={signOut}
-              className="max-sm:w-full"
-            >
-              Se déconnecter
-            </Button>
-          </div>
-        )}
       </Card>
 
-      {/* ── Classements ──────────────────────────────────────────── */}
+      {/* ── Classements ──────────────────────────────────────────────
+          La carte du haut ne porte plus que l'identité — vignette, pseudo,
+          titre, ancienneté. Elle contenait aussi l'adresse, les pseudos
+          d'ailleurs, la déconnexion et la porte des statistiques : quatre
+          choses sans rapport entre elles, empilées dans le même encadré parce
+          qu'elles concernaient toutes « le compte ». On lisait son pseudo, puis
+          un champ de saisie Chess.com, puis un bouton rouge. Les réglages du
+          compte sont maintenant tout en bas, sous leur propre titre. */}
+      <div className="mt-6 flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="font-display text-lg font-semibold tracking-tight">
+          {isMe ? 'Tes classements' : 'Ses classements'}
+        </h2>
+        {/* Les statistiques ne concernent que soi : leur porte est ici, à côté
+            des chiffres qu'elles détaillent, et non plus dans la fiche
+            d'identité où elle voisinait avec la déconnexion. */}
+        {isMe && (
+          <Link
+            href="/statistiques"
+            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-accent hover:underline"
+          >
+            <BarChart3 size={14} aria-hidden />
+            Statistiques détaillées
+          </Link>
+        )}
+      </div>
+
       {profile.ratings.length > 0 ? (
-        <div className="mt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
           {profile.ratings.map((rating) => (
             <Card key={rating.category} className="p-4">
               <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
@@ -392,7 +393,14 @@ export default function ProfilePage() {
         </Card>
       )}
 
-      {/* ── Parties récentes ─────────────────────────────────────── */}
+      {/* ── Parties récentes ─────────────────────────────────────────
+          Trois lignes, et le reste sur demande.
+
+          La liste rendait les cinq cents dernières parties d'un coup : sur un
+          téléphone, cela fait une trentaine d'écrans de défilement, et tout ce
+          qui vient après — les réglages du compte — devenait inatteignable
+          autrement qu'au pouce fatigué. Or on vient y voir *la dernière*, et
+          c'est un déplié qu'on cherche quand on veut remonter le temps. */}
       <Card className="mt-4 overflow-hidden">
         <p className="border-b border-line/60 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
           Parties récentes
@@ -401,146 +409,353 @@ export default function ProfilePage() {
           <EmptyState title="Aucune partie enregistrée" />
         ) : (
           <ul>
-            {profile.games.map((game) => (
-              <li
-                key={game.slug}
-                className="flex items-center gap-3 border-b border-line/40 px-4 py-2.5 last:border-0"
-              >
-                <span
-                  className={clsx(
-                    'w-1 shrink-0 self-stretch rounded-full',
-                    game.outcome === 'win' && 'bg-[var(--q-best)]',
-                    game.outcome === 'loss' && 'bg-[var(--q-blunder)]',
-                    game.outcome === 'draw' && 'bg-[var(--q-forced)]',
-                  )}
-                  aria-hidden
-                />
-                <span
-                  className={clsx(
-                    'h-3 w-3 shrink-0 rounded-full',
-                    game.colour === 'w'
-                      ? 'bg-[var(--eval-white)]'
-                      : 'bg-[var(--eval-black)] ring-1 ring-line',
-                  )}
-                  aria-label={game.colour === 'w' ? 'Blancs' : 'Noirs'}
-                />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm">
-                    contre <strong className="font-semibold">{game.opponent}</strong>
-                  </span>
-                  <span className="block truncate text-[11px] text-faint">
-                    {game.opening ?? 'ouverture non répertoriée'} · {game.moveCount} demi-coups
-                    {game.accuracy != null && ` · ${Math.round(game.accuracy)} % de précision`}
-                  </span>
-                </span>
-                {game.ratingDelta !== null && (
+            {(toutesLesParties ? profile.games : profile.games.slice(0, PARTIES_VISIBLES)).map(
+              (game) => (
+                <li
+                  key={game.slug}
+                  className="flex items-center gap-3 border-b border-line/40 px-4 py-2.5 last:border-0"
+                >
                   <span
                     className={clsx(
-                      'shrink-0 text-sm font-semibold tabular-nums',
-                      game.ratingDelta >= 0 ? 'text-[var(--q-best)]' : 'text-[var(--q-blunder)]',
+                      'w-1 shrink-0 self-stretch rounded-full',
+                      game.outcome === 'win' && 'bg-[var(--q-best)]',
+                      game.outcome === 'loss' && 'bg-[var(--q-blunder)]',
+                      game.outcome === 'draw' && 'bg-[var(--q-forced)]',
                     )}
-                  >
-                    {game.ratingDelta >= 0 ? '+' : ''}
-                    {game.ratingDelta}
+                    aria-hidden
+                  />
+                  <span
+                    className={clsx(
+                      'h-3 w-3 shrink-0 rounded-full',
+                      game.colour === 'w'
+                        ? 'bg-[var(--eval-white)]'
+                        : 'bg-[var(--eval-black)] ring-1 ring-line',
+                    )}
+                    aria-label={game.colour === 'w' ? 'Blancs' : 'Noirs'}
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm">
+                      contre{' '}
+                      {/* Le nom mène au profil quand il y en a un. Une
+                          personnalité de l'ordinateur n'en a pas : un lien
+                          vers elle n'annoncerait qu'un « joueur introuvable ». */}
+                      {game.opponentIsMember ? (
+                        <Link
+                          href={`/profil/${encodeURIComponent(game.opponent)}`}
+                          className="font-semibold transition-colors hover:text-accent hover:underline"
+                        >
+                          {game.opponent}
+                        </Link>
+                      ) : (
+                        <strong className="font-semibold">{game.opponent}</strong>
+                      )}
+                    </span>
+                    <span className="block truncate text-[11px] text-faint">
+                      {game.opening ?? 'ouverture non répertoriée'} · {game.moveCount} demi-coups
+                      {game.accuracy != null && ` · ${Math.round(game.accuracy)} % de précision`}
+                    </span>
                   </span>
-                )}
-                <span className="shrink-0 text-[11px] text-faint">{formatDate(game.playedAt)}</span>
-                {/*
+                  {game.ratingDelta !== null && (
+                    <span
+                      className={clsx(
+                        'shrink-0 text-sm font-semibold tabular-nums',
+                        game.ratingDelta >= 0 ? 'text-[var(--q-best)]' : 'text-[var(--q-blunder)]',
+                      )}
+                    >
+                      {game.ratingDelta >= 0 ? '+' : ''}
+                      {game.ratingDelta}
+                    </span>
+                  )}
+                  <span className="shrink-0 text-[11px] text-faint">
+                    {formatDate(game.playedAt)}
+                  </span>
+                  {/*
                   La porte de sortie de cette liste. Sans elle, l'historique ne
                   sert qu'à constater : on sait qu'on a perdu, jamais pourquoi.
                   Chez soi uniquement — le PGN d'un autre ne se prend pas depuis
                   son profil.
                 */}
-                {isMe && (
-                  <button
-                    type="button"
-                    onClick={() => void analyser(game.slug, game.colour)}
-                    disabled={envoi !== null}
-                    title="Analyser cette partie"
-                    aria-label={`Analyser la partie contre ${game.opponent}`}
-                    className="shrink-0 rounded-[var(--radius-sm)] p-1 text-faint transition-colors hover:bg-surface-strong hover:text-accent disabled:opacity-40"
-                  >
-                    <Gauge
-                      size={13}
-                      className={clsx(envoi === game.slug && 'animate-pulse text-accent')}
-                      aria-hidden
-                    />
-                  </button>
-                )}
-                {/*
+                  {isMe && (
+                    <button
+                      type="button"
+                      onClick={() => void analyser(game.slug, game.colour)}
+                      disabled={envoi !== null}
+                      title="Analyser cette partie"
+                      aria-label={`Analyser la partie contre ${game.opponent}`}
+                      className="shrink-0 rounded-[var(--radius-sm)] p-1 text-faint transition-colors hover:bg-surface-strong hover:text-accent disabled:opacity-40"
+                    >
+                      <Gauge
+                        size={13}
+                        className={clsx(envoi === game.slug && 'animate-pulse text-accent')}
+                        aria-hidden
+                      />
+                    </button>
+                  )}
+                  {/*
                   Effaçable seulement chez soi, et seulement si la partie n'est
                   pas classée : une partie classée a bougé le classement d'un
                   adversaire, et la faire disparaître d'un côté laisserait de
                   l'autre des points sans partie pour les expliquer.
                 */}
-                {isMe && !game.rated && (
-                  <button
-                    type="button"
-                    onClick={() => void oublier(game.slug)}
-                    title="Effacer cette partie de ton historique"
-                    aria-label={`Effacer la partie contre ${game.opponent}`}
-                    className="shrink-0 rounded-[var(--radius-sm)] p-1 text-faint transition-colors hover:bg-surface-strong hover:text-[var(--q-blunder)]"
-                  >
-                    <Trash2 size={13} aria-hidden />
-                  </button>
-                )}
-              </li>
-            ))}
+                  {isMe && !game.rated && (
+                    <button
+                      type="button"
+                      onClick={() => void oublier(game.slug)}
+                      title="Effacer cette partie de ton historique"
+                      aria-label={`Effacer la partie contre ${game.opponent}`}
+                      className="shrink-0 rounded-[var(--radius-sm)] p-1 text-faint transition-colors hover:bg-surface-strong hover:text-[var(--q-blunder)]"
+                    >
+                      <Trash2 size={13} aria-hidden />
+                    </button>
+                  )}
+                </li>
+              ),
+            )}
           </ul>
         )}
+
+        {/* Le déplié, en pied de liste et non en tête : on le cherche après
+            avoir lu les trois dernières, pas avant. Il dit combien il en
+            reste — « voir les 22 autres » se décide, « voir plus » se subit. */}
+        {profile.games.length > PARTIES_VISIBLES && (
+          <button
+            type="button"
+            onClick={() => setToutesLesParties((ouvert) => !ouvert)}
+            aria-expanded={toutesLesParties}
+            className="flex w-full items-center justify-center gap-1.5 border-t border-line/60 px-4 py-3 text-[13px] font-medium text-muted transition-colors hover:bg-surface-hover hover:text-ink"
+          >
+            {toutesLesParties ? (
+              <>
+                <ChevronUp size={14} aria-hidden />
+                Réduire la liste
+              </>
+            ) : (
+              <>
+                <ChevronDown size={14} aria-hidden />
+                Voir les {profile.games.length - PARTIES_VISIBLES} autres parties
+              </>
+            )}
+          </button>
+        )}
       </Card>
+
+      {/* ── Ton compte ───────────────────────────────────────────────
+          Séparé de la fiche d'identité, et posé en bas.
+
+          Ce sont des réglages : une adresse, deux pseudos d'ailleurs, une
+          sortie. Ils n'ont rien à faire au milieu de ce qu'on vient voir —
+          classement, progression, dernières parties — et rien non plus à voir
+          entre eux et le titre de joueur affiché au-dessus. Ils ne concernent
+          que soi, et ne s'affichent donc que chez soi. */}
+      {isMe && (
+        <section className="mt-4">
+          <h2 className="mb-2 font-display text-lg font-semibold tracking-tight">Ton compte</h2>
+          <Card className="p-5">
+            {/* Ses pseudos d'ailleurs, pour que l'analyse les trouve remplis. */}
+            <ComptesAilleurs />
+
+            {email?.email && <EmailStatus email={email} />}
+
+            {/* La seule action de cette page qu'on vienne y faire exprès — le
+                reste s'y consulte. Pleine largeur sur téléphone, où viser un
+                bouton de trois mots dans un coin n'a rien d'évident. */}
+            <div className="mt-4 flex justify-end border-t border-line/60 pt-4">
+              <Button
+                variant="secondary"
+                icon={<LogOut size={15} />}
+                onClick={signOut}
+                className="max-sm:w-full"
+              >
+                Se déconnecter
+              </Button>
+            </div>
+          </Card>
+        </section>
+      )}
     </div>
   )
 }
 
 /**
- * Courbe de progression.
+ * Courbe de progression, une catégorie à la fois.
  *
- * Volontairement minimaliste : pas d'axes, pas de graduations, pas de légende.
- * Ce qui compte visuellement est la **pente**, pas les valeurs exactes — celles-ci
- * sont déjà affichées au-dessus.
+ * Elle traçait **toutes les catégories dans une seule ligne**, dans l'ordre où
+ * les points avaient été enregistrés : un classement de puzzles à 1 200, une
+ * partie blitz à 1 480, une rapide à 1 530, puis un puzzle de nouveau. La ligne
+ * sautait de deux cents points d'un pas à l'autre sans que rien ne l'explique,
+ * et l'on croyait s'être effondré alors qu'on avait simplement changé de
+ * cadence. C'est ce qui la rendait incompréhensible : elle superposait quatre
+ * histoires sans dire qu'il y en avait quatre.
+ *
+ * Une seule à la fois, donc, choisie parmi celles qui ont de quoi faire une
+ * courbe. Et ce qui manquait pour la lire : **le point de départ** en trait
+ * pointillé — c'est par rapport à lui qu'on juge une pente —, les valeurs
+ * extrêmes, les dates aux deux bouts, et l'écart sur la période, dit en
+ * toutes lettres plutôt que laissé à déduire.
  */
 function RatingChart({ history }: { history: Profile['history'] }) {
-  const values = history.map((entry) => entry.rating)
-  const min = Math.min(...values)
-  const max = Math.max(...values)
-  const range = Math.max(40, max - min)
+  /** Les séries assez fournies pour qu'une courbe veuille dire quelque chose. */
+  const series = useMemo(() => {
+    const parCategorie = new Map<string, Profile['history']>()
+    for (const entree of history) {
+      const liste = parCategorie.get(entree.category)
+      if (liste) liste.push(entree)
+      else parCategorie.set(entree.category, [entree])
+    }
+    return [...parCategorie.entries()]
+      .map(([categorie, entrees]) => ({ categorie, entrees }))
+      .filter((serie) => serie.entrees.length >= 3)
+      .sort((a, b) => b.entrees.length - a.entrees.length)
+  }, [history])
 
-  const points = values
-    .map((value, index) => {
-      const x = (index / Math.max(1, values.length - 1)) * 100
-      const y = 30 - ((value - min) / range) * 28
-      return `${x.toFixed(2)},${y.toFixed(2)}`
-    })
-    .join(' L ')
+  const [choisie, setChoisie] = useState<string | null>(null)
+  const serie = series.find((entree) => entree.categorie === choisie) ?? series[0]
+
+  // Aucune catégorie n'a trois points : une ligne de deux points ne dit rien
+  // qu'un chiffre ne dise mieux.
+  if (!serie) return null
+
+  const valeurs = serie.entrees.map((entree) => entree.rating)
+  const depart = valeurs[0]!
+  const arrivee = valeurs[valeurs.length - 1]!
+  const ecart = arrivee - depart
+  const min = Math.min(...valeurs)
+  const max = Math.max(...valeurs)
+  // Une amplitude plancher : sans elle, trois points dans un mouchoir de dix
+  // points produisent une courbe en dents de scie qui suggère des montagnes
+  // russes là où il ne s'est rien passé.
+  const amplitude = Math.max(60, max - min)
+  const milieu = (max + min) / 2
+  const bas = milieu - amplitude / 2
+
+  // Repère en pixels : les formes et le texte s'agrandissent ensemble, ce
+  // qu'un `preserveAspectRatio="none"` interdisait — il aplatissait les points
+  // en ellipses et rendait tout étiquetage impossible.
+  const L = 600
+  const H = 150
+  const MARGE = { gauche: 8, droite: 46, haut: 12, bas: 22 }
+  const largeur = L - MARGE.gauche - MARGE.droite
+  const hauteur = H - MARGE.haut - MARGE.bas
+
+  const x = (index: number) => MARGE.gauche + (index / Math.max(1, valeurs.length - 1)) * largeur
+  const y = (valeur: number) => MARGE.haut + hauteur - ((valeur - bas) / amplitude) * hauteur
+
+  const trace = valeurs.map((valeur, index) => `${x(index).toFixed(1)},${y(valeur).toFixed(1)}`)
+  const ligne = `M ${trace.join(' L ')}`
 
   return (
     <div>
+      {/* ── Le choix de la catégorie ──────────────────────────────────
+          Absent tant qu'il n'y a qu'une histoire à raconter : une rangée d'un
+          seul bouton laisse croire qu'il en manque. */}
+      {series.length > 1 && (
+        <div className="mb-3 flex flex-wrap gap-1">
+          {series.map((entree) => (
+            <button
+              key={entree.categorie}
+              type="button"
+              onClick={() => setChoisie(entree.categorie)}
+              className={clsx(
+                'rounded-full px-2.5 py-1 text-[12px] font-medium transition-colors',
+                entree.categorie === serie.categorie
+                  ? 'bg-accent/18 text-ink'
+                  : 'text-muted hover:bg-surface-hover',
+              )}
+            >
+              {CATEGORY_LABELS[entree.categorie] ?? entree.categorie}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Ce que la courbe raconte, écrit. Une pente se lit vite et se
+          surinterprète tout aussi vite : le chiffre tranche. */}
+      <p className="mb-2 text-[13px] leading-relaxed">
+        <strong className="font-display text-lg font-bold tabular-nums">{arrivee}</strong>{' '}
+        <span className="text-muted">aujourd’hui, </span>
+        <span
+          className={clsx(
+            'font-semibold tabular-nums',
+            ecart > 0 && 'text-[var(--q-best)]',
+            ecart < 0 && 'text-[var(--q-blunder)]',
+            ecart === 0 && 'text-muted',
+          )}
+        >
+          {ecart > 0 ? '+' : ''}
+          {ecart}
+        </span>{' '}
+        <span className="text-muted">
+          depuis {formatDate(serie.entrees[0]!.at)}, sur {valeurs.length} parties classées.
+        </span>
+      </p>
+
       <svg
-        viewBox="0 0 100 30"
-        preserveAspectRatio="none"
-        className="h-24 w-full"
+        viewBox={`0 0 ${L} ${H}`}
+        className="h-auto w-full"
         role="img"
-        aria-label="Courbe de classement"
+        aria-label={`Classement ${CATEGORY_LABELS[serie.categorie] ?? serie.categorie} : ${depart} au départ, ${arrivee} aujourd’hui, sur ${valeurs.length} parties.`}
       >
+        {/* Le point de départ, en pointillé : c'est la ligne de flottaison, et
+            sans elle on ne sait pas si la courbe monte ou revient. */}
+        <line
+          x1={MARGE.gauche}
+          x2={L - MARGE.droite}
+          y1={y(depart)}
+          y2={y(depart)}
+          stroke="var(--border)"
+          strokeWidth="1"
+          strokeDasharray="4 4"
+        />
+        <text
+          x={L - MARGE.droite + 6}
+          y={y(depart) + 4}
+          className="fill-[var(--text-faint)] text-[11px] tabular-nums"
+        >
+          {depart}
+        </text>
+
         <path
-          d={`M ${points} L 100,30 L 0,30 Z`}
-          fill="color-mix(in oklab, var(--accent) 18%, transparent)"
+          d={`${ligne} L ${x(valeurs.length - 1)},${H - MARGE.bas} L ${MARGE.gauche},${H - MARGE.bas} Z`}
+          fill="color-mix(in oklab, var(--accent) 14%, transparent)"
         />
         <path
-          d={`M ${points}`}
+          d={ligne}
           fill="none"
           stroke="var(--accent)"
-          strokeWidth="0.7"
+          strokeWidth="2"
           strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke"
+          strokeLinecap="round"
         />
+
+        {/* Le dernier point, marqué et chiffré : c'est celui qu'on cherche. */}
+        <circle cx={x(valeurs.length - 1)} cy={y(arrivee)} r="3.5" fill="var(--accent)" />
+        <text
+          x={L - MARGE.droite + 6}
+          y={y(arrivee) + 4}
+          className="fill-[var(--accent)] text-[11px] font-semibold tabular-nums"
+        >
+          {arrivee}
+        </text>
+
+        {/* Les dates, aux deux bouts, sous la courbe : une progression sans
+            durée ne veut rien dire — cent points en un mois ou en deux ans ne
+            racontent pas la même chose. */}
+        <text x={MARGE.gauche} y={H - 4} className="fill-[var(--text-faint)] text-[11px]">
+          {formatShortDate(serie.entrees[0]!.at)}
+        </text>
+        <text
+          x={L - MARGE.droite}
+          y={H - 4}
+          textAnchor="end"
+          className="fill-[var(--text-faint)] text-[11px]"
+        >
+          {formatShortDate(serie.entrees[serie.entrees.length - 1]!.at)}
+        </text>
       </svg>
-      <div className="mt-1 flex justify-between text-[11px] tabular-nums text-faint">
-        <span>{min}</span>
-        <span>{values.length} parties classées</span>
-        <span>{max}</span>
-      </div>
+
+      <p className="mt-1 text-[11px] text-faint">
+        Plus haut : {max} · plus bas : {min}
+      </p>
     </div>
   )
 }
@@ -563,6 +778,15 @@ function formatMonth(value: string): string {
   ]
   const index = Number(month) - 1
   return `${names[index] ?? ''} ${year}`
+}
+
+/** « 4 mars 2026 » — pour les deux bouts d'une courbe. */
+function formatShortDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
 }
 
 function formatDate(iso: string): string {
