@@ -15,11 +15,13 @@
  */
 
 import { useMemo, useState } from 'react'
-import { Search } from 'lucide-react'
+import { Grid3x3, Search } from 'lucide-react'
 import clsx from 'clsx'
 import { motifGlossary } from '@coupparfait/core'
 import { Card, Chip } from '@/components/ui/index.tsx'
 import { FAMILIES, TERMS } from '@/lib/glossaire.ts'
+import { POSITIONS_DU_GLOSSAIRE } from '@/lib/glossaire-positions.ts'
+import { BoiteTerme } from '@/components/glossaire/BoiteTerme.tsx'
 import { renderBold } from '@/lib/gras.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
@@ -31,6 +33,13 @@ function normalise(value: string): string {
 export default function GlossaryPage() {
   const locale = usePreferences((state) => state.locale)
   const [query, setQuery] = useState('')
+  /**
+   * Le terme qu'on veut voir sur l'échiquier.
+   *
+   * L'état vit ici et non dans chaque carte : une seule boîte à la fois, et
+   * elle se referme d'elle-même quand la recherche change la liste.
+   */
+  const [montre, setMontre] = useState<{ name: string; definition: string } | null>(null)
 
   /** Toutes les entrées, motifs compris, dans un seul ensemble consultable. */
   const entries = useMemo(() => {
@@ -105,21 +114,60 @@ export default function GlossaryPage() {
             </div>
 
             <dl className="grid gap-2 sm:grid-cols-2">
-              {items.map((entry) => (
-                <Card
-                  key={`${family}-${entry.name}`}
-                  className={clsx('p-4', 'transition-colors hover:bg-surface-hover')}
-                >
-                  <dt className="text-sm font-semibold text-ink">{entry.name}</dt>
-                  <dd className="mt-1.5 text-[13px] leading-relaxed text-muted">
-                    {renderBold(entry.definition)}
-                  </dd>
-                </Card>
-              ))}
+              {items.map((entry) => {
+                // Certains mots se montrent, les autres se lisent. La carte
+                // ne devient cliquable que s'il y a quelque chose à voir :
+                // un bouton qui n'ouvre rien coûte plus cher qu'une carte
+                // inerte.
+                const position = POSITIONS_DU_GLOSSAIRE[entry.name]
+                return (
+                  <Card
+                    key={`${family}-${entry.name}`}
+                    className={clsx('p-4', 'transition-colors hover:bg-surface-hover')}
+                  >
+                    <dt className="text-sm font-semibold text-ink">
+                      {position ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setMontre({ name: entry.name, definition: entry.definition })
+                          }
+                          className="group inline-flex items-center gap-1.5 text-left transition-colors hover:text-accent"
+                          aria-label={`Voir « ${entry.name} » sur l’échiquier`}
+                        >
+                          <span className="group-hover:underline">{entry.name}</span>
+                          <Grid3x3
+                            size={12}
+                            className="shrink-0 text-faint transition-colors group-hover:text-accent"
+                            aria-hidden
+                          />
+                        </button>
+                      ) : (
+                        entry.name
+                      )}
+                    </dt>
+                    <dd className="mt-1.5 text-[13px] leading-relaxed text-muted">
+                      {renderBold(entry.definition)}
+                    </dd>
+                  </Card>
+                )
+              })}
             </dl>
           </section>
         ))}
       </div>
+
+      {/* Ce qui se montre, montré. Les motifs tactiques n'ont pas encore leur
+          position : leurs définitions viennent du cœur, et l'illustration se
+          fait aujourd'hui sur les mots du vocabulaire général. */}
+      {montre && POSITIONS_DU_GLOSSAIRE[montre.name] && (
+        <BoiteTerme
+          nom={montre.name}
+          definition={montre.definition}
+          position={POSITIONS_DU_GLOSSAIRE[montre.name]!}
+          onFermer={() => setMontre(null)}
+        />
+      )}
     </div>
   )
 }
