@@ -30,13 +30,19 @@ import {
   eq,
   games,
   getDb,
+  gt,
   ilike,
   or,
   ratings,
   sql,
   users,
 } from '@coupparfait/db'
-import { destroyAllSessions, hashPassword, validatePassword } from '@coupparfait/db/auth'
+import {
+  PRESENCE_MS,
+  destroyAllSessions,
+  hashPassword,
+  validatePassword,
+} from '@coupparfait/db/auth'
 import { getAdmin } from '@/lib/server/admin.ts'
 import { journaliser } from '@/lib/server/audit.ts'
 
@@ -93,11 +99,13 @@ export async function GET(request: Request) {
     const motif = `%${recherche}%`
 
     // Chaque filtre décrit une question qu'on se pose vraiment devant une liste
-    // de comptes : qui est bloqué, qui a des droits, qui n'a jamais joué, qui
-    // ne pourra pas récupérer son mot de passe faute d'adresse confirmée.
+    // de comptes : qui est là en ce moment, qui est bloqué, qui a des droits,
+    // qui n'a jamais joué, qui ne pourra pas récupérer son mot de passe faute
+    // d'adresse confirmée.
     const conditions = [
       recherche ? or(ilike(users.username, motif), ilike(users.email, motif)) : undefined,
       filtre === 'admins' ? eq(users.role, 'admin') : undefined,
+      filtre === 'enLigne' ? gt(users.lastSeenAt, new Date(Date.now() - PRESENCE_MS)) : undefined,
       filtre === 'desactives' ? eq(users.disabled, true) : undefined,
       filtre === 'sansAdresse' ? sql`${users.emailVerifiedAt} is null` : undefined,
       filtre === 'inactifs'
@@ -136,8 +144,13 @@ export async function GET(request: Request) {
             select max(ratings.rating) from ratings
             where ratings.user_id = users.id and ratings.games > 0
           )`,
-          // Une session encore valide signale quelqu'un connecté en ce moment,
-          // ce qui change la lecture d'une désactivation : elle le déconnecte.
+          // Le nombre d'**appareils** dont la session est encore valide — pas
+          // une présence. Une session dure trente jours et personne ne se
+          // déconnecte d'une application installée sur l'écran d'accueil : ce
+          // compte-là valait 1 pour presque tout le monde, en permanence, et
+          // c'est ce qui affichait la moitié du site comme « connectée ». Il
+          // reste utile pour une seule question, celle qu'il sait réellement
+          // répondre : combien d'accès une désactivation va-t-elle fermer.
           sessions: sql<number>`(
             select count(*) from sessions
             where sessions.user_id = users.id and sessions.expires_at > now()
@@ -169,6 +182,9 @@ export async function GET(request: Request) {
         parties: Number(ligne.parties),
         classement: ligne.classement == null ? null : Number(ligne.classement),
         sessions: Number(ligne.sessions),
+        // La présence, elle, se lit sur le dernier battement du navigateur :
+        // c'est la seule mesure qui s'éteint quand la personne s'en va.
+        enLigne: Date.now() - ligne.lastSeenAt.getTime() < PRESENCE_MS,
         inscrit: ligne.createdAt.toISOString(),
         vu: ligne.lastSeenAt.toISOString(),
       })),

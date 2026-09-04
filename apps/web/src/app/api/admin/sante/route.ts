@@ -26,6 +26,7 @@ import {
   sql,
   users,
 } from '@coupparfait/db'
+import { PRESENCE_MS } from '@coupparfait/db/auth'
 import { getAdmin } from '@/lib/server/admin.ts'
 
 export const runtime = 'nodejs'
@@ -55,6 +56,14 @@ export async function GET() {
       base.select({ n: count() }).from(users).where(gt(users.createdAt, ilYaUneSemaine)),
       base.select({ n: count() }).from(users).where(gt(users.lastSeenAt, ilYaUnJour)),
       base.select({ n: count() }).from(games).where(gt(games.createdAt, ilYaUnJour)),
+      // Ceux qui sont devant leur écran en ce moment. À ne pas confondre avec
+      // les sessions ouvertes juste au-dessus : une session dure trente jours
+      // et survit à la fermeture de l'application — elle compte des cookies,
+      // pas des gens.
+      base
+        .select({ n: count() })
+        .from(users)
+        .where(gt(users.lastSeenAt, new Date(maintenant.getTime() - PRESENCE_MS))),
     ]).catch(() => null),
 
     // Le poids de la base et celui de ses plus grosses tables. C'est la seule
@@ -96,6 +105,7 @@ export async function GET() {
       inscritsCetteSemaine: nombre(5),
       vus24h: nombre(6),
       parties24h: nombre(7),
+      enLigne: nombre(8),
       octets: tailles?.base != null ? Number(tailles.base) : null,
       octetsTables: tailles?.tables != null ? Number(tailles.tables) : null,
     },

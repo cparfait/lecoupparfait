@@ -12,6 +12,7 @@
 
 import { and, desc, eq, gt, ilike, ne, or, sql } from 'drizzle-orm'
 import { getDb } from './index.ts'
+import { PRESENCE_MS } from './auth.ts'
 import { challenges, friendships, ratings, users } from './schema.ts'
 
 /** Une entrée du carnet, telle qu'on l'affiche. */
@@ -33,8 +34,14 @@ export interface PendingRequest {
   createdAt: Date
 }
 
-/** Fenêtre au-delà de laquelle on ne se dit plus « en ligne ». */
-const ONLINE_MS = 5 * 60 * 1000
+/**
+ * Fenêtre au-delà de laquelle on ne se dit plus « en ligne ».
+ *
+ * Elle vient d'`auth.ts`, avec le battement qui l'alimente : la fenêtre et
+ * l'écriture doivent se répondre, et deux constantes séparées finiraient par
+ * diverger — une pastille verte perpétuelle ou jamais allumée.
+ */
+const ONLINE_MS = PRESENCE_MS
 
 /**
  * Durée de vie d'un défi.

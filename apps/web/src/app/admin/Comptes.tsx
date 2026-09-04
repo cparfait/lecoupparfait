@@ -42,13 +42,17 @@ interface Compte {
   pays: string | null
   parties: number
   classement: number | null
+  /** Appareils dont la session est encore valide. Voir `enLigne`. */
   sessions: number
+  /** Vu battre depuis moins de cinq minutes — la présence, la vraie. */
+  enLigne: boolean
   inscrit: string
   vu: string
 }
 
 const FILTRES = [
   { cle: 'tous', texte: 'Tous' },
+  { cle: 'enLigne', texte: 'En ligne' },
   { cle: 'admins', texte: 'Administrateurs' },
   { cle: 'desactives', texte: 'Désactivés' },
   { cle: 'inactifs', texte: 'Jamais joué' },
@@ -246,6 +250,24 @@ export function Comptes() {
   )
 }
 
+/**
+ * « Vu le 12/03 » ne suffit plus depuis que la date dit quelque chose.
+ *
+ * Tant que `last_seen_at` n'était écrit qu'à la connexion, la date du jour
+ * était l'information la plus fine qui eût du sens. Le battement la rend
+ * vivante : l'heure devient lisible pour la journée en cours, qui est celle
+ * qu'on regarde quand on se demande si quelqu'un vient de partir.
+ */
+function derniereVisite(compte: Compte): string {
+  if (compte.enLigne) return 'en ligne à l’instant'
+
+  const vu = new Date(compte.vu)
+  const memeJour = vu.toDateString() === new Date().toDateString()
+  return memeJour
+    ? `vu à ${vu.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`
+    : `vu le ${vu.toLocaleDateString('fr-FR')}`
+}
+
 function LigneCompte({
   compte,
   estMoi,
@@ -274,7 +296,14 @@ function LigneCompte({
             {compte.role === 'admin' && <Chip tone="accent">admin</Chip>}
             {compte.disabled && <Chip tone="danger">désactivé</Chip>}
             {estMoi && <Chip>toi</Chip>}
-            {compte.sessions > 0 && !compte.disabled && <Chip tone="success">connecté</Chip>}
+            {/*
+              « En ligne » se lit sur le dernier battement du navigateur, pas
+              sur l'existence d'une session : celle-ci dure trente jours, et
+              une application installée sur l'écran d'accueil ne se déconnecte
+              jamais — la pastille était allumée pour tout le monde, tout le
+              temps, et ne voulait plus rien dire.
+            */}
+            {compte.enLigne && !compte.disabled && <Chip tone="success">en ligne</Chip>}
           </p>
           <p className="mt-0.5 truncate text-[11px] text-faint">
             {[
@@ -284,7 +313,13 @@ function LigneCompte({
               `${compte.parties} partie${compte.parties > 1 ? 's' : ''}`,
               compte.classement == null ? null : `meilleur classement ${compte.classement}`,
               `inscrit le ${new Date(compte.inscrit).toLocaleDateString('fr-FR')}`,
-              `vu le ${new Date(compte.vu).toLocaleDateString('fr-FR')}`,
+              derniereVisite(compte),
+              // Le nombre d'appareils encore ouverts : c'est ce qu'une
+              // désactivation va fermer, et la seule question à laquelle le
+              // compte des sessions sache vraiment répondre.
+              compte.sessions > 0
+                ? `${compte.sessions} appareil${compte.sessions > 1 ? 's' : ''} ouvert${compte.sessions > 1 ? 's' : ''}`
+                : null,
             ]
               .filter(Boolean)
               .join(' · ')}

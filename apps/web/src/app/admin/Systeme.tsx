@@ -26,6 +26,8 @@ interface Sante {
     inscritsCetteSemaine: number | null
     vus24h: number | null
     parties24h: number | null
+    /** Comptes vus battre depuis moins de cinq minutes. */
+    enLigne: number | null
     octets: number | null
     octetsTables: number | null
   }
@@ -112,10 +114,15 @@ export function Systeme() {
           valeur={sante.base.parties}
           note={`+${sante.base.parties24h ?? 0} depuis hier`}
         />
+        {/* Trois échelles de la même question, de la plus vraie à la plus
+            large : qui est là maintenant, qui est passé aujourd'hui, et
+            combien de cookies restent valides. La dernière ne dit rien de la
+            fréquentation — une session dure trente jours — mais dit combien
+            d'accès une désactivation refermerait. */}
         <Mesure
-          titre="Vus depuis 24 h"
-          valeur={sante.base.vus24h}
-          note={`${sante.base.sessionsActives ?? 0} sessions ouvertes`}
+          titre="En ligne"
+          valeur={sante.base.enLigne}
+          note={`${sante.base.vus24h ?? 0} vus depuis 24 h · ${sante.base.sessionsActives ?? 0} sessions ouvertes`}
         />
         <Mesure
           titre="Analyses conservées"

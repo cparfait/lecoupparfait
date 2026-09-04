@@ -111,6 +111,12 @@ export function ChallengeWatcher() {
 
     let alive = true
     const look = async () => {
+      // Rien tant que l'onglet n'est pas devant. Une application installée sur
+      // l'écran d'accueil ne se ferme pas : sans cette garde, elle interrogeait
+      // le serveur toutes les quatre secondes pendant des journées entières,
+      // pour une invitation que personne n'était là pour voir. On reprend au
+      // retour au premier plan, immédiatement.
+      if (document.visibilityState !== 'visible') return
       try {
         const response = await fetch('/api/defis')
         if (!response.ok || !alive) return
@@ -130,11 +136,14 @@ export function ChallengeWatcher() {
       }
     }
 
+    const reprendre = () => void look()
     void look()
-    const timer = setInterval(() => void look(), POLL_MS)
+    const timer = setInterval(reprendre, POLL_MS)
+    document.addEventListener('visibilitychange', reprendre)
     return () => {
       alive = false
       clearInterval(timer)
+      document.removeEventListener('visibilitychange', reprendre)
     }
   }, [signedIn, router])
 

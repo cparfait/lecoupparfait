@@ -16,7 +16,7 @@
 
 import { randomBytes, scrypt as scryptCallback, timingSafeEqual, createHash } from 'node:crypto'
 import { promisify } from 'node:util'
-import { and, eq, gt, lt } from 'drizzle-orm'
+import { and, eq, gt, lt, sql } from 'drizzle-orm'
 import { getDb } from './index.ts'
 import { ratings, sessions, users, type User } from './schema.ts'
 
@@ -256,6 +256,50 @@ export async function authenticate(
   await database.update(users).set({ lastSeenAt: new Date() }).where(eq(users.id, user.id))
 
   return { ok: true, user }
+}
+
+/**
+ * Fenêtre de présence : au-delà, on ne se dit plus « en ligne ».
+ *
+ * Cinq minutes, soit cinq battements manqués. Assez pour qu'un tunnel, une
+ * mise en veille de quelques instants ou un rechargement de page ne fassent
+ * pas clignoter la pastille ; assez peu pour que « en ligne » veuille encore
+ * dire quelque chose quand on cherche quelqu'un à défier.
+ */
+export const PRESENCE_MS = 5 * 60 * 1000
+
+/**
+ * Intervalle en deçà duquel on ne réécrit pas `last_seen_at`.
+ *
+ * Le battement arrive toutes les minutes, et plusieurs onglets battent en même
+ * temps. Sans ce garde-fou, chaque page ouverte écrirait dans `users` en
+ * continu — pour une information dont la précision utile est la minute.
+ */
+const PRESENCE_THROTTLE_MS = 45 * 1000
+
+/**
+ * Marque quelqu'un comme présent *maintenant*.
+ *
+ * `last_seen_at` n'était écrit qu'à la connexion. C'est ce qui rendait
+ * l'administration illisible : une session dure trente jours, une application
+ * installée sur l'écran d'accueil ne se déconnecte jamais, et « connecté »
+ * finissait par désigner tout le monde. La présence se mesure au battement du
+ * navigateur (`/api/presence`), pas à la survie d'un cookie.
+ *
+ * L'écriture est conditionnée en SQL plutôt que lue puis écrite : deux onglets
+ * qui battent ensemble font alors une seule mise à jour, sans course.
+ */
+export async function touchPresence(userId: string): Promise<void> {
+  const database = getDb()
+  await database
+    .update(users)
+    .set({ lastSeenAt: new Date() })
+    .where(
+      and(
+        eq(users.id, userId),
+        lt(users.lastSeenAt, sql`now() - ${`${PRESENCE_THROTTLE_MS} milliseconds`}::interval`),
+      ),
+    )
 }
 
 /** Change le mot de passe après avoir vérifié l'ancien. */
