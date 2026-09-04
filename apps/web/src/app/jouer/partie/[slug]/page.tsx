@@ -31,7 +31,9 @@ import clsx from 'clsx'
 import { Chess } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import {
+  SIMPLE_VALUES,
   START_FEN,
+  capturedPieces,
   formatTimeControl,
   normalizeTimeControlId,
   parseTimeControl,
@@ -49,7 +51,8 @@ import { useLiveGame } from '@/lib/game/useLiveGame.ts'
 import { oublierPartieEnLigne, retenirPartieEnLigne } from '@/lib/game/partieEnLigne.ts'
 import { usePrecoup } from '@/lib/game/usePrecoup.ts'
 import { playMoveForSan, playResultSound, playSound } from '@/lib/sound.ts'
-import { useCurrentOpening } from '@/lib/game/useOpeningBook.ts'
+import { useCurrentOpening, useOpeningBook } from '@/lib/game/useOpeningBook.ts'
+import { useQualitesDesCoups } from '@/lib/game/useQualitesDesCoups.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import type { ChatMessage } from '@/lib/game/useLiveGame.ts'
 import { toPlayedMove, type PlayedMove } from '@/lib/game/useChessGame.ts'
@@ -350,6 +353,18 @@ export default function LiveGamePage() {
 
   const opening = useCurrentOpening(snapshot?.moves ?? [], locale)
 
+  /*
+    La qualité de chaque coup, pour colorer la notation dans la liste.
+
+    Le moteur tourne dans le navigateur et ne juge que les coups **déjà
+    joués** : il ne propose jamais celui qui vient. Cela reste une aide — savoir
+    en direct qu'on vient de gaffer est une information que la partie ne donnait
+    pas —, et c'est un choix assumé de cet écran, qui est celui des parties
+    entre amis.
+  */
+  const { book } = useOpeningBook()
+  const qualites = useQualitesDesCoups({ moves: playedMoves, book })
+
   // ── Revoir les coups sans quitter la partie ─────────────────────────────
   //
   // La liste des coups était figée : on ne pouvait ni revenir sur la position
@@ -399,6 +414,29 @@ export default function LiveGamePage() {
       checkSquare: echec,
     }
   }, [revu, playedMoves])
+
+  /*
+    Le matériel capturé, comme en partie locale et contre l'ordinateur.
+
+    Il manquait ici seul : le serveur n'envoie que la position, et cet écran se
+    contentait de l'afficher. Il n'y a pourtant rien à demander au réseau — les
+    pièces manquantes d'une position se comptent depuis le FEN.
+
+    On compte sur la position *regardée* et non sur celle du direct : quand on
+    remonte les coups, les bandeaux doivent raconter le même moment que
+    l'échiquier.
+  */
+  const material = useMemo(() => {
+    const fen = revue?.fen ?? snapshot?.fen ?? START_FEN
+    try {
+      const captured = capturedPieces(new Chess(fen, { skipValidation: true }))
+      const valeur = (pieces: PieceSymbol[]) =>
+        pieces.reduce((somme, piece) => somme + SIMPLE_VALUES[piece], 0)
+      return { ...captured, balance: valeur(captured.w) - valeur(captured.b) }
+    } catch {
+      return { w: [] as PieceSymbol[], b: [] as PieceSymbol[], balance: 0 }
+    }
+  }, [revue, snapshot?.fen])
 
   const handleMove = useCallback(
     (from: Square, to: Square, promotion?: PieceSymbol) => {
@@ -524,6 +562,10 @@ export default function LiveGamePage() {
           timeMs={clock ? clock[opponentColor] : null}
           timeControl={timeControl}
           active={snapshot.turn === opponentColor && !over}
+          captured={material[opponentColor]}
+          materialLead={
+            opponentColor === 'w' ? Math.max(0, material.balance) : Math.max(0, -material.balance)
+          }
           status={opponent && !opponent.connected ? 'déconnecté' : undefined}
         />
 
@@ -585,6 +627,10 @@ export default function LiveGamePage() {
           timeMs={clock ? clock[orientation] : null}
           timeControl={timeControl}
           active={snapshot.turn === orientation && !over}
+          captured={material[orientation]}
+          materialLead={
+            orientation === 'w' ? Math.max(0, material.balance) : Math.max(0, -material.balance)
+          }
         />
 
         {/* ── Actions ────────────────────────────────────────── */}
@@ -760,6 +806,7 @@ export default function LiveGamePage() {
               moves={playedMoves}
               cursor={revu ?? dernierDemiCoup}
               onSeek={revoir}
+              qualities={qualites}
               className="min-h-0 flex-1"
             />
           </Card>
