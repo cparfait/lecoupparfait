@@ -24,7 +24,7 @@ import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import clsx from 'clsx'
 import type { Color } from 'chess.js'
-import { QUALITY_STYLES, type MoveQuality } from '@coupparfait/core'
+import { QUALITY_STYLES, isNotableQuality, type MoveQuality } from '@coupparfait/core'
 import { useSan } from '@/lib/notation.ts'
 
 /** Ce que le ruban a besoin de savoir d'un coup. */
@@ -43,11 +43,16 @@ export interface CoupDuRuban {
  * Le numéro se déduit du rang : c'est vrai de toute partie commencée à la
  * position initiale, ce qui est le cas de tous les écrans qui s'en servent.
  */
-export function rubanDepuisLesCoups(coups: Array<{ san: string; color: Color }>): CoupDuRuban[] {
+export function rubanDepuisLesCoups(
+  coups: Array<{ san: string; color: Color }>,
+  /** Verdicts par demi-coup, quand on en a. */
+  qualites?: Record<number, MoveQuality>,
+): CoupDuRuban[] {
   return coups.map((coup, index) => ({
     san: coup.san,
     color: coup.color,
     moveNumber: Math.floor(index / 2) + 1,
+    quality: qualites?.[index],
   }))
 }
 
@@ -123,7 +128,10 @@ export function RubanCoups({
       <div className="flex min-w-0 flex-1 items-center justify-center gap-1">
         {visibles.map((coup, rang) => {
           const index = premier + rang
-          const style = coup.quality ? QUALITY_STYLES[coup.quality] : null
+          // Même filtre que la liste complète : seuls les coups remarquables
+          // portent une couleur, sinon la bande est verte d'un bout à l'autre.
+          const style =
+            coup.quality && isNotableQuality(coup.quality) ? QUALITY_STYLES[coup.quality] : null
           const courant = index === cursor
           return (
             <button
@@ -151,7 +159,16 @@ export function RubanCoups({
                 <span className="font-mono text-accent">? ? ?</span>
               ) : (
                 <>
-                  <span className="truncate font-mono">{format(coup.san)}</span>
+                  {/* Comme dans la liste complète : la notation porte la
+                      couleur de son verdict. Le ruban est ce qu'on a sous les
+                      yeux sur téléphone, il ne peut pas être le seul endroit
+                      où l'information se réduit à un glyphe de onze pixels. */}
+                  <span
+                    className="truncate font-mono"
+                    style={style ? { color: `var(--q-${style.token})` } : undefined}
+                  >
+                    {format(coup.san)}
+                  </span>
                   {style && (
                     <span
                       className="shrink-0"

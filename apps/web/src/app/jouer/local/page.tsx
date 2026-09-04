@@ -44,6 +44,7 @@ import { MoveList } from '@/components/game/MoveList.tsx'
 import { PourquoiPanel } from '@/components/game/PourquoiPanel.tsx'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import { PlayerBar } from '@/components/game/PlayerBar.tsx'
+import { useQualitesDesCoups } from '@/lib/game/useQualitesDesCoups.ts'
 import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
 import { Button, Card, Chip, Toggle } from '@/components/ui/index.tsx'
 import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
@@ -115,6 +116,11 @@ export default function LocalGamePage() {
     state.moves.map((move) => move.san),
     locale,
   )
+
+  // La couleur des coups dans la liste. Ici moins que partout ailleurs il n'y a
+  // de question d'assistance : les deux joueurs partagent l'écran, et le mode
+  // commenté juste en dessous leur dit déjà bien davantage.
+  const qualites = useQualitesDesCoups({ moves: state.moves, book })
 
   // ── Mode commenté ───────────────────────────────────────────────────────
   //
@@ -339,6 +345,7 @@ export default function LocalGamePage() {
               moves={state.moves}
               cursor={state.cursor}
               onSeek={goTo}
+              qualities={qualites}
               className="min-h-0 flex-1"
             />
           </Card>

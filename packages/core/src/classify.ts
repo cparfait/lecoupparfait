@@ -367,6 +367,21 @@ export const QUALITY_STYLES: Record<MoveQuality, QualityStyle> = {
   },
 }
 
+/**
+ * Qualités qui méritent d'être signalées dans une liste de coups.
+ *
+ * Une partie est faite pour l'essentiel de coups corrects : les colorer tous
+ * revient à n'en colorer aucun, puisque plus rien ne ressort. On garde donc les
+ * deux extrémités — ce qui était remarquable, ce qui a coûté cher — et on
+ * laisse le reste de la couleur du texte ordinaire.
+ *
+ * `book` en fait partie : un coup de théorie n'est pas un mérite du joueur,
+ * c'est une page de livre.
+ */
+export function isNotableQuality(quality: MoveQuality): boolean {
+  return quality !== 'good' && quality !== 'excellent' && quality !== 'forced' && quality !== 'book'
+}
+
 /** Compte les coups par qualité, pour le tableau de bord d'après-partie. */
 export function countQualities(moves: AnalysedMove[], color: Color): Record<MoveQuality, number> {
   const counts = Object.fromEntries(Object.keys(QUALITY_STYLES).map((k) => [k, 0])) as Record<

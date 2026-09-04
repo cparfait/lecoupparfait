@@ -62,6 +62,7 @@ import { ApprofondirCoup } from '@/components/ia/ApprofondirCoup.tsx'
 import { Menu } from '@/components/ui/Menu.tsx'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import { PlayerBar } from '@/components/game/PlayerBar.tsx'
+import { useQualitesDesCoups } from '@/lib/game/useQualitesDesCoups.ts'
 import { TurnIndicator } from '@/components/game/TurnIndicator.tsx'
 import { OpeningBanner } from '@/components/game/OpeningBanner.tsx'
 import {
@@ -1620,8 +1621,21 @@ function GameScreen({
   // Naviguer dans la liste des coups replace la position sur l'échiquier, mais
   // une position seule ne dit pas *quel* coup y a mené : on flèche donc le coup
   // consulté, et le coup que le moteur préférait si on l'a déjà calculé.
+  /*
+    La qualité de chaque coup, pour colorer la notation.
+
+    Le mode commenté ne juge que le coup courant, et son verdict s'efface au
+    coup suivant : la liste, elle, se relit d'un bout à l'autre, et c'est là
+    qu'on cherche *où* la partie a basculé. Le crochet garde donc tous les
+    verdicts, y compris ceux des coups du bot.
+  */
+  const qualites = useQualitesDesCoups({ moves: state.moves, book })
+
   // Les coups tels que le ruban les attend : le numéro se déduit du rang.
-  const rubanCoups = useMemo(() => rubanDepuisLesCoups(state.moves), [state.moves])
+  const rubanCoups = useMemo(
+    () => rubanDepuisLesCoups(state.moves, qualites),
+    [state.moves, qualites],
+  )
 
   const reviewing = !state.isLive
   const reviewedMove = reviewing ? (state.moves[state.cursor] ?? null) : null
@@ -2342,6 +2356,7 @@ function GameScreen({
               moves={state.moves}
               cursor={state.cursor}
               onSeek={goTo}
+              qualities={qualites}
               className="min-h-0 flex-1"
             />
           </Card>

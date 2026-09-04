@@ -16,7 +16,7 @@ import { useEffect, useRef } from 'react'
 import clsx from 'clsx'
 import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
 import type { MoveQuality } from '@coupparfait/core'
-import { QUALITY_STYLES } from '@coupparfait/core'
+import { QUALITY_STYLES, isNotableQuality } from '@coupparfait/core'
 import { groupMoves, type PlayedMove } from '@/lib/game/useChessGame.ts'
 import { useMoveWords, useSan } from '@/lib/notation.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
@@ -291,8 +291,26 @@ const MoveCell = function MoveCell({
   const style = quality ? QUALITY_STYLES[quality] : null
   // Les coups ordinaires ne méritent pas de pastille : on ne signale que ce qui
   // sort de l'ordinaire, sinon la liste devient un sapin de Noël illisible.
+  // La théorie garde son 📖 : ce n'est pas un jugement, c'est un repère.
   const worthShowing =
     style && quality !== 'excellent' && quality !== 'good' && quality !== 'forced'
+  /*
+    La notation prend la couleur de son verdict — « Cé6 » en vert quand c'était
+    le meilleur coup, en rouge quand c'était une gaffe.
+
+    Le glyphe seul ne suffisait pas : il fait onze pixels, il est posé à droite
+    de la cellule, et l'œil qui parcourt la colonne des coups ne le rencontre
+    jamais. La couleur, elle, se lit sans être cherchée — c'est tout l'intérêt
+    d'une liste qu'on relit après coup pour retrouver *où* ça a basculé.
+
+    On ne colore que la notation, pas la cellule : un fond teinté par ligne
+    donnait une colonne bariolée où le coup sélectionné ne se distinguait plus
+    de son voisin. Et on laisse en gris les coups corrects — `good`,
+    `excellent`, `forced`, la théorie —, faute de quoi tout est coloré et plus
+    rien ne ressort.
+  */
+  const teinte =
+    style && quality && isNotableQuality(quality) ? `var(--q-${style.token})` : undefined
 
   return (
     <button
@@ -301,7 +319,9 @@ const MoveCell = function MoveCell({
       onClick={() => onSeek(ply)}
       // « Tg2+ » ne veut rien dire tant qu'on ne l'a pas apprise, et c'est en
       // survolant qu'on l'apprend.
-      title={dire(move.san)}
+      // Et le verdict avec, sans quoi la couleur reste une devinette : « rouge,
+      // d'accord, mais rouge de quoi ? ».
+      title={style ? `${dire(move.san)} — ${style.label[locale]}` : dire(move.san)}
       className={clsx(
         // Au doigt, la ligne s'épaissit jusqu'à la taille d'un pouce ; la
         // liste s'allonge d'autant, mais elle défile.
@@ -312,7 +332,12 @@ const MoveCell = function MoveCell({
       )}
       aria-current={active ? 'true' : undefined}
     >
-      <span className="truncate">{san}</span>
+      <span
+        className={clsx('truncate', teinte && 'font-semibold')}
+        style={teinte ? { color: teinte } : undefined}
+      >
+        {san}
+      </span>
       {worthShowing && (
         <span
           className="ml-auto shrink-0 text-[11px] font-bold leading-none"
