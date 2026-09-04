@@ -42,6 +42,15 @@ export interface EntreeNav {
   icon: LucideIcon
   /** Une demi-phrase affichée sous le libellé, dans les panneaux déroulants. */
   hintKey?: TranslationKey
+  /**
+   * Autres chemins que cette entrée éclaire dans la barre inférieure.
+   *
+   * « S'entraîner » mène au sommaire `/entrainer`, mais les trois écrans qu'il
+   * propose vivent sous `/puzzles` : sans cela, l'onglet s'éteignait dès qu'on
+   * ouvrait ce qu'il venait de proposer — on ne savait plus dans quelle
+   * rubrique on se trouvait.
+   */
+  actifSur?: string[]
 }
 
 export interface SectionNav {
@@ -153,7 +162,13 @@ export const SECTIONS: SectionNav[] = [
     teinte: 'var(--accent-3)',
     labelKey: 'nav.train',
     icon: Target,
-    sommaire: '/puzzles',
+    // La rubrique a maintenant sa page-sommaire, comme « Jouer » et
+    // « Apprendre ». Elle pointait sur `/puzzles`, c'est-à-dire sur l'un de ses
+    // trois écrans : ouvrir « S'entraîner » lançait aussitôt une position, sans
+    // jamais montrer qu'il existait aussi la manche chronométrée et le défi du
+    // jour. Sur téléphone, où l'onglet du bas s'appelait « Puzzles », les deux
+    // autres n'existaient tout simplement pas.
+    sommaire: '/entrainer',
     entrees: [
       { href: '/puzzles', labelKey: 'nav.puzzles', icon: Puzzle, hintKey: 'nav.puzzlesHint' },
       {
@@ -220,7 +235,13 @@ export const SECTIONS: SectionNav[] = [
 export const RACCOURCIS_MOBILES: EntreeNav[] = [
   { href: '/jouer', labelKey: 'nav.play', icon: Swords },
   { href: '/apprendre', labelKey: 'nav.learn', icon: GraduationCap },
-  { href: '/puzzles', labelKey: 'nav.puzzles', icon: Puzzle },
+  // « S'entraîner », et non plus « Puzzles ».
+  //
+  // L'onglet portait le nom de l'un des trois écrans de la rubrique et menait
+  // droit dessus : la manche chronométrée et le défi du jour n'apparaissaient
+  // nulle part sur un téléphone. Le nom de la rubrique — le même que sur grand
+  // écran — annonce les trois, et le sommaire les propose.
+  { href: '/entrainer', labelKey: 'nav.train', icon: Target, actifSur: ['/puzzles'] },
   { href: '/analyse', labelKey: 'nav.analysis', icon: Gauge },
 ]
 
@@ -232,6 +253,10 @@ export const RACCOURCIS_MOBILES: EntreeNav[] = [
  * sa section.
  */
 export function sectionActive(section: SectionNav, pathname: string): boolean {
+  // La page-sommaire compte, même quand elle ne figure pas dans les entrées :
+  // `/entrainer` n'est aucun des trois écrans qu'elle propose, et la rubrique
+  // s'éteignait donc sur sa propre page d'accueil.
+  if (section.sommaire && pathname.startsWith(section.sommaire)) return true
   return section.entrees.some((entree) => {
     const chemin = entree.href.split(/[?#]/)[0] ?? entree.href
     return chemin === '/' ? pathname === '/' : pathname.startsWith(chemin)

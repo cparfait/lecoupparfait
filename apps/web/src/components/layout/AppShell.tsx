@@ -131,15 +131,17 @@ export function AppShell({ children }: { children: ReactNode }) {
               site, et suffit à identifier la page comme à ramener à l'accueil.
               Le cavalier reste où il vaut quelque chose : sur l'icône de
               l'application, où il est seul et grand. */}
-          <Link
-            href="/"
-            className="group flex shrink-0 items-center rounded-[var(--radius-sm)] px-1.5 py-1"
-            aria-label="Le Coup Parfait — accueil"
-          >
-            <span className="font-display text-[15px] font-semibold tracking-tight transition-colors group-hover:text-accent sm:text-[17px]">
-              Le Coup Parfait
-            </span>
-          </Link>
+          {/* Et le nom ouvre désormais le menu de l'application.
+
+              Il ne menait qu'à l'accueil, ce que rien n'annonçait — et la
+              maison, à droite, le fait maintenant en le disant. Le nom du site
+              est en revanche l'endroit où l'on cherche ce qui concerne le site
+              lui-même : préférences, à propos, crédits, administration. Ces
+              pages vivaient dans un pied de page invisible sous `lg` et dans un
+              bloc au fond du menu mobile, c'est-à-dire à deux endroits dont
+              aucun n'était le bon. L'accueil ouvre la liste, pour qui avait
+              l'habitude de cliquer là. */}
+          <MenuApplication />
 
           {/* La navigation à plat n'apparaît qu'à partir de `lg`, pas de `md` :
               cinq rubriques, le nom du site et cinq commandes à droite font
@@ -333,6 +335,67 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+//  Le nom du site, et ce qu'il ouvre
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Les pages de l'application, sous son nom.
+ *
+ * Une seule liste pour les deux tailles d'écran, et le même geste : on clique
+ * le nom du site pour ce qui concerne le site. L'administration n'y figure que
+ * pour qui l'ouvre — `useEstAdmin` vaut `false` tant qu'on ne sait pas, si bien
+ * qu'elle ne clignote jamais chez un visiteur ordinaire — et elle ne donne
+ * aucun droit : chaque route revérifie.
+ */
+function MenuApplication() {
+  const t = useT()
+  const estAdmin = useEstAdmin()
+
+  const pages = [
+    { href: '/', label: t('nav.home'), icon: House },
+    { href: '/preferences', label: t('nav.settings'), icon: Settings },
+    ...(estAdmin ? [{ href: '/admin', label: 'Administration', icon: ShieldCheck }] : []),
+    { href: '/a-propos', label: 'À propos', icon: Info },
+    { href: '/credits', label: 'Crédits & licences', icon: Scale },
+  ]
+
+  return (
+    <Menu
+      className="shrink-0"
+      largeur="w-60"
+      label="Le Coup Parfait"
+      declencheur={(ouvert) => (
+        <>
+          <span className="font-display text-[15px] font-semibold tracking-tight text-ink sm:text-[17px]">
+            Le Coup Parfait
+          </span>
+          <ChevronDown
+            size={14}
+            aria-hidden
+            className={clsx('transition-transform duration-200', ouvert && 'rotate-180')}
+          />
+        </>
+      )}
+    >
+      {pages.map((page) => {
+        const Icone = page.icon
+        return (
+          <Link
+            key={page.href}
+            href={page.href}
+            role="menuitem"
+            className="flex items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-sm font-medium transition-colors hover:bg-surface-hover"
+          >
+            <Icone size={16} className="shrink-0 text-accent" aria-hidden />
+            {page.label}
+          </Link>
+        )
+      })}
+    </Menu>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  Navigation sur grand écran
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -368,17 +431,42 @@ function MenuSection({
         </>
       )}
     >
-      {/* Le titre du panneau mène à la page-sommaire : un menu se referme au
-          premier clic, et vouloir simplement « voir ce qu'il y a dans Jouer »
-          doit mener quelque part plutôt qu'obliger à choisir tout de suite. */}
+      {/* ── La page de la rubrique, en première entrée ──────────────────
+          Elle existait déjà, et personne ne la voyait : un titre en capitales
+          de onze pixels, gris clair, avec une flèche — c'est-à-dire la forme
+          exacte d'une étiquette de section, celle qu'on apprend justement à ne
+          pas lire. Les pages « Jouer », « Apprendre » et « S'entraîner »
+          n'étaient donc atteintes que depuis un téléphone, où la barre du bas y
+          mène, alors que ce sont elles qui présentent chaque rubrique en grand,
+          avec une phrase par destination.
+
+          Elle devient une entrée comme les autres — icône, libellé, sous-titre
+          — mais posée sur un fond léger et séparée du reste par un filet : la
+          première chose qu'on lit en ouvrant le menu, et la seule qui ne
+          demande pas de choisir tout de suite. */}
       {section.sommaire && (
-        <Link
-          href={section.sommaire}
-          className="mb-1 flex items-center justify-between rounded-[var(--radius-sm)] px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-faint transition-colors hover:bg-surface-hover hover:text-ink"
-        >
-          {t(section.labelKey)}
-          <span aria-hidden>→</span>
-        </Link>
+        <>
+          <Link
+            href={section.sommaire}
+            role="menuitem"
+            className="flex items-center gap-2.5 rounded-[var(--radius-sm)] bg-surface/70 px-2.5 py-2 transition-colors hover:bg-surface-hover"
+          >
+            <section.icon size={16} className="shrink-0" style={{ color: section.teinte }} />
+            <span className="min-w-0 flex-1">
+              {/* « Voir la page Jouer » et non « Jouer » : le mot seul répète
+                  le bouton qu'on vient d'ouvrir, et l'on croit avoir affaire à
+                  un titre. Le verbe dit que c'est une destination. */}
+              <span className="block text-sm font-semibold">
+                Voir la page {t(section.labelKey)}
+              </span>
+              <span className="block text-[11px] leading-snug text-faint">
+                toute la rubrique, présentée en grand
+              </span>
+            </span>
+            <ChevronRight size={14} className="shrink-0 text-faint" aria-hidden />
+          </Link>
+          <span className="my-1 block h-px bg-line/60" aria-hidden />
+        </>
       )}
 
       {section.entrees.map((entree) => {
@@ -424,29 +512,25 @@ function MenuSection({
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Menu mobile : les rubriques, pas leur contenu.
+ * Menu mobile : les cinq rubriques et leur contenu, comme sur grand écran.
  *
- * Il dépliait les trente entrées de la navigation, et c'était trois fois la
- * même liste : la barre du bas conduit déjà aux quatre rubriques principales,
- * et chaque page de rubrique montre ce qu'elle contient — « Jouer » aligne ses
- * six façons de jouer en grand, sous le pouce. Un panneau qui répète tout cela
- * en petit oblige à choisir deux fois, et il fallait le faire défiler pour
- * atteindre « Communauté », tout en bas.
+ * Il n'a longtemps montré que « Communauté » et les pages de l'application, au
+ * motif que la barre du bas conduit aux quatre autres rubriques et que chaque
+ * page de rubrique montre ce qu'elle contient. C'était vrai des destinations et
+ * faux de l'usage : sur grand écran, cinq menus déroulants donnent la carte
+ * complète du site d'un coup d'œil — trente entrées, nommées et expliquées —
+ * alors que le téléphone n'en voyait que cinq, et devait ouvrir une rubrique
+ * pour découvrir ce qu'il y avait dedans. Deux gestes au lieu d'un, et rien
+ * qui dise ce qui existe.
  *
- * Il ne garde donc que ce qu'on ne trouve pas ailleurs, et la barre du bas
- * en offre déjà quatre : « Jouer », « Apprendre », « Puzzles », « Analyse ».
- * Les répéter ici mettait deux fois les mêmes destinations sur le même écran,
- * à trois centimètres d'écart. Restent donc :
+ * Le menu porte donc **les mêmes entrées que les panneaux du haut**, dans le
+ * même ordre, lues au même endroit (`SECTIONS`). Chaque rubrique garde son
+ * titre — cliquable quand elle a une page-sommaire, exactement comme l'en-tête
+ * du panneau déroulant — puis ses entrées en deux colonnes, à taille de doigt.
  *
- *  - **Communauté**, la seule rubrique sans page à elle ;
- *  - **l'application elle-même** — préférences, à propos, crédits —, jusqu'ici
- *    reléguée dans un pied de page qui ne s'affiche qu'à partir de `lg` :
- *    trois écrans qu'un téléphone ne pouvait pas atteindre ;
- *  - **les quatre rubriques de la barre du bas, en paysage seulement**, où
- *    cette barre s'efface pour rendre sa hauteur à l'échiquier.
- *
- * Le reste est allé dans les pages, où il y a la place de le nommer et de
- * l'expliquer : voir `AutresDeLaSection`.
+ * S'y ajoute **l'application elle-même** — préférences, à propos, crédits —,
+ * jusqu'ici reléguée dans un pied de page qui ne s'affiche qu'à partir de
+ * `lg` : trois écrans qu'un téléphone ne pouvait pas atteindre.
  */
 function MobileMenu({
   pathname,
@@ -458,7 +542,6 @@ function MobileMenu({
   onPorte: (porte: { avantage: AvantageCompte; href: string }) => void
 }) {
   const t = useT()
-  const estAdmin = useEstAdmin()
 
   return (
     <div className="animate-slide-up max-h-[70dvh] overflow-y-auto border-t border-line bg-[var(--bg-elev)] lg:hidden">
@@ -467,17 +550,31 @@ function MobileMenu({
           const Icone = section.icon
           const active = sectionActive(section, pathname)
 
-          /*
-            Une rubrique qui a une page y conduit ; les autres se déplient.
-
-            « Communauté » est la seule sans page-sommaire : classement, amis,
-            correspondance et statistiques ne se rejoignent nulle part
-            ailleurs, et les cacher derrière un titre inerte les rendrait
-            introuvables. Elle garde donc ses entrées, en petit, sous son nom.
-          */
-          if (!section.sommaire) {
-            return (
-              <div key={section.id} className="rounded-[var(--radius-sm)] bg-surface/70 p-2.5">
+          return (
+            <div
+              key={section.id}
+              className={clsx(
+                'rounded-[var(--radius-sm)] bg-surface/70 p-2.5',
+                active && 'ring-1 ring-inset ring-accent/40',
+              )}
+            >
+              {/*
+                Le titre de la rubrique, et il conduit quelque part quand la
+                rubrique a une page — exactement comme l'en-tête du panneau
+                déroulant sur grand écran. « Communauté » est la seule sans
+                page-sommaire : son titre reste un titre.
+              */}
+              {section.sommaire ? (
+                <Link
+                  href={section.sommaire}
+                  className="mb-1.5 flex min-h-9 items-center gap-2 rounded-[var(--radius-sm)] px-0.5 text-[11px] font-semibold uppercase tracking-wide transition-colors hover:bg-surface-hover"
+                  style={{ color: section.teinte }}
+                >
+                  <Icone size={12} aria-hidden />
+                  {t(section.labelKey)}
+                  <ChevronRight size={13} className="ml-auto" aria-hidden />
+                </Link>
+              ) : (
                 <p
                   className="mb-1.5 flex items-center gap-2 px-0.5 text-[11px] font-semibold uppercase tracking-wide"
                   style={{ color: section.teinte }}
@@ -485,111 +582,50 @@ function MobileMenu({
                   <Icone size={12} aria-hidden />
                   {t(section.labelKey)}
                 </p>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {section.entrees.map((entree) => {
-                    const IconeEntree = entree.icon
-                    const reservee = intercepter(entree.href)
-                    return (
-                      <Link
-                        key={entree.href}
-                        href={entree.href}
-                        onClick={(event) => {
-                          if (!reservee) return
-                          event.preventDefault()
-                          onPorte({ avantage: reservee, href: entree.href })
-                        }}
-                        className="flex min-h-11 items-center gap-2 rounded-[var(--radius-sm)] bg-bg-elev px-2.5 text-sm font-medium text-ink"
-                      >
-                        <IconeEntree
-                          size={15}
-                          className="shrink-0"
-                          style={{ color: section.teinte }}
-                          aria-hidden
-                        />
-                        <span className="min-w-0 flex-1 truncate">{t(entree.labelKey)}</span>
-                        {reservee && (
-                          <Lock
-                            size={11}
-                            className="shrink-0 text-faint"
-                            aria-label="demande un compte"
-                          />
-                        )}
-                      </Link>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          }
-
-          /*
-            Cette rubrique est déjà dans la barre du bas — sauf en paysage, où
-            la barre n'existe pas. On ne l'affiche donc que là.
-          */
-          return (
-            <Link
-              key={section.id}
-              href={section.sommaire}
-              className={clsx(
-                'hidden min-h-14 items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2.5 transition-colors paysage:flex',
-                active
-                  ? 'bg-surface-strong ring-1 ring-inset ring-accent/50'
-                  : 'bg-surface/70 hover:bg-surface-hover',
               )}
-            >
-              <span
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)]"
-                style={{ background: `color-mix(in oklab, ${section.teinte} 18%, transparent)` }}
-                aria-hidden
-              >
-                <Icone size={17} style={{ color: section.teinte }} />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-ink">{t(section.labelKey)}</span>
-                <span className="block truncate text-[11px] text-faint">
-                  {section.entrees
-                    .slice(0, 3)
-                    .map((entree) => t(entree.labelKey))
-                    .join(' · ')}
-                </span>
-              </span>
-              <ChevronRight size={16} className="shrink-0 text-faint" aria-hidden />
-            </Link>
+
+              <div className="grid grid-cols-2 gap-1.5">
+                {section.entrees.map((entree) => {
+                  const IconeEntree = entree.icon
+                  const reservee = intercepter(entree.href)
+                  return (
+                    <Link
+                      key={entree.href}
+                      href={entree.href}
+                      onClick={(event) => {
+                        if (!reservee) return
+                        event.preventDefault()
+                        onPorte({ avantage: reservee, href: entree.href })
+                      }}
+                      className="flex min-h-11 items-center gap-2 rounded-[var(--radius-sm)] bg-bg-elev px-2.5 text-sm font-medium text-ink"
+                    >
+                      <IconeEntree
+                        size={15}
+                        className="shrink-0"
+                        style={{ color: section.teinte }}
+                        aria-hidden
+                      />
+                      <span className="min-w-0 flex-1 truncate">{t(entree.labelKey)}</span>
+                      {reservee && (
+                        <Lock
+                          size={11}
+                          className="shrink-0 text-faint"
+                          aria-label="demande un compte"
+                        />
+                      )}
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
           )
         })}
 
-        {/* ── L'application ────────────────────────────────────────────────
-            Ces trois pages n'étaient nulle part sur un téléphone : le pied de
-            page qui les portait ne s'affiche qu'à partir de `lg`. On les
-            atteignait donc uniquement en écrivant l'adresse. */}
-        <div className="rounded-[var(--radius-sm)] bg-surface/70 p-2.5">
-          <p className="mb-1.5 px-0.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
-            L’application
-          </p>
-          <div className="grid grid-cols-2 gap-1.5">
-            {[
-              { href: '/preferences', label: t('nav.settings'), icon: Settings },
-              // Sur téléphone, l'en-tête n'a pas la place d'une commande de
-              // plus : sans cette entrée, l'administration ne s'atteindrait
-              // qu'en écrivant l'adresse. Elle n'apparaît que pour qui l'ouvre.
-              ...(estAdmin ? [{ href: '/admin', label: 'Administration', icon: ShieldCheck }] : []),
-              { href: '/a-propos', label: 'À propos', icon: Info },
-              { href: '/credits', label: 'Crédits', icon: Scale },
-            ].map((page) => {
-              const Icone = page.icon
-              return (
-                <Link
-                  key={page.href}
-                  href={page.href}
-                  className="flex min-h-11 items-center gap-2 rounded-[var(--radius-sm)] bg-bg-elev px-2.5 text-sm font-medium text-ink"
-                >
-                  <Icone size={15} className="shrink-0 text-faint" aria-hidden />
-                  <span className="min-w-0 flex-1 truncate">{page.label}</span>
-                </Link>
-              )
-            })}
-          </div>
-        </div>
+        {/* Les pages de l'application — préférences, à propos, crédits,
+            administration — ne sont plus ici : elles sont sous le nom du site,
+            en haut à gauche, sur les deux tailles d'écran. Les répéter au fond
+            de ce panneau en ferait le seul endroit qu'on pense à ouvrir, et le
+            nom du site resterait ce mot qu'on ne sait pas cliquable. */}
       </nav>
     </div>
   )
@@ -618,7 +654,12 @@ function BottomBar({
       <div className="mx-auto flex max-w-md items-stretch justify-around px-1 pt-1.5">
         {RACCOURCIS_MOBILES.map((entree) => {
           const Icone = entree.icon
-          const active = pathname.startsWith(entree.href)
+          // Un onglet reste allumé sur les écrans qu'il propose : « S'entraîner »
+          // mène au sommaire `/entrainer`, dont les trois portes vivent sous
+          // `/puzzles`. Voir `actifSur`.
+          const active = [entree.href, ...(entree.actifSur ?? [])].some((chemin) =>
+            pathname.startsWith(chemin),
+          )
           return (
             /* ── La barre du bas, enfin visible ─────────────────────────
                Elle était en `text-faint` — la couleur des mentions
