@@ -35,6 +35,26 @@ export interface MoveListProps {
   onToggleAutoplay?: () => void
 }
 
+/**
+ * La couleur d'un verdict, ou rien.
+ *
+ * Trois familles : ce qui est remarquable prend sa teinte pleine, ce qui est
+ * simplement correct prend un vert atténué — présent, mais qui ne dispute pas
+ * l'attention à une gaffe deux lignes plus bas —, et le reste garde la couleur
+ * du texte.
+ */
+function couleurDuVerdict(
+  quality: MoveQuality | undefined,
+  style: { token: string } | null | undefined,
+): string | undefined {
+  if (!quality || !style) return undefined
+  if (isNotableQuality(quality)) return `var(--q-${style.token})`
+  if (quality === 'excellent' || quality === 'good') {
+    return `color-mix(in oklab, var(--q-${style.token}) 78%, var(--text))`
+  }
+  return undefined
+}
+
 export function MoveList({
   moves,
   cursor,
@@ -305,12 +325,20 @@ const MoveCell = function MoveCell({
 
     On ne colore que la notation, pas la cellule : un fond teinté par ligne
     donnait une colonne bariolée où le coup sélectionné ne se distinguait plus
-    de son voisin. Et on laisse en gris les coups corrects — `good`,
-    `excellent`, `forced`, la théorie —, faute de quoi tout est coloré et plus
-    rien ne ressort.
+    de son voisin.
+
+    **Les bons coups sont colorés eux aussi**, et c'est un changement d'avis.
+    On les laissait gris au motif que tout colorer revient à ne rien colorer.
+    C'est vrai d'une couleur criarde ; c'est faux d'un vert discret. Une liste
+    où seules les fautes ont une couleur ne dit qu'une moitié de la partie —
+    on relit pour savoir où ça a basculé, mais aussi pour voir ce qu'on a bien
+    joué, et un joueur qui n'a fait aucune faute se retrouvait devant une
+    colonne entièrement grise, comme s'il n'avait rien fait.
+
+    Restent sans couleur `forced` — un coup obligé n'est le mérite de personne
+    — et la théorie, qui garde son glyphe de livre.
   */
-  const teinte =
-    style && quality && isNotableQuality(quality) ? `var(--q-${style.token})` : undefined
+  const teinte = couleurDuVerdict(quality, style)
 
   return (
     <button

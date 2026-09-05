@@ -128,10 +128,11 @@ export function RubanCoups({
       <div className="flex min-w-0 flex-1 items-center justify-center gap-1">
         {visibles.map((coup, rang) => {
           const index = premier + rang
-          // Même filtre que la liste complète : seuls les coups remarquables
-          // portent une couleur, sinon la bande est verte d'un bout à l'autre.
-          const style =
-            coup.quality && isNotableQuality(coup.quality) ? QUALITY_STYLES[coup.quality] : null
+          // Même règle que la liste complète : la teinte pleine pour ce qui est
+          // remarquable, un vert atténué pour ce qui est simplement correct.
+          const style = coup.quality ? QUALITY_STYLES[coup.quality] : null
+          const remarquable = coup.quality ? isNotableQuality(coup.quality) : false
+          const bon = coup.quality === 'excellent' || coup.quality === 'good'
           const courant = index === cursor
           return (
             <button
@@ -165,11 +166,22 @@ export function RubanCoups({
                       où l'information se réduit à un glyphe de onze pixels. */}
                   <span
                     className="truncate font-mono"
-                    style={style ? { color: `var(--q-${style.token})` } : undefined}
+                    style={
+                      remarquable
+                        ? { color: `var(--q-${style?.token})` }
+                        : bon
+                          ? {
+                              color: `color-mix(in oklab, var(--q-${style?.token}) 78%, var(--text))`,
+                            }
+                          : undefined
+                    }
                   >
                     {format(coup.san)}
                   </span>
-                  {style && (
+                  {/* Le glyphe, lui, reste réservé au remarquable : une bande
+                      où chaque coup porte une coche n'a plus de relief, et il
+                      n'y a de la place que pour cinq coups. */}
+                  {style && remarquable && (
                     <span
                       className="shrink-0"
                       style={{ color: `var(--q-${style.token})` }}

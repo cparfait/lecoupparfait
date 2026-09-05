@@ -81,7 +81,10 @@ export const PlayerBar = memo(function PlayerBar({
       <div
         className={clsx(
           'shrink-0 rounded-[var(--radius-sm)] px-2.5 py-1 font-mono text-lg font-semibold tabular-nums leading-none transition-colors',
-          active ? 'bg-surface-strong text-ink' : 'text-muted',
+          // La pendule de celui qui attend garde une surface, elle aussi : sans
+          // fond, deux chiffres blancs sur la page ne se lisaient pas comme une
+          // pendule mais comme du texte.
+          active ? 'bg-accent/20 text-ink' : 'bg-surface/70 text-muted',
           urgency === 'critical' && active && 'bg-[var(--q-blunder)] text-white animate-pulse',
           urgency === 'low' && active && 'text-[var(--q-inaccuracy)]',
         )}
@@ -94,13 +97,29 @@ export const PlayerBar = memo(function PlayerBar({
   }
 
   return (
+    /*
+      Les deux bandeaux se voient, et celui qui a le trait se voit davantage.
+
+      Le bandeau n'avait de fond que lorsque c'était à ce joueur de jouer :
+      l'autre flottait à même la page, sans cadre ni surface, et disparaissait
+      dans le fond — on ne savait plus si l'on regardait un nom d'adversaire ou
+      une ligne de texte perdue au-dessus de l'échiquier. Or ces deux bandeaux
+      sont l'état de la partie : qui joue, avec quel matériel, en combien de
+      temps.
+
+      Les deux ont donc une surface et un liseré. Celui qui a le trait passe à
+      la surface forte, garde son liseré d'accent, et porte un filet vertical de
+      la même couleur : trois signes plutôt qu'un, parce que c'est l'information
+      qu'on cherche du coin de l'œil pendant qu'on regarde ailleurs.
+    */
     <div
       className={clsx(
-        'flex items-center gap-2.5 rounded-[var(--radius-sm)] px-2 py-1.5 transition-colors',
-        active && 'bg-surface',
+        'relative flex items-center gap-2.5 overflow-hidden rounded-[var(--radius-sm)] px-2 py-1.5 ring-1 ring-inset transition-colors',
+        active ? 'bg-surface-strong ring-accent/45' : 'bg-surface/60 ring-line',
         className,
       )}
     >
+      {active && <span className="absolute inset-y-0 left-0 w-[3px] bg-accent" aria-hidden />}
       {/* Avatar + pastille de couleur du camp */}
       <div className="relative shrink-0">
         <div

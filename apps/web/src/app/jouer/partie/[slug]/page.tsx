@@ -25,7 +25,6 @@ import {
   MessageSquare,
   Send,
   Swords,
-  Undo2,
   WifiOff,
 } from 'lucide-react'
 import clsx from 'clsx'
@@ -677,21 +676,18 @@ export default function LiveGamePage() {
             </Button>
           )}
 
-          <Button
-            size="sm"
-            variant="ghost"
-            icon={<Undo2 size={14} />}
-            onClick={
-              snapshot.takebackFrom && snapshot.takebackFrom !== color
-                ? game.acceptTakeback
-                : game.requestTakeback
-            }
-            disabled={over || waiting || color === null || snapshot.moves.length < 2}
-          >
-            {snapshot.takebackFrom && snapshot.takebackFrom !== color
-              ? 'Accepter la reprise'
-              : 'Reprendre'}
-          </Button>
+          {/* ── Plus de « Reprendre » entre deux joueurs ──────────────
+              Le bouton demandait une reprise de coup à l'adversaire, qui
+              pouvait l'accepter. C'est courtois entre amis et douteux partout
+              ailleurs : sur une partie classée, cela revient à négocier le
+              résultat une fois le coup vu, et rien ne distingue à l'écran la
+              main tremblante de la mauvaise foi. Il encombrait surtout une
+              barre où les deux boutons qui comptent — proposer nulle,
+              abandonner — sont ceux qu'on doit trouver du premier coup d'œil.
+
+              Le geste existe toujours côté serveur : une partie déjà ouverte
+              dans un onglet ancien peut encore le demander, et l'autre reçoit
+              le message. Simplement, plus rien ici ne le propose. */}
 
           <Button
             size="sm"
