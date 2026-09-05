@@ -8,10 +8,14 @@
  * étiquette, au hasard d'une partie. Difficile d'apprendre un vocabulaire
  * qu'on ne peut pas parcourir.
  *
- * Deux sources réunies ici : le vocabulaire général du jeu, et les 44 motifs
- * que le coach sait nommer. C'est volontaire — quand l'analyse dit « fou de
+ * Deux sources réunies ici : le vocabulaire général du jeu, et les motifs que
+ * le coach sait nommer. C'est volontaire — quand l'analyse dit « fou de
  * mauvaise couleur », il faut pouvoir chercher les deux moitiés de la phrase
- * au même endroit.
+ * au même endroit. Les mots présents des deux côtés ne s'affichent qu'une
+ * fois : voir `entries`.
+ *
+ * Une bonne part d'entre eux s'ouvre sur un échiquier, où le mot se montre au
+ * lieu de se décrire : voir `glossaire-positions.ts`.
  */
 
 import { useMemo, useState } from 'react'
@@ -115,13 +119,33 @@ export default function GlossaryPage() {
    */
   const [montre, setMontre] = useState<{ name: string; definition: string } | null>(null)
 
-  /** Toutes les entrées, motifs compris, dans un seul ensemble consultable. */
+  /**
+   * Toutes les entrées, motifs compris — et dédoublonnées.
+   *
+   * Huit mots existent des deux côtés : « Pion passé », « Mauvais fou »,
+   * « Prise en passant », « Promotion »… Le cœur les définit parce que le coach
+   * s'en sert pour commenter un coup ; le glossaire général les définit parce
+   * qu'un débutant les rencontre dès sa première partie. Les deux textes disent
+   * la même chose autrement, et la page les affichait **tous les deux**, dans
+   * deux sections différentes — on tombait sur « Pion passé » en parcourant les
+   * pions, puis de nouveau cent lignes plus bas, et l'on cherchait la nuance
+   * qu'il n'y avait pas.
+   *
+   * Le mot général l'emporte : il est écrit pour être lu de bout en bout, là où
+   * la définition d'un motif est faite pour tenir dans une infobulle au-dessus
+   * d'un échiquier. Rien n'est perdu — celle du cœur continue de servir là où
+   * elle a été écrite, dans les explications de coups et sur l'écran de
+   * puzzles.
+   */
   const entries = useMemo(() => {
-    const motifs = motifGlossary(locale).map((motif) => ({
-      name: motif.name,
-      definition: motif.definition,
-      family: 'Motifs tactiques' as const,
-    }))
+    const connus = new Set(TERMS.map((terme) => terme.name))
+    const motifs = motifGlossary(locale)
+      .filter((motif) => !connus.has(motif.name))
+      .map((motif) => ({
+        name: motif.name,
+        definition: motif.definition,
+        family: 'Motifs tactiques' as const,
+      }))
     return [...TERMS, ...motifs]
   }, [locale])
 
@@ -133,6 +157,19 @@ export default function GlossaryPage() {
         normalise(entry.name).includes(needle) || normalise(entry.definition).includes(needle),
     )
   }, [entries, query])
+
+  /**
+   * Combien de mots s'ouvrent sur un échiquier.
+   *
+   * Compté sur les entrées réellement affichées, et non sur la taille du
+   * catalogue : une position écrite pour un mot qui n'existe plus se
+   * compterait toute seule. Le contrôle `check:glossaire` refuse déjà ce cas,
+   * mais la page n'a pas à faire confiance à un contrôle qu'elle ne lance pas.
+   */
+  const illustres = useMemo(
+    () => entries.filter((entree) => POSITIONS_DU_GLOSSAIRE[entree.name]).length,
+    [entries],
+  )
 
   const groups = useMemo(() => {
     const order = [...FAMILIES, 'Motifs tactiques']
@@ -151,8 +188,8 @@ export default function GlossaryPage() {
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">Glossaire</h1>
       <p className="mt-2 max-w-2xl text-muted max-lg:text-[13px] max-lg:leading-relaxed">
         {entries.length} termes définis en français clair — les règles, le matériel, les phases de
-        la partie, et les {motifGlossary(locale).length} motifs que le coach sait reconnaître et
-        nommer dans tes parties.
+        la partie, et les motifs que le coach sait reconnaître et nommer dans tes parties.{' '}
+        {illustres} d’entre eux se montrent sur un échiquier : leur nom porte une pastille.
       </p>
 
       {/* ── Recherche ────────────────────────────────────────────────── */}

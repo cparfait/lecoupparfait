@@ -11,6 +11,7 @@
  */
 
 import { Chess } from 'chess.js'
+import { motifGlossary } from '@coupparfait/core'
 import { POSITIONS_DU_GLOSSAIRE } from '../apps/web/src/lib/glossaire-positions.ts'
 import { TERMS } from '../apps/web/src/lib/glossaire.ts'
 
@@ -26,13 +27,18 @@ const echec = (nom, message) => {
   erreurs++
 }
 
-const noms = new Set(TERMS.map((terme) => terme.name))
+// Les deux moitiés du vocabulaire : les mots généraux et les motifs du cœur,
+// que la page du glossaire réunit dans une seule liste.
+const noms = new Set([
+  ...TERMS.map((terme) => terme.name),
+  ...motifGlossary('fr').map((motif) => motif.name),
+])
 
 for (const [nom, position] of Object.entries(POSITIONS_DU_GLOSSAIRE)) {
   // Un nom qui ne correspond à aucun terme n'atteindrait jamais l'écran : c'est
   // une illustration écrite pour rien, et le plus souvent une faute de frappe.
   if (!noms.has(nom)) {
-    echec(nom, 'aucun terme du glossaire ne porte ce nom')
+    echec(nom, 'aucun terme ni motif du glossaire ne porte ce nom')
     continue
   }
 
@@ -73,4 +79,4 @@ if (erreurs > 0) {
   console.error(`\n${erreurs} problème(s) sur ${total} positions du glossaire.`)
   process.exit(1)
 }
-console.log(`✔ ${total} positions du glossaire, toutes jouables.`)
+console.log(`✔ ${total} positions du glossaire sur ${noms.size} entrées, toutes jouables.`)

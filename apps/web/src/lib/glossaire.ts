@@ -23,7 +23,7 @@ export const TERMS: Term[] = [
     name: 'Cadence',
     family: 'Règles',
     definition:
-      "Le temps dont chaque joueur dispose. Elle s'écrit avec deux nombres : **« 3 | 2 » veut dire 3 minutes au départ, plus 2 secondes ajoutées à ta pendule à chaque coup joué**. Un seul nombre — « 5 min » — signifie qu'il n'y a rien à récupérer : quand la pendule tombe, la partie est perdue, même avec une dame de plus. La cadence détermine aussi la catégorie de la partie : bullet, blitz, rapide ou classique, chacune tenant son propre classement.",
+      "Le temps dont chaque joueur dispose. Elle s'écrit avec deux nombres : **« 3 | 2 » veut dire 3 minutes au départ, plus 2 secondes ajoutées à ta pendule à chaque coup joué**. Un seul nombre — « 5 min » — signifie qu'il n'y a rien à récupérer : quand la pendule tombe, la partie est perdue, même avec une dame de plus. La cadence détermine aussi la catégorie de la partie, et chacune tient son propre classement : bullet sous 3 minutes, blitz jusqu'à 10, rapide jusqu'à 60, classique au-delà. On progresse beaucoup plus vite en jouant lentement.",
   },
   {
     name: 'Incrément',
@@ -180,12 +180,6 @@ export const TERMS: Term[] = [
     family: 'Évaluation et jeu',
     definition:
       "Une version plus fine de l'Elo, qui suit aussi l'**incertitude** sur ton niveau. Après une longue absence, le classement bouge plus vite : le système sait qu'il te connaît moins bien. C'est celui utilisé ici.",
-  },
-  {
-    name: 'Cadence',
-    family: 'Évaluation et jeu',
-    definition:
-      "Le temps alloué. « 10+5 » veut dire dix minutes chacun, plus cinq secondes ajoutées après chaque coup. Bullet sous 3 minutes, blitz jusqu'à 10, rapide jusqu'à 60, classique au-delà. On progresse beaucoup plus vite en jouant lentement.",
   },
   {
     name: 'Zugzwang',
