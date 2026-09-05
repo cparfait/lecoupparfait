@@ -49,6 +49,7 @@ export const en: Dictionary = {
 
     train: 'Train',
     community: 'Community',
+    tools: 'Tools',
 
     vsComputer: 'Against the computer',
     vsFriend: 'Against someone',
@@ -62,10 +63,12 @@ export const en: Dictionary = {
     analyseGame: 'Analyse a game',
     stats: 'Statistics',
     myProfile: 'My profile',
+    clock: 'Chess clock',
 
     vsComputerHint: '25 levels, 7 personalities',
     vsFriendHint: 'a link, or days per move',
     localGameHint: 'two players, one device',
+    clockHint: 'time your game on a real board',
     correspondenceHint: 'games waiting on you',
     watchHint: 'games in progress',
     lessonsHint: '36 lessons, from zero to a repertoire',

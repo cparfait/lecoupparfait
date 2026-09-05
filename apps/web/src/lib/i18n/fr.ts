@@ -46,6 +46,7 @@ export const fr = {
     // servent à la fois de titre de section et d'entrée, d'où leur absence ici.
     train: 'S’entraîner',
     community: 'Communauté',
+    tools: 'Outils',
 
     // Entrées de section.
     vsComputer: 'Contre l’ordinateur',
@@ -60,11 +61,13 @@ export const fr = {
     analyseGame: 'Analyser une partie',
     stats: 'Statistiques',
     myProfile: 'Mon profil',
+    clock: 'Pendule',
 
     // Repères affichés sous les entrées, dans les panneaux déroulants.
     vsComputerHint: '25 niveaux, 7 personnalités',
     vsFriendHint: 'un lien, ou plusieurs jours par coup',
     localGameHint: 'à deux, sur le même appareil',
+    clockHint: 'la pendule de ta partie sur échiquier réel',
     correspondenceHint: 'les parties où c’est ton tour',
     watchHint: 'les parties en cours',
     lessonsHint: '36 leçons, de zéro au répertoire',

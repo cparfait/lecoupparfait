@@ -231,6 +231,29 @@ export const SECTIONS: SectionNav[] = [
       { href: '/statistiques', labelKey: 'nav.stats', icon: BarChart3 },
     ],
   },
+  /**
+   * Outils.
+   *
+   * La sixième rubrique, et la seule qui ne serve pas à jouer une partie sur
+   * l'écran : ce qu'on y trouve accompagne une partie qui se joue ailleurs —
+   * sur un vrai plateau, en face de quelqu'un. La pendule l'inaugure ; d'autres
+   * suivront le même principe, l'écran au service du bois et non l'inverse.
+   */
+  {
+    id: 'outils',
+    teinte: 'var(--q-inaccuracy)',
+    labelKey: 'nav.tools',
+    icon: Timer,
+    sommaire: '/outils',
+    entrees: [
+      {
+        href: '/outils/pendule',
+        labelKey: 'nav.clock',
+        icon: Timer,
+        hintKey: 'nav.clockHint',
+      },
+    ],
+  },
 ]
 
 /**
@@ -271,6 +294,12 @@ export const RACCOURCIS_MOBILES: EntreeNav[] = [
     // un lien ou l'historique : l'onglet doit rester allumé sur chacun.
     actifSur: ['/classement', '/amis', '/statistiques'],
   },
+  // Sixième onglet, et il n'y avait pas le choix : la pendule est faite pour
+  // le téléphone et la tablette posés sur la table. Une rubrique qu'on ne peut
+  // atteindre qu'au clavier, depuis un grand écran, serait une rubrique que
+  // personne n'ouvrirait — et surtout jamais depuis l'appareil auquel elle est
+  // destinée.
+  { href: '/outils', labelKey: 'nav.tools', icon: Timer },
 ]
 
 /**
