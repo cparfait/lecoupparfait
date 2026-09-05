@@ -3,11 +3,14 @@
 /**
  * Sommaire de la communauté.
  *
- * C'était la seule rubrique sans page à elle : classement, amis,
- * correspondance et statistiques ne se rejoignaient nulle part. Sur grand
- * écran, un menu déroulant tenait lieu de sommaire ; sur téléphone, ces quatre
- * écrans n'existaient que dans le panneau « Menu », c'est-à-dire derrière un
- * bouton qui ne dit pas ce qu'il contient.
+ * C'était la seule rubrique sans page à elle : classement, amis et
+ * statistiques ne se rejoignaient nulle part. Sur grand écran, un menu
+ * déroulant tenait lieu de sommaire ; sur téléphone, ces écrans n'existaient
+ * que dans le panneau « Menu », c'est-à-dire derrière un bouton qui ne dit pas
+ * ce qu'il contient.
+ *
+ * La correspondance, elle, est repartie dans « Jouer » : on ouvre cette
+ * boîte-là pour jouer son coup, pas pour prendre des nouvelles.
  *
  * Elle a maintenant sa page, comme les quatre autres, et la barre du bas y
  * mène directement : plus rien à déplier pour savoir ce qu'il y a dans
@@ -15,7 +18,7 @@
  */
 
 import Link from 'next/link'
-import { ArrowRight, BarChart3, Mail, Trophy, Users } from 'lucide-react'
+import { ArrowRight, BarChart3, Trophy, Users } from 'lucide-react'
 
 const ENTREES = [
   {
@@ -35,14 +38,6 @@ const ENTREES = [
     accent: 'var(--accent)',
   },
   {
-    href: '/correspondance',
-    icon: Mail,
-    titre: 'Correspondance',
-    phrase:
-      'Les parties qui durent — de un à quatorze jours par coup. On joue entre deux occupations, et c’est ici qu’on voit à qui c’est le tour.',
-    accent: 'var(--accent-3)',
-  },
-  {
     href: '/statistiques',
     icon: BarChart3,
     titre: 'Statistiques',
@@ -57,8 +52,8 @@ export default function CommunautePage() {
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:py-14">
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">Communauté</h1>
       <p className="mt-2 max-w-xl text-muted max-lg:text-[13px] max-lg:leading-relaxed">
-        Les autres joueurs, et ce que tu fais avec eux : se comparer, se retrouver, se défier sur
-        plusieurs jours.
+        Les autres joueurs, et ce que tu fais avec eux : se comparer, se retrouver, et regarder ce
+        que tes parties disent de ton jeu.
       </p>
 
       <div className="mt-6 grid gap-2 md:mt-8 md:grid-cols-2 md:gap-3">

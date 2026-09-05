@@ -124,6 +124,19 @@ export const SECTIONS: SectionNav[] = [
         icon: Users,
         hintKey: 'nav.localGameHint',
       },
+      // La boîte des correspondances, revenue dans « Jouer ».
+      //
+      // Elle avait été rangée dans « Communauté » au motif qu'elle concerne des
+      // gens plutôt qu'une façon de jouer. C'est vrai de la liste, et faux de
+      // ce qu'on vient y faire : on l'ouvre pour **jouer son coup**. Personne
+      // ne cherche « où en sont mes parties par correspondance ? » dans la même
+      // rubrique que le classement et le carnet d'adresses.
+      {
+        href: '/correspondance',
+        labelKey: 'nav.correspondence',
+        icon: Mail,
+        hintKey: 'nav.correspondenceHint',
+      },
       { href: '/tournois', labelKey: 'nav.tournaments', icon: Trophy },
       { href: '/jouer/regarder', labelKey: 'nav.watch', icon: Eye, hintKey: 'nav.watchHint' },
     ],
@@ -215,15 +228,6 @@ export const SECTIONS: SectionNav[] = [
     entrees: [
       { href: '/classement', labelKey: 'nav.leaderboard', icon: Trophy },
       { href: '/amis', labelKey: 'nav.friends', icon: Users },
-      // La boîte des correspondances : une liste d'obligations, pas un mode de
-      // jeu. Elle est ici parce qu'elle concerne des gens, pas une façon de
-      // jouer — et un compteur la signale dans l'en-tête quand c'est ton tour.
-      {
-        href: '/correspondance',
-        labelKey: 'nav.correspondence',
-        icon: Mail,
-        hintKey: 'nav.correspondenceHint',
-      },
       { href: '/statistiques', labelKey: 'nav.stats', icon: BarChart3 },
     ],
   },
@@ -244,7 +248,12 @@ export const SECTIONS: SectionNav[] = [
  * l'application sait faire se lit sur cinq onglets et cinq pages.
  */
 export const RACCOURCIS_MOBILES: EntreeNav[] = [
-  { href: '/jouer', labelKey: 'nav.play', icon: Swords },
+  {
+    href: '/jouer',
+    labelKey: 'nav.play',
+    icon: Swords,
+    actifSur: ['/correspondance', '/tournois', '/carriere'],
+  },
   { href: '/apprendre', labelKey: 'nav.learn', icon: GraduationCap },
   // « S'entraîner », et non plus « Puzzles ».
   //
@@ -260,7 +269,7 @@ export const RACCOURCIS_MOBILES: EntreeNav[] = [
     icon: Users,
     // Les quatre écrans de la rubrique s'atteignent aussi directement, depuis
     // un lien ou l'historique : l'onglet doit rester allumé sur chacun.
-    actifSur: ['/classement', '/amis', '/correspondance', '/statistiques'],
+    actifSur: ['/classement', '/amis', '/statistiques'],
   },
 ]
 

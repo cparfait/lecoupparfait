@@ -12,7 +12,16 @@
  */
 
 import Link from 'next/link'
-import { ArrowRight, Cpu, Eye, Footprints, MonitorSmartphone, Trophy, Users } from 'lucide-react'
+import {
+  ArrowRight,
+  Cpu,
+  Eye,
+  Footprints,
+  Mail,
+  MonitorSmartphone,
+  Trophy,
+  Users,
+} from 'lucide-react'
 import { BOT_PERSONALITIES } from '@coupparfait/core'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
@@ -32,6 +41,22 @@ const MODES = [
     titleKey: 'play.vsFriend',
     blurbKey: 'play.vsFriendBlurb',
     detail: 'De 15 secondes à 14 jours par coup · un lien, ou un ami',
+    accent: 'var(--accent-2)',
+  },
+  {
+    // La boîte des correspondances, revenue ici.
+    //
+    // Elle avait été rangée dans « Communauté » au motif qu'elle concerne des
+    // gens plutôt qu'une façon de jouer. C'est vrai de la liste, et faux de ce
+    // qu'on vient y faire : on l'ouvre pour jouer son coup. « Contre
+    // quelqu'un » propose bien la cadence longue, mais c'est l'écran qui
+    // *crée* une partie — celui-ci est l'endroit où l'on retrouve celles qui
+    // sont en cours.
+    href: '/correspondance',
+    icon: Mail,
+    titleKey: 'play.correspondence',
+    blurbKey: 'play.correspondenceBlurb',
+    detail: 'Un coup quand tu peux · de 1 à 14 jours par coup',
     accent: 'var(--accent-2)',
   },
   {
@@ -87,7 +112,7 @@ export default function PlayLobbyPage() {
         sur le même écran.
       </p>
 
-      {/* ── Les six portes ───────────────────────────────────────────────
+      {/* ── Les sept portes ───────────────────────────────────────────────
 
           Deux mises en page pour la même liste, et le partage se fait à `md`,
           là où la grille passe à trois colonnes.
@@ -96,14 +121,14 @@ export default function PlayLobbyPage() {
           et la ligne de détail en capitales. C'est une vitrine, on la parcourt
           du regard.
 
-          En dessous, les six cartes s'empilent — et une vitrine empilée
-          devient un couloir. Chacune faisait près de deux cents points de
-          haut : la carrière, en sixième position, se trouvait à trois écrans
-          de défilement de « Contre l'ordinateur ». On les remet donc en
-          rangées : icône à gauche, texte à droite, sans la ligne de détail.
-          Six rangées tiennent alors dans un écran et demi, et l'on voit qu'il
-          y a six façons de jouer — ce qui est la première chose que cet écran
-          a à dire. */}
+          En dessous, les cartes s'empilent — et une vitrine empilée devient un
+          couloir. Chacune faisait près de deux cents points de haut : la
+          carrière, en dernière position, se trouvait à trois écrans de
+          défilement de « Contre l'ordinateur ». On les remet donc en rangées :
+          icône à gauche, texte à droite, sans la ligne de détail. Sept rangées
+          tiennent alors dans un écran et demi, et l'on voit qu'il y a sept
+          façons de jouer — ce qui est la première chose que cet écran a à
+          dire. */}
       <div className="mt-6 grid gap-2 md:mt-8 md:gap-3 md:grid-cols-3">
         {MODES.map(({ href, icon: Icon, titleKey, blurbKey, detail, accent }, index) => (
           <Link
