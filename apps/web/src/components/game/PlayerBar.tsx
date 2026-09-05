@@ -115,7 +115,13 @@ export const PlayerBar = memo(function PlayerBar({
     <div
       className={clsx(
         'relative flex items-center gap-2.5 overflow-hidden rounded-[var(--radius-sm)] px-2 py-1.5 ring-1 ring-inset transition-colors',
-        active ? 'bg-surface-strong ring-accent/45' : 'bg-surface/60 ring-line',
+        // La matière des surfaces qui se posent sur la page, et non un voile :
+        // `--surface` est un blanc à 4,5 %, invisible sur un fond sombre. Le
+        // bandeau du joueur au trait prend en plus une pointe d'accent dans son
+        // fond et un liseré franc — il doit se repérer sans être cherché.
+        active
+          ? 'bg-[color-mix(in_oklab,var(--accent)_14%,var(--flottant))] ring-accent/70'
+          : 'bg-[var(--flottant)] ring-line-strong',
         className,
       )}
     >

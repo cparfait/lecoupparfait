@@ -9,7 +9,7 @@
  * sous-promotion existe et peut être décisive.
  */
 
-import { useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { useDialogue } from '@/lib/useDialogue.ts'
 import { pieceUrl, squarePosition } from './boardKit.ts'
@@ -19,6 +19,26 @@ import { pieceUrl, squarePosition } from './boardKit.ts'
   est ce qui coûte le plus cher au GPU d'un téléphone, et il s'appliquait ici
   à un plateau entier au moment précis où l'on doit choisir vite.
 */
+
+/**
+ * Le temps pendant lequel on ignore ce qu'on nous dit.
+ *
+ * Sur un écran tactile, le geste qui ouvre ce menu le referme aussitôt. Le pion
+ * est lâché sur la case de promotion ; le menu s'ouvre **sous le doigt**, la
+ * dame pile sur cette case puisqu'elle est en tête de liste ; et le navigateur
+ * envoie ensuite, pour compatibilité, la volée d'événements de souris — dont un
+ * `click` — au même endroit. Ce clic-là tombe sur la dame fraîchement montée.
+ *
+ * Vu du joueur : on promeut, rien ne s'affiche, et l'on récupère une dame. La
+ * sous-promotion était donc impossible au doigt, sans que rien ne l'explique.
+ * Le même clic tombant à côté du menu déclenchait l'annulation, et le coup
+ * était perdu.
+ *
+ * Trois cent vingt millisecondes couvrent le délai de compatibilité des
+ * navigateurs (300 ms) avec une marge. Personne ne choisit sa pièce en moins de
+ * temps que ça : le menu vient d'apparaître, il faut d'abord le voir.
+ */
+const DELAI_DE_GARDE_MS = 320
 
 const CHOICES: Array<{ type: PieceSymbol; labelFr: string }> = [
   { type: 'q', labelFr: 'Dame' },
@@ -69,6 +89,29 @@ export function PromotionPicker({
   const boite = useRef<HTMLDivElement>(null)
   useDialogue(boite, { onFermer: onCancel })
 
+  /*
+    On ignore le clic qui appartient au geste d'ouverture — voir
+    `DELAI_DE_GARDE_MS`. Le garde vaut pour le choix comme pour l'annulation :
+    les deux se déclenchaient tout seuls, et perdre le coup est encore pire que
+    recevoir une dame qu'on n'a pas demandée.
+
+    Une référence et non un état : ce compte à rebours ne redessine rien, et le
+    relire à chaque rendu ferait repartir la fenêtre à zéro.
+  */
+  const ouvertA = useRef(Date.now())
+  const tropTot = () => Date.now() - ouvertA.current < DELAI_DE_GARDE_MS
+  const choisir = useCallback(
+    (type: PieceSymbol) => {
+      if (tropTot()) return
+      onSelect(type)
+    },
+    [onSelect],
+  )
+  const annuler = useCallback(() => {
+    if (tropTot()) return
+    onCancel()
+  }, [onCancel])
+
   const { left, top } = squarePosition(square, orientation)
   // Le menu se déroule vers le bas s'il y a la place, vers le haut sinon.
   const downwards = top < 50
@@ -77,7 +120,7 @@ export function PromotionPicker({
     return (
       <div
         className="absolute inset-0 z-50 grid place-items-center"
-        onClick={onCancel}
+        onClick={annuler}
         onContextMenu={(event) => {
           event.preventDefault()
           onCancel()
@@ -99,7 +142,7 @@ export function PromotionPicker({
               type="button"
               title={labelFr}
               aria-label={labelFr}
-              onClick={() => onSelect(type)}
+              onClick={() => choisir(type)}
               className="group grid h-16 w-16 place-items-center rounded-[var(--radius-sm)] border border-line-strong bg-bg-elev transition-transform hover:scale-105 hover:bg-surface-strong focus-visible:scale-105"
               style={{
                 animation: `slide-up .18s cubic-bezier(.16,1,.3,1) ${index * 35}ms both`,
@@ -121,7 +164,7 @@ export function PromotionPicker({
   return (
     <div
       className="absolute inset-0 z-50"
-      onClick={onCancel}
+      onClick={annuler}
       onContextMenu={(event) => {
         event.preventDefault()
         onCancel()
@@ -150,7 +193,7 @@ export function PromotionPicker({
             type="button"
             title={labelFr}
             aria-label={labelFr}
-            onClick={() => onSelect(type)}
+            onClick={() => choisir(type)}
             className="group relative aspect-square w-full transition-transform hover:scale-105 focus-visible:scale-105"
             style={{
               animation: `slide-up .18s cubic-bezier(.16,1,.3,1) ${index * 35}ms both`,
