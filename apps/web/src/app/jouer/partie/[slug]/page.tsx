@@ -26,6 +26,7 @@ import {
   Send,
   Swords,
   WifiOff,
+  X,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { Chess } from 'chess.js'
@@ -57,6 +58,7 @@ import { usePreferences } from '@/lib/store/preferences.ts'
 import type { ChatMessage } from '@/lib/game/useLiveGame.ts'
 import { toPlayedMove, type PlayedMove } from '@/lib/game/useChessGame.ts'
 import { useLegalMoves } from '@/lib/game/useLegalMoves.ts'
+import { useDialogue } from '@/lib/useDialogue.ts'
 
 /**
  * De quoi reconnaître un message parmi les autres.
@@ -286,32 +288,30 @@ export default function LiveGamePage() {
   }, [chat, chatOpen])
 
   /**
-   * Ouvrir le tchat doit *emmener* au tchat.
+   * Sur téléphone, le tchat s'ouvre **par-dessus** la partie.
    *
-   * Sur téléphone, le bouton « Tchat » se trouve dans la barre d'actions,
-   * juste sous l'échiquier ; le panneau qu'il déplie est tout en bas de la
-   * colonne, derrière la liste des coups. On appuyait, rien ne semblait se
-   * passer — le panneau s'ouvrait bien, à un écran et demi plus bas. Il faut
-   * donc y aller, et poser le curseur dans la zone de saisie : on appuie sur
-   * « Tchat » pour écrire, pas pour relire.
+   * Il était un bloc de plus au bas de la colonne, derrière la liste des
+   * coups : on appuyait sur « Tchat », rien ne semblait se passer, et le
+   * panneau s'ouvrait bien — à un écran et demi plus bas. On rattrapait cela
+   * en faisant défiler la page jusqu'à lui, ce qui emmenait l'échiquier hors
+   * de l'écran : pour écrire un mot, on perdait la partie de vue.
    *
-   * Sur grand écran, le panneau est déjà là en permanence et le bouton
-   * n'existe pas : rien à faire défiler.
+   * Une conversation pendant une partie est une surcouche, pas une section :
+   * elle vient devant, elle se referme, et l'échiquier reste là-dessous.
+   * `useDialogue` fournit ce qu'on attend d'une surcouche — Échap, le focus
+   * posé dans la saisie, le piège à tabulation, et le focus rendu en partant.
+   *
+   * Sur grand écran, rien ne change : le panneau vit dans la colonne, en
+   * permanence, et le bouton « Tchat » n'existe pas.
    */
-  const cadreDuChat = useRef<HTMLElement>(null)
+  const cadreDuChat = useRef<HTMLDivElement>(null)
   const saisieDuChat = useRef<HTMLInputElement>(null)
-  useEffect(() => {
-    if (!chatOpen || grandEcran) return
-    // Après le rendu qui l'affiche : avant, le cadre est encore `hidden` et
-    // n'a donc aucune position à rejoindre.
-    const image = requestAnimationFrame(() => {
-      cadreDuChat.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      // `preventScroll` : le défilement est déjà en cours, et le focus le
-      // ferait sauter à la fin d'un coup sec.
-      saisieDuChat.current?.focus({ preventScroll: true })
-    })
-    return () => cancelAnimationFrame(image)
-  }, [chatOpen, grandEcran])
+  const tchatEnSurcouche = chatOpen && !grandEcran
+  useDialogue(cadreDuChat, {
+    onFermer: () => setChatOpen(false),
+    focusInitial: saisieDuChat,
+    actif: tchatEnSurcouche,
+  })
 
   // ── Coups légaux ────────────────────────────────────────────────────────
   // Hors de son tour, aucun : le serveur reste maître, mais autant ne pas
@@ -819,15 +819,55 @@ export default function LiveGamePage() {
             moitié pour la saisie — il restait une ligne de messages, ce qui
             n'est plus un tchat mais une fente.
           */}
-          <Card
+          {/* Le voile, sous la surcouche : il dit que le reste attend, et un
+              geste à côté referme — c'est le réflexe devant tout ce qui
+              s'ouvre par-dessus. */}
+          {tchatEnSurcouche && (
+            <div
+              className="fixed inset-0 z-[80] bg-black/45 lg:hidden"
+              onClick={() => setChatOpen(false)}
+              aria-hidden
+            />
+          )}
+          {/* Un `div` et non une `Card` : la surcouche porte `role="dialog"` et
+              son étiquette, que la carte partagée n'a pas à connaître. Elle
+              garde son habillage, qui tient dans une classe. */}
+          <div
             ref={cadreDuChat}
+            role={tchatEnSurcouche ? 'dialog' : undefined}
+            aria-modal={tchatEnSurcouche ? true : undefined}
+            aria-label={tchatEnSurcouche ? 'Tchat de la partie' : undefined}
             className={clsx(
-              'flex h-56 shrink-0 flex-col overflow-hidden',
+              'flex flex-col overflow-hidden',
+              // `popover` et non `glass` en surcouche : le verre est un voile à
+              // 4,5 % d'opacité, fait pour laisser deviner la page qu'il
+              // recouvre. Posé sur un échiquier, il laissait passer les pièces
+              // au travers des messages. Une surface qui recouvre est opaque.
+              tchatEnSurcouche
+                ? 'popover animate-slide-up fixed inset-x-3 bottom-3 z-[81] h-[60dvh] shadow-[var(--shadow-lg)]'
+                : 'glass h-56 shrink-0',
               // Le bouton « Tchat » ne commande plus que le tchat : c'est ce
               // qu'il annonce, et la liste des coups n'a plus à en dépendre.
               !chatOpen && 'max-lg:hidden',
             )}
           >
+            {/* L'en-tête n'existe que dans la surcouche : dans la colonne, le
+                tchat est bordé par ses voisins et n'a rien à annoncer. */}
+            {tchatEnSurcouche && (
+              <div className="flex items-center justify-between border-b border-line/60 px-3 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
+                  Tchat
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setChatOpen(false)}
+                  className="rounded p-1 text-faint transition-colors hover:text-ink"
+                  aria-label="Fermer le tchat"
+                >
+                  <X size={16} aria-hidden />
+                </button>
+              </div>
+            )}
             <div
               ref={filDuChat}
               className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3 text-[13px]"
@@ -869,7 +909,7 @@ export default function LiveGamePage() {
                 <Send size={13} aria-hidden />
               </Button>
             </form>
-          </Card>
+          </div>
         </div>
       </div>
 
