@@ -134,8 +134,32 @@ export type RoomEvent =
   | { type: 'takebackRequest'; from: Color }
   | { type: 'error'; message: string }
 
-/** Délai après lequel un joueur déconnecté perd la partie. */
+/**
+ * Délai après lequel un joueur déconnecté perd la partie.
+ *
+ * Soixante secondes, et **seulement pendant que l'adversaire attend** : voir
+ * `delaiAbandon` et le veilleur plus bas. Ce plancher vaut pour le blitz, où
+ * une minute d'absence est déjà une éternité pour celui qui est resté devant
+ * l'échiquier.
+ */
 const ABANDON_DELAY_MS = 60_000
+
+/**
+ * Le même délai, mais proportionné à la cadence.
+ *
+ * Une minute est juste en blitz et absurde ailleurs : sur une partie de trente
+ * minutes, on va chercher un café et l'on revient à une défaite par abandon.
+ * Sur une partie sans limite — celle qu'on joue justement en plusieurs fois —
+ * c'était pire encore : fermer l'onglet, c'était perdre.
+ *
+ * La règle : la moitié du temps initial, entre une minute et un quart d'heure.
+ * Une cadence sans limite prend le plafond.
+ */
+function delaiAbandon(tc: TimeControl): number {
+  const PLAFOND = 15 * 60_000
+  if (tc.initial <= 0) return PLAFOND
+  return Math.min(PLAFOND, Math.max(ABANDON_DELAY_MS, (tc.initial * 1000) / 2))
+}
 
 /**
  * Délai au bout duquel une partie où personne n'a joué s'annule.
@@ -610,11 +634,27 @@ export class GameRoom {
         return
       }
 
-      // Abandon pour déconnexion prolongée.
+      /*
+        Abandon pour déconnexion prolongée — et seulement si quelqu'un attend.
+
+        Le compte à rebours tournait dès qu'un joueur se déconnectait, quoi que
+        fasse l'autre. Fermer l'application une minute suffisait donc à perdre
+        une partie que personne n'était en train d'attendre : les deux joueurs
+        partis, la partie se soldait quand même par un abandon, et il n'y avait
+        aucun moyen d'y revenir. C'est le contraire de ce qu'un abandon
+        automatique existe pour faire — il protège **celui qui reste**, il ne
+        punit pas celui qui s'absente.
+
+        Trois conditions, donc : le joueur est parti, l'adversaire est là, et
+        le délai de la cadence est passé.
+      */
+      const limite = delaiAbandon(this.timeControl)
       for (const color of ['w', 'b'] as const) {
         const player = this.players[color]
         if (!player || player.connected || player.disconnectedAt === null) continue
-        if (now - player.disconnectedAt > ABANDON_DELAY_MS) {
+        const adverse = this.players[color === 'w' ? 'b' : 'w']
+        if (!adverse?.connected) continue
+        if (now - player.disconnectedAt > limite) {
           // Une partie sans le moindre coup ne se gagne pas : elle s'annule.
           // Autrement, quelqu'un qui ouvre un lien puis referme son onglet
           // offrait une « Victoire ! » sur zéro demi-coup — et, en partie

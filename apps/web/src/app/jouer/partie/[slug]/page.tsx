@@ -10,7 +10,8 @@
  * Un point d'attention particulier : la **reconnexion**. Une partie d'échecs
  * dure plusieurs minutes, un téléphone passe du Wi-Fi à la 4G, un onglet se met
  * en veille. La bannière de connexion est donc toujours visible quand quelque
- * chose ne va pas, et le serveur garde la place du joueur pendant une minute.
+ * chose ne va pas, et le serveur garde la place du joueur tant que personne ne
+ * l'attend.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -159,7 +160,8 @@ export default function LiveGamePage() {
     Une partie en direct n'existe qu'en mémoire du serveur : rien ne permet de
     la retrouver depuis un autre écran, et quelqu'un qui quittait l'onglet
     n'avait plus que son historique de navigation — ou la conversation où le
-    lien avait été reçu. Le siège, lui, reste gardé une minute : le retour est
+    lien avait été reçu. Le siège, lui, reste gardé tant que l'adversaire
+    n'attend pas devant l'échiquier : le retour est
     donc possible, il n'était simplement pas trouvable.
 
     Réservé à qui joue : un spectateur n'a pas de partie à reprendre. Et effacé
@@ -545,7 +547,8 @@ export default function LiveGamePage() {
       {connection === 'disconnected' && (
         <div className="mb-3 flex items-center gap-2 rounded-[var(--radius-sm)] bg-[color-mix(in_oklab,var(--q-inaccuracy)_16%,transparent)] px-3 py-2 text-sm text-[var(--q-inaccuracy)]">
           <Loader2 size={14} className="animate-spin" aria-hidden />
-          Connexion perdue — reconnexion en cours. Ta place est gardée une minute.
+          Connexion perdue — reconnexion en cours. Ta place est gardée : tu ne perds la partie que
+          si ton adversaire attend, et pas avant la moitié de la cadence.
         </div>
       )}
 

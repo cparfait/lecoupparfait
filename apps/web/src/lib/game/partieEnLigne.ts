@@ -22,19 +22,24 @@
 
 import { useEffect, useState } from 'react'
 
-/** Le siège est perdu au bout d'une minute de déconnexion : voir `gameRoom`. */
 const CLE = 'coupparfait.partieEnLigne'
 
 /**
  * Au-delà, on n'en parle plus.
  *
- * Le serveur déclare forfait après une minute d'absence, mais une partie
- * abandonnée par les *deux* joueurs peut survivre bien plus longtemps sans que
- * personne ne la termine. Un quart d'heure est le compromis : assez pour un
- * onglet refermé et rouvert, trop peu pour reproposer demain matin une partie
- * de la veille.
+ * Un quart d'heure ne suffisait plus. Le serveur ne déclare forfait que si
+ * l'adversaire attend devant l'échiquier — voir `gameRoom` : une partie que les
+ * deux joueurs ont quittée reste donc jouable, parfois des heures, et le
+ * souvenir local expirait bien avant elle. On fermait l'application, on
+ * revenait le soir, et le seul chemin vers une partie encore vivante avait
+ * disparu.
+ *
+ * Douze heures : assez pour reprendre une partie entamée le matin, trop peu
+ * pour proposer la semaine prochaine une partie que tout le monde a oubliée.
+ * L'accueil, lui, ne dépend pas de ce souvenir — il demande au serveur ce qui
+ * m'attend vraiment.
  */
-const PEREMPTION_MS = 15 * 60 * 1000
+const PEREMPTION_MS = 12 * 60 * 60 * 1000
 
 export interface PartieEnLigne {
   slug: string

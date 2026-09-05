@@ -6,13 +6,15 @@
  * Le pendant du souvenir posé dans `partieEnLigne.ts`. Quitter une partie en
  * direct n'a rien d'exceptionnel — un lien touché par mégarde dans le tchat, un
  * retour arrière, une notification qu'on ouvre — et jusqu'ici on ne revenait
- * qu'en retrouvant l'adresse soi-même. Le serveur, lui, garde la place une
- * minute : c'est court, et c'est précisément pour cela que le chemin du retour
- * doit être immédiat plutôt que caché.
+ * qu'en retrouvant l'adresse soi-même.
  *
- * Il apparaît sans délai, contrairement au bandeau de mise en route : une
- * minute est déjà courte, et l'on n'attend pas trois secondes pour signaler à
- * quelqu'un que son adversaire est en train de patienter.
+ * Le serveur garde désormais la place tant que **personne n'attend** : le
+ * compte à rebours d'abandon ne tourne que si l'adversaire est là, et il dure
+ * la moitié de la cadence plutôt qu'une minute fixe. On peut donc sortir de
+ * l'application et revenir — la partie est aussi rappelée sur l'accueil.
+ *
+ * Le bandeau, lui, apparaît sans délai : quand l'adversaire est en train de
+ * patienter, on ne le signale pas trois secondes plus tard.
  */
 
 import Link from 'next/link'
