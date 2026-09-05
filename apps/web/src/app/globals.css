@@ -446,8 +446,23 @@
    BASE
    ═══════════════════════════════════════════════════════════════════════════ */
 
-* {
-  border-color: var(--border);
+/*
+ * La couleur de bord par défaut — et elle doit rester un défaut.
+ *
+ * Écrite hors de toute couche, cette règle universelle **battait toutes les
+ * autres** : une déclaration sans couche l'emporte sur n'importe quelle couche,
+ * quelle que soit la spécificité. Le sélecteur `*` gagnait donc contre
+ * `.popover`, et chaque surface flottante — menus, boîte de fin de partie,
+ * tchat, explications — reprenait le liseré à 9 % de blanc au lieu du sien.
+ * On croyait poser un contour franc, et l'on reposait le contour discret.
+ *
+ * Rangée dans `base`, elle redevient ce qu'elle est : le repli de ceux qui ne
+ * demandent rien.
+ */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
 }
 
 html {
@@ -664,7 +679,15 @@ button.glass:hover {
  */
 @utility popover {
   background: var(--flottant);
-  border: 1px solid var(--border-strong);
+  /* Le contour, et pas seulement l'ombre.
+
+     `--border-strong` vaut 17 % de blanc sur le thème sombre : à un pixel, sur
+     une boîte de la taille d'une fenêtre, cela ne dessine plus un bord mais un
+     souvenir de bord. La boîte de fin de partie flottait ainsi au milieu de
+     l'échiquier sans qu'on voie où elle commençait. Le contour se prend donc
+     sur la couleur du texte — le seul repère qui reste franc dans les quatre
+     thèmes, clair compris, où il devient une encre sur du blanc. */
+  border: 1px solid color-mix(in oklab, var(--text) 26%, transparent);
   border-radius: var(--radius);
   /* L'ombre était laissée à l'appelant, et la moitié l'oubliait : un panneau
      sans ombre sur un fond presque de la même couleur ne flotte pas, il se
