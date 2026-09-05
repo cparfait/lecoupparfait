@@ -9,7 +9,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Analyse partagée',
+  title: 'Une partie analysée',
   robots: { index: false, follow: false },
 }
 

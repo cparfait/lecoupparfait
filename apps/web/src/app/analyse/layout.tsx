@@ -10,7 +10,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Analyse',
+  title: 'Analyser une partie',
   description: 'Rejoue une partie coup par coup, avec l’explication de chaque erreur.',
 }
 

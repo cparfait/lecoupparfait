@@ -1,16 +1,32 @@
 /**
- * Titre de l'onglet pour profil.
+ * Titre de l'onglet d'un profil — le pseudo, et non le mot « Profil ».
  *
- * Une mise en page serveur d'une ligne, et rien d'autre : la page est un
- * composant client, elle ne peut donc pas exporter `metadata` elle-même. Le
- * suffixe « · Le Coup Parfait » est posé par `title.template` de la mise en
- * page racine.
+ * Il valait « Profil » pour tout le monde : on ouvrait trois profils dans trois
+ * onglets pour comparer des classements, et les trois portaient le même nom.
+ *
+ * Le pseudo vient de l'adresse et non de la base : ce titre se calcule à chaque
+ * requête, et interroger la base pour une casse de lettres coûterait un
+ * aller-retour à chaque ouverture de profil. Un pseudo qui n'existe pas donne
+ * un onglet qui annonce un joueur introuvable, ce que la page dit aussi.
+ *
+ * Une mise en page serveur, comme les autres : la page est un composant client
+ * et ne peut pas produire ses propres métadonnées.
  */
 
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'Profil',
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string }>
+}): Promise<Metadata> {
+  const { username } = await params
+  const pseudo = decodeURIComponent(username)
+
+  return {
+    title: pseudo,
+    description: `Classements, progression et dernières parties de ${pseudo}.`,
+  }
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

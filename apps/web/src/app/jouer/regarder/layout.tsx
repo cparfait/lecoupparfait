@@ -10,7 +10,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Regarder',
+  title: 'Regarder une partie',
   description: 'Les parties en cours sur cette instance.',
 }
 

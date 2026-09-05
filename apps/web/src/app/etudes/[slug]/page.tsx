@@ -27,6 +27,7 @@ import { GameNav } from '@/components/game/GameNav.tsx'
 import { Button, Card, EmptyState, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useSan } from '@/lib/notation.ts'
+import { useTitreDeLOnglet } from '@/lib/titreOnglet.ts'
 
 interface Chapter {
   id: string
@@ -72,6 +73,10 @@ export default function StudyPage() {
       })
       .catch(() => setStudy(null))
   }, [slug])
+
+  // L'onglet prend le nom de l'étude dès qu'on le connaît : « Étude » ne
+  // distingue pas deux onglets ouverts côte à côte, ni un signet d'un autre.
+  useTitreDeLOnglet(study?.title)
 
   const chapter = study?.chapters.find((entry) => entry.id === chapterId) ?? null
 
