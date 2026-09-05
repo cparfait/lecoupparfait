@@ -27,11 +27,9 @@ import {
   House,
   Info,
   Lock,
-  Menu as MenuIcon,
   Scale,
   Settings,
   ShieldCheck,
-  X,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { AccountButton } from '@/components/layout/AccountButton.tsx'
@@ -65,7 +63,6 @@ type Intercepteur = (href: string) => AvantageCompte | null
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const t = useT()
-  const [menuOpen, setMenuOpen] = useState(false)
   const identite = useIdentite()
   const estAdmin = useEstAdmin()
   const [porte, setPorte] = useState<{ avantage: AvantageCompte; href: string } | null>(null)
@@ -75,23 +72,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     [identite],
   )
 
-  /**
-   * Ouvrir la boîte referme le menu qui l'a déclenchée.
-   *
-   * Sur téléphone le menu occupe tout l'écran : sans cela il restait déroulé
-   * derrière la boîte, et l'on refermait la boîte pour retomber sur une liste
-   * qu'on croyait avoir quittée. Le clic est consommé par l'explication, il ne
-   * doit pas laisser le menu ouvert dans son dos.
-   */
   const ouvrirPorte = useCallback((demande: { avantage: AvantageCompte; href: string }) => {
-    setMenuOpen(false)
     setPorte(demande)
   }, [])
 
-  // Toute navigation referme le menu : sinon il resterait ouvert par-dessus la
-  // nouvelle page.
-  useEffect(() => setMenuOpen(false), [pathname])
-  // Et la boîte, pour la même raison : « Voir quand même » navigue, la boîte
+  // Toute navigation referme la boîte : « Voir quand même » navigue, et elle
   // n'a plus rien à dire sur la page où l'on vient d'arriver.
   useEffect(() => setPorte(null), [pathname])
 
@@ -240,32 +225,42 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Settings size={17} aria-hidden />
             </Link>
             <AccountButton />
-            {/* Le hamburger n'est plus dans la barre du haut.
+            {/* ── En paysage, les rubriques à la place du hamburger ─────
+                La barre du bas s'efface en paysage pour rendre sa hauteur à
+                l'échiquier, et c'est ce qui faisait vivre le bouton hamburger :
+                sans lui, il n'y avait plus de sortie. Mais un bouton nommé
+                « Menu » n'annonce rien de ce qu'il contient — on le déplie pour
+                *voir*, ce qui est exactement le geste qu'une navigation doit
+                éviter de demander.
 
-                Il ouvrait exactement le même panneau que « Menu », en bas à
-                droite : deux boutons pour une seule chose, l'un sous le pouce,
-                l'autre à l'opposé de l'écran, en haut à droite — le coin le
-                plus difficile à atteindre d'une main. Sur un téléphone, la
-                navigation se tient en bas.
-
-                Il ne survit qu'en paysage, où la barre du bas s'efface pour
-                rendre sa hauteur à l'échiquier : sans lui, il n'y aurait plus
-                aucune porte de sortie. */}
-            <button
-              type="button"
-              onClick={() => setMenuOpen((open) => !open)}
-              className="hidden h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt max-lg:paysage:grid"
-              aria-label={t('nav.menu')}
-              aria-expanded={menuOpen}
-            >
-              {menuOpen ? <X size={18} aria-hidden /> : <MenuIcon size={18} aria-hidden />}
-            </button>
+                Les cinq rubriques tiennent en icônes, à même la barre. Elles
+                sont nommées pour les lecteurs d'écran et par leur infobulle,
+                et l'on voit d'un coup d'œil laquelle est ouverte. Rien n'est
+                plus replié nulle part. */}
+            <nav className="hidden items-center gap-0.5 max-lg:paysage:flex" aria-label="Rubriques">
+              {SECTIONS.map((section) => {
+                if (!section.sommaire) return null
+                const Icone = section.icon
+                const active = sectionActive(section, pathname)
+                return (
+                  <Link
+                    key={section.id}
+                    href={section.sommaire}
+                    aria-current={active ? 'page' : undefined}
+                    aria-label={t(section.labelKey)}
+                    title={t(section.labelKey)}
+                    className={clsx(
+                      'grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] transition-colors cible-doigt',
+                      active ? 'bg-accent/20 text-accent' : 'text-muted hover:bg-surface-hover',
+                    )}
+                  >
+                    <Icone size={17} aria-hidden />
+                  </Link>
+                )
+              })}
+            </nav>
           </div>
         </div>
-
-        {menuOpen && (
-          <MobileMenu pathname={pathname} intercepter={intercepter} onPorte={ouvrirPorte} />
-        )}
       </header>
 
       {/* Hors de l'en-tête : la boîte se superpose à toute la page, et un
@@ -313,13 +308,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {!immersive && <MiseEnRoute />}
 
       {/* ── Barre inférieure mobile ──────────────────────────────────── */}
-      {!immersive && (
-        <BottomBar
-          pathname={pathname}
-          menuOpen={menuOpen}
-          onToggleMenu={() => setMenuOpen((open) => !open)}
-        />
-      )}
+      {!immersive && <BottomBar pathname={pathname} />}
 
       {/* Pas de pied de page sur un écran de partie.
           L'écran de jeu est calibré pour tenir exactement dans la fenêtre :
@@ -511,135 +500,25 @@ function MenuSection({
 //  Navigation sur mobile
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Menu mobile : les cinq rubriques et leur contenu, comme sur grand écran.
- *
- * Il n'a longtemps montré que « Communauté » et les pages de l'application, au
- * motif que la barre du bas conduit aux quatre autres rubriques et que chaque
- * page de rubrique montre ce qu'elle contient. C'était vrai des destinations et
- * faux de l'usage : sur grand écran, cinq menus déroulants donnent la carte
- * complète du site d'un coup d'œil — trente entrées, nommées et expliquées —
- * alors que le téléphone n'en voyait que cinq, et devait ouvrir une rubrique
- * pour découvrir ce qu'il y avait dedans. Deux gestes au lieu d'un, et rien
- * qui dise ce qui existe.
- *
- * Le menu porte donc **les mêmes entrées que les panneaux du haut**, dans le
- * même ordre, lues au même endroit (`SECTIONS`). Chaque rubrique garde son
- * titre — cliquable quand elle a une page-sommaire, exactement comme l'en-tête
- * du panneau déroulant — puis ses entrées en deux colonnes, à taille de doigt.
- *
- * S'y ajoute **l'application elle-même** — préférences, à propos, crédits —,
- * jusqu'ici reléguée dans un pied de page qui ne s'affiche qu'à partir de
- * `lg` : trois écrans qu'un téléphone ne pouvait pas atteindre.
- */
-function MobileMenu({
-  pathname,
-  intercepter,
-  onPorte,
-}: {
-  pathname: string
-  intercepter: Intercepteur
-  onPorte: (porte: { avantage: AvantageCompte; href: string }) => void
-}) {
-  const t = useT()
+/*
+  Il n'y a plus de panneau à déplier.
 
-  return (
-    <div className="animate-slide-up max-h-[70dvh] overflow-y-auto border-t border-line bg-[var(--bg-elev)] lg:hidden">
-      <nav className="space-y-2 p-3" aria-label="Navigation">
-        {SECTIONS.map((section) => {
-          const Icone = section.icon
-          const active = sectionActive(section, pathname)
+  Le menu mobile a existé sous trois formes : les trente entrées de la
+  navigation, puis les seules rubriques sans page, puis de nouveau les trente.
+  Les trois avaient le même défaut, et c'est celui du bouton qui les ouvrait :
+  « Menu » n'annonce rien de ce qu'il contient. On le déplie pour *voir* — donc
+  pour savoir ce que l'application sait faire, il fallait d'abord faire un geste
+  qui ne promettait rien.
 
-          return (
-            <div
-              key={section.id}
-              className={clsx(
-                'rounded-[var(--radius-sm)] bg-surface/70 p-2.5',
-                active && 'ring-1 ring-inset ring-accent/40',
-              )}
-            >
-              {/*
-                Le titre de la rubrique, et il conduit quelque part quand la
-                rubrique a une page — exactement comme l'en-tête du panneau
-                déroulant sur grand écran. « Communauté » est la seule sans
-                page-sommaire : son titre reste un titre.
-              */}
-              {section.sommaire ? (
-                <Link
-                  href={section.sommaire}
-                  className="mb-1.5 flex min-h-9 items-center gap-2 rounded-[var(--radius-sm)] px-0.5 text-[11px] font-semibold uppercase tracking-wide transition-colors hover:bg-surface-hover"
-                  style={{ color: section.teinte }}
-                >
-                  <Icone size={12} aria-hidden />
-                  {t(section.labelKey)}
-                  <ChevronRight size={13} className="ml-auto" aria-hidden />
-                </Link>
-              ) : (
-                <p
-                  className="mb-1.5 flex items-center gap-2 px-0.5 text-[11px] font-semibold uppercase tracking-wide"
-                  style={{ color: section.teinte }}
-                >
-                  <Icone size={12} aria-hidden />
-                  {t(section.labelKey)}
-                </p>
-              )}
+  Les cinq rubriques tiennent dans la barre du bas, « Communauté » comprise
+  depuis qu'elle a sa page. Chacune montre son contenu en grand, à taille de
+  doigt, avec une phrase par destination — c'est ce que le panneau essayait de
+  faire en petit. En paysage, où la barre s'efface pour rendre sa hauteur à
+  l'échiquier, les cinq rubriques passent en icônes dans l'en-tête : voir plus
+  haut.
+*/
 
-              <div className="grid grid-cols-2 gap-1.5">
-                {section.entrees.map((entree) => {
-                  const IconeEntree = entree.icon
-                  const reservee = intercepter(entree.href)
-                  return (
-                    <Link
-                      key={entree.href}
-                      href={entree.href}
-                      onClick={(event) => {
-                        if (!reservee) return
-                        event.preventDefault()
-                        onPorte({ avantage: reservee, href: entree.href })
-                      }}
-                      className="flex min-h-11 items-center gap-2 rounded-[var(--radius-sm)] bg-bg-elev px-2.5 text-sm font-medium text-ink"
-                    >
-                      <IconeEntree
-                        size={15}
-                        className="shrink-0"
-                        style={{ color: section.teinte }}
-                        aria-hidden
-                      />
-                      <span className="min-w-0 flex-1 truncate">{t(entree.labelKey)}</span>
-                      {reservee && (
-                        <Lock
-                          size={11}
-                          className="shrink-0 text-faint"
-                          aria-label="demande un compte"
-                        />
-                      )}
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-          )
-        })}
-
-        {/* Les pages de l'application — préférences, à propos, crédits,
-            administration — ne sont plus ici : elles sont sous le nom du site,
-            en haut à gauche, sur les deux tailles d'écran. Les répéter au fond
-            de ce panneau en ferait le seul endroit qu'on pense à ouvrir, et le
-            nom du site resterait ce mot qu'on ne sait pas cliquable. */}
-      </nav>
-    </div>
-  )
-}
-
-function BottomBar({
-  pathname,
-  menuOpen,
-  onToggleMenu,
-}: {
-  pathname: string
-  menuOpen: boolean
-  onToggleMenu: () => void
-}) {
+function BottomBar({ pathname }: { pathname: string }) {
   const t = useT()
 
   return (
@@ -700,44 +579,6 @@ function BottomBar({
             </Link>
           )
         })}
-
-        {/* Cinquième place : le reste de l'application.
-            Sans ce bouton, la barre inférieure laissait croire qu'elle était
-            toute la navigation mobile — le reste ne s'atteignait que par
-            l'icône hamburger de l'en-tête, que personne ne va chercher quand
-            une barre d'onglets est déjà sous le pouce. */}
-        <button
-          type="button"
-          onClick={onToggleMenu}
-          aria-expanded={menuOpen}
-          className={clsx(
-            'flex min-w-0 flex-1 flex-col items-center gap-1 rounded-[var(--radius-sm)] px-1 pb-1.5 pt-1 transition-colors',
-            menuOpen ? 'text-accent' : 'text-muted',
-          )}
-        >
-          {/* Même traitement que les quatre autres : le menu ouvert est un
-              état, il doit se voir comme tel. */}
-          <span
-            className={clsx(
-              'grid h-7 w-12 place-items-center rounded-full transition-all',
-              menuOpen && 'bg-accent/20 shadow-[0_0_16px_-4px_var(--accent)]',
-            )}
-          >
-            {menuOpen ? (
-              <X size={20} strokeWidth={2.5} aria-hidden />
-            ) : (
-              <MenuIcon size={20} strokeWidth={2} aria-hidden />
-            )}
-          </span>
-          <span
-            className={clsx(
-              'truncate text-[10px] leading-none',
-              menuOpen ? 'font-bold' : 'font-medium',
-            )}
-          >
-            {t('nav.menu')}
-          </span>
-        </button>
       </div>
     </nav>
   )

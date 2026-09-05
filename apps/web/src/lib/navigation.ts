@@ -207,6 +207,11 @@ export const SECTIONS: SectionNav[] = [
     teinte: 'var(--accent-2)',
     labelKey: 'nav.community',
     icon: Users,
+    // La seule rubrique qui n'avait pas de page à elle. Ses quatre écrans ne se
+    // rejoignaient donc nulle part, et sur téléphone ils n'existaient que dans
+    // le panneau « Menu » — un bouton qui ne dit pas ce qu'il contient. La
+    // barre du bas y mène désormais directement, et le panneau a disparu.
+    sommaire: '/communaute',
     entrees: [
       { href: '/classement', labelKey: 'nav.leaderboard', icon: Trophy },
       { href: '/amis', labelKey: 'nav.friends', icon: Users },
@@ -225,12 +230,18 @@ export const SECTIONS: SectionNav[] = [
 ]
 
 /**
- * Barre inférieure sur téléphone : quatre destinations, plus « Menu ».
+ * Barre inférieure sur téléphone : les cinq rubriques, et rien d'autre.
  *
- * Quatre et pas cinq : le bouton « Menu » occupe la cinquième place, et sans
- * lui la barre laissait croire qu'elle était toute la navigation mobile — le
- * reste ne s'atteignait que par l'icône hamburger de l'en-tête, que personne
- * ne pense à chercher quand une barre d'onglets est déjà visible en bas.
+ * La cinquième place était tenue par un bouton « Menu » qui dépliait un
+ * panneau contenant les cinq rubriques et leurs trente entrées. C'était la
+ * navigation mobile réelle, et elle était **cachée** : un bouton nommé
+ * « Menu » n'annonce rien de ce qu'il contient, et l'on ne déplie pas un
+ * panneau pour savoir ce qui existe dans une application qu'on découvre.
+ *
+ * Les cinq rubriques tiennent dans la barre — elles ont toutes une page,
+ * « Communauté » comprise depuis qu'elle a la sienne —, et chaque page montre
+ * son contenu en grand. Il n'y a donc plus rien à replier : ce que
+ * l'application sait faire se lit sur cinq onglets et cinq pages.
  */
 export const RACCOURCIS_MOBILES: EntreeNav[] = [
   { href: '/jouer', labelKey: 'nav.play', icon: Swords },
@@ -243,6 +254,14 @@ export const RACCOURCIS_MOBILES: EntreeNav[] = [
   // écran — annonce les trois, et le sommaire les propose.
   { href: '/entrainer', labelKey: 'nav.train', icon: Target, actifSur: ['/puzzles'] },
   { href: '/analyse', labelKey: 'nav.analysis', icon: Gauge },
+  {
+    href: '/communaute',
+    labelKey: 'nav.community',
+    icon: Users,
+    // Les quatre écrans de la rubrique s'atteignent aussi directement, depuis
+    // un lien ou l'historique : l'onglet doit rester allumé sur chacun.
+    actifSur: ['/classement', '/amis', '/correspondance', '/statistiques'],
+  },
 ]
 
 /**
