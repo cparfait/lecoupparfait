@@ -166,34 +166,33 @@ export default function LearnPage() {
         </button>
       </div>
 
-      {/* `space-y-8` et non plus 14 : l'écart était calculé pour des chapitres
-          tous dépliés, où il sépare une grille de cartes de la suivante.
-          Repliés, les sept en-têtes flottaient à cinquante-six pixels les uns
-          des autres — une liste ne se lit pas comme ça. */}
-      <div className="mt-4 space-y-8">
+      {/* Trois points entre deux panneaux, et non plus trente-deux : chaque
+          chapitre porte désormais son propre cadre, qui fait le travail que
+          l'écart faisait mal. */}
+      <div className="mt-4 space-y-3">
         {CHAPTERS.map((chapter, chapterIndex) => {
           const done = chapter.lessons.filter((lesson) => progress[lesson.id]?.completed).length
           const replie = Boolean(collapsed[chapter.id])
 
           return (
+            /* ── Un chapitre, un bloc ──────────────────────────────────
+               Les chapitres étaient séparés du suivant par un filet dégradé, et
+               c'était tout : une fois les leçons dépliées, l'en-tête du
+               chapitre 2 arrivait juste sous les cartes du chapitre 1, à la même
+               largeur et sur le même fond. On ne voyait plus où l'un finissait
+               et où l'autre commençait — six titres et trente-six cartes dans
+               une seule colonne indifférenciée.
+
+               Chaque chapitre est maintenant un panneau : un cadre, un fond
+               légèrement en retrait, et ses leçons posées **dedans**, sur des
+               cartes plus claires que lui. La hiérarchie se voit sans qu'on ait
+               à lire — un chapitre contient des leçons, et cela se dessine. */
             <section
               key={chapter.id}
-              className="animate-slide-up"
+              className="animate-slide-up overflow-hidden rounded-[var(--radius)] border border-line/70 bg-surface/40 p-3 sm:p-4"
               style={{ animationDelay: `${chapterIndex * 60}ms` }}
             >
-              {/* Filet de séparation : sans lui, les chapitres se confondent
-                  avec les cartes de leçons du chapitre précédent. */}
-              {chapterIndex > 0 && (
-                <div
-                  className="mb-6 h-px w-full"
-                  style={{
-                    background: 'linear-gradient(90deg, var(--border-strong), transparent 70%)',
-                  }}
-                  aria-hidden
-                />
-              )}
-
-              <header className="mb-5">
+              <header className={clsx(replie ? 'mb-0' : 'mb-4')}>
                 <button
                   type="button"
                   onClick={() => toggle(chapter.id)}
@@ -270,8 +269,8 @@ export default function LearnPage() {
                         'group relative flex gap-3 rounded-[var(--radius)] border p-3.5 transition-all',
                         'hover:-translate-y-0.5 hover:bg-surface-hover',
                         completed
-                          ? 'border-[color-mix(in_oklab,var(--q-best)_35%,transparent)] bg-[color-mix(in_oklab,var(--q-best)_7%,transparent)]'
-                          : 'border-line bg-surface',
+                          ? 'border-[color-mix(in_oklab,var(--q-best)_35%,transparent)] bg-[color-mix(in_oklab,var(--q-best)_10%,transparent)]'
+                          : 'border-line bg-bg-elev',
                       )}
                     >
                       <span className="mt-0.5 text-xl" aria-hidden>
