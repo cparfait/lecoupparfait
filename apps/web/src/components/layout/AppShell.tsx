@@ -348,6 +348,23 @@ export function AppShell({ children }: { children: ReactNode }) {
  * qu'elle ne clignote jamais chez un visiteur ordinaire — et elle ne donne
  * aucun droit : chaque route revérifie.
  */
+/**
+ * Les menus de la barre ne portent pas de cadre.
+ *
+ * Ils en avaient un, et la raison paraissait bonne : un bouton de menu doit
+ * ressembler à un bouton, sans quoi rien n'annonce qu'il s'ouvre. Sauf qu'ils
+ * sont six côte à côte — le nom du site et les cinq rubriques — et que six
+ * boîtes alignées ne se lisent plus comme six boutons : elles font une rangée
+ * d'onglets grillagée, juste au-dessus d'une page qui n'en a aucune. Le chevron
+ * dit déjà qu'il y a quelque chose dessous, la rubrique ouverte porte son trait
+ * d'accent, et la surface apparaît au survol.
+ *
+ * Les menus d'une barre d'actions de partie gardent le leur : là, ils voisinent
+ * de vrais boutons, et c'est l'inverse qui détonnerait.
+ */
+const MENU_BARRE =
+  'flex items-center gap-1 rounded-[var(--radius-sm)] px-2.5 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface-hover hover:text-ink'
+
 function MenuApplication() {
   const t = useT()
   const estAdmin = useEstAdmin()
@@ -365,6 +382,7 @@ function MenuApplication() {
       className="shrink-0"
       largeur="w-60"
       label="Le Coup Parfait"
+      boutonClassName={MENU_BARRE}
       declencheur={(ouvert) => (
         <>
           <span className="font-display text-[15px] font-semibold tracking-tight text-ink sm:text-[17px]">
@@ -420,6 +438,7 @@ function MenuSection({
     <Menu
       largeur="w-72"
       label={t(section.labelKey)}
+      boutonClassName={MENU_BARRE}
       declencheur={(ouvert) => (
         <>
           <span className={clsx(active && 'text-ink')}>{t(section.labelKey)}</span>

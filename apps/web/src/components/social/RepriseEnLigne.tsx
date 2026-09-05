@@ -20,6 +20,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Swords, X } from 'lucide-react'
+import { Alerte } from '@/components/ui/Alerte.tsx'
 import { Button } from '@/components/ui/index.tsx'
 import { oublierPartieEnLigne, usePartieEnLigne } from '@/lib/game/partieEnLigne.ts'
 
@@ -33,11 +34,11 @@ export function RepriseEnLigne() {
   if (pathname.startsWith(`/jouer/partie/${partie.slug}`)) return null
 
   return (
-    <div
-      role="region"
-      aria-label="Partie en cours"
-      className="animate-slide-up popover fixed bottom-[5.5rem] left-3 right-3 z-40 p-3.5 shadow-[var(--shadow-lg)] md:bottom-4 md:left-auto md:right-4 md:w-[24rem]"
-    >
+    // Sous l'en-tête, au centre, avec les autres : voir `Alerte`. Le bandeau
+    // vivait dans le coin bas-droit, où l'on ne regarde pas — et c'est
+    // précisément l'alerte qu'il ne faut pas manquer, puisqu'une partie
+    // continue sans nous pendant qu'on ne la voit pas.
+    <Alerte label="Partie en cours" className="popover p-3.5 shadow-[var(--shadow-lg)]">
       <div className="flex items-start gap-3">
         <span
           className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[color-mix(in_oklab,var(--accent)_16%,transparent)] text-accent"
@@ -84,6 +85,6 @@ export function RepriseEnLigne() {
           <X size={15} aria-hidden />
         </button>
       </div>
-    </div>
+    </Alerte>
   )
 }

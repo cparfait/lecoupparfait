@@ -4,13 +4,20 @@
  * Notifications éphémères.
  *
  * Un store minimal plutôt qu'une dépendance : trois fonctions et un composant.
- * Les messages s'empilent en bas sur mobile, en haut à droite sur grand écran —
- * là où le pouce ne les recouvre pas.
+ * Les messages rejoignent la pile d'alertes — sous l'en-tête, au centre, avec
+ * la reprise d'une partie et le défi d'un ami. Ils s'empilaient auparavant en
+ * bas sur téléphone et en haut à droite sur grand écran : deux positions, deux
+ * coins, et dans les deux cas hors du chemin du regard. Voir `Alerte`.
+ *
+ * Chacun bat de sa propre teinte à l'arrivée : un avertissement orange et une
+ * confirmation verte ne demandent pas la même attention, et le halo le dit
+ * avant qu'on ait lu.
  */
 
 import { useEffect, useState } from 'react'
 import { AlertTriangle, Check, Info, X } from 'lucide-react'
 import clsx from 'clsx'
+import { Alerte } from '@/components/ui/Alerte.tsx'
 
 export type ToastKind = 'info' | 'success' | 'warning' | 'error'
 
@@ -69,6 +76,14 @@ const TONES = {
   error: 'text-[var(--q-blunder)]',
 } as const
 
+/** La même échelle, pour le halo qui bat à l'apparition. */
+const TEINTES = {
+  info: 'var(--accent)',
+  success: 'var(--q-best)',
+  warning: 'var(--q-inaccuracy)',
+  error: 'var(--q-blunder)',
+} as const
+
 export function ToastHost() {
   const [items, setItems] = useState<Toast[]>([])
 
@@ -98,29 +113,19 @@ export function ToastHost() {
   if (items.length === 0) return null
 
   return (
-    <div
-      className={clsx(
-        'pointer-events-none fixed z-[100] flex flex-col gap-2',
-        'inset-x-3 bottom-3 safe-bottom',
-        // Sur grand écran le message s'affiche en haut à droite — mais l'en-tête
-        // y est déjà, et il mesure 57 px : posé à 16 px du haut, le message
-        // tombait derrière le bouton de connexion et se lisait mal. On le
-        // descend juste au-dessous.
-        'sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-[4.25rem] sm:w-80',
-      )}
-      role="region"
-      aria-label="Notifications"
-      aria-live="polite"
-    >
+    <>
       {items.map((item) => {
         const Icon = ICONS[item.kind]
         return (
-          <div
+          <Alerte
             key={item.id}
+            role="status"
+            label="Notification"
+            teinte={TEINTES[item.kind]}
             // Opaque : un message posé par-dessus la page se lit d'un coup
             // d'œil ou ne sert à rien, et le verre laissait passer le texte
             // qu'il recouvrait.
-            className="animate-slide-up popover pointer-events-auto flex items-start gap-3 p-3 shadow-[var(--shadow)]"
+            className="popover flex items-start gap-3 p-3 shadow-[var(--shadow)]"
           >
             <Icon size={17} className={clsx('mt-0.5 shrink-0', TONES[item.kind])} aria-hidden />
             <div className="min-w-0 flex-1">
@@ -137,9 +142,9 @@ export function ToastHost() {
             >
               <X size={14} aria-hidden />
             </button>
-          </div>
+          </Alerte>
         )
       })}
-    </div>
+    </>
   )
 }

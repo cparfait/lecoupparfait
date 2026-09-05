@@ -31,7 +31,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Bell, Download, Share, X } from 'lucide-react'
-import clsx from 'clsx'
+import { Alerte } from '@/components/ui/Alerte.tsx'
 import { Button } from '@/components/ui/index.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { usePartieEnLigne } from '@/lib/game/partieEnLigne.ts'
@@ -231,9 +231,10 @@ function ProposerNotifications({
 /**
  * L'habillage commun.
  *
- * Posé en bas et au-dessus de la barre de pouce sur téléphone, en bas à droite
- * sur grand écran : jamais en tête de page, où il repousserait le contenu et
- * ferait sauter la mise en page une fois refermé.
+ * Il vivait en bas de l'écran, au-dessus de la barre de pouce sur téléphone et
+ * dans le coin bas-droit ailleurs. Il rejoint la pile d'alertes, sous
+ * l'en-tête et au centre — voir `Alerte`. Il ne repousse toujours rien : la
+ * pile est en position fixe, et la page ne bouge pas quand il se referme.
  */
 function Bandeau({
   icone,
@@ -249,16 +250,7 @@ function Bandeau({
   onFermer: () => void
 }) {
   return (
-    <div
-      role="region"
-      aria-label={titre}
-      className={clsx(
-        'animate-slide-up popover fixed z-40 p-3.5 shadow-[var(--shadow-lg)]',
-        // Au-dessus de la barre inférieure mobile, qui fait 5 rem.
-        'bottom-[5.5rem] left-3 right-3',
-        'md:bottom-4 md:left-auto md:right-4 md:w-[24rem]',
-      )}
-    >
+    <Alerte label={titre} className="popover p-3.5 shadow-[var(--shadow-lg)]">
       <div className="flex items-start gap-3">
         <span
           className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[color-mix(in_oklab,var(--accent)_16%,transparent)] text-accent"
@@ -289,6 +281,6 @@ function Bandeau({
           <X size={15} aria-hidden />
         </button>
       </div>
-    </div>
+    </Alerte>
   )
 }
