@@ -5,132 +5,24 @@
  * **exigent** l'attribution. Sans cette page, la redistribution du projet serait
  * illégale. Elle sert aussi à montrer sur quoi le projet est bâti — c'est une
  * bonne façon de découvrir l'écosystème libre des échecs.
+ *
+ * Elle ne porte plus sa liste : celle-ci vit dans `lib/credits/catalogue.ts`,
+ * que l'administration confronte aux dépendances réelles et qu'un contrôle
+ * vérifie à chaque exécution des tests. Écrite ici, elle restait à jour le jour
+ * où on l'avait écrite — et il y manquait les dix-sept bibliothèques qui font
+ * tourner l'application, Maia, Lc0 et Piper.
  */
 
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Card } from '@/components/ui/index.tsx'
+import { TITRES_CATEGORIE, creditsDe, type Credit } from '@/lib/credits/catalogue.ts'
 
 export const metadata: Metadata = {
   title: 'Crédits & licences',
   description:
     'Les logiciels, jeux de données et ressources graphiques libres sur lesquels Le Coup Parfait est construit, avec leurs auteurs et leurs licences.',
 }
-
-interface Credit {
-  name: string
-  author: string
-  licence: string
-  url: string
-  note: string
-}
-
-const ENGINE: Credit[] = [
-  {
-    name: 'Stockfish 18',
-    author: 'les auteurs de Stockfish',
-    licence: 'GPL-3.0-or-later',
-    url: 'https://github.com/official-stockfish/Stockfish',
-    note: 'Le moteur d’échecs le plus fort au monde. Il tourne côté serveur en version native, et dans le navigateur en WebAssembly.',
-  },
-  {
-    name: 'Stockfish.js',
-    author: 'Nathan Rugg',
-    licence: 'GPL-3.0-or-later',
-    url: 'https://github.com/nmrugg/stockfish.js',
-    note: 'La compilation WebAssembly de Stockfish, qui permet d’analyser sans rien envoyer à un serveur.',
-  },
-  {
-    name: 'chess.js',
-    author: 'Jeff Hlywa',
-    licence: 'BSD-2-Clause',
-    url: 'https://github.com/jhlywa/chess.js',
-    note: 'Les règles du jeu : génération des coups légaux, détection du mat, lecture du PGN.',
-  },
-]
-
-const DATA: Credit[] = [
-  {
-    name: 'Base d’ouvertures ECO',
-    author: 'Lichess',
-    licence: 'CC0-1.0 (domaine public)',
-    url: 'https://github.com/lichess-org/chess-openings',
-    note: '3 810 ouvertures nommées et classées, traduites en français pour ce projet.',
-  },
-  {
-    name: 'Base de puzzles',
-    author: 'Lichess',
-    licence: 'CC0-1.0 (domaine public)',
-    url: 'https://database.lichess.org/',
-    note: '6 057 356 positions tactiques, notées et étiquetées par thème, extraites de vraies parties.',
-  },
-  {
-    name: 'Base de positions de finales',
-    author: 'supertorpe et les contributeurs',
-    licence: 'GPL-3.0',
-    url: 'https://github.com/supertorpe/chessendgametraining',
-    note: '3 568 positions de finales classées par matériel, de « mater avec une dame » à « tenir la nulle avec une tour de moins », traduites et re-cotées en difficulté pour ce projet.',
-  },
-  {
-    name: 'Tables de finales Syzygy',
-    author: 'Ronald de Man, service hébergé par Lichess',
-    licence: 'accès libre',
-    url: 'https://tablebase.lichess.ovh/',
-    note: 'Le jeu parfait dans toutes les finales à sept pièces ou moins. Une certitude, pas une évaluation.',
-  },
-]
-
-const ASSETS: Credit[] = [
-  {
-    name: 'Pièces Staunton (cburnett)',
-    author: 'Colin M. L. Burnett',
-    licence: 'GPL-2.0-or-later',
-    url: 'https://en.wikipedia.org/wiki/User:Cburnett',
-    note: 'Le jeu de pièces vectoriel le plus utilisé du monde libre.',
-  },
-  {
-    name: 'Pièces Merida',
-    author: 'Armando Hernandez Marroquin',
-    licence: 'GPL-2.0-or-later',
-    url: 'https://github.com/lichess-org/lila/tree/master/public/piece/merida',
-    note: 'Contours nets, excellente lisibilité en petite taille.',
-  },
-  {
-    name: 'Pièces Fantasy, Spatial, Celtique',
-    author: 'Maurizio Monge',
-    licence: 'MIT',
-    url: 'https://github.com/maurimo/chess-art',
-    note: 'Trois jeux de caractère, aux volumes sculptés.',
-  },
-  {
-    name: 'Pièces Chessnut',
-    author: 'Alexis Luengas',
-    licence: 'Apache-2.0',
-    url: 'https://github.com/LexLuengas/chessnut-pieces',
-    note: 'Épuré et contemporain.',
-  },
-  {
-    name: 'Pièces Rhos',
-    author: 'RhosGFX',
-    licence: 'CC0-1.0',
-    url: 'https://rhosgfx.itch.io/',
-    note: 'Aplats colorés, domaine public.',
-  },
-  {
-    name: 'Pièces Alpha, Pixel, Lettres',
-    author: 'les auteurs de lila, therealqtpi, usolando',
-    licence: 'AGPL-3.0-or-later',
-    url: 'https://github.com/lichess-org/lila/tree/master/public/piece',
-    note: 'Trois approches minimalistes, dont un jeu en lettres pour la lisibilité maximale.',
-  },
-  {
-    name: 'Bruitages',
-    author: 'Enigmahack et les auteurs de lila',
-    licence: 'AGPL-3.0-or-later',
-    url: 'https://github.com/lichess-org/lila/tree/master/public/sound',
-    note: 'Déplacement, capture, échec, fin de partie.',
-  },
-]
 
 export default function CreditsPage() {
   return (
@@ -142,9 +34,14 @@ export default function CreditsPage() {
         plusieurs de ces licences exigent explicitement l’attribution.
       </p>
 
-      <Section title="Moteur et règles" credits={ENGINE} />
-      <Section title="Jeux de données" credits={DATA} />
-      <Section title="Ressources graphiques et sonores" credits={ASSETS} />
+      <Section titre={TITRES_CATEGORIE.moteur} credits={creditsDe('moteur')} />
+      <Section titre={TITRES_CATEGORIE.donnees} credits={creditsDe('donnees')} />
+      <Section titre={TITRES_CATEGORIE.ressources} credits={creditsDe('ressources')} />
+      {/* Les bibliothèques en compact : quinze cartes de plus feraient de cette
+          page un inventaire, alors qu'elle raconte sur quoi le projet est bâti.
+          Une ligne chacune suffit à porter l'attribution que leurs licences
+          demandent — nom, auteur, licence, et le lien pour aller voir. */}
+      <Bibliotheques credits={creditsDe('bibliotheque')} />
 
       <Card className="mt-8 p-5">
         <h2 className="font-display text-lg font-semibold">La licence du Coup Parfait</h2>
@@ -175,13 +72,13 @@ export default function CreditsPage() {
   )
 }
 
-function Section({ title, credits }: { title: string; credits: Credit[] }) {
+function Section({ titre, credits }: { titre: string; credits: Credit[] }) {
   return (
     <section className="mt-8">
-      <h2 className="font-display text-xl font-semibold tracking-tight">{title}</h2>
+      <h2 className="font-display text-xl font-semibold tracking-tight">{titre}</h2>
       <div className="mt-3 space-y-2">
         {credits.map((credit) => (
-          <Card key={credit.name} className="p-4">
+          <Card key={credit.nom} className="p-4">
             <div className="flex flex-wrap items-baseline gap-2">
               <a
                 href={credit.url}
@@ -189,9 +86,10 @@ function Section({ title, credits }: { title: string; credits: Credit[] }) {
                 rel="noreferrer noopener"
                 className="font-semibold text-accent hover:underline"
               >
-                {credit.name}
+                {credit.nom}
+                {credit.version ? ` ${credit.version}` : ''}
               </a>
-              <span className="text-xs text-muted">par {credit.author}</span>
+              <span className="text-xs text-muted">par {credit.auteur}</span>
               <span className="ml-auto rounded-full border border-line px-2 py-0.5 font-mono text-[10px] text-faint">
                 {credit.licence}
               </span>
@@ -200,6 +98,42 @@ function Section({ title, credits }: { title: string; credits: Credit[] }) {
           </Card>
         ))}
       </div>
+    </section>
+  )
+}
+
+function Bibliotheques({ credits }: { credits: Credit[] }) {
+  return (
+    <section className="mt-8">
+      <h2 className="font-display text-xl font-semibold tracking-tight">
+        {TITRES_CATEGORIE.bibliotheque}
+      </h2>
+      <p className="mt-1 text-[13px] text-muted">
+        Les {credits.length} bibliothèques embarquées dans l’application.
+      </p>
+      <Card className="mt-3 overflow-hidden">
+        <ul>
+          {credits.map((credit) => (
+            <li
+              key={credit.paquet ?? credit.nom}
+              className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 border-b border-line/40 px-4 py-2 last:border-0"
+            >
+              <a
+                href={credit.url}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="text-[13px] font-semibold text-accent hover:underline"
+              >
+                {credit.nom}
+              </a>
+              <span className="text-[11px] text-muted">par {credit.auteur}</span>
+              <span className="ml-auto shrink-0 font-mono text-[10px] text-faint">
+                {credit.licence}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </Card>
     </section>
   )
 }

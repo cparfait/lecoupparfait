@@ -3,11 +3,13 @@
 /**
  * Administration.
  *
- * Cinq onglets, dans l'ordre où l'on s'en sert : le **tableau de bord** (ce
+ * Six onglets, dans l'ordre où l'on s'en sert : le **tableau de bord** (ce
  * qu'on regarde en arrivant), les **comptes** (c'est souvent pour eux qu'on
  * vient), les **contenus** (on y va quand quelque chose est signalé), le
  * **journal** (on le relit quand on se demande qui a fait quoi), le **système**
- * (une fois par mois, ou quand ça va mal).
+ * (une fois par mois, ou quand ça va mal), les **outils** (moins souvent
+ * encore, mais il faut bien un endroit où voir qu'une dépendance a trois
+ * versions de retard et qu'un paquet n'est crédité nulle part).
  *
  * **Elle n'existe pas pour qui n'y a pas droit.** Toutes les routes répondent
  * 404 plutôt que 403, et cette page se comporte pareil : sans droits, on voit
@@ -25,6 +27,7 @@ import { Skeleton, EmptyState, SegmentedControl } from '@/components/ui/index.ts
 import { Comptes } from './Comptes.tsx'
 import { Contenus } from './Contenus.tsx'
 import { Journal } from './Journal.tsx'
+import { Outils } from './Outils.tsx'
 import { Systeme } from './Systeme.tsx'
 import { TableauDeBord } from './TableauDeBord.tsx'
 
@@ -34,6 +37,7 @@ const ONGLETS = [
   { value: 'contenus', label: 'Contenus' },
   { value: 'journal', label: 'Journal' },
   { value: 'systeme', label: 'Système' },
+  { value: 'outils', label: 'Outils' },
 ] as const
 
 type Onglet = (typeof ONGLETS)[number]['value']
@@ -94,19 +98,19 @@ export default function AdminPage() {
         d’écrire le pseudo, et tous sont consignés dans le journal.
       </p>
 
-      {/* Cinq onglets ne tiennent pas dans 375 pixels : les libellés se
+      {/* Six onglets ne tiennent pas dans 375 pixels : les libellés se
           coupaient, et « Système » sortait du cadre. On leur donne leur largeur
           et l'on fait glisser la bande — plutôt que d'abréger des intitulés,
           qui sont ici la seule indication de ce que chaque onglet contient. */}
       <div className="mt-5 -mx-4 overflow-x-auto px-4 sm:mx-0 sm:overflow-visible sm:px-0">
-        <div className="min-w-[32rem] sm:min-w-0">
+        <div className="min-w-[38rem] sm:min-w-0">
           <SegmentedControl
             value={onglet}
             onChange={(valeur: Onglet) => {
               setOnglet(valeur)
               // `replaceState` et non `push` : l'onglet n'est pas une étape de
-              // navigation, et empiler cinq entrées d'historique obligerait à
-              // cliquer cinq fois sur « précédent » pour quitter la page.
+              // navigation, et empiler six entrées d'historique obligerait à
+              // cliquer six fois sur « précédent » pour quitter la page.
               window.history.replaceState(null, '', `#${valeur}`)
             }}
             options={[...ONGLETS]}
@@ -120,6 +124,7 @@ export default function AdminPage() {
         {onglet === 'contenus' && <Contenus />}
         {onglet === 'journal' && <Journal />}
         {onglet === 'systeme' && <Systeme />}
+        {onglet === 'outils' && <Outils />}
       </div>
     </div>
   )
