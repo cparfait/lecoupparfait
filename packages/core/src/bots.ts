@@ -53,6 +53,42 @@ export interface BotPersonality {
    * que d'un fichier.
    */
   emoji: string
+  /**
+   * Ce qu'il dirait s'il parlait. Une ligne, dans sa voix.
+   */
+  devise: string
+  /**
+   * D'où il vient, en deux paragraphes.
+   *
+   * ── Pourquoi une fiction, et pourquoi celle-là ──────────────────────────
+   *
+   * Les sept adversaires portaient un nom, une phrase et un portrait, et rien
+   * derrière : on ne pouvait pas cliquer dessus, donc il n'y avait rien à
+   * savoir. Or ce sont eux qu'on affronte pendant des heures, et un adversaire
+   * dont on ne sait rien reste un curseur de difficulté déguisé.
+   *
+   * Le lore ne s'invente pas librement pour autant. Il part de deux choses
+   * vraies : la **matière** de la sculpture, décidée dans
+   * `scripts/build-cavale.mjs` d'après les biais ci-dessous, et **les biais
+   * eux-mêmes**. Rempart est en granit parce qu'il a `sacrifice: -80` ; son
+   * histoire raconte le granit, et son granit raconte le refus du risque. La
+   * page d'un adversaire affiche d'ailleurs ses biais chiffrés à côté du
+   * texte : si l'un contredisait l'autre, cela se verrait.
+   *
+   * En français seulement, contrairement à `name` et `blurb`. Ces deux-là sont
+   * courts et traduits depuis toujours ; un texte littéraire traduit à
+   * l'estime serait moins bon que pas de traduction du tout, et l'interface
+   * n'affiche de toute façon que le français pour les adversaires.
+   */
+  lore: string[]
+  /**
+   * Comment le battre.
+   *
+   * Le seul champ qui doit rester du conseil d'échecs et non de la
+   * littérature : c'est ce qui empêche la fiche de n'être qu'une décoration.
+   * Chaque conseil vise le biais, pas le personnage.
+   */
+  contre: string
   bias: StyleBias
 }
 
@@ -75,6 +111,13 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonality> = {
     },
     portrait: '/brand/adversaires/novice.webp',
     emoji: '🐣',
+    devise: 'Je peux la prendre ?',
+    lore: [
+      'Le premier tirage de la série, et le seul qu’on n’ait pas retouché. Le tilleul porte encore les traces de la gouge, les oreilles sont trop grandes pour l’encolure, et l’ensemble penche vers l’avant. Le sculpteur n’a rien corrigé : c’est de ce déséquilibre que vient l’air de vouloir avancer.',
+      'Au tableau, cela donne quelqu’un qui voit une pièce à prendre et qui la prend. Pas par gourmandise — par confiance. Il n’a pas encore appris qu’une pièce peut être posée là exprès. C’est l’adversaire des premières parties, et il apprendra en même temps que toi.',
+    ],
+    contre:
+      'Laisse-lui du matériel là où tu le reprends au coup suivant : il mord presque à chaque fois. Et développe tes pièces pendant qu’il ramasse — c’est la seule chose qu’il oublie de faire.',
     bias: { ...NEUTRAL, capture: 90, check: 40, development: -30 },
   },
   prudent: {
@@ -86,6 +129,13 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonality> = {
     },
     portrait: '/brand/adversaires/prudent.webp',
     emoji: '🛡️',
+    devise: 'Après vous.',
+    lore: [
+      'Taillé dans un bloc de granit gris-bleu qui avait passé l’hiver dehors ; la mousse prise dans les creux n’a pas été retirée. Les plaques de fer rivetées sur l’encolure n’ont jamais servi à rien — rien n’est jamais arrivé jusqu’à lui.',
+      'Il roque tôt, échange dès qu’on le lui propose, et refuse tout ce qui ressemble à un risque. On ne perd pas contre Rempart sur une combinaison : on perd de fatigue, après avoir cherché pendant quarante coups une ouverture qui n’existait pas.',
+    ],
+    contre:
+      'Ne lui donne pas les échanges qu’il attend : garde tes pièces, prends de l’espace, et ouvre un second front. Sa solidité tient tant qu’il n’a qu’un seul endroit à défendre.',
     bias: { ...NEUTRAL, quiet: 35, development: 40, sacrifice: -80, capture: -10 },
   },
   fonceur: {
@@ -97,6 +147,13 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonality> = {
     },
     portrait: '/brand/adversaires/fonceur.webp',
     emoji: '🔥',
+    devise: 'On verra après.',
+    lore: [
+      'Coulé trop chaud, refroidi trop vite. Le bronze s’est fendu en séchant et la lumière sort encore des fissures. Le sculpteur a gardé la pièce ratée : aucune des suivantes n’avait ce mouvement — oreilles couchées, naseaux ouverts, déjà lancé.',
+      'Il pousse ses pions vers ton roi sans se demander ce qu’il laisse derrière. Souvent cela passe, parce qu’une attaque qui arrive vite trouve rarement une défense prête. Quand cela ne passe pas, il ne lui reste plus de position du tout.',
+    ],
+    contre:
+      'Ne recule pas devant les pions qui montent : chaque pion poussé est un pion qui ne reviendra pas défendre. Échange ses attaquants, tiens le centre, et son assaut devient une rangée de faiblesses.',
     bias: { ...NEUTRAL, check: 70, pawnPush: 50, sacrifice: 45, quiet: -40 },
   },
   tacticien: {
@@ -108,6 +165,13 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonality> = {
     },
     portrait: '/brand/adversaires/tacticien.webp',
     emoji: '⚡',
+    devise: 'Tu as vu ce que tu viens de laisser ?',
+    lore: [
+      'Cristal givré, taillé à facettes franches. Une seule fêlure traverse l’encolure de part en part : elle est arrivée au démoulage, elle n’était pas prévue, et c’est elle qu’on regarde en premier.',
+      'Il ne cherche pas à mieux placer ses pièces — il attend. Une pièce non défendue, deux pièces sur la même diagonale, un roi qui a bougé une fois de trop : il trouve, et il trouve avant toi. Contre une position saine il n’a rien de particulier à dire ; c’est le désordre qu’il mange.',
+    ],
+    contre:
+      'Une seule discipline suffit : après chacun de ses coups, regarde ce qui est en prise et ce qui vise quoi. Il ne crée pas les failles, il les ramasse.',
     bias: { ...NEUTRAL, capture: 25, check: 35, sacrifice: 25 },
   },
   positionnel: {
@@ -119,6 +183,13 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonality> = {
     },
     portrait: '/brand/adversaires/positionnel.webp',
     emoji: '🧭',
+    devise: 'Rien ne presse.',
+    lore: [
+      'Laiton patiné et palissandre sombre, monté d’aplomb au fil à plomb. Une rose des vents est gravée sur le côté de l’encolure ; elle indique une direction que rien, dans la sculpture, ne suit. C’est un instrument, pas un voyageur.',
+      'Il ne t’attaquera pas. Il améliorera une pièce, puis une autre, puis prendra une case dont tu ne voyais pas l’intérêt. Trente coups plus tard, tu chercheras un coup à jouer et il n’y en aura plus.',
+    ],
+    contre:
+      'Ne le laisse pas ranger tranquillement. Prends de l’espace tôt, crée un déséquilibre pendant qu’il finit son développement : il joue mal les positions qu’on ne peut pas mettre en ordre.',
     bias: { ...NEUTRAL, quiet: 45, development: 30, capture: -20, pawnPush: -15 },
   },
   gambiteur: {
@@ -130,6 +201,13 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonality> = {
     },
     portrait: '/brand/adversaires/gambiteur.webp',
     emoji: '🎭',
+    devise: 'Prends-le donc.',
+    lore: [
+      'Résine fumée, coulée deux fois : le contour se dédouble, la couleur se décale d’un cheveu, et l’arrière de l’encolure se dissout dans l’air. Personne n’a jamais su dire exactement où l’objet s’arrête — le détourage automatique non plus.',
+      'Il offre un pion dès l’ouverture, parfois une pièce. Ce n’est pas de la générosité : ce qu’il achète, ce sont des lignes ouvertes et deux temps d’avance, et il sait quoi en faire. Refuser est souvent le bon choix. C’est rarement celui qu’on fait.',
+    ],
+    contre:
+      'Tu peux accepter, à une condition : rendre le matériel dès qu’il commence à te coûter des temps. Un pion de plus ne vaut rien contre trois pièces développées et une colonne ouverte sur ton roi.',
     bias: { ...NEUTRAL, sacrifice: 90, pawnPush: 30, development: 35, quiet: -25 },
   },
   machine: {
@@ -141,8 +219,61 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonality> = {
     },
     portrait: '/brand/adversaires/machine.webp',
     emoji: '🜛',
+    devise: 'Rien à ajouter.',
+    lore: [
+      'Obsidienne polie, sans grain, sans une trace d’outil. C’est le seul de la série qui regarde droit devant, et le seul rigoureusement symétrique : il n’existe aucun angle sous lequel il soit plus flatteur qu’un autre.',
+      'Aucun biais, aucune préférence, aucun mauvais jour. Il joue le meilleur coup que le moteur trouve, ni plus ni moins, et il le joue aussi bien contre toi que contre n’importe qui. Les six autres ont été bridés pour te ressembler un peu. Lui, non.',
+    ],
+    contre:
+      'Il n’y a pas de défaut de style à exploiter, et c’est tout l’intérêt : baisse le niveau si tu veux gagner, garde-le au plus haut si tu veux savoir où tu en es. Une défaite contre Oracle ne dit rien de toi.',
     bias: NEUTRAL,
   },
+}
+
+/**
+ * Les six axes de style, dits en français.
+ *
+ * Un biais est un nombre de centipions ajouté à un coup qui présente le trait
+ * en question — voir `styleBonus`. Positif, il attire ; négatif, il repousse.
+ * Les deux formulations sont donc nécessaires : `capture: 90` et
+ * `capture: -20` ne se racontent pas avec la même phrase.
+ */
+const AXES: Record<keyof StyleBias, { attire: string; repousse: string }> = {
+  capture: { attire: 'prendre du matériel', repousse: 'laisser passer une prise' },
+  check: { attire: 'donner échec', repousse: 'éviter les échecs' },
+  pawnPush: { attire: 'pousser ses pions', repousse: 'garder ses pions en place' },
+  development: { attire: 'sortir ses pièces', repousse: 'négliger son développement' },
+  sacrifice: { attire: 'sacrifier du matériel', repousse: 'refuser tout sacrifice' },
+  quiet: { attire: 'jouer des coups tranquilles', repousse: 'ne jamais rester tranquille' },
+}
+
+export interface Penchant {
+  axe: keyof StyleBias
+  /** Le trait, formulé selon le signe. */
+  libelle: string
+  /** Le biais brut, en centipions. Négatif pour un rejet. */
+  poids: number
+}
+
+/**
+ * Ce qu'un adversaire cherche et ce qu'il fuit, déduit de ses biais.
+ *
+ * Déduit, et non écrit à côté : la fiche d'un adversaire affiche son caractère
+ * *et* les nombres qui le produisent, sur la même page. Les recopier à la main
+ * garantirait qu'un jour l'un dise l'inverse de l'autre — et la page de `/jouer`
+ * promet précisément que « ce n'est pas qu'un habillage ».
+ *
+ * Trié par intensité : c'est l'ordre dans lequel on décrirait quelqu'un.
+ */
+export function penchants(bias: StyleBias): Penchant[] {
+  return (Object.keys(AXES) as Array<keyof StyleBias>)
+    .filter((axe) => bias[axe] !== 0)
+    .map((axe) => ({
+      axe,
+      libelle: bias[axe] > 0 ? AXES[axe].attire : AXES[axe].repousse,
+      poids: bias[axe],
+    }))
+    .sort((a, b) => Math.abs(b.poids) - Math.abs(a.poids))
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -481,6 +612,44 @@ export const BOT_LEVELS: BotLevel[] = LEVEL_TABLE.map((spec, index) => {
 export function botLevel(level: number): BotLevel {
   const clamped = Math.max(1, Math.min(BOT_LEVELS.length, Math.round(level)))
   return BOT_LEVELS[clamped - 1]!
+}
+
+/**
+ * Les niveaux tenus par une personnalité, du plus faible au plus fort.
+ *
+ * Une personnalité revient à plusieurs paliers de l'échelle — Rempart en tient
+ * quatre, Oracle les cinq derniers. Sa fiche l'annonce, et l'écran de réglages
+ * s'en sert pour honorer « Jouer contre Mirage ».
+ */
+export function niveauxDe(id: BotPersonalityId): BotLevel[] {
+  return BOT_LEVELS.filter((niveau) => niveau.personality === id)
+}
+
+/**
+ * Le niveau de cette personnalité le plus proche d'un niveau souhaité.
+ *
+ * Arriver depuis la fiche d'un adversaire pose une contrainte — *lui* — et une
+ * préférence — la force qu'on a l'habitude d'affronter. On garde la contrainte
+ * et l'on approche la préférence, plutôt que de servir systématiquement le
+ * palier le plus faible : demander Oracle ne doit pas donner le niveau 21 à
+ * quelqu'un qui joue au 25, ni l'inverse.
+ *
+ * Rend `souhaite` inchangé si la personnalité est inconnue : l'appelant n'a
+ * alors rien demandé de particulier.
+ */
+export function niveauProche(id: BotPersonalityId, souhaite: number): number {
+  const siens = niveauxDe(id)
+  if (siens.length === 0) return souhaite
+  let meilleur = siens[0]!.level
+  let ecart = Infinity
+  for (const niveau of siens) {
+    const distance = Math.abs(niveau.level - souhaite)
+    if (distance < ecart) {
+      ecart = distance
+      meilleur = niveau.level
+    }
+  }
+  return meilleur
 }
 
 /** Niveau conseillé face à un joueur d'un classement donné. */

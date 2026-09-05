@@ -180,9 +180,17 @@ export default function PlayLobbyPage() {
 
       {/* ── Aperçu des personnalités ─────────────────────────────────── */}
       <section className="mt-12">
-        <h2 className="font-display text-xl font-semibold tracking-tight">
-          Tes adversaires artificiels
-        </h2>
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-display text-xl font-semibold tracking-tight">
+            Tes adversaires artificiels
+          </h2>
+          <Link
+            href="/jouer/adversaires"
+            className="text-[13px] font-medium text-accent hover:underline"
+          >
+            Tous les portraits
+          </Link>
+        </div>
         <p className="mt-1.5 text-sm text-muted">
           Chacun a un style de jeu réellement différent — ce n’est pas qu’un habillage : leur façon
           de choisir un coup est biaisée en faveur de ce qu’ils aiment.
@@ -192,16 +200,26 @@ export default function PlayLobbyPage() {
             trois autres encadrés font une page de tableau de bord. Ces sept-là
             ne sont pas des boutons — on ne choisit pas son adversaire ici, on
             fait sa connaissance. Un portrait, un nom, une phrase suffisent ;
-            le liseré ne servait qu'à occuper l'espace entre eux. */}
+            le liseré ne servait qu'à occuper l'espace entre eux.
+
+            Ce sont en revanche des **liens**, désormais. Ils ne l'étaient pas,
+            et il n'y avait donc rien à savoir de sept personnages qu'on
+            affronte pendant des heures : d'où viennent-ils, à quels niveaux les
+            croise-t-on, comment les battre. Le survol souligne le nom — le
+            reste de la vignette n'a pas à s'agiter au passage de la souris. */}
         <div className="mt-5 grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
           {Object.values(BOT_PERSONALITIES).map((personality) => (
-            <div key={personality.id} className="flex gap-3">
+            <Link
+              key={personality.id}
+              href={`/jouer/adversaires/${personality.id}`}
+              className="group flex gap-3"
+            >
               <PortraitAdversaire personality={personality} size={44} />
               <div className="min-w-0">
-                <p className="text-sm font-semibold">{personality.name.fr}</p>
+                <p className="text-sm font-semibold group-hover:underline">{personality.name.fr}</p>
                 <p className="mt-1 text-xs leading-relaxed text-muted">{personality.blurb.fr}</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </section>

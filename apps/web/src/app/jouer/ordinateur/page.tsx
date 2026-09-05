@@ -41,6 +41,7 @@ import {
   TIME_CONTROLS,
   applyMove,
   botLevel,
+  niveauProche,
   createClock,
   flaggedColor,
   formatScore,
@@ -221,6 +222,28 @@ export default function PlayComputerPage() {
    */
   const [tournoi, setTournoi] = useState(false)
   const [styleImpose, setStyleImpose] = useState<BotPersonalityId | null>(null)
+  /**
+   * L'adversaire demandé depuis sa fiche.
+   *
+   * `?perso=` n'était lu que dans l'effet du tournoi, derrière son
+   * `if (tournoi !== '1') return` : arriver ici par « Jouer contre Mirage »
+   * ignorait donc le paramètre en silence, et l'on tombait sur la personnalité
+   * du niveau conseillé — Pion, la plupart du temps. La promesse du bouton
+   * n'était pas tenue, et rien ne disait pourquoi.
+   *
+   * Il ne force pas un style par-dessus un niveau : il **choisit le niveau**
+   * qui porte cette personnalité, au plus près de celui qu'on jouerait sinon.
+   * C'est la seule façon d'être cohérent — le portrait, l'Elo annoncé et le
+   * style viennent tous du niveau, et les faire diverger produirait un Pion de
+   * 2 250 Elo qui joue comme Mirage.
+   */
+  const [persoDemande, setPersoDemande] = useState<BotPersonalityId | null>(null)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('tournoi') === '1') return
+    const perso = params.get('perso')
+    if (perso && perso in BOT_PERSONALITIES) setPersoDemande(perso as BotPersonalityId)
+  }, [])
   const tournoiLance = useRef(false)
   useEffect(() => {
     if (tournoiLance.current) return
@@ -415,6 +438,7 @@ export default function PlayComputerPage() {
         reprise={reprise ?? null}
         onReprendre={reprendre}
         suggererNiveau={!niveauArbitre.current}
+        personnaliteVoulue={persoDemande}
       />
     )
   }
@@ -462,6 +486,7 @@ function SetupScreen({
   reprise,
   onReprendre,
   suggererNiveau = false,
+  personnaliteVoulue = null,
 }: {
   initial: Setup
   onStart: (setup: Setup) => void
@@ -475,8 +500,18 @@ function SetupScreen({
    * alors celui qu'on vient de choisir, et le remplacer serait défaire un choix.
    */
   suggererNiveau?: boolean
+  /**
+   * L'adversaire demandé depuis sa fiche, s'il y en a un.
+   *
+   * Il contraint le niveau de départ — et lui seul : le curseur reste libre,
+   * et le déplacer change d'adversaire comme d'habitude. Une barre qui
+   * refuserait de sortir des paliers de Mirage serait une barre cassée.
+   */
+  personnaliteVoulue?: BotPersonalityId | null
 }) {
-  const [level, setLevel] = useState(initial.level)
+  const [level, setLevel] = useState(() =>
+    personnaliteVoulue ? niveauProche(personnaliteVoulue, initial.level) : initial.level,
+  )
   const [color, setColor] = useState<Color | 'random'>(initial.color)
   const [timeControlId, setTimeControlId] = useState(initial.timeControlId)
   const [human, setHuman] = useState(initial.human)
@@ -556,14 +591,36 @@ function SetupScreen({
     toucheRef.current = true
     setLevel(valeur)
   }, [])
+
+  /**
+   * L'adversaire demandé arrive après le premier rendu.
+   *
+   * Il est lu dans l'adresse, donc dans un effet du composant parent : au
+   * moment où l'état initial du curseur est calculé, il vaut encore `null`.
+   * L'initialisateur de `useState` ne se rejoue pas — d'où cet effet, qui pose
+   * le niveau une fois et une seule, et jamais par-dessus un curseur déjà
+   * déplacé à la main.
+   */
+  const persoApplique = useRef(false)
+  useEffect(() => {
+    if (!personnaliteVoulue || persoApplique.current || toucheRef.current) return
+    persoApplique.current = true
+    setLevel((actuel) => niveauProche(personnaliteVoulue, actuel))
+  }, [personnaliteVoulue])
   useEffect(() => {
     if (!suggererNiveau || toucheRef.current) return
     if (!progress?.tracked || progress.defeated < 1) return
-    setLevel(Math.min(BOT_LEVELS.length, progress.defeated))
-  }, [progress, suggererNiveau])
+    const habituel = Math.min(BOT_LEVELS.length, progress.defeated)
+    // Venu d'une fiche, on garde l'adversaire demandé et l'on approche
+    // seulement la force habituelle : la progression ne doit pas défaire le
+    // clic sur « Jouer contre Mirage ».
+    setLevel(personnaliteVoulue ? niveauProche(personnaliteVoulue, habituel) : habituel)
+  }, [progress, suggererNiveau, personnaliteVoulue])
 
   const bot = botLevel(level)
   const personality = BOT_PERSONALITIES[bot.personality]
+  /** Position du curseur sur la barre, de 0 à 100. */
+  const pourcentNiveau = ((level - 1) / (BOT_LEVELS.length - 1)) * 100
 
   /**
    * Maia peut-elle jouer *ce* niveau-là ?
@@ -717,12 +774,23 @@ function SetupScreen({
               <PortraitAdversaire personality={personality} size={56} />
             </span>
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-baseline gap-2">
+              {/* Deux lignes réservées sous `lg` : « Pion ≈ 100 Elo Niveau 1 »
+                  tient sur une ligne, « Boussole ≈ 1500 Elo Niveau 8 » passe à
+                  la suivante, et la carte grandissait de trente pixels au
+                  passage d'un cran de curseur. Au-delà de `lg` la colonne est
+                  large et rien ne se replie : y réserver la place ne ferait
+                  qu'ouvrir un vide. */}
+              <div className="flex min-h-[3.7rem] flex-wrap items-baseline gap-2 lg:min-h-0">
                 <h2 className="font-display text-xl font-semibold">{personality.name.fr}</h2>
                 <Chip tone="accent">≈ {bot.elo} Elo</Chip>
                 <Chip>Niveau {bot.level}</Chip>
               </div>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted">{personality.blurb.fr}</p>
+              {/* Hauteur réservée : voir la note sur la stabilité de la carte,
+                  plus bas, au-dessus du curseur. Trois lignes suffisent au
+                  plus long des sept résumés dans la colonne la plus étroite. */}
+              <p className="mt-1.5 min-h-[3.9rem] text-sm leading-relaxed text-muted">
+                {personality.blurb.fr}
+              </p>
             </div>
           </div>
 
@@ -804,13 +872,24 @@ function SetupScreen({
                         </span>
                         <span className="text-[11px] text-faint">{choix.resume}</span>
                         {/* La quatrième marque, et la seule qui se lise sans
-                          comparer les deux cartes entre elles. */}
-                        {actif && (
-                          <span className="ml-auto flex shrink-0 items-center gap-1 text-[11px] font-semibold text-accent">
-                            <Check size={12} aria-hidden />
-                            choisi
-                          </span>
-                        )}
+                          comparer les deux cartes entre elles.
+
+                          Toujours rendue, masquée quand elle ne s'applique
+                          pas : elle occupe de la largeur, et son apparition
+                          renvoyait « Joue comme un humain » à la ligne
+                          suivante. Les deux cartes grandissaient alors de
+                          seize pixels au moment précis où l'on cliquait, et
+                          le curseur de niveau — juste en dessous — fuyait
+                          sous le doigt. */}
+                        <span
+                          className={clsx(
+                            'ml-auto flex shrink-0 items-center gap-1 text-[11px] font-semibold text-accent',
+                            !actif && 'invisible',
+                          )}
+                        >
+                          <Check size={12} aria-hidden />
+                          choisi
+                        </span>
                       </span>
                       <span className="mt-1 block text-xs leading-relaxed text-muted">
                         {choix.detail}
@@ -820,16 +899,30 @@ function SetupScreen({
                 })}
               </div>
 
-              {/* Pourquoi Maia est éteinte, dit au moment où on le constate. */}
-              {!maiaPossible && (
-                <p className="mt-2 text-xs leading-relaxed text-muted">
-                  Maia a appris sur des parties humaines de {MAIA_MIN_ELO} à {MAIA_MAX_ELO} Elo, et
-                  ne sait rien jouer en dehors. Au niveau {bot.level} ({bot.elo} Elo), c’est donc{' '}
-                  <strong className="font-semibold text-ink">Stockfish</strong> qui joue — lui se
-                  règle sur n’importe quelle force. Pour affronter Maia, choisis un niveau entre{' '}
-                  {premierNiveauMaia} et {dernierNiveauMaia}.
-                </p>
-              )}
+              {/* Pourquoi Maia est éteinte, dit au moment où on le constate.
+                  La place est réservée même quand elle est disponible : ce
+                  paragraphe apparaît et disparaît au fil du curseur, et c'est
+                  lui qui faisait le plus sauter la carte — voir la note
+                  au-dessus du curseur. */}
+              {/* `invisible` plutôt qu'un rendu conditionnel : le paragraphe
+                  occupe toujours sa place, quelle que soit la largeur de la
+                  colonne. Une hauteur réservée en dur aurait suffi sur un
+                  écran et débordé de six pixels sur un autre — et six pixels
+                  suffisent à faire fuir le curseur sous le doigt. Masqué
+                  ainsi, il sort aussi de l'arbre d'accessibilité : un lecteur
+                  d'écran n'annonce pas une explication sans objet. */}
+              <p
+                className={clsx(
+                  'mt-2 text-xs leading-relaxed text-muted',
+                  maiaPossible && 'invisible',
+                )}
+              >
+                Maia a appris sur des parties humaines de {MAIA_MIN_ELO} à {MAIA_MAX_ELO} Elo, et ne
+                sait rien jouer en dehors. Au niveau {bot.level} ({bot.elo} Elo), c’est donc{' '}
+                <strong className="font-semibold text-ink">Stockfish</strong> qui joue — lui se
+                règle sur n’importe quelle force. Pour affronter Maia, choisis un niveau entre{' '}
+                {premierNiveauMaia} et {dernierNiveauMaia}.
+              </p>
             </div>
           )}
 
@@ -877,7 +970,10 @@ function SetupScreen({
               On répète donc l'identité ici, en petit. Masqué à partir de `lg`,
               où la carte tient entière dans l'écran et où répéter reviendrait
               à dire deux fois la même chose à dix centimètres d'intervalle. */}
-            <div className="mb-2 flex items-center justify-between gap-2">
+            {/* Même réserve, même raison : le rappel d'identité passe à deux
+                lignes selon la longueur du nom, et c'est le curseur qui est
+                juste en dessous. */}
+            <div className="mb-2 flex min-h-[2.5rem] items-center justify-between gap-2 lg:min-h-0">
               <label htmlFor="level" className="block text-sm font-medium">
                 Niveau de difficulté
               </label>
@@ -886,6 +982,28 @@ function SetupScreen({
                 <span className="text-[12px] font-semibold text-ink">{personality.name.fr}</span>
                 <span className="text-[12px] tabular-nums text-accent">≈ {bot.elo} Elo</span>
                 <span className="text-[12px] text-faint">n°{bot.level}</span>
+              </span>
+            </div>
+            {/* ── La graduation, et le repère qui suit le pouce ────────────
+              La barre n'avait aucune marque : vingt-cinq crans sur un rail
+              lisse, et l'on ne savait ni où l'on était ni de combien on venait
+              de bouger. Deux ajouts, et un seul principe — que le curseur dise
+              lui-même ce qu'il fait, sans qu'on ait à remonter la carte des
+              yeux.
+
+              Le repère se cale sur la position du pouce. Un pouce mesure
+              22 px : son centre ne parcourt pas toute la largeur mais celle-ci
+              moins sa propre taille, d'où la correction de onze pixels sur
+              chaque bord. Sans elle, le repère dérive d'un demi-pouce aux deux
+              extrémités — précisément là où l'on regarde. Le même décalage
+              borne la graduation en dessous. */}
+            <div className="relative h-5">
+              <span
+                className="absolute -translate-x-1/2 whitespace-nowrap rounded-full bg-accent px-2 py-0.5 text-[11px] font-bold tabular-nums text-[var(--accent-contrast)] transition-[left] duration-100"
+                style={{ left: `calc(${pourcentNiveau}% + ${11 - pourcentNiveau * 0.22}px)` }}
+                aria-hidden
+              >
+                {bot.level} · {personality.name.fr}
               </span>
             </div>
             <input
@@ -905,13 +1023,50 @@ function SetupScreen({
                huit points de haut, `center` le pose au milieu. */
               className="h-8 w-full cursor-pointer appearance-none bg-transparent"
               style={{
-                backgroundImage: `linear-gradient(to right, var(--accent) ${((level - 1) / (BOT_LEVELS.length - 1)) * 100}%, var(--surface-strong) ${((level - 1) / (BOT_LEVELS.length - 1)) * 100}%)`,
+                backgroundImage: `linear-gradient(to right, var(--accent) ${pourcentNiveau}%, var(--surface-strong) ${pourcentNiveau}%)`,
                 backgroundSize: '100% 8px',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
                 borderRadius: '9999px',
               }}
             />
+
+            {/* Vingt-cinq crans, un par niveau, plus haut tous les cinq. On ne
+                numérote pas chaque cran : vingt-cinq nombres sous une barre de
+                trois cents pixels ne se lisent plus, et ce qu'on cherche ici
+                est un ordre de grandeur — « je suis vers le milieu ». */}
+            <div className="mx-[11px] flex items-end justify-between" aria-hidden>
+              {BOT_LEVELS.map((niveau) => {
+                const jalon = niveau.level === 1 || niveau.level % 5 === 0
+                return (
+                  <span
+                    key={niveau.level}
+                    className={clsx(
+                      'w-px rounded-full',
+                      jalon ? 'h-2' : 'h-1',
+                      niveau.level <= level ? 'bg-accent/70' : 'bg-line-strong',
+                    )}
+                  />
+                )
+              })}
+            </div>
+            {/* Les nombres sont posés à leur position réelle, et non répartis :
+                1, 5, 10, 15, 20, 25 ne sont pas également espacés sur l'échelle
+                — quatre crans séparent les deux premiers, cinq les suivants —
+                et un `justify-between` les aurait tous décalés sauf aux
+                extrémités. */}
+            <div className="relative mx-[11px] mt-0.5 h-3.5" aria-hidden>
+              {[1, 5, 10, 15, 20, 25].map((jalon) => (
+                <span
+                  key={jalon}
+                  className="absolute -translate-x-1/2 text-[10px] tabular-nums text-faint"
+                  style={{ left: `${((jalon - 1) / (BOT_LEVELS.length - 1)) * 100}%` }}
+                >
+                  {jalon}
+                </span>
+              ))}
+            </div>
+
             <div className="mt-1.5 flex justify-between text-[11px] text-faint">
               <span>1 · débutant complet (100)</span>
               <span>25 · surhumain (3200)</span>
