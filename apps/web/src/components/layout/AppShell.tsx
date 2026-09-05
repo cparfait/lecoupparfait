@@ -93,8 +93,14 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Zone sûre en haut : `viewport-fit=cover` fait passer la page sous la
           barre d'état et l'encoche en mode installé, et l'en-tête collant
           commençait là-dessous. Le rembourrage vaut zéro partout ailleurs. */}
-      <header className="sticky top-0 z-50 border-b border-line/70 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
-        <div className="absolute inset-0 -z-10 bg-[var(--bg)]/72" aria-hidden />
+      <header className="sticky top-0 z-50 border-b border-line-strong/70 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
+        {/* La barre se peignait avec la couleur de la page à 72 % : sur trois
+            thèmes sur quatre, elle avait donc exactement la teinte de ce qu'elle
+            surplombe, et l'on ne voyait ni où elle commençait ni ce qui passait
+            dessous en défilant. Elle prend la matière des surfaces qui flottent
+            — la même que les menus qu'elle ouvre — et son filet inférieur passe
+            au liseré fort. */}
+        <div className="absolute inset-0 -z-10 bg-[var(--flottant)]/92" aria-hidden />
         {/* Le resserrement sous 360 px n'est pas cosmétique.
             Cinq commandes à droite — série, thème, préférences, compte,
             menu — tiennent à 375 px, et débordaient à 320 du temps où la voix
@@ -401,6 +407,8 @@ function MenuSection({
 }) {
   const t = useT()
   const active = sectionActive(section, pathname)
+  /** Voir le commentaire de la première entrée du panneau. */
+  const teinteSommaire = section.teinte === 'var(--accent)' ? 'var(--accent-2)' : section.teinte
 
   return (
     <Menu
@@ -440,7 +448,16 @@ function MenuSection({
             role="menuitem"
             className="flex items-center gap-2.5 rounded-[var(--radius-sm)] bg-surface/70 px-2.5 py-2 transition-colors hover:bg-surface-hover"
           >
-            <section.icon size={16} className="shrink-0" style={{ color: section.teinte }} />
+            {/* Une couleur qui n'est pas celle des entrées.
+
+                Les entrées du panneau portent toutes l'accent. Quand la
+                rubrique porte le même — « Jouer », « Analyse », « Communauté »
+                —, la première ligne se fondait dans les six suivantes, et
+                l'on ne voyait plus qu'elle n'était pas du même ordre. Sur
+                « Apprendre », dont la teinte est le vert, elle se détachait
+                d'elle-même : c'est cet effet-là qu'on reproduit là où il
+                manque, sans toucher aux rubriques qui l'ont déjà. */}
+            <section.icon size={16} className="shrink-0" style={{ color: teinteSommaire }} />
             <span className="min-w-0 flex-1">
               {/* « Voir la page Jouer » et non « Jouer » : le mot seul répète
                   le bouton qu'on vient d'ouvrir, et l'on croit avoir affaire à
@@ -527,7 +544,11 @@ function BottomBar({ pathname }: { pathname: string }) {
       // quatre-vingt-dix : la barre prenait un sixième de la hauteur, et
       // recouvrait le bas de l'échiquier. C'est le seul cas où le hamburger
       // de l'en-tête reparaît, et la seule raison qui le fait vivre encore.
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-[var(--bg)]/88 backdrop-blur-xl safe-bottom lg:hidden paysage:hidden"
+      // Même matière que l'en-tête et les menus : la barre du bas portait la
+      // couleur de la page, et sur un écran sombre elle ne se détachait que par
+      // un filet à 9 % de blanc. Une barre de navigation posée par-dessus le
+      // contenu doit se voir comme posée.
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-line-strong bg-[var(--flottant)]/95 backdrop-blur-xl safe-bottom lg:hidden paysage:hidden"
       aria-label="Navigation rapide"
     >
       <div className="mx-auto flex max-w-md items-stretch justify-around px-1 pt-1.5">

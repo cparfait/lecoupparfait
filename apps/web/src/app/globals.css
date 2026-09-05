@@ -34,6 +34,14 @@
   --bg: #07070c;
   --bg-deep: #04040a;
   --bg-elev: #0d0d17;
+  /* Ce qui flotte au-dessus de la page : menus, barre du haut, barre du bas.
+
+     `--bg-elev` ne suffisait pas. Six points de luminance séparent #07070c de
+     #0d0d17 : posé sur la page, un menu déroulant se distinguait par son seul
+     liseré à 17 % de blanc, et disparaissait dès qu'on le regardait sur un
+     écran peu contrasté ou en plein jour. Une surface flottante doit se lire
+     comme un objet posé, pas comme une découpe du fond. */
+  --flottant: #1e1e2f;
   --surface: rgb(255 255 255 / 0.045);
   --surface-hover: rgb(255 255 255 / 0.075);
   --surface-strong: rgb(255 255 255 / 0.1);
@@ -117,6 +125,7 @@
   --bg: #14100b;
   --bg-deep: #0d0a07;
   --bg-elev: #1d1710;
+  --flottant: #322718;
   --surface: rgb(232 220 200 / 0.05);
   --surface-hover: rgb(232 220 200 / 0.085);
   --surface-strong: rgb(232 220 200 / 0.12);
@@ -190,6 +199,10 @@
   --bg: #f7f7f9;
   --bg-deep: #eeeef2;
   --bg-elev: #ffffff;
+  /* Sur fond clair, une surface flottante ne peut pas monter plus haut que le
+     blanc : c'est l'ombre portée et le liseré qui la détachent, et ils sont
+     posés par l'utilitaire `popover`. */
+  --flottant: #ffffff;
   --surface: rgb(255 255 255 / 0.85);
   --surface-hover: #ffffff;
   --surface-strong: #ffffff;
@@ -262,6 +275,7 @@
   --bg: #000000;
   --bg-deep: #000000;
   --bg-elev: #0a0a0a;
+  --flottant: #1c1c1c;
   --surface: #101010;
   --surface-hover: #1c1c1c;
   --surface-strong: #262626;
@@ -649,9 +663,13 @@ button.glass:hover {
  * surfaces-là sont donc opaques.
  */
 @utility popover {
-  background: var(--bg-elev);
+  background: var(--flottant);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
+  /* L'ombre était laissée à l'appelant, et la moitié l'oubliait : un panneau
+     sans ombre sur un fond presque de la même couleur ne flotte pas, il se
+     fond. Elle appartient à la surface, pas à l'endroit où on la pose. */
+  box-shadow: var(--shadow);
 }
 
 /* Bordure en dégradé : un fond dégradé masqué pour ne laisser que le contour. */

@@ -27,7 +27,7 @@
       "port": 3001
     },
     {
-      "name": "web-3002",
+      "name": "web-3005",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
         "run",
@@ -36,10 +36,10 @@
         "@coupparfait/web",
         "--",
         "-p",
-        "3002"
+        "3005"
       ],
-      "url": "http://localhost:3002",
-      "port": 3002
+      "url": "http://localhost:3005",
+      "port": 3005
     }
   ]
 }
