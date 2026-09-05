@@ -114,13 +114,22 @@ export function RubanCoups({
   const premier = Math.max(0, debut)
 
   return (
-    <div className={clsx('flex items-center gap-1', className)}>
+    /*
+      Les deux flèches se voient et se visent.
+
+      Elles étaient grises sur le fond, sans surface ni contour : deux
+      chevrons de dix-huit pixels qu'on ne distinguait pas d'une décoration, et
+      qu'on ratait une fois sur deux au pouce. Ce sont pourtant les seules
+      commandes de ce ruban — tout le reste est du texte. Surface, liseré, et
+      quarante-huit points de côté au doigt.
+    */
+    <div className={clsx('flex items-center gap-1.5', className)}>
       <button
         type="button"
         onClick={() => onSeek(Math.max(0, cursor - 1))}
         disabled={cursor <= 0}
         aria-label="Coup précédent"
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover disabled:opacity-30 pointer-coarse:h-11 pointer-coarse:w-11"
+        className="grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius-sm)] bg-surface-strong text-ink ring-1 ring-inset ring-line-strong transition-colors hover:bg-surface-hover disabled:opacity-30 disabled:ring-line pointer-coarse:h-12 pointer-coarse:w-12"
       >
         <ChevronLeft size={18} aria-hidden />
       </button>
@@ -202,7 +211,7 @@ export function RubanCoups({
         onClick={() => onSeek(Math.min(coups.length - 1, cursor + 1))}
         disabled={cursor >= coups.length - 1}
         aria-label="Coup suivant"
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover disabled:opacity-30 pointer-coarse:h-11 pointer-coarse:w-11"
+        className="grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius-sm)] bg-surface-strong text-ink ring-1 ring-inset ring-line-strong transition-colors hover:bg-surface-hover disabled:opacity-30 disabled:ring-line pointer-coarse:h-12 pointer-coarse:w-12"
       >
         <ChevronRight size={18} aria-hidden />
       </button>

@@ -44,6 +44,7 @@ import { PhysicalBoardPanel } from '@/components/board/PhysicalBoardPanel.tsx'
 import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
 import { useEcranAllume } from '@/lib/ecranAllume.ts'
 import { MoveList } from '@/components/game/MoveList.tsx'
+import { RubanCoups, rubanDepuisLesCoups } from '@/components/game/RubanCoups.tsx'
 import { PlayerBar } from '@/components/game/PlayerBar.tsx'
 import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
 import { Button, ButtonLink, Card, Chip, Spinner } from '@/components/ui/index.tsx'
@@ -380,6 +381,12 @@ export default function LiveGamePage() {
   const [revu, setRevu] = useState<number | null>(null)
   const dernierDemiCoup = playedMoves.length - 1
 
+  /** Les coups tels que le ruban les attend, verdicts compris. */
+  const rubanCoups = useMemo(
+    () => rubanDepuisLesCoups(playedMoves, qualites),
+    [playedMoves, qualites],
+  )
+
   const revoir = useCallback(
     (ply: number) => {
       // Revenir au dernier coup, c'est revenir au direct — sinon la position
@@ -596,6 +603,27 @@ export default function LiveGamePage() {
             />
           </div>
 
+          {/* ── Le ruban des coups, sous l'échiquier ──────────────────────
+            Revoir le coup précédent demandait de descendre : les flèches
+            vivent dans la liste des coups, qui est dans la colonne de droite —
+            c'est-à-dire, sur téléphone, sous l'échiquier, sous la barre
+            d'actions et sous le tchat. On quittait donc la position des yeux
+            pour aller chercher le bouton qui sert à la revoir.
+
+            Le ruban est celui de la partie contre l'ordinateur, où il rend ce
+            service depuis toujours : trois coups, deux flèches, à portée de
+            pouce et immédiatement sous le plateau. À partir de `lg`, la liste
+            complète est à côté de l'échiquier et le ruban n'a plus lieu
+            d'être. */}
+          {rubanCoups.length > 0 && (
+            <RubanCoups
+              coups={rubanCoups}
+              cursor={revu ?? dernierDemiCoup}
+              onSeek={revoir}
+              className="mt-1.5 lg:hidden"
+            />
+          )}
+
           {/* Le retour au direct, en clair et à portée de pouce : sans lui, on
             se retrouve devant un échiquier qui refuse les coups sans dire
             pourquoi — et l'adversaire attend. */}
@@ -758,27 +786,6 @@ export default function LiveGamePage() {
             </Card>
           )}
 
-          {waiting && (
-            <Card glow className="p-4 text-center">
-              <Spinner size={20} className="mx-auto text-accent" />
-              <p className="mt-3 text-sm font-medium">En attente de ton adversaire…</p>
-              <p className="mt-1.5 text-xs leading-relaxed text-muted">
-                Partage l’adresse de cette page. La partie démarrera dès qu’il arrivera.
-              </p>
-              <Button
-                size="sm"
-                variant="secondary"
-                className="mt-3"
-                onClick={() => {
-                  void navigator.clipboard.writeText(window.location.href)
-                  toast.success('Lien copié')
-                }}
-              >
-                Copier le lien
-              </Button>
-            </Card>
-          )}
-
           <div className="flex flex-wrap gap-1.5">
             <Chip>{formatTimeControl(timeControl)}</Chip>
             <Chip tone={snapshot.rated ? 'accent' : 'neutral'}>
@@ -912,6 +919,41 @@ export default function LiveGamePage() {
           </div>
         </div>
       </div>
+
+      {/* ── L'attente, au milieu de l'écran ────────────────────────────
+          Elle était une carte de plus dans la colonne de droite : sur
+          téléphone, elle atterrissait donc sous l'échiquier, sous la barre
+          d'actions, à demi coupée par le bord de la fenêtre — on lisait « La
+          partie démarrera dès qu'il arriv… ». C'est pourtant le seul message
+          de l'écran tant que personne n'est en face, et il n'y a rien d'autre
+          à faire que le lire et copier le lien.
+
+          Il passe donc au milieu, par-dessus le reste. Pas de `role="dialog"`
+          ni de piège à focus : rien n'est à décider, et l'on doit pouvoir
+          continuer à tourner l'échiquier ou ouvrir le tchat pendant qu'on
+          attend. */}
+      {waiting && (
+        <div className="pointer-events-none fixed inset-0 z-[70] grid place-items-center p-4">
+          <div className="popover pointer-events-auto animate-slide-up w-full max-w-xs p-5 text-center shadow-[var(--shadow-lg)]">
+            <Spinner size={22} className="mx-auto text-accent" />
+            <p className="mt-3 text-sm font-medium">En attente de ton adversaire…</p>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+              Partage l’adresse de cette page. La partie démarrera dès qu’il arrivera.
+            </p>
+            <Button
+              size="sm"
+              variant="primary"
+              className="mt-4"
+              onClick={() => {
+                void navigator.clipboard.writeText(window.location.href)
+                toast.success('Lien copié')
+              }}
+            >
+              Copier le lien
+            </Button>
+          </div>
+        </div>
+      )}
 
       {over && (
         <GameOverDialog
