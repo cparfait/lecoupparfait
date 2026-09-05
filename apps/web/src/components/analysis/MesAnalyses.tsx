@@ -25,6 +25,7 @@ import {
   type AnalyseEnregistree,
 } from '@/lib/analysis/enregistrees.ts'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { MarqueService } from '@/components/brand/MarqueService.tsx'
 
 /** Ce qu'on affiche à gauche de chaque ligne, selon la provenance. */
 const PROVENANCE: Record<AnalyseEnregistree['source'], { glyphe: string; nom: string }> = {
@@ -131,13 +132,24 @@ export function MesAnalyses({
           return (
             <li key={analyse.id}>
               <div className="flex items-center gap-2 rounded-[var(--radius-sm)] border border-line bg-surface px-2.5 py-2 transition-colors hover:bg-surface-hover">
-                <span
-                  className="grid h-7 w-7 shrink-0 place-items-center rounded-[var(--radius-sm)] bg-surface-strong text-sm"
-                  title={marque.nom}
-                  aria-hidden
-                >
-                  {marque.glyphe}
-                </span>
+                {/* Les deux services extérieurs portent leur vignette : dans
+                    une liste où se mêlent parties d'ici, PGN collés et
+                    imports, la provenance se lit à la couleur avant le mot. */}
+                {analyse.source === 'chesscom' || analyse.source === 'lichess' ? (
+                  <MarqueService
+                    service={analyse.source}
+                    taille={28}
+                    className="rounded-[var(--radius-sm)]"
+                  />
+                ) : (
+                  <span
+                    className="grid h-7 w-7 shrink-0 place-items-center rounded-[var(--radius-sm)] bg-surface-strong text-sm"
+                    title={marque.nom}
+                    aria-hidden
+                  >
+                    {marque.glyphe}
+                  </span>
+                )}
 
                 <button
                   type="button"

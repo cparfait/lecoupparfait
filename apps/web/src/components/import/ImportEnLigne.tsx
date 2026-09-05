@@ -25,6 +25,7 @@ import {
   type PartieImportee,
   type SourceEnLigne,
 } from '@/lib/import/enligne.ts'
+import { MarqueService } from '@/components/brand/MarqueService.tsx'
 
 export function ImportEnLigne({
   onChoisir,
@@ -104,7 +105,17 @@ export function ImportEnLigne({
           setErreur(null)
         }}
         label="Service"
-        options={SOURCES.map((entry) => ({ value: entry.id, label: entry.label }))}
+        // La vignette du service dans l'onglet : les deux se choisissent d'un
+        // coup d'œil, à leur couleur, plutôt qu'en lisant deux mots proches.
+        options={SOURCES.map((entry) => ({
+          value: entry.id,
+          label: (
+            <span className="inline-flex items-center justify-center gap-1.5">
+              <MarqueService service={entry.id} taille={14} />
+              {entry.label}
+            </span>
+          ),
+        }))}
       />
 
       <form

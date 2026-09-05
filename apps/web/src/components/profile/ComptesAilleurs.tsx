@@ -18,10 +18,16 @@ import Link from 'next/link'
 import { Gauge } from 'lucide-react'
 import { Button } from '@/components/ui/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import { MarqueService } from '@/components/brand/MarqueService.tsx'
 
 const SERVICES = [
-  { cle: 'chesscomUsername', label: 'Chess.com', exemple: 'ton pseudo Chess.com' },
-  { cle: 'lichessUsername', label: 'Lichess', exemple: 'ton pseudo Lichess' },
+  {
+    cle: 'chesscomUsername',
+    service: 'chesscom',
+    label: 'Chess.com',
+    exemple: 'ton pseudo Chess.com',
+  },
+  { cle: 'lichessUsername', service: 'lichess', label: 'Lichess', exemple: 'ton pseudo Lichess' },
 ] as const
 
 export function ComptesAilleurs() {
@@ -41,7 +47,11 @@ export function ComptesAilleurs() {
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         {SERVICES.map((service) => (
           <label key={service.cle} className="block">
-            <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-faint">
+            {/* La vignette du service, à côté de son nom : deux champs de
+                saisie gris l'un à côté de l'autre se remplissent une fois sur
+                deux dans le mauvais. */}
+            <span className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
+              <MarqueService service={service.service} taille={14} />
               {service.label}
             </span>
             <input
