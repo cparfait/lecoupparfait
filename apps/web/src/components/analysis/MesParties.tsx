@@ -16,7 +16,7 @@
 
 import { useEffect, useState } from 'react'
 import type { Color } from 'chess.js'
-import { Bot, Loader2, Swords, Users } from 'lucide-react'
+import { Bot, ChevronDown, ChevronUp, Loader2, Swords, Users } from 'lucide-react'
 import { SectionTitle } from '@/components/ui/index.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 
@@ -55,6 +55,17 @@ const ISSUE: Record<PartieJouee['issue'], string> = {
   nulle: 'Nulle',
 }
 
+/**
+ * Combien de parties on montre sans qu'on le demande.
+ *
+ * Trois. La liste en affichait trente dans un cadre à défilement interne, posé
+ * au milieu d'un écran qui défile déjà : deux ascenseurs imbriqués, et la
+ * moitié du formulaire d'import repoussée sous la ligne de flottaison. Or on
+ * vient analyser **celle qu'on vient de jouer** — la première de la liste dans
+ * neuf cas sur dix.
+ */
+const PARTIES_VISIBLES = 3
+
 export function MesParties({
   onChoisir,
 }: {
@@ -64,6 +75,8 @@ export function MesParties({
   const identite = useIdentite()
   const [parties, setParties] = useState<PartieJouee[] | null>(null)
   const [choisie, setChoisie] = useState<string | null>(null)
+  /** La liste est-elle dépliée ? Voir `PARTIES_VISIBLES`. */
+  const [toutes, setToutes] = useState(false)
 
   useEffect(() => {
     // `undefined` = on ne sait pas encore ; `null` = personne. Sans compte il
@@ -93,8 +106,11 @@ export function MesParties({
         Celles que tu as jouées ici. Un clic la charge&nbsp;; il ne reste qu’à lancer l’analyse.
       </p>
 
-      <ul className="max-h-[22rem] space-y-1.5 overflow-y-auto pr-1">
-        {parties.map((partie) => {
+      {/* Plus de cadre à défilement : la liste tient en trois lignes, et se
+          déplie sur place quand on cherche une partie plus ancienne. Un
+          ascenseur dans un ascenseur ne se manœuvre pas au pouce. */}
+      <ul className="space-y-1.5">
+        {(toutes ? parties : parties.slice(0, PARTIES_VISIBLES)).map((partie) => {
           const origine = ORIGINE[partie.mode] ?? ORIGINE_PAR_DEFAUT
           const Icone = origine.Icone
 
@@ -144,6 +160,27 @@ export function MesParties({
           )
         })}
       </ul>
+
+      {parties.length > PARTIES_VISIBLES && (
+        <button
+          type="button"
+          onClick={() => setToutes((ouvert) => !ouvert)}
+          aria-expanded={toutes}
+          className="flex w-full items-center justify-center gap-1.5 rounded-[var(--radius-sm)] py-2 text-[12px] font-medium text-muted transition-colors hover:bg-surface-hover hover:text-ink"
+        >
+          {toutes ? (
+            <>
+              <ChevronUp size={13} aria-hidden />
+              Réduire la liste
+            </>
+          ) : (
+            <>
+              <ChevronDown size={13} aria-hidden />
+              Voir les {parties.length - PARTIES_VISIBLES} autres parties
+            </>
+          )}
+        </button>
+      )}
     </div>
   )
 }
