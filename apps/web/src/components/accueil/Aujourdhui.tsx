@@ -24,8 +24,10 @@
  * suffisent à les distinguer.
  */
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { Check, Swords } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Swords } from 'lucide-react'
+import clsx from 'clsx'
 import { tranchesAuDessus } from '@coupparfait/core'
 import { Card } from '@/components/ui/index.tsx'
 import { ListeDesQuetes } from '@/components/daily/ListeDesQuetes.tsx'
@@ -53,6 +55,25 @@ export function Aujourdhui({
   const { etat, xp } = useQuotidien()
   const superieures = tranche ? tranchesAuDessus(tranche) : []
 
+  /**
+   * Une fois le défi relevé, la carte se referme sur son titre.
+   *
+   * Elle gardait sa taille entière toute la journée : la barre de points, le
+   * mot « reviens demain », les quatre quêtes et les tranches plus dures. Or
+   * elle n'annonce plus rien à faire — elle constate. En haut de l'accueil,
+   * cela repousse d'un demi-écran ce qu'on vient vraiment reprendre : une
+   * partie, un chapitre, une leçon.
+   *
+   * Repliée, il reste la seule ligne qui compte : c'est fait, et voilà les
+   * points du jour. Elle se rouvre d'un geste — les quêtes du jour restent à
+   * portée, et c'est justement là qu'on va voir ce qui reste.
+   *
+   * Le choix ne dure que la visite : demain il y a un nouveau défi, et la carte
+   * doit reprendre sa place d'elle-même.
+   */
+  const [deplie, setDeplie] = useState(false)
+  const replie = defiFait && !deplie
+
   return (
     <Card className="overflow-hidden">
       {/* Le liseré vert, comme la teinte de chapitre sur la carte voisine.
@@ -61,23 +82,44 @@ export function Aujourdhui({
           coup d'œil, pas en cherchant une ligne au milieu d'une liste. */}
       {defiFait && <div className="h-1 bg-[var(--q-best)]" aria-hidden />}
 
-      <div className="flex items-baseline justify-between gap-2 border-b border-line/60 px-4 py-2.5">
-        {defiFait ? (
-          <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--q-best)]">
+      {/* Le titre devient le bouton, une fois le défi relevé : c'est la ligne
+          qu'on regarde, autant qu'elle serve. Tant qu'il reste à faire, elle
+          n'est qu'un titre — rien à replier. */}
+      {defiFait ? (
+        <button
+          type="button"
+          onClick={() => setDeplie((ouvert) => !ouvert)}
+          aria-expanded={deplie}
+          className={clsx(
+            'flex w-full items-center gap-2 px-4 py-2.5 text-left transition-colors hover:bg-surface-hover',
+            !replie && 'border-b border-line/60',
+          )}
+        >
+          <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--q-best)]">
             <Check size={12} strokeWidth={3} aria-hidden />
             Défi du jour relevé
-          </p>
-        ) : (
+          </span>
+          <span className="ml-auto text-[11px] tabular-nums text-muted">
+            {xp} / {XP_TOTAL} points du jour
+          </span>
+          {replie ? (
+            <ChevronDown size={14} className="shrink-0 text-faint" aria-hidden />
+          ) : (
+            <ChevronUp size={14} className="shrink-0 text-faint" aria-hidden />
+          )}
+        </button>
+      ) : (
+        <div className="flex items-baseline justify-between gap-2 border-b border-line/60 px-4 py-2.5">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
             Aujourd’hui
           </p>
-        )}
-        <p className="text-[11px] tabular-nums text-muted">
-          {xp} / {XP_TOTAL} points du jour
-        </p>
-      </div>
+          <p className="text-[11px] tabular-nums text-muted">
+            {xp} / {XP_TOTAL} points du jour
+          </p>
+        </div>
+      )}
 
-      <div className="px-4 pb-3 pt-3">
+      <div className={clsx('px-4 pb-3 pt-3', replie && 'hidden')}>
         <div
           className="mb-3 h-1 w-full overflow-hidden rounded-full bg-surface-strong"
           role="progressbar"

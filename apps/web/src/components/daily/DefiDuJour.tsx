@@ -16,11 +16,11 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Check, Swords } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Swords } from 'lucide-react'
 import clsx from 'clsx'
 import { Card, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
-import { queteFaite, jourLocal } from '@/lib/daily/quotidien.ts'
+import { QUETES, queteFaite, jourLocal } from '@/lib/daily/quotidien.ts'
 import { FlammeSerie } from './FlammeSerie.tsx'
 import { ListeDesQuetes } from './ListeDesQuetes.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
@@ -69,6 +69,23 @@ export function DefiDuJour({ className }: { className?: string }) {
   }, [])
 
   const defiFait = etat ? queteFaite(etat, 'defi') : false
+  /**
+   * Le bloc se replie quand le défi est relevé.
+   *
+   * Une fois la position du jour résolue, la carte gardait sa taille entière —
+   * l'échiquier de la position, la ligne « reviens demain », la barre de points
+   * et les quatre quêtes — en haut de l'accueil, tous les jours, alors qu'elle
+   * n'annonce plus rien à faire. Elle repoussait d'un écran ce qu'on vient
+   * vraiment voir : reprendre une partie, une leçon.
+   *
+   * Repliée, elle tient en une ligne qui dit l'essentiel — c'est fait, et
+   * voilà où en est le reste de la journée — et se rouvre d'un geste. Le choix
+   * ne vit que le temps de la visite : demain, il y a de nouveau un défi à
+   * relever, et la carte doit reprendre sa place.
+   */
+  const [deplie, setDeplie] = useState(false)
+  const quetesFaites = etat ? QUETES.filter((quete) => queteFaite(etat, quete.id)).length : 0
+  const replie = defiFait && !deplie
 
   return (
     // `relative` : le recouvrement de `DefiCliquable` s'étend sur cette carte,
@@ -90,7 +107,29 @@ export function DefiDuJour({ className }: { className?: string }) {
         </span>
       </SectionTitle>
 
-      {chargement ? (
+      {replie ? (
+        <button
+          type="button"
+          onClick={() => setDeplie(true)}
+          aria-expanded={false}
+          className="mt-1 flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-1 py-1.5 text-left transition-colors hover:bg-surface-hover"
+        >
+          <span
+            className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[color-mix(in_oklab,var(--q-best)_20%,transparent)]"
+            aria-hidden
+          >
+            <Check size={14} className="text-[var(--q-best)]" />
+          </span>
+          <span className="min-w-0 flex-1 text-[13px] leading-snug">
+            <span className="block font-semibold text-[var(--q-best)]">Défi du jour relevé</span>
+            <span className="block text-muted">
+              {quetesFaites} quête{quetesFaites > 1 ? 's' : ''} sur {QUETES.length} · {xp} /{' '}
+              {XP_TOTAL} points · la prochaine position arrive à minuit
+            </span>
+          </span>
+          <ChevronDown size={16} className="shrink-0 text-faint" aria-hidden />
+        </button>
+      ) : chargement ? (
         <p className="flex items-center gap-2 py-2 text-sm text-muted">
           <Spinner size={13} /> Tirage du jour…
         </p>
@@ -107,7 +146,7 @@ export function DefiDuJour({ className }: { className?: string }) {
       )}
 
       {/* ── Quêtes ────────────────────────────────────────────────────── */}
-      <div className="mt-4">
+      <div className={clsx('mt-4', replie && 'hidden')}>
         <div className="mb-2 flex items-baseline justify-between">
           <span className="text-xs font-semibold uppercase tracking-wide text-faint">
             Aujourd’hui
@@ -131,8 +170,23 @@ export function DefiDuJour({ className }: { className?: string }) {
           />
         </div>
 
-        {/* Cinq lignes, cinq destinations : voir `ListeDesQuetes`. */}
+        {/* Une ligne par quête, une destination par ligne : voir `ListeDesQuetes`. */}
         <ListeDesQuetes etat={etat} />
+
+        {/* Refermer, une fois qu'on a regardé. Seulement quand le défi est
+            relevé : tant qu'il reste à faire, la carte est ce qu'on vient
+            chercher. */}
+        {defiFait && (
+          <button
+            type="button"
+            onClick={() => setDeplie(false)}
+            aria-expanded
+            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-[var(--radius-sm)] py-1.5 text-[12px] font-medium text-muted transition-colors hover:bg-surface-hover hover:text-ink"
+          >
+            <ChevronUp size={13} aria-hidden />
+            Replier le défi du jour
+          </button>
+        )}
       </div>
     </Card>
   )
