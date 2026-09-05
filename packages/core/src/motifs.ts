@@ -19,6 +19,7 @@ import {
   analysePawns,
   fileIndex,
   findHangingPieces,
+  gamePhase,
   kingDistance,
   kingSquare,
   listPieces,
@@ -545,8 +546,23 @@ export function findBadBishops(chess: Chess, color: Color): Square[] {
 }
 
 /**
- * Opposition en finale de pions : les rois se font face à distance impaire sur
- * une même ligne, colonne ou diagonale. Celui qui n'a *pas* le trait la détient.
+ * Opposition en finale de pions.
+ *
+ * Les rois se font face sur une même ligne, colonne ou diagonale, avec un
+ * **nombre impair de cases entre eux** — une, trois ou cinq. Celui qui n'a pas
+ * le trait la détient : l'autre doit jouer, donc céder le passage.
+ *
+ * ── La faute de parité ────────────────────────────────────────────────────
+ *
+ * La fonction comptait la parité de la **distance** au lieu de celle des cases
+ * *entre* les rois, et exigeait qu'elle soit impaire. Or l'opposition directe
+ * — e4 contre e6, une seule case entre les deux — est une distance de 2. Une
+ * distance impaire, elle, ne se produit qu'à distance 1, c'est-à-dire deux rois
+ * collés : une position illégale. La fonction ne rendait donc **jamais** vrai,
+ * et le motif « opposition » n'a jamais été signalé à personne.
+ *
+ * La distance est paire, et vaut au moins deux : 2 pour l'opposition directe,
+ * 4 et 6 pour les oppositions à distance, qui obéissent à la même règle.
  */
 export function hasOpposition(chess: Chess, color: Color): boolean {
   const own = kingSquare(chess, color)
@@ -557,8 +573,7 @@ export function hasOpposition(chess: Chess, color: Color): boolean {
   const aligned = df === 0 || dr === 0 || df === dr
   if (!aligned) return false
   const distance = Math.max(df, dr)
-  // Distance impaire = cases de même couleur entre les rois = opposition.
-  return distance % 2 === 1 && chess.turn() !== color
+  return distance >= 2 && distance % 2 === 0 && chess.turn() !== color
 }
 
 /** Tour placée derrière un pion passé (règle de Tarrasch). */
@@ -755,7 +770,14 @@ export function detectPositionMotifs(chess: Chess, options: MotifOptions = {}): 
     }
 
     // ── Finale ──────────────────────────────────────────────────────────────
-    if (hasOpposition(chess, side)) {
+    //
+    // Et vraiment la finale, désormais. Ce bloc n'était gardé par rien : tant
+    // que `hasOpposition` ne rendait jamais vrai, cela ne se voyait pas. La
+    // faute de parité corrigée, deux rois alignés au milieu d'une partie
+    // complète auraient valu une « opposition » à chaque coup — un mot juste
+    // dans une finale de pions, dénué de sens avec vingt pièces sur
+    // l'échiquier.
+    if (gamePhase(chess) === 'endgame' && hasOpposition(chess, side)) {
       const king = kingSquare(chess, side)
       if (king) out.push(motif('opposition', side, [king], 0.45))
     }

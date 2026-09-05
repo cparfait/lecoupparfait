@@ -761,11 +761,15 @@ repasse.
 **Ce que les tests ont appris sur le code, et qui n'a pas été corrigé** — c'est
 la règle du chantier, une découverte va au journal et non dans le commit :
 
-1. **`hasOpposition` teste la mauvaise parité.** Elle exige une distance
-   impaire entre les rois ; l'opposition directe — e4 contre e6, une case entre
-   les deux — est une distance de **2**. La fonction ne rend donc jamais vrai
-   pour le cas le plus courant. Le test existe, marqué `todo` : il ne fait pas
-   échouer la suite, il attend la correction.
+1. ~~**`hasOpposition` teste la mauvaise parité.**~~ **Corrigé.** Elle exigeait
+   une distance impaire entre les rois ; l'opposition directe — e4 contre e6,
+   une case entre les deux — est une distance de **2**, et une distance impaire
+   ne se produit qu'à distance 1, soit deux rois collés, ce qui est illégal. La
+   fonction ne rendait donc _jamais_ vrai, et le motif « opposition » n'a jamais
+   été signalé à personne. Le test n'est plus `todo`, et deux cas s'y ajoutent :
+   l'opposition à distance et l'opposition diagonale, que la première faute
+   masquait. Le motif est en outre réservé aux finales — sans quoi la
+   correction l'aurait fait apparaître au milieu de parties complètes.
 2. **Deux barèmes de cadence coexistent.** `speedCategory` dans le cœur suit la
    formule de Lichess (`initial + 40 × incrément`, seuils 30/180/480/1500) ;
    `cadence()` dans `api/parties/terminee` ne regarde que le temps initial
@@ -1003,12 +1007,10 @@ l'écran dans les deux sens.
 Les huit lots sont faits. Ce qui reste ouvert, dans l'ordre où je le
 reprendrais :
 
-1. **`hasOpposition` teste la mauvaise parité** (lot E1). Un test `todo`
-   l'attend. C'est le seul défaut de calcul connu restant.
-2. **Deux barèmes de cadence divergent** entre 8 et 10 minutes (lot E1) : une
+1. **Deux barèmes de cadence divergent** entre 8 et 10 minutes (lot E1) : une
    partie change de catégorie de classement selon l'écran où elle a été jouée.
-3. **`jouer/partie/[slug]` a le même défaut de pendule** que l'écran contre
+2. **`jouer/partie/[slug]` a le même défaut de pendule** que l'écran contre
    l'ordinateur (lot B). `PlayerBar` accepte déjà la bonne forme.
-4. **L'arrêt sur `SIGTERM` n'a pas été vérifié à l'exécution** (lot A5) : Node
+3. **L'arrêt sur `SIGTERM` n'a pas été vérifié à l'exécution** (lot A5) : Node
    sous Windows ne l'émet pas depuis `process.kill`. À refaire sur le serveur.
-5. **La notification d'ouverture d'arène** n'est pas branchée (lot G).
+4. **La notification d'ouverture d'arène** n'est pas branchée (lot G).

@@ -136,31 +136,46 @@ test('la paire de fous se compte, sans se tromper de couleur', () => {
   assert.equal(hasBishopPair(new Chess('4k3/8/8/8/8/4B3/8/2B1K3 w - - 0 1'), 'w'), false)
 })
 
-test(
-  'l’opposition appartient à celui qui n’a pas le trait',
-  {
-    todo:
-      'hasOpposition teste la mauvaise parité : elle exige une distance impaire ' +
-      'entre les rois, alors que l’opposition directe — e4 contre e6, une case ' +
-      'entre les deux — est une distance de 2. La fonction ne rend donc jamais ' +
-      'vrai pour l’opposition la plus courante. Trouvé en écrivant ce test ; ' +
-      'la correction sort du lot E1, elle est notée au journal du chantier.',
-  },
-  () => {
-    /*
-      Rois en e4 et e6, une seule case entre eux. L'opposition est au camp qui
-      **ne** doit **pas** jouer : celui qui a le trait doit céder du terrain.
-    */
-    const traitAuxBlancs = new Chess('8/8/4k3/8/4K3/8/8/8 w - - 0 1')
-    assert.equal(hasOpposition(traitAuxBlancs, 'b'), true, 'les Noirs, qui attendent')
-    assert.equal(hasOpposition(traitAuxBlancs, 'w'), false, 'pas les Blancs, qui doivent jouer')
+test('l’opposition appartient à celui qui n’a pas le trait', () => {
+  /*
+    Rois en e4 et e6, une seule case entre eux. L'opposition est au camp qui
+    **ne** doit **pas** jouer : celui qui a le trait doit céder du terrain.
+  */
+  const traitAuxBlancs = new Chess('8/8/4k3/8/4K3/8/8/8 w - - 0 1')
+  assert.equal(hasOpposition(traitAuxBlancs, 'b'), true, 'les Noirs, qui attendent')
+  assert.equal(hasOpposition(traitAuxBlancs, 'w'), false, 'pas les Blancs, qui doivent jouer')
 
-    // Rois décalés en diagonale non alignée : personne n'a l'opposition.
-    const decales = new Chess('8/8/5k2/8/4K3/8/8/8 w - - 0 1')
-    assert.equal(hasOpposition(decales, 'b'), false)
-    assert.equal(hasOpposition(decales, 'w'), false)
-  },
-)
+  // Rois décalés en diagonale non alignée : personne n'a l'opposition.
+  const decales = new Chess('8/8/5k2/8/4K3/8/8/8 w - - 0 1')
+  assert.equal(hasOpposition(decales, 'b'), false)
+  assert.equal(hasOpposition(decales, 'w'), false)
+})
+
+test('l’opposition se compte aussi à distance, et sur les diagonales', () => {
+  /*
+    Ce sont les deux cas que la faute de parité masquait avec le premier : la
+    fonction ne rendait jamais vrai, donc rien ne distinguait une règle fausse
+    d'une règle incomplète.
+  */
+
+  // Opposition à distance : e2 contre e8, cinq cases entre les rois.
+  const lointaine = new Chess('4k3/8/8/8/8/8/4K3/8 w - - 0 1')
+  assert.equal(hasOpposition(lointaine, 'b'), true, 'six cases d’écart : distance paire')
+  assert.equal(hasOpposition(lointaine, 'w'), false)
+
+  // Opposition diagonale : c3 contre e5, une case entre les rois.
+  const diagonale = new Chess('8/8/8/4k3/8/2K5/8/8 w - - 0 1')
+  assert.equal(hasOpposition(diagonale, 'b'), true, 'sur la diagonale aussi')
+
+  /*
+    Distance impaire : les rois se font face avec deux cases entre eux, et c'est
+    celui qui a le trait qui prendra l'opposition en avançant. Personne ne l'a
+    encore — c'est exactement le cas que l'ancienne règle déclarait bon.
+  */
+  const personne = new Chess('8/4k3/8/8/4K3/8/8/8 w - - 0 1')
+  assert.equal(hasOpposition(personne, 'b'), false, 'distance de 3 : pas d’opposition')
+  assert.equal(hasOpposition(personne, 'w'), false)
+})
 
 test('une pièce piégée est repérée, et une pièce libre ne l’est pas', () => {
   /*
