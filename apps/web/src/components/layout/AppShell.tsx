@@ -195,7 +195,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 // demandait alors deux gestes au lieu d'un. Les quatre
                 // commandes tiennent : le sélecteur de thème et la voix ont
                 // libéré la place, et l'écart se resserre déjà sous 360 px.
-                className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
+                className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] bg-surface-strong text-ink ring-1 ring-inset ring-line-strong transition-colors hover:bg-surface-hover cible-doigt"
                 aria-label="Administration"
                 title="Administration"
               >
@@ -216,7 +216,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 les quatre raccourcis du bas. */}
             <Link
               href="/"
-              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
+              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] bg-surface-strong text-ink ring-1 ring-inset ring-line-strong transition-colors hover:bg-surface-hover cible-doigt"
               aria-label={t('nav.home')}
               title={t('nav.home')}
             >
@@ -224,7 +224,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
             <Link
               href="/preferences"
-              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
+              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] bg-surface-strong text-ink ring-1 ring-inset ring-line-strong transition-colors hover:bg-surface-hover cible-doigt"
               aria-label={t('nav.settings')}
               title={t('nav.settings')}
             >
@@ -256,8 +256,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                     aria-label={t(section.labelKey)}
                     title={t(section.labelKey)}
                     className={clsx(
-                      'grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] transition-colors cible-doigt',
-                      active ? 'bg-accent/20 text-accent' : 'text-muted hover:bg-surface-hover',
+                      'grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] ring-1 ring-inset transition-colors cible-doigt',
+                      active
+                        ? 'bg-accent/20 text-accent ring-accent/50'
+                        : 'bg-surface-strong text-ink ring-line-strong hover:bg-surface-hover',
                     )}
                   >
                     <Icone size={17} aria-hidden />
@@ -582,9 +584,14 @@ function BottomBar({ pathname }: { pathname: string }) {
               )}
             >
               <span
+                /* La pastille existe aussi quand l'onglet n'est pas actif :
+                   sans elle, quatre icônes grises flottaient sur la barre et
+                   rien ne disait où appuyer. */
                 className={clsx(
-                  'grid h-7 w-12 place-items-center rounded-full transition-all',
-                  active && 'bg-accent/20 shadow-[0_0_16px_-4px_var(--accent)]',
+                  'grid h-7 w-12 place-items-center rounded-full ring-1 ring-inset transition-all',
+                  active
+                    ? 'bg-accent/20 shadow-[0_0_16px_-4px_var(--accent)] ring-accent/40'
+                    : 'bg-surface-strong ring-line-strong',
                 )}
               >
                 <Icone size={20} strokeWidth={active ? 2.5 : 2} aria-hidden />

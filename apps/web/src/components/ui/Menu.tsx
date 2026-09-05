@@ -174,9 +174,21 @@ export function Menu({
         aria-haspopup="menu"
         aria-expanded={ouvert}
         aria-controls={ouvert ? panneauId : undefined}
+        /*
+          Un bouton de menu doit ressembler à un bouton.
+
+          Celui-ci était un mot gris posé sur le fond de la page : rien ne le
+          distinguait d'un titre, et l'on n'apprenait qu'il s'ouvrait qu'en le
+          survolant — ce qui n'existe pas au doigt. Il porte donc une surface et
+          un liseré, en permanence, et passe à la surface forte une fois
+          ouvert. Le texte est en pleine encre : c'est de la navigation, pas
+          une mention secondaire.
+        */
         className={clsx(
-          'flex items-center gap-1 rounded-[var(--radius-sm)] px-2.5 py-1.5 text-sm font-medium transition-colors',
-          ouvert ? 'bg-surface-hover text-ink' : 'text-muted hover:bg-surface-hover hover:text-ink',
+          'flex items-center gap-1 rounded-[var(--radius-sm)] px-2.5 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors',
+          ouvert
+            ? 'bg-surface-strong text-ink ring-accent/50'
+            : 'bg-surface-strong text-ink ring-line-strong hover:bg-surface-hover',
         )}
       >
         {declencheur(ouvert)}

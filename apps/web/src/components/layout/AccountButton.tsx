@@ -89,9 +89,12 @@ export function AccountButton({ variant = 'header' }: { variant?: 'header' | 'me
       href={`/profil/${me.username}`}
       title={t('nav.profile')}
       className={clsx(
+        // Comme les autres commandes de la barre : une surface et un liseré.
+        // Sans eux, un avatar et un pseudo posés sur le fond ne se lisaient pas
+        // comme un bouton — et c'est pourtant la porte du compte.
         'items-center gap-2 rounded-[var(--radius-sm)] font-semibold transition-colors hover:bg-surface-hover',
         variant === 'header'
-          ? 'inline-flex h-9 px-1.5 text-[13px] text-ink sm:px-2'
+          ? 'inline-flex h-9 bg-surface-strong px-1.5 text-[13px] text-ink ring-1 ring-inset ring-line-strong sm:px-2'
           : 'col-span-2 mt-1 flex justify-center px-3 py-2.5 text-sm text-ink',
       )}
     >

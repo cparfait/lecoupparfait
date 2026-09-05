@@ -59,7 +59,11 @@ import { useIdentite } from '@/lib/auth/useIdentite.ts'
 type Habillage = 'entete' | 'carte'
 
 const HABILLAGES: Record<Habillage, string> = {
-  entete: 'h-9 gap-1 rounded-[var(--radius-sm)] px-2 hover:bg-surface-hover',
+  // Dans la barre, la flamme est une commande parmi les autres : elle en prend
+  // la surface et le liseré. Un chiffre orange posé sur le fond ne se lisait
+  // pas comme un bouton, alors qu'il en ouvre un.
+  entete:
+    'h-9 gap-1 rounded-[var(--radius-sm)] bg-surface-strong px-2 ring-1 ring-inset ring-line-strong hover:bg-surface-hover',
   carte: 'gap-1 hover:underline',
 }
 
@@ -121,7 +125,7 @@ export function FlammeSerie({
       label={`Série de ${jours}`}
       className="shrink-0"
       declencheur={() => (
-        <span className={clsx(classe, 'h-auto px-0 hover:bg-transparent')}>
+        <span className={clsx(classe, 'h-auto bg-transparent px-0 ring-0 hover:bg-transparent')}>
           {contenu}
           <span className="sr-only">jours consécutifs — voir ta série</span>
         </span>
