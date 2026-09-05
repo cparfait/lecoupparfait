@@ -24,7 +24,7 @@
  * suffisent à les distinguer.
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Check, ChevronDown, ChevronUp, Swords } from 'lucide-react'
 import clsx from 'clsx'
@@ -33,6 +33,9 @@ import { Card } from '@/components/ui/index.tsx'
 import { ListeDesQuetes } from '@/components/daily/ListeDesQuetes.tsx'
 import { XP_TOTAL } from '@/lib/daily/quetes.ts'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
+
+/** L'ancre de la carte, visée depuis le panneau de la série. */
+const ANCRE = 'aujourdhui'
 
 export interface TrancheDefi {
   id: string
@@ -74,8 +77,44 @@ export function Aujourdhui({
   const [deplie, setDeplie] = useState(false)
   const replie = defiFait && !deplie
 
+  /*
+    Sauf quand on vient exprès la voir.
+
+    Le panneau de la flamme, dans la barre du haut, propose « Voir les quêtes
+    du jour ». Il menait à `/` — c'est-à-dire à cette page, souvent celle où
+    l'on était déjà : rien ne bougeait, et quand le défi était relevé les
+    quêtes restaient repliées derrière le titre. Un lien qui ne fait rien est
+    pire qu'un lien absent.
+
+    Il vise désormais `#aujourdhui`. Le navigateur amène la carte sous les
+    yeux ; à nous de l'ouvrir. Deux moments, et les deux comptent : au montage
+    quand on arrive d'une autre page, et sur `hashchange` quand on était déjà
+    ici.
+
+    L'ancre est ensuite retirée de l'adresse. Sans cela, elle reste en place et
+    un second clic sur le même lien n'émet plus rien — on replierait la carte,
+    on redemanderait à la voir, et il ne se passerait rien.
+  */
+  useEffect(() => {
+    const viser = () => {
+      if (window.location.hash !== `#${ANCRE}`) return
+      setDeplie(true)
+      // Après le rendu, sinon on fait défiler vers une carte encore repliée et
+      // l'on s'arrête quelques dizaines de pixels trop bas.
+      requestAnimationFrame(() => {
+        document.getElementById(ANCRE)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        history.replaceState(null, '', window.location.pathname + window.location.search)
+      })
+    }
+    viser()
+    window.addEventListener('hashchange', viser)
+    return () => window.removeEventListener('hashchange', viser)
+  }, [])
+
   return (
-    <Card className="overflow-hidden">
+    // `scroll-mt-20` : l'en-tête est collant, et sans cette marge la carte
+    // s'arrête juste dessous — son titre caché par la barre.
+    <Card id={ANCRE} className="scroll-mt-20 overflow-hidden">
       {/* Le liseré vert, comme la teinte de chapitre sur la carte voisine.
           C'est ce qui se voit sans lire, et c'est tout l'objet : la question
           « est-ce que j'ai fait le défi aujourd'hui ? » doit se répondre d'un

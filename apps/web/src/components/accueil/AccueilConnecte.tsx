@@ -54,7 +54,6 @@ import {
   chapitre as chapitreNumero,
   etapesDe,
   prochaineEtape,
-  rangPour,
 } from '@coupparfait/core'
 import clsx from 'clsx'
 import { Button, ButtonLink, Card, Chip, Skeleton } from '@/components/ui/index.tsx'
@@ -64,6 +63,7 @@ import { chargerPartieEnCours, type PartieEnCours } from '@/lib/game/partieEnCou
 import { jourLocal, queteFaite } from '@/lib/daily/quotidien.ts'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import { DemandesDAmi } from '@/components/social/DemandesDAmi.tsx'
+import { PointsCarriere } from '@/components/carriere/PointsCarriere.tsx'
 import { Aujourdhui, type TrancheDefi } from './Aujourdhui.tsx'
 import { Maintenant } from './Maintenant.tsx'
 import { prochainesChoses, type EtatAccueil } from './prochainesChoses.ts'
@@ -188,7 +188,6 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
 
   const chapitre = progression ? chapitreNumero(progression.chapter) : null
   const suite = chapitre && progression ? prochaineEtape(chapitre, progression) : null
-  const rang = progression ? rangPour(progression.xp) : null
   const carriereEnCours =
     progression != null && progression.chapter < CARRIERE_TERMINEE && chapitre != null
   const defiFait = journee ? queteFaite(journee, 'defi') : null
@@ -237,18 +236,26 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
           Bonjour {pseudo}
         </h1>
         <div className="flex flex-wrap items-center gap-2">
+          {/* La série ne s'affiche qu'à partir de `sm`.
+              La flamme de la barre du haut porte le même chiffre, à trois
+              centimètres au-dessus et sur toutes les tailles d'écran. Sur
+              téléphone, où l'en-tête passe à la ligne, la pastille prenait une
+              ligne entière pour répéter ce qu'on venait de lire. Au-delà, elle
+              reste : elle nomme ce que la flamme ne fait que compter. */}
+          {/* Le pliage est porté par une enveloppe, et non par une classe posée
+              sur la pastille : `Chip` s'ouvre sur `inline-flex`, et deux
+              utilitaires d'affichage sur le même élément se départagent dans
+              l'ordre de la feuille de style, pas dans celui des classes. */}
           {journee != null && journee.serie > 0 && (
-            <Chip tone="warning" title="Jours d’affilée avec au moins une quête faite">
-              <Flame size={11} aria-hidden />
-              {journee.serie} jour{journee.serie > 1 ? 's' : ''} d’affilée
-            </Chip>
+            <div className="hidden sm:block">
+              <Chip tone="warning" title="Jours d’affilée avec au moins une quête faite">
+                <Flame size={11} aria-hidden />
+                {journee.serie} jour{journee.serie > 1 ? 's' : ''} d’affilée
+              </Chip>
+            </div>
           )}
-          {rang && (
-            <Chip tone="accent" title="Expérience accumulée en carrière">
-              <span aria-hidden>{rang.rang.emoji}</span> {rang.rang.nom} · {progression?.xp} pts de
-              carrière
-            </Chip>
-          )}
+          {/* Les points s'ouvrent : voir `PointsCarriere`. */}
+          {progression && <PointsCarriere progression={progression} />}
         </div>
       </header>
 

@@ -186,10 +186,23 @@ export default function LearnPage() {
                Chaque chapitre est maintenant un panneau : un cadre, un fond
                légèrement en retrait, et ses leçons posées **dedans**, sur des
                cartes plus claires que lui. La hiérarchie se voit sans qu'on ait
-               à lire — un chapitre contient des leçons, et cela se dessine. */
+               à lire — un chapitre contient des leçons, et cela se dessine.
+
+               Encore fallait-il que le panneau se voie. Il était peint en
+               `bg-surface/40` sur un liseré `line/70`, c'est-à-dire, en thème
+               sombre, quarante pour cent d'un blanc déjà à 4,5 % — moins de deux
+               points de blanc sur un fond presque noir, et un cadre à six. Rien
+               ne se détachait : le panneau était là dans le code, invisible à
+               l'écran, et les chapitres retombaient dans la colonne
+               indifférenciée que ce bloc devait justement casser.
+
+               `bg-bg-deep` est un fond *creusé*, plus sombre que la page en
+               thème sombre et plus gris qu'elle en thème clair — dans les deux
+               cas un vrai cran, et dans les deux cas les cartes de leçons
+               remontent au-dessus. Le liseré passe au fort. */
             <section
               key={chapter.id}
-              className="animate-slide-up overflow-hidden rounded-[var(--radius)] border border-line/70 bg-surface/40 p-3 sm:p-4"
+              className="animate-slide-up overflow-hidden rounded-[var(--radius)] border border-line-strong bg-bg-deep p-3 sm:p-4"
               style={{ animationDelay: `${chapterIndex * 60}ms` }}
             >
               <header className={clsx(replie ? 'mb-0' : 'mb-4')}>

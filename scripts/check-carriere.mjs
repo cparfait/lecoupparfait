@@ -24,6 +24,7 @@ const {
   etoilesPour,
   etapesDe,
   prochaineEtape,
+  detailXp,
   PROGRESSION_INITIALE,
 } = await import('../packages/core/src/carriere.ts')
 const { BOT_LEVELS, BOT_PERSONALITIES } = await import('../packages/core/src/bots.ts')
@@ -143,6 +144,28 @@ console.log(`  ✓ carrière minimale  : ${xpMinimale} points → ${rangPour(xpM
 
 check('la barre est pleine au dernier rang', rangPour(99999).fraction === 1)
 check('la barre part de zéro', rangPour(0).fraction === 0)
+
+/*
+  Le détail des points doit faire le compte.
+
+  `detailXp` reconstitue d'où viennent les points — la pastille de l'accueil
+  l'ouvre et l'affiche ligne par ligne. Il ne lit aucun journal : il déduit tout
+  des chapitres franchis. Si la route d'accueil se met un jour à accorder de
+  l'expérience pour un geste que cette déduction ignore, la somme des lignes
+  cessera de retomber sur le total, et le panneau affichera une ligne
+  « non détaillés » à tout le monde. Autant s'en apercevoir ici.
+*/
+const carriereFinie = {
+  ...PROGRESSION_INITIALE,
+  chapter: CARRIERE_TERMINEE,
+  stars: Object.fromEntries(CHAPITRES.map((c) => [String(c.numero), 3])),
+}
+check(
+  'le détail des points retombe sur une carrière sans faute',
+  detailXp(carriereFinie).total === xpParfaite,
+  `${detailXp(carriereFinie).total} détaillés pour ${xpParfaite} accordés`,
+)
+check('une carrière vierge n’a aucune ligne de détail', detailXp(PROGRESSION_INITIALE).total === 0)
 
 console.log('\n♟  Étoiles et hauts faits\n')
 

@@ -59,11 +59,11 @@ import { useIdentite } from '@/lib/auth/useIdentite.ts'
 type Habillage = 'entete' | 'carte'
 
 const HABILLAGES: Record<Habillage, string> = {
-  // Dans la barre, la flamme est une commande parmi les autres : elle en prend
-  // la surface et le liseré. Un chiffre orange posé sur le fond ne se lisait
-  // pas comme un bouton, alors qu'il en ouvre un.
-  entete:
-    'h-9 gap-1 rounded-[var(--radius-sm)] bg-surface-strong px-2 ring-1 ring-inset ring-line-strong hover:bg-surface-hover',
+  // Dans la barre, la flamme est une commande parmi les autres : elle prend
+  // leur hauteur et leur surface au survol. Plus de liseré, comme les icônes
+  // voisines — six cadres alignés faisaient une rangée de cases, et la barre
+  // se lisait comme un tableau.
+  entete: 'h-9 gap-1 rounded-[var(--radius-sm)] px-2 hover:bg-surface-hover',
   carte: 'gap-1 hover:underline',
 }
 
@@ -124,11 +124,15 @@ export function FlammeSerie({
       largeur="w-[19rem]"
       label={`Série de ${jours}`}
       className="shrink-0"
+      // Le déclencheur *est* la pastille : sans cela, le bouton de `Menu`
+      // rapporterait son propre cadre, celui-là même qu'on vient de retirer aux
+      // icônes voisines.
+      boutonClassName={clsx(classe, 'cible-doigt')}
       declencheur={() => (
-        <span className={clsx(classe, 'h-auto bg-transparent px-0 ring-0 hover:bg-transparent')}>
+        <>
           {contenu}
           <span className="sr-only">jours consécutifs — voir ta série</span>
-        </span>
+        </>
       )}
     >
       <PanneauSerie etat={etat} serie={serie} />
@@ -192,8 +196,15 @@ function PanneauSerie({ etat, serie }: { etat: EtatQuotidien | null; serie: numb
         les sept derniers jours · aujourd’hui à droite
       </p>
 
+      {/* « Le défi du jour en est une » n'est pas un détail de formulation.
+          Le site nomme deux choses à part — le défi du jour, les quêtes du
+          jour — sans jamais dire que la première est la première des secondes.
+          On y lisait donc deux devoirs quotidiens là où il n'y en a qu'un
+          ensemble. La quête « analyser une partie » citée ici avait par
+          ailleurs disparu du catalogue il y a longtemps. */}
       <p className="mt-3 px-1 text-[12px] leading-relaxed text-muted">
-        Un jour compte dès qu’une seule quête est terminée — un puzzle, une partie, une analyse.{' '}
+        Un jour compte dès qu’une seule des {QUETES.length} quêtes est terminée — et le défi du jour
+        en est une.{' '}
         <strong className="font-semibold text-ink">
           Un jour sans rien, et la flamme repart de zéro.
         </strong>
@@ -215,13 +226,26 @@ function PanneauSerie({ etat, serie }: { etat: EtatQuotidien | null; serie: numb
               <Check size={13} aria-hidden />
               Défi du jour déjà relevé
             </p>
-            <Link
-              href="/"
+            {/* `#aujourdhui`, et non `/` : le lien menait à la page où l'on
+                était déjà, sur une carte repliée. L'ancre l'ouvre et l'amène
+                sous les yeux — voir `Aujourdhui`.
+
+                Et une ancre ordinaire, pas un `Link`. Le routeur de Next change
+                l'adresse par `pushState`, qui n'émet **aucun** événement :
+                depuis l'accueil, la carte n'apprenait jamais qu'on venait de la
+                désigner, et le lien continuait de ne rien faire. Une balise
+                `<a>` déclenche la navigation de fragment du navigateur, donc un
+                `hashchange`, sans recharger quoi que ce soit tant qu'on est
+                déjà sur la page. Depuis une autre page, elle recharge — c'est
+                une navigation de toute façon. */}
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+            <a
+              href="/#aujourdhui"
               className="mt-1 flex items-center justify-between rounded-[var(--radius-sm)] px-1 py-1.5 text-[13px] font-medium transition-colors hover:bg-surface-hover"
             >
-              Voir les quêtes du jour
+              Voir les {QUETES.length - 1} autres quêtes
               <ArrowRight size={14} aria-hidden />
-            </Link>
+            </a>
           </>
         ) : (
           <Link

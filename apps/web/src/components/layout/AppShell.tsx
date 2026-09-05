@@ -195,7 +195,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 // demandait alors deux gestes au lieu d'un. Les quatre
                 // commandes tiennent : le sélecteur de thème et la voix ont
                 // libéré la place, et l'écart se resserre déjà sous 360 px.
-                className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] bg-surface-strong text-ink ring-1 ring-inset ring-line-strong transition-colors hover:bg-surface-hover cible-doigt"
+                className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
                 aria-label="Administration"
                 title="Administration"
               >
@@ -216,7 +216,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 les quatre raccourcis du bas. */}
             <Link
               href="/"
-              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] bg-surface-strong text-ink ring-1 ring-inset ring-line-strong transition-colors hover:bg-surface-hover cible-doigt"
+              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
               aria-label={t('nav.home')}
               title={t('nav.home')}
             >
@@ -224,7 +224,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
             <Link
               href="/preferences"
-              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] bg-surface-strong text-ink ring-1 ring-inset ring-line-strong transition-colors hover:bg-surface-hover cible-doigt"
+              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
               aria-label={t('nav.settings')}
               title={t('nav.settings')}
             >
@@ -256,10 +256,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                     aria-label={t(section.labelKey)}
                     title={t(section.labelKey)}
                     className={clsx(
-                      'grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] ring-1 ring-inset transition-colors cible-doigt',
+                      'grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] transition-colors cible-doigt',
+                      // La rubrique ouverte garde sa surface : c'est un état,
+                      // pas une décoration. Les autres n'ont plus de cadre —
+                      // huit liserés côte à côte faisaient une grille de cases
+                      // vides, et le seul qui comptait s'y perdait.
                       active
-                        ? 'bg-accent/20 text-accent ring-accent/50'
-                        : 'bg-surface-strong text-ink ring-line-strong hover:bg-surface-hover',
+                        ? 'bg-accent/20 text-accent'
+                        : 'text-muted hover:bg-surface-hover hover:text-ink',
                     )}
                   >
                     <Icone size={17} aria-hidden />

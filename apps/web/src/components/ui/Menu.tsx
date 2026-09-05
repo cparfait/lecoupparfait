@@ -57,6 +57,7 @@ export function Menu({
   sens = 'bas',
   largeur = 'w-64',
   className,
+  boutonClassName,
 }: {
   /** Contenu du bouton. Reçoit l'état d'ouverture pour orienter un chevron. */
   declencheur: (ouvert: boolean) => ReactNode
@@ -75,6 +76,15 @@ export function Menu({
   sens?: 'bas' | 'haut'
   largeur?: string
   className?: string
+  /**
+   * Habillage du déclencheur, en remplacement du bouton par défaut.
+   *
+   * Sert quand le menu s'ouvre depuis quelque chose qui a déjà sa forme
+   * ailleurs dans la page — une pastille de l'en-tête d'accueil, par exemple.
+   * Lui imposer l'aspect d'un bouton de barre de navigation la ferait détonner
+   * à côté de sa voisine, qui n'en est pas un.
+   */
+  boutonClassName?: string
 }) {
   const [ouvert, setOuvert] = useState(false)
   const fermer = useCallback(() => setOuvert(false), [])
@@ -184,12 +194,15 @@ export function Menu({
           ouvert. Le texte est en pleine encre : c'est de la navigation, pas
           une mention secondaire.
         */
-        className={clsx(
-          'flex items-center gap-1 rounded-[var(--radius-sm)] px-2.5 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors',
-          ouvert
-            ? 'bg-surface-strong text-ink ring-accent/50'
-            : 'bg-surface-strong text-ink ring-line-strong hover:bg-surface-hover',
-        )}
+        className={
+          boutonClassName ??
+          clsx(
+            'flex items-center gap-1 rounded-[var(--radius-sm)] px-2.5 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors',
+            ouvert
+              ? 'bg-surface-strong text-ink ring-accent/50'
+              : 'bg-surface-strong text-ink ring-line-strong hover:bg-surface-hover',
+          )
+        }
       >
         {declencheur(ouvert)}
       </button>

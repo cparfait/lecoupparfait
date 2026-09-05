@@ -166,10 +166,13 @@ export function Card({
   className,
   glow,
   as: Tag = 'div',
+  id,
   ref,
 }: {
   children: ReactNode
   className?: string
+  /** Ancre, pour ce qu'un lien doit pouvoir viser depuis une autre page. */
+  id?: string
   /** Ajoute le contour dégradé caractéristique du thème. */
   glow?: boolean
   as?: 'div' | 'section' | 'article' | 'aside'
@@ -184,7 +187,7 @@ export function Card({
   ref?: Ref<HTMLElement>
 }) {
   return (
-    <Tag ref={ref as never} className={clsx('glass', glow && 'gradient-ring', className)}>
+    <Tag id={id} ref={ref as never} className={clsx('glass', glow && 'gradient-ring', className)}>
       {children}
     </Tag>
   )
@@ -210,6 +213,37 @@ export function SectionTitle({
   )
 }
 
+export type TonChip = 'neutral' | 'accent' | 'success' | 'warning' | 'danger'
+
+const TONS_CHIP: Record<TonChip, string> = {
+  neutral: 'bg-surface text-muted border-line',
+  accent:
+    'bg-[color-mix(in_oklab,var(--accent)_18%,transparent)] text-accent border-[color-mix(in_oklab,var(--accent)_35%,transparent)]',
+  success:
+    'bg-[color-mix(in_oklab,var(--q-best)_16%,transparent)] text-[var(--q-best)] border-[color-mix(in_oklab,var(--q-best)_32%,transparent)]',
+  warning:
+    'bg-[color-mix(in_oklab,var(--q-inaccuracy)_16%,transparent)] text-[var(--q-inaccuracy)] border-[color-mix(in_oklab,var(--q-inaccuracy)_32%,transparent)]',
+  danger:
+    'bg-[color-mix(in_oklab,var(--q-blunder)_16%,transparent)] text-[var(--q-blunder)] border-[color-mix(in_oklab,var(--q-blunder)_32%,transparent)]',
+}
+
+/**
+ * L'habillage d'une pastille, sans la pastille.
+ *
+ * Exporté pour ce qui doit *être* une pastille sans passer par `Chip` : la
+ * pastille des points de carrière ouvre un panneau, donc son bouton est celui
+ * de `Menu`. Recopier les classes à la main, c'est se garantir qu'un jour l'une
+ * des deux aura la bonne bordure et l'autre l'ancienne.
+ */
+export function classesChip(tone: TonChip = 'neutral', className?: string): string {
+  return clsx(
+    'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5',
+    'text-[11px] font-semibold uppercase tracking-wide',
+    TONS_CHIP[tone],
+    className,
+  )
+}
+
 /** Étiquette compacte, pour les codes ECO, les cadences, les thèmes. */
 export function Chip({
   children,
@@ -221,7 +255,7 @@ export function Chip({
   title,
 }: {
   children: ReactNode
-  tone?: 'neutral' | 'accent' | 'success' | 'warning' | 'danger'
+  tone?: TonChip
   className?: string
   /**
    * Teinte imposée, hors des cinq tons prévus.
@@ -236,31 +270,19 @@ export function Chip({
   /** Infobulle : sert notamment à afficher la définition d'un motif tactique. */
   title?: string
 }) {
-  const tones = {
-    neutral: 'bg-surface text-muted border-line',
-    accent:
-      'bg-[color-mix(in_oklab,var(--accent)_18%,transparent)] text-accent border-[color-mix(in_oklab,var(--accent)_35%,transparent)]',
-    success:
-      'bg-[color-mix(in_oklab,var(--q-best)_16%,transparent)] text-[var(--q-best)] border-[color-mix(in_oklab,var(--q-best)_32%,transparent)]',
-    warning:
-      'bg-[color-mix(in_oklab,var(--q-inaccuracy)_16%,transparent)] text-[var(--q-inaccuracy)] border-[color-mix(in_oklab,var(--q-inaccuracy)_32%,transparent)]',
-    danger:
-      'bg-[color-mix(in_oklab,var(--q-blunder)_16%,transparent)] text-[var(--q-blunder)] border-[color-mix(in_oklab,var(--q-blunder)_32%,transparent)]',
-  } as const
-
   const Tag = onClick ? 'button' : 'span'
   return (
     <Tag
       onClick={onClick}
       title={title}
       style={style}
-      className={clsx(
-        'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5',
-        'text-[11px] font-semibold uppercase tracking-wide',
-        tones[tone],
-        onClick && 'cursor-pointer transition-colors hover:brightness-125',
-        active && 'ring-1 ring-accent',
-        className,
+      className={classesChip(
+        tone,
+        clsx(
+          onClick && 'cursor-pointer transition-colors hover:brightness-125',
+          active && 'ring-1 ring-accent',
+          className,
+        ),
       )}
     >
       {children}

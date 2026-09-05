@@ -344,6 +344,82 @@ export function rangPour(xp: number): EtatDuRang {
   }
 }
 
+/** Une ligne du détail des points : d'où viennent tel nombre de points. */
+export interface LigneXp {
+  cle: 'lecon' | 'puzzle' | 'victoire' | 'chapitre' | 'etoile'
+  /** Ce qui a été fait, au pluriel accordé. */
+  libelle: string
+  nombre: number
+  /** Ce que vaut une unité. */
+  unitaire: number
+  points: number
+}
+
+/**
+ * D'où viennent les points, reconstitué depuis la progression.
+ *
+ * Aucun journal n'est tenu : la base garde un total et les compteurs du
+ * chapitre en cours, pas l'historique des gains. Le détail se **déduit** donc,
+ * exactement comme `puzzlesCumules` déduit les puzzles réussis — un chapitre
+ * franchi a forcément vu sa leçon, ses puzzles et ses victoires, puisque
+ * c'était la condition pour le franchir.
+ *
+ * La somme des lignes doit retomber sur `progression.xp`. Quand ce n'est pas le
+ * cas — un compte d'avant un changement de barème —, c'est à l'écran de le dire
+ * plutôt que de maquiller : voir `PointsCarriere`.
+ */
+export function detailXp(progression: Progression): { lignes: LigneXp[]; total: number } {
+  const franchis = CHAPITRES.filter((c) => c.numero < progression.chapter)
+  const somme = (choisir: (c: Chapitre) => number) => franchis.reduce((t, c) => t + choisir(c), 0)
+
+  const lecons = franchis.length + (progression.lessonDone ? 1 : 0)
+  const puzzles = somme((c) => c.puzzles) + progression.puzzlesDone
+  const victoires = somme((c) => c.victoires) + progression.winsInChapter
+  const etoiles = Object.values(progression.stars).reduce((t, e) => t + e, 0)
+
+  const chapitres = franchis.length
+  const brut: LigneXp[] = [
+    {
+      cle: 'lecon',
+      libelle: lecons > 1 ? 'leçons suivies' : 'leçon suivie',
+      nombre: lecons,
+      unitaire: XP.lecon,
+      points: lecons * XP.lecon,
+    },
+    {
+      cle: 'puzzle',
+      libelle: puzzles > 1 ? 'puzzles réussis' : 'puzzle réussi',
+      nombre: puzzles,
+      unitaire: XP.puzzle,
+      points: puzzles * XP.puzzle,
+    },
+    {
+      cle: 'victoire',
+      libelle: victoires > 1 ? 'victoires en duel' : 'victoire en duel',
+      nombre: victoires,
+      unitaire: XP.victoire,
+      points: victoires * XP.victoire,
+    },
+    {
+      cle: 'chapitre',
+      libelle: chapitres > 1 ? 'chapitres terminés' : 'chapitre terminé',
+      nombre: chapitres,
+      unitaire: XP.chapitre,
+      points: chapitres * XP.chapitre,
+    },
+    {
+      cle: 'etoile',
+      libelle: etoiles > 1 ? 'étoiles décrochées' : 'étoile décrochée',
+      nombre: etoiles,
+      unitaire: XP.etoile,
+      points: etoiles * XP.etoile,
+    },
+  ]
+
+  const lignes = brut.filter((ligne) => ligne.nombre > 0)
+  return { lignes, total: lignes.reduce((t, ligne) => t + ligne.points, 0) }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  Étoiles
 // ─────────────────────────────────────────────────────────────────────────────

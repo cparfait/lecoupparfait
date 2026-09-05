@@ -85,6 +85,22 @@ const THEMES: Array<{ id: string; label: string }> = [
   { id: 'zugzwang', label: 'Zugzwang' },
 ]
 
+/**
+ * Comment on sort du défi du jour.
+ *
+ * C'était « Passer au libre » et « Continuer en libre ». Deux libellés pour la
+ * même action, et « le libre » ne désigne rien : le mot n'apparaît nulle part
+ * dans la navigation, aucun écran ne s'appelle ainsi, et il faut avoir lu le
+ * code pour savoir qu'il s'oppose au défi. Sur téléphone, la formule passait en
+ * prime sur deux lignes dans un bouton large de la moitié de l'écran.
+ *
+ * « Autres puzzles » dit ce qui se passe — on quitte la position du jour pour
+ * des positions calibrées sur son classement — en deux mots qui tiennent sur
+ * une ligne. Un seul endroit, pour que les trois boutons qui font cela le
+ * disent pareil.
+ */
+const SORTIE_DU_DEFI = 'Autres puzzles'
+
 export default function PuzzlesPage() {
   const locale = usePreferences((state) => state.locale)
   const format = useSan()
@@ -1032,7 +1048,7 @@ export default function PuzzlesPage() {
                 onClick={modeDefi ? quitterLeDefi : () => void load()}
                 fullWidth={revealed}
               >
-                {modeDefi ? 'Passer au libre' : 'Passer'}
+                {modeDefi ? SORTIE_DU_DEFI : 'Passer'}
               </Button>
             )}
             {/* « Recommencer » d'abord, et il ne recharge rien : c'est la même
@@ -1074,7 +1090,7 @@ export default function PuzzlesPage() {
                   onClick={quitterLeDefi}
                   fullWidth
                 >
-                  Continuer en libre
+                  {SORTIE_DU_DEFI}
                 </Button>
               </>
             )}
@@ -1111,7 +1127,7 @@ export default function PuzzlesPage() {
           quete={mission.quete}
           restantes={mission.restantes}
           serie={journee?.serie}
-          libelleContinuer={mission.quete.id === 'defi' ? 'Continuer en libre' : 'Puzzle suivant'}
+          libelleContinuer={mission.quete.id === 'defi' ? SORTIE_DU_DEFI : 'Puzzle suivant'}
           onContinuer={() => {
             mission.fermer()
             // Le défi du jour n'a pas de suivant : on sort vers les puzzles
