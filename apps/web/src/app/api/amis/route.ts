@@ -21,6 +21,7 @@ import {
   searchUsers,
 } from '@coupparfait/db/friends'
 import { getCurrentUser } from '@/lib/server/session.ts'
+import { prevenir } from '@/lib/server/push.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -66,6 +67,33 @@ export async function POST(request: Request) {
       if (!result.ok) {
         return NextResponse.json({ error: ADD_ERRORS[result.reason] }, { status: 400 })
       }
+
+      /*
+        On prévient la personne, et c'était le trou le plus visible.
+
+        Une demande d'ami n'envoyait rien du tout : elle attendait dans un
+        carnet qu'on n'ouvre pas sans raison, et se découvrait des jours plus
+        tard — quand elle se découvrait. Le défi entre amis, lui, prévenait
+        depuis toujours ; c'est la même attente, sur un rythme plus lent.
+
+        Deux issues à distinguer : une demande en attente, et une demande
+        croisée que l'on vient de sceller. Annoncer « untel veut t'ajouter » à
+        quelqu'un qui avait déjà demandé serait un contresens — de son point de
+        vue, c'est une réponse, pas une demande.
+      */
+      prevenir(result.targetId, 'invitations', {
+        titre:
+          result.status === 'accepted'
+            ? `${me.username} et toi êtes amis`
+            : `${me.username} veut t’ajouter`,
+        corps:
+          result.status === 'accepted'
+            ? 'Ta demande a trouvé la sienne : vous pouvez vous défier.'
+            : 'Ouvre ton carnet pour accepter ou refuser.',
+        url: '/amis',
+        fil: 'ami',
+      })
+
       return NextResponse.json({ ok: true, status: result.status })
     }
 

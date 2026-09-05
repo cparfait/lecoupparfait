@@ -38,10 +38,12 @@ export interface Notification {
   /**
    * Fil de discussion : une notification remplace la précédente du même fil.
    *
-   * `invitation` pour un défi reçu, `defi-du-jour` pour le rappel quotidien.
-   * Deux rappels quotidiens ne doivent jamais s'empiler.
+   * `invitation` pour un défi reçu, `defi-du-jour` pour le rappel quotidien,
+   * `ami` pour une demande de carnet, `correspondance` pour un coup joué contre
+   * soi. Deux rappels quotidiens ne doivent jamais s'empiler, et trois coups
+   * de correspondance non plus : c'est le dernier qui compte.
    */
-  fil: 'invitation' | 'defi-du-jour'
+  fil: 'invitation' | 'defi-du-jour' | 'ami' | 'correspondance'
 }
 
 const CLE_PUBLIQUE = process.env.VAPID_PUBLIC_KEY?.trim()
@@ -63,6 +65,14 @@ function sujet(): string {
 
   // Dernier recours : l'adresse du site. La norme accepte une URL.
   return process.env.NEXT_PUBLIC_APP_URL?.trim() || 'https://coupparfait.example'
+}
+
+/** Durée de vie du message chez le service de messagerie, en secondes. */
+const DUREES: Record<Notification['fil'], number> = {
+  invitation: 300,
+  'defi-du-jour': 6 * 3600,
+  ami: 3 * 24 * 3600,
+  correspondance: 2 * 24 * 3600,
 }
 
 let configure = false
@@ -111,9 +121,12 @@ export async function envoyerAux(
             keys: { p256dh: abonnement.p256dh, auth: abonnement.auth },
           },
           charge,
-          // Une invitation périmée n'intéresse plus personne : le défi expire
-          // au bout de cinq minutes. Le rappel du jour, lui, vaut la journée.
-          { TTL: notification.fil === 'invitation' ? 300 : 6 * 3600, urgency: 'normal' },
+          // Combien de temps le message attend chez le service de messagerie
+          // si le téléphone est éteint. Une invitation périmée n'intéresse plus
+          // personne — le défi expire en cinq minutes ; un coup de
+          // correspondance vaut jusqu'à ce qu'on le joue, et une demande d'ami
+          // ne se démode pas.
+          { TTL: DUREES[notification.fil], urgency: 'normal' },
         )
         envoyes.push(abonnement.endpoint)
       } catch (erreur) {

@@ -170,7 +170,15 @@ export async function listOutgoingRequests(userId: string): Promise<PendingReque
 }
 
 export type AddFriendResult =
-  | { ok: true; status: 'pending' | 'accepted' }
+  /*
+    `targetId` : à qui la demande s'adresse.
+
+    La route en a besoin pour prévenir la personne — une demande d'ami arrivait
+    sans un signe, et se découvrait en ouvrant le carnet, c'est-à-dire des jours
+    plus tard. Le pseudo ne suffit pas : les notifications sont rangées par
+    identifiant de compte.
+  */
+  | { ok: true; status: 'pending' | 'accepted'; targetId: string }
   | { ok: false; reason: 'unknownUser' | 'self' | 'already' }
 
 /**
@@ -218,13 +226,13 @@ export async function addFriend(userId: string, username: string): Promise<AddFr
         .update(friendships)
         .set({ status: 'accepted', respondedAt: new Date() })
         .where(eq(friendships.id, existing.id))
-      return { ok: true, status: 'accepted' }
+      return { ok: true, status: 'accepted', targetId: target.id }
     }
     return { ok: false, reason: 'already' }
   }
 
   await db.insert(friendships).values({ requesterId: userId, addresseeId: target.id })
-  return { ok: true, status: 'pending' }
+  return { ok: true, status: 'pending', targetId: target.id }
 }
 
 /**

@@ -27,7 +27,7 @@
  * au niveau du document.
  */
 
-import { useEffect, type RefObject } from 'react'
+import { useEffect, useRef, type RefObject } from 'react'
 
 /** Ce qui peut recevoir le focus, dans l'ordre du document. */
 const FOCUSABLES = [
@@ -56,6 +56,27 @@ export function useDialogue(
   conteneur: RefObject<HTMLElement | null>,
   { onFermer, focusInitial, actif = true }: OptionsDialogue = {},
 ): void {
+  /*
+    La fermeture passe par une référence, et ce n'est pas un détail de style.
+
+    Presque tous les appelants écrivent `onFermer={() => setOuvert(false)}` :
+    une fonction neuve à chaque rendu. Avec elle en dépendance, l'effet se
+    défaisait et se refaisait **à chaque rendu du parent** — et il pose le focus
+    en entrant, le rend en sortant.
+
+    Sur un écran de partie, le parent se redessine à chaque battement de
+    pendule, c'est-à-dire une fois par seconde. Le tchat ouvert sur téléphone
+    devenait alors inutilisable : le clavier s'ouvrait, se refermait, se
+    rouvrait, indéfiniment, parce que le focus sautait de la saisie à
+    l'élément précédent une fois par seconde.
+
+    L'effet ne dépend donc plus que de ce qui change vraiment — le conteneur et
+    l'état d'ouverture. Le rappel le plus récent est lu au moment où l'on s'en
+    sert.
+  */
+  const fermerRef = useRef(onFermer)
+  fermerRef.current = onFermer
+
   useEffect(() => {
     const boite = conteneur.current
     if (!actif || !boite) return
@@ -75,7 +96,7 @@ export function useDialogue(
     const auClavier = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault()
-        onFermer?.()
+        fermerRef.current?.()
         return
       }
       if (event.key !== 'Tab') return
@@ -109,5 +130,5 @@ export function useDialogue(
       // le `body`, c'est-à-dire nulle part.
       if (precedent?.isConnected) precedent.focus({ preventScroll: true })
     }
-  }, [conteneur, onFermer, focusInitial, actif])
+  }, [conteneur, focusInitial, actif])
 }

@@ -21,6 +21,7 @@ import {
 import { areFriends } from '@coupparfait/db/friends'
 import { eq, getDb, users } from '@coupparfait/db'
 import { getCurrentUser } from '@/lib/server/session.ts'
+import { prevenir } from '@/lib/server/push.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -105,6 +106,29 @@ export async function POST(request: Request) {
       if (!result.ok) {
         return NextResponse.json({ error: REASONS[result.reason] }, { status: 400 })
       }
+
+      /*
+        C'est maintenant à l'autre de jouer, et il faut bien le lui dire.
+
+        Une partie par correspondance dure des jours : sans notification, elle
+        repose entièrement sur l'habitude d'ouvrir la boîte « au cas où ». On
+        perdait au délai des parties qu'on aurait jouées — c'est le format qui
+        avait le plus besoin d'être prévenu, et c'est celui qui n'avait rien.
+
+        Rien quand la partie vient de se terminer : le mat, l'abandon et la
+        nulle ont leur propre écran, et « à toi de jouer » serait faux.
+      */
+      const adversaire = result.game.opponentId
+      if (adversaire && result.game.result === '*') {
+        const jours = result.game.daysPerMove
+        prevenir(adversaire, 'invitations', {
+          titre: `${me.username} a joué`,
+          corps: `À toi de jouer — tu as ${jours} jour${jours > 1 ? 's' : ''} pour répondre.`,
+          url: '/correspondance',
+          fil: 'correspondance',
+        })
+      }
+
       return NextResponse.json({ ok: true, game: result.game })
     }
 

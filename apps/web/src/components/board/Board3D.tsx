@@ -161,6 +161,26 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
   const quality = prefs.effects === 'high' && !petitEcranTactile ? 'high' : 'low'
 
   /**
+   * La netteté se règle à part des effets.
+   *
+   * Le bridage mobile coupait tout d'un bloc, y compris la densité de pixels,
+   * ramenée à 1. Sur un téléphone dont l'écran en compte trois par point, un
+   * échiquier de trois cent soixante points est alors rendu en 360 × 360 puis
+   * étiré : les arêtes des pièces bavent, et c'est ce qu'on voit en premier —
+   * bien avant l'absence d'ombres portées.
+   *
+   * Or ce n'est pas la densité qui faisait rendre l'âme aux appareils, ce sont
+   * les matériaux à transmission et les ombres, chacun coûtant une passe de
+   * scène entière. On rend donc la moitié du chemin : une densité de 1,5 —
+   * 2,25 fois plus de pixels qu'avant, moitié moins qu'un rendu complet — et
+   * l'on garde éteint tout ce qui multiplie les passes.
+   *
+   * Seulement pour qui a demandé « effets complets » : le réglage économe
+   * reste franchement économe.
+   */
+  const densite = quality === 'high' ? 2 : prefs.effects === 'high' && petitEcranTactile ? 1.5 : 1
+
+  /**
    * Le contexte WebGL peut être repris par le système.
    *
    * Sur téléphone, l'onglet qui passe en arrière-plan ou la mémoire qui manque
@@ -264,7 +284,7 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
     const container = containerRef.current
     if (!container) return
 
-    const dpr = Math.min(window.devicePixelRatio || 1, quality === 'high' ? 2 : 1)
+    const dpr = Math.min(window.devicePixelRatio || 1, densite)
     const attendu = Math.round(size * dpr)
 
     let attempts = 0
@@ -279,7 +299,7 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
     }, 100)
 
     return () => clearInterval(timer)
-  }, [size, quality])
+  }, [size, densite])
 
   return (
     <div
@@ -303,7 +323,7 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
         */
           frameloop="demand"
           shadows={quality === 'high'}
-          dpr={quality === 'high' ? [1, 2] : 1}
+          dpr={[1, densite]}
           gl={{
             antialias: quality === 'high',
             // `high-performance` réclame la carte dédiée quand il y en a une ;

@@ -31,6 +31,8 @@ export interface CorrespondenceGame {
   /** Est-ce à moi de jouer ? */
   yourTurn: boolean
   opponent: string
+  /** Son identifiant de compte : c'est lui qu'on prévient quand on a joué. */
+  opponentId: string | null
   status: string
   result: string
   /** Date du dernier coup, pour savoir depuis quand l'autre réfléchit. */
@@ -85,6 +87,7 @@ function toGame(
     colour,
     yourTurn: !finished && board.turn() === colour,
     opponent,
+    opponentId: colour === 'w' ? row.blackId : row.whiteId,
     status: row.status,
     result: row.result,
     lastMoveAt,

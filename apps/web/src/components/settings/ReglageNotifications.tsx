@@ -76,8 +76,8 @@ export function ReglageNotifications() {
             <Toggle
               checked={choix.invitations}
               onChange={(value) => void changerChoix({ ...choix, invitations: value })}
-              label="Invitations"
-              description="Quand un ami te propose une partie."
+              label="Quand quelqu’un t’attend"
+              description="Une partie proposée, une demande d’ami, un coup joué contre toi en correspondance."
             />
             <Toggle
               checked={choix.defiDuJour}
