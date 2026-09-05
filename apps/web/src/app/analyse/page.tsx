@@ -15,11 +15,13 @@
  * de « −2.4 » il y a toujours une phrase qui dit ce que ça signifie.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ChevronRight,
   ClipboardPaste,
+  Copy,
   Download,
+  ImageDown,
   Gauge,
   Crown,
   Footprints,
@@ -40,6 +42,7 @@ import {
   type FullGameReport,
   toPgn,
   type MoveQuality,
+  MOVE_QUALITY_ORDER,
 } from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { ANNOTATION_COLORS } from '@/components/board/boardKit.ts'
@@ -58,6 +61,7 @@ import {
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import { positionEnPng, telecharger } from '@/lib/board/imagePosition.ts'
 import { ImportEnLigne } from '@/components/import/ImportEnLigne.tsx'
 import { MesAnalyses } from '@/components/analysis/MesAnalyses.tsx'
 import { MesParties } from '@/components/analysis/MesParties.tsx'
@@ -827,6 +831,10 @@ export function ReviewScreen({
   const notation = usePreferences((state) => state.notation)
   const voiceEnabled = usePreferences((state) => state.voiceEnabled)
   const setPreference = usePreferences((state) => state.set)
+  // L'image exportée doit ressembler à l'échiquier qu'on a sous les yeux :
+  // même habillage, mêmes pièces. Voir `positionEnPng`.
+  const habillage = usePreferences((state) => state.boardStyle)
+  const jeuDePieces = usePreferences((state) => state.pieceSet)
 
   /**
    * Les noms des joueurs, quand le PGN les porte.
@@ -1247,8 +1255,16 @@ export function ReviewScreen({
     />
   )
 
-  const exportPgn = useCallback(() => {
-    const pgn = toPgn(report.moves, {
+  /**
+   * Le PGN annoté de la partie analysée.
+   *
+   * Il servait au seul téléchargement ; il sert maintenant aussi au
+   * presse-papiers. Un fichier `.pgn` se range dans les téléchargements et se
+   * retrouve mal ; **coller** est le geste de qui veut relire sa partie
+   * ailleurs — sur un autre moteur, dans un message, dans une étude.
+   */
+  const pgnAnnote = useCallback(() => {
+    return toPgn(report.moves, {
       annotate: true,
       includeEvaluations: true,
       locale,
@@ -1265,15 +1281,48 @@ export function ReviewScreen({
         ]),
       ),
     })
-
-    const blob = new Blob([pgn], { type: 'application/x-chess-pgn' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = 'partie-analysee.pgn'
-    link.click()
-    URL.revokeObjectURL(url)
   }, [report, locale])
+
+  const exportPgn = useCallback(() => {
+    telecharger(new Blob([pgnAnnote()], { type: 'application/x-chess-pgn' }), 'partie-analysee.pgn')
+  }, [pgnAnnote])
+
+  const copierPgn = useCallback(async () => {
+    const pgn = pgnAnnote()
+    try {
+      await navigator.clipboard.writeText(pgn)
+      toast.success('PGN copié', 'Colle-le où tu veux : il porte les annotations.')
+    } catch {
+      // Presse-papiers refusé — contexte non sécurisé, permission absente. Le
+      // fichier reste la sortie de secours, et on le dit plutôt que d'échouer
+      // en silence.
+      toast.info('Copie refusée par le navigateur', 'Utilise « PGN » pour le fichier.')
+    }
+  }, [pgnAnnote])
+
+  /**
+   * La position en image.
+   *
+   * C'est ce qu'on partage vraiment : un diagramme se colle dans un message,
+   * un PGN non. On exporte **la position regardée**, pas la position finale —
+   * on ouvre cet écran pour montrer un moment précis.
+   */
+  const exportImage = useCallback(async () => {
+    const image = await positionEnPng({
+      fen: move?.fenAfter ?? report.moves[0]?.fenBefore ?? '',
+      orientation,
+      habillage: habillage,
+      jeu: jeuDePieces,
+      dernierCoup: move ? { from: move.uci.slice(0, 2), to: move.uci.slice(2, 4) } : null,
+      legende: report.opening?.name ?? null,
+    })
+    if (!image) {
+      toast.error('Image impossible', 'Le navigateur a refusé de dessiner la position.')
+      return
+    }
+    telecharger(image, 'position.png')
+    toast.success('Image enregistrée', 'La position, avec le dernier coup souligné.')
+  }, [move, report.moves, report.opening, orientation, habillage, jeuDePieces])
 
   const style = move ? QUALITY_STYLES[move.quality] : null
 
@@ -1372,14 +1421,37 @@ export function ReviewScreen({
           >
             {voiceEnabled ? 'Voix activée' : 'Voix coupée'}
           </Button>
+          {/* Trois sorties, et elles ne servent pas la même chose : copier
+              pour relire ailleurs tout de suite, le fichier pour archiver,
+              l'image pour montrer une position à quelqu'un. */}
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Copy size={14} />}
+            onClick={() => void copierPgn()}
+            title="Copier le PGN annoté, pour l’analyser ailleurs"
+          >
+            Copier
+          </Button>
           <Button
             size="sm"
             variant="ghost"
             icon={<Download size={14} />}
             onClick={exportPgn}
             className={relecture ? 'max-sm:hidden' : undefined}
+            title="Télécharger la partie annotée au format PGN"
           >
             PGN
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<ImageDown size={14} />}
+            onClick={() => void exportImage()}
+            className={relecture ? 'max-sm:hidden' : undefined}
+            title="Enregistrer la position affichée en image PNG"
+          >
+            Image
           </Button>
           {/* Une analyse ouverte par un lien n'a pas d'« autre partie » : il
               n'y a pas d'écran d'import derrière, on est arrivé directement
@@ -1807,57 +1879,113 @@ function AccuracySummary({
   noms: { w: string | null; b: string | null }
   issue: 'w' | 'b' | 'nulle' | null
 }) {
+  /*
+    On ne montre que les lignes qui existent.
+
+    Le barème compte onze catégories. Les afficher toutes donne un tableau dont
+    la moitié des lignes sont des zéros — et un zéro n'apprend rien, sinon que
+    la catégorie existe. On garde donc celles qu'au moins un des deux joueurs a
+    touchées, dans l'ordre du barème : du brillant à la gaffe, ce qui se lit
+    comme une échelle.
+  */
+  const lignes = MOVE_QUALITY_ORDER.filter(
+    (quality) => report.counts.w[quality] > 0 || report.counts.b[quality] > 0,
+  )
+
   return (
-    <Card className="p-3">
-      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
-        Précision de la partie
+    <Card className="overflow-hidden">
+      <p className="border-b border-line/60 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
+        Bilan de la partie
       </p>
-      <div className="space-y-1.5">
-        {(['w', 'b'] as const).map((colour) => (
-          <div key={colour} className="flex items-center gap-2">
-            <span
-              className={clsx(
-                'h-2.5 w-2.5 shrink-0 rounded-full',
-                colour === 'w'
-                  ? 'bg-[var(--eval-white)]'
-                  : 'bg-[var(--eval-black)] ring-1 ring-line',
+
+      <div className="p-3">
+        {/* ── Les deux joueurs, et leur précision ─────────────────────────
+            En haut et en grand : c'est le chiffre qu'on vient chercher, et
+            celui qui donne son sens à tout ce qui suit. */}
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          {(['w', 'b'] as const).map((colour, rang) => (
+            <Fragment key={colour}>
+              {rang === 1 && (
+                <span className="px-1 text-[10px] uppercase tracking-wide text-faint">
+                  précision
+                </span>
               )}
-              aria-hidden
-            />
-            {/* Le nom passe avant la couleur : dans une partie importée, on
-                cherche « comment j'ai joué », pas « comment les Blancs ont
-                joué ». La largeur fixe saute — un pseudo ne tient pas en douze
-                pixels — et le débordement est tronqué plutôt que de pousser les
-                chiffres hors du cadre. */}
-            <span className="min-w-0 flex-1 truncate text-[13px] font-medium">
-              {noms[colour] ?? (colour === 'w' ? 'Blancs' : 'Noirs')}
-            </span>
-            <span className="w-16 shrink-0 font-display text-lg font-bold tabular-nums leading-none">
-              {report.accuracy[colour].toFixed(0)}
-              <span className="text-[11px] font-normal text-muted"> %</span>
-            </span>
-            <span className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
-              {SUMMARY_QUALITIES.filter((quality) => report.counts[colour][quality] > 0).map(
-                (quality) => {
-                  const style = QUALITY_STYLES[quality]
-                  return (
-                    <span
-                      key={quality}
-                      className="inline-flex items-center gap-0.5 rounded-[var(--radius-sm)] px-1 py-0.5 text-[11px] font-semibold"
-                      style={{
-                        background: `color-mix(in oklab, var(--q-${style.token}) 16%, transparent)`,
-                        color: `var(--q-${style.token})`,
-                      }}
-                      title={`${style.label.fr} — ${style.description.fr}`}
-                    >
-                      {style.glyph} {report.counts[colour][quality]}
+              <div className={clsx('min-w-0', rang === 0 ? 'text-left' : 'text-right')}>
+                <p className="flex items-center gap-1.5 truncate text-[12px] font-medium">
+                  {rang === 1 && (
+                    <span className="min-w-0 flex-1 truncate text-right">
+                      {noms[colour] ?? 'Noirs'}
                     </span>
-                  )
-                },
-              )}
-            </span>
-          </div>
-        ))}
+                  )}
+                  <span
+                    className={clsx(
+                      'h-2.5 w-2.5 shrink-0 rounded-full',
+                      colour === 'w'
+                        ? 'bg-[var(--eval-white)]'
+                        : 'bg-[var(--eval-black)] ring-1 ring-line',
+                    )}
+                    aria-hidden
+                  />
+                  {rang === 0 && (
+                    <span className="min-w-0 flex-1 truncate">{noms[colour] ?? 'Blancs'}</span>
+                  )}
+                </p>
+                <p className="mt-0.5 font-display text-2xl font-bold tabular-nums leading-none">
+                  {report.accuracy[colour].toFixed(1)}
+                  <span className="text-[11px] font-normal text-muted"> %</span>
+                </p>
+              </div>
+            </Fragment>
+          ))}
+        </div>
+
+        {/* ── Une ligne par catégorie ──────────────────────────────────────
+            Le compte de chacun de part et d'autre, et au milieu le glyphe du
+            barème avec sa couleur. C'est la forme d'un tableau de scores : on
+            compare deux colonnes, pas deux paragraphes.
+
+            Les chips en fin de ligne, qui tenaient lieu de bilan, disaient la
+            même chose en moins clair — on ne pouvait ni comparer les deux
+            joueurs sur une catégorie, ni voir d'un coup d'œil ce qui manquait. */}
+        <div className="mt-3 space-y-0.5 border-t border-line/60 pt-2">
+          {lignes.map((quality) => {
+            const style = QUALITY_STYLES[quality]
+            const teinte = `var(--q-${style.token})`
+            return (
+              <div
+                key={quality}
+                className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 rounded-[var(--radius-sm)] px-1 py-1"
+                title={`${style.label.fr} — ${style.description.fr}`}
+              >
+                <span
+                  className="text-left text-[13px] font-semibold tabular-nums"
+                  style={{ color: teinte }}
+                >
+                  {report.counts.w[quality]}
+                </span>
+                <span className="flex items-center justify-center gap-1.5">
+                  <span
+                    className="grid h-5 w-5 shrink-0 place-items-center rounded-full text-[11px] font-bold"
+                    style={{
+                      background: `color-mix(in oklab, ${teinte} 20%, transparent)`,
+                      color: teinte,
+                    }}
+                    aria-hidden
+                  >
+                    {style.glyph}
+                  </span>
+                  <span className="text-[12px] text-muted">{style.label.fr}</span>
+                </span>
+                <span
+                  className="text-right text-[13px] font-semibold tabular-nums"
+                  style={{ color: teinte }}
+                >
+                  {report.counts.b[quality]}
+                </span>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </Card>
   )
@@ -1931,16 +2059,6 @@ function KeyMoments({
     </Card>
   )
 }
-
-/** Catégories qui apportent une information — les coups corrects vont de soi. */
-const SUMMARY_QUALITIES: MoveQuality[] = [
-  'brilliant',
-  'great',
-  'inaccuracy',
-  'mistake',
-  'blunder',
-  'miss',
-]
 
 function PlayerReport({
   colour,
