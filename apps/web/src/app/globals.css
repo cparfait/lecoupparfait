@@ -82,8 +82,8 @@
   --aurora-4: rgb(124 92 255 / 0.14);
   --aurora-5: rgb(0 229 168 / 0.08);
   --aurora-3: rgb(255 122 89 / 0.16);
-  /* Une image sous les dégradés, tirée par `scripts/build-fonds.mjs` : voir `.ambient-backdrop`. */
-  --fond-image: url('/fond/aurora.webp');
+  /* Une image sous les dégradés, si l'on en veut une : voir `.ambient-backdrop`. */
+  --fond-image: none;
 
   /* Échiquier */
   --sq-light: #dfd7ea;
@@ -160,7 +160,6 @@
   --aurora-4: rgb(201 162 39 / 0.1);
   --aurora-5: rgb(163 59 42 / 0.08);
   --aurora-3: rgb(127 168 124 / 0.12);
-  --fond-image: url('/fond/club.webp');
 
   --sq-light: #e8dcc8;
   --sq-dark: #8a6a45;
@@ -241,7 +240,6 @@
   --aurora-4: rgb(91 60 224 / 0.06);
   --aurora-5: rgb(0 146 110 / 0.04);
   --aurora-3: rgb(212 86 47 / 0.08);
-  --fond-image: url('/fond/clair.webp');
 
   --sq-light: #eeeef4;
   --sq-dark: #8e93b8;
