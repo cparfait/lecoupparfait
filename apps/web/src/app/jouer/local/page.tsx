@@ -70,6 +70,8 @@ export default function LocalGamePage() {
   const [rotationEnAttente, setRotationEnAttente] = useState(false)
   /** Côté du plateau, pour aligner les bandeaux dessus. */
   const [cotePlateau, setCotePlateau] = useState<number | null>(null)
+  /** L'en-tête de la colonne des coups, où le plateau pose sa bascule de vue. */
+  const [emplacementBascule, setEmplacementBascule] = useState<HTMLElement | null>(null)
   const grandEcran = useGrandEcran()
   const minuterie = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -279,7 +281,13 @@ export default function LocalGamePage() {
             fitParentHeight
             reservedHeight={9}
             onFit={setCotePlateau}
-            showViewToggle={!grandEcran}
+            // Sur grand écran, la bascule vit en tête de la colonne des coups — dessinée
+
+            // par le plateau, qui garde ainsi son bouton de plein écran. En dessous,
+
+            // elle reprend sa rangée sous le plateau.
+
+            emplacementBascule={grandEcran ? emplacementBascule : undefined}
             fen={state.fen}
             orientation={orientation}
             playable={state.isLive && !state.isGameOver && !rotationEnAttente ? 'both' : null}
@@ -386,7 +394,7 @@ export default function LocalGamePage() {
                 {(state.isGameOver || rotationEnAttente) && (
                   <span className="truncate text-[12px] text-muted">· {etatDuTrait}</span>
                 )}
-                <ViewToggle className="ml-auto" />
+                <div ref={setEmplacementBascule} className="ml-auto" />
               </div>
             )}
             <MoveList

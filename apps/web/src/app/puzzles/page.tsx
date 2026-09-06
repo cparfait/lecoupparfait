@@ -136,6 +136,8 @@ export default function PuzzlesPage() {
    * continue de la proposer.
    */
   const [categorieVisible, setCategorieVisible] = useState(false)
+  /** À droite du titre, où le plateau pose sa bascule 2D / 3D / plein écran. */
+  const [emplacementBascule, setEmplacementBascule] = useState<HTMLElement | null>(null)
 
   /**
    * L'adversaire est-il en train de répondre ?
@@ -787,7 +789,12 @@ export default function PuzzlesPage() {
           {/* La voix annonce la position et lit la solution. Le bouton est ici,
             à côté de ce qu'il fait taire, et non dans la barre de navigation
             où un haut-parleur ne dit pas ce qu'il coupe. */}
-          <VoiceQuickToggle className="ml-auto" />
+          {/* La bascule de vue, en tête et non sous le plateau : la rangée
+              qu'elle y prenait est rendue au plateau. Le plateau la dessine
+              lui-même dans cet emplacement, plein écran compris. Masqué sous
+              `sm`, où le plateau n'a de toute façon pas de rangée. */}
+          <div ref={setEmplacementBascule} className="ml-auto hidden sm:block" />
+          <VoiceQuickToggle />
         </div>
 
         {/* ── Les thèmes, sur une seule rangée ─────────────────────────────
@@ -889,6 +896,7 @@ export default function PuzzlesPage() {
             ) : (
               <ChessBoard
                 fitParentHeight
+                emplacementBascule={emplacementBascule}
                 fen={fen}
                 orientation={orientation}
                 playable={status === 'playing' && !repliqueEnCours ? orientation : null}

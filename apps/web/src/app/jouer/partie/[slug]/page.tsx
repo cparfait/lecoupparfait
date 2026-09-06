@@ -217,6 +217,8 @@ export default function LiveGamePage() {
   const chatVisible = grandEcran || chatOpen
   /** Côté du plateau, pour aligner les bandeaux dessus. */
   const [cotePlateau, setCotePlateau] = useState<number | null>(null)
+  /** L'en-tête de la colonne des coups, où le plateau pose sa bascule de vue. */
+  const [emplacementBascule, setEmplacementBascule] = useState<HTMLElement | null>(null)
 
   const [nonLus, setNonLus] = useState(0)
   useEffect(() => {
@@ -648,7 +650,13 @@ export default function LiveGamePage() {
               fitParentHeight
               reservedHeight={9}
               onFit={setCotePlateau}
-              showViewToggle={!grandEcran}
+              // Sur grand écran, la bascule vit en tête de la colonne des coups — dessinée
+
+              // par le plateau, qui garde ainsi son bouton de plein écran. En dessous,
+
+              // elle reprend sa rangée sous le plateau.
+
+              emplacementBascule={grandEcran ? emplacementBascule : undefined}
               fen={revue?.fen ?? snapshot.fen}
               orientation={orientation}
               playable={
@@ -826,7 +834,7 @@ export default function LiveGamePage() {
             {grandEcran && (
               <div className="flex items-center gap-2 border-b border-line/60 px-3 py-2">
                 <span className="text-[12px] font-semibold text-faint">Coups</span>
-                <ViewToggle className="ml-auto" />
+                <div ref={setEmplacementBascule} className="ml-auto" />
               </div>
             )}
             <MoveList

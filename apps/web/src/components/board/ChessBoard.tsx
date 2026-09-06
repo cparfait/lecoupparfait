@@ -19,6 +19,7 @@
  */
 
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import dynamic from 'next/dynamic'
 import { Box, Grid2x2, Maximize2, Minimize2 } from 'lucide-react'
 import clsx from 'clsx'
@@ -86,6 +87,19 @@ export interface ChessBoardProps extends Board2DProps {
    * `null` quand le plateau se règle sur la largeur, et non sur la hauteur.
    */
   onFit?: (cote: number | null) => void
+  /**
+   * Où poser la bascule 2D / 3D / plein écran, quand ce n'est pas sous le plateau.
+   *
+   * Sous le plateau, la bascule prend une rangée de quarante pixels, retirée
+   * au plateau lui-même. Les pages qui ont de la place en tête — le titre
+   * d'un puzzle, l'en-tête de la colonne des coups — la reçoivent là : le
+   * plateau la dessine dans cet élément par un portail, ce qui garde le bouton
+   * de plein écran, qui a besoin du plateau pour agir.
+   *
+   * `null` signifie « ailleurs, mais pas encore monté » : la rangée sous le
+   * plateau ne réapparaît pas entre-temps. `undefined` : sous le plateau.
+   */
+  emplacementBascule?: HTMLElement | null
 }
 
 /**
@@ -129,6 +143,7 @@ export const ChessBoard = memo(function ChessBoard({
   fitParentHeight = false,
   dernierCoupSan,
   onFit,
+  emplacementBascule,
   ...props
 }: ChessBoardProps) {
   const view = usePreferences((state) => state.view)
@@ -184,7 +199,8 @@ export const ChessBoard = memo(function ChessBoard({
     }
   }, [])
 
-  const barreVisible = showViewToggle && !compact
+  const externe = emplacementBascule !== undefined
+  const barreVisible = showViewToggle && !compact && !externe
   const toggleRow = barreVisible ? (tactile ? TOGGLE_ROW_TACTILE_PX : TOGGLE_ROW_PX) : 0
 
   useEffect(() => {
@@ -314,6 +330,16 @@ export const ChessBoard = memo(function ChessBoard({
             onToggleFullscreen={pleinEcranPossible ? toggleFullscreen : undefined}
           />
         )}
+        {externe &&
+          showViewToggle &&
+          emplacementBascule &&
+          createPortal(
+            <ViewToggle
+              fullscreen={fullscreen}
+              onToggleFullscreen={pleinEcranPossible ? toggleFullscreen : undefined}
+            />,
+            emplacementBascule,
+          )}
       </div>
     </div>
   )

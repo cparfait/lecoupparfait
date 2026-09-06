@@ -73,6 +73,8 @@ export default function LessonPage() {
   const locale = usePreferences((state) => state.locale)
 
   const [stepIndex, setStepIndex] = useState(0)
+  /** À droite du fil d'Ariane, où le plateau pose sa bascule 2D / 3D / plein écran. */
+  const [emplacementBascule, setEmplacementBascule] = useState<HTMLElement | null>(null)
   /** Coups réellement choisis par l'apprenant, pour rejouer fidèlement. */
   const [played, setPlayed] = useState<PlayedByStep>({})
 
@@ -393,6 +395,9 @@ export default function LessonPage() {
           <Chip className="ml-auto">
             Étape {stepIndex + 1} / {lesson.steps.length}
           </Chip>
+          {/* La bascule de vue, en tête plutôt que sous le plateau, qui
+              récupère sa rangée. Le plateau la dessine lui-même ici. */}
+          <div ref={setEmplacementBascule} className="hidden sm:block" />
         </div>
 
         <div className="mb-4 h-1 overflow-hidden rounded-full bg-surface-strong">
@@ -409,6 +414,7 @@ export default function LessonPage() {
           <div className="etude-cadre">
             <ChessBoard
               fitParentHeight
+              emplacementBascule={emplacementBascule}
               fen={fen}
               orientation={orientation}
               playable={needsAction && !solved ? orientation : null}

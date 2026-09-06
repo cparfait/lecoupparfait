@@ -1353,6 +1353,8 @@ function GameScreen({
   const [reviewedFen, setReviewedFen] = useState<string | null>(null)
   /** Côté du plateau, pour aligner les bandeaux dessus. */
   const [cotePlateau, setCotePlateau] = useState<number | null>(null)
+  /** L'en-tête de la colonne des coups, où le plateau pose sa bascule de vue. */
+  const [emplacementBascule, setEmplacementBascule] = useState<HTMLElement | null>(null)
   const grandEcran = useGrandEcran()
   const lastPlayed = state.moves[state.moves.length - 1] ?? null
   // Le gestionnaire de touches est posé une fois pour toutes : il lit la
@@ -2146,7 +2148,13 @@ function GameScreen({
                 // Sur grand écran, la bascule de vue vit en tête de la
                 // colonne des coups : sous le plateau, sa rangée lui prenait
                 // quarante pixels de hauteur.
-                showViewToggle={!grandEcran}
+                // Sur grand écran, la bascule vit en tête de la colonne des coups — dessinée
+
+                // par le plateau, qui garde ainsi son bouton de plein écran. En dessous,
+
+                // elle reprend sa rangée sous le plateau.
+
+                emplacementBascule={grandEcran ? emplacementBascule : undefined}
                 fen={state.fen}
                 orientation={orientation}
                 playable={state.isLive && !gameOver ? playerColor : null}
@@ -2302,7 +2310,7 @@ function GameScreen({
                   Classée
                 </Chip>
               )}
-              <ViewToggle className="ml-auto" />
+              <div ref={setEmplacementBascule} className="ml-auto" />
             </div>
 
             <RubanCoups coups={rubanCoups} cursor={state.cursor} onSeek={goTo} className="mt-1" />
@@ -2468,7 +2476,7 @@ function GameScreen({
               <div className="flex items-center gap-2 border-b border-line/60 px-3 py-2">
                 <span className="text-[12px] font-semibold text-faint">Coups</span>
                 {classee && pastilleClassee}
-                <ViewToggle className="ml-auto" />
+                <div ref={setEmplacementBascule} className="ml-auto" />
               </div>
             )}
             <MoveList
