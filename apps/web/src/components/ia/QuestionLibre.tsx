@@ -108,7 +108,7 @@ export function QuestionLibre({
 
       {(reponse || encours) && (
         <div className="rounded-[var(--radius-sm)] border border-line bg-surface p-3">
-          <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
+          <div className="mb-1.5 flex items-center gap-1.5 text-[12px] font-semibold text-faint">
             <Sparkles size={11} aria-hidden />
             {assistant.nomFournisseur ?? 'Assistant'}
             {encours && <Spinner size={11} />}
@@ -136,7 +136,7 @@ export function QuestionLibre({
               key={texte}
               type="button"
               onClick={() => void envoyer(texte)}
-              className="rounded-full border border-line bg-surface px-2.5 py-1 text-[11px] text-muted transition-colors hover:bg-surface-hover hover:text-ink"
+              className="rounded-full border border-line bg-surface px-2.5 py-1 text-[12px] text-muted transition-colors hover:bg-surface-hover hover:text-ink"
             >
               {texte}
             </button>

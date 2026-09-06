@@ -50,7 +50,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
 }
 
 const SIZES: Record<ButtonSize, string> = {
-  sm: 'h-8 px-3 text-[13px] gap-1.5 rounded-[var(--radius-sm)]',
+  sm: 'h-8 px-3 text-[14px] gap-1.5 rounded-[var(--radius-sm)]',
   md: 'h-10 px-4 text-sm gap-2 rounded-[var(--radius-sm)]',
   lg: 'h-12 px-6 text-[15px] gap-2.5 rounded-[var(--radius)]',
 }
@@ -238,7 +238,7 @@ const TONS_CHIP: Record<TonChip, string> = {
 export function classesChip(tone: TonChip = 'neutral', className?: string): string {
   return clsx(
     'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5',
-    'text-[11px] font-semibold uppercase tracking-wide',
+    'text-[12px] font-semibold',
     TONS_CHIP[tone],
     className,
   )
@@ -365,7 +365,7 @@ export function Toggle({
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={clsx(
-          'relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200',
+          'relative h-6 w-11 shrink-0 rounded-full transition-colors duration-150',
           checked ? 'bg-accent' : 'bg-surface-strong border border-line',
         )}
       >
@@ -375,7 +375,7 @@ export function Toggle({
             // part de sa position statique, et les boutons sont centrés par
             // défaut. Elle se retrouvait alors décalée de la moitié du rail et
             // débordait à droite.
-            'absolute left-0 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200',
+            'absolute left-0 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-150',
             checked ? 'translate-x-[22px]' : 'translate-x-0.5',
           )}
         />

@@ -59,7 +59,7 @@ export const EvalBar = memo(function EvalBar({
         {showLabel && (
           <span
             className={clsx(
-              'absolute inset-0 grid place-items-center text-[11px] font-bold tabular-nums',
+              'absolute inset-0 grid place-items-center text-[12px] font-bold tabular-nums',
               'mix-blend-difference text-white',
             )}
           >
@@ -101,7 +101,7 @@ export const EvalBar = memo(function EvalBar({
       {showLabel && (
         <span
           className={clsx(
-            'absolute inset-x-0 text-center text-[10px] font-bold tabular-nums leading-none',
+            'absolute inset-x-0 text-center text-[12px] font-bold tabular-nums leading-none',
             // L'étiquette se place du côté du camp qui mène, pour rester lisible.
             bottomShare > 50 ? 'bottom-1 text-black/80' : 'top-1 text-white/85',
           )}

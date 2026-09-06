@@ -80,11 +80,11 @@ export const PlayerBar = memo(function PlayerBar({
     return (
       <div
         className={clsx(
-          'shrink-0 rounded-[var(--radius-sm)] px-2.5 py-1 font-mono text-lg font-semibold tabular-nums leading-none transition-colors',
+          'shrink-0 rounded-[var(--radius-sm)] px-2.5 py-1 font-mono text-xl font-bold tabular-nums leading-none transition-colors',
           // La pendule de celui qui attend garde une surface, elle aussi : sans
           // fond, deux chiffres blancs sur la page ne se lisaient pas comme une
           // pendule mais comme du texte.
-          active ? 'bg-accent/20 text-ink' : 'bg-surface/70 text-muted',
+          active ? 'bg-accent/20 text-ink' : 'bg-surface-strong text-muted',
           urgency === 'critical' && active && 'bg-[var(--q-blunder)] text-white animate-pulse',
           urgency === 'low' && active && 'text-[var(--q-inaccuracy)]',
         )}
@@ -98,41 +98,35 @@ export const PlayerBar = memo(function PlayerBar({
 
   return (
     /*
-      Les deux bandeaux se voient, et celui qui a le trait se voit davantage.
+      Un bandeau accroché au plateau, et non une carte posée à côté.
 
-      Le bandeau n'avait de fond que lorsque c'était à ce joueur de jouer :
-      l'autre flottait à même la page, sans cadre ni surface, et disparaissait
-      dans le fond — on ne savait plus si l'on regardait un nom d'adversaire ou
-      une ligne de texte perdue au-dessus de l'échiquier. Or ces deux bandeaux
-      sont l'état de la partie : qui joue, avec quel matériel, en combien de
-      temps.
+      Les deux bandeaux ont été des cartes — fond, liseré, filet d'accent —
+      séparées de l'échiquier par un écart. Trois objets empilés avec du vide
+      entre eux : l'œil lisait trois choses, alors qu'il n'y en a qu'une, la
+      partie. Ils perdent leur boîte et se posent contre le plateau, à sa
+      largeur exacte quand la page la connaît (voir `--cote-plateau`).
 
-      Les deux ont donc une surface et un liseré. Celui qui a le trait passe à
-      la surface forte, garde son liseré d'accent, et porte un filet vertical de
-      la même couleur : trois signes plutôt qu'un, parce que c'est l'information
-      qu'on cherche du coin de l'œil pendant qu'on regarde ailleurs.
+      Celui qui a le trait se voit toujours, mais autrement : l'avatar prend
+      un anneau d'accent, le nom passe en gras, et l'étiquette d'état — « à
+      toi de jouer », « réfléchit… » — s'écrit dans la couleur d'accent. C'est
+      l'information qu'on cherche du coin de l'œil pendant qu'on regarde
+      ailleurs, et un anneau lumineux se repère mieux qu'un fond à peine plus
+      clair que la page.
     */
     <div
       className={clsx(
-        'relative flex items-center gap-2.5 overflow-hidden rounded-[var(--radius-sm)] px-2 py-1.5 ring-1 ring-inset transition-colors',
-        // La matière des surfaces qui se posent sur la page, et non un voile :
-        // `--surface` est un blanc à 4,5 %, invisible sur un fond sombre. Le
-        // bandeau du joueur au trait prend en plus une pointe d'accent dans son
-        // fond et un liseré franc — il doit se repérer sans être cherché.
-        active
-          ? 'bg-[color-mix(in_oklab,var(--accent)_14%,var(--flottant))] ring-accent/70'
-          : 'bg-[var(--flottant)] ring-line-strong',
+        'relative flex max-w-full items-center gap-2.5 px-1 py-1.5 transition-colors',
+        'w-[var(--cote-plateau,100%)] justify-self-center',
         className,
       )}
     >
-      {active && <span className="absolute inset-y-0 left-0 w-[3px] bg-accent" aria-hidden />}
       {/* Avatar + pastille de couleur du camp */}
       <div className="relative shrink-0">
         <div
           className={clsx(
-            'grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-lg',
+            'grid h-10 w-10 place-items-center rounded-[var(--radius-sm)] text-lg transition-shadow',
             'bg-surface-strong ring-1 ring-line',
-            active && 'ring-accent',
+            active && 'ring-2 ring-accent shadow-[0_0_18px_-4px_var(--accent)]',
           )}
         >
           {/* Le test portait sur `http` seul, ce qui suffisait tant que les
@@ -177,7 +171,9 @@ export const PlayerBar = memo(function PlayerBar({
       {/* Identité et matériel */}
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-1.5">
-          <span className="truncate text-sm font-semibold">{name}</span>
+          <span className={clsx('truncate text-sm', active ? 'font-bold' : 'font-semibold')}>
+            {name}
+          </span>
           {rating != null && (
             <span className="shrink-0 text-xs tabular-nums text-muted">
               {rating}
@@ -190,10 +186,17 @@ export const PlayerBar = memo(function PlayerBar({
           {captured.length > 0 ? (
             <CapturedRow pieces={captured} pieceSet={pieceSet} color={color === 'w' ? 'b' : 'w'} />
           ) : status ? (
-            <span className="truncate text-[11px] text-faint">{status}</span>
+            <span
+              className={clsx(
+                'truncate text-[12px]',
+                active ? 'font-medium text-accent' : 'text-faint',
+              )}
+            >
+              {status}
+            </span>
           ) : null}
           {materialLead > 0 && (
-            <span className="ml-0.5 text-[11px] font-semibold tabular-nums text-muted">
+            <span className="ml-0.5 text-[12px] font-semibold tabular-nums text-muted">
               +{materialLead}
             </span>
           )}

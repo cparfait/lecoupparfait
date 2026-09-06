@@ -178,8 +178,8 @@ function Filtre({
       aria-pressed={actif}
       className={
         actif
-          ? 'rounded-full bg-[var(--accent)] px-2.5 py-1 text-[11px] font-medium text-[var(--accent-contrast)]'
-          : 'rounded-full border border-line px-2.5 py-1 text-[11px] text-muted hover:bg-[var(--surface-hover)]'
+          ? 'rounded-full bg-[var(--accent)] px-2.5 py-1 text-[12px] font-medium text-[var(--accent-contrast)]'
+          : 'rounded-full border border-line px-2.5 py-1 text-[12px] text-muted hover:bg-[var(--surface-hover)]'
       }
     >
       {children}
@@ -195,7 +195,7 @@ function LigneJournal({ ligne }: { ligne: Ligne }) {
   return (
     <li>
       <Card className="p-2.5">
-        <p className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1 text-[13px]">
+        <p className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1 text-[14px]">
           <strong className="font-semibold">{ligne.auteur}</strong>
           <span className="text-muted">{acte.texte}</span>
           {ligne.cibleNom && <span className="font-medium">{ligne.cibleNom}</span>}
@@ -203,7 +203,7 @@ function LigneJournal({ ligne }: { ligne: Ligne }) {
             <Chip tone={acte.ton}>{acte.ton === 'danger' ? 'sans retour' : 'droits'}</Chip>
           )}
         </p>
-        <p className="mt-0.5 text-[11px] text-faint">
+        <p className="mt-0.5 text-[12px] text-faint">
           <time dateTime={ligne.quand} title={quand.toLocaleString('fr-FR')}>
             {formaterQuand(quand)}
           </time>

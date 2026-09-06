@@ -120,7 +120,7 @@ export function DefiDuJour({ className }: { className?: string }) {
           >
             <Check size={14} className="text-[var(--q-best)]" />
           </span>
-          <span className="min-w-0 flex-1 text-[13px] leading-snug">
+          <span className="min-w-0 flex-1 text-[14px] leading-snug">
             <span className="block font-semibold text-[var(--q-best)]">Défi du jour relevé</span>
             <span className="block text-muted">
               {quetesFaites} quête{quetesFaites > 1 ? 's' : ''} sur {QUETES.length} · {xp} /{' '}
@@ -148,9 +148,7 @@ export function DefiDuJour({ className }: { className?: string }) {
       {/* ── Quêtes ────────────────────────────────────────────────────── */}
       <div className={clsx('mt-4', replie && 'hidden')}>
         <div className="mb-2 flex items-baseline justify-between">
-          <span className="text-xs font-semibold uppercase tracking-wide text-faint">
-            Aujourd’hui
-          </span>
+          <span className="text-xs font-semibold text-faint">Aujourd’hui</span>
           <span className="text-xs tabular-nums text-muted">
             {xp} / {XP_TOTAL} points
           </span>
@@ -314,7 +312,7 @@ function PlusDur({ tranche }: { tranche: Tranche }) {
   if (superieures.length === 0) return null
 
   return (
-    <p className="relative z-10 mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-faint">
+    <p className="relative z-10 mt-2 flex flex-wrap items-center gap-1.5 text-[12px] text-faint">
       <span>Plus dur&nbsp;:</span>
       {superieures.map((autre) => (
         <Link

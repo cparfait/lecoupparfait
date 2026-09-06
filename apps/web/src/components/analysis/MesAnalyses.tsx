@@ -159,14 +159,14 @@ export function MesAnalyses({
                   }}
                   className="min-w-0 flex-1 text-left"
                 >
-                  <p className="truncate text-[13px] font-medium">
+                  <p className="truncate text-[14px] font-medium">
                     {analyse.whiteName ?? 'Blancs'}
                     <span className="mx-1 font-normal text-faint">
                       {resultatCourt(analyse.result)}
                     </span>
                     {analyse.blackName ?? 'Noirs'}
                   </p>
-                  <p className="truncate text-[11px] text-faint">
+                  <p className="truncate text-[12px] text-faint">
                     {[
                       analyse.opening,
                       analyse.coups ? `${analyse.coups} demi-coups` : null,

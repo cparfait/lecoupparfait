@@ -161,7 +161,7 @@ export function Comptes() {
             aria-pressed={filtre === element.cle}
             onClick={() => changerTamis(() => setFiltre(element.cle))}
             className={clsx(
-              'rounded-full px-2.5 py-1 text-[11px]',
+              'rounded-full px-2.5 py-1 text-[12px]',
               filtre === element.cle
                 ? 'bg-[var(--accent)] font-medium text-[var(--accent-contrast)]'
                 : 'border border-line text-muted hover:bg-[var(--surface-hover)]',
@@ -171,12 +171,12 @@ export function Comptes() {
           </button>
         ))}
 
-        <span className="ml-auto flex items-center gap-1 text-[11px] text-faint">
+        <span className="ml-auto flex items-center gap-1 text-[12px] text-faint">
           trier par
           <select
             value={tri}
             onChange={(event) => changerTamis(() => setTri(event.target.value))}
-            className="rounded border border-line bg-[var(--surface)] px-1.5 py-0.5 text-[11px] text-ink"
+            className="rounded border border-line bg-[var(--surface)] px-1.5 py-0.5 text-[12px] text-ink"
           >
             {TRIS.map((element) => (
               <option key={element.cle} value={element.cle}>
@@ -202,7 +202,7 @@ export function Comptes() {
         <EmptyState title="Aucun compte" description="Aucun résultat pour ce filtre." />
       ) : (
         <>
-          <p className="text-[11px] uppercase tracking-wide text-faint">
+          <p className="text-[12px] text-faint">
             {nombre(total)} compte{total > 1 ? 's' : ''} retenu{total > 1 ? 's' : ''}
             {total !== totalGeneral && ` sur ${nombre(totalGeneral)}`}
           </p>
@@ -230,7 +230,7 @@ export function Comptes() {
               >
                 Précédents
               </Button>
-              <span className="text-[11px] tabular-nums text-faint">
+              <span className="text-[12px] tabular-nums text-faint">
                 page {page + 1} sur {dernierePage + 1}
               </span>
               <Button
@@ -305,7 +305,7 @@ function LigneCompte({
             */}
             {compte.enLigne && !compte.disabled && <Chip tone="success">en ligne</Chip>}
           </p>
-          <p className="mt-0.5 truncate text-[11px] text-faint">
+          <p className="mt-0.5 truncate text-[12px] text-faint">
             {[
               compte.email
                 ? `${compte.email}${compte.emailVerifie ? ' (confirmée)' : ' (non confirmée)'}`

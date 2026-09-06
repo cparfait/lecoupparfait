@@ -273,7 +273,7 @@ export default function PreferencesPage() {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={pieceUrl(entry.id, 'b', 'q')} alt="" className="h-7 w-7" />
                     </span>
-                    <span className="text-[11px] font-medium">{entry.label}</span>
+                    <span className="text-[12px] font-medium">{entry.label}</span>
                   </button>
                 ))}
               </div>
@@ -351,7 +351,7 @@ export default function PreferencesPage() {
                               }}
                             />
                           </span>
-                          <span className="min-w-0 text-[11px] font-medium leading-tight">
+                          <span className="min-w-0 text-[12px] font-medium leading-tight">
                             {entry.label}
                           </span>
                         </button>
@@ -753,9 +753,7 @@ export default function PreferencesPage() {
 
         {/* ── Aperçu ───────────────────────────────────────────────── */}
         <div className="lg:sticky lg:top-20 lg:self-start">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
-            Aperçu en direct
-          </p>
+          <p className="mb-2 text-[12px] font-semibold text-faint">Aperçu en direct</p>
           <Board2D
             fen={DEMO_FEN}
             playable="both"

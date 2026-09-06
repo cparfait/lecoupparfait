@@ -102,11 +102,11 @@ export function DemandesDAmi({ className }: { className?: string }) {
     <Card className={clsx('overflow-hidden', className)}>
       <div className="h-1 bg-accent" aria-hidden />
       <div className="flex items-baseline justify-between gap-2 border-b border-line/60 px-4 py-2.5">
-        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-accent">
+        <p className="flex items-center gap-1.5 text-[12px] font-semibold text-accent">
           <UserPlus size={12} aria-hidden />
           {demandes.length === 1 ? 'Une demande d’ami' : `${demandes.length} demandes d’ami`}
         </p>
-        <Link href="/amis" className="text-[11px] text-accent hover:underline">
+        <Link href="/amis" className="text-[12px] text-accent hover:underline">
           mon carnet
         </Link>
       </div>

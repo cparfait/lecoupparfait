@@ -254,7 +254,7 @@ export default function OpeningsPage() {
 
           {history.length > 0 && (
             <Card className="mt-2 p-3 paysage:hidden">
-              <p className="font-mono text-[13px] leading-relaxed">
+              <p className="font-mono text-[14px] leading-relaxed">
                 {history
                   .map((san, index) =>
                     index % 2 === 0
@@ -332,7 +332,7 @@ export default function OpeningsPage() {
           {/* Continuations */}
           {continuations.length > 0 && (
             <Card className="overflow-hidden">
-              <p className="border-b border-line/60 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
+              <p className="border-b border-line/60 px-4 py-2.5 text-[12px] font-semibold text-faint">
                 Continuations théoriques
               </p>
               <ul className="max-h-64 overflow-y-auto">
@@ -347,8 +347,8 @@ export default function OpeningsPage() {
                       <span className="w-14 shrink-0 font-mono text-sm font-semibold">
                         {format(san)}
                       </span>
-                      <span className="w-9 shrink-0 text-[11px] text-faint">{opening.eco}</span>
-                      <span className="min-w-0 flex-1 truncate text-[13px] text-muted">
+                      <span className="w-9 shrink-0 text-[12px] text-faint">{opening.eco}</span>
+                      <span className="min-w-0 flex-1 truncate text-[14px] text-muted">
                         {opening.label}
                       </span>
                     </button>
@@ -426,16 +426,16 @@ export default function OpeningsPage() {
                       onClick={() => loadLine(match.uci)}
                       className="flex w-full items-baseline gap-2.5 border-b border-line/40 px-4 py-2.5 text-left transition-colors last:border-0 hover:bg-surface-hover"
                     >
-                      <span className="w-9 shrink-0 font-mono text-[11px] font-semibold text-accent">
+                      <span className="w-9 shrink-0 font-mono text-[12px] font-semibold text-accent">
                         {match.eco}
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[13px] font-medium">
+                        <span className="block truncate text-[14px] font-medium">
                           {match.label}
                         </span>
-                        <span className="block truncate text-[11px] text-faint">{match.name}</span>
+                        <span className="block truncate text-[12px] text-faint">{match.name}</span>
                       </span>
-                      <span className="shrink-0 text-[11px] tabular-nums text-faint">
+                      <span className="shrink-0 text-[12px] tabular-nums text-faint">
                         {Math.ceil(match.ply / 2)} coups
                       </span>
                     </button>
@@ -447,7 +447,7 @@ export default function OpeningsPage() {
         </div>
       </div>
 
-      <p className="mt-6 text-center text-[11px] text-faint">
+      <p className="mt-6 text-center text-[12px] text-faint">
         Jeu de données <span className="font-mono">lichess-org/chess-openings</span>, domaine public
         (CC0).
       </p>
@@ -505,9 +505,7 @@ function PopularMoves({
   return (
     <Card className="overflow-hidden">
       <div className="flex items-center gap-2 border-b border-line/60 px-4 py-2.5">
-        <p className="min-w-0 flex-1 text-[11px] font-semibold uppercase tracking-wide text-faint">
-          Ce qu’on joue ici
-        </p>
+        <p className="min-w-0 flex-1 text-[12px] font-semibold text-faint">Ce qu’on joue ici</p>
         <div className="flex shrink-0 gap-0.5 rounded-full bg-surface-strong p-0.5">
           {BANDS.map((entry) => (
             <button
@@ -516,7 +514,7 @@ function PopularMoves({
               onClick={() => onBand(entry.id)}
               aria-pressed={band === entry.id}
               className={clsx(
-                'rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors',
+                'rounded-full px-2 py-0.5 text-[12px] font-medium transition-colors',
                 band === entry.id
                   ? 'bg-accent text-[var(--accent-contrast)]'
                   : 'text-muted hover:text-ink',
@@ -532,7 +530,7 @@ function PopularMoves({
         // Deux raisons très différentes de n'avoir rien à dire, et il faut les
         // distinguer : « les données s'arrêtent ici » se comprend et se prévoit,
         // « trop peu de parties » veut dire qu'on quitte les sentiers battus.
-        <p className="px-4 py-4 text-[13px] text-muted">
+        <p className="px-4 py-4 text-[14px] text-muted">
           {tropLoin ? (
             <>
               Les statistiques couvrent les{' '}
@@ -561,7 +559,7 @@ function PopularMoves({
                   <span className="w-12 shrink-0 font-mono text-sm font-semibold">
                     {format(move.san)}
                   </span>
-                  <span className="w-11 shrink-0 text-right text-[11px] tabular-nums text-faint">
+                  <span className="w-11 shrink-0 text-right text-[12px] tabular-nums text-faint">
                     {move.share.toFixed(0)} %
                   </span>
 
@@ -585,7 +583,7 @@ function PopularMoves({
                   </span>
 
                   <span
-                    className="w-11 shrink-0 text-right text-[11px] font-semibold tabular-nums"
+                    className="w-11 shrink-0 text-right text-[12px] font-semibold tabular-nums"
                     style={{
                       color:
                         move.score >= 53
@@ -602,7 +600,7 @@ function PopularMoves({
             ))}
           </ul>
 
-          <p className="border-t border-line/60 px-4 py-2 text-[11px] text-faint">
+          <p className="border-t border-line/60 px-4 py-2 text-[12px] text-faint">
             {total.toLocaleString('fr-FR')} parties · coup {Math.floor(ply / 2) + 1} sur{' '}
             {maxPlies / 2} couverts · le second pourcentage est le score du camp au trait, nulle
             comptée pour un demi-point.

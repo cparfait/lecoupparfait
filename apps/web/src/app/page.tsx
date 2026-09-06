@@ -16,7 +16,7 @@ import { Chess } from 'chess.js'
 import { Board2D } from '@/components/board/Board2D.tsx'
 import { CavalePortrait } from '@/components/brand/CavalePortrait.tsx'
 import { DefiDuJour } from '@/components/daily/DefiDuJour.tsx'
-import { ButtonLink, Card, Chip } from '@/components/ui/index.tsx'
+import { ButtonLink, Card, Chip, Skeleton } from '@/components/ui/index.tsx'
 import { AccueilConnecte } from '@/components/accueil/AccueilConnecte.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { renderEmphasis, useI18n } from '@/lib/i18n/index.tsx'
@@ -134,7 +134,11 @@ const PORTES = [
 export default function HomePage() {
   const identite = useIdentite()
 
-  if (identite === undefined) return <div className="min-h-[60vh]" aria-hidden />
+  // Un squelette plutôt qu'un vide : la demi-seconde où l'on ne sait pas
+  // encore qui est là se voyait comme une page blanche, puis un saut. Trois
+  // formes grises qui miroitent disent « ça arrive », et la page qui suit
+  // les recouvre sans à-coup.
+  if (identite === undefined) return <SqueletteAccueil />
   if (identite) return <AccueilConnecte pseudo={identite.username} />
 
   return (
@@ -142,6 +146,28 @@ export default function HomePage() {
       <Hero />
       <Essentiel />
     </>
+  )
+}
+
+/** La silhouette de la page, le temps de savoir laquelle afficher. */
+function SqueletteAccueil() {
+  return (
+    <div className="mx-auto w-full max-w-[1400px] px-4 py-10 sm:px-6 lg:pt-20" aria-hidden>
+      <div className="grid gap-10 lg:grid-cols-[1.05fr_.95fr] lg:gap-16">
+        <div>
+          <Skeleton className="h-6 w-56 rounded-full" />
+          <Skeleton className="mt-6 h-12 w-3/4" />
+          <Skeleton className="mt-3 h-12 w-1/2" />
+          <Skeleton className="mt-6 h-5 w-full max-w-xl" />
+          <Skeleton className="mt-2 h-5 w-2/3 max-w-xl" />
+          <div className="mt-8 flex gap-3">
+            <Skeleton className="h-12 w-44 rounded-[var(--radius)]" />
+            <Skeleton className="h-12 w-52 rounded-[var(--radius)]" />
+          </div>
+        </div>
+        <Skeleton className="mx-auto aspect-square w-full max-w-[440px] rounded-[var(--radius)]" />
+      </div>
+    </div>
   )
 }
 
@@ -313,7 +339,7 @@ function Hero() {
               <Volume2 size={14} className="text-accent" aria-hidden />
             </span>
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
+              <p className="text-[12px] font-semibold text-faint">
                 Le coach commente · Anderssen – Kieseritzky, Londres 1851
               </p>
               <p className="mt-1 text-sm leading-relaxed">{comment}</p>
@@ -400,9 +426,7 @@ function Essentiel() {
         aria-label="Aller plus loin"
         className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line/60 pt-5 text-sm"
       >
-        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
-          Aller plus loin
-        </span>
+        <span className="text-[12px] font-semibold text-faint">Aller plus loin</span>
         {PORTES.map(({ href, label }) => (
           <Link
             key={href}
@@ -413,7 +437,7 @@ function Essentiel() {
             <ArrowRight
               size={14}
               aria-hidden
-              className="text-faint transition-transform duration-200 group-hover:translate-x-0.5"
+              className="text-faint transition-transform duration-150 group-hover:translate-x-0.5"
             />
           </Link>
         ))}

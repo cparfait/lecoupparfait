@@ -242,13 +242,13 @@ export function MoveList({
             Les coups joués apparaîtront ici.
           </p>
         ) : (
-          <ol className="text-[13px]">
+          <ol className="text-[14px]">
             {rows.map((row) => (
               <li
                 key={row.number}
                 className="grid grid-cols-[2.4rem_1fr_1fr] items-stretch border-b border-line/40 last:border-0"
               >
-                <span className="grid place-items-center bg-surface/40 text-[11px] font-semibold tabular-nums text-faint">
+                <span className="grid place-items-center bg-surface/40 text-[12px] font-semibold tabular-nums text-faint">
                   {row.number}
                 </span>
                 <MoveCell
@@ -368,7 +368,7 @@ const MoveCell = function MoveCell({
       </span>
       {worthShowing && (
         <span
-          className="ml-auto shrink-0 text-[11px] font-bold leading-none"
+          className="ml-auto shrink-0 text-[12px] font-bold leading-none"
           style={{ color: `var(--q-${style.token})` }}
           title={`${style.label[locale]} — ${style.description[locale]}`}
         >

@@ -89,7 +89,7 @@ export default function AboutPage() {
         <p>
           Le code est sous licence AGPL. Tu peux le télécharger, le modifier et le faire tourner
           chez toi — un{' '}
-          <code className="rounded bg-surface px-1.5 py-0.5 font-mono text-[13px]">
+          <code className="rounded bg-surface px-1.5 py-0.5 font-mono text-[14px]">
             docker compose up
           </code>{' '}
           suffit. C’est même l’usage prévu : une instance pour toi et tes amis, sans dépendre de

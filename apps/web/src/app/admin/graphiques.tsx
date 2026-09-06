@@ -155,12 +155,12 @@ export function Courbe({
 
         {/* Le maximum est écrit plutôt que gradué : une seule valeur suffit à
             calibrer l'œil, et une échelle complète mangerait la place du tracé. */}
-        <span className="pointer-events-none absolute right-1 top-0 rounded bg-[var(--bg-elev)]/80 px-1 text-[10px] tabular-nums text-faint">
+        <span className="pointer-events-none absolute right-1 top-0 rounded bg-[var(--bg-elev)]/80 px-1 text-[12px] tabular-nums text-faint">
           {nombre(maximum)}
         </span>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px]">
         {series.map((serie, index) => (
           <span key={serie.nom} className="flex items-center gap-1.5">
             <span
@@ -234,7 +234,7 @@ export function Barres({ parts, total }: { parts: Part[]; total?: number }) {
           <div className="flex items-baseline gap-2 text-[12px]">
             <span className="min-w-0 flex-1 truncate">{element.cle}</span>
             {element.note && (
-              <span className="shrink-0 text-[11px] text-faint">{element.note}</span>
+              <span className="shrink-0 text-[12px] text-faint">{element.note}</span>
             )}
             <span className="shrink-0 tabular-nums font-medium">{nombre(element.n)}</span>
             <span className="w-10 shrink-0 text-right tabular-nums text-faint">
@@ -298,7 +298,7 @@ export function Histogramme({
           />
         ))}
       </div>
-      <div className="mt-1 flex justify-between text-[10px] tabular-nums text-faint">
+      <div className="mt-1 flex justify-between text-[12px] tabular-nums text-faint">
         <span>{etiquette(0)}</span>
         <span>{etiquette(Math.floor(valeurs.length / 2))}</span>
         <span>{etiquette(valeurs.length - 1)}</span>
@@ -325,7 +325,7 @@ export function Mesure({
 }) {
   return (
     <div className="rounded-[var(--radius-sm)] border border-line bg-[var(--surface)] p-3">
-      <p className="text-[11px] uppercase tracking-wide text-faint">{titre}</p>
+      <p className="text-[12px] text-faint">{titre}</p>
       <p
         className="font-display text-2xl font-bold tabular-nums"
         style={{
@@ -339,7 +339,7 @@ export function Mesure({
       >
         {typeof valeur === 'number' ? nombre(valeur) : (valeur ?? '—')}
       </p>
-      {note && <p className="text-[11px] leading-snug text-faint">{note}</p>}
+      {note && <p className="text-[12px] leading-snug text-faint">{note}</p>}
     </div>
   )
 }

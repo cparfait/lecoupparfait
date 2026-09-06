@@ -470,9 +470,7 @@ export default function LessonPage() {
               >
                 <Volume2 size={14} className="text-accent" />
               </span>
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-                Le coach
-              </span>
+              <span className="text-[12px] font-semibold text-faint">Le coach</span>
               {/* Couper la voix, à côté de ce qu'elle lit : un haut-parleur
                   posé dans une barre ne dit pas ce qu'il fait taire — les
                   pièces, la fin de partie, une musique ? Ici, il n'y a aucun

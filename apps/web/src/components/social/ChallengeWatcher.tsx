@@ -222,7 +222,7 @@ export function ChallengeWatcher() {
         </span>
 
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-bold uppercase tracking-wide text-accent">Invitation</p>
+          <p className="text-[12px] font-bold text-accent">Invitation</p>
           <p className="text-sm font-semibold leading-snug">
             {challenge.from.username} te propose une partie
           </p>

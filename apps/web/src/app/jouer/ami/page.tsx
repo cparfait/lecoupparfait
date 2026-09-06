@@ -348,7 +348,7 @@ export default function CreateFriendGamePage() {
                   {/* Le symbole seul ne dit rien : on le réduit et on nomme la
                       catégorie, qui est ce qui détermine le classement mis à
                       jour à la fin de la partie. */}
-                  <span className="block text-[10px] font-normal leading-tight text-faint">
+                  <span className="block text-[12px] font-normal leading-tight text-faint">
                     <span aria-hidden>{SPEED_LABELS[tc.category].icon}</span>{' '}
                     {SPEED_LABELS[tc.category].fr}
                   </span>
@@ -364,7 +364,7 @@ export default function CreateFriendGamePage() {
               ailleurs obligeait à décider « ami ou correspondance ? » avant de
               savoir à quel rythme on voulait jouer.
             */}
-            <p className="mb-1.5 mt-4 text-[11px] font-semibold uppercase tracking-wide text-faint">
+            <p className="mb-1.5 mt-4 text-[12px] font-semibold text-faint">
               Ou sur plusieurs jours
             </p>
             <div className="grid grid-cols-5 gap-1.5">
@@ -381,7 +381,7 @@ export default function CreateFriendGamePage() {
                       : 'border-line text-muted hover:bg-surface-hover',
                   )}
                 >
-                  <span className="block text-[10px] font-normal leading-tight text-faint">
+                  <span className="block text-[12px] font-normal leading-tight text-faint">
                     <span aria-hidden>📬</span> corresp.
                   </span>
                   <span className="mt-0.5 block text-sm">
@@ -465,7 +465,7 @@ export default function CreateFriendGamePage() {
                 </div>
               ) : amis.length === 0 ? (
                 <Card className="p-4">
-                  <p className="text-[13px] leading-relaxed text-muted">
+                  <p className="text-[14px] leading-relaxed text-muted">
                     Ton carnet est vide. Envoie le lien d’invitation ci-dessus, ou{' '}
                     <Link href="/amis" className="font-semibold text-accent hover:underline">
                       cherche quelqu’un par son pseudo
@@ -498,7 +498,7 @@ export default function CreateFriendGamePage() {
 
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-medium">{ami.username}</span>
-                          <span className="block text-[11px] text-faint">
+                          <span className="block text-[12px] text-faint">
                             {ami.rating != null && `${ami.rating} · `}
                             {ami.online ? 'en ligne' : 'hors ligne'}
                           </span>
@@ -689,7 +689,7 @@ function RangeeAction({
         <span className="flex items-center gap-2">
           <span className="text-[15px] font-semibold">{titre}</span>
           {marque && (
-            <span className="flex items-center gap-1 text-[11px] font-semibold text-accent">
+            <span className="flex items-center gap-1 text-[12px] font-semibold text-accent">
               <Check size={12} aria-hidden />
               {marque}
             </span>

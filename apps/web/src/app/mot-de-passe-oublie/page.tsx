@@ -86,7 +86,7 @@ export default function ForgotPasswordPage() {
                 <MailX size={22} />
               </span>
               <p className="text-sm font-semibold">Pas encore possible ici</p>
-              <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+              <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
                 Ce serveur n’envoie pas de courriel pour le moment : il n’y a donc aucun moyen de
                 t’envoyer un lien de réinitialisation.
               </p>
@@ -109,7 +109,7 @@ export default function ForgotPasswordPage() {
                 <MailCheck size={22} />
               </span>
               <p className="text-sm font-semibold">C’est envoyé</p>
-              <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+              <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
                 Si un compte utilise cette adresse <strong>et qu’elle a été confirmée</strong>, un
                 lien vient d’y être envoyé. Il est valable une heure.
               </p>

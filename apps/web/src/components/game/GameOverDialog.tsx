@@ -248,10 +248,8 @@ export function GameOverDialog({
               quete.faite ? 'bg-[color-mix(in_oklab,var(--q-best)_14%,transparent)]' : 'bg-surface',
             )}
           >
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-              Quête du jour
-            </p>
-            <p className="mt-0.5 flex items-center gap-1.5 text-[13px] font-semibold">
+            <p className="text-[12px] font-semibold text-faint">Quête du jour</p>
+            <p className="mt-0.5 flex items-center gap-1.5 text-[14px] font-semibold">
               {quete.faite ? (
                 <Check size={14} className="shrink-0 text-[var(--q-best)]" aria-hidden />
               ) : (
@@ -359,7 +357,7 @@ export function GameOverDialog({
               l'issue qu'on recommande. */}
           <Link
             href="/jouer"
-            className="mt-4 inline-flex items-center justify-center gap-1.5 text-[13px] font-medium text-muted transition-colors hover:text-ink"
+            className="mt-4 inline-flex items-center justify-center gap-1.5 text-[14px] font-medium text-muted transition-colors hover:text-ink"
           >
             <LayoutGrid size={13} aria-hidden />
             Retour au menu

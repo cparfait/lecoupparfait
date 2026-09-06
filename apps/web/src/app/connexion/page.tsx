@@ -244,7 +244,7 @@ function AuthForm() {
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold leading-snug">{referrer} t’invite à jouer</p>
-                <p className="mt-0.5 text-[13px] leading-relaxed text-muted">
+                <p className="mt-0.5 text-[14px] leading-relaxed text-muted">
                   Choisis un pseudo et entre dans la partie. Pas besoin de compte.
                 </p>
 

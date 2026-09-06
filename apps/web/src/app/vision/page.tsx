@@ -148,7 +148,7 @@ export default function VisionPage() {
       </h1>
       <p
         className={clsx(
-          'mt-2 max-w-2xl text-muted max-lg:text-[13px]',
+          'mt-2 max-w-2xl text-muted max-lg:text-[14px]',
           phase === 'enCours' && 'max-lg:hidden',
         )}
       >
@@ -256,9 +256,7 @@ export default function VisionPage() {
           <Card glow className="order-1 p-4 text-center sm:p-5 lg:order-none">
             {phase === 'enCours' ? (
               <>
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-                  Clique sur
-                </p>
+                <p className="text-[12px] font-semibold text-faint">Clique sur</p>
                 <p className="mt-1 font-display text-5xl font-bold tabular-nums text-accent sm:text-6xl">
                   {target}
                 </p>
@@ -277,7 +275,7 @@ export default function VisionPage() {
               { label: 'Record', value: String(best), icon: Trophy },
             ].map(({ label, value, icon: Icon }) => (
               <Card key={label} className="p-3 text-center">
-                <p className="flex items-center justify-center gap-1 text-[10px] uppercase tracking-wide text-faint">
+                <p className="flex items-center justify-center gap-1 text-[12px] text-faint">
                   {Icon && <Icon size={11} aria-hidden />}
                   {label}
                 </p>

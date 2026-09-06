@@ -48,9 +48,7 @@ export default function CarrierePage() {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-6 lg:py-10">
       <header className="mb-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
-          Mode carrière
-        </p>
+        <p className="text-[12px] font-semibold text-accent">Mode carrière</p>
         <h1 className="mt-1 font-display text-3xl font-bold leading-tight">
           Douze chapitres, un chemin
         </h1>
@@ -90,7 +88,7 @@ function SansCompte() {
     <>
       <Card className="mb-4 p-4">
         <p className="text-sm font-medium">La carrière garde ta place.</p>
-        <p className="mt-1 text-[13px] leading-relaxed text-muted">
+        <p className="mt-1 text-[14px] leading-relaxed text-muted">
           C’est la seule rubrique qui demande un compte, et pour une raison simple : une progression
           sur douze chapitres n’a aucun sens si elle disparaît en fermant l’onglet. Le compte est
           gratuit — un pseudo, un mot de passe, et rien d’autre.
@@ -228,7 +226,7 @@ function Bandeau({
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-lg font-bold leading-tight">{rang.rang.nom}</p>
-          <p className="text-[11px] text-faint">
+          <p className="text-[12px] text-faint">
             {rang.suivant
               ? `${rang.acquis} / ${rang.requis} points avant ${rang.suivant.nom}`
               : 'Rang maximum atteint'}
@@ -236,7 +234,7 @@ function Bandeau({
         </div>
         <div className="shrink-0 text-right">
           <p className="font-display text-xl font-bold tabular-nums text-accent">{affiche}</p>
-          <p className="text-[10px] uppercase tracking-wide text-faint">points</p>
+          <p className="text-[12px] text-faint">points</p>
         </div>
       </div>
 
@@ -247,7 +245,7 @@ function Bandeau({
         />
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-2 text-[11px] text-faint">
+      <div className="mt-3 flex items-center justify-between gap-2 text-[12px] text-faint">
         <span title="Étoiles décrochées sur l’ensemble des chapitres">
           ★ {etoiles} / {CHAPITRES.length * 3}
         </span>
@@ -318,7 +316,7 @@ function CoupDeMain({ chapitre, progression }: { chapitre: Chapitre; progression
         <TriangleAlert size={15} className="shrink-0 text-[var(--q-inaccuracy)]" aria-hidden />
         {progression.losingStreak} défaites d’affilée — ça arrive.
       </p>
-      <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+      <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
         L’adversaire passe à <strong className="font-semibold text-ink">{elo} Elo</strong> pour
         cette tentative, le temps de reprendre pied. Revoir la leçon aide souvent plus qu’une partie
         de plus : c’est là qu’est expliqué ce qui te coûte des points.
@@ -421,13 +419,13 @@ function LigneRepliee({
         <p className={clsx('truncate text-sm font-semibold', verrouille && 'text-muted')}>
           {chapitre.numero}. {chapitre.titre}
         </p>
-        <p className="truncate text-[11px] text-faint">
+        <p className="truncate text-[12px] text-faint">
           {personnalite.name.fr} · {elo} Elo
         </p>
       </div>
 
       {verrouille ? (
-        <span className="shrink-0 text-[11px] text-faint">à venir</span>
+        <span className="shrink-0 text-[12px] text-faint">à venir</span>
       ) : (
         <span className="shrink-0 text-sm" aria-label={`${etoiles} étoiles sur 3`}>
           {[1, 2, 3].map((rang) => (
@@ -480,11 +478,11 @@ function CarteCourante({
             {chapitre.emoji}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
+            <p className="text-[12px] font-semibold text-faint">
               Chapitre {chapitre.numero} sur {CHAPITRES.length}
             </p>
             <h2 className="font-display text-lg font-bold leading-tight">{chapitre.titre}</h2>
-            <p className="mt-1 text-[13px] leading-snug text-muted">{chapitre.objectif}</p>
+            <p className="mt-1 text-[14px] leading-snug text-muted">{chapitre.objectif}</p>
           </div>
         </div>
 
@@ -501,7 +499,7 @@ function CarteCourante({
             >
               <span
                 className={clsx(
-                  'grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-bold',
+                  'grid h-6 w-6 shrink-0 place-items-center rounded-full text-[12px] font-bold',
                   etape.termine ? 'bg-[var(--q-best)] text-white' : 'bg-surface-strong text-faint',
                 )}
                 aria-hidden
@@ -509,11 +507,11 @@ function CarteCourante({
                 {etape.termine ? '✓' : etape.fait}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-medium">{etape.titre}</span>
-                <span className="block truncate text-[11px] text-faint">{etape.detail}</span>
+                <span className="block truncate text-[14px] font-medium">{etape.titre}</span>
+                <span className="block truncate text-[12px] text-faint">{etape.detail}</span>
               </span>
               {etape.total > 1 && (
-                <span className="shrink-0 text-[11px] tabular-nums text-faint">
+                <span className="shrink-0 text-[12px] tabular-nums text-faint">
                   {etape.fait} / {etape.total}
                 </span>
               )}
@@ -526,10 +524,10 @@ function CarteCourante({
             {personnalite.emoji}
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[13px] font-medium">
+            <span className="block truncate text-[14px] font-medium">
               {personnalite.name.fr} · {elo} Elo
             </span>
-            <span className="block truncate text-[11px] text-faint">{personnalite.blurb.fr}</span>
+            <span className="block truncate text-[12px] text-faint">{personnalite.blurb.fr}</span>
           </span>
         </div>
 
@@ -546,7 +544,7 @@ function CarteCourante({
         )}
 
         {progression.losingStreak > 0 && progression.losingStreak < SEUIL_COUP_DE_MAIN && (
-          <p className="mt-2 text-center text-[11px] text-faint">
+          <p className="mt-2 text-center text-[12px] text-faint">
             {progression.losingStreak} défaite{progression.losingStreak > 1 ? 's' : ''} — ça ne
             compte pas contre toi, seules les victoires avancent.
           </p>
@@ -569,7 +567,7 @@ function CarteCourante({
 function HautsFaits({ obtenus }: { obtenus: string[] }) {
   return (
     <Card className="mt-4 p-4">
-      <p className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-faint">
+      <p className="mb-3 text-[12px] font-semibold text-faint">
         Hauts faits · {obtenus.length} / {HAUTS_FAITS.length}
       </p>
       <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
@@ -598,7 +596,7 @@ function HautsFaits({ obtenus }: { obtenus: string[] }) {
                 >
                   {fait.nom}
                 </span>
-                <span className="block truncate text-[10px] leading-tight text-faint">
+                <span className="block truncate text-[12px] leading-tight text-faint">
                   {fait.condition}
                 </span>
               </span>

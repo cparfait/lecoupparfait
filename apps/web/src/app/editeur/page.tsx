@@ -156,9 +156,7 @@ export default function EditorPage() {
         <div className="etude-aside flex min-w-0 flex-col gap-3">
           {/* ── Pièces ─────────────────────────────────────────── */}
           <Card className="p-3">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
-              Pièce à poser
-            </p>
+            <p className="mb-2 text-[12px] font-semibold text-faint">Pièce à poser</p>
             {(['w', 'b'] as const).map((colour) => (
               <div key={colour} className="mb-1.5 flex gap-1">
                 {PIECES.map((piece) => {
@@ -188,7 +186,7 @@ export default function EditorPage() {
               onClick={() => setBrush(null)}
               aria-pressed={brush === null}
               className={clsx(
-                'mt-1 flex w-full items-center justify-center gap-1.5 rounded-[var(--radius-sm)] py-1.5 text-[13px] font-medium transition-colors',
+                'mt-1 flex w-full items-center justify-center gap-1.5 rounded-[var(--radius-sm)] py-1.5 text-[14px] font-medium transition-colors',
                 brush === null
                   ? 'bg-accent/20 ring-2 ring-inset ring-accent'
                   : 'hover:bg-surface-hover',
@@ -201,9 +199,7 @@ export default function EditorPage() {
 
           {/* ── Trait et plateau ───────────────────────────────── */}
           <Card className="p-3">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
-              Trait
-            </p>
+            <p className="mb-2 text-[12px] font-semibold text-faint">Trait</p>
             <div className="flex gap-1.5">
               {(['w', 'b'] as const).map((colour) => (
                 <button
@@ -211,7 +207,7 @@ export default function EditorPage() {
                   type="button"
                   onClick={() => withTurn(colour)}
                   className={clsx(
-                    'flex-1 rounded-[var(--radius-sm)] border px-2 py-1.5 text-[13px] font-medium transition-colors',
+                    'flex-1 rounded-[var(--radius-sm)] border px-2 py-1.5 text-[14px] font-medium transition-colors',
                     turn === colour
                       ? 'border-accent bg-accent/15 text-ink'
                       : 'border-line text-muted hover:bg-surface-hover',
@@ -260,7 +256,7 @@ export default function EditorPage() {
           <Card className="p-3">
             <p
               className={clsx(
-                'text-[13px] leading-snug',
+                'text-[14px] leading-snug',
                 verdict.ok ? 'text-muted' : 'text-[var(--q-blunder)]',
               )}
             >
@@ -288,9 +284,7 @@ export default function EditorPage() {
             </div>
 
             <label className="mt-3 block">
-              <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-faint">
-                FEN
-              </span>
+              <span className="mb-1 block text-[12px] font-semibold text-faint">FEN</span>
               <input
                 value={fen}
                 onChange={(event) => {
@@ -301,7 +295,7 @@ export default function EditorPage() {
                 }}
                 spellCheck={false}
                 aria-label="Position au format FEN"
-                className="w-full rounded-[var(--radius-sm)] border border-line bg-surface px-2 py-1.5 font-mono text-[11px] focus:border-accent focus:outline-none"
+                className="w-full rounded-[var(--radius-sm)] border border-line bg-surface px-2 py-1.5 font-mono text-[12px] focus:border-accent focus:outline-none"
               />
             </label>
           </Card>

@@ -62,7 +62,7 @@ export function AccountButton({ variant = 'header' }: { variant?: 'header' | 'me
         className={clsx(
           'items-center justify-center rounded-[var(--radius-sm)] bg-accent font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110',
           variant === 'header'
-            ? 'cible-doigt inline-flex h-9 whitespace-nowrap px-2.5 text-[13px] sm:px-3.5'
+            ? 'cible-doigt inline-flex h-9 whitespace-nowrap px-2.5 text-[14px] sm:px-3.5'
             : 'col-span-2 mt-1 flex gap-2 px-3 py-2.5 text-sm',
         )}
       >
@@ -94,7 +94,7 @@ export function AccountButton({ variant = 'header' }: { variant?: 'header' | 'me
         // n'y ajoutait qu'une case de plus dans une rangée qui en comptait six.
         'items-center gap-2 rounded-[var(--radius-sm)] font-semibold transition-colors hover:bg-surface-hover',
         variant === 'header'
-          ? 'inline-flex h-9 px-1.5 text-[13px] text-ink sm:px-2'
+          ? 'inline-flex h-9 px-1.5 text-[14px] text-ink sm:px-2'
           : 'col-span-2 mt-1 flex justify-center px-3 py-2.5 text-sm text-ink',
       )}
     >

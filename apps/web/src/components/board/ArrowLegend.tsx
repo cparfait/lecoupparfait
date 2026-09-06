@@ -62,7 +62,7 @@ export function ArrowLegend({
         aria-hidden
         className={clsx(
           'invisible flex flex-wrap items-center gap-x-3.5 gap-y-1.5 rounded-[var(--radius-sm)]',
-          'bg-surface px-3 py-2 text-[11px] leading-none text-muted',
+          'bg-surface px-3 py-2 text-[12px] leading-none text-muted',
           className,
         )}
       >
@@ -75,7 +75,7 @@ export function ArrowLegend({
     <ul
       className={clsx(
         'flex flex-wrap items-center gap-x-3.5 gap-y-1.5 rounded-[var(--radius-sm)]',
-        'bg-surface px-3 py-2 text-[11px] leading-none text-muted',
+        'bg-surface px-3 py-2 text-[12px] leading-none text-muted',
         className,
       )}
       aria-label="Signification des flèches"

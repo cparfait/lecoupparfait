@@ -385,7 +385,7 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
         <div className="absolute inset-0 grid place-items-center bg-[var(--bg)]/92 p-6 text-center">
           <div>
             <p className="text-sm font-semibold">La vue 3D n’est pas disponible ici</p>
-            <p className="mx-auto mt-1.5 max-w-xs text-[13px] leading-relaxed text-muted">
+            <p className="mx-auto mt-1.5 max-w-xs text-[14px] leading-relaxed text-muted">
               Ce navigateur n’offre pas l’accélération graphique dont elle a besoin. La vue 2D joue
               exactement la même partie.
             </p>
@@ -393,7 +393,7 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
               <button
                 type="button"
                 onClick={() => prefs.set('view', '2d')}
-                className="rounded-[var(--radius-sm)] bg-accent px-3 py-1.5 text-[13px] font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
+                className="rounded-[var(--radius-sm)] bg-accent px-3 py-1.5 text-[14px] font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
               >
                 Passer en 2D
               </button>
@@ -409,7 +409,7 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
         <div className="absolute inset-0 grid place-items-center bg-[var(--bg)]/92 p-6 text-center">
           <div>
             <p className="text-sm font-semibold">La vue 3D s’est interrompue</p>
-            <p className="mx-auto mt-1.5 max-w-xs text-[13px] leading-relaxed text-muted">
+            <p className="mx-auto mt-1.5 max-w-xs text-[14px] leading-relaxed text-muted">
               Ton appareil a repris la mémoire graphique. La partie continue : rien n’est perdu.
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
@@ -419,14 +419,14 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
                   setContextePerdu(false)
                   setReprise((valeur) => valeur + 1)
                 }}
-                className="rounded-[var(--radius-sm)] bg-accent px-3 py-1.5 text-[13px] font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
+                className="rounded-[var(--radius-sm)] bg-accent px-3 py-1.5 text-[14px] font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
               >
                 Réessayer
               </button>
               <button
                 type="button"
                 onClick={() => prefs.set('view', '2d')}
-                className="rounded-[var(--radius-sm)] border border-line px-3 py-1.5 text-[13px] font-medium transition-colors hover:bg-surface-hover"
+                className="rounded-[var(--radius-sm)] border border-line px-3 py-1.5 text-[14px] font-medium transition-colors hover:bg-surface-hover"
               >
                 Revenir en 2D
               </button>

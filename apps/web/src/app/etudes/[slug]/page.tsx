@@ -264,9 +264,7 @@ export default function StudyPage() {
       <div className="grid gap-3 lg:grid-cols-[190px_minmax(0,1fr)_300px]">
         {/* ── Chapitres ────────────────────────────────────────────── */}
         <Card className="p-2">
-          <p className="mb-1.5 px-1 text-[11px] font-semibold uppercase tracking-wide text-faint">
-            Chapitres
-          </p>
+          <p className="mb-1.5 px-1 text-[12px] font-semibold text-faint">Chapitres</p>
           <div className="space-y-0.5">
             {study.chapters.map((entry) => (
               <button
@@ -277,14 +275,14 @@ export default function StudyPage() {
                   setCursor(-1)
                 }}
                 className={clsx(
-                  'flex w-full items-center gap-1.5 rounded-[var(--radius-sm)] px-2 py-1.5 text-left text-[13px] transition-colors',
+                  'flex w-full items-center gap-1.5 rounded-[var(--radius-sm)] px-2 py-1.5 text-left text-[14px] transition-colors',
                   entry.id === chapterId
                     ? 'bg-accent/18 font-medium text-ink'
                     : 'text-muted hover:bg-surface-hover',
                 )}
               >
                 <span className="min-w-0 flex-1 truncate">{entry.title}</span>
-                <span className="shrink-0 text-[11px] tabular-nums text-faint">
+                <span className="shrink-0 text-[12px] tabular-nums text-faint">
                   {entry.moves.length}
                 </span>
               </button>
@@ -345,9 +343,7 @@ export default function StudyPage() {
         {/* ── Coups et commentaire ─────────────────────────────────── */}
         <div className="flex min-w-0 flex-col gap-2">
           <Card className="max-h-52 overflow-y-auto p-2">
-            <p className="mb-1 px-1 text-[11px] font-semibold uppercase tracking-wide text-faint">
-              Coups
-            </p>
+            <p className="mb-1 px-1 text-[12px] font-semibold text-faint">Coups</p>
             {chapter && chapter.moves.length > 0 ? (
               <div className="flex flex-wrap gap-0.5">
                 {chapter.moves.map((san, index) => (
@@ -357,7 +353,7 @@ export default function StudyPage() {
                     onClick={() => setCursor(index)}
                     title={chapter.comments[String(index)] ? 'Ce coup est commenté' : undefined}
                     className={clsx(
-                      'rounded px-1.5 py-0.5 text-[13px] transition-colors',
+                      'rounded px-1.5 py-0.5 text-[14px] transition-colors',
                       index === cursor
                         ? 'bg-accent/20 font-semibold text-ink'
                         : 'hover:bg-surface-hover',
@@ -373,12 +369,12 @@ export default function StudyPage() {
                 ))}
               </div>
             ) : (
-              <p className="px-1 py-2 text-[13px] text-faint">Aucun coup pour l’instant.</p>
+              <p className="px-1 py-2 text-[14px] text-faint">Aucun coup pour l’instant.</p>
             )}
           </Card>
 
           <Card className="flex min-h-[180px] flex-1 flex-col p-2">
-            <p className="mb-1 px-1 text-[11px] font-semibold uppercase tracking-wide text-faint">
+            <p className="mb-1 px-1 text-[12px] font-semibold text-faint">
               {cursor < 0 ? 'Note sur la position de départ' : 'Note sur ce coup'}
             </p>
             {own ? (
@@ -388,10 +384,10 @@ export default function StudyPage() {
                 placeholder="Pourquoi ce coup ? Qu’est-ce qu’il prépare ?"
                 maxLength={2000}
                 aria-label="Commentaire du coup"
-                className="min-h-0 flex-1 resize-none rounded-[var(--radius-sm)] bg-transparent px-1.5 py-1 text-[13px] leading-relaxed placeholder:text-faint focus:outline-none"
+                className="min-h-0 flex-1 resize-none rounded-[var(--radius-sm)] bg-transparent px-1.5 py-1 text-[14px] leading-relaxed placeholder:text-faint focus:outline-none"
               />
             ) : (
-              <p className="min-h-0 flex-1 whitespace-pre-wrap px-1.5 py-1 text-[13px] leading-relaxed text-muted">
+              <p className="min-h-0 flex-1 whitespace-pre-wrap px-1.5 py-1 text-[14px] leading-relaxed text-muted">
                 {comment || <span className="text-faint">Pas de note sur ce coup.</span>}
               </p>
             )}

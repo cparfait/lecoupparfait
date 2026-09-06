@@ -122,7 +122,7 @@ export default function StudiesPage() {
       </Card>
 
       {studies.length === 0 ? (
-        <p className="mt-6 text-center text-[13px] leading-relaxed text-faint">
+        <p className="mt-6 text-center text-[14px] leading-relaxed text-faint">
           Aucune étude pour l’instant. Commence par celle qui te servira le plus :
           <br />
           l’ouverture que tu joues et que tu ne comprends pas encore.

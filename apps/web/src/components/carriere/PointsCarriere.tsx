@@ -53,7 +53,7 @@ export function PointsCarriere({ progression }: { progression: Progression }) {
           <ChevronDown
             size={11}
             aria-hidden
-            className={clsx('transition-transform duration-200', ouvert && 'rotate-180')}
+            className={clsx('transition-transform duration-150', ouvert && 'rotate-180')}
           />
         </>
       )}
@@ -75,7 +75,7 @@ function PanneauPoints({ progression }: { progression: Progression }) {
         <p className="font-display text-lg font-bold tracking-tight tabular-nums">
           {progression.xp} points
         </p>
-        <span className="text-[11px] text-faint">de carrière</span>
+        <span className="text-[12px] text-faint">de carrière</span>
       </div>
 
       {/* ── Où ça place ───────────────────────────────────────────────
@@ -106,14 +106,14 @@ function PanneauPoints({ progression }: { progression: Progression }) {
           />
         </div>
         {!rang.suivant && (
-          <p className="mt-1 text-[11px] text-faint">
+          <p className="mt-1 text-[12px] text-faint">
             Dernier rang : il n’y a plus rien au-dessus.
           </p>
         )}
       </div>
 
       {/* ── D'où ils viennent ─────────────────────────────────────────── */}
-      <p className="mt-3 px-1 text-[10px] uppercase tracking-wide text-faint">D’où ils viennent</p>
+      <p className="mt-3 px-1 text-[12px] text-faint">D’où ils viennent</p>
       {lignes.length === 0 ? (
         <p className="mt-1 px-1 text-[12px] text-muted">
           Rien encore. La première leçon en rapporte {XP.lecon}.
@@ -154,7 +154,7 @@ function PanneauPoints({ progression }: { progression: Progression }) {
         les étoiles se gagnent en réussissant{' '}
         <strong className="font-semibold text-ink">sans aide</strong>.
       </p>
-      <p className="mt-2 px-1 text-[11px] leading-relaxed text-faint">
+      <p className="mt-2 px-1 text-[12px] leading-relaxed text-faint">
         Les « points du jour » de la carte Aujourd’hui sont un autre compteur : ils comptent tes
         quêtes de la journée, sur {XP_TOTAL}, et repartent de zéro à minuit.
       </p>
@@ -162,7 +162,7 @@ function PanneauPoints({ progression }: { progression: Progression }) {
       <div className="mt-2 border-t border-line/60 pt-2">
         <Link
           href="/carriere"
-          className="flex items-center justify-between rounded-[var(--radius-sm)] px-1 py-1.5 text-[13px] font-medium transition-colors hover:bg-surface-hover"
+          className="flex items-center justify-between rounded-[var(--radius-sm)] px-1 py-1.5 text-[14px] font-medium transition-colors hover:bg-surface-hover"
         >
           Voir la carte de carrière
           <ArrowRight size={14} aria-hidden />

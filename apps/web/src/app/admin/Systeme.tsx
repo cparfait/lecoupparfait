@@ -174,8 +174,8 @@ export function Systeme() {
               className="flex flex-wrap items-center gap-2 rounded-[var(--radius-sm)] border border-line px-3 py-2"
             >
               <span className="min-w-0 flex-1">
-                <span className="block text-[13px] font-medium">{purge.titre}</span>
-                <span className="block text-[11px] leading-snug text-faint">{purge.detail}</span>
+                <span className="block text-[14px] font-medium">{purge.titre}</span>
+                <span className="block text-[12px] leading-snug text-faint">{purge.detail}</span>
               </span>
               <Button
                 size="sm"
@@ -193,7 +193,7 @@ export function Systeme() {
 
       <Card className="p-4">
         <SectionTitle>Accès administrateur</SectionTitle>
-        <p className="text-[13px] leading-relaxed text-muted">
+        <p className="text-[14px] leading-relaxed text-muted">
           {sante.administration.pseudosPrivilegies.length > 0 ? (
             <>
               <code className="text-ink">ADMIN_USERNAMES</code> désigne{' '}
@@ -267,8 +267,8 @@ function Etat({
         {icone}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[13px] font-medium">{titre}</span>
-        <span className="block truncate text-[11px] text-faint">{detail}</span>
+        <span className="block text-[14px] font-medium">{titre}</span>
+        <span className="block truncate text-[12px] text-faint">{detail}</span>
       </span>
       <Chip tone={ok ? 'success' : 'danger'}>{ok ? 'ok' : 'absent'}</Chip>
     </div>

@@ -282,10 +282,8 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
           <Card className="overflow-hidden">
             <div className="h-1" style={{ background: chapitre.teinte }} aria-hidden />
             <div className="flex items-baseline justify-between gap-2 border-b border-line/60 px-4 py-2.5">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-                Ton parcours
-              </p>
-              <p className="text-[11px] tabular-nums text-muted">
+              <p className="text-[12px] font-semibold text-faint">Ton parcours</p>
+              <p className="text-[12px] tabular-nums text-muted">
                 chapitre {chapitre.numero} / {CHAPITRES.length}
               </p>
             </div>
@@ -317,7 +315,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                     </span>
                     <span className="min-w-0 flex-1 truncate">{etape.titre}</span>
                     {etape.total > 1 && (
-                      <span className="shrink-0 tabular-nums text-[11px] text-faint">
+                      <span className="shrink-0 tabular-nums text-[12px] text-faint">
                         {etape.fait} / {etape.total}
                       </span>
                     )}
@@ -360,12 +358,10 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <Card className="overflow-hidden">
             <div className="flex items-baseline justify-between border-b border-line/60 px-4 py-2.5">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-                Tes dernières parties
-              </p>
+              <p className="text-[12px] font-semibold text-faint">Tes dernières parties</p>
               <Link
                 href={`/profil/${encodeURIComponent(pseudo)}`}
-                className="text-[11px] text-accent hover:underline"
+                className="text-[12px] text-accent hover:underline"
               >
                 tout voir
               </Link>
@@ -377,7 +373,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
               </div>
             ) : parties.length === 0 ? (
               <div className="px-4 py-5 text-center">
-                <p className="text-[13px] text-muted">Aucune partie enregistrée.</p>
+                <p className="text-[14px] text-muted">Aucune partie enregistrée.</p>
                 <ButtonLink href="/jouer/ordinateur" variant="secondary" size="sm" className="mt-3">
                   Jouer une partie
                 </ButtonLink>
@@ -403,14 +399,14 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                             {partie.adversaire ?? 'un adversaire'}
                           </strong>
                         </span>
-                        <span className="block truncate text-[11px] text-faint">
+                        <span className="block truncate text-[12px] text-faint">
                           {ISSUE[partie.issue]} · {partie.opening ?? 'ouverture non répertoriée'} ·{' '}
                           {partie.coups} demi-coups
                         </span>
                       </span>
                       {/* Le mot, et pas seulement l'icône : rien ne disait que
                           cliquer une ligne ouvrait l'analyse. */}
-                      <span className="flex shrink-0 items-center gap-1 text-[11px] font-semibold text-faint transition-colors group-hover:text-accent">
+                      <span className="flex shrink-0 items-center gap-1 text-[12px] font-semibold text-faint transition-colors group-hover:text-accent">
                         <Gauge size={13} aria-hidden />
                         Analyser
                       </span>
@@ -424,10 +420,8 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
           {analyses && analyses.length > 0 ? (
             <Card className="overflow-hidden">
               <div className="flex items-baseline justify-between border-b border-line/60 px-4 py-2.5">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-                  Tes analyses
-                </p>
-                <Link href="/analyse" className="text-[11px] text-accent hover:underline">
+                <p className="text-[12px] font-semibold text-faint">Tes analyses</p>
+                <Link href="/analyse" className="text-[12px] text-accent hover:underline">
                   tout voir
                 </Link>
               </div>
@@ -435,12 +429,12 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                 {analyses.map((analyse) => (
                   <li
                     key={analyse.id}
-                    className="border-b border-line/40 px-4 py-2 text-[13px] last:border-0"
+                    className="border-b border-line/40 px-4 py-2 text-[14px] last:border-0"
                   >
                     <span className="block truncate">
                       {analyse.whiteName ?? 'Blancs'} — {analyse.blackName ?? 'Noirs'}
                     </span>
-                    <span className="block truncate text-[11px] text-faint">
+                    <span className="block truncate text-[12px] text-faint">
                       {analyse.opening ?? 'sans ouverture répertoriée'}
                     </span>
                   </li>
@@ -452,7 +446,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                sert la colonne. C'est la seule invitation de la page, et elle
                vise ce qu'on ne pense pas à faire tout seul. */
             <Card className="flex flex-col justify-center p-4">
-              <p className="flex items-center gap-2 text-[13px] font-semibold">
+              <p className="flex items-center gap-2 text-[14px] font-semibold">
                 <Sparkles size={14} className="shrink-0 text-accent" aria-hidden />
                 Fais analyser une partie
               </p>

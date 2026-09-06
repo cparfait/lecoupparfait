@@ -31,7 +31,7 @@ export default function GalerieAdversaires() {
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
         Tes adversaires artificiels
       </h1>
-      <p className="mt-3 max-w-2xl leading-relaxed text-muted max-lg:text-[13px]">
+      <p className="mt-3 max-w-2xl leading-relaxed text-muted max-lg:text-[14px]">
         Sept caractères, répartis sur les vingt-cinq niveaux. Leur style n’est pas un habillage :
         chacun évalue les coups avec une préférence propre, et sa fiche montre les nombres qui la
         produisent — avec ce qu’il faut faire pour le battre.
@@ -48,7 +48,7 @@ export default function GalerieAdversaires() {
                   <ArrowRight
                     size={14}
                     aria-hidden
-                    className="text-faint transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-accent"
+                    className="text-faint transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-accent"
                   />
                 </p>
                 <p className="mt-0.5 text-[12px] italic text-accent">« {personnalite.devise} »</p>

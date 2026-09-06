@@ -134,11 +134,11 @@ export function Aujourdhui({
             !replie && 'border-b border-line/60',
           )}
         >
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--q-best)]">
+          <span className="flex items-center gap-1.5 text-[12px] font-semibold text-[var(--q-best)]">
             <Check size={12} strokeWidth={3} aria-hidden />
             Défi du jour relevé
           </span>
-          <span className="ml-auto text-[11px] tabular-nums text-muted">
+          <span className="ml-auto text-[12px] tabular-nums text-muted">
             {xp} / {XP_TOTAL} points du jour
           </span>
           {replie ? (
@@ -149,10 +149,8 @@ export function Aujourdhui({
         </button>
       ) : (
         <div className="flex items-baseline justify-between gap-2 border-b border-line/60 px-4 py-2.5">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-            Aujourd’hui
-          </p>
-          <p className="text-[11px] tabular-nums text-muted">
+          <p className="text-[12px] font-semibold text-faint">Aujourd’hui</p>
+          <p className="text-[12px] tabular-nums text-muted">
             {xp} / {XP_TOTAL} points du jour
           </p>
         </div>
@@ -191,7 +189,7 @@ export function Aujourdhui({
             fois le défi relevé — c'est justement là qu'on veut se mesurer plus
             haut. */}
         {superieures.length > 0 && (
-          <p className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-line/40 pt-2.5 text-[11px] text-faint">
+          <p className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-line/40 pt-2.5 text-[12px] text-faint">
             <Swords size={11} aria-hidden />
             <span>Plus dur&nbsp;:</span>
             {superieures.map((autre) => (

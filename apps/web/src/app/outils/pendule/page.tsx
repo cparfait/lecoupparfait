@@ -238,7 +238,7 @@ export default function PendulePage() {
         <>
           <Link
             href="/outils"
-            className="inline-flex items-center gap-1.5 text-[13px] text-muted transition-colors hover:text-ink"
+            className="inline-flex items-center gap-1.5 text-[14px] text-muted transition-colors hover:text-ink"
           >
             <ArrowLeft size={14} aria-hidden />
             Outils
@@ -251,7 +251,7 @@ export default function PendulePage() {
           </p>
 
           <Card className="mt-5 p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">Cadence</p>
+            <p className="text-[12px] font-semibold text-faint">Cadence</p>
             <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
               {CADENCES.map((cadence) => (
                 <button
@@ -361,7 +361,7 @@ export default function PendulePage() {
 
           {state.moves.length > 0 && (
             <Card className="mt-2 p-3">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
+              <p className="text-[12px] font-semibold text-faint">
                 La partie, telle que la carte l’a vue
               </p>
               <p className="mt-1.5 font-mono text-[12px] leading-relaxed text-muted">
@@ -422,7 +422,7 @@ function CoteJoueur({
       )}
     >
       <span className="flex flex-col items-center gap-1">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-faint">
+        <span className="text-[12px] font-semibold text-faint">
           {camp === 'w' ? 'Blancs' : 'Noirs'}
         </span>
         <span

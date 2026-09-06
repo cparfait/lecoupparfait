@@ -219,14 +219,12 @@ export default function StatsPage() {
           },
         ].map((entry) => (
           <Card key={entry.label} className="p-3">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-              {entry.label}
-            </p>
+            <p className="text-[12px] font-semibold text-faint">{entry.label}</p>
             <p className="mt-0.5 font-display text-2xl font-bold tabular-nums">
               {entry.value}
               <span className="text-sm font-normal text-muted"> %</span>
             </p>
-            <p className="mt-0.5 text-[11px] text-faint">{entry.games} parties</p>
+            <p className="mt-0.5 text-[12px] text-faint">{entry.games} parties</p>
             <span className="mt-1.5 block">
               <Bar rate={entry.value} />
             </span>
@@ -237,7 +235,7 @@ export default function StatsPage() {
       {/* ── Ce qu'il faut retenir ───────────────────────────────────── */}
       {worst && worst.games >= 3 && (
         <Card className="mt-3 p-3">
-          <p className="flex items-start gap-2 text-[13px] leading-relaxed">
+          <p className="flex items-start gap-2 text-[14px] leading-relaxed">
             <TrendingDown
               size={15}
               className="mt-0.5 shrink-0 text-[var(--q-blunder)]"
@@ -270,18 +268,16 @@ export default function StatsPage() {
 
       {/* ── Par ouverture ───────────────────────────────────────────── */}
       <Card className="mt-3 p-3">
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
-          Par ouverture
-        </p>
+        <p className="mb-2 text-[12px] font-semibold text-faint">Par ouverture</p>
         {stats.openings.length === 0 ? (
-          <p className="text-[13px] text-faint">
+          <p className="text-[14px] text-faint">
             Aucune ouverture jouée au moins trois fois : trop tôt pour en tirer quoi que ce soit.
           </p>
         ) : (
           <div className="space-y-1.5">
             {stats.openings.map((opening) => (
               <div key={`${opening.eco}-${opening.name}`} className="flex items-center gap-2.5">
-                <span className="w-10 shrink-0 font-mono text-[11px] text-faint">
+                <span className="w-10 shrink-0 font-mono text-[12px] text-faint">
                   {opening.eco ?? '—'}
                 </span>
                 <span className="min-w-0 flex-1">
@@ -297,7 +293,7 @@ export default function StatsPage() {
                         blancs: opening.asWhite,
                       })
                     }
-                    className="block text-[13px]"
+                    className="block text-[14px]"
                   >
                     {opening.name}
                   </MotExplique>
@@ -309,7 +305,7 @@ export default function StatsPage() {
                   {opening.rate} %
                 </span>
                 <span
-                  className="w-16 shrink-0 text-right text-[11px] tabular-nums text-faint"
+                  className="w-16 shrink-0 text-right text-[12px] tabular-nums text-faint"
                   title={`${opening.asWhite} avec les Blancs, ${opening.games - opening.asWhite} avec les Noirs`}
                 >
                   {opening.games} p.
@@ -323,9 +319,7 @@ export default function StatsPage() {
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {/* ── Par cadence ───────────────────────────────────────────── */}
         <Card className="p-3">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
-            Par cadence
-          </p>
+          <p className="mb-2 text-[12px] font-semibold text-faint">Par cadence</p>
           <div className="space-y-1.5">
             {stats.speeds.map((entry) => (
               <div key={entry.speed} className="flex items-center gap-2">
@@ -339,7 +333,7 @@ export default function StatsPage() {
                       taux: entry.rate,
                     })
                   }
-                  className="w-24 shrink-0 text-[13px]"
+                  className="w-24 shrink-0 text-[14px]"
                 >
                   {SPEED_LABELS[entry.speed as keyof typeof SPEED_LABELS]?.fr ?? entry.speed}
                 </MotExplique>
@@ -356,12 +350,10 @@ export default function StatsPage() {
 
         {/* ── Comment ça se termine ─────────────────────────────────── */}
         <Card className="p-3">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
-            Comment tes parties finissent
-          </p>
+          <p className="mb-2 text-[12px] font-semibold text-faint">Comment tes parties finissent</p>
           <div className="space-y-1">
             {stats.endings.map((entry) => (
-              <div key={entry.status} className="flex items-center gap-2 text-[13px]">
+              <div key={entry.status} className="flex items-center gap-2 text-[14px]">
                 <MotExplique
                   aide={ENDING_LABELS[entry.status] ?? entry.status}
                   onClick={() =>
@@ -388,13 +380,13 @@ export default function StatsPage() {
       {/* ── Par heure ───────────────────────────────────────────────── */}
       {bestHour && worstHour && bestHour.hour !== worstHour.hour && (
         <Card className="mt-3 p-3">
-          <p className="text-[13px] leading-relaxed text-muted">
+          <p className="text-[14px] leading-relaxed text-muted">
             Tu marques <strong className="font-semibold text-ink">{bestHour.rate} %</strong> vers{' '}
             {bestHour.hour} h, contre{' '}
             <strong className="font-semibold text-ink">{worstHour.rate} %</strong> vers{' '}
             {worstHour.hour} h.
           </p>
-          <p className="mt-1 text-[11px] leading-relaxed text-faint">
+          <p className="mt-1 text-[12px] leading-relaxed text-faint">
             Heure du serveur, et non la tienne : le fuseau des joueurs n’est pas enregistré. L’écart
             reste parlant, l’heure exacte moins.
           </p>
@@ -403,7 +395,7 @@ export default function StatsPage() {
 
       {/* Dit une fois, en bas : les points d'interrogation se voient, mais rien
           n'annonce qu'ils ouvrent une définition plutôt qu'une infobulle. */}
-      <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-faint">
+      <p className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-faint">
         <HelpCircle size={11} aria-hidden />
         Un nom d’ouverture, de cadence ou de fin de partie s’ouvre : on y trouve ce qu’il veut dire.
       </p>

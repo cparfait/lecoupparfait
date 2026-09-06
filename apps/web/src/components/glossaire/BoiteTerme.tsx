@@ -131,7 +131,7 @@ export function BoiteTerme({
         <h2 id="terme-titre" className="pr-8 font-display text-xl font-bold tracking-tight">
           {nom}
         </h2>
-        <p className="mt-2 text-[13px] leading-relaxed text-muted">{renderBold(definition)}</p>
+        <p className="mt-2 text-[14px] leading-relaxed text-muted">{renderBold(definition)}</p>
 
         {/* L'échiquier est bridé à trois cent vingt points : au-delà, il pousse
             la légende hors de la boîte sur un téléphone, et c'est elle qui dit
@@ -147,7 +147,7 @@ export function BoiteTerme({
           />
         </div>
 
-        <p className="mt-3 text-[13px] leading-relaxed">
+        <p className="mt-3 text-[14px] leading-relaxed">
           {position.legende}
           {joues.length > 0 && (
             <span className="ml-1 font-semibold text-accent">

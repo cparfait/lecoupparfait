@@ -157,7 +157,7 @@ export function PanneauIA() {
                   )}
                 >
                   <span className="block truncate font-medium">{entry.name}</span>
-                  <span className="mt-0.5 block text-[11px] text-faint">
+                  <span className="mt-0.5 block text-[12px] text-faint">
                     {entry.local
                       ? 'sur ta machine'
                       : entry.needsKey
@@ -406,7 +406,7 @@ function FournisseursPersonnalises({
             >
               <span className="min-w-0">
                 <span className="block truncate text-sm font-medium">{def.name}</span>
-                <span className="block truncate text-[11px] text-faint">{def.baseUrl}</span>
+                <span className="block truncate text-[12px] text-faint">{def.baseUrl}</span>
               </span>
               <button
                 type="button"

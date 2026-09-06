@@ -102,7 +102,7 @@ export function RubanCoups({
 
   if (coups.length === 0) {
     return (
-      <p className={clsx('py-2 text-center text-[13px] text-faint', className)}>
+      <p className={clsx('py-2 text-center text-[14px] text-faint', className)}>
         Les coups joués apparaîtront ici.
       </p>
     )
@@ -150,7 +150,7 @@ export function RubanCoups({
               onClick={() => onSeek(index)}
               aria-current={courant ? 'true' : undefined}
               className={clsx(
-                'flex min-w-0 items-center gap-1 rounded-[var(--radius-sm)] px-2 py-1.5 text-[13px] transition-colors pointer-coarse:min-h-11',
+                'flex min-w-0 items-center gap-1 rounded-[var(--radius-sm)] px-2 py-1.5 text-[14px] transition-colors pointer-coarse:min-h-11',
                 courant
                   ? 'bg-surface-strong font-bold text-ink'
                   : 'text-muted hover:bg-surface-hover',
@@ -160,7 +160,7 @@ export function RubanCoups({
                   coup courant : répété sur chacun, il double la largeur du
                   ruban pour une information qu'on lit une fois. */}
               {(coup.color === 'w' || courant) && (
-                <span className="shrink-0 text-[11px] tabular-nums text-faint">
+                <span className="shrink-0 text-[12px] tabular-nums text-faint">
                   {coup.moveNumber}
                   {coup.color === 'w' ? '.' : '…'}
                 </span>

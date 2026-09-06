@@ -174,7 +174,7 @@ export function ImportEnLigne({
               </li>
             ))}
           </ul>
-          <p className="text-[11px] text-faint">
+          <p className="text-[12px] text-faint">
             Ces parties ne sont pas enregistrées : elles disparaissent en quittant la page.
           </p>
         </>
@@ -222,7 +222,7 @@ function LignePartie({
                   : 'sans résultat'}
           </span>
         </span>
-        <span className="block text-[11px] text-faint">
+        <span className="block text-[12px] text-faint">
           {partie.monCamp === 'w' ? 'Blancs' : 'Noirs'} · {partie.cadence}
           {partie.date > 0 && ` · ${new Date(partie.date).toLocaleDateString('fr-FR')}`}
         </span>

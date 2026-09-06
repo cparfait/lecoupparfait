@@ -50,7 +50,7 @@ export function ComptesAilleurs() {
             {/* La vignette du service, à côté de son nom : deux champs de
                 saisie gris l'un à côté de l'autre se remplissent une fois sur
                 deux dans le mauvais. */}
-            <span className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
+            <span className="mb-1 flex items-center gap-1.5 text-[12px] font-semibold text-faint">
               <MarqueService service={service.service} taille={14} />
               {service.label}
             </span>

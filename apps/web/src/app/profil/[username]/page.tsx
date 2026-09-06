@@ -318,7 +318,7 @@ export default function ProfilePage() {
         {isMe && (
           <Link
             href="/statistiques"
-            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-accent hover:underline"
+            className="inline-flex items-center gap-1.5 text-[14px] font-medium text-accent hover:underline"
           >
             <BarChart3 size={14} aria-hidden />
             Statistiques détaillées
@@ -330,7 +330,7 @@ export default function ProfilePage() {
         <div className="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
           {profile.ratings.map((rating) => (
             <Card key={rating.category} className="p-4">
-              <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
+              <p className="flex items-center gap-1.5 text-[12px] font-semibold text-faint">
                 {rating.category !== 'puzzle' && (
                   <span aria-hidden>
                     {SPEED_LABELS[rating.category as keyof typeof SPEED_LABELS]?.icon}
@@ -342,10 +342,10 @@ export default function ProfilePage() {
                 {rating.rating}
                 {rating.provisional && <span className="text-faint">?</span>}
               </p>
-              <p className="mt-0.5 text-[11px] text-muted">
+              <p className="mt-0.5 text-[12px] text-muted">
                 Elo {rating.elo} · record {rating.peak}
               </p>
-              <div className="mt-2 flex gap-1 text-[11px] font-medium">
+              <div className="mt-2 flex gap-1 text-[12px] font-medium">
                 <span className="text-[var(--q-best)]">{rating.wins} V</span>
                 <span className="text-faint">{rating.draws} N</span>
                 <span className="text-[var(--q-blunder)]">{rating.losses} D</span>
@@ -386,9 +386,7 @@ export default function ProfilePage() {
       {/* ── Courbe de progression ────────────────────────────────── */}
       {profile.history.length > 3 && (
         <Card className="mt-4 p-4">
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-faint">
-            Évolution du classement
-          </p>
+          <p className="mb-3 text-[12px] font-semibold text-faint">Évolution du classement</p>
           <RatingChart history={profile.history} />
         </Card>
       )}
@@ -402,7 +400,7 @@ export default function ProfilePage() {
           autrement qu'au pouce fatigué. Or on vient y voir *la dernière*, et
           c'est un déplié qu'on cherche quand on veut remonter le temps. */}
       <Card className="mt-4 overflow-hidden">
-        <p className="border-b border-line/60 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
+        <p className="border-b border-line/60 px-4 py-2.5 text-[12px] font-semibold text-faint">
           Parties récentes
         </p>
         {profile.games.length === 0 ? (
@@ -450,7 +448,7 @@ export default function ProfilePage() {
                         <strong className="font-semibold">{game.opponent}</strong>
                       )}
                     </span>
-                    <span className="block truncate text-[11px] text-faint">
+                    <span className="block truncate text-[12px] text-faint">
                       {game.opening ?? 'ouverture non répertoriée'} · {game.moveCount} demi-coups
                       {game.accuracy != null && ` · ${Math.round(game.accuracy)} % de précision`}
                     </span>
@@ -466,7 +464,7 @@ export default function ProfilePage() {
                       {game.ratingDelta}
                     </span>
                   )}
-                  <span className="shrink-0 text-[11px] text-faint">
+                  <span className="shrink-0 text-[12px] text-faint">
                     {formatDate(game.playedAt)}
                   </span>
                   {/*
@@ -522,7 +520,7 @@ export default function ProfilePage() {
             type="button"
             onClick={() => setToutesLesParties((ouvert) => !ouvert)}
             aria-expanded={toutesLesParties}
-            className="flex w-full items-center justify-center gap-1.5 border-t border-line/60 px-4 py-3 text-[13px] font-medium text-muted transition-colors hover:bg-surface-hover hover:text-ink"
+            className="flex w-full items-center justify-center gap-1.5 border-t border-line/60 px-4 py-3 text-[14px] font-medium text-muted transition-colors hover:bg-surface-hover hover:text-ink"
           >
             {toutesLesParties ? (
               <>
@@ -670,7 +668,7 @@ function RatingChart({ history }: { history: Profile['history'] }) {
 
       {/* Ce que la courbe raconte, écrit. Une pente se lit vite et se
           surinterprète tout aussi vite : le chiffre tranche. */}
-      <p className="mb-2 text-[13px] leading-relaxed">
+      <p className="mb-2 text-[14px] leading-relaxed">
         <strong className="font-display text-lg font-bold tabular-nums">{arrivee}</strong>{' '}
         <span className="text-muted">aujourd’hui, </span>
         <span
@@ -709,7 +707,7 @@ function RatingChart({ history }: { history: Profile['history'] }) {
         <text
           x={L - MARGE.droite + 6}
           y={y(depart) + 4}
-          className="fill-[var(--text-faint)] text-[11px] tabular-nums"
+          className="fill-[var(--text-faint)] text-[12px] tabular-nums"
         >
           {depart}
         </text>
@@ -732,7 +730,7 @@ function RatingChart({ history }: { history: Profile['history'] }) {
         <text
           x={L - MARGE.droite + 6}
           y={y(arrivee) + 4}
-          className="fill-[var(--accent)] text-[11px] font-semibold tabular-nums"
+          className="fill-[var(--accent)] text-[12px] font-semibold tabular-nums"
         >
           {arrivee}
         </text>
@@ -740,20 +738,20 @@ function RatingChart({ history }: { history: Profile['history'] }) {
         {/* Les dates, aux deux bouts, sous la courbe : une progression sans
             durée ne veut rien dire — cent points en un mois ou en deux ans ne
             racontent pas la même chose. */}
-        <text x={MARGE.gauche} y={H - 4} className="fill-[var(--text-faint)] text-[11px]">
+        <text x={MARGE.gauche} y={H - 4} className="fill-[var(--text-faint)] text-[12px]">
           {formatShortDate(serie.entrees[0]!.at)}
         </text>
         <text
           x={L - MARGE.droite}
           y={H - 4}
           textAnchor="end"
-          className="fill-[var(--text-faint)] text-[11px]"
+          className="fill-[var(--text-faint)] text-[12px]"
         >
           {formatShortDate(serie.entrees[serie.entrees.length - 1]!.at)}
         </text>
       </svg>
 
-      <p className="mt-1 text-[11px] text-faint">
+      <p className="mt-1 text-[12px] text-faint">
         Plus haut : {max} · plus bas : {min}
       </p>
     </div>

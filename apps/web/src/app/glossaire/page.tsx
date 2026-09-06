@@ -58,12 +58,12 @@ function Definition({ texte }: { texte: string }) {
 
   return (
     <dd className="mt-1.5">
-      <p className="text-[13px] leading-relaxed text-ink/90">{renderBold(chapeau)}</p>
+      <p className="text-[14px] leading-relaxed text-ink/90">{renderBold(chapeau)}</p>
       {suite && (
         <>
           <p
             className={clsx(
-              'mt-1.5 text-[13px] leading-relaxed text-muted',
+              'mt-1.5 text-[14px] leading-relaxed text-muted',
               !ouvert && 'line-clamp-3',
             )}
           >
@@ -186,7 +186,7 @@ export default function GlossaryPage() {
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:py-14">
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">Glossaire</h1>
-      <p className="mt-2 max-w-2xl text-muted max-lg:text-[13px] max-lg:leading-relaxed">
+      <p className="mt-2 max-w-2xl text-muted max-lg:text-[14px] max-lg:leading-relaxed">
         {entries.length} termes définis en français clair — les règles, le matériel, les phases de
         la partie, et les motifs que le coach sait reconnaître et nommer dans tes parties.{' '}
         {illustres} d’entre eux se montrent sur un échiquier : leur nom porte une pastille.

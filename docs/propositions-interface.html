@@ -1,0 +1,1606 @@
+<!doctype html>
+<html lang="fr" data-theme="aurora">
+  <head>
+    <meta charset="utf-8" />
+    <title>Propositions d'interface — Le Coup Parfait</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #07070c;
+        --bg-elev: #0d0d17;
+        --flottant: #1e1e2f;
+        --surface: rgb(255 255 255/0.045);
+        --surface-strong: rgb(255 255 255/0.1);
+        --border: rgb(255 255 255/0.09);
+        --border-strong: rgb(255 255 255/0.17);
+        --text: #f2f1f8;
+        --muted: #a9a7bd;
+        --faint: #7f7d95;
+        --accent: #7c5cff;
+        --accent-soft: #9b83ff;
+        --accent-deep: #5b3ce0;
+        --accent-2: #00e5a8;
+        --accent-3: #ff7a59;
+        --sq-l: #dfd7ea;
+        --sq-d: #6b5f8c;
+        --best: #81b64c;
+        --warn: #f7c631;
+        --display: 'Space Grotesk', sans-serif;
+        --body: 'Inter', system-ui, sans-serif;
+      }
+      /* Version « après » : jetons proposés */
+      .apres {
+        --bg: #0b0b14;
+        --surface: rgb(255 255 255/0.06);
+        --surface-strong: rgb(255 255 255/0.12);
+        --border: rgb(255 255 255/0.12);
+        --border-strong: rgb(255 255 255/0.22);
+        --muted: #b4b2c8;
+        --faint: #8c8aa3;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #101018;
+        color: #f2f1f8;
+        font-family: var(--body);
+        font-size: 15px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: var(--display);
+        letter-spacing: -0.02em;
+        margin: 0;
+      }
+      .page {
+        max-width: 1500px;
+        margin: 0 auto;
+        padding: 32px 28px 80px;
+      }
+      .intro {
+        max-width: 760px;
+        color: #b4b2c8;
+        margin: 8px 0 28px;
+      }
+      section.prop {
+        margin: 56px 0 0;
+        padding-top: 24px;
+        border-top: 1px solid rgb(255 255 255/0.12);
+      }
+      section.prop > h2 {
+        font-size: 24px;
+        margin-bottom: 4px;
+      }
+      section.prop > p {
+        color: #b4b2c8;
+        max-width: 820px;
+        margin: 0 0 18px;
+      }
+      .duo {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        align-items: start;
+      }
+      .duo.uno {
+        grid-template-columns: 1fr;
+      }
+      .frame {
+        border: 1px solid rgb(255 255 255/0.14);
+        border-radius: 14px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      .frame .cap {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 14px;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #8c8aa3;
+        background: #15151f;
+        border-bottom: 1px solid rgb(255 255 255/0.1);
+      }
+      .frame .cap b {
+        color: #f2f1f8;
+        letter-spacing: 0.02em;
+        text-transform: none;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .frame .cap .tag {
+        padding: 2px 8px;
+        border-radius: 99px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+      .tag.avant {
+        background: rgb(255 122 89/0.18);
+        color: #ffb59f;
+      }
+      .tag.apres {
+        background: rgb(0 229 168/0.16);
+        color: #7af0cd;
+      }
+      .screen {
+        padding: 0;
+        color: var(--text);
+        background: var(--bg);
+        font-family: var(--body);
+        overflow: hidden;
+      }
+      .glass {
+        background: linear-gradient(180deg, rgb(255 255 255/0.06), transparent 46%), var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+      }
+      .glass.sm {
+        border-radius: 10px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 38px;
+        padding: 0 16px;
+        border-radius: 10px;
+        border: 1px solid var(--border-strong);
+        font-weight: 500;
+        font-size: 14px;
+        color: var(--text);
+      }
+      .btn.primary {
+        border: 0;
+        background: linear-gradient(
+          140deg,
+          var(--accent-soft),
+          var(--accent) 55%,
+          var(--accent-deep)
+        );
+        color: #fff;
+        box-shadow:
+          0 0 0 1px rgb(124 92 255/0.25),
+          0 0 28px -6px rgb(124 92 255/0.5);
+      }
+      .btn.ghost {
+        border-color: transparent;
+        color: var(--muted);
+      }
+      .btn.lg {
+        height: 46px;
+        padding: 0 22px;
+        font-size: 15px;
+        border-radius: 12px;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 99px;
+        padding: 3px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
+      .chip.on {
+        background: rgb(124 92 255/0.18);
+        border-color: rgb(124 92 255/0.35);
+        color: #b9a7ff;
+      }
+      .apres .chip {
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        text-transform: none;
+        padding: 4px 11px;
+        font-weight: 600;
+      }
+      .board {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        aspect-ratio: 1;
+        width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+        font-size: 0;
+      }
+      .board i {
+        display: grid;
+        place-items: center;
+        font-style: normal;
+        font-size: calc(var(--sz) * 0.78);
+        line-height: 1;
+      }
+      .board i:nth-child(16n + 1),
+      .board i:nth-child(16n + 3),
+      .board i:nth-child(16n + 5),
+      .board i:nth-child(16n + 7),
+      .board i:nth-child(16n + 10),
+      .board i:nth-child(16n + 12),
+      .board i:nth-child(16n + 14),
+      .board i:nth-child(16n + 16) {
+        background: var(--sq-l);
+      }
+      .board i:nth-child(16n + 2),
+      .board i:nth-child(16n + 4),
+      .board i:nth-child(16n + 6),
+      .board i:nth-child(16n + 8),
+      .board i:nth-child(16n + 9),
+      .board i:nth-child(16n + 11),
+      .board i:nth-child(16n + 13),
+      .board i:nth-child(16n + 15) {
+        background: var(--sq-d);
+      }
+      .board i.w {
+        color: #fbfaff;
+        text-shadow:
+          0 0 1px #6b5f8c,
+          0 1px 1px #4a4463;
+      }
+      .board i.b {
+        color: #1a1726;
+      }
+      .board i.hl {
+        background: #7fb59a !important;
+      }
+      .playerbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+      }
+      .playerbar .av {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        background: var(--surface-strong);
+        display: grid;
+        place-items: center;
+        font-size: 16px;
+      }
+      .playerbar .nm {
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .playerbar .sub {
+        font-size: 12px;
+        color: var(--faint);
+      }
+      .playerbar .clk {
+        margin-left: auto;
+        font-family: var(--display);
+        font-weight: 700;
+        font-size: 20px;
+        letter-spacing: 0.02em;
+        font-variant-numeric: tabular-nums;
+      }
+      .moves {
+        display: grid;
+        grid-template-columns: 32px 1fr 1fr;
+        font-size: 14px;
+        font-variant-numeric: tabular-nums;
+      }
+      .moves span {
+        padding: 5px 8px;
+      }
+      .moves .n {
+        color: var(--faint);
+      }
+      .moves .cur {
+        background: rgb(124 92 255/0.2);
+        border-radius: 6px;
+        color: #fff;
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        height: 56px;
+        padding: 0 18px;
+        border-bottom: 1px solid var(--border-strong);
+        background: var(--flottant);
+      }
+      .nav .brand {
+        font-family: var(--display);
+        font-weight: 600;
+        font-size: 17px;
+        margin-right: 12px;
+      }
+      .nav a {
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 14px;
+        color: var(--muted);
+        font-weight: 500;
+        position: relative;
+      }
+      .nav a.on {
+        color: var(--text);
+      }
+      .nav a.on::after {
+        content: '';
+        position: absolute;
+        left: 10px;
+        right: 10px;
+        bottom: -14px;
+        height: 2px;
+        background: var(--accent);
+        border-radius: 2px;
+      }
+      .nav .right {
+        margin-left: auto;
+        display: flex;
+        gap: 4px;
+        align-items: center;
+      }
+      .nav .ico {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+        font-size: 16px;
+      }
+      .apres .nav a {
+        font-size: 15px;
+      }
+      .apres .nav a.on::after {
+        height: 3px;
+        bottom: -13px;
+      }
+      .mobile {
+        width: 360px;
+        max-width: 100%;
+        margin: 0 auto;
+        border-radius: 22px;
+        overflow: hidden;
+        border: 1px solid rgb(255 255 255/0.18);
+      }
+      .bottombar {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        height: 64px;
+        background: var(--flottant);
+        border-top: 1px solid var(--border-strong);
+        padding: 0 4px;
+      }
+      .bottombar .t {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        font-size: 10px;
+        color: var(--muted);
+        width: 56px;
+        white-space: nowrap;
+      }
+      .bottombar .t b {
+        font-size: 18px;
+        font-weight: 400;
+      }
+      .bottombar .t.on {
+        color: #b9a7ff;
+      }
+      .apres .bottombar .t {
+        width: auto;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .apres .bottombar .t.on {
+        background: rgb(124 92 255/0.2);
+        border-radius: 99px;
+        flex-direction: row;
+        padding: 8px 14px;
+        gap: 8px;
+        color: #d3c8ff;
+        font-weight: 600;
+      }
+      .apres .bottombar .t:not(.on) span {
+        display: none;
+      }
+      .kv {
+        display: grid;
+        grid-template-columns: 150px 1fr 1fr;
+        gap: 0;
+        font-size: 14px;
+      }
+      .kv > div {
+        padding: 10px 12px;
+        border-bottom: 1px solid rgb(255 255 255/0.08);
+      }
+      .kv .h {
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #8c8aa3;
+        font-weight: 600;
+      }
+      .sw {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border-radius: 4px;
+        vertical-align: -2px;
+        margin-right: 8px;
+        border: 1px solid rgb(255 255 255/0.2);
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 99px;
+        background: var(--surface-strong);
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .step {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        padding: 16px 0;
+        border-top: 1px solid var(--border);
+      }
+      .step .num {
+        width: 26px;
+        height: 26px;
+        border-radius: 99px;
+        background: rgb(124 92 255/0.22);
+        color: #c9bcff;
+        display: grid;
+        place-items: center;
+        font-size: 13px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .step h4 {
+        margin: 0 0 6px;
+        font-size: 16px;
+        font-family: var(--display);
+      }
+      .seg {
+        display: inline-flex;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .seg span {
+        padding: 8px 14px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .seg span.on {
+        background: var(--accent);
+        color: #fff;
+        font-weight: 600;
+      }
+      .persona {
+        display: flex;
+        gap: 10px;
+        overflow: hidden;
+      }
+      .persona div {
+        flex: 0 0 96px;
+        padding: 10px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        text-align: center;
+        font-size: 13px;
+      }
+      .persona div.on {
+        border-color: var(--accent);
+        background: rgb(124 92 255/0.14);
+        box-shadow: 0 0 0 1px var(--accent);
+      }
+      .persona div em {
+        display: block;
+        font-size: 24px;
+        font-style: normal;
+        margin-bottom: 4px;
+      }
+      .persona div small {
+        display: block;
+        color: var(--faint);
+        font-size: 12px;
+      }
+      .sticky {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 16px;
+        border-top: 1px solid var(--border-strong);
+        background: var(--flottant);
+        border-radius: 0 0 14px 14px;
+      }
+      .sticky .sum {
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .sticky .sum b {
+        color: var(--text);
+      }
+      .sticky .btn {
+        margin-left: auto;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .note {
+        font-size: 13px;
+        color: #8c8aa3;
+        margin-top: 10px;
+        max-width: 760px;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        padding: 16px;
+      }
+      .cards .glass {
+        padding: 16px;
+      }
+      .cards .glass .ic {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        display: grid;
+        place-items: center;
+        font-size: 16px;
+        margin-bottom: 12px;
+        background: rgb(124 92 255/0.16);
+        color: #b9a7ff;
+      }
+      .cards .glass h4 {
+        margin: 0 0 4px;
+        font-size: 15px;
+        font-family: var(--display);
+      }
+      .cards .glass p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .cards .glass small {
+        display: block;
+        margin-top: 10px;
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+      .apres .cards {
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .apres .cards .glass {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+      }
+      .apres .cards .glass.hero {
+        grid-column: span 2;
+        padding: 22px;
+        flex-direction: column;
+      }
+      .apres .cards .glass.hero .ic {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+      }
+      .apres .cards .glass.hero h4 {
+        font-size: 20px;
+      }
+      .apres .cards .glass.hero p {
+        font-size: 15px;
+      }
+      .apres .cards .glass .ic {
+        margin: 0;
+        flex-shrink: 0;
+      }
+      .apres .cards .glass h4 {
+        font-size: 16px;
+      }
+      .apres .cards .glass p {
+        font-size: 14px;
+      }
+      .apres .cards .glass small {
+        font-size: 12px;
+        letter-spacing: 0.02em;
+        text-transform: none;
+        margin-top: 6px;
+      }
+      .tools {
+        display: inline-flex;
+        gap: 2px;
+        padding: 3px;
+        border-radius: 10px;
+        background: var(--surface-strong);
+        border: 1px solid var(--border);
+      }
+      .tools span {
+        width: 30px;
+        height: 28px;
+        display: grid;
+        place-items: center;
+        border-radius: 7px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .tools span.on {
+        background: var(--accent);
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <h1 style="font-size: 34px">Propositions d'interface</h1>
+      <p class="intro">
+        Six propositions, chacune avec l'état actuel à gauche et l'état proposé à droite. Les
+        maquettes reprennent les vrais jetons du thème Aurora ; la colonne « après » applique aussi
+        les jetons proposés en (1). Rien n'est encore modifié dans l'application.
+      </p>
+
+      <section class="prop" id="p1">
+        <h2>1 · Échelle typographique et matière des surfaces</h2>
+        <p>
+          L'application se lit à 14 px avec des méta-informations à 11 px en capitales. Passage du
+          corps à 15 px, plancher à 12 px, et abandon des capitales espacées pour les étiquettes.
+          Les surfaces gagnent deux points d'opacité et les bordures trois, pour que les cartes se
+          détachent sans liseré lumineux.
+        </p>
+        <div class="duo">
+          <div class="frame">
+            <div class="cap"><b>Échelle actuelle</b><span class="tag avant">avant</span></div>
+            <div class="screen" style="padding: 22px 26px">
+              <div
+                style="
+                  font-size: 10px;
+                  letter-spacing: 0.06em;
+                  text-transform: uppercase;
+                  color: var(--faint);
+                  font-weight: 600;
+                "
+              >
+                25 niveaux · 7 personnalités · de 100 à 3200 Elo
+              </div>
+              <div
+                style="
+                  font-size: 11px;
+                  letter-spacing: 0.06em;
+                  text-transform: uppercase;
+                  color: var(--faint);
+                  font-weight: 600;
+                  margin-top: 10px;
+                "
+              >
+                Le coach commente · Anderssen – Kieseritzky
+              </div>
+              <div style="font-size: 12px; color: var(--muted); margin-top: 10px">
+                Demande un compte : c'est lui qui porte le classement. (12 px, texte d'aide)
+              </div>
+              <div style="font-size: 13px; color: var(--muted); margin-top: 10px">
+                Vingt-cinq niveaux, du tout premier coup au grand maître. (13 px, description de
+                carte)
+              </div>
+              <div style="font-size: 14px; margin-top: 10px">
+                Le plus fort du monde, bridé au niveau voulu. Joue juste, puis lâche un coup faible
+                d'un coup. (14 px, corps)
+              </div>
+              <h3 style="font-size: 18px; margin-top: 14px">
+                Pendant la partie (18 px, titre de bloc)
+              </h3>
+              <h2 style="font-size: 28px; margin-top: 10px">
+                Contre l'ordinateur (28 px, titre de page)
+              </h2>
+            </div>
+          </div>
+          <div class="frame apres">
+            <div class="cap"><b>Échelle proposée</b><span class="tag apres">après</span></div>
+            <div class="screen" style="padding: 22px 26px">
+              <div style="font-size: 12px; color: var(--faint); font-weight: 500">
+                25 niveaux · 7 personnalités · de 100 à 3200 Elo (12 px, plancher)
+              </div>
+              <div style="font-size: 12px; color: var(--faint); font-weight: 600; margin-top: 10px">
+                Le coach commente · Anderssen – Kieseritzky (12 px, étiquette en bas-de-casse)
+              </div>
+              <div style="font-size: 13px; color: var(--muted); margin-top: 10px">
+                Demande un compte : c'est lui qui porte le classement. (13 px, texte d'aide)
+              </div>
+              <div style="font-size: 14px; color: var(--muted); margin-top: 10px">
+                Vingt-cinq niveaux, du tout premier coup au grand maître. (14 px, description de
+                carte)
+              </div>
+              <div style="font-size: 15px; margin-top: 10px; line-height: 1.6">
+                Le plus fort du monde, bridé au niveau voulu. Joue juste, puis lâche un coup faible
+                d'un coup. (15 px, corps)
+              </div>
+              <h3 style="font-size: 19px; margin-top: 14px">
+                Pendant la partie (19 px, titre de bloc)
+              </h3>
+              <h2 style="font-size: 32px; margin-top: 10px">
+                Contre l'ordinateur (32 px, titre de page)
+              </h2>
+            </div>
+          </div>
+        </div>
+        <div class="duo" style="margin-top: 16px">
+          <div class="frame">
+            <div class="cap"><b>Jetons Aurora</b><span class="tag avant">avant</span></div>
+            <div class="screen kv">
+              <div class="h">Jeton</div>
+              <div class="h">Valeur</div>
+              <div class="h">Rendu</div>
+              <div>--bg</div>
+              <div><span class="sw" style="background: #07070c"></span>#07070c</div>
+              <div style="background: #07070c"></div>
+              <div>--surface</div>
+              <div>blanc 4,5 %</div>
+              <div style="background: rgb(255 255 255/0.045)"></div>
+              <div>--border</div>
+              <div>blanc 9 %</div>
+              <div style="border-top: 1px solid rgb(255 255 255/0.09)"></div>
+              <div>--text-muted</div>
+              <div><span class="sw" style="background: #a9a7bd"></span>#a9a7bd</div>
+              <div style="color: #a9a7bd">Texte secondaire</div>
+              <div>--text-faint</div>
+              <div><span class="sw" style="background: #7f7d95"></span>#7f7d95</div>
+              <div style="color: #7f7d95">Texte tertiaire</div>
+              <div>--radius</div>
+              <div>18 px</div>
+              <div>
+                <span
+                  style="
+                    display: inline-block;
+                    width: 48px;
+                    height: 28px;
+                    border-radius: 18px;
+                    border: 1px solid var(--border-strong);
+                  "
+                ></span>
+              </div>
+            </div>
+          </div>
+          <div class="frame apres">
+            <div class="cap"><b>Jetons proposés</b><span class="tag apres">après</span></div>
+            <div class="screen kv">
+              <div class="h">Jeton</div>
+              <div class="h">Valeur</div>
+              <div class="h">Rendu</div>
+              <div>--bg</div>
+              <div><span class="sw" style="background: #0b0b14"></span>#0b0b14, moins noir</div>
+              <div style="background: #0b0b14"></div>
+              <div>--surface</div>
+              <div>blanc 6 %</div>
+              <div style="background: rgb(255 255 255/0.06)"></div>
+              <div>--border</div>
+              <div>blanc 12 %</div>
+              <div style="border-top: 1px solid rgb(255 255 255/0.12)"></div>
+              <div>--text-muted</div>
+              <div><span class="sw" style="background: #b4b2c8"></span>#b4b2c8 (9,2:1)</div>
+              <div style="color: #b4b2c8">Texte secondaire</div>
+              <div>--text-faint</div>
+              <div><span class="sw" style="background: #8c8aa3"></span>#8c8aa3 (5,6:1)</div>
+              <div style="color: #8c8aa3">Texte tertiaire</div>
+              <div>--radius</div>
+              <div>14 px (12 sur les petites cartes)</div>
+              <div>
+                <span
+                  style="
+                    display: inline-block;
+                    width: 48px;
+                    height: 28px;
+                    border-radius: 14px;
+                    border: 1px solid var(--border-strong);
+                  "
+                ></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="note">
+          Le rayon de 18 px arrondit tout au même degré, boutons compris ; à 14 px les cartes
+          gardent leur douceur et les contrôles paraissent plus précis. Les thèmes Club, Clair et
+          Contraste reçoivent la même correction relative.
+        </p>
+      </section>
+
+      <section class="prop" id="p2">
+        <h2>2 · Écran de partie : l'échiquier prend la hauteur, tout le reste s'y accroche</h2>
+        <p>
+          Aujourd'hui le plateau occupe un tiers de la largeur, les deux barres de joueurs flottent
+          au-dessus et en dessous avec un écart, la liste des coups est une boîte vide de toute la
+          hauteur, et les outils de vue pendent sous le plateau. Proposition : plateau dimensionné
+          sur la hauteur disponible, barres collées au plateau, colonne droite en trois zones fixes,
+          état du tour intégré à la barre du joueur.
+        </p>
+        <div class="duo">
+          <div class="frame">
+            <div class="cap"><b>Disposition actuelle</b><span class="tag avant">avant</span></div>
+            <div
+              class="screen"
+              style="
+                padding: 14px 18px;
+                display: grid;
+                grid-template-columns: 1fr 200px;
+                gap: 14px;
+                --sz: 22px;
+              "
+            >
+              <div>
+                <div class="glass sm playerbar">
+                  <span class="av">♞</span>
+                  <div>
+                    <div class="nm">
+                      Pion <span style="font-weight: 400; color: var(--faint)">850</span>
+                    </div>
+                    <div class="sub">Stockfish · niveau 6</div>
+                  </div>
+                  <span class="clk">10:00</span>
+                </div>
+                <div style="width: 62%; margin: 10px auto"><div class="board" id="b1"></div></div>
+                <div style="text-align: center; margin: -2px 0 8px">
+                  <span class="tools"><span class="on">▦</span><span>◈</span><span>⤢</span></span>
+                </div>
+                <div class="glass sm playerbar" style="border-color: var(--accent)">
+                  <span class="av">☺</span>
+                  <div><div class="nm">Toi</div></div>
+                  <span class="clk">10:00</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-top: 10px;
+                    font-size: 13px;
+                  "
+                >
+                  <span>À toi de jouer</span
+                  ><span style="margin-left: auto" class="tools"
+                    ><span>⏮</span><span>‹</span><span>›</span><span>⏭</span></span
+                  ><span class="btn ghost" style="height: 30px; font-size: 12px">Indice</span
+                  ><span class="btn ghost" style="height: 30px; font-size: 12px">Annuler</span>
+                </div>
+              </div>
+              <div
+                class="glass"
+                style="
+                  padding: 12px;
+                  display: grid;
+                  place-items: center;
+                  min-height: 360px;
+                  font-size: 12px;
+                  color: var(--faint);
+                  text-align: center;
+                "
+              >
+                Les coups joués apparaîtront ici.
+              </div>
+            </div>
+          </div>
+          <div class="frame apres">
+            <div class="cap"><b>Disposition proposée</b><span class="tag apres">après</span></div>
+            <div
+              class="screen"
+              style="
+                padding: 14px 18px;
+                display: grid;
+                grid-template-columns: 1fr 250px;
+                gap: 16px;
+                --sz: 36px;
+              "
+            >
+              <div style="display: flex; flex-direction: column; align-items: center">
+                <div style="width: min(100%, 430px)">
+                  <div class="playerbar" style="padding: 8px 4px">
+                    <span class="av">♞</span>
+                    <div>
+                      <div class="nm">
+                        Pion <span style="font-weight: 400; color: var(--faint)">850</span>
+                      </div>
+                      <div class="sub">Stockfish · niveau 6</div>
+                    </div>
+                    <span class="clk" style="opacity: 0.6">10:00</span>
+                  </div>
+                  <div class="board" id="b2" style="border-radius: 10px"></div>
+                  <div class="playerbar" style="padding: 8px 4px">
+                    <span class="av" style="box-shadow: 0 0 0 2px var(--accent)">☺</span>
+                    <div>
+                      <div class="nm">Toi</div>
+                      <div class="sub" style="color: #b9a7ff">À toi de jouer</div>
+                    </div>
+                    <span class="clk">10:00</span>
+                  </div>
+                </div>
+              </div>
+              <div class="glass" style="display: flex; flex-direction: column; min-height: 460px">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 10px 12px;
+                    border-bottom: 1px solid var(--border);
+                  "
+                >
+                  <span style="font-size: 13px; font-weight: 600">Coups</span
+                  ><span class="tools"><span class="on">▦</span><span>◈</span><span>⤢</span></span>
+                </div>
+                <div class="moves" style="padding: 8px 6px; flex: 1">
+                  <span class="n">1.</span><span>e4</span><span>e5</span> <span class="n">2.</span
+                  ><span>Cf3</span><span>Cc6</span> <span class="n">3.</span
+                  ><span class="cur">Fb5</span><span style="color: var(--faint)">…</span>
+                </div>
+                <div
+                  style="
+                    padding: 8px 10px;
+                    border-top: 1px solid var(--border);
+                    display: flex;
+                    justify-content: center;
+                  "
+                >
+                  <span class="tools"
+                    ><span>⏮</span><span>‹</span><span>›</span><span>⏭</span></span
+                  >
+                </div>
+                <div
+                  style="
+                    padding: 10px;
+                    border-top: 1px solid var(--border);
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 8px;
+                  "
+                >
+                  <span class="btn" style="height: 36px">Indice</span
+                  ><span class="btn" style="height: 36px">Annuler</span
+                  ><span
+                    class="btn ghost"
+                    style="height: 34px; grid-column: span 2; font-size: 13px"
+                    >Abandonner · Nulle · Plus…</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="note">
+          La colonne droite a trois zones à hauteur fixe : en haut les outils de vue, au milieu les
+          coups (seule zone qui défile), en bas la navigation et les actions. Le pouce et la souris
+          savent toujours où retrouver « Indice ». Sur téléphone, cette même colonne devient la
+          bande sous le plateau, dans le même ordre.
+        </p>
+      </section>
+
+      <section class="prop" id="p3">
+        <h2>3 · Écran puzzle : une consigne, une action, un thème</h2>
+        <p>
+          Douze filtres de thème sur une ligne à 11 px, une colonne droite creuse, et deux cartes «
+          Aussi dans S'entraîner » tronquées. Proposition : les thèmes passent dans un sélecteur, la
+          consigne devient une vraie carte de tâche avec la couleur qui joue, et les raccourcis
+          retrouvent leurs libellés.
+        </p>
+        <div class="duo">
+          <div class="frame">
+            <div class="cap"><b>Actuel</b><span class="tag avant">avant</span></div>
+            <div class="screen" style="padding: 14px 18px; --sz: 20px">
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px">
+                <span class="chip on">Tous</span><span class="chip">Fourchette</span
+                ><span class="chip">Clouage</span><span class="chip">Enfilade</span
+                ><span class="chip">Découverte</span><span class="chip">Pièce en prise</span
+                ><span class="chip">Mat en 1</span><span class="chip">Mat en 2</span
+                ><span class="chip">Sacrifice</span>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 190px; gap: 14px">
+                <div style="width: 88%"><div class="board" id="b3"></div></div>
+                <div>
+                  <div class="glass sm" style="padding: 10px; font-size: 12px">
+                    <b>Les Blancs jouent</b>
+                    <div style="color: var(--muted); margin-top: 4px">
+                      Trouve le meilleur coup. Il y en a un seul.
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      gap: 6px;
+                      margin: 10px 0;
+                      font-size: 12px;
+                      justify-content: center;
+                      color: var(--muted);
+                    "
+                  >
+                    <span>◉ Solution</span><span>→ Passer</span>
+                  </div>
+                  <div style="font-size: 10px; color: var(--faint); margin: 14px 0 8px">
+                    Aussi dans S'entraîner
+                  </div>
+                  <div style="display: flex; gap: 6px">
+                    <div class="glass sm" style="padding: 8px; flex: 1; font-size: 11px">
+                      <b>Puzzl…</b>
+                      <div style="color: var(--faint)">le plus p…</div>
+                    </div>
+                    <div class="glass sm" style="padding: 8px; flex: 1; font-size: 11px">
+                      <b>Défi d…</b>
+                      <div style="color: var(--faint)">la même…</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="frame apres">
+            <div class="cap"><b>Proposé</b><span class="tag apres">après</span></div>
+            <div
+              class="screen"
+              style="
+                padding: 14px 18px;
+                display: grid;
+                grid-template-columns: 1fr 260px;
+                gap: 16px;
+                --sz: 32px;
+              "
+            >
+              <div style="width: min(100%, 420px); justify-self: center">
+                <div class="board" id="b4" style="border-radius: 10px"></div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 12px">
+                <div class="glass" style="padding: 14px; border-color: rgb(124 92 255/0.4)">
+                  <div style="display: flex; align-items: center; gap: 10px">
+                    <span
+                      style="
+                        width: 22px;
+                        height: 22px;
+                        border-radius: 99px;
+                        background: #fbfaff;
+                        border: 2px solid #b9b4cc;
+                      "
+                    ></span
+                    ><b style="font-size: 16px; font-family: var(--display)">Les Blancs jouent</b>
+                  </div>
+                  <p style="margin: 8px 0 0; font-size: 14px; color: var(--muted)">
+                    Trouve le meilleur coup. Il y en a un seul.
+                  </p>
+                  <div
+                    style="
+                      margin-top: 12px;
+                      display: flex;
+                      gap: 8px;
+                      align-items: center;
+                      font-size: 13px;
+                      color: var(--faint);
+                    "
+                  >
+                    <span class="pill" style="font-size: 12px">Fourchette</span><span>·</span
+                    ><span>Elo 1 240</span>
+                  </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+                  <span class="btn">Indice</span><span class="btn ghost">Passer →</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    font-size: 14px;
+                    padding: 10px 12px;
+                  "
+                  class="glass sm"
+                >
+                  <span>Thème</span
+                  ><span style="color: var(--text); font-weight: 600"
+                    >Tous <span style="color: var(--faint)">▾</span></span
+                  >
+                </div>
+                <div style="flex: 1"></div>
+                <div style="font-size: 12px; color: var(--faint); font-weight: 600">
+                  Aussi dans S'entraîner
+                </div>
+                <div
+                  class="glass sm"
+                  style="
+                    padding: 10px 12px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    font-size: 14px;
+                  "
+                >
+                  <span style="color: var(--accent-3)">⏱</span>
+                  <div>
+                    <b>Puzzle rush</b>
+                    <div style="font-size: 12px; color: var(--faint)">
+                      Le plus de positions possible
+                    </div>
+                  </div>
+                  <span style="margin-left: auto; color: var(--faint)">›</span>
+                </div>
+                <div
+                  class="glass sm"
+                  style="
+                    padding: 10px 12px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    font-size: 14px;
+                  "
+                >
+                  <span style="color: var(--accent-2)">⚡</span>
+                  <div>
+                    <b>Défi du jour</b>
+                    <div style="font-size: 12px; color: var(--faint)">
+                      La même position pour tous
+                    </div>
+                  </div>
+                  <span style="margin-left: auto; color: var(--faint)">›</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="prop" id="p4">
+        <h2>4 · Réglage d'une partie contre l'ordinateur : un parcours en trois pas</h2>
+        <p>
+          Trois niveaux de cartes imbriquées, l'adversaire « Maia » grisé comme s'il était en panne,
+          un curseur et cinq raccourcis pour le même réglage, et le bouton de départ sous le pli.
+          Proposition : une seule colonne, trois pas numérotés, personnalités en carrousel, et un
+          résumé collant qui porte le bouton de départ.
+        </p>
+        <div class="duo">
+          <div class="frame">
+            <div class="cap"><b>Actuel</b><span class="tag avant">avant</span></div>
+            <div
+              class="screen"
+              style="
+                padding: 16px;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                font-size: 12px;
+              "
+            >
+              <div class="glass" style="padding: 12px">
+                <div style="display: flex; gap: 10px; align-items: center">
+                  <span
+                    style="
+                      width: 40px;
+                      height: 40px;
+                      border-radius: 10px;
+                      background: var(--surface-strong);
+                      display: grid;
+                      place-items: center;
+                      font-size: 22px;
+                    "
+                    >♞</span
+                  >
+                  <div>
+                    <b style="font-size: 14px">Pion</b>
+                    <span class="chip on" style="font-size: 9px">≈ 850 Elo</span>
+                    <span class="chip" style="font-size: 9px">Niveau 6</span>
+                    <div style="color: var(--muted)">Apprend en même temps que toi.</div>
+                  </div>
+                </div>
+                <div style="margin-top: 10px; font-size: 11px; font-weight: 600">Adversaire</div>
+                <div
+                  style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px"
+                >
+                  <div class="glass sm" style="padding: 8px; opacity: 0.45">
+                    <b>Maia</b>
+                    <div style="color: var(--muted)">
+                      Réseau entraîné sur des millions de parties…
+                    </div>
+                  </div>
+                  <div class="glass sm" style="padding: 8px; border-color: var(--accent)">
+                    <b>Stockfish</b>
+                    <div style="color: var(--muted)">
+                      Le plus fort du monde, bridé au niveau voulu…
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-top: 10px; font-size: 11px; font-weight: 600">
+                  Niveau de difficulté
+                </div>
+                <div
+                  style="
+                    height: 4px;
+                    border-radius: 4px;
+                    background: linear-gradient(
+                      90deg,
+                      var(--accent) 22%,
+                      var(--surface-strong) 22%
+                    );
+                    margin: 10px 0;
+                  "
+                ></div>
+                <div style="display: flex; gap: 4px; flex-wrap: wrap">
+                  <span class="chip" style="font-size: 9px">Je débute</span
+                  ><span class="chip" style="font-size: 9px">Occasionnel</span
+                  ><span class="chip" style="font-size: 9px">Club</span
+                  ><span class="chip" style="font-size: 9px">Fort</span
+                  ><span class="chip" style="font-size: 9px">Sans pitié</span>
+                </div>
+              </div>
+              <div class="glass" style="padding: 12px">
+                <b style="font-size: 13px">Ta couleur</b>
+                <div style="display: flex; margin: 6px 0 12px" class="seg">
+                  <span>Blancs</span><span>Noirs</span><span class="on">Hasard</span>
+                </div>
+                <b style="font-size: 13px">Cadence</b>
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 5px;
+                    margin: 6px 0 12px;
+                  "
+                >
+                  <span class="glass sm" style="padding: 6px; text-align: center">3 min</span
+                  ><span class="glass sm" style="padding: 6px; text-align: center">5 min</span
+                  ><span class="glass sm" style="padding: 6px; text-align: center">5|3</span
+                  ><span class="glass sm" style="padding: 6px; text-align: center">10 min</span
+                  ><span
+                    class="glass sm"
+                    style="padding: 6px; text-align: center; border-color: var(--accent)"
+                    >10|5</span
+                  ><span class="glass sm" style="padding: 6px; text-align: center">15|10</span
+                  ><span class="glass sm" style="padding: 6px; text-align: center">30 min</span
+                  ><span class="glass sm" style="padding: 6px; text-align: center">∞</span>
+                </div>
+                <b style="font-size: 13px">Pendant la partie</b>
+                <div style="color: var(--muted); margin-top: 6px">
+                  Partie classée · Commenter chaque coup
+                </div>
+              </div>
+              <div style="grid-column: span 2" class="btn primary">Commencer la partie</div>
+            </div>
+          </div>
+          <div class="frame apres">
+            <div class="cap"><b>Proposé</b><span class="tag apres">après</span></div>
+            <div class="screen">
+              <div style="padding: 18px 20px 0">
+                <div class="step" style="border-top: 0; padding-top: 4px">
+                  <span class="num">1</span>
+                  <div style="flex: 1; min-width: 0">
+                    <h4>Qui affrontes-tu ?</h4>
+                    <div class="persona">
+                      <div><em>♟</em>Débutant<small>≈ 400</small></div>
+                      <div class="on"><em>♞</em>Pion<small>≈ 850 · niv. 6</small></div>
+                      <div><em>♝</em>Club<small>≈ 1 400</small></div>
+                      <div><em>♜</em>Fort<small>≈ 1 900</small></div>
+                      <div><em>♛</em>Maître<small>≈ 2 400</small></div>
+                      <div style="color: var(--faint)">···</div>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        margin-top: 10px;
+                        font-size: 14px;
+                      "
+                    >
+                      <span style="color: var(--muted)">Niveau fin</span
+                      ><span
+                        style="
+                          flex: 1;
+                          height: 4px;
+                          border-radius: 4px;
+                          background: linear-gradient(
+                            90deg,
+                            var(--accent) 22%,
+                            var(--surface-strong) 22%
+                          );
+                        "
+                      ></span
+                      ><b>6 / 25</b>
+                    </div>
+                    <div style="font-size: 13px; color: var(--faint); margin-top: 6px">
+                      Style de jeu : <b style="color: var(--text)">Humain (Maia)</b> · Moteur
+                      (Stockfish)
+                    </div>
+                  </div>
+                </div>
+                <div class="step">
+                  <span class="num">2</span>
+                  <div style="flex: 1; display: flex; gap: 28px; flex-wrap: wrap">
+                    <div>
+                      <h4>Ta couleur</h4>
+                      <span class="seg"
+                        ><span>♔ Blancs</span><span>♚ Noirs</span
+                        ><span class="on">⚄ Hasard</span></span
+                      >
+                    </div>
+                    <div>
+                      <h4>Cadence</h4>
+                      <span class="seg"
+                        ><span>5 min</span><span class="on">10 | 5</span><span>15 | 10</span
+                        ><span>Sans limite</span
+                        ><span style="color: var(--faint)">Plus ▾</span></span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="step">
+                  <span class="num">3</span>
+                  <div style="flex: 1">
+                    <h4>Pendant la partie</h4>
+                    <div style="display: flex; gap: 22px; font-size: 14px; color: var(--muted)">
+                      <span
+                        >○ Partie classée <span style="font-size: 12px">(compte requis)</span></span
+                      ><span>● Le coach commente chaque coup</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="sticky">
+                <span class="sum"><b>Pion</b> · ≈ 850 Elo · Hasard · 10 | 5 · coach activé</span
+                ><span class="btn primary lg">Commencer la partie →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="note">
+          Le curseur reste pour le réglage fin, mais il n'est plus le premier geste : on choisit
+          d'abord une personnalité, ce que la page fait déjà en coulisses. Maia et Stockfish
+          deviennent un « style de jeu » secondaire au lieu de deux cartes qui se disputent la
+          place.
+        </p>
+      </section>
+
+      <section class="prop" id="p5">
+        <h2>5 · Navigation : une barre plus lisible, une barre du bas qui respire</h2>
+        <p>
+          En haut : le nom du site, une maison, un engrenage et le compte se partagent la même
+          importance visuelle ; la rubrique ouverte n'a qu'un trait de deux pixels. En bas sur
+          téléphone : six onglets à 10 px. Proposition : rubriques à 15 px avec un trait de la
+          couleur de la section, la maison retirée (le nom du site y mène et le dit au survol), et
+          une barre du bas où seul l'onglet actif porte son libellé, dans une pastille.
+        </p>
+        <div class="duo uno">
+          <div class="frame">
+            <div class="cap">
+              <b>Barre supérieure actuelle</b><span class="tag avant">avant</span>
+            </div>
+            <div class="screen">
+              <div class="nav">
+                <span class="brand">Le Coup Parfait ▾</span><a class="on">Jouer ▾</a
+                ><a>Apprendre ▾</a><a>S'entraîner ▾</a><a>Analyse ▾</a><a>Communauté ▾</a
+                ><a>Outils ▾</a>
+                <div class="right">
+                  <span class="ico">⌂</span><span class="ico">⚙</span
+                  ><span class="btn primary" style="height: 32px; font-size: 13px"
+                    >Se connecter</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="frame apres">
+            <div class="cap">
+              <b>Barre supérieure proposée</b><span class="tag apres">après</span>
+            </div>
+            <div class="screen">
+              <div class="nav">
+                <span class="brand">Le Coup Parfait</span><a class="on">Jouer</a><a>Apprendre</a
+                ><a>S'entraîner</a><a>Analyse</a><a>Communauté</a><a>Outils</a>
+                <div class="right">
+                  <span class="ico">⚙</span
+                  ><span class="btn primary" style="height: 34px; font-size: 14px"
+                    >Se connecter</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="duo" style="margin-top: 16px">
+          <div class="frame">
+            <div class="cap"><b>Barre du bas actuelle</b><span class="tag avant">avant</span></div>
+            <div class="screen" style="padding: 18px 0 0">
+              <div class="mobile">
+                <div style="height: 60px; background: var(--bg)"></div>
+                <div class="bottombar">
+                  <span class="t on"><b>⚔</b><span>Jouer</span></span
+                  ><span class="t"><b>◇</b><span>Apprendre</span></span
+                  ><span class="t"><b>◎</b><span>S'entraîner</span></span
+                  ><span class="t"><b>◔</b><span>Analyse</span></span
+                  ><span class="t"><b>⚇</b><span>Communauté</span></span
+                  ><span class="t"><b>⏱</b><span>Outils</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="frame apres">
+            <div class="cap"><b>Barre du bas proposée</b><span class="tag apres">après</span></div>
+            <div class="screen" style="padding: 18px 0 0">
+              <div class="mobile">
+                <div style="height: 60px; background: var(--bg)"></div>
+                <div class="bottombar">
+                  <span class="t on"><b>⚔</b><span>Jouer</span></span
+                  ><span class="t"><b>◇</b><span>Apprendre</span></span
+                  ><span class="t"><b>◎</b><span>S'entraîner</span></span
+                  ><span class="t"><b>◔</b><span>Analyse</span></span
+                  ><span class="t"><b>⚇</b><span>Communauté</span></span
+                  ><span class="t"><b>⏱</b><span>Outils</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="note">
+          Le libellé glisse d'un onglet à l'autre avec une courte animation ; les icônes des
+          rubriques sont déjà nommées pour les lecteurs d'écran. Le trait de la rubrique active
+          prend la teinte de la section (violet, menthe, corail) : c'est le même code que les icônes
+          des cartes-sommaires.
+        </p>
+      </section>
+
+      <section class="prop" id="p6">
+        <h2>6 · Pages-sommaires : hiérarchiser au lieu d'aligner</h2>
+        <p>
+          La page « Jouer » présente sept cartes identiques : « Contre l'ordinateur » pèse autant
+          que « Regarder une partie ». Proposition : les deux façons de jouer tout de suite en
+          grand, le reste en rangée compacte à icône latérale. Même traitement pour « Apprendre »
+          (la reprise de la leçon en cours en grand) et « Analyse » (coller une partie en grand).
+        </p>
+        <div class="duo">
+          <div class="frame">
+            <div class="cap"><b>Actuel</b><span class="tag avant">avant</span></div>
+            <div class="screen">
+              <div class="cards">
+                <div class="glass">
+                  <div class="ic">▣</div>
+                  <h4>Contre l'ordinateur</h4>
+                  <p>Vingt-cinq niveaux, du tout premier coup au grand maître.</p>
+                  <small>25 niveaux · 7 personnalités</small>
+                </div>
+                <div class="glass">
+                  <div class="ic" style="background: rgb(0 229 168/0.16); color: #7af0cd">⚇</div>
+                  <h4>Contre quelqu'un</h4>
+                  <p>De quinze secondes à quatorze jours par coup.</p>
+                  <small>Un lien, ou un ami</small>
+                </div>
+                <div class="glass">
+                  <div class="ic" style="background: rgb(0 229 168/0.16); color: #7af0cd">✉</div>
+                  <h4>Par correspondance</h4>
+                  <p>Un coup quand tu peux, sur des jours.</p>
+                  <small>De 1 à 14 jours par coup</small>
+                </div>
+                <div class="glass">
+                  <div class="ic" style="background: rgb(255 122 89/0.16); color: #ffb59f">⇄</div>
+                  <h4>Sur le même écran</h4>
+                  <p>Deux joueurs, un seul appareil.</p>
+                  <small>L'échiquier se retourne</small>
+                </div>
+                <div class="glass">
+                  <div class="ic" style="background: rgb(255 122 89/0.16); color: #ffb59f">♛</div>
+                  <h4>Arène</h4>
+                  <p>Un tournoi où l'on arrive et repart quand on veut.</p>
+                  <small>On arrive quand on veut</small>
+                </div>
+                <div class="glass">
+                  <div class="ic" style="background: rgb(0 229 168/0.16); color: #7af0cd">◉</div>
+                  <h4>Regarder une partie</h4>
+                  <p>Suis en direct les parties commencées par d'autres.</p>
+                  <small>Coup par coup</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="frame apres">
+            <div class="cap"><b>Proposé</b><span class="tag apres">après</span></div>
+            <div class="screen">
+              <div class="cards">
+                <div class="glass hero">
+                  <div class="ic">▣</div>
+                  <div>
+                    <h4>Contre l'ordinateur</h4>
+                    <p>Vingt-cinq niveaux, sept personnalités, du premier coup au grand maître.</p>
+                    <small>Sans compte · commence en un clic</small>
+                  </div>
+                </div>
+                <div class="glass hero">
+                  <div class="ic" style="background: rgb(0 229 168/0.16); color: #7af0cd">⚇</div>
+                  <div>
+                    <h4>Contre quelqu'un</h4>
+                    <p>En direct par un lien, ou sur plusieurs jours par correspondance.</p>
+                    <small>Un lien, ou un ami</small>
+                  </div>
+                </div>
+                <div class="glass">
+                  <div class="ic" style="background: rgb(255 122 89/0.16); color: #ffb59f">⇄</div>
+                  <div>
+                    <h4>Même écran</h4>
+                    <p>Deux joueurs, un appareil.</p>
+                  </div>
+                </div>
+                <div class="glass">
+                  <div class="ic" style="background: rgb(255 122 89/0.16); color: #ffb59f">♛</div>
+                  <div>
+                    <h4>Arène</h4>
+                    <p>Un tournoi continu.</p>
+                  </div>
+                </div>
+                <div class="glass">
+                  <div class="ic" style="background: rgb(0 229 168/0.16); color: #7af0cd">◉</div>
+                  <div>
+                    <h4>Regarder</h4>
+                    <p>Les parties en cours.</p>
+                  </div>
+                </div>
+                <div class="glass">
+                  <div class="ic" style="background: rgb(124 92 255/0.16); color: #b9a7ff">★</div>
+                  <div>
+                    <h4>Carrière</h4>
+                    <p>Gravir les 25 niveaux.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="prop">
+        <h2>Et en transversal</h2>
+        <p>
+          Trois règles qui ne se voient pas sur une maquette mais qui font la fluidité : une seule
+          durée de transition (160 ms, courbe standard) au lieu de 150/200/220 ms au hasard ; un
+          squelette de chargement gris à la place du vide d'une demi-seconde sur l'accueil et
+          l'analyse ; et plus jamais une carte dans une carte : le second niveau devient une simple
+          ligne bordée.
+        </p>
+      </section>
+    </div>
+    <script>
+      const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
+      const MID = 'r1bqkb1r/pppp1ppp/2n2n2/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R'
+      const PZ = '6k1/5ppp/8/8/8/8/5PPP/3R2K1'
+      const G = { p: '♟', r: '♜', n: '♞', b: '♝', q: '♛', k: '♚' }
+      function draw(id, fen, hl) {
+        const el = document.getElementById(id)
+        let h = ''
+        let i = 0
+        for (const ch of fen) {
+          if (ch === '/') continue
+          if (/\d/.test(ch)) {
+            for (let k = 0; k < +ch; k++) {
+              h += `<i class="${hl && hl.includes(i) ? 'hl' : ''}"></i>`
+              i++
+            }
+          } else {
+            const w = ch === ch.toUpperCase()
+            h += `<i class="${w ? 'w' : 'b'} ${hl && hl.includes(i) ? 'hl' : ''}">${G[ch.toLowerCase()]}</i>`
+            i++
+          }
+        }
+        el.innerHTML = h
+      }
+      draw('b1', START)
+      draw('b2', MID, [25, 33])
+      draw('b3', PZ)
+      draw('b4', PZ, [59, 3])
+    </script>
+  </body>
+</html>

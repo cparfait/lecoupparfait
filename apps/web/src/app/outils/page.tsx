@@ -35,7 +35,7 @@ export default function OutilsPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:py-12">
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">Outils</h1>
-      <p className="mt-3 max-w-2xl leading-relaxed text-muted max-lg:text-[13px]">
+      <p className="mt-3 max-w-2xl leading-relaxed text-muted max-lg:text-[14px]">
         Ce qui sert autour de l’échiquier plutôt que dessus : de quoi accompagner une partie jouée
         sur un vrai plateau, en face de quelqu’un.
       </p>
@@ -62,7 +62,7 @@ export default function OutilsPage() {
                     <ArrowRight
                       size={15}
                       aria-hidden
-                      className="text-faint transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-accent"
+                      className="text-faint transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-accent"
                     />
                   </span>
                   <span className="mt-1 block text-sm leading-relaxed text-muted">

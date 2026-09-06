@@ -202,26 +202,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <ShieldCheck size={17} aria-hidden />
               </Link>
             )}
-            {/* Le retour à l'accueil, nommé.
+            {/* Plus de maison à droite.
 
-                Le nom du site, à gauche, y menait déjà — mais rien ne le dit :
-                c'est un mot, pas un bouton, et il faut avoir l'habitude du web
-                pour deviner qu'un titre est cliquable. Sur un écran de partie
-                c'était même la seule sortie, la barre du bas s'effaçant pour
-                rendre sa hauteur à l'échiquier.
-
-                Une maison, à côté de l'engrenage et du compte, ne demande
-                aucune habitude. Elle vaut sur les deux tailles d'écran :
-                l'accueil ne figure ni dans les cinq rubriques du haut, ni dans
-                les quatre raccourcis du bas. */}
-            <Link
-              href="/"
-              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
-              aria-label={t('nav.home')}
-              title={t('nav.home')}
-            >
-              <House size={17} aria-hidden />
-            </Link>
+                Elle doublait le nom du site, dont le menu commence par
+                « Accueil » : deux chemins vers la même page, et une commande
+                de plus dans une barre qui se dispute la largeur sur téléphone.
+                Le menu du nom porte l'entrée, en toutes lettres et en tête. */}
             <Link
               href="/preferences"
               className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
@@ -363,7 +349,7 @@ export function AppShell({ children }: { children: ReactNode }) {
  * de vrais boutons, et c'est l'inverse qui détonnerait.
  */
 const MENU_BARRE =
-  'flex items-center gap-1 rounded-[var(--radius-sm)] px-2.5 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface-hover hover:text-ink'
+  'flex items-center gap-1 rounded-[var(--radius-sm)] px-3 py-1.5 text-[15px] font-medium text-muted transition-colors hover:bg-surface-hover hover:text-ink'
 
 function MenuApplication() {
   const t = useT()
@@ -391,7 +377,7 @@ function MenuApplication() {
           <ChevronDown
             size={14}
             aria-hidden
-            className={clsx('transition-transform duration-200', ouvert && 'rotate-180')}
+            className={clsx('transition-transform duration-150', ouvert && 'rotate-180')}
           />
         </>
       )}
@@ -441,14 +427,17 @@ function MenuSection({
       boutonClassName={MENU_BARRE}
       declencheur={(ouvert) => (
         <>
-          <span className={clsx(active && 'text-ink')}>{t(section.labelKey)}</span>
-          <ChevronDown
-            size={14}
-            aria-hidden
-            className={clsx('transition-transform duration-200', ouvert && 'rotate-180')}
-          />
+          {/* Sans chevron : six chevrons côte à côte faisaient une dentelure
+              qui n'apprenait rien — tous les boutons de la barre s'ouvrent.
+              Le survol suffit à le dire, et la rubrique ouverte garde son
+              trait, dans la teinte de la section : c'est le même code de
+              couleur que les icônes de ses cartes. */}
+          <span className={clsx((active || ouvert) && 'text-ink')}>{t(section.labelKey)}</span>
           {active && (
-            <span className="absolute inset-x-2.5 -bottom-[11px] h-[2px] rounded-full bg-accent" />
+            <span
+              className="absolute inset-x-2.5 -bottom-[11px] h-[3px] rounded-full"
+              style={{ background: section.teinte }}
+            />
           )}
         </>
       )}
@@ -490,7 +479,7 @@ function MenuSection({
               <span className="block text-sm font-semibold">
                 Voir la page {t(section.labelKey)}
               </span>
-              <span className="block text-[11px] leading-snug text-faint">
+              <span className="block text-[12px] leading-snug text-faint">
                 toute la rubrique, présentée en grand
               </span>
             </span>
@@ -523,7 +512,7 @@ function MenuSection({
             <span className="min-w-0 flex-1">
               <span className="block text-sm font-medium">{t(entree.labelKey)}</span>
               {entree.hintKey && (
-                <span className="block text-[11px] leading-snug text-faint">
+                <span className="block text-[12px] leading-snug text-faint">
                   {t(entree.hintKey)}
                 </span>
               )}

@@ -742,7 +742,7 @@ export default function PuzzlesPage() {
             — une position unique, partagée, qui compte pour la série — d'une
             séance d'entraînement libre. C'est ce qui rendait « Puzzle suivant »
             crédible là où il n'y a pas de suivant. */}
-          <h1 className="font-display text-xl font-bold tracking-tight">
+          <h1 className="font-display text-2xl font-bold tracking-tight">
             {modeDefi ? 'Défi du jour' : 'Puzzles'}
           </h1>
           {modeDefi ? (
@@ -802,9 +802,13 @@ export default function PuzzlesPage() {
         {/* Masqués dans le défi du jour : le filtre de thème n'y change rien,
           la position est tirée par la date et la tranche de niveau. Douze
           pastilles qui ne font rien se cliquent quand même, une fois. */}
+        {/* Et masqués sur grand écran : douze pastilles sur une rangée au-dessus
+            du plateau, c'est douze libellés à parcourir pour un choix qu'on
+            fait une fois sur vingt. Là, le thème est un sélecteur dans la
+            colonne de droite, sous la consigne — voir plus bas. */}
         <div
           className={clsx(
-            '-mx-3 mb-4 flex gap-1.5 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0',
+            '-mx-3 mb-4 flex gap-1.5 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 lg:hidden',
             modeDefi && 'hidden',
           )}
         >
@@ -851,7 +855,7 @@ export default function PuzzlesPage() {
               l'écran. Sur grand écran le panneau est à côté et dit déjà tout :
               la ligne n'apparaît qu'en dessous de `lg`. */}
           {status === 'playing' && (
-            <p className="mb-1.5 flex items-center gap-2 text-[13px] font-medium lg:hidden paysage:hidden">
+            <p className="mb-1.5 flex items-center gap-2 text-[14px] font-medium lg:hidden paysage:hidden">
               <span
                 className={clsx(
                   'h-2.5 w-2.5 rounded-full',
@@ -861,8 +865,12 @@ export default function PuzzlesPage() {
                 )}
                 aria-hidden
               />
-              {orientation === 'w' ? 'Les Blancs jouent' : 'Les Noirs jouent'}
-              <span className="truncate font-normal text-muted">— trouve le meilleur coup</span>
+              <span className="whitespace-nowrap">
+                {orientation === 'w' ? 'Les Blancs jouent' : 'Les Noirs jouent'}
+              </span>
+              <span className="min-w-0 flex-1 truncate font-normal text-muted">
+                — trouve le meilleur coup
+              </span>
               <CategorieDuPuzzle
                 puzzle={puzzle}
                 filtre={theme}
@@ -896,11 +904,31 @@ export default function PuzzlesPage() {
 
         {/* ── Panneau ────────────────────────────────────────────── */}
         <div className="etude-aside flex flex-col gap-3">
-          <Card className="p-4">
+          {/* La consigne est une carte de tâche, et elle en a l'air : un
+              disque de la couleur qui joue, un titre en police d'affichage,
+              un liseré d'accent. C'est la première chose à lire devant une
+              position, elle ne doit pas se confondre avec une carte
+              d'information. */}
+          <Card
+            className={clsx(
+              'p-4',
+              status === 'playing' &&
+                'border-[color-mix(in_oklab,var(--accent)_40%,var(--border))]',
+            )}
+          >
             {status === 'playing' && (
               <>
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-semibold">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <span
+                    className={clsx(
+                      'h-5 w-5 shrink-0 rounded-full',
+                      orientation === 'w'
+                        ? 'bg-[var(--eval-white)] ring-2 ring-[var(--piece-white-edge)]'
+                        : 'bg-[var(--eval-black)] ring-2 ring-[var(--piece-black-edge)]',
+                    )}
+                    aria-hidden
+                  />
+                  <p className="font-display text-base font-semibold tracking-tight">
                     {orientation === 'w' ? 'Les Blancs jouent' : 'Les Noirs jouent'}
                   </p>
                   <CategorieDuPuzzle
@@ -909,19 +937,20 @@ export default function PuzzlesPage() {
                     locale={locale}
                     visible={categorieVisible}
                     onDemander={() => setCategorieVisible(true)}
+                    className="ml-auto"
                   />
                 </div>
-                <p className="mt-1 text-[13px] leading-relaxed text-muted">
+                <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
                   Trouve le meilleur coup. Il y en a un seul.
                 </p>
                 {wrongAttempts > 0 && (
-                  <p className="mt-2 flex items-center gap-1.5 text-[13px] text-[var(--q-blunder)]">
+                  <p className="mt-2 flex items-center gap-1.5 text-[14px] text-[var(--q-blunder)]">
                     <X size={13} aria-hidden />
                     Ce n’est pas ça. Encore un essai.
                   </p>
                 )}
                 {revealedSan && (
-                  <p className="mt-2 rounded-[var(--radius-sm)] bg-surface px-2.5 py-2 text-[13px]">
+                  <p className="mt-2 rounded-[var(--radius-sm)] bg-surface px-2.5 py-2 text-[14px]">
                     Solution : <strong className="text-accent">{format(revealedSan)}</strong>
                   </p>
                 )}
@@ -943,7 +972,7 @@ export default function PuzzlesPage() {
                   {/* Dans le défi, on ne conseille pas « refais-en un du même
                       thème » : il n'y a pas de suivant avant demain, et c'est
                       justement la promesse du format. */}
-                  <p className="mt-1 text-[13px] leading-relaxed text-muted">
+                  <p className="mt-1 text-[14px] leading-relaxed text-muted">
                     {modeDefi
                       ? 'C’était la position du jour, la même pour tout le monde de ton niveau. La prochaine arrive à minuit.'
                       : wrongAttempts === 0 && !revealed
@@ -973,12 +1002,12 @@ export default function PuzzlesPage() {
                       n'attend qu'un geste — et refuser ce geste, c'est encore
                       chercher. */}
                   {solutionRatee && revealed && (
-                    <p className="mt-1.5 rounded-[var(--radius-sm)] bg-surface px-2.5 py-2 text-[13px]">
+                    <p className="mt-1.5 rounded-[var(--radius-sm)] bg-surface px-2.5 py-2 text-[14px]">
                       Il fallait jouer{' '}
                       <strong className="text-accent">{format(solutionRatee)}</strong>
                     </p>
                   )}
-                  <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+                  <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
                     {revealed
                       ? 'Rejoue la position : c’est en refaisant le coup soi-même qu’on finit par reconnaître le motif d’instinct.'
                       : 'Rejoue la position, ou demande la solution si tu sèches : c’est en refaisant le coup soi-même qu’on finit par reconnaître le motif d’instinct.'}
@@ -991,9 +1020,7 @@ export default function PuzzlesPage() {
           {/* Thèmes : révélés seulement après coup */}
           {(status === 'solved' || status === 'failed') && puzzle && (
             <Card className="p-4">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
-                Ce qu’il fallait voir
-              </p>
+              <p className="mb-2 text-[12px] font-semibold text-faint">Ce qu’il fallait voir</p>
               <div className="flex flex-wrap gap-1.5">
                 {puzzle.themes.slice(0, 6).map((themeId) => {
                   const copy = motifCopy(themeId as MotifId, locale)
@@ -1009,7 +1036,7 @@ export default function PuzzlesPage() {
                   {motifCopy(puzzle.themes[0] as MotifId, locale)?.definition}
                 </p>
               )}
-              <p className="mt-3 text-[11px] text-faint">Niveau du puzzle : {puzzle.rating}</p>
+              <p className="mt-3 text-[12px] text-faint">Niveau du puzzle : {puzzle.rating}</p>
             </Card>
           )}
 
@@ -1028,7 +1055,7 @@ export default function PuzzlesPage() {
             {/* Y compris après un échec : la solution ne s'affiche plus
                 d'elle-même, il faut donc pouvoir la demander là aussi. */}
             {(status === 'playing' || status === 'failed') && !revealed && (
-              <Button variant="ghost" icon={<Eye size={14} />} onClick={reveal} fullWidth>
+              <Button variant="secondary" icon={<Eye size={14} />} onClick={reveal} fullWidth>
                 Solution
               </Button>
             )}
@@ -1106,8 +1133,30 @@ export default function PuzzlesPage() {
             )}
           </div>
 
+          {/* ── Le thème, sur grand écran ─────────────────────────────
+              Un sélecteur à la place des douze pastilles : le choix se fait
+              une fois, il n'a pas besoin de douze boutons en permanence
+              au-dessus du plateau. Un `select` natif, et non un menu maison :
+              il se pilote au clavier, s'ouvre au doigt, et ne réclame rien. */}
+          {!modeDefi && (
+            <label className="hidden items-center justify-between gap-3 rounded-[var(--radius)] border border-line bg-surface px-3.5 py-2 text-sm lg:flex">
+              <span className="text-muted">Thème</span>
+              <select
+                value={theme}
+                onChange={(event) => setTheme(event.target.value)}
+                className="min-w-0 cursor-pointer bg-transparent text-right font-semibold text-ink outline-none"
+              >
+                {THEMES.map((entry) => (
+                  <option key={entry.id} value={entry.id}>
+                    {entry.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
           {playerRating === null && status !== 'loading' && (
-            <p className="text-center text-[11px] leading-relaxed text-faint">
+            <p className="text-center text-[12px] leading-relaxed text-faint">
               Crée un compte pour suivre ton classement puzzles et éviter de revoir les mêmes
               positions.
             </p>
@@ -1115,7 +1164,7 @@ export default function PuzzlesPage() {
 
           {/* En paysage, la colonne défile déjà et l'écran est plein : on ne
               lui ajoute pas une liste de liens. */}
-          <AutresDeLaSection section="entrainer" className="paysage:hidden" />
+          <AutresDeLaSection section="entrainer" colonne className="paysage:hidden" />
         </div>
       </div>
 
@@ -1216,7 +1265,7 @@ function CategorieDuPuzzle({
         type="button"
         onClick={onDemander}
         className={clsx(
-          'shrink-0 rounded-full border border-line px-2.5 py-1 text-[11px] font-medium text-muted',
+          'shrink-0 rounded-full border border-line px-2.5 py-1 text-[12px] font-medium text-muted',
           'transition-colors hover:bg-surface-hover hover:text-ink',
           className,
         )}

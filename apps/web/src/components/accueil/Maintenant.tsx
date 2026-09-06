@@ -53,7 +53,7 @@ export function Maintenant({
       <div className="p-5">
         <p
           className={clsx(
-            'text-[11px] font-semibold uppercase tracking-[0.16em]',
+            'text-[12px] font-semibold',
             principale.urgent ? 'text-accent' : 'text-faint',
           )}
         >
@@ -65,7 +65,7 @@ export function Maintenant({
         <h2 className="mt-1 font-display text-xl font-bold leading-tight sm:text-2xl">
           {principale.titre}
         </h2>
-        <p className="mt-1.5 max-w-prose text-[13px] leading-relaxed text-muted">
+        <p className="mt-1.5 max-w-prose text-[14px] leading-relaxed text-muted">
           {principale.detail}
         </p>
 
@@ -78,9 +78,7 @@ export function Maintenant({
 
       {suite.length > 0 && (
         <div className="border-t border-line/60">
-          <p className="px-5 pt-3 text-[11px] font-semibold uppercase tracking-wide text-faint">
-            Et aussi
-          </p>
+          <p className="px-5 pt-3 text-[12px] font-semibold text-faint">Et aussi</p>
           <ul className="px-2 pb-2">
             {suite.slice(0, SECONDAIRES_MAX).map((chose) => (
               <li key={`${chose.id}-${chose.lien}`}>
@@ -89,8 +87,8 @@ export function Maintenant({
                   className="flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2.5 transition-colors hover:bg-surface-hover"
                 >
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13px] font-medium">{chose.titre}</span>
-                    <span className="block truncate text-[11px] text-faint">{chose.detail}</span>
+                    <span className="block truncate text-[14px] font-medium">{chose.titre}</span>
+                    <span className="block truncate text-[12px] text-faint">{chose.detail}</span>
                   </span>
                   <span className="shrink-0 text-[12px] font-semibold text-accent">
                     {chose.action}

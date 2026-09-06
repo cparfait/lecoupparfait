@@ -286,13 +286,13 @@ export default function RushPage() {
               )}
             >
               <span className="block text-sm font-semibold">{entry.label}</span>
-              <span className="mt-0.5 block text-[13px] text-muted">{entry.hint}</span>
+              <span className="mt-0.5 block text-[14px] text-muted">{entry.hint}</span>
             </button>
           ))}
         </div>
 
         {best > 0 && (
-          <p className="mt-3 flex items-center gap-1.5 text-[13px] text-muted">
+          <p className="mt-3 flex items-center gap-1.5 text-[14px] text-muted">
             <Flame size={14} className="text-[var(--q-inaccuracy)]" aria-hidden />
             Ton record : <strong className="font-semibold text-ink">{best}</strong> puzzles.
           </p>
@@ -336,7 +336,7 @@ export default function RushPage() {
               Nouveau record
             </p>
           ) : (
-            <p className="mt-3 text-[13px] text-faint">Ton record reste à {best}.</p>
+            <p className="mt-3 text-[14px] text-faint">Ton record reste à {best}.</p>
           )}
           <div className="mt-5 space-y-1.5">
             <Button
@@ -370,7 +370,7 @@ export default function RushPage() {
       <div className="mb-2 flex items-center gap-2">
         <h1 className="font-display text-base font-bold tracking-tight">Manche chronométrée</h1>
         {modeCourant && (
-          <span className="rounded-full bg-surface px-2 py-0.5 text-[11px] font-medium text-muted">
+          <span className="rounded-full bg-surface px-2 py-0.5 text-[12px] font-medium text-muted">
             {modeCourant.label}
           </span>
         )}
@@ -386,7 +386,7 @@ export default function RushPage() {
       {/* ── Compteurs ────────────────────────────────────────────── */}
       <div className="mb-2 flex items-center gap-3">
         <span className="font-display text-2xl font-bold tabular-nums">{solved}</span>
-        <span className="text-[13px] text-muted">résolus</span>
+        <span className="text-[14px] text-muted">résolus</span>
 
         <span
           className="ml-auto flex items-center gap-1"
@@ -433,7 +433,7 @@ export default function RushPage() {
         />
       </div>
 
-      <p className="mt-2 flex items-center justify-center gap-1.5 text-[13px] text-muted">
+      <p className="mt-2 flex items-center justify-center gap-1.5 text-[14px] text-muted">
         <Check size={14} className="text-accent" aria-hidden />
         Les {turn === 'w' ? 'Blancs' : 'Noirs'} jouent — trouve le coup, vite.
       </p>

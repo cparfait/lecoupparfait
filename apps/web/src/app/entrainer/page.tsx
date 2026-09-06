@@ -61,7 +61,7 @@ export default function EntrainementPage() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:py-14">
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">S’entraîner</h1>
-      <p className="mt-2 max-w-xl text-muted max-lg:text-[13px] max-lg:leading-relaxed">
+      <p className="mt-2 max-w-xl text-muted max-lg:text-[14px] max-lg:leading-relaxed">
         Les mêmes positions, trois façons de les travailler : chercher le coup juste, le reconnaître
         vite, ou en résoudre une par jour.
       </p>
@@ -108,12 +108,10 @@ export default function EntrainementPage() {
                   </Chip>
                 )}
               </h2>
-              <p className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-muted md:mt-1.5 md:line-clamp-none md:flex-1 md:text-sm md:leading-relaxed">
+              <p className="mt-0.5 line-clamp-2 text-[14px] leading-snug text-muted md:mt-1.5 md:line-clamp-none md:flex-1 md:text-sm md:leading-relaxed">
                 {phrase}
               </p>
-              <p className="mt-4 hidden text-[11px] uppercase tracking-wide text-faint md:block">
-                {detail}
-              </p>
+              <p className="mt-4 hidden text-[12px] text-faint md:block">{detail}</p>
             </div>
 
             <ArrowRight

@@ -29,6 +29,7 @@ import { useT } from '@/lib/i18n/index.tsx'
 const MODES = [
   {
     href: '/jouer/ordinateur',
+    principal: true,
     icon: Cpu,
     titleKey: 'play.vsComputer',
     blurbKey: 'play.vsComputerBlurb',
@@ -37,6 +38,7 @@ const MODES = [
   },
   {
     href: '/jouer/ami',
+    principal: true,
     icon: Users,
     titleKey: 'play.vsFriend',
     blurbKey: 'play.vsFriendBlurb',
@@ -107,75 +109,92 @@ export default function PlayLobbyPage() {
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
         {t('play.title')}
       </h1>
-      <p className="mt-2 max-w-xl text-muted max-lg:text-[13px] max-lg:leading-relaxed">
+      <p className="mt-2 max-w-xl text-muted max-lg:text-[14px] max-lg:leading-relaxed">
         Contre la machine pour t’entraîner à ton rythme, contre un ami pour le plaisir, ou à deux
         sur le même écran.
       </p>
 
-      {/* ── Les sept portes ───────────────────────────────────────────────
+      {/* ── Deux grandes portes, puis les autres ───────────────────────────
 
-          Deux mises en page pour la même liste, et le partage se fait à `md`,
-          là où la grille passe à trois colonnes.
+          Sept cartes identiques disaient que « Regarder une partie » pesait
+          autant que « Contre l'ordinateur ». Ce n'est pas vrai de ce qu'on
+          vient faire ici : on vient jouer une partie, tout de suite, contre la
+          machine ou contre quelqu'un. Ces deux-là prennent la largeur, en
+          grand ; les cinq autres suivent en rangées compactes, icône à gauche,
+          où l'on voit d'un coup d'œil qu'elles existent sans qu'elles
+          réclament la même attention.
 
-          Au-delà, une carte par colonne : icône posée en haut, titre, phrase,
-          et la ligne de détail en capitales. C'est une vitrine, on la parcourt
-          du regard.
-
-          En dessous, les cartes s'empilent — et une vitrine empilée devient un
-          couloir. Chacune faisait près de deux cents points de haut : la
-          carrière, en dernière position, se trouvait à trois écrans de
-          défilement de « Contre l'ordinateur ». On les remet donc en rangées :
-          icône à gauche, texte à droite, sans la ligne de détail. Sept rangées
-          tiennent alors dans un écran et demi, et l'on voit qu'il y a sept
-          façons de jouer — ce qui est la première chose que cet écran a à
-          dire. */}
-      <div className="mt-6 grid gap-2 md:mt-8 md:gap-3 md:grid-cols-3">
-        {MODES.map(({ href, icon: Icon, titleKey, blurbKey, detail, accent }, index) => (
-          <Link
-            key={href}
-            href={href}
-            /* `pr-11` sous `md` : la flèche est posée en absolu contre le bord
-               droit, et la phrase lui passait dessous — « au grand maître »
-               finissait sous le chevron. Le titre avait son `pr-6`, pas le
-               reste du texte. */
-            className="group animate-slide-up glass gradient-ring relative flex flex-row items-center gap-3.5 overflow-hidden p-3.5 pr-11 transition-transform duration-300 hover:-translate-y-1 md:flex-col md:items-stretch md:gap-0 md:p-6"
-            style={{ animationDelay: `${index * 70}ms` }}
-          >
-            <span
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius)] md:mb-5 md:h-12 md:w-12"
-              style={{
-                background: `color-mix(in oklab, ${accent} 16%, transparent)`,
-                boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${accent} 30%, transparent)`,
-              }}
+          Sur téléphone, tout s'empile dans le même ordre : les deux grandes
+          gardent leur relief, les rangées restent des rangées. */}
+      <div className="mt-6 grid gap-3 md:mt-8 md:grid-cols-2 md:gap-4">
+        {MODES.filter((mode) => 'principal' in mode).map(
+          ({ href, icon: Icon, titleKey, blurbKey, detail, accent }, index) => (
+            <Link
+              key={href}
+              href={href}
+              className="group animate-slide-up glass gradient-ring relative flex flex-col overflow-hidden p-5 pr-12 transition-transform duration-300 hover:-translate-y-1 md:p-7"
+              style={{ animationDelay: `${index * 70}ms` }}
             >
-              <Icon size={22} style={{ color: accent }} aria-hidden />
-            </span>
+              <span
+                className="mb-4 grid h-12 w-12 shrink-0 place-items-center rounded-[var(--radius)] md:mb-5 md:h-14 md:w-14"
+                style={{
+                  background: `color-mix(in oklab, ${accent} 16%, transparent)`,
+                  boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${accent} 30%, transparent)`,
+                }}
+              >
+                <Icon size={26} style={{ color: accent }} aria-hidden />
+              </span>
+              <h2 className="font-display text-xl font-semibold tracking-tight md:text-2xl">
+                {t(titleKey)}
+              </h2>
+              <p className="mt-1.5 flex-1 text-[15px] leading-relaxed text-muted">{t(blurbKey)}</p>
+              <p className="mt-4 text-[13px] text-faint">{detail}</p>
+              <ArrowRight
+                size={18}
+                className="absolute right-5 top-6 text-faint transition-all duration-300 group-hover:translate-x-1 group-hover:text-ink md:top-7"
+                aria-hidden
+              />
+            </Link>
+          ),
+        )}
+      </div>
 
-            {/* `md:contents` : au-delà de `md` cette boîte disparaît de la mise
-                en page et ses trois enfants redeviennent ceux de la carte,
-                ce qui rend au `flex-1` de la phrase son effet d'origine —
-                pousser la ligne de détail contre le bas. */}
-            <div className="min-w-0 flex-1 md:contents">
-              <h2 className="pr-6 text-[15px] font-semibold md:pr-0 md:text-lg">{t(titleKey)}</h2>
-              <p className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-muted md:mt-1.5 md:line-clamp-none md:flex-1 md:text-sm md:leading-relaxed">
-                {t(blurbKey)}
-              </p>
-              {/* Le détail — « 25 niveaux · 7 personnalités » — est ce qu'on
-                  lit une fois, et il coûte deux lignes sur un téléphone. Il
-                  reste sur l'écran de réglages, où il sert au moment de
-                  choisir. */}
-              <p className="mt-4 hidden text-[11px] uppercase tracking-wide text-faint md:block">
-                {detail}
-              </p>
-            </div>
-
-            <ArrowRight
-              size={17}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-faint transition-all duration-300 group-hover:text-ink md:right-5 md:top-6 md:translate-y-0 md:group-hover:translate-x-1"
-              aria-hidden
-            />
-          </Link>
-        ))}
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 md:mt-4 md:gap-3 lg:grid-cols-3">
+        {MODES.filter((mode) => !('principal' in mode)).map(
+          ({ href, icon: Icon, titleKey, blurbKey, accent }, index) => (
+            <Link
+              key={href}
+              href={href}
+              /* `pr-11` : la flèche est posée en absolu contre le bord droit,
+                 et la phrase lui passerait dessous sans cette réserve. */
+              className="group animate-slide-up glass relative flex items-center gap-3.5 overflow-hidden p-3.5 pr-11 transition-transform duration-300 hover:-translate-y-0.5"
+              style={{ animationDelay: `${140 + index * 60}ms` }}
+            >
+              <span
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius-sm)]"
+                style={{
+                  background: `color-mix(in oklab, ${accent} 16%, transparent)`,
+                  boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${accent} 30%, transparent)`,
+                }}
+              >
+                <Icon size={21} style={{ color: accent }} aria-hidden />
+              </span>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-[15px] font-semibold">{t(titleKey)}</h2>
+                {/* Le détail — « 12 chapitres · une leçon… » — est ce qu'on
+                    lit une fois, et il coûte une ligne de plus par rangée. Il
+                    reste sur l'écran de destination, où il sert au moment de
+                    choisir. */}
+                <p className="mt-0.5 line-clamp-2 text-sm leading-snug text-muted">{t(blurbKey)}</p>
+              </div>
+              <ArrowRight
+                size={17}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-faint transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-ink"
+                aria-hidden
+              />
+            </Link>
+          ),
+        )}
       </div>
 
       {/* ── Aperçu des personnalités ─────────────────────────────────── */}
@@ -186,7 +205,7 @@ export default function PlayLobbyPage() {
           </h2>
           <Link
             href="/jouer/adversaires"
-            className="text-[13px] font-medium text-accent hover:underline"
+            className="text-[14px] font-medium text-accent hover:underline"
           >
             Tous les portraits
           </Link>

@@ -122,12 +122,12 @@ export default function MailboxPage() {
             <Card key={mail.id} className="overflow-hidden">
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-line/60 px-4 py-2.5">
                 <span className="font-semibold">{mail.subject}</span>
-                <span className="text-[13px] text-muted">à {mail.to}</span>
-                <span className="ml-auto text-[11px] tabular-nums text-faint">
+                <span className="text-[14px] text-muted">à {mail.to}</span>
+                <span className="ml-auto text-[12px] tabular-nums text-faint">
                   {new Date(mail.sentAt).toLocaleString('fr-FR')}
                 </span>
               </div>
-              <pre className="whitespace-pre-wrap px-4 py-3 font-sans text-[13px] leading-relaxed text-muted">
+              <pre className="whitespace-pre-wrap px-4 py-3 font-sans text-[14px] leading-relaxed text-muted">
                 {mail.body}
               </pre>
             </Card>

@@ -120,16 +120,16 @@ function TexteEcrit({
       <h2 id="explication-titre" className="pr-8 font-display text-xl font-bold tracking-tight">
         {explication.titre}
       </h2>
-      <p className="mt-3 text-[13px] leading-relaxed text-muted">{renderBold(explication.texte)}</p>
+      <p className="mt-3 text-[14px] leading-relaxed text-muted">{renderBold(explication.texte)}</p>
 
       {demande.type === 'cadence' && demande.parties !== undefined && (
-        <p className="mt-4 rounded-[var(--radius-sm)] bg-surface px-3 py-2 text-[13px]">
+        <p className="mt-4 rounded-[var(--radius-sm)] bg-surface px-3 py-2 text-[14px]">
           Tes parties : <strong className="font-semibold">{demande.parties}</strong>, pour{' '}
           <strong className="font-semibold">{demande.taux} %</strong> de points marqués.
         </p>
       )}
       {demande.type === 'fin' && demande.parties !== undefined && (
-        <p className="mt-4 rounded-[var(--radius-sm)] bg-surface px-3 py-2 text-[13px]">
+        <p className="mt-4 rounded-[var(--radius-sm)] bg-surface px-3 py-2 text-[14px]">
           Tes parties finies ainsi : <strong className="font-semibold">{demande.parties}</strong>,
           dont <strong className="font-semibold">{demande.gagnees}</strong> gagnée
           {(demande.gagnees ?? 0) > 1 ? 's' : ''}.
@@ -139,7 +139,7 @@ function TexteEcrit({
       {explication.terme && (
         <Link
           href="/glossaire"
-          className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-accent hover:underline"
+          className="mt-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-accent hover:underline"
         >
           <BookOpen size={13} aria-hidden />
           Voir « {explication.terme} » dans le glossaire
@@ -194,7 +194,7 @@ function Ouverture({ demande }: { demande: Extract<DemandeExplication, { type: '
       </div>
 
       {volume && (
-        <p className="mt-3 text-[13px] leading-relaxed text-muted">
+        <p className="mt-3 text-[14px] leading-relaxed text-muted">
           <strong className="font-semibold text-ink">{volume.name.fr}</strong> ({volume.range}) —{' '}
           {volume.description.fr}
         </p>
@@ -202,19 +202,17 @@ function Ouverture({ demande }: { demande: Extract<DemandeExplication, { type: '
 
       {/* ── La ligne ─────────────────────────────────────────────────── */}
       <div className="mt-4">
-        <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
-          Les coups qui la définissent
-        </p>
+        <p className="mb-1.5 text-[12px] font-semibold text-faint">Les coups qui la définissent</p>
         {!ready || ligne === null ? (
-          <span className="flex items-center gap-2 text-[13px] text-faint">
+          <span className="flex items-center gap-2 text-[14px] text-faint">
             <Spinner size={14} /> Lecture du livre d’ouvertures…
           </span>
         ) : ligne.length === 0 ? (
-          <p className="text-[13px] text-faint">
+          <p className="text-[14px] text-faint">
             Cette ouverture n’est pas dans le livre : elle vient du nom enregistré avec la partie.
           </p>
         ) : (
-          <p className="rounded-[var(--radius-sm)] bg-surface px-3 py-2 font-mono text-[13px] leading-relaxed">
+          <p className="rounded-[var(--radius-sm)] bg-surface px-3 py-2 font-mono text-[14px] leading-relaxed">
             {ligne.map((san, index) => (
               <span key={index}>
                 {index % 2 === 0 && <span className="text-faint">{index / 2 + 1}. </span>}
@@ -226,7 +224,7 @@ function Ouverture({ demande }: { demande: Extract<DemandeExplication, { type: '
       </div>
 
       {/* ── Ton bilan ────────────────────────────────────────────────── */}
-      <p className="mt-4 rounded-[var(--radius-sm)] bg-surface px-3 py-2 text-[13px] leading-relaxed">
+      <p className="mt-4 rounded-[var(--radius-sm)] bg-surface px-3 py-2 text-[14px] leading-relaxed">
         Tu l’as jouée <strong className="font-semibold">{demande.parties}</strong> fois — dont{' '}
         {demande.blancs} avec les Blancs — pour{' '}
         <strong className="font-semibold">{demande.taux} %</strong> de points marqués.
@@ -234,7 +232,7 @@ function Ouverture({ demande }: { demande: Extract<DemandeExplication, { type: '
 
       <Link
         href={`/ouvertures?q=${encodeURIComponent(demande.nom)}`}
-        className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-accent hover:underline"
+        className="mt-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-accent hover:underline"
       >
         <ExternalLink size={13} aria-hidden />
         Explorer cette ouverture

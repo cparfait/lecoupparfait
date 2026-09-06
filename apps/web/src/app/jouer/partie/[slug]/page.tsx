@@ -55,6 +55,7 @@ import { usePrecoup } from '@/lib/game/usePrecoup.ts'
 import { playMoveForSan, playResultSound, playSound } from '@/lib/sound.ts'
 import { useCurrentOpening, useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { useQualitesDesCoups } from '@/lib/game/useQualitesDesCoups.ts'
+import { useGrandEcran } from '@/lib/useMediaQuery.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import type { ChatMessage } from '@/lib/game/useLiveGame.ts'
 import { toPlayedMove, type PlayedMove } from '@/lib/game/useChessGame.ts'
@@ -212,15 +213,10 @@ export default function LiveGamePage() {
   // le bouton « Tchat », et le message lui-même en notification.
 
   /** Le panneau est-il sous les yeux ? Il est toujours là à partir de `lg`. */
-  const [grandEcran, setGrandEcran] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)')
-    const sync = () => setGrandEcran(mq.matches)
-    sync()
-    mq.addEventListener('change', sync)
-    return () => mq.removeEventListener('change', sync)
-  }, [])
+  const grandEcran = useGrandEcran()
   const chatVisible = grandEcran || chatOpen
+  /** Côté du plateau, pour aligner les bandeaux dessus. */
+  const [cotePlateau, setCotePlateau] = useState<number | null>(null)
 
   const [nonLus, setNonLus] = useState(0)
   useEffect(() => {
@@ -548,6 +544,67 @@ export default function LiveGamePage() {
   const drawOfferedToMe =
     snapshot.drawOfferFrom !== null && color !== null && snapshot.drawOfferFrom !== color
 
+  /**
+   * Les actions, rendues une seule fois : sous le plateau jusqu'à `lg`, au
+   * pied de la colonne des coups au-delà.
+   *
+   * Une partie finie n'a plus rien à proposer : « Proposer nulle » et
+   * « Abandonner » se désactivent en même temps, et il ne reste qu'une barre
+   * grise. La boîte de résultat refermée, on est devant un échiquier mort
+   * sans aucune porte — celles-ci prennent la place des autres.
+   *
+   * Plus de « Reprendre » entre deux joueurs : le bouton demandait une
+   * reprise de coup à l'adversaire, qui pouvait l'accepter. C'est courtois
+   * entre amis et douteux partout ailleurs — sur une partie classée, cela
+   * revient à négocier le résultat une fois le coup vu. Le geste existe
+   * toujours côté serveur ; simplement, plus rien ici ne le propose.
+   */
+  const actions = (
+    <>
+      {over ? (
+        <>
+          <ButtonLink href="/jouer/ami" size="sm" variant="primary" icon={<Swords size={14} />}>
+            Nouvelle partie
+          </ButtonLink>
+          <ButtonLink href="/jouer" size="sm" variant="ghost" icon={<LayoutGrid size={14} />}>
+            Menu
+          </ButtonLink>
+        </>
+      ) : drawOfferedToMe ? (
+        <>
+          <Button size="sm" variant="primary" onClick={game.offerDraw}>
+            Accepter la nulle
+          </Button>
+          <Button size="sm" variant="ghost" onClick={game.declineDraw}>
+            Refuser
+          </Button>
+        </>
+      ) : (
+        <Button
+          size="sm"
+          variant="secondary"
+          icon={<Handshake size={14} />}
+          onClick={game.offerDraw}
+          disabled={over || waiting || color === null}
+        >
+          {snapshot.drawOfferFrom === color ? 'Nulle proposée' : 'Proposer nulle'}
+        </Button>
+      )}
+
+      <Button
+        size="sm"
+        variant="secondary"
+        icon={<Flag size={14} />}
+        onClick={() => {
+          if (confirm('Abandonner la partie ?')) game.resign()
+        }}
+        disabled={over || waiting || color === null}
+      >
+        Abandonner
+      </Button>
+    </>
+  )
+
   return (
     <div className="mx-auto w-full max-w-[1400px] px-2 py-3 sm:px-4 lg:py-6">
       {connection === 'disconnected' && (
@@ -561,7 +618,14 @@ export default function LiveGamePage() {
       {/* Les zones sont placées par nom : voir `.grille-partie` dans
           `globals.css`. Même grille que la partie contre l'ordinateur — en
           paysage, le plateau à gauche et tout le reste à droite. */}
-      <div className="grille-partie [--aside:340px]">
+      <div
+        className="grille-partie [--aside:340px]"
+        style={
+          cotePlateau
+            ? ({ '--cote-plateau': `${cotePlateau}px` } as React.CSSProperties)
+            : undefined
+        }
+      >
         {/* ── Échiquier ──────────────────────────────────────────── */}
         <PlayerBar
           className="[grid-area:pion]"
@@ -583,6 +647,8 @@ export default function LiveGamePage() {
             <ChessBoard
               fitParentHeight
               reservedHeight={9}
+              onFit={setCotePlateau}
+              showViewToggle={!grandEcran}
               fen={revue?.fen ?? snapshot.fen}
               orientation={orientation}
               playable={
@@ -628,7 +694,7 @@ export default function LiveGamePage() {
             se retrouve devant un échiquier qui refuse les coups sans dire
             pourquoi — et l'adversaire attend. */}
           {revue !== null && (
-            <div className="mb-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2 text-[13px]">
+            <div className="mb-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2 text-[14px]">
               <Eye size={15} className="shrink-0 text-accent" aria-hidden />
               <span className="min-w-0 flex-1 leading-snug text-muted">
                 {/* La pendule ne tourne plus quand la partie est finie :
@@ -657,6 +723,9 @@ export default function LiveGamePage() {
           timeMs={clock ? clock[orientation] : null}
           timeControl={timeControl}
           active={snapshot.turn === orientation && !over}
+          // L'état du tour, dans le bandeau : c'est lui qu'on regarde pour
+          // savoir si c'est à soi.
+          status={snapshot.turn === orientation && !over && !waiting ? 'À toi de jouer' : undefined}
           captured={material[orientation]}
           materialLead={
             orientation === 'w' ? Math.max(0, material.balance) : Math.max(0, -material.balance)
@@ -664,92 +733,38 @@ export default function LiveGamePage() {
         />
 
         {/* ── Actions ────────────────────────────────────────── */}
-        <div className="[grid-area:barre] mt-3 flex flex-wrap gap-1.5">
-          {/* La bascule 2D / 3D sous `sm` et en paysage : ailleurs elle
-              occupait une rangée entière sous l'échiquier pour trois
-              boutons alignés à droite. */}
-          <ViewToggle className="sm:hidden paysage:flex" />
-          {/* Une partie finie n'a plus rien à proposer : « Proposer nulle »,
-              « Reprendre » et « Abandonner » se désactivent tous les trois
-              en même temps, et il ne reste qu'une barre grise. La boîte de
-              résultat refermée, on est devant un échiquier mort sans aucune
-              porte — celles-ci prennent la place des trois autres. */}
-          {over ? (
-            <>
-              <ButtonLink href="/jouer/ami" size="sm" variant="primary" icon={<Swords size={14} />}>
-                Nouvelle partie
-              </ButtonLink>
-              <ButtonLink href="/jouer" size="sm" variant="ghost" icon={<LayoutGrid size={14} />}>
-                Menu
-              </ButtonLink>
-            </>
-          ) : drawOfferedToMe ? (
-            <>
-              <Button size="sm" variant="primary" onClick={game.offerDraw}>
-                Accepter la nulle
-              </Button>
-              <Button size="sm" variant="ghost" onClick={game.declineDraw}>
-                Refuser
-              </Button>
-            </>
-          ) : (
+        {/* Jusqu'à `lg` seulement : au-delà, les actions vivent au pied de la
+            colonne des coups et le plateau récupère la hauteur de la barre. */}
+        {!grandEcran && (
+          <div className="[grid-area:barre] mt-3 flex flex-wrap gap-1.5">
+            {/* La bascule 2D / 3D sous `sm` et en paysage : ailleurs elle
+                occupait une rangée entière sous l'échiquier pour trois
+                boutons alignés à droite. */}
+            <ViewToggle className="sm:hidden paysage:flex" />
+            {actions}
+
             <Button
               size="sm"
               variant="ghost"
-              icon={<Handshake size={14} />}
-              onClick={game.offerDraw}
-              disabled={over || waiting || color === null}
+              icon={<MessageSquare size={14} />}
+              onClick={() => setChatOpen((value) => !value)}
+              className="relative ml-auto"
             >
-              {snapshot.drawOfferFrom === color ? 'Nulle proposée' : 'Proposer nulle'}
+              Tchat
+              {/* La pastille compte ce qu'on n'a pas lu. Elle est aussi
+                  annoncée dans le nom du bouton, sans quoi un lecteur d'écran
+                  n'y verrait qu'un chiffre posé à côté d'un mot. */}
+              {nonLus > 0 && (
+                <span
+                  className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[12px] font-bold text-[var(--accent-contrast)]"
+                  aria-label={`${nonLus} message${nonLus > 1 ? 's' : ''} non lu${nonLus > 1 ? 's' : ''}`}
+                >
+                  {nonLus > 9 ? '9+' : nonLus}
+                </span>
+              )}
             </Button>
-          )}
-
-          {/* ── Plus de « Reprendre » entre deux joueurs ──────────────
-              Le bouton demandait une reprise de coup à l'adversaire, qui
-              pouvait l'accepter. C'est courtois entre amis et douteux partout
-              ailleurs : sur une partie classée, cela revient à négocier le
-              résultat une fois le coup vu, et rien ne distingue à l'écran la
-              main tremblante de la mauvaise foi. Il encombrait surtout une
-              barre où les deux boutons qui comptent — proposer nulle,
-              abandonner — sont ceux qu'on doit trouver du premier coup d'œil.
-
-              Le geste existe toujours côté serveur : une partie déjà ouverte
-              dans un onglet ancien peut encore le demander, et l'autre reçoit
-              le message. Simplement, plus rien ici ne le propose. */}
-
-          <Button
-            size="sm"
-            variant="ghost"
-            icon={<Flag size={14} />}
-            onClick={() => {
-              if (confirm('Abandonner la partie ?')) game.resign()
-            }}
-            disabled={over || waiting || color === null}
-          >
-            Abandonner
-          </Button>
-
-          <Button
-            size="sm"
-            variant="ghost"
-            icon={<MessageSquare size={14} />}
-            onClick={() => setChatOpen((value) => !value)}
-            className="relative ml-auto lg:hidden"
-          >
-            Tchat
-            {/* La pastille compte ce qu'on n'a pas lu. Elle est aussi
-                annoncée dans le nom du bouton, sans quoi un lecteur d'écran
-                n'y verrait qu'un chiffre posé à côté d'un mot. */}
-            {nonLus > 0 && (
-              <span
-                className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold text-[var(--accent-contrast)]"
-                aria-label={`${nonLus} message${nonLus > 1 ? 's' : ''} non lu${nonLus > 1 ? 's' : ''}`}
-              >
-                {nonLus > 9 ? '9+' : nonLus}
-              </span>
-            )}
-          </Button>
-        </div>
+          </div>
+        )}
 
         {/* ── Panneau latéral ────────────────────────────────────── */}
         {/*
@@ -775,7 +790,7 @@ export default function LiveGamePage() {
           */}
           {color === null && !waiting && (
             <Card className="p-3">
-              <p className="flex items-center gap-2 text-[13px] leading-relaxed text-muted">
+              <p className="flex items-center gap-2 text-[14px] leading-relaxed text-muted">
                 <Eye size={15} className="shrink-0 text-accent" aria-hidden />
                 <span>
                   Tu regardes cette partie.{' '}
@@ -808,6 +823,12 @@ export default function LiveGamePage() {
               contraire la place qui reste, la colonne étant calée sur la
               fenêtre. */}
           <Card className="flex max-h-[40vh] flex-col overflow-hidden lg:max-h-none lg:min-h-[120px] lg:flex-1">
+            {grandEcran && (
+              <div className="flex items-center gap-2 border-b border-line/60 px-3 py-2">
+                <span className="text-[12px] font-semibold text-faint">Coups</span>
+                <ViewToggle className="ml-auto" />
+              </div>
+            )}
             <MoveList
               moves={playedMoves}
               cursor={revu ?? dernierDemiCoup}
@@ -815,6 +836,11 @@ export default function LiveGamePage() {
               qualities={qualites}
               className="min-h-0 flex-1"
             />
+            {grandEcran && (
+              <div className="flex flex-wrap items-center justify-center gap-1.5 border-t border-line/60 p-2.5">
+                {actions}
+              </div>
+            )}
           </Card>
 
           {/* ── Tchat ──────────────────────────────────────────── */}
@@ -862,9 +888,7 @@ export default function LiveGamePage() {
                 tchat est bordé par ses voisins et n'a rien à annoncer. */}
             {tchatEnSurcouche && (
               <div className="flex items-center justify-between border-b border-line/60 px-3 py-2">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-                  Tchat
-                </p>
+                <p className="text-[12px] font-semibold text-faint">Tchat</p>
                 <button
                   type="button"
                   onClick={() => setChatOpen(false)}
@@ -877,7 +901,7 @@ export default function LiveGamePage() {
             )}
             <div
               ref={filDuChat}
-              className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3 text-[13px]"
+              className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3 text-[14px]"
             >
               {chat.length === 0 ? (
                 <p className="text-xs text-faint">Dis bonjour à ton adversaire.</p>
@@ -910,7 +934,7 @@ export default function LiveGamePage() {
                 placeholder="Message…"
                 maxLength={300}
                 aria-label="Message de tchat"
-                className="min-w-0 flex-1 rounded-[var(--radius-sm)] border border-line bg-surface px-2.5 py-1.5 text-[13px] placeholder:text-faint focus:border-accent focus:outline-none"
+                className="min-w-0 flex-1 rounded-[var(--radius-sm)] border border-line bg-surface px-2.5 py-1.5 text-[14px] placeholder:text-faint focus:border-accent focus:outline-none"
               />
               <Button size="sm" type="submit" variant="secondary" aria-label="Envoyer">
                 <Send size={13} aria-hidden />
@@ -937,7 +961,7 @@ export default function LiveGamePage() {
           <div className="popover pointer-events-auto animate-slide-up w-full max-w-xs p-5 text-center shadow-[var(--shadow-lg)]">
             <Spinner size={22} className="mx-auto text-accent" />
             <p className="mt-3 text-sm font-medium">En attente de ton adversaire…</p>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+            <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
               Partage l’adresse de cette page. La partie démarrera dès qu’il arrivera.
             </p>
             <Button

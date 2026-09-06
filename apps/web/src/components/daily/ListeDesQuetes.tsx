@@ -46,7 +46,7 @@ export function ListeDesQuetes({
               // texte — il faut au moins un doigt de large — sans décaler la
               // liste par rapport au reste de la carte.
               className={clsx(
-                '-mx-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] px-1.5 py-1 text-[13px] transition-colors hover:bg-surface-hover',
+                '-mx-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] px-1.5 py-1 text-[14px] transition-colors hover:bg-surface-hover',
                 faite ? 'text-faint line-through' : 'text-muted hover:text-ink',
               )}
             >
@@ -61,14 +61,14 @@ export function ListeDesQuetes({
               </span>
               <span className="min-w-0 flex-1 truncate">{quete.label}</span>
               {!faite && quete.objectif > 1 && (
-                <span className="shrink-0 text-[11px] tabular-nums text-faint">
+                <span className="shrink-0 text-[12px] tabular-nums text-faint">
                   {avancement} / {quete.objectif}
                 </span>
               )}
               {/* Le chevron ne dit pas seulement « c'est un lien » : sans lui,
                   rien ne distingue ces lignes de la liste des étapes de
                   carrière, juste à côté, qui n'en est pas une. */}
-              <span aria-hidden className="shrink-0 text-[11px] text-faint">
+              <span aria-hidden className="shrink-0 text-[12px] text-faint">
                 →
               </span>
             </Link>

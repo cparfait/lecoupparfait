@@ -25,7 +25,7 @@ import {
   overallProgress,
   type LessonProgress,
 } from '@/lib/lessons/index.ts'
-import { Card, Chip } from '@/components/ui/index.tsx'
+import { ButtonLink, Card, Chip } from '@/components/ui/index.tsx'
 
 const LEVEL_LABELS = {
   beginner: { label: 'Débutant', tone: 'success' as const },
@@ -104,6 +104,25 @@ export default function LearnPage() {
   }, [allCollapsed])
 
   const overall = overallProgress(progress)
+
+  /**
+   * La leçon à proposer en grand : la première entamée sans être finie, et
+   * sinon la première qui reste à faire. `null` quand tout est terminé.
+   */
+  const prochaine = (() => {
+    const toutes = CHAPTERS.flatMap((chapitre, index) =>
+      chapitre.lessons.map((lecon) => ({ lecon, chapitre: index + 1 })),
+    )
+    const entamee = toutes.find(({ lecon }) => {
+      const etat = progress[lecon.id]
+      return etat && etat.steps > 0 && !etat.completed
+    })
+    if (entamee) {
+      return { ...entamee, entamee: true, etapes: progress[entamee.lecon.id]?.steps ?? 0 }
+    }
+    const restante = toutes.find(({ lecon }) => !progress[lecon.id]?.completed)
+    return restante ? { ...restante, entamee: false, etapes: 0 } : null
+  })()
   const termineesEnTout = CHAPTERS.reduce(
     (total, chapitre) =>
       total + chapitre.lessons.filter((lecon) => progress[lecon.id]?.completed).length,
@@ -121,7 +140,7 @@ export default function LearnPage() {
           trente-six pixels : deux blocs de texte avant la moindre leçon, et la
           progression repoussée d'autant. Elle se lit une fois, à la première
           visite ; ensuite on vient reprendre un cours. */}
-      <p className="mt-1.5 max-w-2xl text-[13px] leading-relaxed text-muted">
+      <p className="mt-1.5 max-w-2xl text-[14px] leading-relaxed text-muted">
         {CURRICULUM_STATS.lessons} leçons guidées, {CURRICULUM_STATS.steps} étapes, une voix qui
         explique chaque coup. Tu peux commencer sans rien connaître — la première leçon part de
         l’échiquier vide.
@@ -152,15 +171,58 @@ export default function LearnPage() {
         </div>
       </Card>
 
+      {/* ── La leçon à reprendre, en grand ─────────────────────────────
+          Trente-six cartes de la même taille : celle qu'on était en train de
+          suivre pesait autant que les trente-cinq autres, et il fallait la
+          retrouver dans les chapitres. Elle est ici, seule, avec son bouton.
+          À défaut d'une leçon entamée, c'est la première qui reste à faire ;
+          quand tout est fait, il n'y a rien à reprendre et la carte s'efface. */}
+      {prochaine && (
+        <Card glow className="mt-4 flex flex-wrap items-center gap-4 p-5">
+          <span
+            className="grid h-14 w-14 shrink-0 place-items-center rounded-[var(--radius)] text-3xl"
+            style={{ background: 'color-mix(in oklab, var(--accent-2) 16%, transparent)' }}
+            aria-hidden
+          >
+            {prochaine.lecon.icon}
+          </span>
+          <div className="min-w-[14rem] flex-1">
+            <p className="text-[12px] font-semibold text-accent">
+              {prochaine.entamee ? 'Reprendre où tu en étais' : 'Par où commencer'} · chapitre{' '}
+              {prochaine.chapitre}
+            </p>
+            <h2 className="mt-0.5 font-display text-xl font-semibold tracking-tight">
+              {prochaine.lecon.title}
+            </h2>
+            <p className="mt-1 text-sm leading-relaxed text-muted">{prochaine.lecon.summary}</p>
+            <p className="mt-1.5 flex items-center gap-2 text-[12px] text-faint">
+              <Clock size={11} aria-hidden />
+              {prochaine.lecon.minutes} min
+              <span aria-hidden>·</span>
+              {prochaine.entamee
+                ? `étape ${prochaine.etapes + 1} sur ${prochaine.lecon.steps.length}`
+                : `${prochaine.lecon.steps.length} étapes`}
+            </p>
+          </div>
+          <ButtonLink
+            href={`/apprendre/${prochaine.lecon.id}`}
+            variant="primary"
+            size="lg"
+            icon={<Play size={16} />}
+            className="w-full sm:w-auto"
+          >
+            {prochaine.entamee ? 'Reprendre' : 'Commencer'}
+          </ButtonLink>
+        </Card>
+      )}
+
       {/* ── Chapitres ────────────────────────────────────────────────── */}
       <div className="mt-8 flex items-baseline justify-between gap-4">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
-          {CHAPTERS.length} chapitres
-        </p>
+        <p className="text-[12px] font-semibold text-faint">{CHAPTERS.length} chapitres</p>
         <button
           type="button"
           onClick={toggleAll}
-          className="text-[13px] font-medium text-accent transition-colors hover:underline"
+          className="text-[14px] font-medium text-accent transition-colors hover:underline"
         >
           {allCollapsed ? 'Tout déplier' : 'Tout replier'}
         </button>
@@ -230,7 +292,7 @@ export default function LearnPage() {
                   <div className="min-w-0 flex-1">
                     {/* Le numéro de chapitre situe la progression dans le
                         programme, et fait respirer le titre au-dessus. */}
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
+                    <p className="text-[12px] font-semibold text-accent">
                       Chapitre {chapterIndex + 1}
                       {done > 0 && (
                         <span className="ml-2 font-normal normal-case tracking-normal text-faint">
@@ -251,7 +313,7 @@ export default function LearnPage() {
                     size={20}
                     aria-hidden
                     className={clsx(
-                      'shrink-0 self-start text-faint transition-transform duration-200',
+                      'shrink-0 self-start text-faint transition-transform duration-150',
                       replie && '-rotate-90',
                     )}
                   />
@@ -259,7 +321,7 @@ export default function LearnPage() {
 
                 {/* La description reste visible replié : elle dit ce que le
                     chapitre apprend, et c'est sur elle qu'on choisit d'ouvrir. */}
-                <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-muted">
+                <p className="mt-3 max-w-2xl text-[14px] leading-relaxed text-muted">
                   {chapter.description}
                 </p>
               </header>
@@ -292,7 +354,7 @@ export default function LearnPage() {
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold leading-snug">{lesson.title}</p>
                         <p className="mt-1 text-xs leading-relaxed text-muted">{lesson.summary}</p>
-                        <p className="mt-2 flex items-center gap-2 text-[11px] text-faint">
+                        <p className="mt-2 flex items-center gap-2 text-[12px] text-faint">
                           <Clock size={11} aria-hidden />
                           {lesson.minutes} min
                           <span aria-hidden>·</span>

@@ -53,6 +53,7 @@ import { useChessGame } from '@/lib/game/useChessGame.ts'
 import { useCurrentOpening, useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { playMoveSound, playResultSound } from '@/lib/sound.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import { useGrandEcran } from '@/lib/useMediaQuery.ts'
 
 export default function LocalGamePage() {
   const autoFlip = usePreferences((state) => state.autoFlip)
@@ -67,6 +68,9 @@ export default function LocalGamePage() {
 
   // Rotation en attente : le coup est joué, le plateau n'a pas encore basculé.
   const [rotationEnAttente, setRotationEnAttente] = useState(false)
+  /** Côté du plateau, pour aligner les bandeaux dessus. */
+  const [cotePlateau, setCotePlateau] = useState<number | null>(null)
+  const grandEcran = useGrandEcran()
   const minuterie = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const annulerRotation = useCallback(() => {
@@ -191,18 +195,76 @@ export default function LocalGamePage() {
     undo(1)
   }, [undo, annulerRotation])
 
+  /**
+   * Les actions, rendues une seule fois : sous le plateau jusqu'à `lg`, au
+   * pied de la colonne des coups au-delà — voir la partie contre
+   * l'ordinateur, qui suit la même règle.
+   */
+  const actions = (
+    <>
+      <Button
+        size="sm"
+        variant="secondary"
+        icon={<RotateCcw size={14} />}
+        onClick={() => {
+          // Retourner à la main pendant la pause doit gagner : sans cette
+          // annulation, la minuterie basculerait le plateau une seconde
+          // plus tard et défairait le geste.
+          annulerRotation()
+          setOrientation((value) => (value === 'w' ? 'b' : 'w'))
+        }}
+      >
+        Retourner
+      </Button>
+      <Button
+        size="sm"
+        variant="secondary"
+        icon={<Undo2 size={14} />}
+        onClick={annulerCoup}
+        disabled={state.moves.length === 0}
+      >
+        Annuler
+      </Button>
+      <Button size="sm" variant="ghost" icon={<RefreshCw size={14} />} onClick={newGame}>
+        Nouvelle partie
+      </Button>
+      <CommentaryToggle
+        active={commentaryMode}
+        onChange={(value) => setPreference('commentaryMode', value)}
+      />
+    </>
+  )
+
+  const etatDuTrait = state.isGameOver
+    ? 'Partie terminée'
+    : rotationEnAttente
+      ? 'Coup joué — l’échiquier pivote…'
+      : `Trait aux ${state.turn === 'w' ? 'Blancs' : 'Noirs'}`
+
   return (
     <div className="mx-auto w-full max-w-[1300px] px-2 py-3 sm:px-4 lg:py-6">
       {/* Les zones sont placées par nom : voir `.grille-partie` dans
           `globals.css`. Même grille que la partie contre l'ordinateur — en
           paysage, le plateau à gauche et tout le reste à droite. */}
-      <div className="grille-partie [--aside:320px]">
+      <div
+        className="grille-partie [--aside:320px]"
+        style={
+          cotePlateau
+            ? ({ '--cote-plateau': `${cotePlateau}px` } as React.CSSProperties)
+            : undefined
+        }
+      >
         <PlayerBar
           className="[grid-area:pion]"
           name={orientation === 'w' ? 'Noirs' : 'Blancs'}
           color={orientation === 'w' ? 'b' : 'w'}
           avatar={orientation === 'w' ? '♚' : '♔'}
           active={state.turn !== orientation && !state.isGameOver}
+          status={
+            state.turn !== orientation && !state.isGameOver && !rotationEnAttente
+              ? 'Au trait'
+              : undefined
+          }
           captured={state.material[orientation === 'w' ? 'b' : 'w']}
           materialLead={
             orientation === 'w'
@@ -216,6 +278,8 @@ export default function LocalGamePage() {
             key={gameKey}
             fitParentHeight
             reservedHeight={9}
+            onFit={setCotePlateau}
+            showViewToggle={!grandEcran}
             fen={state.fen}
             orientation={orientation}
             playable={state.isLive && !state.isGameOver && !rotationEnAttente ? 'both' : null}
@@ -236,6 +300,11 @@ export default function LocalGamePage() {
           color={orientation}
           avatar={orientation === 'w' ? '♔' : '♚'}
           active={state.turn === orientation && !state.isGameOver}
+          status={
+            state.turn === orientation && !state.isGameOver && !rotationEnAttente
+              ? 'Au trait'
+              : undefined
+          }
           captured={state.material[orientation]}
           materialLead={
             orientation === 'w'
@@ -244,58 +313,28 @@ export default function LocalGamePage() {
           }
         />
 
-        <div className="[grid-area:barre] mt-3 flex flex-wrap gap-1.5">
-          {/* La bascule 2D / 3D sous `sm` et en paysage : ailleurs elle
-              occupait une rangée entière sous l'échiquier pour trois
-              boutons alignés à droite. */}
-          <ViewToggle className="sm:hidden paysage:flex" />
-          <span className="mr-auto flex items-center gap-2 pl-1 text-sm">
-            <span
-              className={
-                state.turn === 'w'
-                  ? 'h-2.5 w-2.5 rounded-full bg-[var(--eval-white)]'
-                  : 'h-2.5 w-2.5 rounded-full bg-[var(--eval-black)] ring-1 ring-line'
-              }
-              aria-hidden
-            />
-            {state.isGameOver
-              ? 'Partie terminée'
-              : rotationEnAttente
-                ? 'Coup joué — l’échiquier pivote…'
-                : `Trait aux ${state.turn === 'w' ? 'Blancs' : 'Noirs'}`}
-          </span>
-
-          <Button
-            size="sm"
-            variant="ghost"
-            icon={<RotateCcw size={14} />}
-            onClick={() => {
-              // Retourner à la main pendant la pause doit gagner : sans cette
-              // annulation, la minuterie basculerait le plateau une seconde
-              // plus tard et défairait le geste.
-              annulerRotation()
-              setOrientation((value) => (value === 'w' ? 'b' : 'w'))
-            }}
-          >
-            Retourner
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            icon={<Undo2 size={14} />}
-            onClick={annulerCoup}
-            disabled={state.moves.length === 0}
-          >
-            Annuler
-          </Button>
-          <Button size="sm" variant="ghost" icon={<RefreshCw size={14} />} onClick={newGame}>
-            Nouvelle partie
-          </Button>
-          <CommentaryToggle
-            active={commentaryMode}
-            onChange={(value) => setPreference('commentaryMode', value)}
-          />
-        </div>
+        {/* Jusqu'à `lg` seulement : au-delà, les actions vivent au pied de la
+            colonne des coups et le plateau récupère la hauteur de la barre. */}
+        {!grandEcran && (
+          <div className="[grid-area:barre] mt-3 flex flex-wrap gap-1.5">
+            {/* La bascule 2D / 3D sous `sm` et en paysage : ailleurs elle
+                occupait une rangée entière sous l'échiquier pour trois
+                boutons alignés à droite. */}
+            <ViewToggle className="sm:hidden paysage:flex" />
+            <span className="mr-auto flex items-center gap-2 pl-1 text-sm">
+              <span
+                className={
+                  state.turn === 'w'
+                    ? 'h-2.5 w-2.5 rounded-full bg-[var(--eval-white)]'
+                    : 'h-2.5 w-2.5 rounded-full bg-[var(--eval-black)] ring-1 ring-line'
+                }
+                aria-hidden
+              />
+              {etatDuTrait}
+            </span>
+            {actions}
+          </div>
+        )}
 
         <div className="[grid-area:aside] mt-4 flex min-h-0 flex-col gap-3 lg:mt-0 paysage:mt-0 paysage:overflow-y-auto paysage:overscroll-contain">
           {commentaryMode ? (
@@ -341,6 +380,15 @@ export default function LocalGamePage() {
           {/* Même règle qu'en partie contre l'ordinateur : la liste prend la
               hauteur de ses coups sur téléphone, la place restante au-delà. */}
           <Card className="flex max-h-[45vh] flex-col overflow-hidden lg:max-h-none lg:min-h-[220px] lg:flex-1">
+            {grandEcran && (
+              <div className="flex items-center gap-2 border-b border-line/60 px-3 py-2">
+                <span className="text-[12px] font-semibold text-faint">Coups</span>
+                {(state.isGameOver || rotationEnAttente) && (
+                  <span className="truncate text-[12px] text-muted">· {etatDuTrait}</span>
+                )}
+                <ViewToggle className="ml-auto" />
+              </div>
+            )}
             <MoveList
               moves={state.moves}
               cursor={state.cursor}
@@ -348,6 +396,11 @@ export default function LocalGamePage() {
               qualities={qualites}
               className="min-h-0 flex-1"
             />
+            {grandEcran && (
+              <div className="flex flex-wrap items-center justify-center gap-1.5 border-t border-line/60 p-2.5">
+                {actions}
+              </div>
+            )}
           </Card>
         </div>
       </div>

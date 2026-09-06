@@ -672,7 +672,7 @@ export function CommentaryPanel({
       )}
 
       {stale && commentary && (
-        <div className="flex items-center gap-2 border-b border-line bg-surface-strong px-3 py-1.5 text-[11px] text-faint">
+        <div className="flex items-center gap-2 border-b border-line bg-surface-strong px-3 py-1.5 text-[12px] text-faint">
           <History size={12} className="shrink-0" aria-hidden />
           <span className="min-w-0 flex-1 leading-snug">
             Porte sur ton coup{' '}
@@ -736,7 +736,7 @@ export function CommentaryPanel({
                       pourcentage sur un premier coup ne sont pas une faute, ce
                       sont les préférences du moteur — et on vient de décider
                       qu'on ne les présentait plus comme des corrections. */}
-                  <p className="mt-0.5 text-[11px] tabular-nums text-faint">
+                  <p className="mt-0.5 text-[12px] tabular-nums text-faint">
                     {formatScore(commentary.scoreBefore)} → {formatScore(commentary.scoreAfter)}
                     {meriteUnMeilleurCoup(commentary.quality, commentary.winLoss) &&
                       ` · −${commentary.winLoss.toFixed(0)} pts de chances de victoire`}
@@ -846,7 +846,7 @@ export function CommentaryPanel({
         {commentary && commentary.body.length > 0 && (
           <div className="mt-2.5 space-y-1.5">
             {commentary.body.slice(0, 2).map((paragraph, index) => (
-              <p key={index} className="text-[13px] leading-relaxed text-muted">
+              <p key={index} className="text-[14px] leading-relaxed text-muted">
                 {paragraph}
               </p>
             ))}
@@ -857,9 +857,7 @@ export function CommentaryPanel({
       {/* ── Les options qu'on avait ─────────────────────────────────────── */}
       {commentary && commentary.alternatives.length > 0 && (
         <div className="border-t border-line/60">
-          <p className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
-            Ce que tu pouvais jouer
-          </p>
+          <p className="px-4 py-2 text-[12px] font-semibold text-faint">Ce que tu pouvais jouer</p>
           <ul onMouseLeave={() => onHoverAlternative?.(null)}>
             {commentary.alternatives.map((alternative) => (
               /* La ligne et l'écoute sont **deux** boutons côte à côte, et non
@@ -875,7 +873,7 @@ export function CommentaryPanel({
                 >
                   <span
                     className={clsx(
-                      'grid h-5 w-5 shrink-0 place-items-center rounded text-[10px] font-bold',
+                      'grid h-5 w-5 shrink-0 place-items-center rounded text-[12px] font-bold',
                       !couleurDeLigne(alternative) && 'bg-surface-strong text-faint',
                     )}
                     style={teinteDeRang(alternative)}
@@ -1181,7 +1179,7 @@ export function CommentaryToggle({
       aria-pressed={active}
       title="Commenter chaque coup en direct"
       className={clsx(
-        'inline-flex items-center gap-1.5 rounded-[var(--radius-sm)] px-2.5 py-1.5 text-[13px] font-medium transition-colors',
+        'inline-flex items-center gap-1.5 rounded-[var(--radius-sm)] px-2.5 py-1.5 text-[14px] font-medium transition-colors',
         active
           ? 'bg-accent text-[var(--accent-contrast)]'
           : 'text-muted hover:bg-surface-hover hover:text-ink',

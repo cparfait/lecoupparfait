@@ -78,7 +78,7 @@ export function OpeningBanner({ opening, moveCount, onDismiss, className }: Open
       </Chip>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-semibold">{opening.name}</span>
-        {volume && <span className="block truncate text-[11px] text-faint">{volume.name.fr}</span>}
+        {volume && <span className="block truncate text-[12px] text-faint">{volume.name.fr}</span>}
       </span>
       {onDismiss && (
         <button

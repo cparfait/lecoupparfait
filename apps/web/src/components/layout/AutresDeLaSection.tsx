@@ -31,10 +31,19 @@ const TEINTES = ['var(--accent)', 'var(--accent-2)', 'var(--accent-3)']
 export function AutresDeLaSection({
   section: id,
   className,
+  colonne = false,
 }: {
   /** Identifiant de la rubrique dans `SECTIONS`. */
   section: string
   className?: string
+  /**
+   * Une seule colonne, quel que soit l'écran.
+   *
+   * Dans la colonne latérale d'un puzzle — trois cents pixels —, deux cartes
+   * côte à côte n'ont plus la place d'un mot : on lisait « Puzzl… » et
+   * « Défi d… ». Empilées, elles gardent leur libellé et leur sous-titre.
+   */
+  colonne?: boolean
 }) {
   const pathname = usePathname()
   const t = useT()
@@ -51,7 +60,7 @@ export function AutresDeLaSection({
 
   return (
     <nav
-      className={clsx('mt-10', className)}
+      className={clsx(colonne ? 'mt-6' : 'mt-10', className)}
       aria-label={`Le reste de la rubrique ${t(section.labelKey)}`}
     >
       {/* ── Un vrai titre, et non plus une étiquette ────────────────────
@@ -78,7 +87,7 @@ export function AutresDeLaSection({
         />
       </div>
 
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className={clsx('grid gap-2', !colonne && 'sm:grid-cols-2')}>
         {autres.map((entree, index) => {
           const Icone = entree.icon
           /*
@@ -113,7 +122,7 @@ export function AutresDeLaSection({
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-semibold">{t(entree.labelKey)}</span>
                 {entree.hintKey && (
-                  <span className="block truncate text-[11px] leading-snug text-faint">
+                  <span className="block truncate text-[12px] leading-snug text-faint">
                     {t(entree.hintKey)}
                   </span>
                 )}

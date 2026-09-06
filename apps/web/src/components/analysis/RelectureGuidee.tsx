@@ -121,7 +121,7 @@ export function RelectureGuidee({
             <>
               <div className="flex items-start gap-2">
                 <span
-                  className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-accent/20 text-[13px] font-bold text-accent"
+                  className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-accent/20 text-[14px] font-bold text-accent"
                   aria-hidden
                 >
                   ?
@@ -130,7 +130,7 @@ export function RelectureGuidee({
                   Ici, tu as perdu du terrain. À toi de trouver mieux.
                 </p>
               </div>
-              <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+              <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
                 {essais === 0
                   ? 'Joue le coup que tu aurais dû jouer, directement sur l’échiquier.'
                   : essais === 1
@@ -142,7 +142,7 @@ export function RelectureGuidee({
             <>
               <div className="flex items-start gap-2">
                 <span
-                  className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[13px] font-bold"
+                  className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[14px] font-bold"
                   style={{
                     background: `color-mix(in oklab, var(--q-${style.token}) 20%, transparent)`,
                     color: `var(--q-${style.token})`,
@@ -168,7 +168,7 @@ export function RelectureGuidee({
                 vue détaillée.
               */}
               {enigme === 'trouvee' && (
-                <p className="mt-1.5 text-[13px] font-semibold leading-relaxed text-[var(--q-best)]">
+                <p className="mt-1.5 text-[14px] font-semibold leading-relaxed text-[var(--q-best)]">
                   Trouvé — c’était bien ce coup-là.
                 </p>
               )}
@@ -176,7 +176,7 @@ export function RelectureGuidee({
                 <TexteAvecTermes
                   key={index}
                   texte={phrase.replace(/\*\*/g, '')}
-                  className="mt-1.5 text-[13px] leading-relaxed text-muted"
+                  className="mt-1.5 text-[14px] leading-relaxed text-muted"
                 />
               ))}
             </>
@@ -334,11 +334,11 @@ function RubanDesCoups({
               type="button"
               onClick={() => onCursor(index)}
               className={clsx(
-                'flex min-w-0 items-center gap-1 rounded-[var(--radius-sm)] px-2 py-1.5 text-[13px] transition-colors',
+                'flex min-w-0 items-center gap-1 rounded-[var(--radius-sm)] px-2 py-1.5 text-[14px] transition-colors',
                 courant ? 'bg-surface-strong font-bold' : 'text-muted hover:bg-surface-hover',
               )}
             >
-              <span className="shrink-0 text-[11px] tabular-nums text-faint">
+              <span className="shrink-0 text-[12px] tabular-nums text-faint">
                 {coup.moveNumber}
                 {coup.color === 'w' ? '.' : '…'}
               </span>

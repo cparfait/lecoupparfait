@@ -555,7 +555,7 @@ function ImportScreen({
               placeholder={
                 '1. e4 e5 2. Nf3 Nc6 3. Bb5 a6…\n\nou un PGN complet, ou une position FEN.'
               }
-              className="w-full resize-y rounded-[var(--radius-sm)] border border-line bg-surface p-3 font-mono text-[13px] leading-relaxed placeholder:text-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--accent)_30%,transparent)]"
+              className="w-full resize-y rounded-[var(--radius-sm)] border border-line bg-surface p-3 font-mono text-[14px] leading-relaxed placeholder:text-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--accent)_30%,transparent)]"
             />
 
             <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -649,7 +649,7 @@ function ImportScreen({
               Sans cette ligne, on arrive sur un champ pré-rempli sans savoir
               d'où il sort ni ce qu'on attend de nous. */}
           {handedOver && !running && parsed && parsed.moves.length > 0 && (
-            <p className="mb-2.5 text-[13px] leading-relaxed text-muted">
+            <p className="mb-2.5 text-[14px] leading-relaxed text-muted">
               Ta partie est prête, avec ton camp déjà retenu. Règle la profondeur si tu veux, puis
               lance l’analyse.
             </p>
@@ -1615,7 +1615,7 @@ export function ReviewScreen({
                       <TexteAvecTermes
                         key={index}
                         texte={paragraph}
-                        className="text-[13px] leading-relaxed text-muted"
+                        className="text-[14px] leading-relaxed text-muted"
                       />
                     ))}
                   </div>
@@ -1633,9 +1633,7 @@ export function ReviewScreen({
                   {move.bestLine && move.bestLine.length > 0 && move.bestMove && (
                     <div className="mt-3 rounded-[var(--radius-sm)] bg-surface p-2.5">
                       <div className="flex items-baseline justify-between gap-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-                          Suite recommandée
-                        </p>
+                        <p className="text-[12px] font-semibold text-faint">Suite recommandée</p>
                         <span className="flex shrink-0 items-center gap-3">
                           {/* Deux gestes, et ils ne demandent pas la même chose.
                             « Montrer » déplace les pièces — pour qui n'arrive
@@ -1646,7 +1644,7 @@ export function ReviewScreen({
                             type="button"
                             onClick={() => setPourquoiOuvert((ouvert) => !ouvert)}
                             aria-expanded={pourquoiOuvert}
-                            className="text-[11px] font-semibold text-accent transition-colors hover:underline"
+                            className="text-[12px] font-semibold text-accent transition-colors hover:underline"
                           >
                             {pourquoiOuvert ? 'Masquer' : 'Pourquoi ?'}
                           </button>
@@ -1655,13 +1653,13 @@ export function ReviewScreen({
                           <button
                             type="button"
                             onClick={showBestLine}
-                            className="text-[11px] font-semibold text-accent transition-colors hover:underline"
+                            className="text-[12px] font-semibold text-accent transition-colors hover:underline"
                           >
                             {demo ? `${demo.at + 1} / ${demo.frames.length}` : '▶ Montrer'}
                           </button>
                         </span>
                       </div>
-                      <p className="mt-1 font-mono text-[13px]">
+                      <p className="mt-1 font-mono text-[14px]">
                         {move.bestLine.map((san, index) => (
                           <span
                             key={index}
@@ -1684,12 +1682,12 @@ export function ReviewScreen({
                       {pourquoiOuvert &&
                         (pourquoi ? (
                           <div className="mt-2.5 border-l-2 border-accent/50 pl-3">
-                            <p className="text-[13px] font-semibold leading-snug">
+                            <p className="text-[14px] font-semibold leading-snug">
                               {pourquoi.headline}
                             </p>
                             <div className="mt-1 space-y-1">
                               {pourquoi.body.map((paragraphe, index) => (
-                                <p key={index} className="text-[13px] leading-relaxed text-muted">
+                                <p key={index} className="text-[14px] leading-relaxed text-muted">
                                   {paragraphe}
                                 </p>
                               ))}
@@ -1708,7 +1706,7 @@ export function ReviewScreen({
                           // `explainRecommendedMove` rend `null` quand le coup du
                           // moteur ne se rejoue pas sur la position. On le dit
                           // plutôt que de laisser un bouton qui n'ouvre rien.
-                          <p className="mt-2.5 text-[13px] leading-relaxed text-faint">
+                          <p className="mt-2.5 text-[14px] leading-relaxed text-faint">
                             Ce coup ne se rejoue pas sur cette position : impossible de l’expliquer
                             sans risquer d’inventer.
                           </p>
@@ -1732,7 +1730,7 @@ export function ReviewScreen({
                     où l'on prend le temps de comprendre, en montre moins. */}
                   {move.alternatives && move.alternatives.length > 1 && (
                     <div className="mt-3 overflow-hidden rounded-[var(--radius-sm)] border border-line/60">
-                      <p className="border-b border-line/60 bg-surface px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
+                      <p className="border-b border-line/60 bg-surface px-3 py-1.5 text-[12px] font-semibold text-faint">
                         Ce que tu pouvais jouer
                       </p>
                       <ul>
@@ -1762,7 +1760,7 @@ export function ReviewScreen({
                             >
                               <span
                                 className={clsx(
-                                  'grid h-5 w-5 shrink-0 place-items-center rounded text-[10px] font-bold',
+                                  'grid h-5 w-5 shrink-0 place-items-center rounded text-[12px] font-bold',
                                   !teinte && 'bg-surface-strong text-faint',
                                 )}
                                 style={
@@ -1779,7 +1777,7 @@ export function ReviewScreen({
                                 {rang + 1}
                               </span>
                               <span
-                                className="w-16 shrink-0 font-mono text-[13px] font-semibold"
+                                className="w-16 shrink-0 font-mono text-[14px] font-semibold"
                                 title="Le coup, en notation d'échecs"
                               >
                                 {format(option.san)}
@@ -1894,7 +1892,7 @@ function AccuracySummary({
 
   return (
     <Card className="overflow-hidden">
-      <p className="border-b border-line/60 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
+      <p className="border-b border-line/60 px-3 py-2 text-[12px] font-semibold text-faint">
         Bilan de la partie
       </p>
 
@@ -1905,11 +1903,7 @@ function AccuracySummary({
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
           {(['w', 'b'] as const).map((colour, rang) => (
             <Fragment key={colour}>
-              {rang === 1 && (
-                <span className="px-1 text-[10px] uppercase tracking-wide text-faint">
-                  précision
-                </span>
-              )}
+              {rang === 1 && <span className="px-1 text-[12px] text-faint">précision</span>}
               <div className={clsx('min-w-0', rang === 0 ? 'text-left' : 'text-right')}>
                 <p className="flex items-center gap-1.5 truncate text-[12px] font-medium">
                   {rang === 1 && (
@@ -1932,7 +1926,7 @@ function AccuracySummary({
                 </p>
                 <p className="mt-0.5 font-display text-2xl font-bold tabular-nums leading-none">
                   {report.accuracy[colour].toFixed(1)}
-                  <span className="text-[11px] font-normal text-muted"> %</span>
+                  <span className="text-[12px] font-normal text-muted"> %</span>
                 </p>
               </div>
             </Fragment>
@@ -1958,14 +1952,14 @@ function AccuracySummary({
                 title={`${style.label.fr} — ${style.description.fr}`}
               >
                 <span
-                  className="text-left text-[13px] font-semibold tabular-nums"
+                  className="text-left text-[14px] font-semibold tabular-nums"
                   style={{ color: teinte }}
                 >
                   {report.counts.w[quality]}
                 </span>
                 <span className="flex items-center justify-center gap-1.5">
                   <span
-                    className="grid h-5 w-5 shrink-0 place-items-center rounded-full text-[11px] font-bold"
+                    className="grid h-5 w-5 shrink-0 place-items-center rounded-full text-[12px] font-bold"
                     style={{
                       background: `color-mix(in oklab, ${teinte} 20%, transparent)`,
                       color: teinte,
@@ -1977,7 +1971,7 @@ function AccuracySummary({
                   <span className="text-[12px] text-muted">{style.label.fr}</span>
                 </span>
                 <span
-                  className="text-right text-[13px] font-semibold tabular-nums"
+                  className="text-right text-[14px] font-semibold tabular-nums"
                   style={{ color: teinte }}
                 >
                   {report.counts.b[quality]}
@@ -2013,7 +2007,7 @@ function KeyMoments({
   if (moments.length === 0) {
     return (
       <Card className="p-3">
-        <p className="text-[13px] leading-snug text-muted">
+        <p className="text-[14px] leading-snug text-muted">
           Aucun coup n’a fait basculer la partie : l’avantage n’a jamais changé de camp brutalement.
         </p>
       </Card>
@@ -2022,9 +2016,7 @@ function KeyMoments({
 
   return (
     <Card className="p-3">
-      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
-        Moments clés
-      </p>
+      <p className="mb-2 text-[12px] font-semibold text-faint">Moments clés</p>
       <div className="space-y-0.5">
         {moments.map((move) => {
           const style = QUALITY_STYLES[move.quality]
@@ -2033,7 +2025,7 @@ function KeyMoments({
               key={move.ply}
               type="button"
               onClick={() => onSeek(move.ply)}
-              className="flex w-full items-center gap-2 rounded-[var(--radius-sm)] px-1.5 py-1 text-left text-[13px] transition-colors hover:bg-surface-hover"
+              className="flex w-full items-center gap-2 rounded-[var(--radius-sm)] px-1.5 py-1 text-left text-[14px] transition-colors hover:bg-surface-hover"
             >
               <span className="w-9 shrink-0 tabular-nums text-faint">
                 {move.moveNumber}
@@ -2048,7 +2040,7 @@ function KeyMoments({
                 {style.glyph}
               </span>
               {meriteUnMeilleurCoup(move.quality, move.winLoss) && (
-                <span className="w-14 shrink-0 text-right text-[11px] tabular-nums text-faint">
+                <span className="w-14 shrink-0 text-right text-[12px] tabular-nums text-faint">
                   −{move.winLoss.toFixed(0)} pts
                 </span>
               )}
@@ -2152,7 +2144,7 @@ function PlayerReport({
             return (
               <span
                 key={quality}
-                className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] px-1.5 py-0.5 text-[11px] font-semibold"
+                className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] px-1.5 py-0.5 text-[12px] font-semibold"
                 style={{
                   background: `color-mix(in oklab, var(--q-${style.token}) 16%, transparent)`,
                   color: `var(--q-${style.token})`,
@@ -2166,7 +2158,7 @@ function PlayerReport({
       </div>
 
       <div className="mt-3 border-t border-line/60 pt-3">
-        <p className="text-[13px] font-medium leading-snug">{coach.headline}</p>
+        <p className="text-[14px] font-medium leading-snug">{coach.headline}</p>
         <p className="mt-1.5 text-xs leading-relaxed text-muted">{coach.focus}</p>
       </div>
     </Card>

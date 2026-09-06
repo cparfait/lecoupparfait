@@ -133,7 +133,7 @@ export default function CorrespondencePage() {
         <div className="flex flex-col gap-3">
           <Card className="p-2">
             {games.length === 0 ? (
-              <p className="px-1 py-2 text-[13px] leading-relaxed text-faint">
+              <p className="px-1 py-2 text-[14px] leading-relaxed text-faint">
                 Aucune partie. Lance-en une avec quelqu’un de ton carnet.
               </p>
             ) : (
@@ -160,10 +160,10 @@ export default function CorrespondencePage() {
                       aria-hidden
                     />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] font-medium">
+                      <span className="block truncate text-[14px] font-medium">
                         {entry.opponent}
                       </span>
-                      <span className="block text-[11px] text-faint">
+                      <span className="block text-[12px] text-faint">
                         {entry.result !== '*'
                           ? `terminée · ${entry.result}`
                           : entry.yourTurn
@@ -186,15 +186,13 @@ export default function CorrespondencePage() {
             d'une partie en direct. Les deux se choisissent donc au même endroit.
           */}
           <Card className="p-3">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
-              Nouvelle partie
-            </p>
+            <p className="mb-2 text-[12px] font-semibold text-faint">Nouvelle partie</p>
             <p className="mb-2 text-[12px] leading-relaxed text-muted">
               Elle se lance depuis l’écran de partie, en choisissant une cadence en jours.
             </p>
             <Link
               href="/jouer/ami"
-              className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent hover:underline"
+              className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-accent hover:underline"
             >
               <Plus size={13} aria-hidden />
               Jouer contre quelqu’un
@@ -206,7 +204,7 @@ export default function CorrespondencePage() {
         <div className="min-w-0">
           {game && board ? (
             <>
-              <div className="mb-2 flex flex-wrap items-center gap-2 text-[13px]">
+              <div className="mb-2 flex flex-wrap items-center gap-2 text-[14px]">
                 <span className="font-medium">contre {game.opponent}</span>
                 <span className="text-faint">
                   · tu joues les {game.colour === 'w' ? 'Blancs' : 'Noirs'} · {game.daysPerMove}{' '}
@@ -236,7 +234,7 @@ export default function CorrespondencePage() {
               />
 
               {game.result !== '*' ? (
-                <p className="mt-2 text-center text-[13px] text-muted">
+                <p className="mt-2 text-center text-[14px] text-muted">
                   Partie terminée — {game.result}.
                 </p>
               ) : (

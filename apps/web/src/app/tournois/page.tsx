@@ -117,7 +117,7 @@ export default function TournamentsPage() {
               <p className="font-display text-lg font-bold leading-tight">
                 Tournoi contre l’ordinateur
               </p>
-              <p className="text-[13px] text-muted">
+              <p className="text-[14px] text-muted">
                 Tu es le seul humain. Trois à sept adversaires, de force choisie ou variée, et un
                 classement aux points.
               </p>
@@ -155,7 +155,7 @@ export default function TournamentsPage() {
               Créer
             </Button>
           </form>
-          <p className="mt-1.5 text-[11px] text-faint">
+          <p className="mt-1.5 text-[12px] text-faint">
             3 minutes par partie, 45 minutes d’arène, départ dans 5 minutes.
           </p>
         </Card>

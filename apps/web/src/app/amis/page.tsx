@@ -271,7 +271,7 @@ function FriendsBook() {
           <Link2 size={18} className="mt-0.5 shrink-0 text-accent" aria-hidden />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold">Inviter quelqu’un qui n’est pas encore là</p>
-            <p className="mt-0.5 text-[13px] leading-relaxed text-muted">
+            <p className="mt-0.5 text-[14px] leading-relaxed text-muted">
               Envoie ce lien. La personne crée son compte et vous êtes amis directement, sans
               demande à accepter.
             </p>
@@ -298,7 +298,7 @@ function FriendsBook() {
       {/* ── Demandes reçues ────────────────────────────────────────── */}
       {incoming.length > 0 && (
         <Card className="mt-3 p-4">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
+          <p className="mb-2 text-[12px] font-semibold text-faint">
             {incoming.length === 1 ? 'Une demande d’ami' : `${incoming.length} demandes d’ami`}
           </p>
           <div className="space-y-1.5">
@@ -342,9 +342,7 @@ function FriendsBook() {
 
       {/* ── Recherche ──────────────────────────────────────────────── */}
       <Card className="mt-3 p-4">
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
-          Ajouter quelqu’un déjà inscrit
-        </p>
+        <p className="mb-2 text-[12px] font-semibold text-faint">Ajouter quelqu’un déjà inscrit</p>
         <div className="relative">
           <Search
             size={15}
@@ -370,7 +368,7 @@ function FriendsBook() {
         {query.trim().length >= 2 && (
           <div className="mt-2 space-y-1">
             {results.length === 0 && !searching ? (
-              <p className="px-1 py-2 text-[13px] text-faint">
+              <p className="px-1 py-2 text-[14px] text-faint">
                 Personne de ce nom. Envoie plutôt le lien d’invitation ci-dessus.
               </p>
             ) : (
@@ -401,7 +399,7 @@ function FriendsBook() {
       {/* ── Carnet ─────────────────────────────────────────────────── */}
       <Card className="mt-3 p-4">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
+          <p className="text-[12px] font-semibold text-faint">
             Mon carnet {friends.length > 0 && `· ${friends.length}`}
           </p>
           <label className="flex items-center gap-1.5 text-[12px] text-muted">
@@ -425,7 +423,7 @@ function FriendsBook() {
             <Spinner size={20} />
           </div>
         ) : friends.length === 0 ? (
-          <p className="px-1 py-3 text-[13px] leading-relaxed text-faint">
+          <p className="px-1 py-3 text-[14px] leading-relaxed text-faint">
             Personne pour l’instant. Envoie le lien d’invitation à quelqu’un, ou cherche son pseudo
             s’il est déjà inscrit.
           </p>
@@ -497,9 +495,7 @@ function FriendsBook() {
       */}
       {sent.length > 0 && (
         <Card className="mt-3 p-4">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
-            Parties en attente
-          </p>
+          <p className="mb-2 text-[12px] font-semibold text-faint">Parties en attente</p>
           <div className="space-y-1">
             {sent.map((game) => (
               <div key={game.id} className="flex items-center gap-2.5 py-0.5">
@@ -510,10 +506,10 @@ function FriendsBook() {
                   {game.kind === 'open' ? <Link2 size={15} /> : <Swords size={15} />}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] font-medium">
+                  <span className="block truncate text-[14px] font-medium">
                     {game.toName ?? 'Partie par lien'}
                   </span>
-                  <span className="block text-[11px] text-faint">
+                  <span className="block text-[12px] text-faint">
                     {Math.round(game.initialTime / 60)} min
                     {game.increment > 0 ? ` + ${game.increment} s` : ''}
                     {game.rated ? ' · classée' : ''} · <Countdown until={game.expiresAt} />

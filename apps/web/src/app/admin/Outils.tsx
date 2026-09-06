@@ -162,7 +162,7 @@ export function Outils() {
                     <code className="text-ink">{entree.paquet}</code>
                     <span className="text-faint">{entree.installee ?? entree.plage}</span>
                     {entree.licenceReelle && (
-                      <span className="font-mono text-[10px] text-faint">
+                      <span className="font-mono text-[12px] text-faint">
                         {entree.licenceReelle}
                       </span>
                     )}
@@ -232,7 +232,7 @@ export function Outils() {
         >
           Relire
         </Button>
-        <span className="text-[11px] leading-snug text-faint">
+        <span className="text-[12px] leading-snug text-faint">
           Interroge le registre npm et GitHub depuis le serveur. Rien d’autre que des noms de
           paquets publics ne sort d’ici.
         </span>
@@ -244,10 +244,8 @@ export function Outils() {
         return (
           <Card key={categorie} className="overflow-hidden">
             <div className="flex items-baseline justify-between border-b border-line/60 px-4 py-2.5">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-                {TITRES_CATEGORIE[categorie]}
-              </p>
-              <p className="text-[11px] tabular-nums text-muted">{dedans.length}</p>
+              <p className="text-[12px] font-semibold text-faint">{TITRES_CATEGORIE[categorie]}</p>
+              <p className="text-[12px] tabular-nums text-muted">{dedans.length}</p>
             </div>
             <ul>
               {dedans.map((outil) => (
@@ -272,7 +270,7 @@ function Anomalie({
 }) {
   return (
     <div>
-      <p className="flex items-center gap-1.5 text-[13px] font-semibold text-[var(--q-inaccuracy)]">
+      <p className="flex items-center gap-1.5 text-[14px] font-semibold text-[var(--q-inaccuracy)]">
         <AlertTriangle size={13} aria-hidden />
         {titre}
       </p>
@@ -296,17 +294,17 @@ function Ligne({ outil }: { outil: Outil }) {
         href={outil.url}
         target="_blank"
         rel="noreferrer noopener"
-        className="text-[13px] font-semibold text-accent hover:underline"
+        className="text-[14px] font-semibold text-accent hover:underline"
       >
         {outil.nom}
       </a>
       {outil.paquet && (
-        <code className="text-[11px] text-faint">
+        <code className="text-[12px] text-faint">
           <Package size={10} className="mr-0.5 inline" aria-hidden />
           {outil.paquet}
         </code>
       )}
-      {actuelle && <span className="text-[11px] tabular-nums text-muted">{actuelle}</span>}
+      {actuelle && <span className="text-[12px] tabular-nums text-muted">{actuelle}</span>}
 
       {etat === 'plusrecent' && (
         <Chip tone="warning" title="Version publiée par l’auteur">
@@ -315,7 +313,7 @@ function Ligne({ outil }: { outil: Outil }) {
       )}
       {etat === 'ajour' && (
         <span
-          className="flex items-center gap-0.5 text-[11px] text-[var(--q-best)]"
+          className="flex items-center gap-0.5 text-[12px] text-[var(--q-best)]"
           title="Dernière version publiée"
         >
           <Check size={11} aria-hidden />à jour
@@ -324,7 +322,7 @@ function Ligne({ outil }: { outil: Outil }) {
 
       <span
         className={clsx(
-          'ml-auto shrink-0 font-mono text-[10px]',
+          'ml-auto shrink-0 font-mono text-[12px]',
           licenceDiverge ? 'text-[var(--q-inaccuracy)]' : 'text-faint',
         )}
         title={

@@ -161,7 +161,7 @@ function PanneauSerie({ etat, serie }: { etat: EtatQuotidien | null; serie: numb
           {serie} jour{serie > 1 ? 's' : ''} d’affilée
         </p>
         {etat && etat.meilleureSerie > serie && (
-          <span className="text-[11px] text-faint">record : {etat.meilleureSerie}</span>
+          <span className="text-[12px] text-faint">record : {etat.meilleureSerie}</span>
         )}
       </div>
 
@@ -192,7 +192,7 @@ function PanneauSerie({ etat, serie }: { etat: EtatQuotidien | null; serie: numb
           )
         })}
       </div>
-      <p className="mt-1 px-1 text-[10px] uppercase tracking-wide text-faint">
+      <p className="mt-1 px-1 text-[12px] text-faint">
         les sept derniers jours · aujourd’hui à droite
       </p>
 
@@ -241,7 +241,7 @@ function PanneauSerie({ etat, serie }: { etat: EtatQuotidien | null; serie: numb
             {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a
               href="/#aujourdhui"
-              className="mt-1 flex items-center justify-between rounded-[var(--radius-sm)] px-1 py-1.5 text-[13px] font-medium transition-colors hover:bg-surface-hover"
+              className="mt-1 flex items-center justify-between rounded-[var(--radius-sm)] px-1 py-1.5 text-[14px] font-medium transition-colors hover:bg-surface-hover"
             >
               Voir les {QUETES.length - 1} autres quêtes
               <ArrowRight size={14} aria-hidden />
@@ -250,7 +250,7 @@ function PanneauSerie({ etat, serie }: { etat: EtatQuotidien | null; serie: numb
         ) : (
           <Link
             href="/puzzles?defi=1"
-            className="flex items-center justify-between rounded-[var(--radius-sm)] bg-accent/15 px-2.5 py-2 text-[13px] font-semibold text-accent transition-colors hover:bg-accent/25"
+            className="flex items-center justify-between rounded-[var(--radius-sm)] bg-accent/15 px-2.5 py-2 text-[14px] font-semibold text-accent transition-colors hover:bg-accent/25"
           >
             Relever le défi du jour
             <ArrowRight size={14} aria-hidden />

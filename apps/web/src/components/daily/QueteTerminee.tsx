@@ -78,9 +78,7 @@ export function QueteTerminee({
           />
         </span>
 
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-          Quête du jour
-        </p>
+        <p className="text-[12px] font-semibold text-faint">Quête du jour</p>
         <h2 id="quete-terminee-titre" className="font-display text-2xl font-bold tracking-tight">
           {quete.label}
         </h2>
@@ -94,7 +92,7 @@ export function QueteTerminee({
           )}
         </p>
 
-        <p className="mt-3 text-[13px] leading-relaxed text-muted">
+        <p className="mt-3 text-[14px] leading-relaxed text-muted">
           {restantes === 0
             ? 'Toutes les quêtes du jour sont faites. La suivante arrive à minuit.'
             : `Il te reste ${restantes} quête${restantes > 1 ? 's' : ''} aujourd’hui.`}

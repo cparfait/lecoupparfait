@@ -51,7 +51,7 @@ export default function CommunautePage() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:py-14">
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">Communauté</h1>
-      <p className="mt-2 max-w-xl text-muted max-lg:text-[13px] max-lg:leading-relaxed">
+      <p className="mt-2 max-w-xl text-muted max-lg:text-[14px] max-lg:leading-relaxed">
         Les autres joueurs, et ce que tu fais avec eux : se comparer, se retrouver, et regarder ce
         que tes parties disent de ton jeu.
       </p>
@@ -78,7 +78,7 @@ export default function CommunautePage() {
               <span className="block pr-6 text-[15px] font-semibold md:pr-0 md:text-lg">
                 {titre}
               </span>
-              <span className="mt-0.5 line-clamp-2 block text-[13px] leading-snug text-muted md:mt-1.5 md:line-clamp-none md:leading-relaxed">
+              <span className="mt-0.5 line-clamp-2 block text-[14px] leading-snug text-muted md:mt-1.5 md:line-clamp-none md:leading-relaxed">
                 {phrase}
               </span>
             </span>

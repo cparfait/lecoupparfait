@@ -132,13 +132,13 @@ export function MesParties({
                 <Icone size={15} className="shrink-0 text-faint" aria-label={origine.nom} />
 
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] font-medium">
+                  <span className="block truncate text-[14px] font-medium">
                     contre {partie.adversaire ?? 'un adversaire'}
                     {partie.botLevel !== null && (
                       <span className="font-normal text-faint"> · niveau {partie.botLevel}</span>
                     )}
                   </span>
-                  <span className="block truncate text-[11px] text-faint">
+                  <span className="block truncate text-[12px] text-faint">
                     {[
                       ISSUE[partie.issue],
                       partie.opening,

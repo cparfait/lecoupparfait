@@ -162,7 +162,7 @@ export default function LeaderboardPage() {
 
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold">{player.username}</span>
-                    <span className="block text-[11px] text-faint">
+                    <span className="block text-[12px] text-faint">
                       {player.games} parties · {player.winRate} % de victoires
                     </span>
                   </span>
@@ -172,7 +172,7 @@ export default function LeaderboardPage() {
                       {player.rating}
                       {player.provisional && <span className="text-faint">?</span>}
                     </span>
-                    <span className="block text-[11px] text-faint">Elo {player.elo}</span>
+                    <span className="block text-[12px] text-faint">Elo {player.elo}</span>
                   </span>
                 </Link>
               </li>
@@ -182,17 +182,15 @@ export default function LeaderboardPage() {
       </Card>
 
       <Card className="mt-4 p-4">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-          Comment ce classement est calculé
-        </p>
-        <p className="mt-2 text-[13px] leading-relaxed text-muted">
+        <p className="text-[12px] font-semibold text-faint">Comment ce classement est calculé</p>
+        <p className="mt-2 text-[14px] leading-relaxed text-muted">
           Le tri ne se fait pas sur le classement brut mais sur un classement{' '}
           <strong className="text-ink">conservateur</strong> : on retranche deux écarts-types.
           Concrètement, un joueur qui vient de gagner trois parties a une incertitude énorme sur son
           vrai niveau, et n’occupe donc pas la première place pour autant. Il faut jouer
           régulièrement pour que l’incertitude descende — et donc pour monter.
         </p>
-        <p className="mt-2 text-[13px] leading-relaxed text-muted">
+        <p className="mt-2 text-[14px] leading-relaxed text-muted">
           Le point d’interrogation à côté d’un classement signifie qu’il est encore provisoire :
           moins d’une trentaine de parties, l’estimation bouge beaucoup.
         </p>

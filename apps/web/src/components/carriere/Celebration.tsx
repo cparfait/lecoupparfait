@@ -130,7 +130,7 @@ export function Celebration({
         className="animate-carriere-tampon glass relative w-full max-w-sm rounded-[var(--radius-lg)] border border-line p-6 text-center shadow-[var(--shadow-lg)]"
         onClick={(evenement) => evenement.stopPropagation()}
       >
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
+        <p className="text-[12px] font-semibold text-accent">
           {gains.chapitreTermine ? 'Chapitre terminé' : 'Bien joué'}
         </p>
         <h2 className="mt-1 font-display text-2xl font-bold leading-tight">{titre}</h2>
@@ -183,7 +183,7 @@ export function Celebration({
                 </span>
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-semibold">{badge.nom}</span>
-                  <span className="block truncate text-[11px] text-faint">{badge.condition}</span>
+                  <span className="block truncate text-[12px] text-faint">{badge.condition}</span>
                 </span>
               </div>
             ))}

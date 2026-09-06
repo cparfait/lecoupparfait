@@ -135,7 +135,7 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
       <h1 className="font-display text-3xl font-bold tracking-tight">
         Tournoi contre l’ordinateur
       </h1>
-      <p className="mt-2 max-w-prose text-muted max-lg:text-[13px] max-lg:leading-relaxed">
+      <p className="mt-2 max-w-prose text-muted max-lg:text-[14px] max-lg:leading-relaxed">
         Tu es le seul humain. Tu affrontes chaque adversaire une fois, et le classement se fait aux
         points — comme dans un vrai toutes rondes.
       </p>
@@ -157,7 +157,7 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
               )}
             >
               {n} adversaires
-              <span className="mt-0.5 block text-[11px] font-normal text-faint">
+              <span className="mt-0.5 block text-[12px] font-normal text-faint">
                 {n} parties à jouer
               </span>
             </button>
@@ -248,7 +248,7 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
                   : 'border-line text-muted hover:bg-surface-hover',
               )}
             >
-              <span className="block text-[10px] font-normal leading-tight text-faint">
+              <span className="block text-[12px] font-normal leading-tight text-faint">
                 {SPEED_LABELS[tc.category].fr}
               </span>
               <span className="mt-0.5 block text-sm">{tc.label}</span>
@@ -337,7 +337,7 @@ function Tableau({ tournoi, onAbandonner }: { tournoi: TournoiSolo; onAbandonner
       )}
 
       <Card className="mt-4 overflow-hidden">
-        <p className="border-b border-line/60 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
+        <p className="border-b border-line/60 px-4 py-2.5 text-[12px] font-semibold text-faint">
           Classement
         </p>
         <ul>
@@ -357,7 +357,7 @@ function Tableau({ tournoi, onAbandonner }: { tournoi: TournoiSolo; onAbandonner
                   <span className={clsx('block truncate text-sm', moiMeme && 'font-bold')}>
                     {ligne.concurrent.nom}
                   </span>
-                  <span className="block text-[11px] text-faint">
+                  <span className="block text-[12px] text-faint">
                     {ligne.concurrent.elo} Elo · {ligne.joues} partie
                     {ligne.joues > 1 ? 's' : ''}
                   </span>
@@ -401,14 +401,12 @@ function ProchaineRonde({
 
   return (
     <Card className="mt-5 p-5">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-        Ronde {duel.ronde} · ta partie
-      </p>
+      <p className="text-[12px] font-semibold text-faint">Ronde {duel.ronde} · ta partie</p>
       <div className="mt-2 flex items-center gap-3">
         {bot && <VisageDuConcurrent concurrent={bot} taille={56} />}
         <div className="min-w-0 flex-1">
           <p className="font-display text-lg font-bold leading-tight">{bot?.nom}</p>
-          <p className="text-[13px] text-muted">
+          <p className="text-[14px] text-muted">
             {bot?.elo} Elo · tu joues les {couleur}
           </p>
         </div>
@@ -499,7 +497,7 @@ function Resultats({ tournoi }: { tournoi: TournoiSolo }) {
 
   return (
     <Card className="mt-4 overflow-hidden">
-      <p className="border-b border-line/60 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-faint">
+      <p className="border-b border-line/60 px-4 py-2.5 text-[12px] font-semibold text-faint">
         Résultats
       </p>
       <div className="max-h-80 overflow-y-auto">
@@ -508,7 +506,7 @@ function Resultats({ tournoi }: { tournoi: TournoiSolo }) {
           if (duels.length === 0) return null
           return (
             <div key={ronde} className="border-b border-line/40 px-4 py-2 last:border-0">
-              <p className="mb-1 text-[11px] font-semibold text-faint">Ronde {ronde}</p>
+              <p className="mb-1 text-[12px] font-semibold text-faint">Ronde {ronde}</p>
               {duels.map((duel, index) => {
                 const blancs = trouverConcurrent(tournoi, duel.blancs)
                 const noirs = trouverConcurrent(tournoi, duel.noirs)
@@ -517,7 +515,7 @@ function Resultats({ tournoi }: { tournoi: TournoiSolo }) {
                   <p
                     key={index}
                     className={clsx(
-                      'flex items-center gap-2 py-0.5 text-[13px]',
+                      'flex items-center gap-2 py-0.5 text-[14px]',
                       !mien && 'text-muted',
                     )}
                   >
@@ -529,7 +527,7 @@ function Resultats({ tournoi }: { tournoi: TournoiSolo }) {
                     </span>
                     {duel.simule && (
                       <span
-                        className="shrink-0 text-[10px] uppercase tracking-wide text-faint"
+                        className="shrink-0 text-[12px] text-faint"
                         title="Résultat tiré selon l’écart de classement, la partie n’a pas été jouée."
                       >
                         simulé

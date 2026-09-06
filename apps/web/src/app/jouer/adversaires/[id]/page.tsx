@@ -87,7 +87,7 @@ export default async function FicheAdversaire({ params }: { params: Promise<{ id
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:py-12">
       <Link
         href="/jouer/adversaires"
-        className="inline-flex items-center gap-1.5 text-[13px] text-muted transition-colors hover:text-ink"
+        className="inline-flex items-center gap-1.5 text-[14px] text-muted transition-colors hover:text-ink"
       >
         <ArrowLeft size={14} aria-hidden />
         Tous les adversaires
@@ -117,9 +117,7 @@ export default async function FicheAdversaire({ params }: { params: Promise<{ id
 
       {/* ── Où on le rencontre ─────────────────────────────────────── */}
       <Card className="mt-7 p-4">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-          Où tu le rencontres
-        </p>
+        <p className="text-[12px] font-semibold text-faint">Où tu le rencontres</p>
         <p className="mt-1.5 text-[14px] leading-relaxed">
           {niveaux.nombre === 1 ? 'Au niveau ' : 'Aux niveaux '}
           <strong className="tabular-nums">{niveaux.numeros.join(', ')}</strong> des vingt-cinq,
@@ -149,7 +147,7 @@ export default async function FicheAdversaire({ params }: { params: Promise<{ id
           en attend. */}
       <section className="mt-7">
         <h2 className="font-display text-xl font-semibold tracking-tight">Son caractère</h2>
-        <p className="mt-1 text-[13px] text-muted">
+        <p className="mt-1 text-[14px] text-muted">
           Ce que son évaluation ajoute — ou retire — à un coup, en centièmes de pion. Ce n’est pas
           une étiquette : c’est le nombre qui le fait jouer comme il joue.
         </p>
@@ -162,7 +160,7 @@ export default async function FicheAdversaire({ params }: { params: Promise<{ id
           <ul className="mt-3 space-y-2">
             {traits.map((trait) => (
               <li key={trait.axe} className="flex items-center gap-3">
-                <span className="w-52 shrink-0 text-[13px]">{trait.libelle}</span>
+                <span className="w-52 shrink-0 text-[14px]">{trait.libelle}</span>
                 <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-strong">
                   <span
                     className="block h-full rounded-full"
@@ -187,7 +185,7 @@ export default async function FicheAdversaire({ params }: { params: Promise<{ id
 
       {/* ── Comment le battre ──────────────────────────────────────── */}
       <Card className="mt-7 p-4">
-        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-accent">
+        <p className="flex items-center gap-1.5 text-[12px] font-semibold text-accent">
           <Target size={13} aria-hidden />
           Comment le battre
         </p>
@@ -200,7 +198,7 @@ export default async function FicheAdversaire({ params }: { params: Promise<{ id
       <nav className="mt-8 flex items-center justify-between gap-3 border-t border-line/60 pt-4">
         <Link
           href={`/jouer/adversaires/${precedent.id}`}
-          className="group flex min-w-0 items-center gap-2 text-[13px] text-muted transition-colors hover:text-ink"
+          className="group flex min-w-0 items-center gap-2 text-[14px] text-muted transition-colors hover:text-ink"
         >
           <ArrowLeft size={14} className="shrink-0" aria-hidden />
           <PortraitAdversaire personality={precedent} size={28} />
@@ -208,7 +206,7 @@ export default async function FicheAdversaire({ params }: { params: Promise<{ id
         </Link>
         <Link
           href={`/jouer/adversaires/${suivant.id}`}
-          className="group flex min-w-0 items-center gap-2 text-[13px] text-muted transition-colors hover:text-ink"
+          className="group flex min-w-0 items-center gap-2 text-[14px] text-muted transition-colors hover:text-ink"
         >
           <span className="truncate">{suivant.name.fr}</span>
           <PortraitAdversaire personality={suivant} size={28} />

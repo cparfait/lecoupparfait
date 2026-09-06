@@ -87,11 +87,11 @@ export function Contenus() {
             {contenus.parties.map((partie) => (
               <Card key={partie.slug} className="flex items-center gap-2 p-2.5">
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px]">
+                  <span className="block truncate text-[14px]">
                     {partie.blancs ?? 'Blancs'} — {partie.noirs ?? 'Noirs'}{' '}
                     <span className="text-faint">{partie.result ?? '*'}</span>
                   </span>
-                  <span className="block truncate text-[11px] text-faint">
+                  <span className="block truncate text-[12px] text-faint">
                     {[
                       partie.mode,
                       partie.rated ? 'classée' : 'amicale',
@@ -144,10 +144,10 @@ export function Contenus() {
             {contenus.analyses.map((analyse) => (
               <Card key={analyse.id} className="flex items-center gap-2 p-2.5">
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px]">
+                  <span className="block truncate text-[14px]">
                     {analyse.blancs ?? 'Blancs'} — {analyse.noirs ?? 'Noirs'}
                   </span>
-                  <span className="block truncate text-[11px] text-faint">
+                  <span className="block truncate text-[12px] text-faint">
                     {[
                       analyse.proprietaire ? `à ${analyse.proprietaire}` : 'sans propriétaire',
                       analyse.opening,

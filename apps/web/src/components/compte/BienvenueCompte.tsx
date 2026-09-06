@@ -160,11 +160,11 @@ export function BienvenueCompte({
           </span>
           <div className="min-w-0 flex-1">
             <p className="font-display text-lg font-bold leading-tight">Bienvenue, {pseudo}.</p>
-            <p className="text-[13px] text-muted">
+            <p className="text-[14px] text-muted">
               Ton compte est créé. Quelques réglages, et tu joues.
             </p>
           </div>
-          <span className="shrink-0 pt-1 text-[11px] tabular-nums text-faint">
+          <span className="shrink-0 pt-1 text-[12px] tabular-nums text-faint">
             {index + 1} / {etapes.length}
           </span>
         </div>
@@ -206,7 +206,7 @@ export function BienvenueCompte({
           Passer, je réglerai plus tard
         </button>
 
-        <p className="mt-3 text-center text-[11px] leading-relaxed text-faint">
+        <p className="mt-3 text-center text-[12px] leading-relaxed text-faint">
           Tout se retrouve dans tes préférences et sur ton profil. Rien n’est définitif.
         </p>
       </div>
@@ -419,8 +419,8 @@ function EtapeNiveau() {
                 : 'border-line hover:bg-surface-hover',
             )}
           >
-            <span className="block text-[13px] font-medium">{repere.label}</span>
-            <span className="block text-[11px] leading-snug text-faint">{repere.detail}</span>
+            <span className="block text-[14px] font-medium">{repere.label}</span>
+            <span className="block text-[12px] leading-snug text-faint">{repere.detail}</span>
           </button>
         ))}
       </div>
@@ -492,7 +492,7 @@ function EtapeTheme() {
                 />
               ))}
             </span>
-            <span className="min-w-0 flex-1 truncate text-[13px] font-medium">
+            <span className="min-w-0 flex-1 truncate text-[14px] font-medium">
               {t(`settings.themes.${entree.id}` as never)}
             </span>
             {theme === entree.id && (
@@ -564,7 +564,7 @@ function EtapeNotifications({
       detail="Une invitation expire en cinq minutes : sans notification, elle meurt dans un téléphone resté dans une poche. Rien d’autre ne te sera envoyé — ni actualités, ni relances."
     >
       {etat === 'actif' ? (
-        <p className="flex items-center gap-2 rounded-[var(--radius-sm)] bg-surface-strong px-3 py-2 text-[13px] text-ink">
+        <p className="flex items-center gap-2 rounded-[var(--radius-sm)] bg-surface-strong px-3 py-2 text-[14px] text-ink">
           <Check size={15} className="shrink-0 text-[var(--q-best)]" aria-hidden />
           C’est activé sur cet appareil.
         </p>
@@ -594,7 +594,7 @@ function EtapeNotifications({
 
       {erreur && (
         <p
-          className="mt-2 rounded-[var(--radius-sm)] bg-[color-mix(in_oklab,var(--q-blunder)_12%,transparent)] px-3 py-2 text-[13px] text-[var(--q-blunder)]"
+          className="mt-2 rounded-[var(--radius-sm)] bg-[color-mix(in_oklab,var(--q-blunder)_12%,transparent)] px-3 py-2 text-[14px] text-[var(--q-blunder)]"
           role="alert"
         >
           {erreur}
@@ -675,7 +675,7 @@ function Etage({
         <span className="shrink-0 text-accent">{icone}</span>
         {titre}
       </p>
-      <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{detail}</p>
+      <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{detail}</p>
       <div className="mt-3.5">{children}</div>
     </div>
   )

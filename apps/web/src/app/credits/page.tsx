@@ -28,7 +28,7 @@ export default function CreditsPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:py-14">
       <h1 className="font-display text-3xl font-bold tracking-tight">Crédits &amp; licences</h1>
-      <p className="mt-3 max-w-2xl leading-relaxed text-muted max-lg:text-[13px]">
+      <p className="mt-3 max-w-2xl leading-relaxed text-muted max-lg:text-[14px]">
         Le Coup Parfait n’aurait pas pu exister sans le travail libre d’autres personnes. Tout ce
         qui suit est réutilisé dans le respect de sa licence — et cette page en fait partie :
         plusieurs de ces licences exigent explicitement l’attribution.
@@ -90,11 +90,11 @@ function Section({ titre, credits }: { titre: string; credits: Credit[] }) {
                 {credit.version ? ` ${credit.version}` : ''}
               </a>
               <span className="text-xs text-muted">par {credit.auteur}</span>
-              <span className="ml-auto rounded-full border border-line px-2 py-0.5 font-mono text-[10px] text-faint">
+              <span className="ml-auto rounded-full border border-line px-2 py-0.5 font-mono text-[12px] text-faint">
                 {credit.licence}
               </span>
             </div>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{credit.note}</p>
+            <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{credit.note}</p>
           </Card>
         ))}
       </div>
@@ -108,7 +108,7 @@ function Bibliotheques({ credits }: { credits: Credit[] }) {
       <h2 className="font-display text-xl font-semibold tracking-tight">
         {TITRES_CATEGORIE.bibliotheque}
       </h2>
-      <p className="mt-1 text-[13px] text-muted">
+      <p className="mt-1 text-[14px] text-muted">
         Les {credits.length} bibliothèques embarquées dans l’application.
       </p>
       <Card className="mt-3 overflow-hidden">
@@ -122,12 +122,12 @@ function Bibliotheques({ credits }: { credits: Credit[] }) {
                 href={credit.url}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="text-[13px] font-semibold text-accent hover:underline"
+                className="text-[14px] font-semibold text-accent hover:underline"
               >
                 {credit.nom}
               </a>
-              <span className="text-[11px] text-muted">par {credit.auteur}</span>
-              <span className="ml-auto shrink-0 font-mono text-[10px] text-faint">
+              <span className="text-[12px] text-muted">par {credit.auteur}</span>
+              <span className="ml-auto shrink-0 font-mono text-[12px] text-faint">
                 {credit.licence}
               </span>
             </li>

@@ -151,7 +151,7 @@ function FamilyList({
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
         Entraînement aux finales
       </h1>
-      <p className="mt-2 max-w-2xl text-muted max-lg:text-[13px] max-lg:leading-relaxed">
+      <p className="mt-2 max-w-2xl text-muted max-lg:text-[14px] max-lg:leading-relaxed">
         {total.toLocaleString('fr-FR')} positions classées. On te donne un objectif — gagner ou
         tenir la nulle — et l’ordinateur défend au mieux. Il faut jouer jusqu’au bout : aucune
         solution à réciter.
@@ -193,7 +193,7 @@ function FamilyList({
                     </span>
                   )}
                 </span>
-                <span className="mt-1 line-clamp-2 block text-[13px] leading-snug text-muted">
+                <span className="mt-1 line-clamp-2 block text-[14px] leading-snug text-muted">
                   {family.blurb}
                 </span>
                 {percent > 0 && (
@@ -216,7 +216,7 @@ function FamilyList({
         })}
       </div>
 
-      <p className="mt-8 text-center text-[11px] text-faint">
+      <p className="mt-8 text-center text-[12px] text-faint">
         Positions issues de{' '}
         <a
           href="https://github.com/supertorpe/chessendgametraining"
@@ -274,7 +274,7 @@ function GroupList({
                   <span className="block truncate text-sm font-semibold first-letter:uppercase">
                     {group.nameFr}
                   </span>
-                  <span className="block truncate text-[11px] text-faint">{group.name}</span>
+                  <span className="block truncate text-[12px] text-faint">{group.name}</span>
                 </span>
                 <span className="shrink-0 text-xs tabular-nums text-muted">
                   {solved.size} / {group.positions.length}
@@ -289,7 +289,7 @@ function GroupList({
                     onClick={() => onPick(group, index)}
                     title={describePosition(position)}
                     className={clsx(
-                      'grid h-8 w-8 place-items-center rounded-[var(--radius-sm)] text-[11px] font-semibold transition-colors',
+                      'grid h-8 w-8 place-items-center rounded-[var(--radius-sm)] text-[12px] font-semibold transition-colors',
                       solved.has(index)
                         ? 'bg-[color-mix(in_oklab,var(--q-best)_22%,transparent)] text-[var(--q-best)]'
                         : 'bg-surface text-muted hover:bg-surface-hover hover:text-ink',
@@ -444,9 +444,7 @@ function EndgameTrainer({
         <div className="etude-aside flex flex-col gap-3">
           {/* ── Objectif ─────────────────────────────────────────── */}
           <Card glow className="p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-faint">
-              Ton objectif
-            </p>
+            <p className="text-[12px] font-semibold text-faint">Ton objectif</p>
             <p className="mt-1.5 flex items-center gap-2 text-lg font-semibold">
               {position.target === 'checkmate' ? (
                 <Trophy size={18} className="text-accent" aria-hidden />
@@ -455,7 +453,7 @@ function EndgameTrainer({
               )}
               {objective}
             </p>
-            <p className="mt-2 text-[13px] leading-relaxed text-muted">
+            <p className="mt-2 text-[14px] leading-relaxed text-muted">
               Tu joues les {playerColor === 'w' ? 'Blancs' : 'Noirs'}. L’ordinateur défend au
               maximum de ses moyens — il ne te fera aucun cadeau.
             </p>
@@ -512,7 +510,7 @@ function EndgameTrainer({
                           ? 'Objectif manqué'
                           : 'Position perdue'}
                   </p>
-                  <p className="mt-1 text-[13px] leading-relaxed text-muted">
+                  <p className="mt-1 text-[14px] leading-relaxed text-muted">
                     {outcome === 'lost'
                       ? position.target === 'checkmate'
                         ? 'La position était gagnante. Reprends-la : en finale, une seule imprécision suffit à tout annuler.'
@@ -555,7 +553,7 @@ function EndgameTrainer({
             )}
           </div>
 
-          <p className="text-[11px] leading-relaxed text-faint">
+          <p className="text-[12px] leading-relaxed text-faint">
             La règle des cinquante coups s’applique : si tu n’avances pas, la partie sera déclarée
             nulle — ce qui est une défaite quand l’objectif est de gagner.
           </p>

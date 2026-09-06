@@ -103,7 +103,7 @@ export function PlayerSearch({ className }: { className?: string }) {
         // au travers.
         <div className="popover absolute left-0 right-0 top-11 z-50 max-h-80 overflow-y-auto p-1 shadow-[var(--shadow-lg)]">
           {players.length === 0 ? (
-            <p className="px-2.5 py-3 text-[13px] text-faint">
+            <p className="px-2.5 py-3 text-[14px] text-faint">
               {searching ? 'Recherche…' : 'Personne de ce nom dans l’annuaire.'}
             </p>
           ) : (
@@ -117,7 +117,7 @@ export function PlayerSearch({ className }: { className?: string }) {
                 <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-surface-strong text-sm">
                   <span aria-hidden>{player.avatar ?? '♟️'}</span>
                 </span>
-                <span className="min-w-0 flex-1 truncate text-[13px] font-medium">
+                <span className="min-w-0 flex-1 truncate text-[14px] font-medium">
                   {player.username}
                 </span>
                 {player.rating != null && (

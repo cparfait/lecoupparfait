@@ -159,11 +159,11 @@ export default function ArenaPage() {
       {/* ── Ce qu'il y a à faire ─────────────────────────────────────── */}
       <Card className="p-3">
         {finished ? (
-          <p className="text-[13px] text-muted">
+          <p className="text-[14px] text-muted">
             Arène terminée. Le classement ci-dessous est définitif.
           </p>
         ) : !me ? (
-          <p className="text-[13px] text-muted">
+          <p className="text-[14px] text-muted">
             <Link href="/connexion" className="font-semibold text-accent hover:underline">
               Connecte-toi
             </Link>{' '}
@@ -171,7 +171,7 @@ export default function ArenaPage() {
           </p>
         ) : !joined ? (
           <div className="flex flex-wrap items-center gap-2">
-            <p className="min-w-0 flex-1 text-[13px] text-muted">
+            <p className="min-w-0 flex-1 text-[14px] text-muted">
               {running
                 ? 'L’arène a commencé : tu peux rejoindre en cours, tu seras apparié au prochain tour.'
                 : `Départ ${new Date(tournament.startsAt).toLocaleString('fr-FR', { hour: '2-digit', minute: '2-digit' })}.`}
@@ -181,13 +181,13 @@ export default function ArenaPage() {
             </Button>
           </div>
         ) : mine?.playing ? (
-          <p className="flex items-center gap-2 text-[13px] font-medium text-[var(--accent-2)]">
+          <p className="flex items-center gap-2 text-[14px] font-medium text-[var(--accent-2)]">
             <Swords size={15} aria-hidden />
             Ta partie est en cours — tu y es conduit automatiquement.
           </p>
         ) : mine?.active ? (
           <div className="flex flex-wrap items-center gap-2">
-            <p className="min-w-0 flex-1 text-[13px] text-muted">
+            <p className="min-w-0 flex-1 text-[14px] text-muted">
               {running
                 ? 'En file d’attente. Dès qu’un adversaire est libre, tu es apparié.'
                 : 'Inscrit. L’arène démarrera à l’heure prévue.'}
@@ -203,7 +203,7 @@ export default function ArenaPage() {
           </div>
         ) : (
           <div className="flex flex-wrap items-center gap-2">
-            <p className="min-w-0 flex-1 text-[13px] text-muted">
+            <p className="min-w-0 flex-1 text-[14px] text-muted">
               En pause. Tes points sont conservés — reviens quand tu veux.
             </p>
             <Button
@@ -220,11 +220,9 @@ export default function ArenaPage() {
 
       {/* ── Classement ───────────────────────────────────────────────── */}
       <Card className="mt-3 p-3">
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-faint">
-          Classement
-        </p>
+        <p className="mb-2 text-[12px] font-semibold text-faint">Classement</p>
         {standings.length === 0 ? (
-          <p className="text-[13px] text-faint">Personne d’inscrit pour l’instant.</p>
+          <p className="text-[14px] text-faint">Personne d’inscrit pour l’instant.</p>
         ) : (
           <div className="space-y-0.5">
             {standings.map((player, index) => (
@@ -238,15 +236,15 @@ export default function ArenaPage() {
                 <span className="w-5 shrink-0 text-right text-[12px] tabular-nums text-faint">
                   {index + 1}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-[13px] font-medium">
+                <span className="min-w-0 flex-1 truncate text-[14px] font-medium">
                   {player.username}
-                  <span className="ml-1.5 text-[11px] font-normal text-faint">{player.rating}</span>
+                  <span className="ml-1.5 text-[12px] font-normal text-faint">{player.rating}</span>
                 </span>
                 {/* Une série en cours vaut le double : la signaler, c'est dire
                     à tout le monde qui est dangereux en ce moment. */}
                 {player.streak >= 2 && (
                   <span
-                    className="flex shrink-0 items-center gap-0.5 text-[11px] font-semibold text-[var(--q-inaccuracy)]"
+                    className="flex shrink-0 items-center gap-0.5 text-[12px] font-semibold text-[var(--q-inaccuracy)]"
                     title={`${player.streak} victoires d’affilée — ses points sont doublés`}
                   >
                     <Flame size={12} aria-hidden />
@@ -270,7 +268,7 @@ export default function ArenaPage() {
           </div>
         )}
 
-        <p className="mt-2.5 border-t border-line/60 pt-2.5 text-[11px] leading-relaxed text-faint">
+        <p className="mt-2.5 border-t border-line/60 pt-2.5 text-[12px] leading-relaxed text-faint">
           Deux points par victoire, un par nulle. À partir de la deuxième victoire d’affilée, les
           points doublent — c’est ce qui rend l’arène rattrapable jusqu’au bout.
         </p>

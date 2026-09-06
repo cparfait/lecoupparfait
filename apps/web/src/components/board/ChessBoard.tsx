@@ -77,6 +77,15 @@ export interface ChessBoardProps extends Board2DProps {
    * puisqu'il n'y a pas de partie en cours.
    */
   dernierCoupSan?: string | null
+  /**
+   * Le côté du plateau, chaque fois qu'il est mesuré.
+   *
+   * Les bandeaux des joueurs sont posés hors du plateau, dans leurs propres
+   * zones de grille : pour qu'ils s'alignent sur ses bords plutôt que sur
+   * ceux de la colonne, la page a besoin de connaître sa largeur réelle.
+   * `null` quand le plateau se règle sur la largeur, et non sur la hauteur.
+   */
+  onFit?: (cote: number | null) => void
 }
 
 /**
@@ -119,6 +128,7 @@ export const ChessBoard = memo(function ChessBoard({
   reservedHeight = 17,
   fitParentHeight = false,
   dernierCoupSan,
+  onFit,
   ...props
 }: ChessBoardProps) {
   const view = usePreferences((state) => state.view)
@@ -211,19 +221,22 @@ export const ChessBoard = memo(function ChessBoard({
 
       if (sansLePlateau < MIN_BOARD_PX) {
         setFitSide(null)
+        onFit?.(null)
         return
       }
 
       const box = area.getBoundingClientRect()
       const height = box.height - marges
-      setFitSide(Math.floor(Math.min(box.width, height - toggleRow)))
+      const cote = Math.floor(Math.min(box.width, height - toggleRow))
+      setFitSide(cote)
+      onFit?.(Math.max(MIN_BOARD_PX, cote))
     }
 
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(area)
     return () => observer.disconnect()
-  }, [fitParentHeight, toggleRow])
+  }, [fitParentHeight, toggleRow, onFit])
 
   // L'utilisateur peut sortir du plein écran par la touche Échap sans passer
   // par notre bouton : on suit donc l'état réel du document.

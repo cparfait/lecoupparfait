@@ -101,7 +101,7 @@ export function PhysicalBoardPanel({
             >
               <span className="flex min-w-0 flex-col items-start">
                 <span className="text-sm">{driver.label}</span>
-                <span className="truncate text-[11px] text-muted">{driver.models}</span>
+                <span className="truncate text-[12px] text-muted">{driver.models}</span>
               </span>
             </Button>
           ))}
