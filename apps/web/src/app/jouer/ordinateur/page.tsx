@@ -701,6 +701,23 @@ function SetupScreen({
     rangee.scrollLeft = actif.offsetLeft - (rangee.clientWidth - actif.offsetWidth) / 2
   }, [bot.personality])
 
+  const teinteCourante = TEINTES_ADVERSAIRES[bot.personality]
+
+  /**
+   * Le rail du curseur : vingt-cinq segments, un par niveau, dans la teinte
+   * de l'adversaire qui le joue. Ceux déjà parcourus gardent leur couleur ;
+   * les autres s'éteignent à trente pour cent, assez pour lire l'échelle,
+   * pas assez pour disputer l'attention au pouce.
+   */
+  const rail = BOT_LEVELS.map((niveau, index) => {
+    const teinte = TEINTES_ADVERSAIRES[niveau.personality]
+    const couleur =
+      niveau.level <= level ? teinte : `color-mix(in oklab, ${teinte} 30%, var(--surface-strong))`
+    const debut = ((index / BOT_LEVELS.length) * 100).toFixed(2)
+    const fin = (((index + 1) / BOT_LEVELS.length) * 100).toFixed(2)
+    return `${couleur} ${debut}% ${fin}%`
+  }).join(', ')
+
   const cadence = TIME_CONTROLS.find((tc) => tc.id === timeControlId)
   const couleurChoisie = color === 'w' ? 'Blancs' : color === 'b' ? 'Noirs' : 'Couleur au hasard'
 
@@ -868,15 +885,27 @@ function SetupScreen({
           <label htmlFor="level" className="block text-sm font-medium">
             Niveau fin
           </label>
+          {/* Le repère prend la teinte de l'adversaire, éclaircie pour que
+              l'encre reste lisible sur toutes les matières. */}
           <div className="relative mt-1 h-5">
             <span
-              className="absolute -translate-x-1/2 whitespace-nowrap rounded-full bg-accent px-2 py-0.5 text-[12px] font-bold tabular-nums text-[var(--accent-contrast)] transition-[left] duration-150"
-              style={{ left: `calc(${pourcentNiveau}% + ${11 - pourcentNiveau * 0.22}px)` }}
+              className="absolute -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[12px] font-bold tabular-nums text-[#101018] transition-[left,background-color] duration-150"
+              style={{
+                left: `calc(${pourcentNiveau}% + ${14 - pourcentNiveau * 0.28}px)`,
+                background: `color-mix(in oklab, ${teinteCourante} 80%, white)`,
+                boxShadow: `0 0 14px -2px ${teinteCourante}`,
+              }}
               aria-hidden
             >
               {bot.level} · {personality.name.fr}
             </span>
           </div>
+          {/* ── Le rail, peint adversaire par adversaire ───────────────────
+              Un segment par niveau dans la teinte de la sculpture qui le joue :
+              on voit d'un coup d'œil où Pion cède la place à Brasier, et où
+              Oracle commence. La portion parcourue garde ses couleurs
+              franches ; le reste s'éteint, sans disparaître. Le pouce porte le
+              portrait de l'adversaire courant — voir `.curseur-adversaires`. */}
           <input
             id="level"
             type="range"
@@ -888,33 +917,39 @@ function SetupScreen({
             /* La barre reste fine, la zone touchable ne l'est plus : le champ
                fait trente-deux points de haut et le rail est repeint au
                centre, sur huit. */
-            className="h-8 w-full cursor-pointer appearance-none bg-transparent"
-            style={{
-              backgroundImage: `linear-gradient(to right, var(--accent) ${pourcentNiveau}%, var(--surface-strong) ${pourcentNiveau}%)`,
-              backgroundSize: '100% 8px',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              borderRadius: '9999px',
-            }}
+            className="curseur-adversaires h-8 w-full cursor-pointer appearance-none bg-transparent"
+            style={
+              {
+                '--pouce-image': `url('${personality.portrait}')`,
+                '--pouce-teinte': teinteCourante,
+                backgroundImage: `linear-gradient(180deg, rgb(255 255 255 / 0.18), transparent 55%), linear-gradient(to right, ${rail})`,
+                backgroundSize: '100% 8px',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                borderRadius: '9999px',
+              } as React.CSSProperties
+            }
           />
-          <div className="mx-[11px] flex items-end justify-between" aria-hidden>
+          <div className="mx-[14px] flex items-end justify-between" aria-hidden>
             {BOT_LEVELS.map((niveau) => {
               const jalon = niveau.level === 1 || niveau.level % 5 === 0
               return (
                 <span
                   key={niveau.level}
-                  className={clsx(
-                    'w-px rounded-full',
-                    jalon ? 'h-2' : 'h-1',
-                    niveau.level <= level ? 'bg-accent/70' : 'bg-line-strong',
-                  )}
+                  className={clsx('w-px rounded-full', jalon ? 'h-2' : 'h-1')}
+                  style={{
+                    background:
+                      niveau.level <= level
+                        ? TEINTES_ADVERSAIRES[niveau.personality]
+                        : `color-mix(in oklab, ${TEINTES_ADVERSAIRES[niveau.personality]} 35%, var(--border-strong))`,
+                  }}
                 />
               )
             })}
           </div>
           {/* Les nombres sont posés à leur position réelle, et non répartis :
               quatre crans séparent 1 de 5, cinq les suivants. */}
-          <div className="relative mx-[11px] mt-0.5 h-3.5" aria-hidden>
+          <div className="relative mx-[14px] mt-0.5 h-3.5" aria-hidden>
             {[1, 5, 10, 15, 20, 25].map((jalon) => (
               <span
                 key={jalon}
@@ -940,21 +975,33 @@ function SetupScreen({
               { label: 'Club', level: 12 },
               { label: 'Fort', level: 18 },
               { label: 'Sans pitié', level: 25 },
-            ].map((preset) => (
-              <button
-                key={preset.label}
-                type="button"
-                onClick={() => choisirNiveau(preset.level)}
-                className={clsx(
-                  'rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors',
-                  level === preset.level
-                    ? 'border-accent bg-accent/15 text-ink'
-                    : 'border-line text-muted hover:bg-surface-hover',
-                )}
-              >
-                {preset.label}
-              </button>
-            ))}
+            ].map((preset) => {
+              /* Chaque raccourci porte la teinte de l'adversaire qu'il
+                 désigne : le chip « Fort » est du bronze parce que c'est
+                 Brasier qui attend au niveau 18. */
+              const teinte = TEINTES_ADVERSAIRES[botLevel(preset.level).personality]
+              const choisi = level === preset.level
+              return (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => choisirNiveau(preset.level)}
+                  className={clsx(
+                    'rounded-full border px-3 py-1.5 text-[13px] font-medium transition-[background-color,box-shadow,color]',
+                    choisi ? 'text-ink' : 'text-muted hover:text-ink',
+                  )}
+                  style={{
+                    background: `color-mix(in oklab, ${teinte} ${choisi ? 30 : 10}%, var(--surface))`,
+                    borderColor: choisi
+                      ? 'var(--accent)'
+                      : `color-mix(in oklab, ${teinte} 40%, var(--border))`,
+                    boxShadow: choisi ? `0 0 16px -4px ${teinte}` : undefined,
+                  }}
+                >
+                  {preset.label}
+                </button>
+              )
+            })}
           </div>
         </div>
 
