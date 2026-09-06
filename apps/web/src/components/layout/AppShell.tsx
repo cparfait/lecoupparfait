@@ -596,14 +596,14 @@ function BottomBar({ pathname }: { pathname: string }) {
               )}
             >
               <span
-                /* La pastille existe aussi quand l'onglet n'est pas actif :
-                   sans elle, quatre icônes grises flottaient sur la barre et
-                   rien ne disait où appuyer. */
+                /* Seul l'onglet actif a une pastille. Les autres en avaient
+                   une aussi, grise et cerclée : six anneaux côte à côte
+                   faisaient une rangée de boutons de formulaire, et l'actif
+                   ne se distinguait plus que par sa teinte. Une icône nue
+                   pour ce qui attend, une pastille pour ce qui est ouvert. */
                 className={clsx(
-                  'grid h-7 w-12 place-items-center rounded-full ring-1 ring-inset transition-all',
-                  active
-                    ? 'bg-accent/20 shadow-[0_0_16px_-4px_var(--accent)] ring-accent/40'
-                    : 'bg-surface-strong ring-line-strong',
+                  'grid h-7 w-12 place-items-center rounded-full transition-all',
+                  active && 'bg-accent/20 shadow-[0_0_16px_-4px_var(--accent)]',
                 )}
               >
                 <Icone size={20} strokeWidth={active ? 2.5 : 2} aria-hidden />

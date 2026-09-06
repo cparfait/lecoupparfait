@@ -143,8 +143,12 @@ export function PromotionPicker({
               title={labelFr}
               aria-label={labelFr}
               onClick={() => choisir(type)}
-              className="group grid h-16 w-16 place-items-center rounded-[var(--radius-sm)] border border-line-strong bg-bg-elev transition-transform hover:scale-105 hover:bg-surface-strong focus-visible:scale-105"
+              className="group grid h-16 w-16 place-items-center rounded-[var(--radius-sm)] border border-line-strong transition-transform hover:scale-105 hover:brightness-110 focus-visible:scale-105"
+              /* Le fond prend la couleur de case opposée à la pièce : une
+                 pièce noire sur une surface sombre — le thème Club, le soir —
+                 ne se voyait plus, et l'on promouvait à l'aveugle. */
               style={{
+                background: color === 'b' ? 'var(--sq-light)' : 'var(--sq-dark)',
                 animation: `slide-up .18s cubic-bezier(.16,1,.3,1) ${index * 35}ms both`,
               }}
             >
@@ -200,8 +204,13 @@ export function PromotionPicker({
             }}
           >
             <span
-              className="absolute inset-[6%] rounded-[var(--radius-sm)] border border-line-strong bg-bg-elev shadow-[var(--shadow)] transition-colors group-hover:bg-surface-strong"
-              style={{ boxShadow: 'var(--glow)' }}
+              className="absolute inset-[6%] rounded-[var(--radius-sm)] border border-line-strong shadow-[var(--shadow)] transition-[filter] group-hover:brightness-110"
+              /* Même règle qu'au centre : la case opposée à la pièce, pour
+                 qu'une pièce noire ne se fonde pas dans un fond sombre. */
+              style={{
+                boxShadow: 'var(--glow)',
+                background: color === 'b' ? 'var(--sq-light)' : 'var(--sq-dark)',
+              }}
             />
             <img
               src={pieceUrl(pieceSet, color, type)}

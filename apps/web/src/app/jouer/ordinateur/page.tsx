@@ -62,6 +62,7 @@ import { EvalBar } from '@/components/game/EvalBar.tsx'
 import { MoveList } from '@/components/game/MoveList.tsx'
 import { ApprofondirCoup } from '@/components/ia/ApprofondirCoup.tsx'
 import { Menu } from '@/components/ui/Menu.tsx'
+import { Defilement } from '@/components/ui/Defilement.tsx'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import { useMission } from '@/lib/daily/useMission.ts'
 import { PlayerBar } from '@/components/game/PlayerBar.tsx'
@@ -641,26 +642,44 @@ function SetupScreen({
   const humainRetenu = human && maiaPossible
 
   /**
-   * Les sept personnalités, dans l'ordre de l'échelle.
+   * Les sept personnalités, dans l'ordre où l'échelle les fait apparaître.
    *
    * C'est par elles qu'on choisit d'abord : « Pion », « Boussole », « Mirage »
-   * disent un adversaire, là où « niveau 12 » ne dit qu'un rang. Chacune
-   * couvre une tranche de niveaux ; on note la première et la dernière pour
-   * annoncer sa force en une ligne, et pour savoir laquelle est en cours.
+   * disent un adversaire, là où « niveau 12 » ne dit qu'un rang. Elles ne
+   * couvrent pas chacune une tranche : les niveaux les entremêlent — Pion aux
+   * niveaux 1, 2, 3 et 6, Brasier aux 4, 7 et 14. Une fourchette d'Elo par
+   * vignette mentait donc deux fois, en se chevauchant avec la voisine et en
+   * laissant croire qu'on choisirait dans cette fourchette. Chaque vignette
+   * annonce à la place le niveau qu'elle donnerait *maintenant* : le plus
+   * proche du curseur, celui que le clic pose réellement.
    */
   const personnalites = useMemo(() => {
-    const tranches = new Map<BotPersonalityId, { eloMin: number; eloMax: number }>()
+    const vues: BotPersonalityId[] = []
     for (const niveau of BOT_LEVELS) {
-      const tranche = tranches.get(niveau.personality)
-      if (tranche) tranche.eloMax = niveau.elo
-      else tranches.set(niveau.personality, { eloMin: niveau.elo, eloMax: niveau.elo })
+      if (!vues.includes(niveau.personality)) vues.push(niveau.personality)
     }
-    return [...tranches.entries()].map(([id, tranche]) => ({
-      id,
-      ...tranche,
-      personnalite: BOT_PERSONALITIES[id],
-    }))
+    return vues.map((id) => ({ id, personnalite: BOT_PERSONALITIES[id] }))
   }, [])
+
+  /**
+   * La vignette de l'adversaire en cours reste sous les yeux.
+   *
+   * La rangée défile : venu d'une fiche — « Jouer contre Mirage » — ou revenu
+   * sur un niveau élevé, l'adversaire choisi était hors champ, et la rangée
+   * montrait Pion et Brasier avec l'air de n'avoir rien sélectionné. On fait
+   * défiler la rangée seule, jamais la page : centrer par `scrollIntoView`
+   * aurait aussi déplacé le document.
+   */
+  const rangeePersonnalites = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const rangee = rangeePersonnalites.current
+    const actif = rangee?.querySelector<HTMLElement>('[aria-checked="true"]')
+    if (!rangee || !actif) return
+    // D'un coup, sans animation : un défilement animé lancé pendant que la
+    // page finit de se construire est interrompu à mi-course par le premier
+    // rendu suivant, et la vignette restait à moitié hors champ.
+    rangee.scrollLeft = actif.offsetLeft - (rangee.clientWidth - actif.offsetWidth) / 2
+  }, [bot.personality])
 
   const cadence = TIME_CONTROLS.find((tc) => tc.id === timeControlId)
   const couleurChoisie = color === 'w' ? 'Blancs' : color === 'b' ? 'Noirs' : 'Couleur au hasard'
@@ -753,20 +772,25 @@ function SetupScreen({
             par adversaire, et l'on voit d'un coup d'œil l'échelle entière.
             Choisir une vignette pose le curseur sur le niveau le plus proche
             de sa tranche — le curseur, en dessous, sert au réglage fin. */}
-        <div
-          className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6 sans-barre"
+        <Defilement
+          ref={rangeePersonnalites}
+          className="-mx-4 sm:-mx-6"
+          classeRangee="gap-2 px-4 pb-1 sm:px-6"
           role="radiogroup"
-          aria-label="Adversaire"
+          label="Adversaire"
         >
           {personnalites.map((entree) => {
             const actif = entree.id === bot.personality
+            /* Le niveau que le clic poserait, et son Elo : c'est ce que la
+               vignette promet, et c'est ce qu'elle tient. */
+            const cible = actif ? level : niveauProche(entree.id, level)
             return (
               <button
                 key={entree.id}
                 type="button"
                 role="radio"
                 aria-checked={actif}
-                onClick={() => choisirNiveau(niveauProche(entree.id, level))}
+                onClick={() => choisirNiveau(cible)}
                 className={clsx(
                   'flex w-[6.25rem] shrink-0 flex-col items-center gap-1.5 rounded-[var(--radius)] border px-2 py-3 text-center transition-colors',
                   actif
@@ -779,14 +803,12 @@ function SetupScreen({
                   {entree.personnalite.name.fr}
                 </span>
                 <span className="text-[12px] tabular-nums text-faint">
-                  {entree.eloMin === entree.eloMax
-                    ? `≈ ${entree.eloMin}`
-                    : `${entree.eloMin} – ${entree.eloMax}`}
+                  ≈ {botLevel(cible).elo} · n°{cible}
                 </span>
               </button>
             )
           })}
-        </div>
+        </Defilement>
 
         {/* L'adversaire retenu, en une ligne : le portrait en grand, le nom,
             l'Elo, et sa phrase. C'est ce que le curseur fait changer, et

@@ -42,6 +42,7 @@ import { usePreferences } from '@/lib/store/preferences.ts'
 import { useSan } from '@/lib/notation.ts'
 import { VoiceQuickToggle } from '@/components/layout/VoiceQuickToggle.tsx'
 import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
+import { Defilement } from '@/components/ui/Defilement.tsx'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import { useMission } from '@/lib/daily/useMission.ts'
 import { QueteTerminee } from '@/components/daily/QueteTerminee.tsx'
@@ -806,11 +807,9 @@ export default function PuzzlesPage() {
             du plateau, c'est douze libellés à parcourir pour un choix qu'on
             fait une fois sur vingt. Là, le thème est un sélecteur dans la
             colonne de droite, sous la consigne — voir plus bas. */}
-        <div
-          className={clsx(
-            '-mx-3 mb-4 flex gap-1.5 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 lg:hidden',
-            modeDefi && 'hidden',
-          )}
+        <Defilement
+          className={clsx('-mx-3 mb-4 sm:mx-0 lg:hidden', modeDefi && 'hidden')}
+          classeRangee="gap-1.5 px-3 sm:flex-wrap sm:overflow-visible sm:px-0"
         >
           {THEMES.map((entry) => (
             <button
@@ -831,7 +830,7 @@ export default function PuzzlesPage() {
               {entry.label}
             </button>
           ))}
-        </div>
+        </Defilement>
       </div>
 
       {/* ── La catégorie de ce puzzle ────────────────────────────────────
@@ -1051,11 +1050,16 @@ export default function PuzzlesPage() {
               `bottom-16` dégage la barre de navigation basse. À partir de
               `lg`, la colonne est à côté de l'échiquier et tient dans l'écran :
               la barre redevient un élément ordinaire du flux. */}
-          <div className="sticky bottom-16 z-10 -mx-1 flex gap-2 rounded-[var(--radius)] bg-bg/85 px-1 py-2 backdrop-blur-sm lg:static lg:mx-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+          <div className="sticky bottom-16 z-10 -mx-1 flex flex-wrap gap-2 rounded-[var(--radius)] bg-bg/85 px-1 py-2 backdrop-blur-sm lg:static lg:mx-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
             {/* Y compris après un échec : la solution ne s'affiche plus
                 d'elle-même, il faut donc pouvoir la demander là aussi. */}
             {(status === 'playing' || status === 'failed') && !revealed && (
-              <Button variant="secondary" icon={<Eye size={14} />} onClick={reveal} fullWidth>
+              <Button
+                variant="secondary"
+                icon={<Eye size={14} />}
+                onClick={reveal}
+                className="min-w-[8rem] flex-1"
+              >
                 Solution
               </Button>
             )}
@@ -1073,7 +1077,7 @@ export default function PuzzlesPage() {
                 // n'y en a pas. Il quitte donc le défi pour les puzzles
                 // ordinaires, et le libellé le dit.
                 onClick={modeDefi ? quitterLeDefi : () => void load()}
-                fullWidth={revealed}
+                className="min-w-[8rem] flex-1"
               >
                 {modeDefi ? SORTIE_DU_DEFI : 'Passer'}
               </Button>
@@ -1087,7 +1091,7 @@ export default function PuzzlesPage() {
                 variant="secondary"
                 icon={<RotateCcw size={14} />}
                 onClick={recommencer}
-                fullWidth
+                className="min-w-[8rem] flex-1"
               >
                 Recommencer
               </Button>
@@ -1107,7 +1111,7 @@ export default function PuzzlesPage() {
                   href="/"
                   variant={status === 'failed' ? 'ghost' : 'secondary'}
                   icon={<Home size={15} />}
-                  fullWidth
+                  className="min-w-[8rem] flex-1"
                 >
                   Mes quêtes
                 </ButtonLink>
@@ -1115,7 +1119,7 @@ export default function PuzzlesPage() {
                   variant={status === 'failed' ? 'ghost' : 'primary'}
                   icon={<ArrowRight size={15} />}
                   onClick={quitterLeDefi}
-                  fullWidth
+                  className="min-w-[8rem] flex-1"
                 >
                   {SORTIE_DU_DEFI}
                 </Button>
@@ -1126,7 +1130,7 @@ export default function PuzzlesPage() {
                 variant={status === 'failed' ? 'ghost' : 'primary'}
                 icon={<ArrowRight size={15} />}
                 onClick={() => void load()}
-                fullWidth
+                className="min-w-[8rem] flex-1"
               >
                 Puzzle suivant
               </Button>
