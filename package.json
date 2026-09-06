@@ -37,6 +37,7 @@
     "icons": "node scripts/build-icons.mjs",
     "vapid": "node scripts/vapid.mjs",
     "brand:cavale": "node scripts/build-cavale.mjs",
+    "brand:fonds": "node scripts/build-fonds.mjs",
     "check:lessons": "node --experimental-strip-types scripts/check-lessons.mjs",
     "check:glossaire": "node --experimental-strip-types scripts/check-glossaire.mjs",
     "check:eboards": "node --experimental-strip-types scripts/check-eboards.mjs",
