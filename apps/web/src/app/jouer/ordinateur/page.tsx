@@ -482,6 +482,25 @@ export default function PlayComputerPage() {
 //  Écran de configuration
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * La teinte de chaque adversaire, prise sur la matière de sa sculpture.
+ *
+ * Ivoire pour le bois pâle de Pion, feu pour le bronze fendu de Brasier,
+ * ardoise pour le granit de Rempart, glace pour le cristal d'Éclair, laiton
+ * pour Boussole, eau pour le verre de Mirage, nuit pour l'obsidienne
+ * d'Oracle. Des valeurs littérales, et c'est voulu : ces couleurs viennent
+ * des portraits, qui ne changent pas avec le thème.
+ */
+const TEINTES_ADVERSAIRES: Record<BotPersonalityId, string> = {
+  novice: '#e9d9b6',
+  fonceur: '#ff7a3c',
+  prudent: '#8aa0b8',
+  tacticien: '#8fd8ff',
+  positionnel: '#e2b84a',
+  gambiteur: '#2fd1c8',
+  machine: '#7c5cff',
+}
+
 function SetupScreen({
   initial,
   onStart,
@@ -784,6 +803,7 @@ function SetupScreen({
             /* Le niveau que le clic poserait, et son Elo : c'est ce que la
                vignette promet, et c'est ce qu'elle tient. */
             const cible = actif ? level : niveauProche(entree.id, level)
+            const teinte = TEINTES_ADVERSAIRES[entree.id]
             return (
               <button
                 key={entree.id}
@@ -792,11 +812,19 @@ function SetupScreen({
                 aria-checked={actif}
                 onClick={() => choisirNiveau(cible)}
                 className={clsx(
-                  'flex w-[6.25rem] shrink-0 flex-col items-center gap-1.5 rounded-[var(--radius)] border px-2 py-3 text-center transition-colors',
-                  actif
-                    ? 'border-accent bg-accent/15 ring-1 ring-accent'
-                    : 'border-line hover:bg-surface-hover',
+                  'flex w-[6.25rem] shrink-0 flex-col items-center gap-1.5 rounded-[var(--radius)] border px-2 py-3 text-center transition-[filter,box-shadow]',
+                  actif ? 'ring-1 ring-accent' : 'hover:brightness-110',
                 )}
+                /* Le fond prend la matière de la sculpture : sept cartes du même
+                   gris, c'était sept fois la même carte, et l'on ne voyait pas
+                   pourquoi ces adversaires diffèrent. La lumière vient du haut,
+                   comme sur les portraits. */
+                style={{
+                  background: `linear-gradient(180deg, color-mix(in oklab, ${teinte} 34%, var(--surface)), color-mix(in oklab, ${teinte} 12%, var(--surface)))`,
+                  borderColor: actif
+                    ? 'var(--accent)'
+                    : `color-mix(in oklab, ${teinte} 45%, var(--border))`,
+                }}
               >
                 <PortraitAdversaire personality={entree.personnalite} size={40} />
                 <span className={clsx('text-sm font-semibold', actif ? 'text-ink' : 'text-muted')}>
@@ -817,7 +845,7 @@ function SetupScreen({
           <span
             className="grid h-16 w-16 shrink-0 place-items-center rounded-[var(--radius)]"
             style={{
-              background: 'color-mix(in oklab, var(--accent) 15%, transparent)',
+              background: `linear-gradient(180deg, color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 38%, var(--surface)), color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 14%, var(--surface)))`,
               boxShadow: 'var(--glow)',
             }}
             aria-hidden

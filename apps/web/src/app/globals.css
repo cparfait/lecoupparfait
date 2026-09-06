@@ -26,14 +26,14 @@
      liseré interne, et un fond qui n'est pas parfaitement uni. */
   --sheen: rgb(255 255 255 / 0.06);
   --inner-edge: rgb(255 255 255 / 0.07);
-  --halo-1: rgb(124 92 255 / 0.18);
-  --halo-2: rgb(0 229 168 / 0.1);
+  --halo-1: rgb(124 92 255 / 0.1);
+  --halo-2: rgb(0 229 168 / 0.055);
   color-scheme: dark;
 
   /* Fonds, du plus profond au plus proche de l'œil */
-  --bg: #0d0c1a;
-  --bg-deep: #080813;
-  --bg-elev: #141323;
+  --bg: #0b0b14;
+  --bg-deep: #07070f;
+  --bg-elev: #12121d;
   /* Ce qui flotte au-dessus de la page : menus, barre du haut, barre du bas.
 
      `--bg-elev` ne suffisait pas. Six points de luminance séparent #07070c de
@@ -77,13 +77,9 @@
   --shadow-lg: 0 30px 80px -20px rgb(0 0 0 / 0.85);
 
   /* Dégradé d'ambiance de la page */
-  --aurora-1: rgb(124 92 255 / 0.32);
-  --aurora-2: rgb(0 229 168 / 0.2);
-  --aurora-4: rgb(124 92 255 / 0.14);
-  --aurora-5: rgb(0 229 168 / 0.08);
-  --aurora-3: rgb(255 122 89 / 0.16);
-  /* Une image sous les dégradés, si l'on en veut une : voir `.ambient-backdrop`. */
-  --fond-image: none;
+  --aurora-1: rgb(124 92 255 / 0.16);
+  --aurora-2: rgb(0 229 168 / 0.1);
+  --aurora-3: rgb(255 122 89 / 0.07);
 
   /* Échiquier */
   --sq-light: #dfd7ea;
@@ -122,13 +118,13 @@
      liseré interne, et un fond qui n'est pas parfaitement uni. */
   --sheen: rgb(255 246 224 / 0.055);
   --inner-edge: rgb(255 246 224 / 0.07);
-  --halo-1: rgb(201 162 39 / 0.16);
-  --halo-2: rgb(127 168 124 / 0.09);
+  --halo-1: rgb(201 162 39 / 0.1);
+  --halo-2: rgb(127 168 124 / 0.05);
   color-scheme: dark;
 
-  --bg: #1a140c;
+  --bg: #14100b;
   --bg-deep: #0d0a07;
-  --bg-elev: #231b11;
+  --bg-elev: #1d1710;
   --flottant: #322718;
   --surface: rgb(232 220 200 / 0.065);
   --surface-hover: rgb(232 220 200 / 0.1);
@@ -155,11 +151,9 @@
   --shadow: 0 10px 34px -10px rgb(0 0 0 / 0.8);
   --shadow-lg: 0 34px 90px -24px rgb(0 0 0 / 0.9);
 
-  --aurora-1: rgb(201 162 39 / 0.22);
-  --aurora-2: rgb(163 59 42 / 0.18);
-  --aurora-4: rgb(201 162 39 / 0.1);
-  --aurora-5: rgb(163 59 42 / 0.08);
-  --aurora-3: rgb(127 168 124 / 0.12);
+  --aurora-1: rgb(201 162 39 / 0.1);
+  --aurora-2: rgb(163 59 42 / 0.08);
+  --aurora-3: rgb(127 168 124 / 0.05);
 
   --sq-light: #e8dcc8;
   --sq-dark: #8a6a45;
@@ -198,8 +192,8 @@
   /* Aucun liseré clair sur un thème clair : il serait invisible sur une
      surface déjà blanche. Ici c'est l'ombre portée qui détache la carte. */
   --inner-edge: rgb(255 255 255 / 0);
-  --halo-1: rgb(91 60 224 / 0.09);
-  --halo-2: rgb(0 146 110 / 0.06);
+  --halo-1: rgb(91 60 224 / 0.05);
+  --halo-2: rgb(0 146 110 / 0.035);
   color-scheme: light;
 
   --bg: #f7f7f9;
@@ -235,11 +229,9 @@
   --shadow: 0 6px 24px -8px rgb(16 16 24 / 0.16);
   --shadow-lg: 0 24px 60px -20px rgb(16 16 24 / 0.22);
 
-  --aurora-1: rgb(91 60 224 / 0.14);
-  --aurora-2: rgb(0 146 110 / 0.1);
-  --aurora-4: rgb(91 60 224 / 0.06);
-  --aurora-5: rgb(0 146 110 / 0.04);
-  --aurora-3: rgb(212 86 47 / 0.08);
+  --aurora-1: rgb(91 60 224 / 0.07);
+  --aurora-2: rgb(0 146 110 / 0.05);
+  --aurora-3: rgb(212 86 47 / 0.04);
 
   --sq-light: #eeeef4;
   --sq-dark: #8e93b8;
@@ -312,8 +304,6 @@
   --aurora-1: transparent;
   --aurora-2: transparent;
   --aurora-3: transparent;
-  --aurora-4: transparent;
-  --aurora-5: transparent;
 
   --sq-light: #e8e8e8;
   --sq-dark: #3c3c3c;
@@ -571,21 +561,8 @@ h4 {
 
 /* ═══════════════════════════════════════════════════════════════════════════
    FOND D'AMBIANCE
-   Des taches de couleur floutées et un ruban en diagonale. Coût nul : ce sont
-   des dégradés, pas des éléments animés.
-
-   Trois taches à moins de dix pour cent, c'était un fond qui se voulait discret
-   et qui n'était que noir : sur la plupart des écrans, on ne voyait qu'un
-   aplat sombre, et l'application avait l'air austère. Les taches doublent
-   d'intensité, deux autres s'y ajoutent au milieu de la page, et un ruban de
-   lumière traverse le fond en diagonale, comme une aurore. On ne le regarde
-   pas, mais on ne le prend plus pour du noir.
-
-   `--fond-image` : une image peut se glisser sous les dégradés — une
-   photographie, un rendu généré —, posée par thème dans les jetons
-   (`--fond-image: url('/fond/aurora.webp')`). Les taches restent par-dessus,
-   pour que l'image appartienne au thème plutôt que de le remplacer. Absente,
-   `none` ne coûte rien.
+   Trois taches de couleur floutées, animées très lentement. Coût nul : ce sont
+   des dégradés radiaux, pas des éléments animés.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .ambient-backdrop {
@@ -593,32 +570,10 @@ h4 {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-color: var(--bg);
-  background-image:
+  background:
     radial-gradient(80ch 60ch at 15% -10%, var(--aurora-1), transparent 65%),
     radial-gradient(70ch 55ch at 90% 5%, var(--aurora-2), transparent 60%),
-    radial-gradient(60ch 60ch at 50% 105%, var(--aurora-3), transparent 60%),
-    radial-gradient(90ch 50ch at 70% 55%, var(--aurora-4), transparent 65%),
-    radial-gradient(60ch 40ch at 10% 60%, var(--aurora-5), transparent 65%),
-    linear-gradient(
-      118deg,
-      transparent 28%,
-      var(--aurora-5) 44%,
-      var(--aurora-4) 52%,
-      var(--aurora-5) 60%,
-      transparent 74%
-    ),
-    var(--fond-image, none);
-  background-size: auto, auto, auto, auto, auto, auto, cover;
-  background-position:
-    0 0,
-    0 0,
-    0 0,
-    0 0,
-    0 0,
-    0 0,
-    center;
-  background-repeat: no-repeat;
+    radial-gradient(60ch 60ch at 50% 105%, var(--aurora-3), transparent 60%), var(--bg);
 }
 
 /* Grain de film : casse les dégradés en bandes et donne de la matière. */
