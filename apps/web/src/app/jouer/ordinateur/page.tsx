@@ -56,6 +56,7 @@ import {
   type TimeControl,
 } from '@coupparfait/core'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
+import { CarteAdversaire } from '@/components/brand/CarteAdversaire.tsx'
 import { ChessBoard, ViewToggle } from '@/components/board/ChessBoard.tsx'
 import { PhysicalBoardPanel } from '@/components/board/PhysicalBoardPanel.tsx'
 import { EvalBar } from '@/components/game/EvalBar.tsx'
@@ -794,7 +795,10 @@ function SetupScreen({
         <Defilement
           ref={rangeePersonnalites}
           className="-mx-4 sm:-mx-6"
-          classeRangee="gap-2 px-4 pb-1 sm:px-6"
+          /* De l'air au-dessus et en dessous : les cartes se soulèvent et
+             s'inclinent au survol, et la rangée, qui défile, couperait ce
+             qui dépasse. */
+          classeRangee="gap-3 px-4 py-3 sm:px-6"
           role="radiogroup"
           label="Adversaire"
         >
@@ -803,37 +807,16 @@ function SetupScreen({
             /* Le niveau que le clic poserait, et son Elo : c'est ce que la
                vignette promet, et c'est ce qu'elle tient. */
             const cible = actif ? level : niveauProche(entree.id, level)
-            const teinte = TEINTES_ADVERSAIRES[entree.id]
             return (
-              <button
+              <CarteAdversaire
                 key={entree.id}
-                type="button"
-                role="radio"
-                aria-checked={actif}
+                personnalite={entree.personnalite}
+                teinte={TEINTES_ADVERSAIRES[entree.id]}
+                actif={actif}
+                elo={botLevel(cible).elo}
+                niveau={cible}
                 onClick={() => choisirNiveau(cible)}
-                className={clsx(
-                  'flex w-[6.25rem] shrink-0 flex-col items-center gap-1.5 rounded-[var(--radius)] border px-2 py-3 text-center transition-[filter,box-shadow]',
-                  actif ? 'ring-1 ring-accent' : 'hover:brightness-110',
-                )}
-                /* Le fond prend la matière de la sculpture : sept cartes du même
-                   gris, c'était sept fois la même carte, et l'on ne voyait pas
-                   pourquoi ces adversaires diffèrent. La lumière vient du haut,
-                   comme sur les portraits. */
-                style={{
-                  background: `linear-gradient(180deg, color-mix(in oklab, ${teinte} 34%, var(--surface)), color-mix(in oklab, ${teinte} 12%, var(--surface)))`,
-                  borderColor: actif
-                    ? 'var(--accent)'
-                    : `color-mix(in oklab, ${teinte} 45%, var(--border))`,
-                }}
-              >
-                <PortraitAdversaire personality={entree.personnalite} size={40} />
-                <span className={clsx('text-sm font-semibold', actif ? 'text-ink' : 'text-muted')}>
-                  {entree.personnalite.name.fr}
-                </span>
-                <span className="text-[12px] tabular-nums text-faint">
-                  ≈ {botLevel(cible).elo} · n°{cible}
-                </span>
-              </button>
+              />
             )
           })}
         </Defilement>
@@ -842,15 +825,23 @@ function SetupScreen({
             l'Elo, et sa phrase. C'est ce que le curseur fait changer, et
             c'est juste au-dessus de lui. */}
         <div className="mt-4 flex items-center gap-4">
+          {/* Le portrait retenu, sous le même projecteur que sa carte. */}
           <span
-            className="grid h-16 w-16 shrink-0 place-items-center rounded-[var(--radius)]"
+            className="relative grid h-[4.5rem] w-[4.5rem] shrink-0 place-items-center overflow-hidden rounded-[var(--radius)] border"
             style={{
-              background: `linear-gradient(180deg, color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 38%, var(--surface)), color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 14%, var(--surface)))`,
-              boxShadow: 'var(--glow)',
+              background: `radial-gradient(70% 55% at 50% 20%, color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 55%, transparent), transparent 70%), linear-gradient(180deg, color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 26%, var(--surface)), color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 6%, var(--bg-elev)) 70%)`,
+              borderColor: `color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 50%, var(--border))`,
+              boxShadow: `inset 0 1px 0 rgb(255 255 255 / 0.18), 0 12px 28px -14px color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 70%, black)`,
             }}
             aria-hidden
           >
-            <PortraitAdversaire personality={personality} size={56} />
+            <span
+              style={{
+                filter: `drop-shadow(0 10px 12px color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 65%, transparent))`,
+              }}
+            >
+              <PortraitAdversaire personality={personality} size={60} />
+            </span>
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-baseline gap-2">
