@@ -860,16 +860,26 @@ function SetupScreen({
               <PortraitAdversaire personality={personality} size={60} />
             </span>
           </span>
+          {/* Tout ce bloc change avec le curseur, et le curseur est juste en
+              dessous : sa hauteur ne doit pas dépendre de l'adversaire, sinon
+              la page saute d'un cran à l'autre et le pouce perd sa cible.
+              Deux précautions donc. Le nom et les puces ne partagent une
+              ligne qu'à partir de `sm` — sur téléphone, « Boussole · 1550 Elo
+              · Niveau 10 » débordait et passait sur deux lignes, « Pion · 250
+              · Niveau 2 » non. Et la phrase réserve ses lignes en unités de
+              ligne : trois sur téléphone, deux au-delà, ce que demande la
+              plus longue des sept. */}
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-baseline gap-2">
-              <h3 className="font-display text-xl font-semibold">{personality.name.fr}</h3>
-              <Chip tone="accent">≈ {bot.elo} Elo</Chip>
-              <Chip>Niveau {bot.level}</Chip>
+            <div className="flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-2">
+              <h3 className="font-display text-xl font-semibold leading-tight">
+                {personality.name.fr}
+              </h3>
+              <span className="flex flex-wrap gap-2">
+                <Chip tone="accent">≈ {bot.elo} Elo</Chip>
+                <Chip>Niveau {bot.level}</Chip>
+              </span>
             </div>
-            {/* Hauteur réservée : trois lignes suffisent au plus long des
-                sept résumés, et la page ne saute pas d'un cran de curseur à
-                l'autre. */}
-            <p className="mt-1 min-h-[2.6rem] text-sm leading-relaxed text-muted">
+            <p className="mt-1 min-h-[3lh] text-sm leading-relaxed text-muted sm:min-h-[2lh]">
               {personality.blurb.fr}
             </p>
           </div>

@@ -453,8 +453,12 @@ export function SegmentedControl<T extends string>({
           title={option.title}
           onClick={() => onChange(option.value)}
           className={clsx(
-            'flex-1 rounded-[calc(var(--radius-sm)-2px)] font-medium transition-all',
-            size === 'sm' ? 'px-2 py-1 text-xs' : 'px-3 py-1.5 text-sm',
+            // Jamais de retour à la ligne : « 🎲 Hasard » se coupait après le
+            // dé sur téléphone, et le segment prenait deux lignes de haut. Le
+            // texte y est un peu plus grand et les trois cases plus étroites,
+            // d'où la marge réduite sous `sm`.
+            'flex-1 whitespace-nowrap rounded-[calc(var(--radius-sm)-2px)] font-medium transition-all',
+            size === 'sm' ? 'px-2 py-1 text-xs' : 'px-2 py-1.5 text-sm sm:px-3',
             value === option.value
               ? 'bg-accent text-[var(--accent-contrast)] shadow-sm'
               : 'text-muted hover:bg-surface-hover hover:text-ink',
