@@ -12,13 +12,13 @@
 
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowRight, Timer } from 'lucide-react'
+import { ArrowRight, Calculator, Dices, Scale, Timer } from 'lucide-react'
 import { Card } from '@/components/ui/index.tsx'
 
 export const metadata: Metadata = {
   title: 'Outils',
   description:
-    'La pendule : ton téléphone ou ta tablette devient la pendule d’une partie jouée sur un vrai échiquier — et, branchée sur un échiquier électronique, elle note la partie.',
+    'La pendule, le calculateur Elo, le tirage au sort et l’aide-mémoire d’arbitrage : ce qui sert autour d’un vrai échiquier.',
 }
 
 const OUTILS = [
@@ -29,6 +29,27 @@ const OUTILS = [
       'Deux temps, un incrément, on tape son côté après avoir joué. Branchée sur un échiquier électronique, elle bascule toute seule et note la partie — qui s’ouvre ensuite dans l’analyse.',
     icone: Timer,
   },
+  {
+    href: '/outils/elo',
+    titre: 'Calculateur Elo',
+    resume:
+      'Ta cote, ton coefficient, tes parties : ce que le tournoi te rapporte ou te coûte, partie par partie, et ta performance. Au barème de la FIDE.',
+    icone: Calculator,
+  },
+  {
+    href: '/outils/tirage',
+    titre: 'Tirage au sort',
+    resume:
+      'Qui a les Blancs, qui joue contre qui, dans quel ordre on passe. Un tirage que tout le monde voit, et personne ne conteste.',
+    icone: Dices,
+  },
+  {
+    href: '/outils/arbitrage',
+    titre: 'Aide-mémoire d’arbitrage',
+    resume:
+      'Pièce touchée, coup illégal, drapeau, nulle réclamée, téléphone qui sonne : ce que disent les Règles du jeu de la FIDE, en une page.',
+    icone: Scale,
+  },
 ]
 
 export default function OutilsPage() {
@@ -37,7 +58,7 @@ export default function OutilsPage() {
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">Outils</h1>
       <p className="mt-3 max-w-2xl leading-relaxed text-muted max-lg:text-[14px]">
         Ce qui sert autour de l’échiquier plutôt que dessus : de quoi accompagner une partie jouée
-        sur un vrai plateau, en face de quelqu’un.
+        sur un vrai plateau, en face de quelqu’un — et ce qui vient avant et après, au club.
       </p>
 
       <div className="mt-6 space-y-3">

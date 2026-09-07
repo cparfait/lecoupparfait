@@ -17,7 +17,9 @@ import {
   BarChart3,
   BookMarked,
   BookOpen,
+  Calculator,
   Crown,
+  Dices,
   Eye,
   Gauge,
   GraduationCap,
@@ -26,6 +28,7 @@ import {
   Mail,
   Monitor,
   Puzzle,
+  Scale,
   Swords,
   Target,
   Timer,
@@ -236,8 +239,9 @@ export const SECTIONS: SectionNav[] = [
    *
    * La sixième rubrique, et la seule qui ne serve pas à jouer une partie sur
    * l'écran : ce qu'on y trouve accompagne une partie qui se joue ailleurs —
-   * sur un vrai plateau, en face de quelqu'un. La pendule l'inaugure ; d'autres
-   * suivront le même principe, l'écran au service du bois et non l'inverse.
+   * sur un vrai plateau, en face de quelqu'un. La pendule l'a inaugurée ; le
+   * calculateur Elo, le tirage au sort et l'aide-mémoire d'arbitrage suivent
+   * le même principe, l'écran au service du bois et non l'inverse.
    */
   {
     id: 'outils',
@@ -251,6 +255,19 @@ export const SECTIONS: SectionNav[] = [
         labelKey: 'nav.clock',
         icon: Timer,
         hintKey: 'nav.clockHint',
+      },
+      {
+        href: '/outils/elo',
+        labelKey: 'nav.eloCalculator',
+        icon: Calculator,
+        hintKey: 'nav.eloCalculatorHint',
+      },
+      { href: '/outils/tirage', labelKey: 'nav.draw', icon: Dices, hintKey: 'nav.drawHint' },
+      {
+        href: '/outils/arbitrage',
+        labelKey: 'nav.arbiter',
+        icon: Scale,
+        hintKey: 'nav.arbiterHint',
       },
     ],
   },

@@ -62,12 +62,18 @@ export const fr = {
     stats: 'Statistiques',
     myProfile: 'Mon profil',
     clock: 'Pendule',
+    eloCalculator: 'Calculateur Elo',
+    draw: 'Tirage au sort',
+    arbiter: 'Aide-mémoire d’arbitrage',
 
     // Repères affichés sous les entrées, dans les panneaux déroulants.
     vsComputerHint: '25 niveaux, 7 personnalités',
     vsFriendHint: 'un lien, ou plusieurs jours par coup',
     localGameHint: 'à deux, sur le même appareil',
     clockHint: 'la pendule de ta partie sur échiquier réel',
+    eloCalculatorHint: 'ce qu’un tournoi te rapporte ou te coûte',
+    drawHint: 'couleurs, paires, ordre de passage',
+    arbiterHint: 'les règles qu’on se dispute, en une page',
     correspondenceHint: 'les parties où c’est ton tour',
     watchHint: 'les parties en cours',
     lessonsHint: '36 leçons, de zéro au répertoire',
