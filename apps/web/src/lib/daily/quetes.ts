@@ -39,6 +39,13 @@ export interface Quete {
    * correspondant à « Enchaîner 3 puzzles ». Chaque quête nomme donc sa porte.
    */
   lien: string
+  /**
+   * Le verbe du bouton, quand la quête est mise en avant sur l'accueil.
+   *
+   * « Y aller » convenait à toutes et ne disait rien d'aucune ; on lit ce
+   * qu'on va faire, pas où l'on va.
+   */
+  action: string
 }
 
 /**
@@ -56,6 +63,7 @@ export const QUETES: Quete[] = [
     xp: 25,
     objectif: 1,
     lien: '/puzzles?defi=1&quete=defi',
+    action: 'Chercher le coup',
   },
   // « Jouer » et « gagner » mènent à l'ordinateur plutôt qu'au sommaire des
   // façons de jouer : la quête se compte en parties finies, et c'est le seul
@@ -71,6 +79,7 @@ export const QUETES: Quete[] = [
     xp: 10,
     objectif: 1,
     lien: '/jouer/ordinateur?quete=partie',
+    action: 'Jouer une partie',
   },
   {
     id: 'victoire',
@@ -78,6 +87,7 @@ export const QUETES: Quete[] = [
     xp: 15,
     objectif: 1,
     lien: '/jouer/ordinateur?quete=victoire',
+    action: 'Jouer une partie',
   },
   {
     id: 'puzzles',
@@ -86,6 +96,7 @@ export const QUETES: Quete[] = [
     xp: 20,
     objectif: 3,
     lien: '/puzzles?quete=puzzles',
+    action: 'Résoudre des puzzles',
   },
 ]
 

@@ -60,6 +60,7 @@ import { Button, ButtonLink, Card, Chip, Skeleton } from '@/components/ui/index.
 import { useCarriere } from '@/lib/carriere/useCarriere.ts'
 import { listerAnalyses, type AnalyseEnregistree } from '@/lib/analysis/enregistrees.ts'
 import { chargerPartieEnCours, type PartieEnCours } from '@/lib/game/partieEnCours.ts'
+import { QUETES, XP_TOTAL, xpPour } from '@/lib/daily/quetes.ts'
 import { jourLocal, queteFaite } from '@/lib/daily/quotidien.ts'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import { DemandesDAmi } from '@/components/social/DemandesDAmi.tsx'
@@ -212,6 +213,17 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
       correspondances: correspondances ?? 0,
       reprise: reprise ? { moves: reprise.moves.length } : null,
       defiFait,
+      quetes: {
+        restantes: journee
+          ? // Le défi a sa propre proposition, juste avant : le recompter ici
+            // en ferait deux.
+            QUETES.filter((quete) => quete.id !== 'defi' && !queteFaite(journee, quete.id)).map(
+              ({ label, lien, action }) => ({ label, lien, action }),
+            )
+          : [],
+        xp: journee ? xpPour(journee.avancement) : 0,
+        total: XP_TOTAL,
+      },
       carriere:
         carriereEnCours && chapitre
           ? {
@@ -223,7 +235,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
           : null,
     }
     return prochainesChoses(etat)
-  }, [enDirect, correspondances, reprise, defiFait, carriereEnCours, chapitre, suite])
+  }, [enDirect, correspondances, reprise, defiFait, journee, carriereEnCours, chapitre, suite])
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:py-8">

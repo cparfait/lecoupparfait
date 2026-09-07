@@ -17,8 +17,13 @@
  *     la reprendre coûte un clic et l'oublier coûte une partie.
  *  3. **Le défi du jour**, tant qu'il n'est pas résolu : il meurt à minuit.
  *     C'est la seule chose de l'écran qui ait une échéance.
- *  4. **L'étape de carrière en cours**, qui est le chemin qu'on a choisi.
- *  5. **Faute de mieux**, jouer — c'est ce pour quoi on vient.
+ *  4. **Les quêtes du jour qui restent**, pour la même raison : elles aussi
+ *     expirent à minuit, et les points de la journée ne se rattrapent pas. La
+ *     carrière passait avant elles dès le défi résolu, et l'accueil se mettait
+ *     à parler de chapitre alors qu'il restait deux quêtes à faire.
+ *  5. **L'étape de carrière en cours**, qui est le chemin qu'on a choisi — et
+ *     qui sera encore là demain.
+ *  6. **Faute de mieux**, jouer — c'est ce pour quoi on vient.
  *
  * La fonction rend une **liste ordonnée** et non un seul élément : l'accueil
  * met la première en avant et range les suivantes en dessous, en une ligne
@@ -35,6 +40,7 @@ export type ProchaineChoseId =
   | 'partieOuverte'
   | 'repriseOrdinateur'
   | 'defi'
+  | 'quete'
   | 'carriere'
   | 'jouer'
 
@@ -75,6 +81,15 @@ export interface EtatAccueil {
   reprise: { moves: number } | null
   /** Le défi du jour est-il résolu ? `null` tant qu'on ne sait pas. */
   defiFait: boolean | null
+  /**
+   * Les quêtes du jour encore à faire, hors défi, dans l'ordre de la liste.
+   * Avec les points déjà gagnés et le total, pour dire où l'on en est.
+   */
+  quetes: {
+    restantes: Array<{ label: string; lien: string; action: string }>
+    xp: number
+    total: number
+  }
   /** Chapitre courant et prochaine étape, quand la carrière est en cours. */
   carriere: { chapitre: string; numero: number; libelle: string; lien: string } | null
 }
@@ -160,7 +175,27 @@ export function prochainesChoses(etat: EtatAccueil): ProchaineChose[] {
     })
   }
 
-  // ── 4. La carrière ─────────────────────────────────────────────────────
+  // ── 4. Les quêtes du jour qui restent ──────────────────────────────────
+  //
+  // Une seule proposition, pour la première qui reste : deux quêtes en deux
+  // lignes ferait deux boutons de même poids, ce qu'on a voulu éviter. Les
+  // autres sont dans la carte « Aujourd'hui », juste en dessous.
+  const [prochaine] = etat.quetes.restantes
+  if (prochaine) {
+    const n = etat.quetes.restantes.length
+    liste.push({
+      id: 'quete',
+      categorie: 'Aujourd’hui',
+      titre: prochaine.label,
+      detail: `${etat.quetes.xp} / ${etat.quetes.total} points du jour. ${
+        n > 1 ? `Encore ${n} quêtes` : 'Dernière quête'
+      } avant minuit.`,
+      action: prochaine.action,
+      lien: prochaine.lien,
+    })
+  }
+
+  // ── 5. La carrière ─────────────────────────────────────────────────────
   if (etat.carriere) {
     liste.push({
       id: 'carriere',
@@ -172,7 +207,7 @@ export function prochainesChoses(etat: EtatAccueil): ProchaineChose[] {
     })
   }
 
-  // ── 5. Le repli ────────────────────────────────────────────────────────
+  // ── 6. Le repli ────────────────────────────────────────────────────────
   //
   // Jamais vide : un accueil qui ne propose rien renvoie la personne à la
   // barre de navigation, c'est-à-dire à un sommaire.

@@ -59,7 +59,7 @@ export function Aujourdhui({
   const superieures = tranche ? tranchesAuDessus(tranche) : []
 
   /**
-   * Une fois le défi relevé, la carte se referme sur son titre.
+   * Une fois la journée finie, la carte se referme sur son titre.
    *
    * Elle gardait sa taille entière toute la journée : la barre de points, le
    * mot « reviens demain », les quatre quêtes et les tranches plus dures. Or
@@ -67,14 +67,22 @@ export function Aujourdhui({
    * cela repousse d'un demi-écran ce qu'on vient vraiment reprendre : une
    * partie, un chapitre, une leçon.
    *
-   * Repliée, il reste la seule ligne qui compte : c'est fait, et voilà les
-   * points du jour. Elle se rouvre d'un geste — les quêtes du jour restent à
-   * portée, et c'est justement là qu'on va voir ce qui reste.
+   * « Finie » veut dire toutes les quêtes, pas seulement le défi. Elle se
+   * repliait dès le défi résolu, et l'on se retrouvait devant un titre vert et
+   * « 50 / 70 points du jour » sans voir ce qui manquait : les deux quêtes
+   * restantes étaient derrière le chevron, et la carrière prenait toute la
+   * place à côté. Tant qu'il reste à faire, la carte reste ouverte : c'est la
+   * liste des quêtes qu'on vient regarder.
    *
-   * Le choix ne dure que la visite : demain il y a un nouveau défi, et la carte
-   * doit reprendre sa place d'elle-même.
+   * Repliée, il reste la seule ligne qui compte : c'est fait, et voilà les
+   * points du jour. Elle se rouvre d'un geste, et se referme de même — on
+   * garde le dernier choix, au-dessus de la règle. Il ne dure que la visite :
+   * demain il y a un nouveau défi, et la carte doit reprendre sa place
+   * d'elle-même.
    */
-  const [deplie, setDeplie] = useState(false)
+  const toutFait = defiFait && xp >= XP_TOTAL
+  const [choix, setChoix] = useState<boolean | null>(null)
+  const deplie = choix ?? !toutFait
   const replie = defiFait && !deplie
 
   /*
@@ -98,7 +106,7 @@ export function Aujourdhui({
   useEffect(() => {
     const viser = () => {
       if (window.location.hash !== `#${ANCRE}`) return
-      setDeplie(true)
+      setChoix(true)
       // Après le rendu, sinon on fait défiler vers une carte encore repliée et
       // l'on s'arrête quelques dizaines de pixels trop bas.
       requestAnimationFrame(() => {
@@ -114,7 +122,10 @@ export function Aujourdhui({
   return (
     // `scroll-mt-20` : l'en-tête est collant, et sans cette marge la carte
     // s'arrête juste dessous — son titre caché par la barre.
-    <Card id={ANCRE} className="scroll-mt-20 overflow-hidden">
+    // `self-start` : dans la grille à deux colonnes, la carte prenait la
+    // hauteur de sa voisine ; repliée, cela faisait un titre au-dessus d'un
+    // grand vide.
+    <Card id={ANCRE} className="scroll-mt-20 self-start overflow-hidden">
       {/* Le liseré vert, comme la teinte de chapitre sur la carte voisine.
           C'est ce qui se voit sans lire, et c'est tout l'objet : la question
           « est-ce que j'ai fait le défi aujourd'hui ? » doit se répondre d'un
@@ -127,7 +138,7 @@ export function Aujourdhui({
       {defiFait ? (
         <button
           type="button"
-          onClick={() => setDeplie((ouvert) => !ouvert)}
+          onClick={() => setChoix(!deplie)}
           aria-expanded={deplie}
           className={clsx(
             'flex w-full items-center gap-2 px-4 py-2.5 text-left transition-colors hover:bg-surface-hover',
