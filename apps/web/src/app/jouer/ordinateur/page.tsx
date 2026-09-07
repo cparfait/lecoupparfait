@@ -1087,7 +1087,7 @@ function SetupScreen({
 
       {/* ── 2. Les conditions ──────────────────────────────────────────── */}
       <Etape numero={2} titre="Ta couleur et la cadence">
-        <div className="flex flex-wrap gap-x-10 gap-y-4">
+        <div className="flex flex-wrap gap-x-10 gap-y-5">
           <div>
             <SectionTitle>Ta couleur</SectionTitle>
             <SegmentedControl
@@ -1105,7 +1105,17 @@ function SetupScreen({
             </p>
           </div>
 
-          <div className="min-w-0 flex-1">
+          {/* `min-w-[19rem]` et non `min-w-0` : une colonne qui s'autorise à
+              descendre à zéro ne passe jamais à la ligne, elle se laisse
+              écraser. Sur un téléphone un peu large — 400 px et plus, ce qui
+              fait la moitié des modèles récents — la couleur tenait sur la
+              première ligne et laissait cinquante pixels à la cadence : les
+              huit pastilles s'empilaient une par ligne, « 5 | 3 » se coupait
+              en trois, le titre débordait de l'écran, et la colonne à
+              rallonge repoussait la rubrique 3 hors de vue. Le plancher dit
+              la vraie condition : à côté de la couleur seulement s'il reste
+              de quoi poser trois pastilles, sinon en pleine largeur dessous. */}
+          <div className="min-w-[19rem] flex-1">
             <SectionTitle>Cadence</SectionTitle>
             <div className="flex flex-wrap gap-1.5">
               {TIME_CONTROLS.filter((tc) =>
