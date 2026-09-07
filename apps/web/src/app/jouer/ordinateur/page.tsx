@@ -47,7 +47,7 @@ import {
   flaggedColor,
   formatScore,
   normalizeTimeControlId,
-  sanToFrench,
+  sanToSpeech,
   remainingAt,
   stopClock,
   type ClockState,
@@ -1901,21 +1901,24 @@ function GameScreen({
       const alternative = source?.alternatives.find((candidate) => candidate.uci.startsWith(uci))
       if (!alternative) return
 
-      const san = prefs.locale === 'fr' ? sanToFrench(alternative.san) : alternative.san
+      const san = formatMove(alternative.san)
       const role = alternative.played ? 'Ton coup' : `Coup conseillé (n°${alternative.rank})`
 
       const parts = [
         alternative.reason ?? 'Le moteur le place en tête à cette profondeur.',
         `Évaluation : ${formatScore(alternative.score, playerColor)}.`,
       ]
+      // La suite s'écrivait telle que le moteur la rend, c'est-à-dire en anglais :
+      // « Suite prévue : Nf3 Nc6 Bb5 » sous un titre qui disait « Cf3 ».
       if (alternative.line.length > 1) {
-        parts.push(`Suite prévue : ${alternative.line.slice(0, 4).join(' ')}.`)
+        parts.push(`Suite prévue : ${alternative.line.slice(0, 4).map(formatMove).join(' ')}.`)
       }
 
       toast.info(`${san} — ${role}`, parts.join(' '))
-      speak(`${san}. ${parts[0]}`)
+      // La voix épelle le coup : un glyphe de figurine ne se prononce pas.
+      speak(`${sanToSpeech(alternative.san, prefs.locale)}. ${parts[0]}`)
     },
-    [reviewedMove, reviewedCommentary, commentary, prefs.locale, playerColor],
+    [reviewedMove, reviewedCommentary, commentary, prefs.locale, playerColor, formatMove],
   )
 
   const arrowLegend = useMemo<LegendItem[]>(() => {

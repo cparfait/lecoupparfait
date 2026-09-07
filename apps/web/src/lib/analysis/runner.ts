@@ -22,6 +22,7 @@ import {
   analyseGame,
   summariseForCoach,
   type FullGameReport,
+  type Notation,
   type PositionAnalysis,
 } from '@coupparfait/core'
 import { getEngine } from '@/lib/engine/client.ts'
@@ -41,6 +42,14 @@ export interface RunAnalysisOptions {
   depth?: number
   book?: OpeningBook | null
   locale?: 'fr' | 'en'
+  /**
+   * Façon d'écrire les coups cités dans les explications.
+   *
+   * La même que la liste des coups à côté : sans elle, la relecture affichait
+   * « ♘f3 » dans la colonne et « Cf3 » deux centimètres plus loin, dans la
+   * phrase qui commente ce coup-là.
+   */
+  notation?: Notation
   /** Camp du lecteur, pour que les explications s'adressent à la bonne personne. */
   lecteur?: 'w' | 'b' | null
   /**
@@ -85,6 +94,7 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<Analysis
     depth = 18,
     book,
     locale = 'fr',
+    notation,
     lecteur = null,
     headers,
     onProgress,
@@ -128,6 +138,7 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<Analysis
     analyser,
     book: book ?? undefined,
     locale,
+    notation,
     // Trois lignes et non plus deux : la deuxième suffisait à classer le coup
     // joué, il en faut une de plus pour montrer au lecteur ce qu'il avait
     // d'autre sous la main. Le surcoût est réel mais modéré — le moteur
@@ -181,9 +192,20 @@ export async function rejouerAnalyse(options: {
   headers?: Record<string, string>
   book?: OpeningBook | null
   locale?: 'fr' | 'en'
+  /** Façon d'écrire les coups cités — voir `RunAnalysisOptions.notation`. */
+  notation?: Notation
   lecteur?: 'w' | 'b' | null
 }): Promise<AnalysisOutcome> {
-  const { moves, positions, startFen, headers, book, locale = 'fr', lecteur = null } = options
+  const {
+    moves,
+    positions,
+    startFen,
+    headers,
+    book,
+    locale = 'fr',
+    notation,
+    lecteur = null,
+  } = options
 
   const report = await analyseGame({
     lecteur,
@@ -192,6 +214,7 @@ export async function rejouerAnalyse(options: {
     analyser: makeArrayAnalyser(positions),
     book: book ?? undefined,
     locale,
+    notation,
     multiPv: 3,
   })
 

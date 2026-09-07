@@ -247,6 +247,7 @@ export function useLiveCommentary({
 
         const explanation = explainMove({
           locale: prefs.locale,
+          notation: prefs.notation,
           lecteur,
           suiteDetaillee,
           san: move.san,
@@ -308,6 +309,7 @@ export function useLiveCommentary({
     book,
     prefs.clientDepth,
     prefs.locale,
+    prefs.notation,
   ])
 
   return { commentary, loading, history }

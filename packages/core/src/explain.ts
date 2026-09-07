@@ -83,6 +83,28 @@ export function localiseSan(san: string, locale: Locale, notation: Notation = 'l
   return locale === 'fr' ? sanToFrench(san) : san
 }
 
+/** Le glyphe figurine, et la pièce qu'il dessine. */
+const FIGURINE_PIECES: Record<string, PieceSymbol> = {
+  '♔': 'k',
+  '♕': 'q',
+  '♖': 'r',
+  '♗': 'b',
+  '♘': 'n',
+}
+
+/**
+ * Ramène les figurines à leur lettre.
+ *
+ * Les explications s'écrivent désormais dans la notation choisie : quand c'est
+ * la figurine, elles contiennent « ♘f3 ». La synthèse vocale, elle, lit ce
+ * glyphe « symbole cavalier blanc » — ou ne le lit pas du tout. On le rend donc
+ * à sa lettre avant de parler, ce qui redonne exactement la phrase d'avant.
+ */
+export function figurinesEnLettres(text: string, locale: Locale): string {
+  const letters = locale === 'fr' ? SAN_LETTER_FR : SAN_LETTER_EN
+  return text.replace(/[♔♕♖♗♘]/g, (glyph) => letters[FIGURINE_PIECES[glyph]!]!)
+}
+
 /**
  * Pourquoi un coup marche : ce qu'il attaque, et ce qui le protège.
  *
@@ -422,6 +444,24 @@ export interface ExplainContext {
   quality?: MoveQuality
   /** Coup joué en notation localisée. */
   san: string
+  /**
+   * Façon d'écrire les coups cités dans les phrases.
+   *
+   * Les explications citent des coups — le remède, la suite recommandée, la
+   * variante d'un mat forcé — et elles les écrivaient toujours en lettres,
+   * pendant que la liste des coups, elle, obéissait aux préférences. Avec le
+   * réglage par défaut, la même partie s'affichait donc « ♘f3 » à gauche et
+   * « Cf3 » dans le texte à droite, à deux centimètres l'une de l'autre.
+   *
+   * Absente, on garde les lettres : c'est ce que veulent l'export PGN et les
+   * quelques appels qui n'ont pas de préférence sous la main.
+   */
+  notation?: Notation
+}
+
+/** Un coup cité dans une phrase, écrit comme le lecteur les lit. */
+function citer(san: string, ctx: ExplainContext): string {
+  return localiseSan(san, ctx.locale, ctx.notation)
 }
 
 const squares = (m: DetectedMotif) => m.squares.join(', ')
@@ -635,13 +675,13 @@ const MOTIFS_FR: Partial<Record<MotifId, MotifCopy>> = {
     name: 'Mat en deux',
     definition: 'Un mat forcé en deux coups, quelles que soient les réponses adverses.',
     sentence: (m, ctx) =>
-      `${quiA(m, ctx)} un mat forcé en deux coups${m.detail?.line ? ` : ${(m.detail.line as string[]).map(sanToFrench).join(' ')}` : ''}.`,
+      `${quiA(m, ctx)} un mat forcé en deux coups${m.detail?.line ? ` : ${(m.detail.line as string[]).map((s) => citer(s, ctx)).join(' ')}` : ''}.`,
   },
   mateIn3: {
     name: 'Mat en trois',
     definition: 'Un mat forcé en trois coups : aucune défense ne le repousse.',
     sentence: (m, ctx) =>
-      `${quiA(m, ctx)} un mat forcé en trois coups${m.detail?.line ? ` : ${(m.detail.line as string[]).map(sanToFrench).join(' ')}` : ''}.`,
+      `${quiA(m, ctx)} un mat forcé en trois coups${m.detail?.line ? ` : ${(m.detail.line as string[]).map((s) => citer(s, ctx)).join(' ')}` : ''}.`,
   },
   mateThreat: {
     name: 'Menace de mat',
@@ -1063,6 +1103,11 @@ export function meriteUnMeilleurCoup(quality: MoveQuality, winLoss: number): boo
 
 export interface MoveExplanationInput {
   locale: Locale
+  /**
+   * Façon d'écrire les coups cités — voir `ExplainContext.notation`.
+   * Par défaut les lettres, pour les appels sans préférence sous la main.
+   */
+  notation?: Notation
   /** Coup joué en SAN anglais. */
   san: string
   /** Position après le coup. */
@@ -1130,9 +1175,10 @@ export interface MoveExplanation {
 export function explainMove(input: MoveExplanationInput): MoveExplanation {
   const fr = input.locale === 'fr'
   const board = new Chess(input.fenAfter, { skipValidation: true })
-  const san = localiseSan(input.san, input.locale)
+  const san = localiseSan(input.san, input.locale, input.notation)
   const ctx: ExplainContext = {
     locale: input.locale,
+    notation: input.notation,
     board,
     mover: input.mover,
     lecteur: input.lecteur,
@@ -1208,8 +1254,10 @@ export function explainMove(input: MoveExplanationInput): MoveExplanation {
     input.bestSan !== input.san &&
     meriteUnMeilleurCoup(input.quality, input.winLoss)
   ) {
-    const best = localiseSan(input.bestSan, input.locale)
-    const line = (input.bestLine ?? []).slice(0, 4).map((s) => localiseSan(s, input.locale))
+    const best = localiseSan(input.bestSan, input.locale, input.notation)
+    const line = (input.bestLine ?? [])
+      .slice(0, 4)
+      .map((s) => localiseSan(s, input.locale, input.notation))
     const why = explainBetterMove(input, best)
     const example = exempleDeSuite(line, input, fr)
     betterMove = fr
@@ -1307,6 +1355,7 @@ function explainBetterMove(input: MoveExplanationInput, localisedBest: string): 
     probe.move(input.bestSan)
     const ctx: ExplainContext = {
       locale: input.locale,
+      notation: input.notation,
       board: probe,
       mover: input.mover,
       lecteur: input.lecteur,
@@ -1701,7 +1750,9 @@ function buildSpeech(
 ): string {
   const spoken = sanToSpeech(input.san, fr ? 'fr' : 'en')
   const verdict = QUALITY_STYLES[input.quality].label[fr ? 'fr' : 'en']
-  const first = body[0] ? stripMarkup(body[0]) : ''
+  // Les coups cités dans la phrase reviennent à leur lettre : un glyphe ne se
+  // prononce pas, et la voix sautait le mot entier.
+  const first = body[0] ? figurinesEnLettres(stripMarkup(body[0]), input.locale) : ''
   const intro = fr ? `${spoken}. ${verdict}.` : `${spoken}. ${verdict}.`
   return [intro, first].filter(Boolean).join(' ')
 }
@@ -1727,11 +1778,12 @@ export function describePosition(
   motifs: DetectedMotif[],
   score: Score | null,
   locale: Locale,
+  notation?: Notation,
 ): { summary: string; points: string[] } {
   const fr = locale === 'fr'
   const board = new Chess(fen, { skipValidation: true })
   const turn = board.turn()
-  const ctx: ExplainContext = { locale, board, mover: turn, san: '' }
+  const ctx: ExplainContext = { locale, notation, board, mover: turn, san: '' }
 
   const summaryParts: string[] = []
   summaryParts.push(
@@ -1771,6 +1823,8 @@ export function describePosition(
 
 export interface RecommendedExplanationInput {
   locale: Locale
+  /** Façon d'écrire les coups cités — voir `ExplainContext.notation`. */
+  notation?: Notation
   /** Position **avant** le coup joué — celle où le moteur recommande autre chose. */
   fenBefore: string
   /** Le coup du moteur, en SAN anglais. */
@@ -1832,6 +1886,7 @@ export function explainRecommendedMove(input: RecommendedExplanationInput): Move
 
   return explainMove({
     locale: input.locale,
+    notation: input.notation,
     san: input.bestSan,
     fenBefore: input.fenBefore,
     fenAfter: board.fen(),

@@ -26,7 +26,6 @@ import { ArrowLeft, ArrowRight, Check, Eye, RotateCcw, Volume2, VolumeX } from '
 import clsx from 'clsx'
 import { Chess } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
-import { sanToFrench } from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { ArrowLegend, LEGEND, legendFor } from '@/components/board/ArrowLegend.tsx'
 import { Button, Card, Chip } from '@/components/ui/index.tsx'
@@ -42,6 +41,7 @@ import {
 } from '@/lib/lessons/playback.ts'
 import { playMoveFor, playMoveSound, playSound } from '@/lib/sound.ts'
 import { prefetchSpeech, speak, stopSpeaking } from '@/lib/speech.ts'
+import { useSan } from '@/lib/notation.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import type { Arrow, CircleMark } from '@/components/board/boardKit.ts'
 import { useLegalMoves } from '@/lib/game/useLegalMoves.ts'
@@ -70,7 +70,7 @@ export default function LessonPage() {
 
   const voiceEnabled = usePreferences((state) => state.voiceEnabled)
   const setPreference = usePreferences((state) => state.set)
-  const locale = usePreferences((state) => state.locale)
+  const ecrire = useSan()
 
   const [stepIndex, setStepIndex] = useState(0)
   /** À droite du fil d'Ariane, où le plateau pose sa bascule 2D / 3D / plein écran. */
@@ -276,12 +276,12 @@ export default function LessonPage() {
       setRevealArrow({ from: move.from, to: move.to, color: 'blue', weight: 'bold' })
       setFeedback({
         kind: 'revealed',
-        text: `Le coup était ${locale === 'fr' ? sanToFrench(move.san) : move.san}. Joue-le pour continuer.`,
+        text: `Le coup était ${ecrire(move.san)}. Joue-le pour continuer.`,
       })
     } catch {
       setFeedback({ kind: 'revealed', text: 'Impossible de montrer le coup ici.' })
     }
-  }, [step, fen, locale])
+  }, [step, fen, ecrire])
 
   // ── Navigation ────────────────────────────────────────────────────────────
   const goNext = useCallback(() => {

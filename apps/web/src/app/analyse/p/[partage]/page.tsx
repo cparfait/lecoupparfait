@@ -32,7 +32,7 @@ interface AnalysePartagee {
 
 export default function AnalysePartageePage({ params }: { params: Promise<{ partage: string }> }) {
   const { partage } = use(params)
-  const { locale } = usePreferencesDe('locale')
+  const { locale, notation } = usePreferencesDe('locale', 'notation')
   const { book } = useOpeningBook()
 
   const [outcome, setOutcome] = useState<AnalysisOutcome | null>(null)
@@ -59,6 +59,7 @@ export default function AnalysePartageePage({ params }: { params: Promise<{ part
             lecteur: analyse.lecteur,
             book,
             locale,
+            notation,
           }),
         )
       })
@@ -68,7 +69,7 @@ export default function AnalysePartageePage({ params }: { params: Promise<{ part
       })
 
     return () => controleur.abort()
-  }, [partage, book, locale])
+  }, [partage, book, locale, notation])
 
   if (introuvable) {
     return (

@@ -155,6 +155,7 @@ function ImportScreen({
   const [depth, setDepth] = useState(18)
   const { book } = useOpeningBook()
   const locale = usePreferences((state) => state.locale)
+  const notation = usePreferences((state) => state.notation)
   const { marquer } = useQuotidien()
 
   // Une partie qui vient de se terminer est déposée ici par la boîte de fin de
@@ -241,6 +242,7 @@ function ImportScreen({
         depth,
         book,
         locale,
+        notation,
         // Le camp du joueur, quand la partie vient de lui : les explications
         // s'adressent alors à lui d'un bout à l'autre, y compris sur les coups
         // de son adversaire. Un PGN collé n'a pas de « toi » — `lecteur` reste
@@ -290,7 +292,20 @@ function ImportScreen({
     } finally {
       abandonRef.current = null
     }
-  }, [parsed, depth, book, locale, camp, handedOver, marquer, onStart, onProgress, onDone, onError])
+  }, [
+    parsed,
+    depth,
+    book,
+    locale,
+    notation,
+    camp,
+    handedOver,
+    marquer,
+    onStart,
+    onProgress,
+    onDone,
+    onError,
+  ])
 
   /**
    * Rouvre une analyse déjà faite.
@@ -325,6 +340,7 @@ function ImportScreen({
             headers: gardee.headers,
             book,
             locale,
+            notation,
             lecteur: gardee.lecteur,
           }),
         )
@@ -334,7 +350,7 @@ function ImportScreen({
         onError()
       }
     },
-    [book, locale, onStart, onDone, onError, onSide],
+    [book, locale, notation, onStart, onDone, onError, onSide],
   )
 
   /**

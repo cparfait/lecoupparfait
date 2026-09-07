@@ -17,7 +17,7 @@ import { gamePhase } from './board.ts'
 import { classifyMove, countQualities, findTurningPoints } from './classify.ts'
 import { averageCentipawnLoss, estimateElo, gameAccuracy, winPercent } from './eval.ts'
 import { explainMove } from './explain.ts'
-import type { Locale, MoveExplanation } from './explain.ts'
+import type { Locale, MoveExplanation, Notation } from './explain.ts'
 import type { OpeningBook } from './openings.ts'
 import { uciLineToSan } from './uci.ts'
 import type {
@@ -45,6 +45,13 @@ export interface AnalyseGameOptions {
   /** Livre d'ouvertures, pour marquer les coups de théorie. */
   book?: OpeningBook
   locale?: Locale
+  /**
+   * Façon d'écrire les coups cités dans les explications.
+   *
+   * Elle suit la préférence du lecteur, comme la liste des coups : sans quoi la
+   * même partie s'écrit « ♘f3 » dans la liste et « Cf3 » dans le texte.
+   */
+  notation?: Notation
   /**
    * Camp du lecteur, quand on le connaît.
    *
@@ -90,6 +97,7 @@ export async function analyseGame(options: AnalyseGameOptions): Promise<FullGame
     analyser,
     book,
     locale = 'fr',
+    notation,
     lecteur = null,
     multiPv = 2,
     thinkTimes = [],
@@ -225,6 +233,7 @@ export async function analyseGame(options: AnalyseGameOptions): Promise<FullGame
     explanations.push(
       explainMove({
         locale,
+        notation,
         lecteur,
         san: move.san,
         fenAfter,
