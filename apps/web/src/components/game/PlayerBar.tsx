@@ -182,7 +182,7 @@ export const PlayerBar = memo(function PlayerBar({
           )}
         </div>
 
-        <div className="mt-0.5 flex h-4 items-center gap-1">
+        <div className="mt-0.5 flex h-5 items-center gap-1">
           {captured.length > 0 ? (
             <CapturedRow pieces={captured} pieceSet={pieceSet} color={color === 'w' ? 'b' : 'w'} />
           ) : status ? (
@@ -231,6 +231,26 @@ function CapturedRow({
   const order: PieceSymbol[] = ['q', 'r', 'b', 'n', 'p']
   const sorted = [...pieces].sort((a, b) => order.indexOf(a) - order.indexOf(b))
 
+  /*
+    Un liseré de la couleur opposée à la pièce.
+
+    Les silhouettes sont peintes dans les deux seules couleurs que prennent
+    aussi nos fonds : un pion noir sur le fond nuit du thème par défaut, c'est
+    du noir sur du noir — la prise du joueur noir ne se voyait tout simplement
+    pas. Le trait que portent les SVG ne sauve rien : à seize pixels, ses 1,5
+    unités sur 45 retombent sous le demi-pixel.
+
+    On cerne donc chaque pièce de son propre contraire, et non d'une couleur
+    de thème : le liseré ne sert qu'au camp qui se confond avec le fond, et
+    l'autre le porte sans qu'on le remarque. La règle vaut donc telle quelle
+    sur les quatre thèmes, clair compris, où ce sont les blancs qui
+    s'effacent.
+  */
+  const lisere =
+    color === 'b'
+      ? 'drop-shadow(0 0 1px rgb(255 255 255 / .95)) drop-shadow(0 0 1.5px rgb(255 255 255 / .6))'
+      : 'drop-shadow(0 0 1px rgb(0 0 0 / .95)) drop-shadow(0 0 1.5px rgb(0 0 0 / .6))'
+
   return (
     <span className="flex items-center" aria-label="Pièces capturées">
       {sorted.map((type, index) => (
@@ -238,8 +258,10 @@ function CapturedRow({
           key={`${type}-${index}`}
           src={pieceUrl(pieceSet, color, type)}
           alt=""
-          className="h-4 w-4 opacity-75"
-          style={{ marginLeft: index === 0 ? 0 : -5 }}
+          // Dix-huit pixels et pleine opacité : le voile à 75 % achevait
+          // d'effacer ce que le fond mangeait déjà.
+          className="h-[18px] w-[18px]"
+          style={{ marginLeft: index === 0 ? 0 : -6, filter: lisere }}
         />
       ))}
     </span>
