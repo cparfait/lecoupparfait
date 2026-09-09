@@ -16,7 +16,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Check, ChevronDown, ChevronUp, Swords } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Sun, Swords } from 'lucide-react'
 import clsx from 'clsx'
 import { Card, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
@@ -90,7 +90,11 @@ export function DefiDuJour({ className }: { className?: string }) {
   return (
     // `relative` : le recouvrement de `DefiCliquable` s'étend sur cette carte,
     // et un `absolute inset-0` cherche le premier ancêtre positionné.
-    <Card className={clsx('relative p-5', className)}>
+    // Le fond de l'accent tant que le défi attend, le vert quand il est
+    // relevé — voir `teinte-defi` et `teinte-reussi` dans `globals.css`. La
+    // carte publique est là pour montrer ce qu'un compte apporte : elle doit
+    // se voir avant de se lire.
+    <Card className={clsx('relative p-5', defiFait ? 'teinte-reussi' : 'teinte-defi', className)}>
       <SectionTitle
         hint="La même position pour tout le monde de ton niveau, jusqu’à minuit."
         // La même flamme que dans la barre du haut, et volontairement le même
@@ -146,9 +150,27 @@ export function DefiDuJour({ className }: { className?: string }) {
       )}
 
       {/* ── Quêtes ────────────────────────────────────────────────────── */}
-      <div className={clsx('mt-4', replie && 'hidden')}>
-        <div className="mb-2 flex items-baseline justify-between">
-          <span className="text-xs font-semibold text-faint">Aujourd’hui</span>
+      {/* Un encart à part, dans l'ambre de la flamme : les quêtes ne sont pas
+          le défi, et leur fond le dit avant le libellé. `relative z-10` pour la
+          même raison que la flamme du titre — le recouvrement de
+          `DefiCliquable` couvre toute la carte, et un fond posé après lui le
+          masquerait. Il reste donc dessous : l'encart se voit, la carte entière
+          reste cliquable. */}
+      <div
+        className={clsx(
+          'mt-4 rounded-[var(--radius-sm)] bg-[color-mix(in_oklab,var(--q-inaccuracy)_10%,transparent)] px-3 py-2.5',
+          replie && 'hidden',
+        )}
+      >
+        <div className="mb-2 flex items-center justify-between">
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-[color-mix(in_oklab,var(--q-inaccuracy)_62%,var(--text))]">
+            <Sun size={12} strokeWidth={2.5} aria-hidden />
+            {/* « Les quêtes du jour », et non « Aujourd'hui » : cet encart est
+                dans une carte qui s'appelle déjà « Le défi du jour », et dont
+                la liste commence par « Résoudre le défi du jour ». Le mot
+                « aujourd'hui » ne départageait rien — il vaut pour les deux. */}
+            Les quêtes du jour
+          </span>
           <span className="text-xs tabular-nums text-muted">
             {xp} / {XP_TOTAL} points
           </span>
@@ -163,7 +185,7 @@ export function DefiDuJour({ className }: { className?: string }) {
           aria-label="Points du jour"
         >
           <div
-            className="h-full rounded-full bg-accent transition-[width] duration-500"
+            className="h-full rounded-full bg-[var(--q-inaccuracy)] transition-[width] duration-500"
             style={{ width: `${(xp / XP_TOTAL) * 100}%` }}
           />
         </div>

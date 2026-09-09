@@ -682,6 +682,91 @@ button.glass:hover {
 }
 
 /*
+ * Les cartes teintées : le défi du jour, la journée, et ce qui est fait.
+ *
+ * Sur l'accueil, la carte du défi et celle d'« Aujourd'hui » portaient le même
+ * voile gris que le parcours, les dernières parties et les analyses : rien ne
+ * disait, de loin, que ces deux-là expirent à minuit. Elles prennent donc un
+ * fond, et chacune le sien, choisi pour ce qu'il veut dire plutôt que pour
+ * varier :
+ *
+ *   - `teinte-defi`   : l'accent — c'est l'action du jour, la même couleur que
+ *                       le bouton primaire qui y mène ;
+ *   - `teinte-jour`   : l'ambre de la flamme — les quêtes du jour nourrissent
+ *                       la série, et c'est cette couleur-là qu'on voit dans la
+ *                       barre du haut ;
+ *   - `teinte-reussi` : le vert du meilleur coup — c'est fait.
+ *
+ * Trois classes, une seule règle : la couleur passe par `--teinte`, et le reste
+ * — dégradé, contour, halo — est commun. Le dégradé va du coin haut-gauche,
+ * franc, vers un fond presque neutre : un aplat plein de couleur ferait un
+ * panneau publicitaire, pas une carte.
+ *
+ * Deux variables en ressortent pour le contenu de la carte :
+ *
+ *   - `--teinte-texte`, la même couleur rapprochée du texte, pour les libellés
+ *     écrits dans la teinte : posé tel quel, l'accent sur son propre fond
+ *     tombait à 3:1 sur « aurora », et l'ambre à 2,7:1 sur le thème clair. Le
+ *     mélange l'éclaircit sur fond sombre et l'assombrit sur fond clair, et
+ *     c'est ce qu'il faut dans les deux cas ;
+ *   - `--text-faint`, remplacé par `--text-muted` : le troisième niveau de
+ *     texte est réglé à 4,7:1 sur une carte grise, et le fond teinté, plus
+ *     clair, le ramenait à 2,8:1 dans le coin le plus coloré ; un simple
+ *     éclaircissement le laissait encore à 3,7:1. On perd un cran de
+ *     hiérarchie dans ces trois cartes, on garde le seuil partout. Le pont
+ *     vers Tailwind étant `inline`, redéfinir la variable ici suffit à toute
+ *     la carte.
+ *
+ * 22 % dans le coin, et non plus : au-delà, c'est le texte qui paie.
+ *
+ * Écrit `.glass.teinte-*` et non en `@utility` : il faut passer devant le fond
+ * de `glass`, et devant sa version « effets réduits » qui le remplace par un
+ * aplat opaque. La spécificité du sélecteur composé y suffit. Dans le
+ * raccourci `background`, seule la dernière couche peut être une couleur ; les
+ * teintes sont donc des dégradés, et `--surface` reste en dernier.
+ */
+.glass.teinte-defi {
+  --teinte: var(--accent);
+}
+.glass.teinte-jour {
+  --teinte: var(--q-inaccuracy);
+}
+.glass.teinte-reussi {
+  --teinte: var(--q-best);
+}
+.glass.teinte-defi,
+.glass.teinte-jour,
+.glass.teinte-reussi {
+  --teinte-texte: color-mix(in oklab, var(--teinte) 62%, var(--text));
+  --text-faint: var(--text-muted);
+  background:
+    linear-gradient(180deg, var(--sheen), transparent 46%),
+    linear-gradient(
+      150deg,
+      color-mix(in oklab, var(--teinte) 22%, transparent),
+      color-mix(in oklab, var(--teinte) 7%, transparent) 72%
+    ),
+    var(--surface);
+  border-color: color-mix(in oklab, var(--teinte) 48%, var(--border));
+  box-shadow:
+    inset 0 1px 0 0 var(--inner-edge),
+    var(--shadow-sm),
+    0 0 32px -14px color-mix(in oklab, var(--teinte) 60%, transparent);
+}
+/* Effets réduits : la base redevient opaque, la teinte reste. */
+[data-effects='low'] .glass.teinte-defi,
+[data-effects='low'] .glass.teinte-jour,
+[data-effects='low'] .glass.teinte-reussi {
+  background:
+    linear-gradient(
+      150deg,
+      color-mix(in oklab, var(--teinte) 22%, transparent),
+      color-mix(in oklab, var(--teinte) 7%, transparent) 72%
+    ),
+    var(--bg-elev);
+}
+
+/*
  * Surface flottante : menus, listes déroulantes, barres posées sur le plateau.
  *
  * Le verre translucide convient à ce qui reste dans le flux — on devine la

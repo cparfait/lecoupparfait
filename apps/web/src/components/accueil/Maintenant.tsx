@@ -48,13 +48,23 @@ export function Maintenant({
         // Une personne qui attend mérite qu'on le voie avant de lire : le
         // liseré est la seule différence, et elle se remarque de loin.
         principale.urgent && 'border-accent/60',
+        // Le défi du jour prend le fond de l'accent : c'est la seule
+        // proposition qui expire, et c'est la couleur du bouton qui y mène.
+        // Voir `teinte-defi` dans `globals.css`.
+        principale.id === 'defi' && 'teinte-defi',
       )}
     >
       <div className="p-5">
         <p
           className={clsx(
             'text-[12px] font-semibold',
-            principale.urgent ? 'text-accent' : 'text-faint',
+            // Sur le fond teinté du défi, l'accent lui-même ne se lit plus :
+            // `--teinte-texte` est la même couleur, rapprochée du texte.
+            principale.id === 'defi'
+              ? 'text-[var(--teinte-texte)]'
+              : principale.urgent
+                ? 'text-accent'
+                : 'text-faint',
           )}
         >
           {principale.categorie}
@@ -79,12 +89,19 @@ export function Maintenant({
       {suite.length > 0 && (
         <div className="border-t border-line/60">
           <p className="px-5 pt-3 text-[12px] font-semibold text-faint">Et aussi</p>
-          <ul className="px-2 pb-2">
+          <ul className="space-y-1 px-2 pb-2">
             {suite.slice(0, SECONDAIRES_MAX).map((chose) => (
               <li key={`${chose.id}-${chose.lien}`}>
                 <Link
                   href={chose.lien}
-                  className="flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2.5 transition-colors hover:bg-surface-hover"
+                  className={clsx(
+                    'flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2.5 transition-colors',
+                    // Rangé en second, le défi garde sa couleur : une ligne
+                    // grise parmi les grises se manque, et lui meurt à minuit.
+                    chose.id === 'defi'
+                      ? 'bg-[color-mix(in_oklab,var(--accent)_12%,transparent)] hover:bg-[color-mix(in_oklab,var(--accent)_20%,transparent)]'
+                      : 'hover:bg-surface-hover',
+                  )}
                 >
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[14px] font-medium">{chose.titre}</span>

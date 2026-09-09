@@ -26,7 +26,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Check, ChevronDown, ChevronUp, Swords } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Sun, Swords } from 'lucide-react'
 import clsx from 'clsx'
 import { tranchesAuDessus } from '@coupparfait/core'
 import { Card } from '@/components/ui/index.tsx'
@@ -86,6 +86,33 @@ export function Aujourdhui({
   const replie = defiFait && !deplie
 
   /*
+    Le titre nomme la carte, et il ne nomme qu'elle.
+
+    Il disait « Aujourd'hui ». C'était exactement le mot que portait, juste
+    au-dessus, la rubrique de « Maintenant » quand le défi y est mis en avant —
+    et cette carte-ci commence par la ligne « Résoudre le défi du jour ». Deux
+    blocs sous le même intitulé, le défi du jour écrit dans les deux : rien ne
+    disait s'il s'agissait d'une chose ou de deux.
+
+    Cette carte porte **les quêtes**, au pluriel ; le défi n'en est qu'une, et
+    la liste le distingue à sa couleur. Le titre le dit donc, et l'ancre garde
+    son nom — elle est visée depuis le panneau de la flamme.
+
+    « Journée faite » remplace « Défi du jour relevé » une fois tout terminé :
+    le titre d'une carte de quêtes ne peut pas parler d'autre chose qu'elles.
+    La question « ai-je fait le défi ? » se répond une ligne plus bas, sur la
+    ligne du défi, cochée et barrée — et au liseré vert, qui n'a pas bougé.
+  */
+  const titre = toutFait ? 'Journée faite' : 'Tes quêtes du jour'
+  const Icone = toutFait ? Check : Sun
+  const libelle = (
+    <span className="flex items-center gap-1.5 text-[12px] font-semibold text-[var(--teinte-texte)]">
+      <Icone size={12} strokeWidth={toutFait ? 3 : 2.5} aria-hidden />
+      {titre}
+    </span>
+  )
+
+  /*
     Sauf quand on vient exprès la voir.
 
     Le panneau de la flamme, dans la barre du haut, propose « Voir les quêtes
@@ -125,7 +152,19 @@ export function Aujourdhui({
     // `self-start` : dans la grille à deux colonnes, la carte prenait la
     // hauteur de sa voisine ; repliée, cela faisait un titre au-dessus d'un
     // grand vide.
-    <Card id={ANCRE} className="scroll-mt-20 self-start overflow-hidden">
+    // Le fond dit l'état, avant le titre : ambre tant que la journée est en
+    // cours — c'est la couleur de la flamme, que ces quêtes nourrissent — et
+    // vert quand tout est fait. Les trois teintes sont décrites dans
+    // `globals.css`. La couleur choisie ressort dans `--teinte`, que la barre
+    // de points reprend, et dans `--teinte-texte` pour le libellé : un seul
+    // endroit décide.
+    <Card
+      id={ANCRE}
+      className={clsx(
+        'scroll-mt-20 self-start overflow-hidden',
+        toutFait ? 'teinte-reussi' : 'teinte-jour',
+      )}
+    >
       {/* Le liseré vert, comme la teinte de chapitre sur la carte voisine.
           C'est ce qui se voit sans lire, et c'est tout l'objet : la question
           « est-ce que j'ai fait le défi aujourd'hui ? » doit se répondre d'un
@@ -145,10 +184,7 @@ export function Aujourdhui({
             !replie && 'border-b border-line/60',
           )}
         >
-          <span className="flex items-center gap-1.5 text-[12px] font-semibold text-[var(--q-best)]">
-            <Check size={12} strokeWidth={3} aria-hidden />
-            Défi du jour relevé
-          </span>
+          {libelle}
           <span className="ml-auto text-[12px] tabular-nums text-muted">
             {xp} / {XP_TOTAL} points du jour
           </span>
@@ -159,8 +195,8 @@ export function Aujourdhui({
           )}
         </button>
       ) : (
-        <div className="flex items-baseline justify-between gap-2 border-b border-line/60 px-4 py-2.5">
-          <p className="text-[12px] font-semibold text-faint">Aujourd’hui</p>
+        <div className="flex items-center justify-between gap-2 border-b border-line/60 px-4 py-2.5">
+          {libelle}
           <p className="text-[12px] tabular-nums text-muted">
             {xp} / {XP_TOTAL} points du jour
           </p>
@@ -177,7 +213,7 @@ export function Aujourdhui({
           aria-label="Points du jour"
         >
           <div
-            className="h-full rounded-full bg-accent transition-[width] duration-500"
+            className="h-full rounded-full bg-[var(--teinte)] transition-[width] duration-500"
             style={{ width: `${(xp / XP_TOTAL) * 100}%` }}
           />
         </div>

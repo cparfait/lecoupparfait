@@ -164,12 +164,20 @@ export function prochainesChoses(etat: EtatAccueil): ProchaineChose[] {
   }
 
   // ── 3. Le défi du jour, tant qu'il n'est pas fait ───────────────────────
+  //
+  // La rubrique nomme la chose, et non le moment. Elle disait « Aujourd'hui »,
+  // c'est-à-dire exactement le mot que portait la carte des quêtes juste en
+  // dessous — laquelle commence par « Résoudre le défi du jour ». Deux blocs
+  // sous le même intitulé, le défi écrit dans les deux : on ne savait pas si
+  // l'on avait devant soi une chose ou deux. Ici c'est **le** défi, au
+  // singulier, et le détail dit son rapport à la liste : il en est la première.
   if (etat.defiFait === false) {
     liste.push({
       id: 'defi',
-      categorie: 'Aujourd’hui',
-      titre: 'Le défi du jour t’attend',
-      detail: 'Une position, la même pour tout le monde de ton niveau. Elle change à minuit.',
+      categorie: 'Le défi du jour',
+      titre: 'Une position, et une seule, jusqu’à minuit',
+      detail:
+        'La même pour tout le monde de ton niveau — et c’est la première de tes quêtes du jour.',
       action: 'Chercher le coup',
       lien: '/puzzles?defi=1',
     })
@@ -185,7 +193,10 @@ export function prochainesChoses(etat: EtatAccueil): ProchaineChose[] {
     const n = etat.quetes.restantes.length
     liste.push({
       id: 'quete',
-      categorie: 'Aujourd’hui',
+      // « Une quête du jour », et non « Aujourd'hui » : la rubrique dit d'où
+      // sort cette ligne — de la liste d'à côté, dont on montre ici la
+      // première qui reste.
+      categorie: 'Une quête du jour',
       titre: prochaine.label,
       detail: `${etat.quetes.xp} / ${etat.quetes.total} points du jour. ${
         n > 1 ? `Encore ${n} quêtes` : 'Dernière quête'

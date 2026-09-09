@@ -18,6 +18,16 @@
  * Une quête faite reste un lien : on y retourne volontiers, et une ligne qui
  * cesse d'être cliquable au moment où elle se coche donne l'impression d'une
  * porte qu'on referme.
+ *
+ * **Le défi du jour porte sa couleur.** C'est une quête comme les autres pour
+ * le décompte des points, et pas du tout comme les autres pour le reste : il
+ * est la seule position que tout le monde partage, il a sa propre carte en
+ * haut de l'accueil, et c'est celle-là qu'on met en avant. Écrit en gris au
+ * milieu de trois autres lignes grises, il devenait la quatrième d'une liste
+ * anonyme, et l'on ne savait plus si la grande carte violette du dessus
+ * parlait de cette ligne ou d'autre chose. Elle prend donc le fond de
+ * l'accent — le même que la carte, le même que le bouton qui y mène : un
+ * regard suffit à relier les deux.
  */
 
 import Link from 'next/link'
@@ -38,6 +48,7 @@ export function ListeDesQuetes({
       {QUETES.map((quete) => {
         const faite = etat ? queteFaite(etat, quete.id) : false
         const avancement = etat?.avancement[quete.id] ?? 0
+        const estDefi = quete.id === 'defi'
         return (
           <li key={quete.id}>
             <Link
@@ -46,15 +57,29 @@ export function ListeDesQuetes({
               // texte — il faut au moins un doigt de large — sans décaler la
               // liste par rapport au reste de la carte.
               className={clsx(
-                '-mx-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] px-1.5 py-1 text-[14px] transition-colors hover:bg-surface-hover',
-                faite ? 'text-faint line-through' : 'text-muted hover:text-ink',
+                '-mx-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] px-1.5 py-1 text-[14px] transition-colors',
+                // Le fond de l'accent tient même une fois la quête faite :
+                // c'est ce qui dit « ceci est le défi », pas « ceci reste à
+                // faire ». Le texte, lui, se barre comme les autres.
+                estDefi
+                  ? 'bg-[color-mix(in_oklab,var(--accent)_12%,transparent)] hover:bg-[color-mix(in_oklab,var(--accent)_20%,transparent)]'
+                  : 'hover:bg-surface-hover',
+                faite
+                  ? 'text-faint line-through'
+                  : estDefi
+                    ? 'font-medium text-[color-mix(in_oklab,var(--accent)_62%,var(--text))]'
+                    : 'text-muted hover:text-ink',
               )}
             >
               <span
                 aria-hidden
                 className={clsx(
                   'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
-                  faite ? 'border-[var(--q-best)] bg-[var(--q-best)] text-white' : 'border-line',
+                  faite
+                    ? 'border-[var(--q-best)] bg-[var(--q-best)] text-white'
+                    : estDefi
+                      ? 'border-accent'
+                      : 'border-line',
                 )}
               >
                 {faite && <Check size={11} />}
