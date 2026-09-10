@@ -31,10 +31,11 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Check, ChevronDown, ChevronUp, Sun, Swords } from 'lucide-react'
+import { Check, Sun, Swords } from 'lucide-react'
 import clsx from 'clsx'
 import { tranchesAuDessus } from '@coupparfait/core'
 import { Card } from '@/components/ui/index.tsx'
+import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { ListeDesQuetes } from '@/components/daily/ListeDesQuetes.tsx'
 import { XP_TOTAL } from '@/lib/daily/quetes.ts'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
@@ -111,12 +112,6 @@ export function Aujourdhui({
   */
   const titre = toutFait ? 'Journée faite' : 'Tes quêtes du jour'
   const Icone = toutFait ? Check : Sun
-  const libelle = (
-    <span className="flex items-center gap-1.5 text-[12px] font-semibold text-[var(--teinte-texte)]">
-      <Icone size={12} strokeWidth={toutFait ? 3 : 2.5} aria-hidden />
-      {titre}
-    </span>
-  )
 
   /*
     Sauf quand on vient exprès la voir.
@@ -179,35 +174,19 @@ export function Aujourdhui({
 
       {/* Le titre devient le bouton, une fois le défi relevé : c'est la ligne
           qu'on regarde, autant qu'elle serve. Tant qu'il reste à faire, elle
-          n'est qu'un titre — rien à replier. */}
-      {defiFait ? (
-        <button
-          type="button"
-          onClick={() => setChoix(!deplie)}
-          aria-expanded={deplie}
-          className={clsx(
-            'flex w-full items-center gap-2 px-4 py-2.5 text-left transition-colors hover:bg-surface-hover',
-            !replie && 'border-b border-line/60',
-          )}
-        >
-          {libelle}
-          <span className="ml-auto text-[12px] tabular-nums text-muted">
-            {xp} / {XP_TOTAL} points du jour
-          </span>
-          {replie ? (
-            <ChevronDown size={14} className="shrink-0 text-faint" aria-hidden />
-          ) : (
-            <ChevronUp size={14} className="shrink-0 text-faint" aria-hidden />
-          )}
-        </button>
-      ) : (
-        <div className="flex items-center justify-between gap-2 border-b border-line/60 px-4 py-2.5">
-          {libelle}
-          <p className="text-[12px] tabular-nums text-muted">
-            {xp} / {XP_TOTAL} points du jour
-          </p>
-        </div>
-      )}
+          n'est qu'un titre — rien à replier.
+
+          Le bandeau ne reçoit pas de teinte : il prend celle de la carte, qui
+          la tient déjà de `teinte-jour` ou de `teinte-reussi`. Le titre passe
+          donc de l'ambre au vert avec le reste, sans rien décider ici. */}
+      <EnTeteDeCarte
+        titre={titre}
+        icone={<Icone size={12} strokeWidth={toutFait ? 3 : 2.5} aria-hidden />}
+        fin={`${xp} / ${XP_TOTAL} points du jour`}
+        filet={!replie}
+        onClick={defiFait ? () => setChoix(!deplie) : undefined}
+        ouvert={deplie}
+      />
 
       <div className={clsx('px-4 pb-3 pt-3', replie && 'hidden')}>
         <div

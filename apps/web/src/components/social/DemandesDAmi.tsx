@@ -24,6 +24,7 @@ import Link from 'next/link'
 import { Check, UserPlus, X } from 'lucide-react'
 import clsx from 'clsx'
 import { Button, Card } from '@/components/ui/index.tsx'
+import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 
 interface Demandeur {
@@ -101,15 +102,15 @@ export function DemandesDAmi({ className }: { className?: string }) {
   return (
     <Card className={clsx('overflow-hidden', className)}>
       <div className="h-1 bg-accent" aria-hidden />
-      <div className="flex items-baseline justify-between gap-2 border-b border-line/60 px-4 py-2.5">
-        <p className="flex items-center gap-1.5 text-[12px] font-semibold text-accent">
-          <UserPlus size={12} aria-hidden />
-          {demandes.length === 1 ? 'Une demande d’ami' : `${demandes.length} demandes d’ami`}
-        </p>
-        <Link href="/amis" className="text-[12px] text-accent hover:underline">
-          mon carnet
-        </Link>
-      </div>
+      <EnTeteDeCarte
+        titre={demandes.length === 1 ? 'Une demande d’ami' : `${demandes.length} demandes d’ami`}
+        icone={<UserPlus size={12} aria-hidden />}
+        fin={
+          <Link href="/amis" className="text-accent hover:underline">
+            mon carnet
+          </Link>
+        }
+      />
 
       <ul>
         {demandes.map((demande) => (

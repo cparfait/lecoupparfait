@@ -47,7 +47,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Flame, Gauge, Sparkles } from 'lucide-react'
+import { Flame, Gauge, History, Map, Sparkles } from 'lucide-react'
 import {
   CHAPITRES,
   CARRIERE_TERMINEE,
@@ -57,6 +57,7 @@ import {
 } from '@coupparfait/core'
 import clsx from 'clsx'
 import { Button, ButtonLink, Card, Chip, Skeleton } from '@/components/ui/index.tsx'
+import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { useCarriere } from '@/lib/carriere/useCarriere.ts'
 import { listerAnalyses, type AnalyseEnregistree } from '@/lib/analysis/enregistrees.ts'
 import { chargerPartieEnCours, type PartieEnCours } from '@/lib/game/partieEnCours.ts'
@@ -293,12 +294,15 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
         ) : carriereEnCours && chapitre && progression ? (
           <Card className="overflow-hidden">
             <div className="h-1" style={{ background: chapitre.teinte }} aria-hidden />
-            <div className="flex items-baseline justify-between gap-2 border-b border-line/60 px-4 py-2.5">
-              <p className="text-[12px] font-semibold text-faint">Ton parcours</p>
-              <p className="text-[12px] tabular-nums text-muted">
-                chapitre {chapitre.numero} / {CHAPITRES.length}
-              </p>
-            </div>
+            {/* Le bandeau reprend la teinte du chapitre, celle du liseré
+                juste au-dessus : la carte s'ouvre alors sur un en-tête d'une
+                seule couleur, et cette couleur dit où l'on en est. */}
+            <EnTeteDeCarte
+              titre="Ton parcours"
+              icone={<Map size={12} aria-hidden />}
+              teinte={chapitre.teinte}
+              fin={`chapitre ${chapitre.numero} / ${CHAPITRES.length}`}
+            />
             <div className="p-4">
               <p className="font-display text-base font-bold leading-tight">{chapitre.titre}</p>
               <p className="mt-1 text-[12px] leading-snug text-muted">{chapitre.objectif}</p>
@@ -369,15 +373,22 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
       {(parties === null || parties.length > 0 || (analyses?.length ?? 0) > 0) && (
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <Card className="overflow-hidden">
-            <div className="flex items-baseline justify-between border-b border-line/60 px-4 py-2.5">
-              <p className="text-[12px] font-semibold text-faint">Tes dernières parties</p>
-              <Link
-                href={`/profil/${encodeURIComponent(pseudo)}`}
-                className="text-[12px] text-accent hover:underline"
-              >
-                tout voir
-              </Link>
-            </div>
+            {/* Le bleu de `--q-great` : la seule des couleurs de qualité de
+                coup qui ne porte pas de jugement, et donc la seule qui puisse
+                chapeauter une liste où il y a des victoires et des défaites. */}
+            <EnTeteDeCarte
+              titre="Tes dernières parties"
+              icone={<History size={12} aria-hidden />}
+              teinte="var(--q-great)"
+              fin={
+                <Link
+                  href={`/profil/${encodeURIComponent(pseudo)}`}
+                  className="text-accent hover:underline"
+                >
+                  tout voir
+                </Link>
+              }
+            />
 
             {parties === null ? (
               <div className="p-4">
@@ -431,12 +442,15 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
 
           {analyses && analyses.length > 0 ? (
             <Card className="overflow-hidden">
-              <div className="flex items-baseline justify-between border-b border-line/60 px-4 py-2.5">
-                <p className="text-[12px] font-semibold text-faint">Tes analyses</p>
-                <Link href="/analyse" className="text-[12px] text-accent hover:underline">
-                  tout voir
-                </Link>
-              </div>
+              <EnTeteDeCarte
+                titre="Tes analyses"
+                icone={<Gauge size={12} aria-hidden />}
+                fin={
+                  <Link href="/analyse" className="text-accent hover:underline">
+                    tout voir
+                  </Link>
+                }
+              />
               <ul>
                 {analyses.map((analyse) => (
                   <li
@@ -457,20 +471,26 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
             /* Pas d'analyse conservée : plutôt qu'une carte vide, on dit à quoi
                sert la colonne. C'est la seule invitation de la page, et elle
                vise ce qu'on ne pense pas à faire tout seul. */
-            <Card className="flex flex-col justify-center p-4">
-              <p className="flex items-center gap-2 text-[14px] font-semibold">
-                <Sparkles size={14} className="shrink-0 text-accent" aria-hidden />
-                Fais analyser une partie
-              </p>
-              <p className="mt-1 text-[12px] leading-relaxed text-muted">
-                Coup par coup, ce qui a basculé et pourquoi — avec le meilleur coup montré sur
-                l’échiquier. Tes analyses restent ici.
-              </p>
-              <Link href="/analyse" className="mt-3">
-                <Button variant="secondary" size="sm" fullWidth icon={<Gauge size={14} />}>
-                  Analyser une partie
-                </Button>
-              </Link>
+            <Card className="flex flex-col overflow-hidden">
+              {/* Le même bandeau que ses voisines, alors que ce n'est pas une
+                  carte d'état : les quatre blocs du bas s'ouvrent ainsi sur la
+                  même ligne, et l'on sait de quoi parle chacun sans le lire en
+                  entier. */}
+              <EnTeteDeCarte
+                titre="Fais analyser une partie"
+                icone={<Sparkles size={12} aria-hidden />}
+              />
+              <div className="flex flex-1 flex-col justify-center p-4">
+                <p className="text-[12px] leading-relaxed text-muted">
+                  Coup par coup, ce qui a basculé et pourquoi — avec le meilleur coup montré sur
+                  l’échiquier. Tes analyses restent ici.
+                </p>
+                <Link href="/analyse" className="mt-3">
+                  <Button variant="secondary" size="sm" fullWidth icon={<Gauge size={14} />}>
+                    Analyser une partie
+                  </Button>
+                </Link>
+              </div>
             </Card>
           )}
         </div>

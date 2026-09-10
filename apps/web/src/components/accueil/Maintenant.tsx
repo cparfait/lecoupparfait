@@ -20,12 +20,32 @@
  */
 
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Map, Play, Sun, Swords, Target } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import clsx from 'clsx'
 import { Button, Card, Skeleton } from '@/components/ui/index.tsx'
-import type { ProchaineChose } from './prochainesChoses.ts'
+import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
+import type { ProchaineChose, ProchaineChoseId } from './prochainesChoses.ts'
 
 const SECONDAIRES_MAX = 2
+
+/**
+ * L'icône du bandeau, par situation.
+ *
+ * Les mêmes que sur les cartes plus bas — le soleil des quêtes, la carte du
+ * parcours — pour que la proposition du haut et le bloc qui la reprend se
+ * reconnaissent l'un l'autre.
+ */
+const ICONES: Record<ProchaineChoseId, LucideIcon> = {
+  tonTour: Swords,
+  correspondance: Swords,
+  partieOuverte: Swords,
+  repriseOrdinateur: Play,
+  defi: Target,
+  quete: Sun,
+  carriere: Map,
+  jouer: Swords,
+}
 
 export function Maintenant({
   choses,
@@ -39,6 +59,8 @@ export function Maintenant({
 
   const [principale, ...suite] = choses
   if (!principale) return null
+
+  const Icone = ICONES[principale.id]
 
   return (
     <Card
@@ -54,25 +76,17 @@ export function Maintenant({
         principale.id === 'defi' && 'teinte-defi',
       )}
     >
-      <div className="p-5">
-        <p
-          className={clsx(
-            'text-[12px] font-semibold',
-            // Sur le fond teinté du défi, l'accent lui-même ne se lit plus :
-            // `--teinte-texte` est la même couleur, rapprochée du texte.
-            principale.id === 'defi'
-              ? 'text-[var(--teinte-texte)]'
-              : principale.urgent
-                ? 'text-accent'
-                : 'text-faint',
-          )}
-        >
-          {principale.categorie}
-        </p>
+      {/* Le bandeau, comme sur les cartes plus bas : la catégorie était écrite
+          en douze pixels gris dans le coin de la carte, et elle nomme pourtant
+          le seul bloc de la page qu'on lit à coup sûr. Aucune teinte n'est
+          passée — l'accent par défaut, et celle de la carte quand c'est le
+          défi, qui la porte déjà (`teinte-defi`). */}
+      <EnTeteDeCarte titre={principale.categorie} icone={<Icone size={12} aria-hidden />} />
 
+      <div className="p-5">
         {/* La phrase, en grand. C'est elle qu'on lit en arrivant, et elle doit
             se suffire : on doit savoir quoi faire sans lire la ligne d'après. */}
-        <h2 className="mt-1 font-display text-xl font-bold leading-tight sm:text-2xl">
+        <h2 className="font-display text-xl font-bold leading-tight sm:text-2xl">
           {principale.titre}
         </h2>
         <p className="mt-1.5 max-w-prose text-[14px] leading-relaxed text-muted">

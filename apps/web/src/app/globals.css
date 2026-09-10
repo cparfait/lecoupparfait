@@ -767,6 +767,81 @@ button.glass:hover {
 }
 
 /*
+ * Le bandeau de titre d'une carte.
+ *
+ * Les cartes de l'accueil portaient toutes le même titre : douze pixels, gras,
+ * `--text-faint`, sur le fond de la carte. C'est le niveau de texte le plus
+ * effacé de la palette — celui des mentions qu'on ne lit qu'en cherchant — et
+ * il servait à nommer les blocs. Résultat : quatre cartes grises dont les
+ * intitulés se lisaient moins bien que leur contenu, et une page qu'il fallait
+ * parcourir en entier pour savoir ce qu'elle contient.
+ *
+ * Le bandeau prend donc une couleur, et chaque bloc la sienne — celle qu'il
+ * porte déjà ailleurs : l'ambre de la flamme pour les quêtes, la teinte du
+ * chapitre pour le parcours, l'accent pour ce qui touche à l'analyse. Rien
+ * n'est inventé, on rend visible ce qui était déjà décidé.
+ *
+ * `--teinte` est la seule entrée : posée sur l'élément, ou héritée de la carte
+ * quand celle-ci est déjà teintée (`teinte-jour`, `teinte-reussi`), et l'accent
+ * à défaut. En sortent le dégradé du fond, la couleur du filet, et
+ * `--teinte-texte` — la même formule que pour les cartes teintées, qui
+ * éclaircit sur fond sombre et assombrit sur fond clair pour tenir le seuil de
+ * contraste dans les trois thèmes.
+ *
+ * `background-image` et non `background` : le raccourci remettrait la couleur
+ * de fond à zéro, et un bandeau qui se replie est un bouton — il lui faut un
+ * survol, que Tailwind pose en `background-color` sous le dégradé.
+ */
+.bandeau {
+  --bandeau-teinte: var(--teinte, var(--accent));
+  --bandeau-force: 20%;
+  --bandeau-fuite: 5%;
+  --teinte-texte: color-mix(in oklab, var(--bandeau-teinte) 62%, var(--text));
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--bandeau-teinte) var(--bandeau-force), transparent),
+    color-mix(in oklab, var(--bandeau-teinte) var(--bandeau-fuite), transparent) 76%
+  );
+  border-color: color-mix(in oklab, var(--bandeau-teinte) 30%, var(--border));
+}
+
+/*
+ * Sur une carte déjà teintée, le bandeau ne fait qu'un souffle.
+ *
+ * La couleur y est partout — c'est tout l'objet de `teinte-jour` — et l'empiler
+ * une seconde fois, c'est le texte qui paie : l'ambre du titre des quêtes tombe
+ * à 3,9:1 sur son propre bandeau à pleine force, et le compteur des points du
+ * jour, qui est en `--text-muted`, descend avec lui. À 8 % le filet et l'icône
+ * suffisent à séparer l'en-tête du contenu, et le titre repasse le seuil.
+ *
+ * La fuite tombe à zéro : le bout droit du bandeau est justement là où se lit
+ * ce compteur, et il n'a alors plus rien à payer du tout.
+ */
+.glass.teinte-defi .bandeau,
+.glass.teinte-jour .bandeau,
+.glass.teinte-reussi .bandeau {
+  --bandeau-force: 8%;
+  --bandeau-fuite: 0%;
+  /* Et le titre se rapproche du texte pour la même raison : sur son propre
+     fond, l'accent du défi tombait à 4,3:1 et l'ambre des quêtes à 4,5:1.
+     À 50 %, les quatre thèmes restent au-dessus de 4,6:1. */
+  --teinte-texte: color-mix(in oklab, var(--bandeau-teinte) 50%, var(--text));
+}
+
+/*
+ * Sur fond clair, le titre se mélange davantage au texte.
+ *
+ * 62 % de teinte suffisent partout ailleurs : sur les trois thèmes sombres, la
+ * pire des douze couleurs de chapitre reste au-dessus de 4,7:1. Sur « clair »,
+ * où le mélange se fait vers le noir, le jaune du chapitre 4 tombait à 3,6:1 —
+ * un jaune reste clair quoi qu'on lui ajoute, et il en faut simplement moins.
+ * À 52 %, le même jaune remonte à 4,7:1 et rien ne perd sa couleur.
+ */
+[data-theme='clair'] .bandeau {
+  --teinte-texte: color-mix(in oklab, var(--bandeau-teinte) 52%, var(--text));
+}
+
+/*
  * Surface flottante : menus, listes déroulantes, barres posées sur le plateau.
  *
  * Le verre translucide convient à ce qui reste dans le flux — on devine la
