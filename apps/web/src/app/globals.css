@@ -48,6 +48,17 @@
   --border: rgb(255 255 255 / 0.12);
   --border-strong: rgb(255 255 255 / 0.22);
 
+  /* Ce qu'il faut ajouter à `--surface` pour qu'une carte se voie.
+
+     Le voile à 6 % suffisait sur un écran large, où la carte se détache sur
+     les halos du fond et sur ses propres marges. Sur téléphone, elle prend
+     toute la largeur, le fond n'apparaît plus qu'entre deux cartes, et il ne
+     restait qu'un liseré à 12 % pour dire où l'une finit et où l'autre
+     commence : les blocs de l'accueil se confondaient avec la page. Voir
+     `glass`. */
+  --voile-carte: rgb(255 255 255 / 0.08);
+  --bord-carte: var(--border-strong);
+
   /* Texte
 
      `--text-faint` porte presque toujours du 11px : libellés de sections,
@@ -132,6 +143,12 @@
   --border: rgb(201 162 39 / 0.22);
   --border-strong: rgb(201 162 39 / 0.42);
 
+  /* Le voile de la carte prend la couleur chaude des surfaces du thème, et son
+     contour un or à mi-chemin du liseré franc : à 42 %, chaque carte portait un
+     cadre doré. Voir `--voile-carte` sur `aurora`. */
+  --voile-carte: rgb(232 220 200 / 0.075);
+  --bord-carte: rgb(201 162 39 / 0.32);
+
   --text: #f0e7d6;
   --text-muted: #c0b198;
   /* Même correction que sur `aurora` : 3,6:1 → 4,7:1 sur une carte. */
@@ -209,6 +226,11 @@
   --border: rgb(16 16 24 / 0.13);
   --border-strong: rgb(16 16 24 / 0.24);
 
+  /* Sur fond clair, une carte est déjà blanche sur gris : rien à ajouter au
+     voile, et un contour à peine plus marqué suffit à la poser. */
+  --voile-carte: transparent;
+  --bord-carte: rgb(16 16 24 / 0.18);
+
   --text: #14141c;
   --text-muted: #55556a;
   /* Le thème clair souffrait du même défaut, en plus marqué : 3,4:1. Assombri
@@ -281,6 +303,11 @@
   --surface-strong: #262626;
   --border: #6a6a6a;
   --border-strong: #ffffff;
+
+  /* Rien à renforcer ici : la carte est un gris opaque sur du noir, cerné d'un
+     liseré à 42 % de blanc. C'est le thème qui n'a jamais eu le problème. */
+  --voile-carte: transparent;
+  --bord-carte: var(--border);
 
   --text: #ffffff;
   --text-muted: #d8d8d8;
@@ -607,11 +634,26 @@ h4 {
    *
    * Les teintes viennent des jetons de thème : le thème clair pose du blanc
    * franc là où les thèmes sombres posent un voile à 6 %.
+   *
+   * Ce voile-là ne suffisait pas. Il tient sur un écran large, où la carte se
+   * détache sur les halos du fond et sur ses propres marges ; sur téléphone,
+   * elle occupe toute la largeur, le fond ne se voit plus qu'entre deux cartes,
+   * et un voile à 6 % de blanc sur `#0b0b14` donne un rapport de 1,09:1 — un
+   * écart que l'œil ne trouve pas. Les blocs de l'accueil se confondaient avec
+   * la page. `--voile-carte` s'ajoute donc au fond et `--bord-carte` remplace
+   * le liseré : deux jetons par thème, transparents là où le problème ne se
+   * pose pas (« clair », « contraste »).
+   *
+   * Le voile est enveloppé dans un dégradé d'une couleur vers elle-même, comme
+   * dans `glass-lisible` et pour la même raison : dans le raccourci
+   * `background`, seule la dernière couche peut être une couleur.
    */
-  background: linear-gradient(180deg, var(--sheen), transparent 46%), var(--surface);
+  background:
+    linear-gradient(180deg, var(--sheen), transparent 46%),
+    linear-gradient(0deg, var(--voile-carte), var(--voile-carte)), var(--surface);
   backdrop-filter: blur(var(--blur)) saturate(150%);
   -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
-  border: 1px solid var(--border);
+  border: 1px solid var(--bord-carte);
   border-radius: var(--radius);
   box-shadow:
     inset 0 1px 0 0 var(--inner-edge),
@@ -1232,7 +1274,10 @@ button.gradient-ring:hover::before {
 [data-effects='low'] .glass-strong {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  background: var(--bg-elev);
+  /* Le voile de carte reste : `--bg-elev` vaut `#12121d` sur `aurora`, soit
+     1,03:1 contre la page — sans lui, les effets réduits rendraient les cartes
+     encore plus invisibles que le verre qu'ils remplacent. */
+  background: linear-gradient(0deg, var(--voile-carte), var(--voile-carte)), var(--bg-elev);
 }
 
 [data-effects='low'] .gradient-ring::before {
