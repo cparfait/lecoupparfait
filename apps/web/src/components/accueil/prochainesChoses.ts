@@ -15,15 +15,22 @@
  *     tourne parfois. Rien ne passe devant.
  *  2. **Une partie est ouverte.** Elle t'attend, elle, sans impatience — mais
  *     la reprendre coûte un clic et l'oublier coûte une partie.
- *  3. **Le défi du jour**, tant qu'il n'est pas résolu : il meurt à minuit.
- *     C'est la seule chose de l'écran qui ait une échéance.
- *  4. **Les quêtes du jour qui restent**, pour la même raison : elles aussi
- *     expirent à minuit, et les points de la journée ne se rattrapent pas. La
- *     carrière passait avant elles dès le défi résolu, et l'accueil se mettait
- *     à parler de chapitre alors qu'il restait deux quêtes à faire.
- *  5. **L'étape de carrière en cours**, qui est le chemin qu'on a choisi — et
+ *  3. **La journée** : le défi du jour tant qu'il n'est pas résolu, sinon la
+ *     première quête qui reste. C'est la seule chose de l'écran qui ait une
+ *     échéance — tout meurt à minuit, et les points de la journée ne se
+ *     rattrapent pas. La carrière passait avant les quêtes dès le défi résolu,
+ *     et l'accueil se mettait à parler de chapitre alors qu'il restait deux
+ *     quêtes à faire.
+ *
+ *     **Une seule proposition pour la journée**, jamais deux. Le défi et la
+ *     première quête faisaient chacun leur ligne : « Le défi du jour » en
+ *     grand, puis « Une quête du jour · Jouer une partie » juste dessous, et
+ *     la carte des quêtes, à côté, redisait les deux. Le défi *est* une quête
+ *     — la mieux payée, et la seule partagée — ; il passe en premier, et les
+ *     autres attendent leur tour dans la carte des quêtes.
+ *  4. **L'étape de carrière en cours**, qui est le chemin qu'on a choisi — et
  *     qui sera encore là demain.
- *  6. **Faute de mieux**, jouer — c'est ce pour quoi on vient.
+ *  5. **Faute de mieux**, jouer — c'est ce pour quoi on vient.
  *
  * La fonction rend une **liste ordonnée** et non un seul élément : l'accueil
  * met la première en avant et range les suivantes en dessous, en une ligne
@@ -33,6 +40,8 @@
  * propositions. C'est ce qui rend l'ordre relisible — et discutable — sans
  * ouvrir un composant de cinq cents lignes.
  */
+
+import { quetePar } from '@/lib/daily/quetes.ts'
 
 export type ProchaineChoseId =
   | 'tonTour'
@@ -163,33 +172,42 @@ export function prochainesChoses(etat: EtatAccueil): ProchaineChose[] {
     })
   }
 
-  // ── 3. Le défi du jour, tant qu'il n'est pas fait ───────────────────────
+  // ── 3. La journée : le défi, sinon la première quête qui reste ─────────
   //
   // La rubrique nomme la chose, et non le moment. Elle disait « Aujourd'hui »,
   // c'est-à-dire exactement le mot que portait la carte des quêtes juste en
-  // dessous — laquelle commence par « Résoudre le défi du jour ». Deux blocs
-  // sous le même intitulé, le défi écrit dans les deux : on ne savait pas si
-  // l'on avait devant soi une chose ou deux. Ici c'est **le** défi, au
-  // singulier, et le détail dit son rapport à la liste : il en est la première.
+  // dessous. Ici c'est **le** défi, au singulier, et le détail dit ce qu'il
+  // vaut — ses points, qui sont ceux de la carte d'à côté.
+  const [prochaine] = etat.quetes.restantes
   if (etat.defiFait === false) {
+    // Le détail dit ce que le défi vaut, et ce qui attend derrière lui. Sans
+    // cette seconde phrase, la proposition semblait être la seule chose de la
+    // journée, alors que la carte des quêtes, juste en dessous, en montre
+    // encore deux ou trois.
+    const restantes = etat.quetes.restantes.length
     liste.push({
       id: 'defi',
       categorie: 'Le défi du jour',
       titre: 'Une position, et une seule, jusqu’à minuit',
       detail:
-        'La même pour tout le monde de ton niveau — et c’est la première de tes quêtes du jour.',
+        `La même pour tout le monde de ton niveau, et elle vaut ${quetePar('defi')?.xp ?? 0} des ` +
+        `${etat.quetes.total} points du jour. ` +
+        (restantes > 0
+          ? `${restantes} autre${restantes > 1 ? 's' : ''} quête${restantes > 1 ? 's' : ''} ` +
+            `${restantes > 1 ? 'attendent' : 'attend'} en dessous.`
+          : 'C’est ta dernière quête de la journée.'),
       action: 'Chercher le coup',
-      lien: '/puzzles?defi=1',
+      // L'adresse du catalogue, et non `/puzzles?defi=1` : elle porte
+      // `&quete=defi`, que l'écran de puzzles lit pour annoncer la quête
+      // remplie et proposer la suite. C'était la ligne « Résoudre le défi du
+      // jour » de la liste qui le faisait ; elle n'y est plus, et la fanfare
+      // serait partie avec elle.
+      lien: quetePar('defi')?.lien ?? '/puzzles?defi=1',
     })
-  }
-
-  // ── 4. Les quêtes du jour qui restent ──────────────────────────────────
-  //
-  // Une seule proposition, pour la première qui reste : deux quêtes en deux
-  // lignes ferait deux boutons de même poids, ce qu'on a voulu éviter. Les
-  // autres sont dans la carte « Aujourd'hui », juste en dessous.
-  const [prochaine] = etat.quetes.restantes
-  if (prochaine) {
+  } else if (prochaine) {
+    // Une seule, la première qui reste : deux quêtes en deux lignes ferait
+    // deux boutons de même poids, ce qu'on a voulu éviter. Les autres sont
+    // dans la carte des quêtes, juste en dessous.
     const n = etat.quetes.restantes.length
     liste.push({
       id: 'quete',
@@ -206,7 +224,7 @@ export function prochainesChoses(etat: EtatAccueil): ProchaineChose[] {
     })
   }
 
-  // ── 5. La carrière ─────────────────────────────────────────────────────
+  // ── 4. La carrière ─────────────────────────────────────────────────────
   if (etat.carriere) {
     liste.push({
       id: 'carriere',
@@ -218,7 +236,7 @@ export function prochainesChoses(etat: EtatAccueil): ProchaineChose[] {
     })
   }
 
-  // ── 6. Le repli ────────────────────────────────────────────────────────
+  // ── 5. Le repli ────────────────────────────────────────────────────────
   //
   // Jamais vide : un accueil qui ne propose rien renvoie la personne à la
   // barre de navigation, c'est-à-dire à un sommaire.

@@ -100,6 +100,16 @@ export const QUETES: Quete[] = [
   },
 ]
 
+/**
+ * Les quêtes qu'on affiche en liste : toutes sauf le défi.
+ *
+ * Le défi compte dans les points comme les autres, mais il ne s'affiche jamais
+ * comme les autres : il a son encadré, sa proposition en tête d'accueil, sa
+ * ligne verte une fois relevé. Le répéter dans la liste faisait deux boutons
+ * pour une même position — voir `ListeDesQuetes`.
+ */
+export const QUETES_HORS_DEFI: Quete[] = QUETES.filter((quete) => quete.id !== 'defi')
+
 export const XP_TOTAL = QUETES.reduce((somme, quete) => somme + quete.xp, 0)
 
 export function quetePar(id: string): Quete | undefined {

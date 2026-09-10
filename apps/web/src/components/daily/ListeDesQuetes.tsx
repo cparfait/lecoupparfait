@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Les cinq quêtes du jour, et la porte de chacune.
+ * Les quêtes du jour, sans le défi, et la porte de chacune.
  *
  * Elles étaient écrites deux fois — dans la carte « Aujourd'hui » de l'accueil
  * connecté et dans « Le défi du jour » de l'accueil public — avec le même
@@ -19,27 +19,30 @@
  * cesse d'être cliquable au moment où elle se coche donne l'impression d'une
  * porte qu'on referme.
  *
+ * ── Le défi n'est pas dans la liste ───────────────────────────────────────
+ *
+ * Il en fait partie pour les points — c'est la quête `defi` du catalogue, la
+ * mieux payée — mais il n'y figure pas. Partout où cette liste s'affiche, le
+ * défi est déjà là, en plus grand : l'encadré « Trouve le coup gagnant » de la
+ * carte publique, la proposition en tête de « Maintenant » sur l'accueil
+ * connecté, et une fois relevé, la ligne verte « reviens demain » de la carte
+ * des quêtes. Une ligne « Résoudre le défi du jour » trois centimètres sous
+ * l'un d'eux faisait deux boutons pour une seule position, et l'on ne savait
+ * pas s'il s'agissait d'une chose ou de deux. On avait d'abord essayé de les
+ * relier par la couleur — l'accent sur la ligne comme sur l'encadré — ; ça les
+ * rapprochait, ça ne les fusionnait pas. Le doublon se supprime, il ne
+ * s'habille pas.
+ *
  * ── Ce qui reste à faire se voit, ce qui est fait s'efface ────────────────
  *
- * **Chaque quête à faire porte une couleur**, et deux couleurs suffisent :
- *
- *   - le défi du jour prend l'accent. C'est une quête comme les autres pour le
- *     décompte des points, et pas du tout comme les autres pour le reste : il
- *     est la seule position que tout le monde partage, et il a sa propre carte
- *     en haut de l'accueil. Écrit en gris au milieu de trois lignes grises, il
- *     devenait la quatrième d'une liste anonyme, et l'on ne savait plus si la
- *     grande carte violette du dessus parlait de cette ligne ou d'autre chose.
- *     Même accent des deux côtés : un regard suffit à les relier ;
- *   - les autres prennent l'ambre de la flamme, celle que ces quêtes
- *     nourrissent et que porte déjà la carte qui les contient.
- *
- * La couleur passe par `--teinte-quete`, posée sur la ligne : les classes
- * restent des chaînes littérales, ce qu'exige la compilation de Tailwind, et
- * une seule règle sert les deux cas.
+ * **Une quête à faire porte l'ambre de la flamme** — celle que ces quêtes
+ * nourrissent, et que porte déjà la carte qui les contient. La couleur passe
+ * par `--teinte-quete`, posée sur la ligne : les classes restent des chaînes
+ * littérales, ce qu'exige la compilation de Tailwind.
  *
  * **Une quête faite se replie.** Elle gardait sa pleine hauteur, son fond et
- * son chevron pour dire une chose déjà dite par la coche verte. Quatre lignes
- * de même poids, dont trois sans objet, et la seule qui restait à faire se
+ * son chevron pour dire une chose déjà dite par la coche verte. Trois lignes
+ * de même poids, dont deux sans objet, et la seule qui restait à faire se
  * cherchait. Faite, la ligne perd son fond, sa flèche, deux points de corps et
  * la moitié de son interligne : elle constate, elle n'appelle plus. Elle reste
  * un lien — on retourne volontiers sur une quête finie, et une ligne qui cesse
@@ -51,7 +54,7 @@ import Link from 'next/link'
 import type { CSSProperties } from 'react'
 import { Check } from 'lucide-react'
 import clsx from 'clsx'
-import { QUETES } from '@/lib/daily/quetes.ts'
+import { QUETES_HORS_DEFI } from '@/lib/daily/quetes.ts'
 import { queteFaite, type EtatQuotidien } from '@/lib/daily/quotidien.ts'
 
 export function ListeDesQuetes({
@@ -63,23 +66,17 @@ export function ListeDesQuetes({
 }) {
   return (
     <ul className={clsx('space-y-0.5', className)}>
-      {QUETES.map((quete) => {
+      {QUETES_HORS_DEFI.map((quete) => {
         const faite = etat ? queteFaite(etat, quete.id) : false
         const avancement = etat?.avancement[quete.id] ?? 0
-        const estDefi = quete.id === 'defi'
         return (
           <li key={quete.id}>
             <Link
               href={quete.lien}
-              // L'accent pour le défi, l'ambre de la flamme pour les autres.
-              // Inutile de la poser quand la quête est faite : la ligne repliée
-              // ne s'en sert plus.
+              // L'ambre de la flamme. Inutile de le poser quand la quête est
+              // faite : la ligne repliée ne s'en sert plus.
               style={
-                faite
-                  ? undefined
-                  : ({
-                      '--teinte-quete': estDefi ? 'var(--accent)' : 'var(--q-inaccuracy)',
-                    } as CSSProperties)
+                faite ? undefined : ({ '--teinte-quete': 'var(--q-inaccuracy)' } as CSSProperties)
               }
               // Marges négatives : la zone touchable déborde des bords du
               // texte — il faut au moins un doigt de large — sans décaler la

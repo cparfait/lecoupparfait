@@ -10,9 +10,14 @@
  * pas le défi.
  *
  * Ici, les quêtes redeviennent ce qu'elles sont : un état, pas une destination.
- * Cinq lignes courtes, une barre, et c'est tout. Le défi du jour, lui, est
+ * Trois lignes courtes, une barre, et c'est tout. Le défi du jour, lui, est
  * remonté dans « Maintenant » tant qu'il n'est pas résolu — c'est la seule chose
- * de l'écran qui expire, elle n'a rien à faire au milieu d'un bilan.
+ * de l'écran qui expire, elle n'a rien à faire au milieu d'un bilan. Une fois
+ * résolu, il devient une ligne verte en tête de cette carte, et c'est sa seule
+ * trace ici : il n'est pas repris dans la liste des quêtes. Il y figurait, en
+ * première ligne, et l'accueil disait alors le défi deux fois — en grand dans
+ * « Maintenant », en petit trois centimètres plus bas — sans qu'on sache s'il
+ * s'agissait d'une chose ou de deux.
  *
  * `DefiDuJour` reste en place pour l'accueil public, où il joue un autre rôle :
  * montrer à un visiteur ce qu'un compte lui apporterait.
@@ -95,13 +100,14 @@ export function Aujourdhui({
     disait s'il s'agissait d'une chose ou de deux.
 
     Cette carte porte **les quêtes**, au pluriel ; le défi n'en est qu'une, et
-    la liste le distingue à sa couleur. Le titre le dit donc, et l'ancre garde
-    son nom — elle est visée depuis le panneau de la flamme.
+    il n'est plus dans la liste — il a sa place au-dessus, dans « Maintenant »,
+    tant qu'il reste à faire. Le titre le dit donc, et l'ancre garde son nom —
+    elle est visée depuis le panneau de la flamme.
 
     « Journée faite » remplace « Défi du jour relevé » une fois tout terminé :
     le titre d'une carte de quêtes ne peut pas parler d'autre chose qu'elles.
-    La question « ai-je fait le défi ? » se répond une ligne plus bas, sur la
-    ligne du défi, cochée et barrée — et au liseré vert, qui n'a pas bougé.
+    La question « ai-je fait le défi ? » se répond au liseré vert, qui n'a pas
+    bougé, et à la ligne verte sous la barre.
   */
   const titre = toutFait ? 'Journée faite' : 'Tes quêtes du jour'
   const Icone = toutFait ? Check : Sun
@@ -220,15 +226,34 @@ export function Aujourdhui({
 
         {/* Le défi résolu se dit ici, et une seule fois. Non résolu, il est en
             tête de page dans « Maintenant » : le répéter à deux endroits ferait
-            deux boutons pour une position unique. */}
+            deux boutons pour une position unique — c'est pour cela qu'il n'est
+            pas non plus dans la liste qui suit.
+
+            Cette ligne **le nomme**. Elle disait « La prochaine arrive à
+            minuit » et rien d'autre : tant que la liste commençait par
+            « Résoudre le défi du jour », coché et barré, on savait de quoi
+            parlait ce « la prochaine ». La ligne partie, la phrase n'avait
+            plus d'antécédent — et les jours où la cote du puzzle manque, il ne
+            restait rien du tout. C'est ici, désormais, que se lit la réponse à
+            « ai-je fait le défi ? ». */}
         {defiFait && (
-          <p className="mb-2.5 rounded-[var(--radius-sm)] bg-[color-mix(in_oklab,var(--q-best)_10%,transparent)] px-2.5 py-2 text-[12px] leading-relaxed text-muted">
-            {niveauDefi ? `La position du jour valait ${niveauDefi}. ` : ''}
-            La prochaine arrive à minuit — reviens demain.
+          <p className="mb-2.5 flex items-start gap-1.5 rounded-[var(--radius-sm)] bg-[color-mix(in_oklab,var(--q-best)_10%,transparent)] px-2.5 py-2 text-[12px] leading-relaxed text-muted">
+            <Check
+              size={13}
+              strokeWidth={3}
+              className="mt-0.5 shrink-0 text-[var(--q-best)]"
+              aria-hidden
+            />
+            <span>
+              <strong className="font-semibold text-[var(--q-best)]">Défi du jour relevé</strong>
+              {niveauDefi ? ` — la position valait ${niveauDefi}.` : '.'} La prochaine arrive à
+              minuit.
+            </span>
           </p>
         )}
 
-        {/* Cinq lignes, cinq destinations : voir `ListeDesQuetes`. */}
+        {/* Trois lignes, trois destinations, le défi en moins : voir
+            `ListeDesQuetes`. */}
         <ListeDesQuetes etat={etat} />
 
         {/* Les tranches plus dures, discrètes : c'est un écart qu'on prend

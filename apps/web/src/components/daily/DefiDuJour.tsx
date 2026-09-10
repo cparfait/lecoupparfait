@@ -7,10 +7,14 @@
  * la chose racontable — on peut demander à quelqu'un s'il a trouvé celui du
  * jour, ce qu'aucune progression personnalisée ne permet.
  *
- * Les quêtes tiennent en cinq lignes et la série en un chiffre. On affiche ce
- * qui reste à faire, pas un tableau de bord : cette carte doit se lire en deux
- * secondes avant d'aller jouer, sinon elle devient la destination au lieu du
- * point de départ.
+ * Les autres quêtes tiennent en trois lignes et la série en un chiffre. On
+ * affiche ce qui reste à faire, pas un tableau de bord : cette carte doit se
+ * lire en deux secondes avant d'aller jouer, sinon elle devient la destination
+ * au lieu du point de départ.
+ *
+ * Le défi n'est pas répété dans la liste : il est l'encadré juste au-dessus.
+ * Une ligne « Résoudre le défi du jour » sous « Trouve le coup gagnant »
+ * faisait deux boutons pour une même position — voir `ListeDesQuetes`.
  */
 
 import { useEffect, useState } from 'react'
@@ -149,8 +153,8 @@ export function DefiDuJour({ className }: { className?: string }) {
         </p>
       )}
 
-      {/* ── Quêtes ────────────────────────────────────────────────────── */}
-      {/* Un encart à part, dans l'ambre de la flamme : les quêtes ne sont pas
+      {/* ── Les autres quêtes ─────────────────────────────────────────── */}
+      {/* Un encart à part, dans l'ambre de la flamme : ces quêtes ne sont pas
           le défi, et leur fond le dit avant le libellé. `relative z-10` pour la
           même raison que la flamme du titre — le recouvrement de
           `DefiCliquable` couvre toute la carte, et un fond posé après lui le
@@ -165,11 +169,11 @@ export function DefiDuJour({ className }: { className?: string }) {
         <div className="mb-2 flex items-center justify-between">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-[color-mix(in_oklab,var(--q-inaccuracy)_62%,var(--text))]">
             <Sun size={12} strokeWidth={2.5} aria-hidden />
-            {/* « Les quêtes du jour », et non « Aujourd'hui » : cet encart est
-                dans une carte qui s'appelle déjà « Le défi du jour », et dont
-                la liste commence par « Résoudre le défi du jour ». Le mot
-                « aujourd'hui » ne départageait rien — il vaut pour les deux. */}
-            Les quêtes du jour
+            {/* « Les autres quêtes » : le défi en est une — la barre de points
+                juste dessous le compte — et il est l'encadré au-dessus. Le mot
+                « autres » dit les deux choses, et dispense de le répéter dans
+                la liste. */}
+            Les autres quêtes du jour
           </span>
           <span className="text-xs tabular-nums text-muted">
             {xp} / {XP_TOTAL} points
@@ -190,7 +194,8 @@ export function DefiDuJour({ className }: { className?: string }) {
           />
         </div>
 
-        {/* Une ligne par quête, une destination par ligne : voir `ListeDesQuetes`. */}
+        {/* Une ligne par quête, une destination par ligne, le défi en moins :
+            voir `ListeDesQuetes`. */}
         <ListeDesQuetes etat={etat} />
 
         {/* Refermer, une fois qu'on a regardé. Seulement quand le défi est

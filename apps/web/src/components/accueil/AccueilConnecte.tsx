@@ -60,7 +60,7 @@ import { Button, ButtonLink, Card, Chip, Skeleton } from '@/components/ui/index.
 import { useCarriere } from '@/lib/carriere/useCarriere.ts'
 import { listerAnalyses, type AnalyseEnregistree } from '@/lib/analysis/enregistrees.ts'
 import { chargerPartieEnCours, type PartieEnCours } from '@/lib/game/partieEnCours.ts'
-import { QUETES, XP_TOTAL, xpPour } from '@/lib/daily/quetes.ts'
+import { QUETES_HORS_DEFI, XP_TOTAL, xpPour } from '@/lib/daily/quetes.ts'
 import { jourLocal, queteFaite } from '@/lib/daily/quotidien.ts'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import { DemandesDAmi } from '@/components/social/DemandesDAmi.tsx'
@@ -215,9 +215,9 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
       defiFait,
       quetes: {
         restantes: journee
-          ? // Le défi a sa propre proposition, juste avant : le recompter ici
-            // en ferait deux.
-            QUETES.filter((quete) => quete.id !== 'defi' && !queteFaite(journee, quete.id)).map(
+          ? // Le défi a sa propre proposition, qui passe avant : voir
+            // `prochainesChoses`. Le recompter ici en ferait deux.
+            QUETES_HORS_DEFI.filter((quete) => !queteFaite(journee, quete.id)).map(
               ({ label, lien, action }) => ({ label, lien, action }),
             )
           : [],
