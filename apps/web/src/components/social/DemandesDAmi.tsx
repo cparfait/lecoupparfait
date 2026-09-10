@@ -104,7 +104,7 @@ export function DemandesDAmi({ className }: { className?: string }) {
       <div className="h-1 bg-accent" aria-hidden />
       <EnTeteDeCarte
         titre={demandes.length === 1 ? 'Une demande d’ami' : `${demandes.length} demandes d’ami`}
-        icone={<UserPlus size={12} aria-hidden />}
+        icone={<UserPlus size={14} aria-hidden />}
         fin={
           <Link href="/amis" className="text-accent hover:underline">
             mon carnet

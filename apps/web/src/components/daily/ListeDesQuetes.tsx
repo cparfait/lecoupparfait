@@ -35,10 +35,11 @@
  *
  * ── Ce qui reste à faire se voit, ce qui est fait s'efface ────────────────
  *
- * **Une quête à faire porte l'ambre de la flamme** — celle que ces quêtes
- * nourrissent, et que porte déjà la carte qui les contient. La couleur passe
- * par `--teinte-quete`, posée sur la ligne : les classes restent des chaînes
- * littérales, ce qu'exige la compilation de Tailwind.
+ * **Une quête à faire porte la couleur de la carte qui la contient** — l'ambre
+ * dans l'encadré de l'accueil public, le vert de la journée dans la carte des
+ * quêtes. La couleur passe par `--teinte-quete`, posée sur la ligne : les
+ * classes restent des chaînes littérales, ce qu'exige la compilation de
+ * Tailwind.
  *
  * **Une quête faite se replie.** Elle gardait sa pleine hauteur, son fond et
  * son chevron pour dire une chose déjà dite par la coche verte. Trois lignes
@@ -59,9 +60,20 @@ import { queteFaite, type EtatQuotidien } from '@/lib/daily/quotidien.ts'
 
 export function ListeDesQuetes({
   etat,
+  teinte = 'var(--q-inaccuracy)',
   className,
 }: {
   etat: EtatQuotidien | null
+  /**
+   * La couleur d'une quête à faire.
+   *
+   * L'ambre par défaut, pour l'encadré de l'accueil public. La carte des quêtes
+   * de l'accueil connecté passe la sienne — `var(--teinte)` — pour que les
+   * lignes et le bandeau qui les chapeaute soient de la même couleur : elle a
+   * changé une fois, et trois lignes ambre sont restées seules dans une carte
+   * verte.
+   */
+  teinte?: string
   className?: string
 }) {
   return (
@@ -73,11 +85,9 @@ export function ListeDesQuetes({
           <li key={quete.id}>
             <Link
               href={quete.lien}
-              // L'ambre de la flamme. Inutile de le poser quand la quête est
-              // faite : la ligne repliée ne s'en sert plus.
-              style={
-                faite ? undefined : ({ '--teinte-quete': 'var(--q-inaccuracy)' } as CSSProperties)
-              }
+              // Inutile de la poser quand la quête est faite : la ligne
+              // repliée ne s'en sert plus.
+              style={faite ? undefined : ({ '--teinte-quete': teinte } as CSSProperties)}
               // Marges négatives : la zone touchable déborde des bords du
               // texte — il faut au moins un doigt de large — sans décaler la
               // liste par rapport au reste de la carte.

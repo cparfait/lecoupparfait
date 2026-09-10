@@ -181,7 +181,7 @@ export function Aujourdhui({
           donc de l'ambre au vert avec le reste, sans rien décider ici. */}
       <EnTeteDeCarte
         titre={titre}
-        icone={<Icone size={12} strokeWidth={toutFait ? 3 : 2.5} aria-hidden />}
+        icone={<Icone size={14} strokeWidth={toutFait ? 3 : 2.5} aria-hidden />}
         fin={`${xp} / ${XP_TOTAL} points du jour`}
         filet={!replie}
         onClick={defiFait ? () => setChoix(!deplie) : undefined}
@@ -233,7 +233,7 @@ export function Aujourdhui({
 
         {/* Trois lignes, trois destinations, le défi en moins : voir
             `ListeDesQuetes`. */}
-        <ListeDesQuetes etat={etat} />
+        <ListeDesQuetes etat={etat} teinte="var(--teinte)" />
 
         {/* Les tranches plus dures, discrètes : c'est un écart qu'on prend
             certains jours, pas une consigne. Elles restent affichées même une

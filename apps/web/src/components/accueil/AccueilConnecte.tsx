@@ -299,7 +299,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                 seule couleur, et cette couleur dit où l'on en est. */}
             <EnTeteDeCarte
               titre="Ton parcours"
-              icone={<Map size={12} aria-hidden />}
+              icone={<Map size={14} aria-hidden />}
               teinte={chapitre.teinte}
               fin={`chapitre ${chapitre.numero} / ${CHAPITRES.length}`}
             />
@@ -378,7 +378,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                 chapeauter une liste où il y a des victoires et des défaites. */}
             <EnTeteDeCarte
               titre="Tes dernières parties"
-              icone={<History size={12} aria-hidden />}
+              icone={<History size={14} aria-hidden />}
               teinte="var(--q-great)"
               fin={
                 <Link
@@ -444,7 +444,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
             <Card className="overflow-hidden">
               <EnTeteDeCarte
                 titre="Tes analyses"
-                icone={<Gauge size={12} aria-hidden />}
+                icone={<Gauge size={14} aria-hidden />}
                 fin={
                   <Link href="/analyse" className="text-accent hover:underline">
                     tout voir
@@ -478,7 +478,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                   entier. */}
               <EnTeteDeCarte
                 titre="Fais analyser une partie"
-                icone={<Sparkles size={12} aria-hidden />}
+                icone={<Sparkles size={14} aria-hidden />}
               />
               <div className="flex flex-1 flex-col justify-center p-4">
                 <p className="text-[12px] leading-relaxed text-muted">

@@ -81,7 +81,7 @@ export function Maintenant({
           le seul bloc de la page qu'on lit à coup sûr. Aucune teinte n'est
           passée — l'accent par défaut, et celle de la carte quand c'est le
           défi, qui la porte déjà (`teinte-defi`). */}
-      <EnTeteDeCarte titre={principale.categorie} icone={<Icone size={12} aria-hidden />} />
+      <EnTeteDeCarte titre={principale.categorie} icone={<Icone size={14} aria-hidden />} />
 
       <div className="p-5">
         {/* La phrase, en grand. C'est elle qu'on lit en arrivant, et elle doit

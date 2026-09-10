@@ -64,8 +64,11 @@ export function EnTeteDeCarte({
   className?: string
 }) {
   const classes = clsx(
-    'bandeau flex w-full items-center gap-2 px-4 py-2.5 text-left',
-    filet && 'border-b',
+    'bandeau flex w-full items-center gap-2 px-4 py-3 text-left',
+    // Deux pixels, dans la teinte : à un seul, le filet du bas se confondait
+    // avec ceux qui séparent les lignes du contenu, et le bandeau n'était plus
+    // qu'une ligne parmi d'autres.
+    filet && 'border-b-2',
     className,
   )
   const style = teinte ? ({ '--teinte': teinte } as CSSProperties) : undefined
@@ -74,8 +77,13 @@ export function EnTeteDeCarte({
     <>
       {/* Le titre prend toute la place restante : ce qui suit se range à droite
           de lui-même, sans qu'aucun des deux ait à réclamer la marge. */}
-      <span className="flex min-w-0 flex-1 items-center gap-1.5 text-[12px] font-semibold text-[var(--teinte-texte)]">
-        {icone}
+      {/* Quatorze pixels et gras, là où le reste de la page écrit ses mentions
+          en douze et demi-gras : un titre de bloc doit se voir avant ce qu'il
+          annonce, et il restait plus discret que la ligne qu'il chapeaute.
+          L'icône porte la couleur franche, le titre la garde diluée — voir
+          `.bandeau` dans `globals.css`. */}
+      <span className="flex min-w-0 flex-1 items-center gap-2 text-[14px] font-bold tracking-[0.01em] text-[var(--teinte-texte)]">
+        {icone && <span className="shrink-0 text-[var(--bandeau-icone)]">{icone}</span>}
         <span className="truncate">{titre}</span>
       </span>
       {fin != null && <span className="shrink-0 text-[12px] tabular-nums text-muted">{fin}</span>}

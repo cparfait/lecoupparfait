@@ -692,9 +692,9 @@ button.glass:hover {
  *
  *   - `teinte-defi`   : l'accent — c'est l'action du jour, la même couleur que
  *                       le bouton primaire qui y mène ;
- *   - `teinte-jour`   : l'ambre de la flamme — les quêtes du jour nourrissent
- *                       la série, et c'est cette couleur-là qu'on voit dans la
- *                       barre du haut ;
+ *   - `teinte-jour`   : le vert-bleu du coup brillant — la journée en cours,
+ *                       avant le vert du meilleur coup qui dit qu'elle est
+ *                       faite (voir la règle plus bas) ;
  *   - `teinte-reussi` : le vert du meilleur coup — c'est fait.
  *
  * Trois classes, une seule règle : la couleur passe par `--teinte`, et le reste
@@ -729,7 +729,21 @@ button.glass:hover {
   --teinte: var(--accent);
 }
 .glass.teinte-jour {
-  --teinte: var(--q-inaccuracy);
+  /*
+    Le vert-bleu, et non l'ambre de la flamme.
+
+    L'ambre venait de la série : ces quêtes la nourrissent, et c'est la couleur
+    que porte la flamme de la barre du haut. Mais `--q-inaccuracy` est le jaune
+    de l'imprécision, et une carte jaune-orange en tête de l'accueil se lit
+    comme un avertissement — d'autant qu'elle voisine la teinte du chapitre,
+    orange elle aussi selon l'endroit du parcours.
+
+    Deux verts se suivent donc pour la journée : celui-ci tant qu'il reste des
+    quêtes, celui du meilleur coup une fois tout fait. Ils se distinguent — l'un
+    tire sur le bleu, l'autre sur l'olive — et le passage de l'un à l'autre
+    accompagne le ✓, le titre « Journée faite » et les lignes barrées.
+  */
+  --teinte: var(--q-brilliant);
 }
 .glass.teinte-reussi {
   --teinte: var(--q-best);
@@ -794,25 +808,36 @@ button.glass:hover {
  */
 .bandeau {
   --bandeau-teinte: var(--teinte, var(--accent));
-  --bandeau-force: 20%;
-  --bandeau-fuite: 5%;
-  --teinte-texte: color-mix(in oklab, var(--bandeau-teinte) 62%, var(--text));
+  --bandeau-force: 34%;
+  --bandeau-fuite: 10%;
+  /*
+    Le titre tire vers le texte, l'icône vers la couleur.
+
+    Écrit à 62 % de teinte, comme les libellés des cartes teintées, il tenait le
+    seuil de contraste — 4,6:1 — et restait pourtant en retrait de la ligne
+    qu'il annonce : sur un fond qui porte déjà sa couleur, un texte de la même
+    couleur s'y fond, quel que soit le chiffre. À 40 %, il gagne un tiers de
+    contraste sans rien perdre de son identité, et c'est l'icône — qui n'a que
+    3:1 à tenir — qui porte la couleur franche.
+  */
+  --teinte-texte: color-mix(in oklab, var(--bandeau-teinte) 40%, var(--text));
+  --bandeau-icone: color-mix(in oklab, var(--bandeau-teinte) 78%, var(--text));
   background-image: linear-gradient(
     90deg,
     color-mix(in oklab, var(--bandeau-teinte) var(--bandeau-force), transparent),
     color-mix(in oklab, var(--bandeau-teinte) var(--bandeau-fuite), transparent) 76%
   );
-  border-color: color-mix(in oklab, var(--bandeau-teinte) 30%, var(--border));
+  border-color: color-mix(in oklab, var(--bandeau-teinte) 60%, var(--border));
 }
 
 /*
  * Sur une carte déjà teintée, le bandeau ne fait qu'un souffle.
  *
  * La couleur y est partout — c'est tout l'objet de `teinte-jour` — et l'empiler
- * une seconde fois, c'est le texte qui paie : l'ambre du titre des quêtes tombe
- * à 3,9:1 sur son propre bandeau à pleine force, et le compteur des points du
- * jour, qui est en `--text-muted`, descend avec lui. À 8 % le filet et l'icône
- * suffisent à séparer l'en-tête du contenu, et le titre repasse le seuil.
+ * une seconde fois, c'est le texte qui paie : le titre des quêtes tombait à
+ * 4,3:1 sur son propre bandeau à pleine force, et le compteur des points du
+ * jour, qui est en `--text-muted`, descendait avec lui. À 10 % le filet et
+ * l'icône suffisent à séparer l'en-tête du contenu.
  *
  * La fuite tombe à zéro : le bout droit du bandeau est justement là où se lit
  * ce compteur, et il n'a alors plus rien à payer du tout.
@@ -820,25 +845,23 @@ button.glass:hover {
 .glass.teinte-defi .bandeau,
 .glass.teinte-jour .bandeau,
 .glass.teinte-reussi .bandeau {
-  --bandeau-force: 8%;
+  --bandeau-force: 10%;
   --bandeau-fuite: 0%;
-  /* Et le titre se rapproche du texte pour la même raison : sur son propre
-     fond, l'accent du défi tombait à 4,3:1 et l'ambre des quêtes à 4,5:1.
-     À 50 %, les quatre thèmes restent au-dessus de 4,6:1. */
-  --teinte-texte: color-mix(in oklab, var(--bandeau-teinte) 50%, var(--text));
+  /* Et le titre se rapproche encore du texte, pour la même raison. */
+  --teinte-texte: color-mix(in oklab, var(--bandeau-teinte) 32%, var(--text));
 }
 
 /*
- * Sur fond clair, le titre se mélange davantage au texte.
+ * Sur fond clair, l'icône s'assombrit.
  *
- * 62 % de teinte suffisent partout ailleurs : sur les trois thèmes sombres, la
- * pire des douze couleurs de chapitre reste au-dessus de 4,7:1. Sur « clair »,
- * où le mélange se fait vers le noir, le jaune du chapitre 4 tombait à 3,6:1 —
- * un jaune reste clair quoi qu'on lui ajoute, et il en faut simplement moins.
- * À 52 %, le même jaune remonte à 4,7:1 et rien ne perd sa couleur.
+ * 78 % de teinte tiennent les 3:1 attendus d'un pictogramme sur les trois
+ * thèmes sombres, où le mélange se fait vers le blanc. Sur « clair », il se
+ * fait vers le noir et cela ne suffit pas : le jaune du chapitre 4 tombait à
+ * 2,3:1 — un jaune reste clair quoi qu'on lui ajoute, et il en faut simplement
+ * moins. À 48 %, le même jaune remonte à 4,9:1 et garde sa couleur.
  */
 [data-theme='clair'] .bandeau {
-  --teinte-texte: color-mix(in oklab, var(--bandeau-teinte) 52%, var(--text));
+  --bandeau-icone: color-mix(in oklab, var(--bandeau-teinte) 48%, var(--text));
 }
 
 /*
