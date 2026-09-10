@@ -14,9 +14,10 @@
  */
 
 import { useCallback, useEffect, useState } from 'react'
+import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
-import { Check, ChevronDown, Clock, Play } from 'lucide-react'
+import { Check, ChevronDown, Clock, Play, TrendingUp } from 'lucide-react'
 import clsx from 'clsx'
 import {
   CHAPTERS,
@@ -26,11 +27,27 @@ import {
   type LessonProgress,
 } from '@/lib/lessons/index.ts'
 import { ButtonLink, Card, Chip } from '@/components/ui/index.tsx'
+import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 
+/**
+ * Le niveau donne son étiquette **et** sa couleur au chapitre.
+ *
+ * Les sept chapitres portaient le même bandeau d'accent, et leur en-tête se
+ * lisait comme celui du voisin : sept panneaux violets empilés, dont on ne
+ * distinguait que le titre. La couleur du niveau était pourtant déjà là, dans
+ * la pastille à droite — vert, ambre, rouge, du premier coup au jeu confirmé.
+ * Elle passe donc sur tout l'en-tête, et l'on voit sans lire où la difficulté
+ * change. Un seul endroit décide : la pastille et le bandeau lisent la même
+ * ligne.
+ */
 const LEVEL_LABELS = {
-  beginner: { label: 'Débutant', tone: 'success' as const },
-  intermediate: { label: 'Intermédiaire', tone: 'warning' as const },
-  advanced: { label: 'Confirmé', tone: 'danger' as const },
+  beginner: { label: 'Débutant', tone: 'success' as const, teinte: 'var(--q-best)' },
+  intermediate: {
+    label: 'Intermédiaire',
+    tone: 'warning' as const,
+    teinte: 'var(--q-inaccuracy)',
+  },
+  advanced: { label: 'Confirmé', tone: 'danger' as const, teinte: 'var(--q-blunder)' },
 }
 
 /** Chapitres repliés, conservés d'une visite à l'autre. */
@@ -150,17 +167,23 @@ export default function LearnPage() {
           Affichée même à zéro, et les cours se déplient dessous : c'est la
           première chose qu'on vient voir, et une barre vide dit « tu n'as pas
           commencé » bien mieux qu'une absence, qui ne dit rien du tout. */}
-      <Card className="mt-5 p-4">
-        <div className="mb-2 flex items-baseline justify-between">
-          <span className="text-sm font-medium">Ta progression</span>
-          <span className="text-sm tabular-nums text-muted">
-            {overall} %{' '}
-            <span className="text-faint">
-              · {termineesEnTout} / {CURRICULUM_STATS.lessons} leçons
-            </span>
-          </span>
-        </div>
-        <div className="h-2 overflow-hidden rounded-full bg-surface-strong">
+      <Card className="mt-5 overflow-hidden">
+        <EnTeteDeCarte
+          titre="Ta progression"
+          icone={<TrendingUp size={14} aria-hidden />}
+          fin={
+            <>
+              {overall} %{' '}
+              <span className="text-faint">
+                · {termineesEnTout} / {CURRICULUM_STATS.lessons} leçons
+              </span>
+            </>
+          }
+        />
+        {/* La glissière est en `bg-line` et non en `bg-surface-strong` : sur le
+            thème clair, cette dernière vaut du blanc franc, et une barre à 0 %
+            était une barre invisible sur une carte blanche. */}
+        <div className="m-4 h-2 overflow-hidden rounded-full bg-line">
           <div
             className="h-full rounded-full transition-[width] duration-500"
             style={{
@@ -178,41 +201,45 @@ export default function LearnPage() {
           À défaut d'une leçon entamée, c'est la première qui reste à faire ;
           quand tout est fait, il n'y a rien à reprendre et la carte s'efface. */}
       {prochaine && (
-        <Card glow className="mt-4 flex flex-wrap items-center gap-4 p-5">
-          <span
-            className="grid h-14 w-14 shrink-0 place-items-center rounded-[var(--radius)] text-3xl"
-            style={{ background: 'color-mix(in oklab, var(--accent-2) 16%, transparent)' }}
-            aria-hidden
-          >
-            {prochaine.lecon.icon}
-          </span>
-          <div className="min-w-[14rem] flex-1">
-            <p className="text-[12px] font-semibold text-accent">
-              {prochaine.entamee ? 'Reprendre où tu en étais' : 'Par où commencer'} · chapitre{' '}
-              {prochaine.chapitre}
-            </p>
-            <h2 className="mt-0.5 font-display text-xl font-semibold tracking-tight">
-              {prochaine.lecon.title}
-            </h2>
-            <p className="mt-1 text-sm leading-relaxed text-muted">{prochaine.lecon.summary}</p>
-            <p className="mt-1.5 flex items-center gap-2 text-[12px] text-faint">
-              <Clock size={11} aria-hidden />
-              {prochaine.lecon.minutes} min
-              <span aria-hidden>·</span>
-              {prochaine.entamee
-                ? `étape ${prochaine.etapes + 1} sur ${prochaine.lecon.steps.length}`
-                : `${prochaine.lecon.steps.length} étapes`}
-            </p>
+        <Card glow className="mt-4 overflow-hidden">
+          <EnTeteDeCarte
+            titre={`${prochaine.entamee ? 'Reprendre où tu en étais' : 'Par où commencer'} · chapitre ${prochaine.chapitre}`}
+            icone={<Play size={14} aria-hidden />}
+          />
+          <div className="flex flex-wrap items-center gap-4 p-5">
+            <span
+              className="grid h-14 w-14 shrink-0 place-items-center rounded-[var(--radius)] text-3xl"
+              style={{ background: 'color-mix(in oklab, var(--accent-2) 16%, transparent)' }}
+              aria-hidden
+            >
+              {prochaine.lecon.icon}
+            </span>
+            <div className="min-w-[14rem] flex-1">
+              <h2 className="font-display text-lg font-semibold tracking-tight">
+                {prochaine.lecon.title}
+              </h2>
+              <p className="mt-1 text-[14px] leading-relaxed text-muted">
+                {prochaine.lecon.summary}
+              </p>
+              <p className="mt-1.5 flex items-center gap-2 text-[12px] text-faint">
+                <Clock size={11} aria-hidden />
+                {prochaine.lecon.minutes} min
+                <span aria-hidden>·</span>
+                {prochaine.entamee
+                  ? `étape ${prochaine.etapes + 1} sur ${prochaine.lecon.steps.length}`
+                  : `${prochaine.lecon.steps.length} étapes`}
+              </p>
+            </div>
+            <ButtonLink
+              href={`/apprendre/${prochaine.lecon.id}`}
+              variant="primary"
+              size="lg"
+              icon={<Play size={16} />}
+              className="w-full sm:w-auto"
+            >
+              {prochaine.entamee ? 'Reprendre' : 'Commencer'}
+            </ButtonLink>
           </div>
-          <ButtonLink
-            href={`/apprendre/${prochaine.lecon.id}`}
-            variant="primary"
-            size="lg"
-            icon={<Play size={16} />}
-            className="w-full sm:w-auto"
-          >
-            {prochaine.entamee ? 'Reprendre' : 'Commencer'}
-          </ButtonLink>
         </Card>
       )}
 
@@ -267,22 +294,28 @@ export default function LearnPage() {
               className="animate-slide-up overflow-hidden rounded-[var(--radius)] border border-line-strong bg-bg-deep p-3 sm:p-4"
               style={{ animationDelay: `${chapterIndex * 60}ms` }}
             >
-              <header className={clsx(replie ? 'mb-0' : 'mb-4')}>
+              <header>
+                {/* L'en-tête prend le bandeau des cartes de l'accueil, dans la
+                    couleur du niveau : voir `.bandeau` dans `globals.css`, qui
+                    tient la recette — dégradé, filet, et `--teinte-texte` assez
+                    rapprochée du texte pour rester lisible sur les quatre
+                    thèmes. Il déborde le rembourrage du panneau par des marges
+                    négatives : un bandeau qui s'arrête avant le bord n'est
+                    qu'un rectangle de couleur de plus. */}
                 <button
                   type="button"
                   onClick={() => toggle(chapter.id)}
                   aria-expanded={!replie}
                   aria-controls={`chapitre-${chapter.id}`}
-                  className="flex w-full items-center gap-3.5 rounded-[var(--radius)] text-left transition-colors hover:bg-surface-hover"
+                  style={{ '--teinte': LEVEL_LABELS[chapter.level].teinte } as CSSProperties}
+                  className="bandeau -mx-3 -mt-3 flex w-[calc(100%+1.5rem)] items-center gap-3 border-b-2 px-3 py-3 text-left transition-colors hover:bg-surface-hover sm:-mx-4 sm:-mt-4 sm:w-[calc(100%+2rem)] sm:px-4"
                 >
                   <span
-                    className="grid h-13 w-13 shrink-0 place-items-center rounded-[var(--radius)] text-2xl"
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius-sm)] text-xl"
                     style={{
-                      height: '3.25rem',
-                      width: '3.25rem',
-                      background: 'color-mix(in oklab, var(--accent) 16%, transparent)',
+                      background: 'color-mix(in oklab, var(--bandeau-teinte) 18%, transparent)',
                       boxShadow:
-                        'inset 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent)',
+                        'inset 0 0 0 1px color-mix(in oklab, var(--bandeau-teinte) 34%, transparent)',
                     }}
                     aria-hidden
                   >
@@ -292,28 +325,33 @@ export default function LearnPage() {
                   <div className="min-w-0 flex-1">
                     {/* Le numéro de chapitre situe la progression dans le
                         programme, et fait respirer le titre au-dessus. */}
-                    <p className="text-[12px] font-semibold text-accent">
+                    <p className="text-[12px] font-semibold text-[var(--teinte-texte)]">
                       Chapitre {chapterIndex + 1}
                       {done > 0 && (
-                        <span className="ml-2 font-normal normal-case tracking-normal text-faint">
+                        <span className="ml-2 font-normal normal-case tracking-normal text-muted">
                           {done} / {chapter.lessons.length} terminées
                         </span>
                       )}
                     </p>
-                    <h2 className="mt-0.5 font-display text-[clamp(1.5rem,3.4vw,2rem)] font-bold leading-tight tracking-tight text-ink">
+                    {/* Le titre tenait dans deux rem — trente-deux pixels, la
+                        taille du titre de la page — pour nommer l'un des sept
+                        chapitres qu'elle contient. Il passe sous celui-ci, et
+                        au-dessus des titres de leçons : c'est sa place dans la
+                        hiérarchie, il l'occupe enfin. */}
+                    <h2 className="font-display text-[clamp(1.0625rem,2vw,1.25rem)] font-bold leading-tight tracking-tight text-ink">
                       {chapter.title}
                     </h2>
                   </div>
 
-                  <Chip tone={LEVEL_LABELS[chapter.level].tone} className="shrink-0 self-start">
+                  <Chip tone={LEVEL_LABELS[chapter.level].tone} className="shrink-0">
                     {LEVEL_LABELS[chapter.level].label}
                   </Chip>
 
                   <ChevronDown
-                    size={20}
+                    size={18}
                     aria-hidden
                     className={clsx(
-                      'shrink-0 self-start text-faint transition-transform duration-150',
+                      'shrink-0 text-faint transition-transform duration-150',
                       replie && '-rotate-90',
                     )}
                   />
@@ -321,7 +359,12 @@ export default function LearnPage() {
 
                 {/* La description reste visible replié : elle dit ce que le
                     chapitre apprend, et c'est sur elle qu'on choisit d'ouvrir. */}
-                <p className="mt-3 max-w-2xl text-[14px] leading-relaxed text-muted">
+                <p
+                  className={clsx(
+                    'max-w-2xl pt-3 text-[13px] leading-relaxed text-muted',
+                    !replie && 'pb-3',
+                  )}
+                >
                   {chapter.description}
                 </p>
               </header>
