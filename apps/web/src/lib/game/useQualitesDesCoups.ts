@@ -19,9 +19,14 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type { Color } from 'chess.js'
 import {
+  averageCentipawnLoss,
   classifyMove,
+  gameAccuracy,
+  QUALITY_STYLES,
   terminalScore,
+  type Classification,
   type MoveQuality,
   type OpeningBook,
   type PositionAnalysis,
@@ -80,6 +85,50 @@ function scoreDe(analyse: PositionAnalysis, fen: string): Score {
   return terminalScore(fen) ?? meilleure?.score ?? { type: 'cp', value: 0 }
 }
 
+/**
+ * Ce que valent les coups d'un camp, une fois la partie finie.
+ *
+ * Les mêmes fonctions que la page d'analyse — `gameAccuracy`, `countQualities`
+ * — appliquées aux verdicts déjà calculés pendant la partie. Rien n'est
+ * recalculé : le moteur a fait le travail coup après coup pendant qu'on jouait.
+ */
+export interface BilanDunCamp {
+  /** Précision de 0 à 100, ou `null` tant qu'aucun coup n'a été jugé. */
+  precision: number | null
+  /** Perte moyenne, en centipions. */
+  centipions: number | null
+  /** Nombre de coups joués par ce camp. */
+  coups: number
+  /** Combien de ces coups ont déjà un verdict. */
+  juges: number
+  comptes: Record<MoveQuality, number>
+}
+
+export interface BilanDesCoups {
+  w: BilanDunCamp
+  b: BilanDunCamp
+  /** Verdicts obtenus sur l'ensemble de la partie. */
+  juges: number
+  /** Demi-coups joués. */
+  total: number
+  /** Vrai quand le moteur a fini de passer sur toute la partie. */
+  complet: boolean
+}
+
+function comptesVides(): Record<MoveQuality, number> {
+  return Object.fromEntries(Object.keys(QUALITY_STYLES).map((k) => [k, 0])) as Record<
+    MoveQuality,
+    number
+  >
+}
+
+export interface QualitesDesCoups {
+  /** Verdict de chaque demi-coup, indexé par rang — ce que lit la liste des coups. */
+  parRang: Record<number, MoveQuality>
+  /** Les agrégats de fin de partie, par camp. */
+  bilan: BilanDesCoups
+}
+
 export function useQualitesDesCoups({
   moves,
   enabled = true,
@@ -88,8 +137,16 @@ export function useQualitesDesCoups({
   moves: PlayedMove[]
   enabled?: boolean
   book?: OpeningBook | null
-}): Record<number, MoveQuality> {
-  const [verdicts, setVerdicts] = useState<Record<string, MoveQuality>>({})
+}): QualitesDesCoups {
+  /*
+    On garde la classification **entière**, et pas seulement sa conclusion.
+
+    `classifyMove` calcule déjà la précision du coup et sa perte en centipions
+    pour décider du verdict, puis on jetait tout sauf l'étiquette. La fin de
+    partie n'avait donc rien à afficher, alors que la moitié du travail était
+    faite — il ne manquait que la moyenne.
+  */
+  const [verdicts, setVerdicts] = useState<Record<string, Classification>>({})
   // Le coup en cours d'analyse. Sans lui, chaque rendu relancerait la même
   // recherche : l'effet se redéclenche à chaque coup joué, et le moteur est
   // unique pour toute l'application.
@@ -149,7 +206,7 @@ export function useQualitesDesCoups({
             })
         if (controller.signal.aborted) return
 
-        const { quality } = classifyMove({
+        const classification = classifyMove({
           fenBefore: prochain.before,
           uci: prochain.uci,
           san: prochain.san,
@@ -157,7 +214,7 @@ export function useQualitesDesCoups({
           after: { score: fin ?? scoreDe(apres!, prochain.after) },
           inBook: book?.isInBook(prochain.after) ?? false,
         })
-        setVerdicts((actuels) => ({ ...actuels, [clef]: quality }))
+        setVerdicts((actuels) => ({ ...actuels, [clef]: classification }))
       } catch {
         // Moteur indisponible, recherche interrompue, position refusée : la
         // liste reste simplement sans couleur. Rien de ce qu'on affiche ici ne
@@ -176,8 +233,56 @@ export function useQualitesDesCoups({
     const parRang: Record<number, MoveQuality> = {}
     moves.forEach((move, rang) => {
       const verdict = verdicts[cle(move)]
-      if (verdict) parRang[rang] = verdict
+      if (verdict) parRang[rang] = verdict.quality
     })
-    return parRang
+
+    /*
+      La courbe d'évaluation, vue des Blancs, demi-coup par demi-coup.
+
+      `gameAccuracy` s'en sert pour peser chaque coup par la *volatilité* de la
+      position : une erreur dans une position calme pèse plus lourd qu'une
+      approximation au milieu d'un orage tactique. Il lui faut donc un point
+      par demi-coup joué, et pas seulement par coup déjà jugé — sinon la
+      fenêtre glissante se referme sur une partie plus courte que la vraie.
+
+      Les coups que le moteur n'a pas encore examinés prolongent la dernière
+      valeur connue : l'évaluation ne saute pas toute seule, et c'est une bien
+      meilleure approximation qu'un retour à l'égalité.
+    */
+    const courbe: number[] = []
+    let derniere = 50
+    for (const move of moves) {
+      const verdict = verdicts[cle(move)]
+      if (verdict) derniere = move.color === 'w' ? verdict.winAfter : 100 - verdict.winAfter
+      courbe.push(derniere)
+    }
+
+    const bilan = { juges: 0, total: moves.length, complet: false } as BilanDesCoups
+    for (const couleur of ['w', 'b'] as Color[]) {
+      const siens = moves.filter((move) => move.color === couleur)
+      const juges = siens
+        .map((move) => verdicts[cle(move)])
+        .filter((verdict): verdict is Classification => verdict !== undefined)
+      const comptes = comptesVides()
+      for (const verdict of juges) comptes[verdict.quality] += 1
+      bilan[couleur] = {
+        precision:
+          juges.length > 0
+            ? gameAccuracy(
+                juges.map((v) => v.accuracy),
+                courbe,
+              )
+            : null,
+        centipions:
+          juges.length > 0 ? averageCentipawnLoss(juges.map((v) => v.centipawnLoss)) : null,
+        coups: siens.length,
+        juges: juges.length,
+        comptes,
+      }
+      bilan.juges += juges.length
+    }
+    bilan.complet = bilan.total > 0 && bilan.juges === bilan.total
+
+    return { parRang, bilan }
   }, [moves, verdicts])
 }

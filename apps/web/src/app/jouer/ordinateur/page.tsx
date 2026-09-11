@@ -1807,7 +1807,7 @@ function GameScreen({
     qu'on cherche *où* la partie a basculé. Le crochet garde donc tous les
     verdicts, y compris ceux des coups du bot.
   */
-  const qualites = useQualitesDesCoups({ moves: state.moves, book })
+  const { parRang: qualites, bilan } = useQualitesDesCoups({ moves: state.moves, book })
 
   // Les coups tels que le ruban les attend : le numéro se déduit du rang.
   const rubanCoups = useMemo(
@@ -2608,6 +2608,7 @@ function GameScreen({
           playerColor={playerColor}
           opponentName={personality.name.fr}
           moves={state.moves}
+          bilan={bilan}
           ratingDelta={variationClassement}
           quete={
             mission.quete

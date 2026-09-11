@@ -29,6 +29,19 @@ export interface MoveListProps {
   qualities?: Record<number, MoveQuality>
   startFen?: string
   className?: string
+  /**
+   * Nombre de rangées visibles au maximum — les plus récentes.
+   *
+   * Sans plafond, la liste grandit d'une rangée tous les deux coups et pousse
+   * vers le bas ce qui la suit dans la colonne : au vingtième coup, le tchat
+   * d'une partie en ligne n'était plus qu'une fente sous la ligne de
+   * flottaison, alors qu'il sert justement pendant la partie.
+   *
+   * On ne tronque rien : la liste défile déjà toute seule sur le coup courant,
+   * et l'historique complet reste à un geste de molette. Ce sont les dix
+   * derniers coups qu'on relit — pour les autres, il y a la page d'analyse.
+   */
+  maxRows?: number
   /** Affiche la barre de navigation sous la liste. */
   controls?: boolean
   autoplay?: boolean
@@ -65,6 +78,7 @@ export function MoveList({
   controls = true,
   autoplay,
   onToggleAutoplay,
+  maxRows,
 }: MoveListProps) {
   const locale = usePreferences((state) => state.locale)
   const format = useSan()
@@ -231,9 +245,20 @@ export function MoveList({
           pose le pouce sur la liste, on atteint son extrémité, et plus rien ne
           bouge — ni la liste, ni la page. On ne peut alors plus remonter vers
           l'échiquier autrement qu'en visant les quelques pixels de marge. */}
+      {/* La hauteur d'une rangée passe par une variable plutôt que par un
+          nombre écrit dans le style : au doigt, les cellules s'épaississent
+          (`pointer-coarse:py-3`, soit douze pixels de plus), et dix rangées
+          n'y font plus la même hauteur. La variable suit la même requête de
+          média que la cellule.
+
+          Mesurée, pas devinée : 34,7 px à la souris pour `text-[14px]` et
+          `py-1.5`, bordure comprise. Arrondie au-dessus, la dixième rangée
+          reste entière et l'on aperçoit le haut de la onzième — ce qui dit
+          justement qu'il y a des coups au-dessus. */}
       <div
         ref={scrollRef}
-        className="min-h-0 flex-1 overflow-y-auto overscroll-auto lg:overscroll-contain"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-auto [--hauteur-rangee:35px] lg:overscroll-contain pointer-coarse:[--hauteur-rangee:47px]"
+        style={maxRows ? { maxHeight: `calc(var(--hauteur-rangee) * ${maxRows})` } : undefined}
         role="list"
         aria-label="Liste des coups"
       >

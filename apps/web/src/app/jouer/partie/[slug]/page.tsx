@@ -363,7 +363,7 @@ export default function LiveGamePage() {
     entre amis.
   */
   const { book } = useOpeningBook()
-  const qualites = useQualitesDesCoups({ moves: playedMoves, book })
+  const { parRang: qualites, bilan } = useQualitesDesCoups({ moves: playedMoves, book })
 
   // ── Revoir les coups sans quitter la partie ─────────────────────────────
   //
@@ -827,10 +827,16 @@ export default function LiveGamePage() {
           {/* Sur téléphone, la liste prend la hauteur de ce qu'elle contient,
               plafonnée à 40 % de la fenêtre. Elle réservait 120 px et poussait
               — trois coups joués, une boîte aux trois quarts vide, et le reste
-              du panneau repoussé d'autant. Sur grand écran elle occupe au
-              contraire la place qui reste, la colonne étant calée sur la
-              fenêtre. */}
-          <Card className="flex max-h-[40vh] flex-col overflow-hidden lg:max-h-none lg:min-h-[120px] lg:flex-1">
+              du panneau repoussé d'autant.
+
+              Sur grand écran, elle prenait tout ce qui restait : une partie de
+              vingt coups remplissait la colonne du haut en bas, et le tchat
+              finissait en bande de deux lignes coincée sous la ligne de
+              flottaison. Elle s'arrête maintenant à dix rangées — les dix
+              derniers coups, c'est ce qu'on relit en jouant — et rend le reste
+              au tchat, qui en a plus besoin qu'elle pendant la partie. Les
+              coups d'avant sont toujours là, un cran de molette plus haut. */}
+          <Card className="flex max-h-[40vh] flex-col overflow-hidden lg:max-h-none lg:min-h-[120px]">
             {grandEcran && (
               <div className="flex items-center gap-2 border-b border-line/60 px-3 py-2">
                 <span className="text-[12px] font-semibold text-faint">Coups</span>
@@ -842,6 +848,7 @@ export default function LiveGamePage() {
               cursor={revu ?? dernierDemiCoup}
               onSeek={revoir}
               qualities={qualites}
+              maxRows={10}
               className="min-h-0 flex-1"
             />
             {grandEcran && (
@@ -886,7 +893,10 @@ export default function LiveGamePage() {
               // au travers des messages. Une surface qui recouvre est opaque.
               tchatEnSurcouche
                 ? 'popover animate-slide-up fixed inset-x-3 bottom-3 z-[81] h-[60dvh] shadow-[var(--shadow-lg)]'
-                : 'glass h-56 shrink-0',
+                : // Dans la colonne, le tchat prend maintenant la place que la
+                  // liste des coups ne réclame plus — 224 px restent son
+                  // plancher, pas son plafond.
+                  'glass h-56 shrink-0 lg:h-auto lg:min-h-56 lg:flex-1',
               // Le bouton « Tchat » ne commande plus que le tchat : c'est ce
               // qu'il annonce, et la liste des coups n'a plus à en dépendre.
               !chatOpen && 'max-lg:hidden',
@@ -994,6 +1004,7 @@ export default function LiveGamePage() {
           playerColor={color}
           opponentName={opponent?.name ?? 'Adversaire'}
           moves={playedMoves}
+          bilan={bilan}
           onNewGame={() => window.location.assign('/jouer/ami')}
         />
       )}

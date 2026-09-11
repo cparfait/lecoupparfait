@@ -22,6 +22,8 @@ import type { GameResult, GameStatus } from '@coupparfait/core'
 import { formatPgnDate, toPgn } from '@coupparfait/core'
 import { Button } from '@/components/ui/index.tsx'
 import type { PlayedMove } from '@/lib/game/useChessGame.ts'
+import type { BilanDesCoups as Bilan } from '@/lib/game/useQualitesDesCoups.ts'
+import { BilanDesCoups } from '@/components/game/BilanDesCoups.tsx'
 
 const REASONS: Record<GameStatus, string> = {
   waiting: '',
@@ -44,6 +46,7 @@ export function GameOverDialog({
   playerColor,
   opponentName,
   moves,
+  bilan,
   ratingDelta,
   onRematch,
   onNewGame,
@@ -56,6 +59,14 @@ export function GameOverDialog({
   playerColor: Color | null
   opponentName: string
   moves: PlayedMove[]
+  /**
+   * La pertinence des coups de chaque camp, si l'écran l'a calculée.
+   *
+   * Elle vient de `useQualitesDesCoups`, qui tourne déjà pendant la partie pour
+   * colorer la liste des coups : à l'arrivée ici, le gros du travail est fait
+   * et il ne reste au plus que les derniers coups à juger.
+   */
+  bilan?: Bilan
   /** Variation de classement, si la partie était classée. */
   ratingDelta?: number | null
   onRematch?: () => void
@@ -204,7 +215,10 @@ export function GameOverDialog({
           lisait par-dessus un damier. */}
       <div
         ref={boite}
-        className="popover animate-slide-up relative w-full max-w-sm overflow-hidden p-6 text-center shadow-[var(--shadow-lg)]"
+        // Le bilan ajoute une boîte, et le détail déplié une dizaine de
+        // lignes : sur un téléphone en paysage, « Retour au menu » sortait par
+        // le bas sans qu'aucun défilement ne le rattrape.
+        className="popover animate-slide-up relative max-h-[calc(100dvh-2rem)] w-full max-w-sm overflow-y-auto p-6 text-center shadow-[var(--shadow-lg)]"
       >
         <button
           type="button"
@@ -237,6 +251,21 @@ export function GameOverDialog({
         )}
 
         <p className="mt-4 text-xs text-faint">{moves.length} demi-coups joués</p>
+
+        {/* ── La pertinence des coups ───────────────────────────────────
+            Avant les boutons : c'est le bilan qui décide si l'on veut
+            « Analyser la partie » ou « Revanche », et le lire après avoir vu
+            les boutons revient à ne pas le lire. */}
+        {bilan && (
+          <BilanDesCoups
+            bilan={bilan}
+            noms={{
+              w: playerColor === null ? 'Blancs' : playerColor === 'w' ? 'Toi' : opponentName,
+              b: playerColor === null ? 'Noirs' : playerColor === 'b' ? 'Toi' : opponentName,
+            }}
+            className="mt-4"
+          />
+        )}
 
         {/* ── La quête du jour ──────────────────────────────────────────
             Elle est annoncée avant les boutons parce qu'elle décide lequel

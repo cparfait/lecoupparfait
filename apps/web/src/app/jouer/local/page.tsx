@@ -126,7 +126,7 @@ export default function LocalGamePage() {
   // La couleur des coups dans la liste. Ici moins que partout ailleurs il n'y a
   // de question d'assistance : les deux joueurs partagent l'écran, et le mode
   // commenté juste en dessous leur dit déjà bien davantage.
-  const qualites = useQualitesDesCoups({ moves: state.moves, book })
+  const { parRang: qualites, bilan } = useQualitesDesCoups({ moves: state.moves, book })
 
   // ── Mode commenté ───────────────────────────────────────────────────────
   //
@@ -420,6 +420,7 @@ export default function LocalGamePage() {
           playerColor={null}
           opponentName="l’adversaire"
           moves={state.moves}
+          bilan={bilan}
           onNewGame={newGame}
         />
       )}
