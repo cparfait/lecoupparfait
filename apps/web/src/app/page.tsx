@@ -90,12 +90,7 @@ const IMMORTAL = [
  */
 const DAMIER_PAR_THEME: Record<ThemeId, BoardStyleId> = {
   aurora: 'aurore',
-  club: 'noyer',
   clair: 'marbre',
-  // `contraste` n'a pas d'équivalent jaune, et il n'en faut pas : ce thème
-  // existe pour la lisibilité, donc on prend l'ardoise, le damier le plus
-  // franchement contrasté de la série.
-  contraste: 'ardoise',
 }
 
 /** Commentaires affichés aux moments charnières de la démonstration. */

@@ -182,6 +182,7 @@ export function Menu({
         type="button"
         onClick={() => setOuvert((valeur) => !valeur)}
         aria-haspopup="menu"
+        aria-label={label}
         aria-expanded={ouvert}
         aria-controls={ouvert ? panneauId : undefined}
         /*

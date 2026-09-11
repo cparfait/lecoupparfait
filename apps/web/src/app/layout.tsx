@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Playfair_Display, Space_Grotesk } from 'next/font/google'
+import { Inter, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/Providers.tsx'
 import { AppShell } from '@/components/layout/AppShell.tsx'
@@ -29,13 +29,6 @@ const spaceGrotesk = Space_Grotesk({
   weight: ['500', '600', '700'],
   display: 'swap',
   variable: '--font-space-grotesk',
-})
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  weight: ['600', '700'],
-  display: 'swap',
-  variable: '--font-playfair',
 })
 
 export const metadata: Metadata = {
@@ -115,7 +108,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="fr"
       data-theme="aurora"
-      className={`${inter.variable} ${spaceGrotesk.variable} ${playfair.variable}`}
+      className={`${inter.variable} ${spaceGrotesk.variable}`}
       suppressHydrationWarning
     >
       <head>

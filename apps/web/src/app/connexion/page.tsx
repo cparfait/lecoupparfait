@@ -43,7 +43,10 @@ function AuthForm() {
    * carnet une fois inscrit, où l'amitié se noue toute seule.
    */
   const referrer = params.get('ami')
-  const [mode, setMode] = useState<Mode>(referrer ? 'signup' : 'signin')
+  // `?inscription=1` : le menu du compte propose « Créer un compte » directement.
+  const [mode, setMode] = useState<Mode>(
+    referrer || params.get('inscription') ? 'signup' : 'signin',
+  )
 
   /**
    * Déjà connecté : on ne demande pas de se reconnecter.

@@ -172,7 +172,7 @@ function FamilyList({
               key={family.id}
               type="button"
               onClick={() => onPick(family)}
-              className="animate-slide-up glass gradient-ring group flex w-full items-start gap-3 p-4 text-left transition-transform hover:-translate-y-0.5"
+              className="animate-slide-up glass group flex w-full items-start gap-3 p-4 text-left transition-transform hover:-translate-y-0.5"
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <span

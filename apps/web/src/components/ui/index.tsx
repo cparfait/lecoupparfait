@@ -18,6 +18,7 @@ import type {
 } from 'react'
 import Link from 'next/link'
 import clsx from 'clsx'
+import type { LucideIcon } from 'lucide-react'
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Bouton
@@ -164,7 +165,7 @@ export function Spinner({ size = 16, className }: { size?: number; className?: s
 export function Card({
   children,
   className,
-  glow,
+  glow: _glow,
   as: Tag = 'div',
   id,
   ref,
@@ -173,7 +174,13 @@ export function Card({
   className?: string
   /** Ancre, pour ce qu'un lien doit pouvoir viser depuis une autre page. */
   id?: string
-  /** Ajoute le contour dégradé caractéristique du thème. */
+  /**
+   * Sans effet, conservé pour ne pas casser les appels.
+   *
+   * Ajoutait un contour dégradé violet→menthe. Retiré : une carte se
+   * distingue par son fond et son ombre, et la couleur est réservée à
+   * l'action et aux rubriques.
+   */
   glow?: boolean
   as?: 'div' | 'section' | 'article' | 'aside'
   /**
@@ -187,30 +194,97 @@ export function Card({
   ref?: Ref<HTMLElement>
 }) {
   return (
-    <Tag id={id} ref={ref as never} className={clsx('glass', glow && 'gradient-ring', className)}>
+    <Tag id={id} ref={ref as never} className={clsx('glass', className)}>
       {children}
     </Tag>
   )
 }
 
-export function SectionTitle({
+/**
+ * Le titre d'une page, et sa phrase d'introduction.
+ *
+ * Dix-sept variantes de classes pour la balise `h1` dans l'application, de
+ * `text-xl` à `text-4xl` selon l'écran : le titre changeait de taille en
+ * changeant de rubrique. Une seule forme, ici, et les pages l'appellent.
+ */
+export function TitreDePage({
   children,
+  intro,
+  action,
+  retour,
+}: {
+  children: ReactNode
+  /** Une phrase sous le titre, qui dit ce qu'on fait ici. */
+  intro?: ReactNode
+  /** Une commande à droite du titre : un bouton, un lien. */
+  action?: ReactNode
+  /** Un lien de retour, au-dessus du titre. */
+  retour?: { href: string; label: string }
+}) {
+  return (
+    <header className="mb-6">
+      {retour && (
+        <Link href={retour.href} className="lien mb-2 inline-flex items-center gap-1">
+          <span aria-hidden>←</span> {retour.label}
+        </Link>
+      )}
+      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">{children}</h1>
+        {action && <div className="shrink-0">{action}</div>}
+      </div>
+      {intro && <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-muted">{intro}</p>}
+    </header>
+  )
+}
+
+/**
+ * Le titre d'une section dans une page.
+ *
+ * Une icône dans la teinte de la rubrique quand il y en a une — c'est le seul
+ * endroit où une section porte sa couleur —, un titre, une note, une commande.
+ */
+export function TitreDeSection({
+  children,
+  icon: Icon,
+  teinte,
   hint,
   action,
 }: {
   children: ReactNode
+  icon?: LucideIcon
+  teinte?: string
   hint?: ReactNode
   action?: ReactNode
 }) {
   return (
-    <div className="mb-3 flex items-baseline justify-between gap-3">
-      <div>
-        <h2 className="text-lg font-semibold tracking-tight">{children}</h2>
-        {hint && <p className="mt-0.5 text-xs text-muted">{hint}</p>}
+    <div className="mb-3 flex items-center justify-between gap-3">
+      <div className="flex min-w-0 items-center gap-2.5">
+        {Icon && (
+          <span
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-[var(--radius-sm)] bg-surface-strong"
+            style={
+              teinte
+                ? { background: `color-mix(in oklab, ${teinte} 16%, transparent)`, color: teinte }
+                : { color: 'var(--text-muted)' }
+            }
+            aria-hidden
+          >
+            <Icon size={16} />
+          </span>
+        )}
+        <div className="min-w-0">
+          <h2 className="font-display text-lg font-semibold tracking-tight">{children}</h2>
+          {hint && <p className="mt-0.5 text-xs text-muted">{hint}</p>}
+        </div>
       </div>
       {action}
     </div>
   )
+}
+
+/** Ancien nom de `TitreDeSection`, conservé pour les pages qui l'appellent. */
+export function SectionTitle(props: { children: ReactNode; hint?: ReactNode; action?: ReactNode }) {
+  return <TitreDeSection {...props} />
 }
 
 export type TonChip = 'neutral' | 'accent' | 'success' | 'warning' | 'danger'

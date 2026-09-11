@@ -181,7 +181,7 @@ export default function PreferencesPage() {
                   Thème
                 </span>
               </SectionTitle>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <div className="grid max-w-md grid-cols-2 gap-2">
                 {THEME_LIST.map((entry) => (
                   <button
                     key={entry.id}

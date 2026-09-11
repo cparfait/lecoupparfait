@@ -25,9 +25,6 @@ import clsx from 'clsx'
 import { SECTIONS } from '@/lib/navigation.ts'
 import { useT } from '@/lib/i18n/index.tsx'
 
-/** Les trois accents du thème, pour distinguer les entrées les unes des autres. */
-const TEINTES = ['var(--accent)', 'var(--accent-2)', 'var(--accent-3)']
-
 export function AutresDeLaSection({
   section: id,
   className,
@@ -90,16 +87,9 @@ export function AutresDeLaSection({
       <div className={clsx('grid gap-2', !colonne && 'sm:grid-cols-2')}>
         {autres.map((entree, index) => {
           const Icone = entree.icon
-          /*
-            Une teinte par entrée, prise dans la palette du thème.
-
-            Toutes portaient la couleur de la rubrique : quatre pastilles
-            identiques, qu'on ne distinguait qu'en lisant. La couleur ne
-            classe rien ici — elle sépare, ce qui est déjà tout ce qu'on lui
-            demande pour parcourir quatre cartes du regard. Jamais de valeur
-            en dur : chaque thème redéfinit ces trois variables.
-          */
-          const teinte = TEINTES[index % TEINTES.length]!
+          // La teinte de la rubrique, et elle seule : c'est l'icône qui
+          // distingue une entrée de sa voisine, pas une couleur de plus.
+          const teinte = section.teinte
           return (
             <Link
               key={entree.href}

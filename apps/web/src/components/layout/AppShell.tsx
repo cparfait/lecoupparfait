@@ -4,9 +4,12 @@
  * Ossature de l'application.
  *
  * Deux navigations distinctes plutôt qu'une seule adaptative :
- *  - sur **grand écran**, une barre supérieure de cinq menus déroulants ;
- *  - sur **mobile**, une barre inférieure fixe, à portée de pouce, qui reste
- *    visible pendant une partie.
+ *  - sur **grand écran**, une barre supérieure : le nom du site qui ramène à
+ *    l'accueil, six menus déroulants — un par rubrique —, et à droite une seule
+ *    commande, le compte, qui porte aussi les préférences et les pages du site ;
+ *  - sur **mobile**, une barre inférieure fixe à cinq onglets, à portée de
+ *    pouce, qui reste visible pendant une partie. Le cinquième, « Plus », est
+ *    une page pleine qui montre ce que la barre ne porte pas.
  *
  * Le classement des rubriques est **par verbe** — jouer, apprendre,
  * s'entraîner, analyser — parce qu'on ouvre l'application en sachant ce qu'on
@@ -21,16 +24,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  ChevronDown,
-  ChevronRight,
-  House,
-  Info,
-  Lock,
-  Scale,
-  Settings,
-  ShieldCheck,
-} from 'lucide-react'
+import { ChevronRight, Lock } from 'lucide-react'
 import clsx from 'clsx'
 import { AccountButton } from '@/components/layout/AccountButton.tsx'
 import { ChallengeWatcher } from '@/components/social/ChallengeWatcher.tsx'
@@ -42,9 +36,9 @@ import { Menu } from '@/components/ui/Menu.tsx'
 import { PorteDuCompte } from '@/components/compte/PorteDuCompte.tsx'
 import type { ReactNode } from 'react'
 import { useT } from '@/lib/i18n/index.tsx'
-import { useEstAdmin, useIdentite } from '@/lib/auth/useIdentite.ts'
+import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { avantagePour, type AvantageCompte } from '@/lib/compte/avantages.ts'
-import { RACCOURCIS_MOBILES, SECTIONS, sectionActive } from '@/lib/navigation.ts'
+import { PAGES_APPLICATION, RACCOURCIS_MOBILES, SECTIONS, sectionActive } from '@/lib/navigation.ts'
 
 /**
  * Ce qu'il y a à dire avant d'ouvrir cette rubrique, s'il y a quelque chose.
@@ -64,7 +58,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const t = useT()
   const identite = useIdentite()
-  const estAdmin = useEstAdmin()
   const [porte, setPorte] = useState<{ avantage: AvantageCompte; href: string } | null>(null)
 
   const intercepter = useCallback<Intercepteur>(
@@ -109,30 +102,19 @@ export function AppShell({ children }: { children: ReactNode }) {
             SE. On récupère la place sur les marges et les écarts, qui ne se
             voient pas, plutôt qu'en retirant une commande, qui se verrait. */}
         <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center gap-2 px-3 [@media(max-width:359px)]:px-1.5 sm:px-5">
-          {/* Le nom seul, sans vignette.
+          {/* Le nom seul, sans vignette, et il ramène à l'accueil.
 
-              La marque a été une couronne, puis un cavalier sur champ violet,
-              puis le même sur champ noir cerné d'accent. Aucune de ces
-              vignettes ne tenait à trente-deux pixels dans une barre déjà
-              chargée : une sculpture photographique réduite à la taille d'une
-              favicon perd sa matière, qui est précisément ce qui la rendait
-              belle, et il ne reste qu'une tache sombre à côté d'un mot.
-
-              Le nom, lui, se lit. Il est écrit dans la police d'affichage du
-              site, et suffit à identifier la page comme à ramener à l'accueil.
-              Le cavalier reste où il vaut quelque chose : sur l'icône de
-              l'application, où il est seul et grand. */}
-          {/* Et le nom ouvre désormais le menu de l'application.
-
-              Il ne menait qu'à l'accueil, ce que rien n'annonçait — et la
-              maison, à droite, le fait maintenant en le disant. Le nom du site
-              est en revanche l'endroit où l'on cherche ce qui concerne le site
-              lui-même : préférences, à propos, crédits, administration. Ces
-              pages vivaient dans un pied de page invisible sous `lg` et dans un
-              bloc au fond du menu mobile, c'est-à-dire à deux endroits dont
-              aucun n'était le bon. L'accueil ouvre la liste, pour qui avait
-              l'habitude de cliquer là. */}
-          <MenuApplication />
+              Il ouvrait un menu — accueil, préférences, à propos, crédits —
+              que rien n'annonçait, et l'accueil se cachait derrière un chevron.
+              Le nom d'un site est le lien vers sa première page : c'est ce
+              que tout le monde essaie en premier. Ce qui concerne le site
+              lui-même vit dans le menu du compte, à droite, et sur « Plus ». */}
+          <Link
+            href="/"
+            className="shrink-0 rounded-[var(--radius-sm)] px-2 py-1.5 font-display text-[15px] font-semibold tracking-tight text-ink transition-colors hover:bg-surface-hover sm:text-[17px]"
+          >
+            Le Coup Parfait
+          </Link>
 
           {/* La navigation à plat n'apparaît qu'à partir de `lg`, pas de `md` :
               cinq rubriques, le nom du site et cinq commandes à droite font
@@ -174,48 +156,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                 et nommé. Deux chemins pour un choix qu'on fait une fois — et
                 celui-ci occupait une des cinq places de la barre sur
                 téléphone, là où elles se disputent la largeur. */}
-            {/* La porte de l'administration.
-
-                Elle n'apparaît que pour qui l'ouvre : `useEstAdmin` vaut `false`
-                tant qu'on ne sait pas, si bien qu'elle ne clignote jamais chez
-                un visiteur ordinaire. C'est la même règle que la page elle-même,
-                qui répond « cette page n'existe pas » plutôt que « tu n'as pas
-                le droit » — montrer une porte fermée apprend qu'il y en a une.
-
-                Elle ne donne aucun droit : chaque route revérifie, et forcer le
-                booléen depuis la console ferait apparaître un lien vers une page
-                introuvable. */}
-            {estAdmin && (
-              <Link
-                href="/admin"
-                // Sur téléphone aussi, et non plus à partir de 640 px : elle y
-                // était masquée au motif que le menu du bas portait la même
-                // entrée. Mais l'administration se surveille depuis le
-                // téléphone au moins autant que depuis le bureau, et l'ouvrir
-                // demandait alors deux gestes au lieu d'un. Les quatre
-                // commandes tiennent : le sélecteur de thème et la voix ont
-                // libéré la place, et l'écart se resserre déjà sous 360 px.
-                className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
-                aria-label="Administration"
-                title="Administration"
-              >
-                <ShieldCheck size={17} aria-hidden />
-              </Link>
-            )}
-            {/* Plus de maison à droite.
-
-                Elle doublait le nom du site, dont le menu commence par
-                « Accueil » : deux chemins vers la même page, et une commande
-                de plus dans une barre qui se dispute la largeur sur téléphone.
-                Le menu du nom porte l'entrée, en toutes lettres et en tête. */}
-            <Link
-              href="/preferences"
-              className="grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
-              aria-label={t('nav.settings')}
-              title={t('nav.settings')}
-            >
-              <Settings size={17} aria-hidden />
-            </Link>
+            {/* Plus d'engrenage ni de porte d'administration ici : les deux
+                vivent dans le menu du compte, avec les pages du site. Une
+                seule commande à droite, et c'est soi. */}
             <AccountButton />
             {/* ── En paysage, les rubriques à la place du hamburger ─────
                 La barre du bas s'efface en paysage pour rendre sa hauteur à
@@ -230,23 +173,20 @@ export function AppShell({ children }: { children: ReactNode }) {
                 et l'on voit d'un coup d'œil laquelle est ouverte. Rien n'est
                 plus replié nulle part. */}
             <nav className="hidden items-center gap-0.5 max-lg:paysage:flex" aria-label="Rubriques">
-              {SECTIONS.map((section) => {
-                if (!section.sommaire) return null
-                const Icone = section.icon
-                const active = sectionActive(section, pathname)
+              {RACCOURCIS_MOBILES.map((entree) => {
+                const Icone = entree.icon
+                const active = [entree.href, ...(entree.actifSur ?? [])].some((chemin) =>
+                  pathname.startsWith(chemin),
+                )
                 return (
                   <Link
-                    key={section.id}
-                    href={section.sommaire}
+                    key={entree.href}
+                    href={entree.href}
                     aria-current={active ? 'page' : undefined}
-                    aria-label={t(section.labelKey)}
-                    title={t(section.labelKey)}
+                    aria-label={t(entree.labelKey)}
+                    title={t(entree.labelKey)}
                     className={clsx(
                       'grid h-9 w-9 place-items-center rounded-[var(--radius-sm)] transition-colors cible-doigt',
-                      // La rubrique ouverte garde sa surface : c'est un état,
-                      // pas une décoration. Les autres n'ont plus de cadre —
-                      // huit liserés côte à côte faisaient une grille de cases
-                      // vides, et le seul qui comptait s'y perdait.
                       active
                         ? 'bg-accent/20 text-accent'
                         : 'text-muted hover:bg-surface-hover hover:text-ink',
@@ -321,84 +261,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Le nom du site, et ce qu'il ouvre
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Les pages de l'application, sous son nom.
- *
- * Une seule liste pour les deux tailles d'écran, et le même geste : on clique
- * le nom du site pour ce qui concerne le site. L'administration n'y figure que
- * pour qui l'ouvre — `useEstAdmin` vaut `false` tant qu'on ne sait pas, si bien
- * qu'elle ne clignote jamais chez un visiteur ordinaire — et elle ne donne
- * aucun droit : chaque route revérifie.
- */
 /**
  * Les menus de la barre ne portent pas de cadre.
  *
- * Ils en avaient un, et la raison paraissait bonne : un bouton de menu doit
- * ressembler à un bouton, sans quoi rien n'annonce qu'il s'ouvre. Sauf qu'ils
- * sont six côte à côte — le nom du site et les cinq rubriques — et que six
- * boîtes alignées ne se lisent plus comme six boutons : elles font une rangée
- * d'onglets grillagée, juste au-dessus d'une page qui n'en a aucune. Le chevron
- * dit déjà qu'il y a quelque chose dessous, la rubrique ouverte porte son trait
- * d'accent, et la surface apparaît au survol.
- *
- * Les menus d'une barre d'actions de partie gardent le leur : là, ils voisinent
- * de vrais boutons, et c'est l'inverse qui détonnerait.
+ * Six boîtes alignées ne se lisent plus comme six boutons : elles font une
+ * rangée d'onglets grillagée. La rubrique ouverte porte son trait, et la
+ * surface apparaît au survol.
  */
 const MENU_BARRE =
   'flex items-center gap-1 rounded-[var(--radius-sm)] px-3 py-1.5 text-[15px] font-medium text-muted transition-colors hover:bg-surface-hover hover:text-ink'
-
-function MenuApplication() {
-  const t = useT()
-  const estAdmin = useEstAdmin()
-
-  const pages = [
-    { href: '/', label: t('nav.home'), icon: House },
-    { href: '/preferences', label: t('nav.settings'), icon: Settings },
-    ...(estAdmin ? [{ href: '/admin', label: 'Administration', icon: ShieldCheck }] : []),
-    { href: '/a-propos', label: 'À propos', icon: Info },
-    { href: '/credits', label: 'Crédits & licences', icon: Scale },
-  ]
-
-  return (
-    <Menu
-      className="shrink-0"
-      largeur="w-60"
-      label="Le Coup Parfait"
-      boutonClassName={MENU_BARRE}
-      declencheur={(ouvert) => (
-        <>
-          <span className="font-display text-[15px] font-semibold tracking-tight text-ink sm:text-[17px]">
-            Le Coup Parfait
-          </span>
-          <ChevronDown
-            size={14}
-            aria-hidden
-            className={clsx('transition-transform duration-150', ouvert && 'rotate-180')}
-          />
-        </>
-      )}
-    >
-      {pages.map((page) => {
-        const Icone = page.icon
-        return (
-          <Link
-            key={page.href}
-            href={page.href}
-            role="menuitem"
-            className="flex items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-sm font-medium transition-colors hover:bg-surface-hover"
-          >
-            <Icone size={16} className="shrink-0 text-accent" aria-hidden />
-            {page.label}
-          </Link>
-        )
-      })}
-    </Menu>
-  )
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Navigation sur grand écran
@@ -417,8 +288,6 @@ function MenuSection({
 }) {
   const t = useT()
   const active = sectionActive(section, pathname)
-  /** Voir le commentaire de la première entrée du panneau. */
-  const teinteSommaire = section.teinte === 'var(--accent)' ? 'var(--accent-2)' : section.teinte
 
   return (
     <Menu
@@ -462,16 +331,10 @@ function MenuSection({
             role="menuitem"
             className="flex items-center gap-2.5 rounded-[var(--radius-sm)] bg-surface/70 px-2.5 py-2 transition-colors hover:bg-surface-hover"
           >
-            {/* Une couleur qui n'est pas celle des entrées.
-
-                Les entrées du panneau portent toutes l'accent. Quand la
-                rubrique porte le même — « Jouer », « Analyse », « Communauté »
-                —, la première ligne se fondait dans les six suivantes, et
-                l'on ne voyait plus qu'elle n'était pas du même ordre. Sur
-                « Apprendre », dont la teinte est le vert, elle se détachait
-                d'elle-même : c'est cet effet-là qu'on reproduit là où il
-                manque, sans toucher aux rubriques qui l'ont déjà. */}
-            <section.icon size={16} className="shrink-0" style={{ color: teinteSommaire }} />
+            {/* La teinte de la rubrique, ici et nulle part ailleurs dans le
+                panneau : les entrées restent grises, et la première ligne se
+                détache d'elle-même. */}
+            <section.icon size={16} className="shrink-0" style={{ color: section.teinte }} />
             <span className="min-w-0 flex-1">
               {/* « Voir la page Jouer » et non « Jouer » : le mot seul répète
                   le bouton qu'on vient d'ouvrir, et l'on croit avoir affaire à
@@ -508,7 +371,7 @@ function MenuSection({
             }}
             className="flex items-start gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 transition-colors hover:bg-surface-hover"
           >
-            <Icone size={16} className="mt-0.5 shrink-0 text-accent" aria-hidden />
+            <Icone size={16} className="mt-0.5 shrink-0 text-muted" aria-hidden />
             <span className="min-w-0 flex-1">
               <span className="block text-sm font-medium">{t(entree.labelKey)}</span>
               {entree.hintKey && (
@@ -532,21 +395,13 @@ function MenuSection({
 // ─────────────────────────────────────────────────────────────────────────────
 
 /*
-  Il n'y a plus de panneau à déplier.
+  Cinq onglets, et rien à déplier.
 
-  Le menu mobile a existé sous trois formes : les trente entrées de la
-  navigation, puis les seules rubriques sans page, puis de nouveau les trente.
-  Les trois avaient le même défaut, et c'est celui du bouton qui les ouvrait :
-  « Menu » n'annonce rien de ce qu'il contient. On le déplie pour *voir* — donc
-  pour savoir ce que l'application sait faire, il fallait d'abord faire un geste
-  qui ne promettait rien.
-
-  Les cinq rubriques tiennent dans la barre du bas, « Communauté » comprise
-  depuis qu'elle a sa page. Chacune montre son contenu en grand, à taille de
-  doigt, avec une phrase par destination — c'est ce que le panneau essayait de
-  faire en petit. En paysage, où la barre s'efface pour rendre sa hauteur à
-  l'échiquier, les cinq rubriques passent en icônes dans l'en-tête : voir plus
-  haut.
+  Six onglets se touchaient sur un téléphone étroit. Les quatre rubriques
+  qu'on ouvre le plus gardent leur place ; « Plus » est une page pleine — pas
+  un panneau — qui montre la communauté, les outils, le compte et les réglages
+  en grand, à taille de doigt. En paysage, où la barre s'efface pour rendre sa
+  hauteur à l'échiquier, les cinq onglets passent en icônes dans l'en-tête.
 */
 
 function BottomBar({ pathname }: { pathname: string }) {
@@ -625,6 +480,7 @@ function BottomBar({ pathname }: { pathname: string }) {
 }
 
 function SiteFooter() {
+  const t = useT()
   return (
     <footer className="browser-only mt-auto hidden border-t border-line/60 py-6 lg:block">
       <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-3 px-5 text-xs text-faint">
@@ -633,12 +489,11 @@ function SiteFooter() {
           aucune donnée revendue.
         </p>
         <nav className="flex gap-4" aria-label="Liens secondaires">
-          <Link href="/a-propos" className="transition-colors hover:text-ink">
-            À propos
-          </Link>
-          <Link href="/credits" className="transition-colors hover:text-ink">
-            Crédits &amp; licences
-          </Link>
+          {PAGES_APPLICATION.map((page) => (
+            <Link key={page.href} href={page.href} className="transition-colors hover:text-ink">
+              {t(page.labelKey)}
+            </Link>
+          ))}
           <a
             href="https://github.com/official-stockfish/Stockfish"
             target="_blank"

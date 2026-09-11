@@ -25,10 +25,13 @@ import {
   GraduationCap,
   Grid3x3,
   Handshake,
+  Info,
+  LayoutGrid,
   Mail,
   Monitor,
   Puzzle,
   Scale,
+  Settings,
   Swords,
   Target,
   Timer,
@@ -72,15 +75,15 @@ export interface SectionNav {
   /**
    * Teinte de la section.
    *
-   * Cinq sections, une trentaine d'entrées, et une seule couleur pour le tout :
-   * le menu mobile déroulait quatre listes grises séparées par des titres gris
-   * plus petits, et l'on ne voyait plus où commençait « Apprendre ». La couleur
-   * n'est pas un ornement ici, c'est le seul repère qui survit à un balayage du
-   * pouce.
+   * Six rubriques, six teintes, et aucune n'est le violet de l'action. Elles
+   * étaient quatre pour six rubriques, deux servaient donc deux fois, et le
+   * violet teintait « Jouer » et « Analyse » en plus des boutons : la couleur
+   * ne disait plus rien. Chaque rubrique a la sienne (`--rub-*` dans
+   * `globals.css`), posée à un seul endroit — la pastille d'icône de ses cartes
+   * et le trait de son onglet. Dedans, une page est monochrome.
    *
-   * Elles viennent de la palette du thème — jamais une valeur en dur : chaque
-   * thème redéfinit `--accent`, et une couleur écrite ici jurerait dans la
-   * moitié d'entre eux.
+   * Toujours une variable du thème, jamais une valeur en dur : le thème clair
+   * assombrit chacune pour tenir le contraste.
    */
   teinte: string
   entrees: EntreeNav[]
@@ -89,7 +92,7 @@ export interface SectionNav {
 export const SECTIONS: SectionNav[] = [
   {
     id: 'jouer',
-    teinte: 'var(--accent)',
+    teinte: 'var(--rub-jouer)',
     labelKey: 'nav.play',
     icon: Swords,
     sommaire: '/jouer',
@@ -140,13 +143,18 @@ export const SECTIONS: SectionNav[] = [
         icon: Mail,
         hintKey: 'nav.correspondenceHint',
       },
-      { href: '/tournois', labelKey: 'nav.tournaments', icon: Trophy },
+      {
+        href: '/tournois',
+        labelKey: 'nav.tournaments',
+        icon: Trophy,
+        hintKey: 'nav.tournamentsHint',
+      },
       { href: '/jouer/regarder', labelKey: 'nav.watch', icon: Eye, hintKey: 'nav.watchHint' },
     ],
   },
   {
     id: 'apprendre',
-    teinte: 'var(--accent-2)',
+    teinte: 'var(--rub-apprendre)',
     labelKey: 'nav.learn',
     icon: GraduationCap,
     sommaire: '/apprendre',
@@ -175,7 +183,7 @@ export const SECTIONS: SectionNav[] = [
   },
   {
     id: 'entrainer',
-    teinte: 'var(--accent-3)',
+    teinte: 'var(--rub-entrainer)',
     labelKey: 'nav.train',
     icon: Target,
     // La rubrique a maintenant sa page-sommaire, comme « Jouer » et
@@ -203,7 +211,7 @@ export const SECTIONS: SectionNav[] = [
   },
   {
     id: 'analyser',
-    teinte: 'var(--accent)',
+    teinte: 'var(--rub-analyser)',
     labelKey: 'nav.analysis',
     icon: Gauge,
     sommaire: '/analyse',
@@ -220,7 +228,7 @@ export const SECTIONS: SectionNav[] = [
   },
   {
     id: 'communaute',
-    teinte: 'var(--accent-2)',
+    teinte: 'var(--rub-communaute)',
     labelKey: 'nav.community',
     icon: Users,
     // La seule rubrique qui n'avait pas de page à elle. Ses quatre écrans ne se
@@ -229,9 +237,19 @@ export const SECTIONS: SectionNav[] = [
     // barre du bas y mène désormais directement, et le panneau a disparu.
     sommaire: '/communaute',
     entrees: [
-      { href: '/classement', labelKey: 'nav.leaderboard', icon: Trophy },
-      { href: '/amis', labelKey: 'nav.friends', icon: Users },
-      { href: '/statistiques', labelKey: 'nav.stats', icon: BarChart3 },
+      {
+        href: '/classement',
+        labelKey: 'nav.leaderboard',
+        icon: Trophy,
+        hintKey: 'nav.leaderboardHint',
+      },
+      { href: '/amis', labelKey: 'nav.friends', icon: Users, hintKey: 'nav.friendsHint' },
+      {
+        href: '/statistiques',
+        labelKey: 'nav.stats',
+        icon: BarChart3,
+        hintKey: 'nav.statsHint',
+      },
     ],
   },
   /**
@@ -245,7 +263,7 @@ export const SECTIONS: SectionNav[] = [
    */
   {
     id: 'outils',
-    teinte: 'var(--q-inaccuracy)',
+    teinte: 'var(--rub-outils)',
     labelKey: 'nav.tools',
     icon: Timer,
     sommaire: '/outils',
@@ -274,18 +292,31 @@ export const SECTIONS: SectionNav[] = [
 ]
 
 /**
- * Barre inférieure sur téléphone : les cinq rubriques, et rien d'autre.
+ * Les pages qui concernent l'application elle-même, et non le jeu.
  *
- * La cinquième place était tenue par un bouton « Menu » qui dépliait un
- * panneau contenant les cinq rubriques et leurs trente entrées. C'était la
- * navigation mobile réelle, et elle était **cachée** : un bouton nommé
- * « Menu » n'annonce rien de ce qu'il contient, et l'on ne déplie pas un
- * panneau pour savoir ce qui existe dans une application qu'on découvre.
+ * Une seule liste, lue par le menu du compte, la page « Plus » et le pied de
+ * page : elles vivaient dans un menu sous le nom du site, derrière un
+ * engrenage, et dans un pied de page invisible sous `lg`, c'est-à-dire à trois
+ * endroits dont aucun n'était le bon.
+ */
+export const PAGES_APPLICATION: EntreeNav[] = [
+  { href: '/preferences', labelKey: 'nav.settings', icon: Settings },
+  { href: '/a-propos', labelKey: 'nav.about', icon: Info },
+  { href: '/credits', labelKey: 'nav.credits', icon: Scale },
+]
+
+/** Les rubriques que la barre du bas ne porte pas, et que « Plus » regroupe. */
+export const SECTIONS_DANS_PLUS = ['communaute', 'outils'] as const
+
+/**
+ * Barre inférieure sur téléphone : quatre rubriques, et « Plus ».
  *
- * Les cinq rubriques tiennent dans la barre — elles ont toutes une page,
- * « Communauté » comprise depuis qu'elle a la sienne —, et chaque page montre
- * son contenu en grand. Il n'y a donc plus rien à replier : ce que
- * l'application sait faire se lit sur cinq onglets et cinq pages.
+ * Six onglets se disputaient trois cent soixante-quinze pixels : « Communauté »
+ * et « S'entraîner » se touchaient, et rien ne pouvait plus s'y ajouter. Les
+ * quatre rubriques qu'on ouvre le plus — jouer, apprendre, s'entraîner,
+ * analyser — gardent leur place. « Plus » n'est pas un panneau à déplier mais
+ * une page pleine : elle montre la communauté, les outils, le compte et les
+ * réglages en grand, à taille de doigt.
  */
 export const RACCOURCIS_MOBILES: EntreeNav[] = [
   {
@@ -294,29 +325,32 @@ export const RACCOURCIS_MOBILES: EntreeNav[] = [
     icon: Swords,
     actifSur: ['/correspondance', '/tournois', '/carriere'],
   },
-  { href: '/apprendre', labelKey: 'nav.learn', icon: GraduationCap },
-  // « S'entraîner », et non plus « Puzzles ».
-  //
-  // L'onglet portait le nom de l'un des trois écrans de la rubrique et menait
-  // droit dessus : la manche chronométrée et le défi du jour n'apparaissaient
-  // nulle part sur un téléphone. Le nom de la rubrique — le même que sur grand
-  // écran — annonce les trois, et le sommaire les propose.
-  { href: '/entrainer', labelKey: 'nav.train', icon: Target, actifSur: ['/puzzles'] },
-  { href: '/analyse', labelKey: 'nav.analysis', icon: Gauge },
   {
-    href: '/communaute',
-    labelKey: 'nav.community',
-    icon: Users,
-    // Les quatre écrans de la rubrique s'atteignent aussi directement, depuis
-    // un lien ou l'historique : l'onglet doit rester allumé sur chacun.
-    actifSur: ['/classement', '/amis', '/statistiques'],
+    href: '/apprendre',
+    labelKey: 'nav.learn',
+    icon: GraduationCap,
+    actifSur: ['/ouvertures', '/finales', '/vision', '/glossaire'],
   },
-  // Sixième onglet, et il n'y avait pas le choix : la pendule est faite pour
-  // le téléphone et la tablette posés sur la table. Une rubrique qu'on ne peut
-  // atteindre qu'au clavier, depuis un grand écran, serait une rubrique que
-  // personne n'ouvrirait — et surtout jamais depuis l'appareil auquel elle est
-  // destinée.
-  { href: '/outils', labelKey: 'nav.tools', icon: Timer },
+  { href: '/entrainer', labelKey: 'nav.train', icon: Target, actifSur: ['/puzzles'] },
+  { href: '/analyse', labelKey: 'nav.analysis', icon: Gauge, actifSur: ['/etudes', '/editeur'] },
+  {
+    href: '/plus',
+    labelKey: 'nav.more',
+    icon: LayoutGrid,
+    actifSur: [
+      '/communaute',
+      '/classement',
+      '/amis',
+      '/statistiques',
+      '/outils',
+      '/preferences',
+      '/profil',
+      '/connexion',
+      '/a-propos',
+      '/credits',
+      '/admin',
+    ],
+  },
 ]
 
 /**

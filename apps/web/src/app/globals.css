@@ -3,16 +3,27 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    GAMBIT — SYSTÈME DE DESIGN
 
-   Un seul jeu de variables sémantiques, quatre habillages. Aucun composant ne
+   Un seul jeu de variables sémantiques, deux habillages. Aucun composant ne
    connaît jamais une couleur littérale : il demande `--surface` ou `--accent`,
    et le thème actif décide. Changer de thème est donc instantané et ne
    provoque aucun re-rendu React.
 
    Thèmes :
-     aurora    (défaut)  nuit profonde, verre dépoli, néons violet/menthe
-     club                chêne fumé, ivoire, laiton — ambiance club privé
-     clair               minimal suisse, blanc cassé et encre
-     contraste           noir et blanc purs, ratios AAA, zéro effet
+     aurora    (défaut)  sombre — nuit profonde, verre dépoli, accent violet
+     clair               clair — blanc cassé et encre
+
+   Il y en a eu quatre. « Club » et « Contraste » doublaient chaque règle de
+   couleur : chaque réglage devait être vérifié quatre fois, et l'était rarement.
+   Deux habillages suffisent à couvrir le soir et le plein jour.
+
+   ── Une couleur, un rôle ──────────────────────────────────────────────────
+   `--accent` (le violet) est la couleur de l'action : bouton primaire, lien,
+   onglet ouvert, curseur. Elle ne teinte aucune rubrique et aucune carte.
+   Les six rubriques ont chacune leur teinte (`--rub-*`), posée à un seul
+   endroit : la pastille d'icône d'une carte de destination et le trait de
+   l'onglet actif. À l'intérieur d'une page, on est monochrome.
+   Les couleurs de qualité des coups (`--q-*`) restent réservées à l'analyse
+   et aux états — succès, alerte, erreur.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -80,6 +91,14 @@
   --accent-2: #00e5a8;
   --accent-3: #ff7a59;
 
+  /* Teintes des six rubriques. Aucune n'est le violet de l'action. */
+  --rub-jouer: #5b8def;
+  --rub-apprendre: #00e5a8;
+  --rub-entrainer: #ff7a59;
+  --rub-analyser: #22c4d8;
+  --rub-communaute: #ef5da8;
+  --rub-outils: #f2c14e;
+
   /* Halo lumineux caractéristique du thème */
   --glow: 0 0 0 1px rgb(124 92 255 / 0.25), 0 0 32px -4px rgb(124 92 255 / 0.45);
   --glow-2: 0 0 28px -6px rgb(0 229 168 / 0.5);
@@ -120,85 +139,7 @@
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
-   2. Thème CLUB — bois, ivoire, laiton
-   ─────────────────────────────────────────────────────────────────────────── */
-
-[data-theme='club'] {
-  /* ── Matière ──────────────────────────────────────────────────────────
-     Ce qui sépare une surface d'un rectangle gris : un reflet en haut, un
-     liseré interne, et un fond qui n'est pas parfaitement uni. */
-  --sheen: rgb(255 246 224 / 0.055);
-  --inner-edge: rgb(255 246 224 / 0.07);
-  --halo-1: rgb(201 162 39 / 0.1);
-  --halo-2: rgb(127 168 124 / 0.05);
-  color-scheme: dark;
-
-  --bg: #14100b;
-  --bg-deep: #0d0a07;
-  --bg-elev: #1d1710;
-  --flottant: #322718;
-  --surface: rgb(232 220 200 / 0.065);
-  --surface-hover: rgb(232 220 200 / 0.1);
-  --surface-strong: rgb(232 220 200 / 0.14);
-  --border: rgb(201 162 39 / 0.22);
-  --border-strong: rgb(201 162 39 / 0.42);
-
-  /* Le voile de la carte prend la couleur chaude des surfaces du thème, et son
-     contour un or à mi-chemin du liseré franc : à 42 %, chaque carte portait un
-     cadre doré. Voir `--voile-carte` sur `aurora`. */
-  --voile-carte: rgb(232 220 200 / 0.075);
-  --bord-carte: rgb(201 162 39 / 0.32);
-
-  --text: #f0e7d6;
-  --text-muted: #c0b198;
-  /* Même correction que sur `aurora` : 3,6:1 → 4,7:1 sur une carte. */
-  --text-faint: #9e8f74;
-  --text-inverse: #14100b;
-
-  --accent: #c9a227;
-  --accent-soft: #e2be48;
-  --accent-deep: #9a7a15;
-  --accent-contrast: #14100b;
-  --accent-2: #7fa87c;
-  --accent-3: #a33b2a;
-
-  --glow: 0 0 0 1px rgb(201 162 39 / 0.3), 0 2px 24px -6px rgb(201 162 39 / 0.35);
-  --glow-2: 0 0 24px -8px rgb(163 59 42 / 0.5);
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5);
-  --shadow: 0 10px 34px -10px rgb(0 0 0 / 0.8);
-  --shadow-lg: 0 34px 90px -24px rgb(0 0 0 / 0.9);
-
-  --aurora-1: rgb(201 162 39 / 0.1);
-  --aurora-2: rgb(163 59 42 / 0.08);
-  --aurora-3: rgb(127 168 124 / 0.05);
-
-  --sq-light: #e8dcc8;
-  --sq-dark: #8a6a45;
-  --sq-border: rgb(0 0 0 / 0.22);
-  --board-frame: #3a2b1c;
-  --piece-white: #f5ecdb;
-  --piece-white-edge: #b09a76;
-  --piece-black: #2a2018;
-  --piece-black-edge: #5c4832;
-
-  --mat-white: #f0e4cd;
-  --mat-black: #2b2119;
-  --mat-board-light: #e5d6bb;
-  --mat-board-dark: #7d5f3e;
-  --mat-metal: #c9a227;
-  --env-intensity: 0.75;
-
-  --blur: 14px;
-  --radius: 12px;
-  --radius-sm: 7px;
-  --radius-lg: 20px;
-
-  --font-display: var(--font-playfair), Georgia, serif;
-  --font-body: var(--font-inter), system-ui, sans-serif;
-}
-
-/* ───────────────────────────────────────────────────────────────────────────
-   3. Thème CLAIR — minimal, lisible en plein soleil
+   2. Thème CLAIR — minimal, lisible en plein soleil
    ─────────────────────────────────────────────────────────────────────────── */
 
 [data-theme='clair'] {
@@ -245,6 +186,14 @@
   --accent-2: #00926e;
   --accent-3: #d4562f;
 
+  /* Mêmes teintes de rubrique, assombries pour tenir sur fond clair. */
+  --rub-jouer: #2f6ad9;
+  --rub-apprendre: #00926e;
+  --rub-entrainer: #d4562f;
+  --rub-analyser: #0e8fa3;
+  --rub-communaute: #c73d86;
+  --rub-outils: #a8790a;
+
   --glow: 0 0 0 1px rgb(91 60 224 / 0.16);
   --glow-2: 0 0 0 1px rgb(0 146 110 / 0.2);
   --shadow-sm: 0 1px 2px rgb(16 16 24 / 0.06);
@@ -277,83 +226,6 @@
   --radius-lg: 22px;
 
   --font-display: var(--font-space-grotesk), 'Inter', system-ui, sans-serif;
-  --font-body: var(--font-inter), system-ui, sans-serif;
-}
-
-/* ───────────────────────────────────────────────────────────────────────────
-   4. Thème CONTRASTE — accessibilité AAA, aucun effet décoratif
-   ─────────────────────────────────────────────────────────────────────────── */
-
-[data-theme='contraste'] {
-  /* ── Matière ──────────────────────────────────────────────────────────
-     Ce qui sépare une surface d'un rectangle gris : un reflet en haut, un
-     liseré interne, et un fond qui n'est pas parfaitement uni. */
-  --sheen: rgb(255 255 255 / 0.05);
-  --inner-edge: rgb(255 255 255 / 0.1);
-  --halo-1: rgb(255 230 0 / 0.05);
-  --halo-2: rgb(255 255 255 / 0.03);
-  color-scheme: dark;
-
-  --bg: #000000;
-  --bg-deep: #000000;
-  --bg-elev: #0a0a0a;
-  --flottant: #1c1c1c;
-  --surface: #101010;
-  --surface-hover: #1c1c1c;
-  --surface-strong: #262626;
-  --border: #6a6a6a;
-  --border-strong: #ffffff;
-
-  /* Rien à renforcer ici : la carte est un gris opaque sur du noir, cerné d'un
-     liseré à 42 % de blanc. C'est le thème qui n'a jamais eu le problème. */
-  --voile-carte: transparent;
-  --bord-carte: var(--border);
-
-  --text: #ffffff;
-  --text-muted: #d8d8d8;
-  --text-faint: #b0b0b0;
-  --text-inverse: #000000;
-
-  --accent: #ffe600;
-  --accent-soft: #fff35c;
-  --accent-deep: #c9b600;
-  --accent-contrast: #000000;
-  --accent-2: #00ff9d;
-
-  --accent-3: #ff6b4a;
-
-  --glow: 0 0 0 2px #ffe600;
-  --glow-2: 0 0 0 2px #00ff9d;
-  --shadow-sm: none;
-  --shadow: none;
-  --shadow-lg: none;
-
-  --aurora-1: transparent;
-  --aurora-2: transparent;
-  --aurora-3: transparent;
-
-  --sq-light: #e8e8e8;
-  --sq-dark: #3c3c3c;
-  --sq-border: #7a7a7a;
-  --board-frame: #ffffff;
-  --piece-white: #ffffff;
-  --piece-white-edge: #000000;
-  --piece-black: #000000;
-  --piece-black-edge: #ffffff;
-
-  --mat-white: #ffffff;
-  --mat-black: #0a0a0a;
-  --mat-board-light: #e8e8e8;
-  --mat-board-dark: #3c3c3c;
-  --mat-metal: #ffe600;
-  --env-intensity: 1;
-
-  --blur: 0px;
-  --radius: 6px;
-  --radius-sm: 4px;
-  --radius-lg: 8px;
-
-  --font-display: var(--font-inter), system-ui, sans-serif;
   --font-body: var(--font-inter), system-ui, sans-serif;
 }
 
@@ -933,31 +805,80 @@ button.glass:hover {
   box-shadow: var(--shadow);
 }
 
-/* Bordure en dégradé : un fond dégradé masqué pour ne laisser que le contour. */
-@utility gradient-ring {
-  position: relative;
+/*
+ * Plus de contour dégradé sur les cartes.
+ *
+ * `gradient-ring` posait un liseré violet→menthe sur chaque carte, ce qui
+ * revenait à donner deux couleurs de plus à des blocs qui en portaient déjà
+ * une. Une carte se distingue par son fond et son ombre. Le dégradé reste
+ * réservé au titre de l'accueil public (`text-gradient`).
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GABARITS DE PAGE
+
+   Une seule largeur de contenu par type de page, et une seule grille de
+   cartes. Chaque page posait la sienne — `max-w-3xl`, `max-w-5xl`, marges au
+   choix — et l'on changeait de gabarit en changeant de rubrique.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* La page ordinaire : sommaires, listes, formulaires. */
+@utility page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 64rem;
+  padding: 2rem 1rem;
 }
-.gradient-ring::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(140deg, var(--accent), transparent 42%, var(--accent-2));
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  /* 0,55 se devinait à peine. À 0,75 le contour se voit sans crier, et c'est
-     lui qui donne aux cartes leur air d'objet fini plutôt que de div bordée. */
-  opacity: 0.75;
-  pointer-events: none;
-  transition: opacity 160ms ease;
+@media (min-width: 640px) {
+  .page {
+    padding-inline: 1.5rem;
+  }
 }
-a.gradient-ring:hover::before,
-button.gradient-ring:hover::before {
-  opacity: 1;
+@media (min-width: 1024px) {
+  .page {
+    padding-block: 3rem;
+  }
+}
+
+/* La page étroite : un texte qu'on lit, un formulaire qu'on remplit. */
+@utility page-etroite {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 44rem;
+  padding: 2rem 1rem;
+}
+@media (min-width: 640px) {
+  .page-etroite {
+    padding-inline: 1.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .page-etroite {
+    padding-block: 3rem;
+  }
+}
+
+/* La grille des cartes de destination : une colonne au doigt, deux au-delà. */
+@utility grille-cartes {
+  display: grid;
+  gap: 0.5rem;
+}
+@media (min-width: 768px) {
+  .grille-cartes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+}
+
+/* Le lien en texte : la couleur de l'action, et rien d'autre. */
+@utility lien {
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 120ms ease;
+}
+.lien:hover {
+  text-decoration: underline;
 }
 
 @utility text-gradient {

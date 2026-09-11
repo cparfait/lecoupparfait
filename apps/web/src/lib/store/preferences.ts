@@ -16,7 +16,7 @@ import type { Notation } from '@coupparfait/core'
 import type { Locale } from '../i18n/dictionary.ts'
 import type { CustomProviderDef } from '../ia/providers/custom.ts'
 
-export type ThemeId = 'aurora' | 'club' | 'clair' | 'contraste'
+export type ThemeId = 'aurora' | 'clair'
 export type PieceSetId =
   | 'staunton'
   | 'merida'
@@ -287,7 +287,7 @@ export const usePreferences = create<PreferencesStore>()(
     }),
     {
       name: 'coupparfait.preferences',
-      version: 5,
+      version: 6,
       /**
        * Reprise des réglages enregistrés par une version antérieure.
        *
@@ -315,6 +315,9 @@ export const usePreferences = create<PreferencesStore>()(
         // qui utilisent déjà l'application qui butent sur « Cf3 » à longueur
         // de partie. Le réglage reste ouvert dans Préférences.
         if (from < 5) state.notation = 'figurine'
+        // v6 : deux thèmes au lieu de quatre. « Club » et « Contraste » ont
+        // disparu ; qui les avait choisis retombe sur le thème sombre.
+        if (from < 6 && state.theme !== 'clair') state.theme = 'aurora'
         return state as Preferences
       },
       partialize: ({ set: _set, patch: _patch, reset: _reset, hydrated: _h, ...rest }) => rest,
@@ -420,10 +423,8 @@ export function supportsThreadedEngine(): boolean {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const THEME_LIST: Array<{ id: ThemeId; swatch: [string, string, string] }> = [
-  { id: 'aurora', swatch: ['#07070c', '#7c5cff', '#00e5a8'] },
-  { id: 'club', swatch: ['#14100b', '#c9a227', '#e8dcc8'] },
-  { id: 'clair', swatch: ['#f7f7f9', '#5b3ce0', '#00926e'] },
-  { id: 'contraste', swatch: ['#000000', '#ffe600', '#ffffff'] },
+  { id: 'aurora', swatch: ['#0b0b14', '#7c5cff', '#f2f1f8'] },
+  { id: 'clair', swatch: ['#f7f7f9', '#5b3ce0', '#14141c'] },
 ]
 
 /**

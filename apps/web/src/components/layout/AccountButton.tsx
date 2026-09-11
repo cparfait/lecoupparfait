@@ -1,111 +1,156 @@
 'use client'
 
 /**
- * Le bouton de compte, dans l'en-tête.
+ * Le compte, dans l'en-tête : un seul bouton, et tout ce qui concerne soi.
  *
- * Il proposait « Se connecter » à tout le monde, y compris à qui venait de
- * s'inscrire : on lisait son propre pseudo sur son profil pendant que l'en-tête
- * invitait à ouvrir une session. C'est le genre de contradiction qui fait
- * douter d'être vraiment connecté.
+ * L'en-tête portait trois commandes de nature différente à côté des
+ * rubriques : le nom du site ouvrait un menu (accueil, préférences, à propos,
+ * crédits), un engrenage menait aux préférences, et « Se connecter » menait au
+ * compte. Les préférences avaient donc deux chemins, l'accueil se cachait
+ * derrière un chevron, et le principe « à gauche ce qu'on veut faire, à droite
+ * soi » n'était plus tenu.
  *
- * Une fois la session ouverte, il montre donc l'avatar et le pseudo, et mène
- * au profil — d'où l'on peut se déconnecter.
+ * Il reste une commande à droite. Connecté, c'est l'avatar et le pseudo, qui
+ * ouvrent le profil, les préférences, l'administration pour qui l'a, les pages
+ * du site, et la déconnexion. Anonyme, c'est « Se connecter », en toutes
+ * lettres et en bouton plein — c'est l'appel à l'action du visiteur — et le
+ * même menu s'ouvre sur un petit chevron à côté, pour les préférences et le
+ * reste, qui ne demandent pas de compte.
  *
- * **Sur mobile aussi.** Il était masqué sous 640 px — `hidden sm:inline-flex` —
- * et la seule trace du compte se trouvait au fond du menu hamburger, après cinq
- * rubriques : sur téléphone, rien à l'écran ne disait si l'on était connecté.
- * C'est exactement la contradiction décrite plus haut, déplacée d'une taille
- * d'écran à l'autre. Il reste donc visible partout, réduit à sa pastille quand
- * la place manque : le pseudo est le premier à sauter, l'avatar suffit à
- * répondre à la question posée.
+ * **Sur mobile aussi.** Le bouton était masqué sous 640 px et la seule trace
+ * du compte se trouvait au fond d'un menu : rien à l'écran ne disait si l'on
+ * était connecté. Il reste visible partout, réduit à sa pastille quand la
+ * place manque.
  */
 
+import { useCallback } from 'react'
 import Link from 'next/link'
+import { ChevronDown, LogOut, ShieldCheck, User } from 'lucide-react'
 import clsx from 'clsx'
+import { Menu } from '@/components/ui/Menu.tsx'
+import { toast } from '@/components/ui/Toast.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
-import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { useEstAdmin, useIdentite } from '@/lib/auth/useIdentite.ts'
+import { PAGES_APPLICATION } from '@/lib/navigation.ts'
 
-export function AccountButton({ variant = 'header' }: { variant?: 'header' | 'menu' }) {
+const ENTREE =
+  'flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-left text-sm font-medium transition-colors hover:bg-surface-hover'
+
+/** Le corps du menu, commun aux deux états. */
+function EntreesDuSite({ estAdmin }: { estAdmin: boolean }) {
   const t = useT()
+  return (
+    <>
+      {estAdmin && (
+        <Link href="/admin" role="menuitem" className={ENTREE}>
+          <ShieldCheck size={16} className="shrink-0 text-muted" aria-hidden />
+          {t('nav.admin')}
+        </Link>
+      )}
+      {PAGES_APPLICATION.map((page) => {
+        const Icone = page.icon
+        return (
+          <Link key={page.href} href={page.href} role="menuitem" className={ENTREE}>
+            <Icone size={16} className="shrink-0 text-muted" aria-hidden />
+            {t(page.labelKey)}
+          </Link>
+        )
+      })}
+    </>
+  )
+}
 
-  /**
-   * L'identité vient de `useIdentite`, et non plus d'un `fetch` posé ici.
-   *
-   * Elle était lue localement tant que ce bouton était seul à en avoir besoin.
-   * La pastille de série en a désormais besoin aussi — elle n'a de sens que
-   * pour un compte — et deux lectures indépendantes auraient fait deux requêtes
-   * identiques à chaque navigation. `undefined` garde le même sens qu'avant :
-   * on ne sait pas encore, donc on n'affiche rien.
-   */
+export function AccountButton() {
+  const t = useT()
   const me = useIdentite()
+  const estAdmin = useEstAdmin()
+
+  const seDeconnecter = useCallback(async () => {
+    await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'signout' }),
+    })
+    toast.success('À bientôt !')
+    window.location.assign('/')
+  }, [])
 
   if (me === undefined) {
-    return (
-      <span
-        className={clsx(
-          'rounded-[var(--radius-sm)] bg-surface-strong',
-          // Calé sur le bouton « Se connecter », le plus large des deux issues :
-          // une réserve plus étroite que son contenu ferait sauter l'en-tête au
-          // moment où la réponse arrive.
-          variant === 'header' ? 'block h-9 w-20 sm:w-28' : 'col-span-2 mt-1 h-10',
-        )}
-        aria-hidden
-      />
-    )
+    // Calé sur la largeur de l'issue la plus large, pour que l'en-tête ne saute
+    // pas quand la réponse arrive.
+    return <span className="block h-9 w-24 rounded-[var(--radius-sm)] bg-surface-strong sm:w-32" aria-hidden />
   }
 
   if (me === null) {
     return (
-      <Link
-        href="/connexion"
-        title={t('nav.signIn')}
-        className={clsx(
-          'items-center justify-center rounded-[var(--radius-sm)] bg-accent font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110',
-          variant === 'header'
-            ? 'cible-doigt inline-flex h-9 whitespace-nowrap px-2.5 text-[14px] sm:px-3.5'
-            : 'col-span-2 mt-1 flex gap-2 px-3 py-2.5 text-sm',
-        )}
-      >
-        {/* Le mot, et pas une icône.
-
-            Il y avait ici un `LogIn` de lucide sous 640 px, faute de place
-            supposée. Deux erreurs. La place existe : la pastille de série ne
-            s'affiche jamais sans compte — `FlammeSerie` sort sur `!identite` —
-            donc l'en-tête anonyme porte une commande de moins que celui d'un
-            compte, précisément là où le bouton est le plus large.
-
-            Et le picto se lisait à l'envers. `LogIn` (une flèche qui entre dans
-            un chambranle) et `LogOut` (la même flèche qui en sort) ne se
-            distinguent pas à dix-sept pixels : on venait de se déconnecter, et
-            l'en-tête semblait proposer de se déconnecter encore. Un bouton de
-            connexion doit dire « se connecter ». */}
-        {t('nav.signIn')}
-      </Link>
+      <div className="flex items-center gap-0.5">
+        <Link
+          href="/connexion"
+          title={t('nav.signIn')}
+          className="cible-doigt inline-flex h-9 items-center justify-center whitespace-nowrap rounded-[var(--radius-sm)] bg-accent px-3 text-[14px] font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110 sm:px-3.5"
+        >
+          {t('nav.signIn')}
+        </Link>
+        <Menu
+          align="right"
+          largeur="w-56"
+          label={t('nav.account')}
+          boutonClassName="grid h-9 w-8 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover hover:text-ink cible-doigt"
+          declencheur={(ouvert) => (
+            <ChevronDown
+              size={16}
+              aria-hidden
+              className={clsx('transition-transform duration-150', ouvert && 'rotate-180')}
+            />
+          )}
+        >
+          <Link href="/connexion?inscription=1" role="menuitem" className={ENTREE}>
+            <User size={16} className="shrink-0 text-muted" aria-hidden />
+            {t('nav.signUp')}
+          </Link>
+          <span className="my-1 block h-px bg-line/60" aria-hidden />
+          <EntreesDuSite estAdmin={false} />
+        </Menu>
+      </div>
     )
   }
 
   return (
-    <Link
-      href={`/profil/${me.username}`}
-      title={t('nav.profile')}
-      className={clsx(
-        // Comme les autres commandes de la barre, et plus de liseré : c'est
-        // l'avatar, rond et coloré, qui donne sa présence au bouton. Le cadre
-        // n'y ajoutait qu'une case de plus dans une rangée qui en comptait six.
-        'items-center gap-2 rounded-[var(--radius-sm)] font-semibold transition-colors hover:bg-surface-hover',
-        variant === 'header'
-          ? 'inline-flex h-9 px-1.5 text-[14px] text-ink sm:px-2'
-          : 'col-span-2 mt-1 flex justify-center px-3 py-2.5 text-sm text-ink',
+    <Menu
+      align="right"
+      largeur="w-60"
+      label={t('nav.account')}
+      boutonClassName="inline-flex h-9 items-center gap-2 rounded-[var(--radius-sm)] px-1.5 text-[14px] font-semibold text-ink transition-colors hover:bg-surface-hover sm:px-2 cible-doigt"
+      declencheur={(ouvert) => (
+        <>
+          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-surface-strong text-sm">
+            <span aria-hidden>{me.avatar ?? '♟️'}</span>
+          </span>
+          {/* Le pseudo saute le premier quand la place manque : la pastille
+              répond déjà à « suis-je connecté ? », qui est la question. */}
+          <span className="hidden max-w-[10rem] truncate sm:inline">{me.username}</span>
+          <ChevronDown
+            size={14}
+            aria-hidden
+            className={clsx('text-muted transition-transform duration-150', ouvert && 'rotate-180')}
+          />
+        </>
       )}
     >
-      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-surface-strong text-sm">
-        <span aria-hidden>{me.avatar ?? '♟️'}</span>
-      </span>
-      {/* Le pseudo saute le premier quand la place manque : la pastille répond
-          déjà à « suis-je connecté ? », qui est la question. */}
-      <span className={clsx('max-w-[10rem] truncate', variant === 'header' && 'hidden sm:inline')}>
-        {me.username}
-      </span>
-    </Link>
+      <Link href={`/profil/${me.username}`} role="menuitem" className={ENTREE}>
+        <User size={16} className="shrink-0 text-muted" aria-hidden />
+        <span className="min-w-0 flex-1">
+          <span className="block">{t('nav.myProfile')}</span>
+          <span className="block truncate text-[12px] font-normal text-faint">{me.username}</span>
+        </span>
+      </Link>
+      <span className="my-1 block h-px bg-line/60" aria-hidden />
+      <EntreesDuSite estAdmin={estAdmin} />
+      <span className="my-1 block h-px bg-line/60" aria-hidden />
+      <button type="button" role="menuitem" onClick={seDeconnecter} className={ENTREE}>
+        <LogOut size={16} className="shrink-0 text-muted" aria-hidden />
+        {t('nav.signOut')}
+      </button>
+    </Menu>
   )
 }
