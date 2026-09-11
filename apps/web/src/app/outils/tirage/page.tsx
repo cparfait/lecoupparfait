@@ -97,7 +97,9 @@ export default function TiragePage() {
         <ArrowLeft size={14} aria-hidden />
         Outils
       </Link>
-      <h1 className="mt-3 font-display text-2xl font-bold tracking-tight sm:text-3xl">Tirage au sort</h1>
+      <h1 className="mt-3 font-display text-2xl font-bold tracking-tight sm:text-3xl">
+        Tirage au sort
+      </h1>
       <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
         Les couleurs d’une partie, les paires d’une ronde, l’ordre de passage. Un tirage que tout le
         monde voit, et personne ne conteste.

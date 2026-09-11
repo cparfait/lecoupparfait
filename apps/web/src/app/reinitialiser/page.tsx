@@ -98,7 +98,9 @@ function ResetForm() {
           >
             <KeyRound size={22} />
           </span>
-          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Nouveau mot de passe</h1>
+          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+            Nouveau mot de passe
+          </h1>
           <p className="mt-1.5 text-sm text-muted">
             Huit caractères au minimum. C’est la seule règle.
           </p>

@@ -78,7 +78,12 @@ export function AccountButton() {
   if (me === undefined) {
     // Calé sur la largeur de l'issue la plus large, pour que l'en-tête ne saute
     // pas quand la réponse arrive.
-    return <span className="block h-9 w-24 rounded-[var(--radius-sm)] bg-surface-strong sm:w-32" aria-hidden />
+    return (
+      <span
+        className="block h-9 w-24 rounded-[var(--radius-sm)] bg-surface-strong sm:w-32"
+        aria-hidden
+      />
+    )
   }
 
   if (me === null) {

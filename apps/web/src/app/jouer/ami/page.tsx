@@ -286,7 +286,9 @@ export default function CreateFriendGamePage() {
 
   return (
     <div className="page-etroite">
-      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Jouer contre quelqu’un</h1>
+      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+        Jouer contre quelqu’un
+      </h1>
       {/* La phrase suit la cadence choisie : les deux mécanismes n'ont ni les
           mêmes gestes ni les mêmes exigences, et annoncer « ton ami n'a besoin
           d'aucun compte » sur une correspondance serait faux. */}

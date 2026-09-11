@@ -27,7 +27,9 @@ export const metadata: Metadata = {
 export default function CreditsPage() {
   return (
     <div className="page-etroite">
-      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Crédits &amp; licences</h1>
+      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+        Crédits &amp; licences
+      </h1>
       <p className="mt-3 max-w-2xl leading-relaxed text-muted max-lg:text-[14px]">
         Le Coup Parfait n’aurait pas pu exister sans le travail libre d’autres personnes. Tout ce
         qui suit est réutilisé dans le respect de sa licence — et cette page en fait partie :

@@ -60,7 +60,9 @@ export default function ForgotPasswordPage() {
           >
             <KeyRound size={22} />
           </span>
-          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Mot de passe oublié</h1>
+          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+            Mot de passe oublié
+          </h1>
           {/* Le sous-titre suit la même règle que la carte : promettre un lien
               juste au-dessus d'un encart qui explique qu'aucun ne peut partir
               se contredit à deux lignes d'intervalle. */}
