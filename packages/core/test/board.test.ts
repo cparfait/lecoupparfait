@@ -97,3 +97,34 @@ test('une position illisible ne lève pas', () => {
   // leçon : elle ne doit jamais faire échouer l'écran qui l'appelle.
   assert.doesNotThrow(() => staticExchange('n%importe quoi', 'e4', 'w'))
 })
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Chute du drapeau — article 6.9
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { Chess } from 'chess.js'
+import { peutEncoreMater, resultatAuDrapeau } from '../src/board.ts'
+
+test('le drapeau qui tombe donne la partie à celui qui peut encore mater', () => {
+  // Roi et dame blancs contre roi noir : les Noirs tombent, les Blancs gagnent.
+  assert.equal(resultatAuDrapeau(new Chess('4k3/8/8/8/8/8/8/3QK3 b - - 0 1'), 'b'), '1-0')
+  // Un pion suffit : il deviendra dame.
+  assert.equal(resultatAuDrapeau(new Chess('4k3/8/8/8/8/8/4P3/4K3 b - - 0 1'), 'b'), '1-0')
+})
+
+test('le drapeau qui tombe face à un roi seul ne donne rien : nulle', () => {
+  // Roi seul blanc, roi et dame noirs : les Noirs tombent, personne ne gagne.
+  assert.equal(resultatAuDrapeau(new Chess('3qk3/8/8/8/8/8/8/4K3 b - - 0 1'), 'b'), '1/2-1/2')
+  assert.equal(peutEncoreMater(new Chess('3qk3/8/8/8/8/8/8/4K3 b - - 0 1'), 'w'), false)
+})
+
+test('une pièce mineure seule ne mate jamais, deux cavaliers si, deux fous selon leur couleur', () => {
+  assert.equal(peutEncoreMater(new Chess('4k3/8/8/8/8/8/8/1N2K3 w - - 0 1'), 'w'), false)
+  assert.equal(peutEncoreMater(new Chess('4k3/8/8/8/8/8/8/2B1K3 w - - 0 1'), 'w'), false)
+  assert.equal(peutEncoreMater(new Chess('4k3/8/8/8/8/8/8/1NN1K3 w - - 0 1'), 'w'), true)
+  assert.equal(peutEncoreMater(new Chess('4k3/8/8/8/8/8/8/1NB1K3 w - - 0 1'), 'w'), true)
+  // Deux fous sur la même couleur de case (c1 et e3 sont sombres) : rien.
+  assert.equal(peutEncoreMater(new Chess('4k3/8/8/8/8/4B3/8/2B1K3 w - - 0 1'), 'w'), false)
+  // Deux fous de couleurs différentes (c1 sombre, d3 claire) : mat possible.
+  assert.equal(peutEncoreMater(new Chess('4k3/8/8/8/8/3B4/8/2B1K3 w - - 0 1'), 'w'), true)
+})

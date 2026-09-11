@@ -15,15 +15,19 @@
 import { strict as assert } from 'node:assert'
 import { test } from 'node:test'
 import {
+  CADENCE_LIMITES,
   TIME_CONTROLS,
   applyMove,
+  categorieDeClassement,
   clockUrgency,
   createClock,
   flaggedColor,
   formatClock,
   formatTimeControl,
+  normaliserCadence,
   parseTimeControl,
   remainingAt,
+  sansPendule,
   speedCategory,
   stopClock,
 } from '../src/clock.ts'
@@ -80,6 +84,69 @@ test('les seuils de catégorie sont ceux de la formule de Lichess', () => {
   assert.equal(speedCategory({ initial: 180, increment: 8 }), 'rapid')
   // Sans limite du tout : correspondance.
   assert.equal(speedCategory({ initial: 0, increment: 0 }), 'correspondence')
+})
+
+test('une cadence sans temps initial est sans pendule, incrément ou pas', () => {
+  /*
+    `0+5` n'existe sur aucun écran, mais un lien peut le porter. Avant, la
+    moitié du code y voyait une partie chronométrée — classée bullet, décomptée
+    à partir de zéro — et l'autre moitié une partie sans limite, où le drapeau
+    ne tombe jamais. Le test fige la règle unique : sans temps initial, pas de
+    pendule du tout.
+  */
+  const bizarre = { initial: 0, increment: 5 }
+  assert.equal(sansPendule(bizarre), true)
+  assert.equal(speedCategory(bizarre), 'correspondence')
+  assert.equal(formatTimeControl(bizarre), '∞')
+
+  const debut = 1_000_000
+  let pendule = createClock(bizarre, debut)
+  pendule = applyMove(pendule, 'w', debut, true)
+  pendule = applyMove(pendule, 'b', debut + 60_000, false)
+  assert.equal(flaggedColor(pendule, debut + 3_600_000), null, 'personne ne tombe')
+  assert.deepEqual(remainingAt(pendule, debut + 3_600_000), { w: 0, b: 0 }, 'rien à décompter')
+  assert.equal(clockUrgency(0, bizarre), 'calm')
+})
+
+test('la cadence acceptée par le serveur est bornée', () => {
+  // Trois heures et trois minutes d'incrément au plus : au-delà, on prend la
+  // borne, on ne refuse pas — le lien est déjà envoyé.
+  assert.deepEqual(normaliserCadence({ initial: 999_999, increment: 999 }), {
+    initial: CADENCE_LIMITES.initialMax,
+    increment: CADENCE_LIMITES.incrementMax,
+  })
+  assert.deepEqual(normaliserCadence({ initial: -5, increment: -1 }), { initial: 0, increment: 0 })
+  assert.deepEqual(normaliserCadence({ initial: Number.NaN, increment: 3 }), {
+    initial: 0,
+    increment: 0,
+  })
+  // Sans temps initial, l'incrément est ramené à zéro : voir `sansPendule`.
+  assert.deepEqual(normaliserCadence({ initial: 0, increment: 5 }), { initial: 0, increment: 0 })
+  // Une cadence ordinaire ressort intacte, et les fractions de seconde tombent.
+  assert.deepEqual(normaliserCadence({ initial: 180, increment: 2 }), {
+    initial: 180,
+    increment: 2,
+  })
+  assert.deepEqual(normaliserCadence({ initial: 90.7, increment: 1.9 }), {
+    initial: 90,
+    increment: 1,
+  })
+  // Chaque cadence du barème passe sans être touchée.
+  for (const preset of TIME_CONTROLS) {
+    assert.deepEqual(normaliserCadence(preset), {
+      initial: preset.initial,
+      increment: preset.increment,
+    })
+  }
+})
+
+test('l’ultra-bullet se classe en bullet, les autres catégories restent elles-mêmes', () => {
+  // Il n'existe pas de classement ultra-bullet : une partie de 15 secondes
+  // classée écrivait une ligne que personne ne lisait.
+  assert.equal(categorieDeClassement('ultraBullet'), 'bullet')
+  for (const categorie of ['bullet', 'blitz', 'rapid', 'classical', 'correspondence'] as const) {
+    assert.equal(categorieDeClassement(categorie), categorie)
+  }
 })
 
 test('une cadence illisible reste illisible', () => {

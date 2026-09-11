@@ -189,6 +189,15 @@ const SECTIONS: Section[] = [
         texte:
           'Position morte : plus aucun mat possible, pour personne (roi seul, roi et fou, roi et cavalier). La partie est nulle à l’instant, même si un drapeau tombe ensuite.',
       },
+      {
+        // Sur la plateforme, personne n'arrête les pendules pour appeler
+        // l'arbitre : la nulle par répétition ou par les cinquante coups est
+        // appliquée d'office dès qu'elle est atteinte, comme sur les autres
+        // sites de jeu. C'est un écart volontaire avec la lettre des Règles,
+        // et il vaut mieux le dire ici que le laisser découvrir.
+        texte:
+          'Ici, en ligne : la triple répétition et les cinquante coups sont constatés automatiquement, sans réclamation, dès que la position les atteint. La chute du drapeau applique bien la réserve de l’article 6.9 : nulle si l’adversaire ne pouvait plus mater.',
+      },
     ],
   },
   {

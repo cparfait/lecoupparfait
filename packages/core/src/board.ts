@@ -716,3 +716,44 @@ export function hasOppositeCastling(chess: Chess): boolean {
   const bSide = fileIndex(bk) <= 3 ? 'q' : fileIndex(bk) >= 5 ? 'k' : null
   return wSide !== null && bSide !== null && wSide !== bSide
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Chute du drapeau (article 6.9 des règles de la FIDE)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Vrai si `color` dispose encore de quoi mater, par n'importe quelle suite de
+ * coups légaux — même avec la complicité de l'adversaire.
+ *
+ * C'est la question que pose l'article 6.9 : celui dont le drapeau tombe perd,
+ * **sauf** si l'adversaire ne peut plus mater, auquel cas la partie est nulle.
+ * Un roi seul, un roi et une pièce mineure, ou des fous tous sur la même
+ * couleur ne matent jamais. Deux cavaliers, si : le mat existe, il n'est
+ * simplement pas forcé — et l'article parle de « n'importe quelle suite de
+ * coups légaux », pas d'une suite forcée.
+ *
+ * Un pion compte comme une dame en puissance ; une tour ou une dame suffisent.
+ */
+export function peutEncoreMater(chess: Chess, color: Color): boolean {
+  const pieces = listPieces(chess, color).filter((p) => p.type !== 'k')
+  if (pieces.length === 0) return false
+  if (pieces.some((p) => p.type === 'p' || p.type === 'r' || p.type === 'q')) return true
+  const knights = pieces.filter((p) => p.type === 'n')
+  const bishops = pieces.filter((p) => p.type === 'b')
+  if (knights.length >= 2) return true
+  if (knights.length === 1) return bishops.length > 0
+  // Que des fous : il en faut deux sur des couleurs différentes.
+  const shades = new Set(bishops.map((b) => squareShade(b.square)))
+  return shades.size >= 2
+}
+
+/**
+ * Résultat d'une chute de drapeau : défaite du camp tombé, ou nulle si
+ * l'adversaire ne pouvait plus mater. À appeler partout où un drapeau tombe —
+ * serveur, partie contre l'ordinateur, partie locale — pour que les trois
+ * disent la même chose.
+ */
+export function resultatAuDrapeau(chess: Chess, flagged: Color): '1-0' | '0-1' | '1/2-1/2' {
+  if (!peutEncoreMater(chess, opposite(flagged))) return '1/2-1/2'
+  return flagged === 'w' ? '0-1' : '1-0'
+}
