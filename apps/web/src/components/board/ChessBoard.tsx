@@ -51,6 +51,9 @@ export interface ChessBoardProps extends Board2DProps {
    * Mesuré sur la page « contre l'ordinateur » : en-tête 57 px, marges 48 px,
    * bandeau adverse 56 px, bandeau joueur et barre d'actions 100 px — soit
    * 261 px, arrondis à 17 rem.
+   *
+   * En portrait sous `lg`, la valeur est relevée à 20 rem au moins, quoi
+   * qu'en dise la page : voir le calcul de la largeur, plus bas.
    */
   reservedHeight?: number
   /**
@@ -298,7 +301,7 @@ export const ChessBoard = memo(function ChessBoard({
         qui déborde très largement vers le bas.
       */}
       <div
-        className="flex flex-col"
+        className="colonne-plateau flex flex-col"
         style={
           fullscreen
             ? {
@@ -307,11 +310,33 @@ export const ChessBoard = memo(function ChessBoard({
             : // `dvh` plutôt que `vh` : sur mobile, la barre d'adresse se
               // rétracte au défilement et `vh` reste figé sur la hauteur
               // maximale, ce qui redonne un plateau trop grand.
+              //
+              // La réserve demandée par la page passe par une variable, et non
+              // directement dans le calcul : en portrait sous `lg`, la feuille
+              // de style la relève à 20 rem au moins (`.colonne-plateau` dans
+              // `globals.css`). Les écrans de partie demandent 9 rem — juste
+              // pour le paysage, où le plateau ne partage la hauteur qu'avec
+              // l'en-tête —, mais en portrait tout s'empile au-dessus et
+              // au-dessous. Mesuré au navigateur à 360×640 : 132 px au-dessus
+              // du plateau (en-tête, marge, bandeau adverse) et 187 px
+              // au-dessous (bandeau joueur, ruban, barre du pouce), soit
+              // 319 px sans les zones sûres, arrondis à 20 rem. Avec 9 rem, un
+              // téléphone de 640 px de haut recevait un plateau de 496 px et
+              // la barre du pouce sortait de l'écran.
+              //
+              // Le choix se fait en CSS plutôt qu'avec une requête média lue
+              // en JavaScript : celle-ci vaut `false` avant montage, et le
+              // plateau aurait sauté d'une taille à l'autre au chargement.
+              //
+              // Les zones sûres se retranchent aussi : l'en-tête grandit de
+              // l'encoche et la barre du pouce de la barre de gestes, et un
+              // plateau calé sur `100dvh` sans elles débordait d'autant.
               {
+                ['--reserve-demandee' as string]: `${reservedHeight}rem`,
                 width:
                   fitSide != null
                     ? `${Math.max(MIN_BOARD_PX, fitSide)}px`
-                    : `min(100%, max(${MIN_BOARD_PX}px, calc(100dvh - ${reservedHeight}rem - ${toggleRow}px)))`,
+                    : `min(100%, max(${MIN_BOARD_PX}px, calc(100dvh - var(--reserve-plateau, var(--reserve-demandee)) - ${toggleRow}px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))))`,
                 marginInline: 'auto',
               }
         }

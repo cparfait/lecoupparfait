@@ -85,7 +85,11 @@ export const PlayerBar = memo(function PlayerBar({
           // fond, deux chiffres blancs sur la page ne se lisaient pas comme une
           // pendule mais comme du texte.
           active ? 'bg-accent/20 text-ink' : 'bg-surface-strong text-muted',
-          urgency === 'critical' && active && 'bg-[var(--q-blunder)] text-white animate-pulse',
+          // Le rouge fait pour porter du texte, pas celui du barème : voir
+          // `--danger-strong`. Et la pulsation s'arrête pour qui l'a demandé.
+          urgency === 'critical' &&
+            active &&
+            'bg-[var(--danger-strong)] text-[var(--on-danger)] animate-pulse motion-reduce:animate-none',
           urgency === 'low' && active && 'text-[var(--q-inaccuracy)]',
         )}
         role="timer"
@@ -159,11 +163,14 @@ export const PlayerBar = memo(function PlayerBar({
             <span aria-hidden>{avatar ?? (color === 'w' ? '♔' : '♚')}</span>
           )}
         </div>
+        {/* `role="img"` : un `aria-label` sur un `span` sans rôle n'est
+            pas lu — la pastille disait le camp à personne. */}
         <span
           className={clsx(
             'absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-[var(--bg)]',
             color === 'w' ? 'bg-[var(--eval-white)]' : 'bg-[var(--eval-black)]',
           )}
+          role="img"
           aria-label={color === 'w' ? 'Blancs' : 'Noirs'}
         />
       </div>
@@ -183,18 +190,31 @@ export const PlayerBar = memo(function PlayerBar({
         </div>
 
         <div className="mt-0.5 flex h-5 items-center gap-1">
-          {captured.length > 0 ? (
+          {captured.length > 0 && (
             <CapturedRow pieces={captured} pieceSet={pieceSet} color={color === 'w' ? 'b' : 'w'} />
-          ) : status ? (
+          )}
+          {status && (
+            // Annoncé au lecteur d'écran quand il change : « à toi de jouer »
+            // est l'information qu'on attend sans regarder, et rien ne la
+            // disait. Ici et nulle part ailleurs — `TurnIndicator` n'est
+            // plus monté dans les écrans de partie, et deux régions vivantes
+            // pour la même phrase la feraient lire deux fois.
+            //
+            // Dès la première prise, la ligne montre les pièces capturées à la
+            // place du texte ; la région vivante reste alors dans le document,
+            // en `sr-only`, sinon l'annonce disparaissait avec le texte.
             <span
               className={clsx(
                 'truncate text-[12px]',
                 active ? 'font-medium text-accent' : 'text-faint',
+                captured.length > 0 && 'sr-only',
               )}
+              aria-live="polite"
+              aria-atomic="true"
             >
               {status}
             </span>
-          ) : null}
+          )}
           {materialLead > 0 && (
             <span className="ml-0.5 text-[12px] font-semibold tabular-nums text-muted">
               +{materialLead}
@@ -252,7 +272,7 @@ function CapturedRow({
       : 'drop-shadow(0 0 1px rgb(0 0 0 / .95)) drop-shadow(0 0 1.5px rgb(0 0 0 / .6))'
 
   return (
-    <span className="flex items-center" aria-label="Pièces capturées">
+    <span className="flex items-center" role="img" aria-label="Pièces capturées">
       {sorted.map((type, index) => (
         <img
           key={`${type}-${index}`}

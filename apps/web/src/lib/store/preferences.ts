@@ -80,8 +80,6 @@ export interface Preferences {
   highlightCheck: boolean
   /** Durée d'animation d'un déplacement, en millisecondes. `0` = instantané. */
   animationMs: number
-  /** Demande confirmation avant de valider un coup (utile sur mobile). */
-  confirmMove: boolean
   premove: boolean
   /** Rotation automatique de l'échiquier en partie locale. */
   autoFlip: boolean
@@ -222,7 +220,6 @@ const DEFAULTS: Preferences = {
   highlightLastMove: true,
   highlightCheck: true,
   animationMs: 190,
-  confirmMove: false,
   premove: true,
   autoFlip: false,
   whiteAlwaysBottom: false,
@@ -287,7 +284,7 @@ export const usePreferences = create<PreferencesStore>()(
     }),
     {
       name: 'coupparfait.preferences',
-      version: 6,
+      version: 7,
       /**
        * Reprise des réglages enregistrés par une version antérieure.
        *
@@ -318,7 +315,25 @@ export const usePreferences = create<PreferencesStore>()(
         // v6 : deux thèmes au lieu de quatre. « Club » et « Contraste » ont
         // disparu ; qui les avait choisis retombe sur le thème sombre.
         if (from < 6 && state.theme !== 'clair') state.theme = 'aurora'
+        // v7 : « confirmer chaque coup » n'a jamais été branché — le réglage
+        // existait, la case aussi, et rien ne la lisait. On retire la clé des
+        // réglages enregistrés pour qu'elle ne survive pas au type.
+        if (from < 7) delete (state as Record<string, unknown>).confirmMove
         return state as Preferences
+      },
+      /**
+       * Le thème, quand rien n'est enregistré, est celui que l'amorce de
+       * `layout.tsx` a posé sur le document avant le premier rendu — clair ou
+       * sombre selon le système. On relit l'attribut au lieu de recalculer :
+       * une seule décision, prise une seule fois, et le magasin ne peut pas
+       * contredire ce que la page affiche déjà. `merge` n'est appelé qu'au
+       * navigateur, pendant la relecture du stockage ; le rendu serveur garde
+       * la valeur par défaut, et l'attribut posé par l'amorce couvre l'écart.
+       */
+      merge: (persisted, current) => {
+        const enregistre = (persisted ?? {}) as Partial<Preferences>
+        const theme = enregistre.theme ?? themeDuDocument() ?? current.theme
+        return { ...current, ...enregistre, theme }
       },
       partialize: ({ set: _set, patch: _patch, reset: _reset, hydrated: _h, ...rest }) => rest,
       /**
@@ -388,25 +403,40 @@ export function getPreferences(): Preferences {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Le thème que le document porte déjà, s'il est valide.
+ *
+ * L'amorce de `layout.tsx` le pose avant tout rendu ; hors navigateur, ou si
+ * quelqu'un a écrit n'importe quoi dans l'attribut, on ne renvoie rien.
+ */
+function themeDuDocument(): ThemeId | undefined {
+  if (typeof document === 'undefined') return undefined
+  const theme = document.documentElement.dataset.theme
+  return theme === 'aurora' || theme === 'clair' ? theme : undefined
+}
+
+/**
  * Estime si l'appareil peut encaisser les effets lourds.
  *
- * On croise trois signaux disponibles sans permission : le nombre de cœurs, la
- * mémoire annoncée, et la préférence système « animations réduites ». C'est
- * approximatif, mais bien meilleur que d'imposer du flou et du bloom à un
- * téléphone d'entrée de gamme.
+ * On croise quatre signaux disponibles sans permission : la préférence
+ * système « animations réduites », le nombre de cœurs, la mémoire annoncée,
+ * et le pointeur grossier — un téléphone à six cœurs ou moins n'a pas le GPU
+ * d'un portable. C'est approximatif, mais bien meilleur que d'imposer du flou
+ * et du bloom à un téléphone d'entrée de gamme.
+ *
+ * **La même règle est recopiée dans l'amorce en ligne de `layout.tsx`**, qui
+ * ne peut rien importer : elle décide avant le premier rendu, ici on décide
+ * pour de bon. Les deux doivent rester identiques, sinon l'écran change
+ * d'aspect entre le chargement et l'hydratation.
  */
 export function detectEffectsCapability(): EffectsLevel {
   if (typeof window === 'undefined') return 'high'
 
-  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return 'low'
+  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+  const cores = navigator.hardwareConcurrency || 4
+  const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory || 4
+  const coarse = window.matchMedia?.('(pointer: coarse)').matches ?? false
 
-  const cores = navigator.hardwareConcurrency ?? 4
-  const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 4
-  const coarsePointer = window.matchMedia?.('(pointer: coarse)').matches ?? false
-
-  if (cores <= 4 && memory <= 4) return 'low'
-  if (coarsePointer && cores <= 6) return 'low'
-  return 'high'
+  return reduced || (cores <= 4 && memory <= 4) || (coarse && cores <= 6) ? 'low' : 'high'
 }
 
 /** Vrai si le navigateur peut faire tourner Stockfish multi-fils. */

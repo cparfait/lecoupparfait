@@ -347,7 +347,6 @@ export const fr = {
     testVoice: 'Tester la voix',
     language: 'Langue',
     account: 'Compte',
-    confirmMove: 'Confirmer chaque coup',
     premove: 'Autoriser les pré-coups',
   },
 

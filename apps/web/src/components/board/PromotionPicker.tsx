@@ -9,7 +9,7 @@
  * sous-promotion existe et peut être décisive.
  */
 
-import { useCallback, useRef } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { useDialogue } from '@/lib/useDialogue.ts'
 import { pieceUrl, squarePosition } from './boardKit.ts'
@@ -39,6 +39,17 @@ import { pieceUrl, squarePosition } from './boardKit.ts'
  * temps que ça : le menu vient d'apparaître, il faut d'abord le voir.
  */
 const DELAI_DE_GARDE_MS = 320
+
+/**
+ * La case en deçà de laquelle le menu quitte sa colonne.
+ *
+ * Sur la colonne, chaque choix a la taille d'une case : un huitième du
+ * plateau. À 344 px de plateau — un téléphone de 360 —, c'est 43 px, et sur
+ * le plancher de 260 px, 32 : on rate la tour et l'on reçoit un fou. Sous
+ * quarante-quatre points, le menu passe au centre, où ses choix font 64 px
+ * quelle que soit la taille du plateau.
+ */
+const CASE_MIN_AU_DOIGT_PX = 44
 
 const CHOICES: Array<{ type: PieceSymbol; labelFr: string }> = [
   { type: 'q', labelFr: 'Dame' },
@@ -90,6 +101,28 @@ export function PromotionPicker({
   useDialogue(boite, { onFermer: onCancel })
 
   /*
+    Le plateau est-il assez grand pour la colonne ?
+
+    Le voile couvre exactement le plateau : sa largeur est celle du plateau,
+    et un huitième en fait la case. Mesuré avant la première peinture, pour
+    que le menu n'apparaisse pas d'abord en colonne puis saute au centre ; et
+    resuivi ensuite, pour un téléphone tourné pendant qu'on choisit.
+  */
+  const voile = useRef<HTMLDivElement>(null)
+  const [plateauEtroit, setPlateauEtroit] = useState(false)
+  useLayoutEffect(() => {
+    const element = voile.current
+    if (!element) return
+    const mesurer = () => {
+      setPlateauEtroit(element.getBoundingClientRect().width / 8 < CASE_MIN_AU_DOIGT_PX)
+    }
+    mesurer()
+    const observateur = new ResizeObserver(mesurer)
+    observateur.observe(element)
+    return () => observateur.disconnect()
+  }, [])
+
+  /*
     On ignore le clic qui appartient au geste d'ouverture — voir
     `DELAI_DE_GARDE_MS`. Le garde vaut pour le choix comme pour l'annulation :
     les deux se déclenchaient tout seuls, et perdre le coup est encore pire que
@@ -116,9 +149,10 @@ export function PromotionPicker({
   // Le menu se déroule vers le bas s'il y a la place, vers le haut sinon.
   const downwards = top < 50
 
-  if (centre) {
+  if (centre || plateauEtroit) {
     return (
       <div
+        ref={voile}
         className="absolute inset-0 z-50 grid place-items-center"
         onClick={annuler}
         onContextMenu={(event) => {
@@ -167,6 +201,7 @@ export function PromotionPicker({
 
   return (
     <div
+      ref={voile}
       className="absolute inset-0 z-50"
       onClick={annuler}
       onContextMenu={(event) => {

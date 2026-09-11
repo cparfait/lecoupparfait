@@ -49,16 +49,18 @@ import clsx from 'clsx'
 const ID = 'pile-alertes'
 
 /**
- * `top-[4.25rem]` : l'en-tête est collant et mesure 57 px — la pile se pose
- * juste dessous, jamais derrière. `z-[200]` la met au-dessus du menu mobile
- * déplié comme d'une fenêtre de fin de partie.
+ * Calée sur `--entete` plus une marge : l'en-tête est collant, et sa hauteur
+ * n'est pas fixe — en mode installé il grandit de l'encoche. Une valeur en dur
+ * de 4,25 rem posait la pile juste dessous sur un ordinateur, et derrière lui
+ * sur un iPhone. `z-[200]` la met au-dessus du menu mobile déplié comme d'une
+ * fenêtre de fin de partie.
  *
  * `pointer-events-none` sur la pile, rétabli sur chaque alerte : sans cela, la
  * colonne vide barrerait toute la largeur de l'écran sous l'en-tête, et l'on ne
  * pourrait plus cliquer ce qu'elle survole.
  */
 const CLASSES_PILE =
-  'pointer-events-none fixed inset-x-0 top-[4.25rem] z-[200] flex flex-col items-center gap-2 px-3'
+  'pointer-events-none fixed inset-x-0 top-[calc(var(--entete)+0.75rem)] z-[200] flex flex-col items-center gap-2 px-3'
 
 /**
  * Le nœud unique de la pile, créé au besoin et **replacé** à chaque appel.

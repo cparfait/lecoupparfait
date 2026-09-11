@@ -220,10 +220,13 @@ export function GameOverDialog({
         // le bas sans qu'aucun défilement ne le rattrape.
         className="popover animate-slide-up relative max-h-[calc(100dvh-2rem)] w-full max-w-sm overflow-y-auto p-6 text-center shadow-[var(--shadow-lg)]"
       >
+        {/* Quarante-quatre points : une croix de vingt-quatre se rate au
+            pouce, et c'est le geste qu'on fait pour revoir la position. Le
+            bouton est absolu, sa taille ne pousse rien. */}
         <button
           type="button"
           onClick={() => setDismissed(true)}
-          className="absolute right-3 top-3 rounded p-1 text-faint transition-colors hover:text-ink"
+          className="absolute right-1.5 top-1.5 grid h-11 w-11 place-items-center rounded text-faint transition-colors hover:text-ink"
           aria-label="Fermer"
         >
           <X size={16} aria-hidden />
@@ -238,7 +241,13 @@ export function GameOverDialog({
         <h2 id="game-over-title" className="font-display text-2xl font-bold tracking-tight">
           {title}
         </h2>
-        <p className="mt-1.5 text-sm text-muted">{REASONS[status] || result}</p>
+        <p className="mt-1.5 text-sm text-muted">
+          {/* Article 6.9 : le drapeau est tombé, mais l'adversaire n'avait plus
+              de quoi mater. « Au temps » seul se lirait comme une défaite. */}
+          {status === 'timeout' && result === '1/2-1/2'
+            ? 'temps écoulé, mais l’adversaire ne pouvait plus mater'
+            : REASONS[status] || result}
+        </p>
 
         {ratingDelta != null && (
           <p

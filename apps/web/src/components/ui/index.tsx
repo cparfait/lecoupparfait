@@ -47,12 +47,23 @@ const VARIANTS: Record<ButtonVariant, string> = {
   outline:
     'border border-line-strong text-ink hover:bg-surface-hover hover:border-[color-mix(in_oklab,var(--accent)_45%,var(--border-strong))]',
   ghost: 'text-muted hover:text-ink hover:bg-surface-hover',
-  danger: 'bg-[var(--q-blunder)] text-white hover:brightness-110 active:brightness-95',
+  // `--danger-strong` et non `--q-blunder` : le rouge du barème est fait pour
+  // une pastille, et l'encre blanche n'y tenait que 3,8:1 sur le thème sombre.
+  danger:
+    'bg-[var(--danger-strong)] text-[var(--on-danger)] hover:brightness-110 active:brightness-95',
 }
 
+/**
+ * Trente-deux pixels à la souris, quarante-quatre au doigt.
+ *
+ * Le petit bouton garde son dessin sur un écran d'ordinateur ; au pointeur
+ * grossier, il prend la hauteur minimale en deçà de laquelle on rate un bouton
+ * une fois sur cinq. `min-h` plutôt que `h` : la hauteur fixe reste, et la
+ * mise en page ne bouge pas quand la contrainte ne s'applique pas.
+ */
 const SIZES: Record<ButtonSize, string> = {
-  sm: 'h-8 px-3 text-[14px] gap-1.5 rounded-[var(--radius-sm)]',
-  md: 'h-10 px-4 text-sm gap-2 rounded-[var(--radius-sm)]',
+  sm: 'h-8 px-3 text-[14px] gap-1.5 rounded-[var(--radius-sm)] pointer-coarse:min-h-11',
+  md: 'h-10 px-4 text-sm gap-2 rounded-[var(--radius-sm)] pointer-coarse:min-h-11',
   lg: 'h-12 px-6 text-[15px] gap-2.5 rounded-[var(--radius)]',
 }
 
@@ -295,8 +306,10 @@ const TONS_CHIP: Record<TonChip, string> = {
     'bg-[color-mix(in_oklab,var(--accent)_18%,transparent)] text-accent border-[color-mix(in_oklab,var(--accent)_35%,transparent)]',
   success:
     'bg-[color-mix(in_oklab,var(--q-best)_16%,transparent)] text-[var(--q-best)] border-[color-mix(in_oklab,var(--q-best)_32%,transparent)]',
+  // Le texte prend la variante lisible du jaune : sur le thème clair,
+  // `--q-inaccuracy` ne fait que 3,4:1 sur son propre fond teinté.
   warning:
-    'bg-[color-mix(in_oklab,var(--q-inaccuracy)_16%,transparent)] text-[var(--q-inaccuracy)] border-[color-mix(in_oklab,var(--q-inaccuracy)_32%,transparent)]',
+    'bg-[color-mix(in_oklab,var(--q-inaccuracy)_16%,transparent)] text-[var(--q-inaccuracy-text)] border-[color-mix(in_oklab,var(--q-inaccuracy)_32%,transparent)]',
   danger:
     'bg-[color-mix(in_oklab,var(--q-blunder)_16%,transparent)] text-[var(--q-blunder)] border-[color-mix(in_oklab,var(--q-blunder)_32%,transparent)]',
 }
@@ -532,6 +545,9 @@ export function SegmentedControl<T extends string>({
             // texte y est un peu plus grand et les trois cases plus étroites,
             // d'où la marge réduite sous `sm`.
             'flex-1 whitespace-nowrap rounded-[calc(var(--radius-sm)-2px)] font-medium transition-all',
+            // Quarante-quatre points au doigt, quelle que soit la taille : un
+            // segment de 26 px de haut se rate une fois sur cinq au pouce.
+            'pointer-coarse:min-h-11',
             size === 'sm' ? 'px-2 py-1 text-xs' : 'px-2 py-1.5 text-sm sm:px-3',
             value === option.value
               ? 'bg-accent text-[var(--accent-contrast)] shadow-sm'

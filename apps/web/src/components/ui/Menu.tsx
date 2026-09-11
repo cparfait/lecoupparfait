@@ -15,8 +15,59 @@
  */
 
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
+import Link from 'next/link'
 import clsx from 'clsx'
+
+/** Ce qui, dans un panneau, peut recevoir le focus — dans l'ordre du document. */
+const ENTREES_FOCALISABLES = 'a[href], button:not([disabled]), [role="menuitem"]:not([disabled])'
+
+/**
+ * Une entrée de menu, prête à poser.
+ *
+ * Les écrans de partie écrivaient chacun leurs entrées à la main — un
+ * `<button>` ou un `<Link>` avec les mêmes dix classes — et aucune ne portait
+ * `role="menuitem"` : pour un lecteur d'écran, le panneau annoncé comme menu
+ * était vide. Une seule forme, ici, avec le rôle, la hauteur au doigt et
+ * l'habillage ; `href` en fait un lien, sinon c'est un bouton.
+ *
+ * `danger` écrit le libellé en rouge, pour « Abandonner » et ses semblables.
+ */
+export function MenuItem({
+  href,
+  icone,
+  danger = false,
+  className,
+  children,
+  ...rest
+}: {
+  href?: string
+  icone?: ReactNode
+  danger?: boolean
+  className?: string
+  children: ReactNode
+} & Omit<ComponentProps<'button'>, 'className' | 'children'>) {
+  const classes = clsx(
+    'flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-left text-sm transition-colors hover:bg-surface-hover pointer-coarse:min-h-11',
+    'disabled:opacity-40',
+    danger && 'text-[var(--q-blunder)]',
+    className,
+  )
+  if (href) {
+    return (
+      <Link href={href} role="menuitem" className={classes}>
+        {icone}
+        {children}
+      </Link>
+    )
+  }
+  return (
+    <button type="button" role="menuitem" className={classes} {...rest}>
+      {icone}
+      {children}
+    </button>
+  )
+}
 
 /**
  * Referme au clic extérieur et à la touche Échap.
@@ -149,6 +200,36 @@ export function Menu({
   }, [ouvert])
 
   /**
+   * Le focus entre dans le panneau à l'ouverture.
+   *
+   * Sans cela, il restait sur le bouton : les flèches ne parcouraient rien
+   * tant qu'on n'avait pas tabulé une fois, et un lecteur d'écran n'apprenait
+   * pas qu'un menu venait de s'ouvrir. C'est ce que fait un menu natif, et ce
+   * que le rôle `menu` promet. Échap rend ensuite le focus au bouton.
+   */
+  useEffect(() => {
+    if (!ouvert) return
+    panneauRef.current?.querySelector<HTMLElement>(ENTREES_FOCALISABLES)?.focus()
+  }, [ouvert])
+
+  /**
+   * Un clic dans le panneau le referme — sauf sur ce qui demande à rester.
+   *
+   * Choisir une entrée ferme le menu, c'est le geste attendu. Mais un
+   * interrupteur posé dans le panneau — le mode commenté, en partie — se
+   * commute sans qu'on veuille partir : on veut voir la position du curseur
+   * changer. Il se marque `data-garde-ouvert`, et le clic ne referme rien.
+   */
+  const surClicDuPanneau = useCallback(
+    (evenement: React.MouseEvent<HTMLDivElement>) => {
+      const cible = evenement.target as Element | null
+      if (cible?.closest('[data-garde-ouvert]')) return
+      fermer()
+    },
+    [fermer],
+  )
+
+  /**
    * Navigation au clavier dans le panneau.
    *
    * Les flèches parcourent les entrées, `Échap` referme **et rend le focus au
@@ -164,7 +245,7 @@ export function Menu({
     if (evenement.key !== 'ArrowDown' && evenement.key !== 'ArrowUp') return
 
     const cibles = Array.from(
-      evenement.currentTarget.querySelectorAll<HTMLElement>('a[href], button:not([disabled])'),
+      evenement.currentTarget.querySelectorAll<HTMLElement>(ENTREES_FOCALISABLES),
     )
     if (cibles.length === 0) return
     evenement.preventDefault()
@@ -199,6 +280,9 @@ export function Menu({
           boutonClassName ??
           clsx(
             'flex items-center gap-1 rounded-[var(--radius-sm)] px-2.5 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors',
+            // Le bouton « … » d'une barre d'actions ne fait que 32 points :
+            // quarante-quatre au doigt, dans les deux sens.
+            'pointer-coarse:min-h-11 pointer-coarse:min-w-11 pointer-coarse:justify-center',
             ouvert
               ? 'bg-surface-strong text-ink ring-accent/50'
               : 'bg-surface-strong text-ink ring-line-strong hover:bg-surface-hover',
@@ -215,7 +299,7 @@ export function Menu({
           role="menu"
           aria-label={label}
           onKeyDown={surToucheDuPanneau}
-          onClick={fermer}
+          onClick={surClicDuPanneau}
           style={decalage === 0 ? undefined : { translate: `${decalage}px` }}
           className={clsx(
             'animate-slide-up popover absolute z-50 p-1.5 shadow-[var(--shadow-lg)]',

@@ -711,3 +711,91 @@ passent sur la pointe, sans avertissement.
 - Le rectangle de tap Android (`-webkit-tap-highlight-color`).
 - La tenue à 60 i/s pendant un glisser sur un vrai milieu de gamme — le
   ralentissement 4× est une approximation.
+
+---
+
+## Lot 5 — Ergonomie mobile et accessibilité, suite d'audit (11 septembre 2026)
+
+Corrections faites en parallèle d'un autre agent sur `Board2D`, les pages
+`jouer/*` et le serveur : seuls les composants partagés, la feuille de style,
+la coque et le magasin des préférences ont été touchés. Rien n'est commité.
+`typecheck` et `eslint` passent ; `globals.css` compilé par Tailwind pour
+vérifier que chaque nouvelle classe est bien émise.
+
+### Ce qui a changé
+
+- **Plateau en portrait** (`ChessBoard.tsx`, `.colonne-plateau` dans
+  `globals.css`) : la réserve de hauteur demandée par la page passe par une
+  variable, et la feuille de style la relève à 18 rem au moins en portrait
+  sous `lg` — les écrans de partie demandent 9 rem, mesuré pour le paysage.
+  Choix CSS plutôt que requête média en JavaScript, qui vaut `false` avant
+  montage et aurait fait sauter le plateau au chargement. Les zones sûres
+  haut et bas se retranchent aussi du calcul. Calcul documenté dans le
+  composant.
+- **Effets réduits sans perdre les anneaux** : la règle `box-shadow: none`
+  sur tout sous `data-effects='low'` effaçait aussi les `ring-*` (focus clavier,
+  joueur au trait, case active). Remplacé par `--tw-shadow: 0 0 #0000` —
+  Tailwind compose anneau et ombre dans la même propriété à partir de
+  variables — plus une liste des ombres écrites en clair (`glass`,
+  `popover`). Heuristique d'effets unifiée entre l'amorce de `layout.tsx` et
+  `detectEffectsCapability` : même règle, recopiée et commentée des deux
+  côtés.
+- **Zones sûres** : `--entete` inclut `env(safe-area-inset-top)` ; la pile
+  d'alertes se cale sur `--entete + 0,75rem` au lieu de 4,25 rem en dur ;
+  `main` réserve `5rem + env(safe-area-inset-bottom)` sous la barre du bas.
+- **Fenêtre d'affichage** : `maximumScale: 1` retiré (la loupe redevient
+  possible ; l'échiquier se protège du double-tap par `touch-action`) ;
+  `interactiveWidget: 'resizes-content'` pour que le clavier virtuel
+  réduise la fenêtre au lieu de recouvrir les champs.
+- **Thème du système** : sans thème enregistré, l'amorce suit
+  `prefers-color-scheme` ; le magasin relit l'attribut posé (`merge` de
+  `persist`) au lieu de recalculer, donc aucun désaccord entre l'amorce et
+  l'hydratation.
+- **Cibles tactiles** : `Button` sm/md, `SegmentedControl`, bouton de `Menu`,
+  entrées `MenuItem`, croix du `Toast` et de `GameOverDialog` à 44 px au
+  pointeur grossier. `PromotionPicker` passe au centre dès que la case fait
+  moins de 44 px (mesuré avant la première peinture, resuivi à la rotation).
+- **Retour utilisateur** : `role="alert"` pour les erreurs, `status` pour le
+  reste ; compte à rebours suspendu au survol ou au doigt et repris de là où
+  il en était ; six secondes au moins quand il y a une description. « À toi
+  de jouer » annoncé par `aria-live="polite"` dans `PlayerBar` — un seul
+  endroit, `TurnIndicator` n'est monté nulle part. Les pastilles de camp et
+  la rangée des prises passent en `role="img"` : un `aria-label` sur un
+  `span` sans rôle n'était pas lu.
+- **Menu** : `MenuItem` exporté (rôle, hauteur au doigt, habillage, `href`
+  ou `onClick`, `danger`) ; focus sur la première entrée à l'ouverture ; un
+  clic sur un contrôle marqué `data-garde-ouvert` ne referme pas le panneau.
+- **Flèches du clavier** : un seul écouteur global (`useNavigationClavier`
+  dans `GameNav.tsx`), un seul gestionnaire servi, un seul `preventDefault`.
+  `MoveList` ne s'inscrit que quand `controls` est vrai.
+- **Contraste** : jetons `--danger-strong` / `--on-danger` (4,8:1 en aurora,
+  5,2:1 en clair) pour le bouton `danger` et la pendule critique ;
+  `--q-inaccuracy-text` (5,8:1 en clair) pour `Chip tone="warning"` ; barre
+  du bas à 11 px avec interlettrage resserré ; la requête
+  `prefers-contrast: more` renforce `--border`, `--border-strong` et `--text-faint` dans les
+  deux thèmes.
+- **`confirmMove`** retiré du type, des défauts, des traductions ; migration
+  v7 efface la clé enregistrée. Aucun autre fichier ne la lisait.
+- **Manifeste** : `theme_color` / `background_color` alignés sur `--bg` du
+  thème sombre (`#0b0b14`), comme `themeColor` de `layout.tsx`. Pas de
+  `screenshots` : aucune capture n'existe dans `public/`.
+
+### À faire dans les pages `jouer/*` (hors périmètre de ce lot)
+
+- Remplacer les `<button>` / `<Link>` écrits à la main dans les menus
+  « Options de la partie » par `MenuItem` (rôle `menuitem`, 44 px).
+- Poser `data-garde-ouvert` sur l'enveloppe de `CommentaryToggle` dans ces
+  menus, sinon commuter le mode commenté referme toujours le panneau.
+
+### Ce qui reste à constater sur appareil
+
+- iPhone en mode installé : l'en-tête, la pile d'alertes et le plateau
+  tiennent compte de l'encoche par `env()` — à voir sur un vrai appareil,
+  l'émulation ne fournit pas les zones sûres.
+- Clavier virtuel Android et iOS avec `resizes-content` : tchat d'une
+  partie en direct et page de connexion.
+- Portrait 360×640 et 390×844 : plateau, bandeaux, ruban et barre du pouce
+  sans défilement — vérifié par le calcul (277 px autour d'un plateau de
+  344, soit 621 sur 640), pas encore à l'écran.
+- `prefers-contrast: more` et `prefers-color-scheme: light` sans thème
+  enregistré : à voir sur un appareil réglé ainsi.

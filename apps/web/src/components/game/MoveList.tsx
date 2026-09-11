@@ -18,6 +18,7 @@ import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Pause, Play } fro
 import type { MoveQuality } from '@coupparfait/core'
 import { QUALITY_STYLES, isNotableQuality } from '@coupparfait/core'
 import { groupMoves, type PlayedMove } from '@/lib/game/useChessGame.ts'
+import { useNavigationClavier } from './GameNav.tsx'
 import { useMoveWords, useSan } from '@/lib/notation.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
@@ -137,37 +138,28 @@ export function MoveList({
     }
   }, [cursor])
 
-  // Navigation au clavier, active dès que la page a le focus.
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null
-      // On ne détourne pas les flèches si l'utilisateur écrit quelque part.
-      if (target && /input|textarea|select/i.test(target.tagName)) return
-
-      switch (event.key) {
-        case 'ArrowLeft':
-          event.preventDefault()
-          onSeek(Math.max(-1, cursor - 1))
-          break
-        case 'ArrowRight':
-          event.preventDefault()
-          onSeek(Math.min(moves.length - 1, cursor + 1))
-          break
-        case 'Home':
-          event.preventDefault()
-          onSeek(-1)
-          break
-        case 'End':
-          event.preventDefault()
-          onSeek(moves.length - 1)
-          break
-        default:
-          break
-      }
+  // Navigation au clavier, active dès que la page a le focus — et seulement
+  // quand la liste porte ses commandes : sans elles, ce sont les flèches de
+  // `GameNav` qui écoutent, et une touche ne doit avancer que d'un coup. Voir
+  // `useNavigationClavier`, qui ne sert qu'un seul gestionnaire par page.
+  useNavigationClavier(controls, (event) => {
+    switch (event.key) {
+      case 'ArrowLeft':
+        onSeek(Math.max(-1, cursor - 1))
+        return true
+      case 'ArrowRight':
+        onSeek(Math.min(moves.length - 1, cursor + 1))
+        return true
+      case 'Home':
+        onSeek(-1)
+        return true
+      case 'End':
+        onSeek(moves.length - 1)
+        return true
+      default:
+        return false
     }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [cursor, moves.length, onSeek])
+  })
 
   return (
     <div className={clsx('flex min-h-0 flex-col', className)}>

@@ -11,7 +11,7 @@
  * Ils ne changent jamais la partie : reculer n'annule rien.
  */
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import {
   ChevronFirst,
   ChevronLast,
@@ -23,6 +23,71 @@ import {
 } from 'lucide-react'
 import clsx from 'clsx'
 import { toast } from '@/components/ui/Toast.tsx'
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Les flèches du clavier, écoutées une seule fois par page
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Reçoit la touche ; répond vrai s'il l'a prise, et elle est alors consommée. */
+type GestionnaireClavier = (event: KeyboardEvent) => boolean
+
+/**
+ * Les écouteurs inscrits, dans l'ordre de montage. Seul le **dernier** reçoit
+ * la touche.
+ *
+ * `GameNav` et `MoveList` écoutaient chacun `keydown` sur la fenêtre. Sur un
+ * écran de partie où les deux sont montés — la liste avec ses commandes sous
+ * `lg`, les flèches sous le plateau —, une flèche avançait de deux coups, et
+ * deux `preventDefault` partaient pour une touche. Un seul écouteur global,
+ * un seul gestionnaire servi, un seul `preventDefault` : ici.
+ */
+const inscrits: Array<{ current: GestionnaireClavier }> = []
+
+/**
+ * On laisse les champs de saisie tranquilles, et les raccourcis système
+ * intacts. Ctrl+Maj+C est le seul raccourci à modificateur qu'on laisse
+ * passer — la copie de la position ; tous les autres appartiennent au
+ * navigateur et au système. La cible n'est pas toujours un élément : une
+ * touche pressée sans rien de focalisé vise `document`, qui n'a pas `closest`.
+ */
+function surToucheGlobale(event: KeyboardEvent): void {
+  const dernier = inscrits[inscrits.length - 1]
+  if (!dernier) return
+  const copieDeLaPosition = (event.ctrlKey || event.metaKey) && event.shiftKey
+  if ((event.metaKey || event.ctrlKey || event.altKey) && !copieDeLaPosition) return
+  const target = event.target
+  if (
+    target instanceof Element &&
+    target.closest('input, textarea, select, [contenteditable="true"]')
+  ) {
+    return
+  }
+  if (dernier.current(event)) event.preventDefault()
+}
+
+/**
+ * Inscrit un gestionnaire des flèches tant que `actif` est vrai.
+ *
+ * Le gestionnaire est lu à travers une référence, mise à jour à chaque rendu :
+ * l'inscription se fait au montage et ne bouge plus, si bien que l'ordre —
+ * donc qui reçoit la touche — ne dépend que de l'ordre de montage, jamais du
+ * coup courant.
+ */
+export function useNavigationClavier(actif: boolean, gestionnaire: GestionnaireClavier): void {
+  const reference = useRef(gestionnaire)
+  reference.current = gestionnaire
+
+  useEffect(() => {
+    if (!actif) return
+    inscrits.push(reference)
+    if (inscrits.length === 1) window.addEventListener('keydown', surToucheGlobale)
+    return () => {
+      const index = inscrits.indexOf(reference)
+      if (index >= 0) inscrits.splice(index, 1)
+      if (inscrits.length === 0) window.removeEventListener('keydown', surToucheGlobale)
+    }
+  }, [actif])
+}
 
 export interface GameNavProps {
   /** Demi-coup affiché. `-1` = position de départ. */
@@ -70,52 +135,33 @@ export function GameNav({
   const atStart = cursor <= min
   const atEnd = cursor >= last
 
-  // Les flèches du clavier sont le réflexe acquis partout ailleurs. On laisse
-  // les champs de saisie tranquilles, et les raccourcis système intacts.
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      // Ctrl+Maj+C est le seul raccourci à modificateur qu'on écoute ; tous
-      // les autres appartiennent au navigateur et au système.
-      const copieDeLaPosition = (event.ctrlKey || event.metaKey) && event.shiftKey
-      if ((event.metaKey || event.ctrlKey || event.altKey) && !copieDeLaPosition) return
-      // La cible n'est pas toujours un élément : une touche pressée sans rien
-      // de focalisé vise `document`, qui n'a pas de `closest`.
-      const target = event.target
-      if (
-        target instanceof Element &&
-        target.closest('input, textarea, select, [contenteditable="true"]')
-      ) {
-        return
-      }
-
-      switch (event.key) {
-        case 'ArrowLeft':
-          onSeek(Math.max(min, cursor - 1))
-          break
-        case 'ArrowRight':
-          onSeek(Math.min(last, cursor + 1))
-          break
-        case 'Home':
-          onSeek(min)
-          break
-        case 'End':
-          onSeek(last)
-          break
-        // Ctrl+Maj+C : le raccourci de copie enrichi, qui ne prend la place
-        // d'aucun raccourci du navigateur — Ctrl+C copie la sélection, et
-        // c'est très bien ainsi.
-        case 'C':
-          if (!fen || !event.shiftKey) return
-          void copierLaPosition(fen)
-          break
-        default:
-          return
-      }
-      event.preventDefault()
+  // Les flèches du clavier sont le réflexe acquis partout ailleurs. Les
+  // gardes — champs de saisie, modificateurs — sont dans l'écouteur commun.
+  useNavigationClavier(true, (event) => {
+    switch (event.key) {
+      case 'ArrowLeft':
+        onSeek(Math.max(min, cursor - 1))
+        return true
+      case 'ArrowRight':
+        onSeek(Math.min(last, cursor + 1))
+        return true
+      case 'Home':
+        onSeek(min)
+        return true
+      case 'End':
+        onSeek(last)
+        return true
+      // Ctrl+Maj+C : le raccourci de copie enrichi, qui ne prend la place
+      // d'aucun raccourci du navigateur — Ctrl+C copie la sélection, et
+      // c'est très bien ainsi.
+      case 'C':
+        if (!fen || !event.shiftKey) return false
+        void copierLaPosition(fen)
+        return true
+      default:
+        return false
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [cursor, last, min, onSeek, fen])
+  })
 
   return (
     /*

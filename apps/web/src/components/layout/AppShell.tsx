@@ -219,9 +219,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main
         className={clsx(
           'flex-1 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]',
+          // Sous la barre du bas, la barre de gestes s'ajoute : la barre du
+          // bas la respecte (`safe-bottom`) et grandit d'autant, le contenu
+          // doit donc lui laisser cette hauteur en plus, sinon la dernière
+          // carte finit dessous.
           immersive
             ? 'pb-[env(safe-area-inset-bottom)]'
-            : 'pb-20 lg:pb-0 paysage:pb-[env(safe-area-inset-bottom)]',
+            : 'pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pb-0 paysage:pb-[env(safe-area-inset-bottom)]',
         )}
       >
         {children}
@@ -463,9 +467,14 @@ function BottomBar({ pathname }: { pathname: string }) {
               >
                 <Icone size={20} strokeWidth={active ? 2.5 : 2} aria-hidden />
               </span>
+              {/* Onze pixels, pas dix : c'est du texte qu'on lit, et dix est
+                  sous le seuil où l'on distingue encore « Apprendre » de
+                  « Analyser » d'un coup d'œil. « S'entraîner », le plus long,
+                  tient dans les 64 px d'un onglet à 360 px grâce à
+                  l'interlettrage resserré ; `truncate` garde le reste. */}
               <span
                 className={clsx(
-                  'truncate text-[10px] leading-none',
+                  'truncate text-[11px] leading-none tracking-[-0.01em]',
                   active ? 'font-bold' : 'font-medium',
                 )}
               >

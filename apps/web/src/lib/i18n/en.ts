@@ -346,7 +346,6 @@ export const en: Dictionary = {
     testVoice: 'Test voice',
     language: 'Language',
     account: 'Account',
-    confirmMove: 'Confirm every move',
     premove: 'Allow premoves',
   },
 

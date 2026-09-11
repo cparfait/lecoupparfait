@@ -91,6 +91,19 @@
   --accent-2: #00e5a8;
   --accent-3: #ff7a59;
 
+  /* Le rouge des actions destructrices, et l'encre qu'on pose dessus.
+
+     `--q-blunder` est fait pour marquer un coup, pas pour porter du texte :
+     du blanc dessus ne donnait que 3,8:1 sur ce thème. Un rouge plus profond
+     pour le fond des boutons « Abandonner » — 4,8:1 avec l'encre blanche —
+     sans toucher au barème des coups, qui doit rester reconnaissable. */
+  --danger-strong: #d9301f;
+  --on-danger: #ffffff;
+  /* Le jaune de l'imprécision, quand il porte du texte plutôt qu'une
+     pastille : sur ce thème il est déjà lisible (11:1), le thème clair
+     l'assombrit. */
+  --q-inaccuracy-text: #f7c631;
+
   /* Teintes des six rubriques. Aucune n'est le violet de l'action. */
   --rub-jouer: #5b8def;
   --rub-apprendre: #00e5a8;
@@ -185,6 +198,13 @@
   --accent-contrast: #ffffff;
   --accent-2: #00926e;
   --accent-3: #d4562f;
+
+  /* Même rouge que le barème : il tient déjà 5,2:1 sous l'encre blanche. */
+  --danger-strong: #cf2b18;
+  --on-danger: #ffffff;
+  /* `--q-inaccuracy` ne fait que 3,4:1 sur la page claire : trop pâle pour
+     du texte de 12 px. Assombri à 5,8:1, même teinte. */
+  --q-inaccuracy-text: #7a5e05;
 
   /* Mêmes teintes de rubrique, assombries pour tenir sur fond clair. */
   --rub-jouer: #2f6ad9;
@@ -957,7 +977,9 @@ button.glass:hover {
 /* Hauteur de la barre supérieure, bordure comprise : ce que retranche
    toute hauteur calée sur la fenêtre. */
 :root {
-  --entete: calc(3.5rem + 1px);
+  /* L'en-tête grandit de la zone sûre en mode installé — voir `AppShell` —
+     et tout ce qui se cale dessous doit grandir d'autant. */
+  --entete: calc(3.5rem + 1px + env(safe-area-inset-top, 0px));
 }
 
 /* Ce qui apparaît en haut de l'écran vient d'en haut.
@@ -1177,6 +1199,26 @@ button.glass:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   CONTRASTE RENFORCÉ
+   Le système le demande : les filets et le troisième niveau de texte, qui
+   sont ce qu'on perd en premier, montent d'un cran dans les deux thèmes.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-contrast: more) {
+  :root,
+  [data-theme='aurora'] {
+    --border: rgb(255 255 255 / 0.28);
+    --border-strong: rgb(255 255 255 / 0.42);
+    --text-faint: #b4b2c8;
+  }
+  [data-theme='clair'] {
+    --border: rgb(16 16 24 / 0.32);
+    --border-strong: rgb(16 16 24 / 0.5);
+    --text-faint: #44445a;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    RÉGLAGE « PERFORMANCE »
    Désactive tout ce qui coûte du GPU. Appliqué automatiquement sur machine
    lente, ou manuellement depuis les préférences.
@@ -1196,8 +1238,25 @@ button.glass:hover {
   display: none;
 }
 
+/* Les ombres décoratives seulement — jamais les anneaux.
+
+   La règle était `box-shadow: none !important` sur tout : elle effaçait du
+   même coup les `ring-*` de Tailwind — l'anneau de focus au clavier, celui du
+   joueur au trait, la case active de l'échiquier —, qui s'écrivent eux aussi
+   dans `box-shadow`. Tailwind compose anneau et ombre dans la même propriété
+   à partir de variables : vider `--tw-shadow` éteint l'ombre et laisse
+   `--tw-ring-shadow` intact. Les ombres écrites en clair dans cette feuille
+   (cartes, panneaux, bandeaux) sont éteintes une à une. */
 [data-effects='low'] * {
-  box-shadow: none !important;
+  --tw-shadow: 0 0 #0000;
+  --tw-inset-shadow: 0 0 #0000;
+}
+[data-effects='low'] .glass,
+[data-effects='low'] .glass-strong,
+[data-effects='low'] .popover,
+[data-effects='low'] a.glass:hover,
+[data-effects='low'] button.glass:hover {
+  box-shadow: none;
 }
 
 /* Respect du réglage système : personne ne devrait subir des animations. */
@@ -1221,6 +1280,23 @@ button.glass:hover {
    mise en page décide si l'on voit l'échiquier entier ou seulement son
    tiers. La variante s'écrit `paysage:` dans les classes. */
 @custom-variant paysage (@media (orientation: landscape) and (max-height: 540px));
+
+/* ── Réserve de hauteur du plateau en portrait ───────────────────────────
+   La page dit ce qu'elle occupe autour du plateau (`--reserve-demandee`,
+   posée en ligne par `ChessBoard`), et elle le dit pour le paysage sur grand
+   écran, où seul l'en-tête partage la hauteur. En portrait sous `lg`, les
+   bandeaux, le ruban et la barre du pouce s'empilent autour du plateau :
+   20 rem au moins, sinon le plateau calé sur `100dvh` repoussait la barre
+   d'actions sous le bord de l'écran. Le plancher de 260 px reste : voir
+   `MIN_BOARD_PX`. */
+.colonne-plateau {
+  --reserve-plateau: var(--reserve-demandee, 17rem);
+}
+@media (max-width: 1023px) and (orientation: portrait) {
+  .colonne-plateau {
+    --reserve-plateau: max(var(--reserve-demandee, 17rem), 20rem);
+  }
+}
 
 /* ── Grille de partie ─────────────────────────────────────────────────────
    Cinq zones — pendule adverse, plateau, sa pendule, barre d'actions,

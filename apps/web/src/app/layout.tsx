@@ -62,16 +62,23 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
+  // Le fond de page de chaque thème (`--bg`), pour que la barre d'état se
+  // fonde dans la page. Le manifeste dit la même chose pour le thème sombre.
   themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#07070c' },
+    { media: '(prefers-color-scheme: dark)', color: '#0b0b14' },
     { media: '(prefers-color-scheme: light)', color: '#f7f7f9' },
   ],
   width: 'device-width',
   initialScale: 1,
-  // L'échiquier occupe déjà toute la largeur : autoriser le zoom pincé le
-  // rendrait ingérable pendant une partie. Le zoom navigateur reste disponible.
-  maximumScale: 1,
+  // Pas de `maximumScale` : interdire le zoom pincé prive de la loupe ceux
+  // qui en ont besoin, et l'échiquier se protège lui-même du double-tap par
+  // `touch-action`. Le zoom accidentel pendant une partie n'était qu'une
+  // crainte ; l'accessibilité est un critère.
   viewportFit: 'cover',
+  // Le clavier virtuel réduit la fenêtre au lieu de la recouvrir : un champ
+  // de saisie — le tchat d'une partie, la connexion — reste au-dessus du
+  // clavier au lieu de passer dessous, et `dvh` suit.
+  interactiveWidget: 'resizes-content',
 }
 
 /**
@@ -80,20 +87,35 @@ export const viewport: Viewport = {
  * Sans cela, la page s'affiche une fraction de seconde dans le thème par défaut
  * avant de basculer — un clignotement blanc particulièrement désagréable pour
  * quelqu'un qui joue en thème sombre le soir.
+ *
+ * Sans thème enregistré, on suit celui du système : quelqu'un qui a réglé son
+ * téléphone en clair n'a pas à découvrir le réglage pour ne plus être ébloui.
+ * Le magasin des préférences relit ensuite l'attribut posé ici plutôt que de
+ * recalculer — voir `preferences.ts`, `merge`.
+ *
+ * Le niveau d'effets est deviné avec **la même règle** que
+ * `detectEffectsCapability` dans `preferences.ts` : ce script est en ligne,
+ * il ne peut rien importer, la règle est donc recopiée telle quelle. Toute
+ * modification se fait aux deux endroits.
  */
 const THEME_BOOTSTRAP = `
 (function () {
   try {
     var stored = localStorage.getItem('coupparfait.preferences');
     var state = stored ? (JSON.parse(stored).state || {}) : {};
-    document.documentElement.dataset.theme = state.theme || 'aurora';
+    var theme = state.theme;
+    if (theme !== 'aurora' && theme !== 'clair') {
+      theme = matchMedia('(prefers-color-scheme: light)').matches ? 'clair' : 'aurora';
+    }
+    document.documentElement.dataset.theme = theme;
     document.documentElement.lang = state.locale || 'fr';
     var effects = state.effects;
     if (!effects) {
+      var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
       var cores = navigator.hardwareConcurrency || 4;
       var memory = navigator.deviceMemory || 4;
-      var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      effects = (reduced || (cores <= 4 && memory <= 4)) ? 'low' : 'high';
+      var coarse = matchMedia('(pointer: coarse)').matches;
+      effects = (reduced || (cores <= 4 && memory <= 4) || (coarse && cores <= 6)) ? 'low' : 'high';
     }
     document.documentElement.dataset.effects = effects;
   } catch (e) {
