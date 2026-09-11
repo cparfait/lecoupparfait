@@ -125,7 +125,7 @@ export function DemandesDAmi({ className }: { className?: string }) {
               <span
                 className={clsx(
                   'absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-[var(--bg-elev)]',
-                  demande.user.online ? 'bg-[var(--accent-2)]' : 'bg-line',
+                  demande.user.online ? 'bg-[var(--q-best)]' : 'bg-line',
                 )}
                 aria-label={demande.user.online ? 'En ligne' : 'Hors ligne'}
               />

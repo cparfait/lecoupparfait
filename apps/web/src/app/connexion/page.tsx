@@ -301,7 +301,7 @@ function AuthForm() {
               La page s'ouvre donc sur sa phrase, qui est ce qu'on est venu
               lire. `LogoMark` reste utilisé par l'en-tête, où il a un sens :
               y revenir d'un clic. */}
-          <h1 className="font-display text-2xl font-bold tracking-tight">
+          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
             {mode === 'signin' ? 'Content de te revoir' : 'Rejoins Le Coup Parfait'}
           </h1>
           <p className="mt-1.5 text-sm text-muted">

@@ -744,7 +744,7 @@ function SetupScreen({
         Retour au choix du mode
       </Link>
 
-      <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
         Contre l’ordinateur
       </h1>
       <p className="mt-1.5 text-muted">

@@ -147,8 +147,8 @@ function FamilyList({
   )
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:py-12">
-      <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+    <div className="page">
+      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
         Entraînement aux finales
       </h1>
       <p className="mt-2 max-w-2xl text-muted max-lg:text-[14px] max-lg:leading-relaxed">
@@ -248,7 +248,7 @@ function GroupList({
   onPick: (group: EndgameGroup, index: number) => void
 }) {
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:py-12">
+    <div className="page">
       <button
         type="button"
         onClick={onBack}

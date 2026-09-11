@@ -72,7 +72,7 @@ export default function AdminPage() {
 
   if (autorise === undefined) {
     return (
-      <div className="mx-auto w-full max-w-6xl space-y-4 px-4 py-10">
+      <div className="page space-y-4">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-64 w-full" />
       </div>
@@ -91,8 +91,8 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
-      <h1 className="font-display text-3xl font-bold tracking-tight">Administration</h1>
+    <div className="page">
+      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Administration</h1>
       <p className="mt-1.5 text-sm text-muted">
         Ce que tu fais ici s’applique à de vraies personnes. Les actes irréversibles demandent
         d’écrire le pseudo, et tous sont consignés dans le journal.

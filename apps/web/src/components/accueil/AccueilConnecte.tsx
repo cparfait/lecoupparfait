@@ -293,14 +293,13 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
           <Skeleton className="h-48 w-full" />
         ) : carriereEnCours && chapitre && progression ? (
           <Card className="overflow-hidden">
-            <div className="h-1" style={{ background: chapitre.teinte }} aria-hidden />
-            {/* Le bandeau reprend la teinte du chapitre, celle du liseré
-                juste au-dessus : la carte s'ouvre alors sur un en-tête d'une
-                seule couleur, et cette couleur dit où l'on en est. */}
+            {/* La teinte de « Jouer », dont la carrière fait partie — et non
+                plus celle du chapitre : douze chapitres, douze couleurs, et
+                l'accueil changeait de palette à chaque étape. */}
             <EnTeteDeCarte
               titre="Ton parcours"
               icone={<Map size={14} aria-hidden />}
-              teinte={chapitre.teinte}
+              teinte="var(--rub-jouer)"
               fin={`chapitre ${chapitre.numero} / ${CHAPITRES.length}`}
             />
             <div className="p-4">
@@ -373,13 +372,11 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
       {(parties === null || parties.length > 0 || (analyses?.length ?? 0) > 0) && (
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <Card className="overflow-hidden">
-            {/* Le bleu de `--q-great` : la seule des couleurs de qualité de
-                coup qui ne porte pas de jugement, et donc la seule qui puisse
-                chapeauter une liste où il y a des victoires et des défaites. */}
+            {/* La teinte d'« Analyse » : c'est là que mène chaque ligne. */}
             <EnTeteDeCarte
               titre="Tes dernières parties"
               icone={<History size={14} aria-hidden />}
-              teinte="var(--q-great)"
+              teinte="var(--rub-analyser)"
               fin={
                 <Link
                   href={`/profil/${encodeURIComponent(pseudo)}`}

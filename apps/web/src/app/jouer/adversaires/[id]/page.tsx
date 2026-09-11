@@ -84,7 +84,7 @@ export default async function FicheAdversaire({ params }: { params: Promise<{ id
   const suivant = BOT_PERSONALITIES[IDS[(position + 1) % IDS.length]!]
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:py-12">
+    <div className="page-etroite">
       <Link
         href="/jouer/adversaires"
         className="inline-flex items-center gap-1.5 text-[14px] text-muted transition-colors hover:text-ink"
@@ -99,7 +99,7 @@ export default async function FicheAdversaire({ params }: { params: Promise<{ id
       <header className="mt-4 flex flex-wrap items-end gap-5">
         <PortraitAdversaire personality={personnalite} size={128} />
         <div className="min-w-0 flex-1">
-          <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
             {personnalite.name.fr}
           </h1>
           <p className="mt-1 text-lg italic text-accent">« {personnalite.devise} »</p>

@@ -80,7 +80,7 @@ function VerifyResult() {
         {state.phase === 'done' && (
           <>
             <span
-              className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-[var(--accent-2)]/15 text-[var(--accent-2)]"
+              className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-[var(--q-best)]/15 text-[var(--q-best)]"
               aria-hidden
             >
               <CheckCircle2 size={24} />

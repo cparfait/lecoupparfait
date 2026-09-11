@@ -211,7 +211,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="mx-auto w-full max-w-3xl space-y-4 px-4 py-10">
+      <div className="page-etroite space-y-4">
         <Skeleton className="h-28 w-full" />
         <Skeleton className="h-40 w-full" />
         <Skeleton className="h-64 w-full" />
@@ -247,7 +247,7 @@ export default function ProfilePage() {
   const title = best ? ratingTitle(best.rating) : null
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:py-12">
+    <div className="page-etroite">
       {/* ── Identité ─────────────────────────────────────────────── */}
       <Card glow className="p-5">
         {/* Les deux boutons passent à la ligne sous 640 px.
@@ -284,7 +284,7 @@ export default function ProfilePage() {
               laisse comprimer jusqu'à zéro et le rang ne se replie jamais. */}
           <div className="min-w-[12rem] flex-1">
             <div className="flex flex-wrap items-baseline gap-2">
-              <h1 className="font-display text-2xl font-bold tracking-tight">
+              <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
                 {profile.user.username}
               </h1>
               {title && <Chip tone="accent">{title.fr}</Chip>}
@@ -836,7 +836,7 @@ function EmailStatus({ email }: { email: { email: string | null; verified: boole
   if (email.verified) {
     return (
       <p className="mt-4 flex items-center gap-1.5 border-t border-line/60 pt-4 text-xs text-faint">
-        <MailCheck size={13} className="text-[var(--accent-2)]" aria-hidden />
+        <MailCheck size={13} className="text-[var(--q-best)]" aria-hidden />
         Adresse confirmée : {email.email}
       </p>
     )

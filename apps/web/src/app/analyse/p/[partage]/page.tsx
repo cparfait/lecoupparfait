@@ -87,7 +87,7 @@ export default function AnalysePartageePage({ params }: { params: Promise<{ part
 
   if (!outcome) {
     return (
-      <div className="mx-auto w-full max-w-6xl space-y-4 px-4 py-10">
+      <div className="page space-y-4">
         <Skeleton className="h-16 w-full" />
         <Skeleton className="h-[28rem] w-full" />
       </div>

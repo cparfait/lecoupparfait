@@ -243,7 +243,7 @@ export default function PendulePage() {
             <ArrowLeft size={14} aria-hidden />
             Outils
           </Link>
-          <h1 className="mt-3 font-display text-3xl font-bold tracking-tight">Pendule</h1>
+          <h1 className="mt-3 font-display text-2xl font-bold tracking-tight sm:text-3xl">Pendule</h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
             Pose l’appareil entre les deux joueurs. Chacun tape son propre côté après avoir joué —
             comme sur une pendule mécanique. Avec un échiquier électronique branché, tu n’as rien à

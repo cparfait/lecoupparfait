@@ -78,7 +78,7 @@ export default function TournoiOrdinateurPage() {
   if (tournoi === undefined) return null
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:py-8">
+    <div className="page-etroite">
       <Link
         href="/tournois"
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
@@ -132,7 +132,7 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
 
   return (
     <>
-      <h1 className="font-display text-3xl font-bold tracking-tight">
+      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
         Tournoi contre l’ordinateur
       </h1>
       <p className="mt-2 max-w-prose text-muted max-lg:text-[14px] max-lg:leading-relaxed">
@@ -303,7 +303,7 @@ function Tableau({ tournoi, onAbandonner }: { tournoi: TournoiSolo; onAbandonner
   return (
     <>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="font-display text-3xl font-bold tracking-tight">Ton tournoi</h1>
+        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Ton tournoi</h1>
         <Chip tone="accent">
           Ronde {Math.min(tournoi.ronde, rondes)} sur {rondes}
         </Chip>

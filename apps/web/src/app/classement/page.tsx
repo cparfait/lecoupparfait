@@ -74,8 +74,8 @@ export default function LeaderboardPage() {
   }, [category, load])
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:py-14">
-      <h1 className="flex items-center gap-2.5 font-display text-3xl font-bold tracking-tight">
+    <div className="page-etroite">
+      <h1 className="flex items-center gap-2.5 font-display text-2xl font-bold tracking-tight sm:text-3xl">
         <Trophy size={26} className="text-accent" aria-hidden />
         Classement
       </h1>

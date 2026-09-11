@@ -105,7 +105,7 @@ export default function CorrespondencePage() {
 
   if (games === null) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-10">
+      <div className="page-etroite">
         <EmptyState
           icon={<Mailbox size={28} />}
           title="La correspondance demande un compte"
@@ -123,7 +123,7 @@ export default function CorrespondencePage() {
   const board = game ? new Chess(game.fen) : null
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6">
+    <div className="page">
       <SectionTitle hint="Un coup quand tu peux. Personne n’attend devant son écran.">
         Correspondance
       </SectionTitle>
@@ -154,7 +154,7 @@ export default function CorrespondencePage() {
                         entry.result !== '*'
                           ? 'bg-line'
                           : entry.yourTurn
-                            ? 'bg-[var(--accent-2)]'
+                            ? 'bg-[var(--q-best)]'
                             : 'bg-[var(--q-inaccuracy)]',
                       )}
                       aria-hidden
@@ -214,7 +214,7 @@ export default function CorrespondencePage() {
                   <span
                     className={clsx(
                       'ml-auto flex items-center gap-1',
-                      game.yourTurn ? 'font-semibold text-[var(--accent-2)]' : 'text-faint',
+                      game.yourTurn ? 'font-semibold text-[var(--q-best)]' : 'text-faint',
                     )}
                   >
                     <Clock size={13} aria-hidden />

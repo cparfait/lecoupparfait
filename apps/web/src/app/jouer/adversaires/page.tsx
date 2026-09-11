@@ -27,8 +27,8 @@ export const metadata: Metadata = {
 
 export default function GalerieAdversaires() {
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:py-12">
-      <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+    <div className="page">
+      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
         Tes adversaires artificiels
       </h1>
       <p className="mt-3 max-w-2xl leading-relaxed text-muted max-lg:text-[14px]">

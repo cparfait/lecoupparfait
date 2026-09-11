@@ -267,7 +267,7 @@ export default function RushPage() {
   // ── Écrans ──────────────────────────────────────────────────────────────
   if (phase === 'choix' || phase === 'chargement') {
     return (
-      <div className="mx-auto w-full max-w-xl px-4 py-8">
+      <div className="page-etroite">
         <SectionTitle hint="Enchaîne les puzzles, de plus en plus durs. Trois erreurs et la manche s’arrête.">
           Manche chronométrée
         </SectionTitle>
@@ -331,7 +331,7 @@ export default function RushPage() {
             puzzle{solved > 1 ? 's' : ''} résolu{solved > 1 ? 's' : ''}
           </p>
           {record ? (
-            <p className="mt-3 flex items-center justify-center gap-1.5 text-sm font-semibold text-[var(--accent-2)]">
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-sm font-semibold text-[var(--q-best)]">
               <Flame size={15} aria-hidden />
               Nouveau record
             </p>
@@ -418,7 +418,7 @@ export default function RushPage() {
       <div
         className={clsx(
           'rounded-[var(--radius)] transition-shadow',
-          flash === 'bon' && 'shadow-[0_0_0_3px_var(--accent-2)]',
+          flash === 'bon' && 'shadow-[0_0_0_3px_var(--q-best)]',
           flash === 'faux' && 'shadow-[0_0_0_3px_var(--q-blunder)]',
         )}
       >

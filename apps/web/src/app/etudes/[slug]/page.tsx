@@ -217,7 +217,7 @@ export default function StudyPage() {
 
   if (study === null) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-10">
+      <div className="page-etroite">
         <EmptyState
           icon={<BookMarked size={28} />}
           title="Étude introuvable"
@@ -235,7 +235,7 @@ export default function StudyPage() {
   const comment = chapter?.comments[String(cursor)] ?? ''
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-5">
+    <div className="page">
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <BookMarked size={18} className="text-accent" aria-hidden />
         <h1 className="font-display text-xl font-bold tracking-tight">{study.title}</h1>

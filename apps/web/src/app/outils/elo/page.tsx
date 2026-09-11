@@ -95,7 +95,7 @@ export default function EloPage() {
         <ArrowLeft size={14} aria-hidden />
         Outils
       </Link>
-      <h1 className="mt-3 font-display text-3xl font-bold tracking-tight">Calculateur Elo</h1>
+      <h1 className="mt-3 font-display text-2xl font-bold tracking-tight sm:text-3xl">Calculateur Elo</h1>
       <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
         Ta cote, ton coefficient, tes parties : ce que le tournoi te rapporte ou te coûte, partie
         par partie, et ta performance. Le barème est celui de la FIDE.

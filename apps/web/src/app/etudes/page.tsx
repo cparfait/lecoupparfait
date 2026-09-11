@@ -77,7 +77,7 @@ export default function StudiesPage() {
 
   if (signedIn === false) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-10">
+      <div className="page-etroite">
         <EmptyState
           icon={<BookMarked size={28} />}
           title="Les études demandent un compte"
@@ -93,7 +93,7 @@ export default function StudiesPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    <div className="page-etroite">
       <SectionTitle hint="Range des positions commentées : tes ouvertures, une partie à comprendre, un thème de finale.">
         Mes études
       </SectionTitle>

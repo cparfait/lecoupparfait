@@ -139,11 +139,11 @@ export default function VisionPage() {
   const accuracy = found + missed > 0 ? Math.round((found / (found + missed)) * 100) : 100
 
   return (
-    <div className="mx-auto w-full max-w-[1100px] px-4 py-8 sm:px-6 lg:py-12">
+    <div className="page">
       {/* Sur téléphone, le titre est plus petit et la consigne disparaît pendant
           la manche : chaque ligne gardée ici est prise sur l'échiquier, et la
           consigne ne s'adresse qu'à celui qui n'a pas encore commencé. */}
-      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
         Vision
       </h1>
       <p

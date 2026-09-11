@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * Le sommaire des outils.
  *
@@ -6,17 +8,10 @@
  * plateau, en face de quelqu'un. L'écran au service du bois, et non l'inverse.
  */
 
-import type { Metadata } from 'next'
 import { Calculator, Dices, Scale, Timer } from 'lucide-react'
 import { CarteDestination } from '@/components/ui/CarteDestination.tsx'
 import { TitreDePage } from '@/components/ui/index.tsx'
 import { SECTIONS } from '@/lib/navigation.ts'
-
-export const metadata: Metadata = {
-  title: 'Outils',
-  description:
-    'La pendule, le calculateur Elo, le tirage au sort et l’aide-mémoire d’arbitrage : ce qui sert autour d’un vrai échiquier.',
-}
 
 const TEINTE = SECTIONS.find((s) => s.id === 'outils')?.teinte
 

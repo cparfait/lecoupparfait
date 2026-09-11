@@ -21,9 +21,9 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6 lg:py-14">
+    <div className="page-etroite">
       <Chip tone="accent">Logiciel libre · AGPL-3.0</Chip>
-      <h1 className="mt-4 font-display text-3xl font-bold tracking-tight sm:text-4xl">
+      <h1 className="mt-4 font-display text-2xl font-bold tracking-tight sm:text-3xl">
         À propos du Coup Parfait
       </h1>
 

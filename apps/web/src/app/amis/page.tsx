@@ -244,7 +244,7 @@ function FriendsBook() {
 
   if (me === null) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-10">
+      <div className="page-etroite">
         <EmptyState
           icon={<Users size={28} />}
           title="Le carnet demande un compte"
@@ -260,7 +260,7 @@ function FriendsBook() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    <div className="page-etroite">
       <SectionTitle hint="Ajoute les gens avec qui tu joues, et lance une partie en un clic.">
         Mes amis
       </SectionTitle>
@@ -599,7 +599,7 @@ function Avatar({ friend }: { friend: Friend }) {
       <span
         className={clsx(
           'absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-[var(--bg-elev)]',
-          friend.online ? 'bg-[var(--accent-2)]' : 'bg-line',
+          friend.online ? 'bg-[var(--q-best)]' : 'bg-line',
         )}
         title={friend.online ? 'En ligne' : 'Hors ligne'}
         aria-label={friend.online ? 'En ligne' : 'Hors ligne'}

@@ -140,7 +140,7 @@ export default function StatsPage() {
 
   if (stats === null) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-10">
+      <div className="page-etroite">
         <EmptyState
           icon={<BarChart3 size={28} />}
           title="Les statistiques demandent un compte"
@@ -157,7 +157,7 @@ export default function StatsPage() {
 
   if (stats.totals.games === 0) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-10">
+      <div className="page-etroite">
         <EmptyState
           icon={<BarChart3 size={28} />}
           title="Pas encore de partie classée"
@@ -179,7 +179,7 @@ export default function StatsPage() {
   const worstHour = [...stats.hours].filter((h) => h.games >= 3).sort((a, b) => a.rate - b.rate)[0]
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    <div className="page-etroite">
       <SectionTitle
         hint={`Sur tes ${stats.totals.games} parties terminées.`}
         action={

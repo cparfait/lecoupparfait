@@ -46,10 +46,10 @@ export default function CarrierePage() {
   const progression = useCarriere()
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-6 lg:py-10">
+    <div className="page-etroite">
       <header className="mb-5">
         <p className="text-[12px] font-semibold text-accent">Mode carrière</p>
-        <h1 className="mt-1 font-display text-3xl font-bold leading-tight">
+        <h1 className="mt-1 font-display text-2xl font-bold tracking-tight sm:text-3xl">
           Douze chapitres, un chemin
         </h1>
         <p className="mt-2 max-w-prose text-sm text-muted">

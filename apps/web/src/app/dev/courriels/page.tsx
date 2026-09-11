@@ -64,7 +64,7 @@ export default function MailboxPage() {
 
   if (!available) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-10">
+      <div className="page-etroite">
         <EmptyState
           icon={<Mail size={28} />}
           title="Réservé au développement"
@@ -75,7 +75,7 @@ export default function MailboxPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    <div className="page-etroite">
       <SectionTitle
         hint="Les messages ne partent pas : ils sont écrits sur le disque, dans data/courriels."
         action={

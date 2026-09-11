@@ -30,24 +30,15 @@ import { ButtonLink, Card, Chip } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 
 /**
- * Le niveau donne son étiquette **et** sa couleur au chapitre.
- *
- * Les sept chapitres portaient le même bandeau d'accent, et leur en-tête se
- * lisait comme celui du voisin : sept panneaux violets empilés, dont on ne
- * distinguait que le titre. La couleur du niveau était pourtant déjà là, dans
- * la pastille à droite — vert, ambre, rouge, du premier coup au jeu confirmé.
- * Elle passe donc sur tout l'en-tête, et l'on voit sans lire où la difficulté
- * change. Un seul endroit décide : la pastille et le bandeau lisent la même
- * ligne.
+ * Le niveau donne son étiquette au chapitre : la pastille à droite, en vert,
+ * ambre ou rouge. Les en-têtes, eux, portent tous la teinte de la rubrique :
+ * trois couleurs de bandeau sur une page qui en avait déjà deux, c'était la
+ * page qui payait. Le niveau se lit sur la pastille, qui est faite pour ça.
  */
 const LEVEL_LABELS = {
-  beginner: { label: 'Débutant', tone: 'success' as const, teinte: 'var(--q-best)' },
-  intermediate: {
-    label: 'Intermédiaire',
-    tone: 'warning' as const,
-    teinte: 'var(--q-inaccuracy)',
-  },
-  advanced: { label: 'Confirmé', tone: 'danger' as const, teinte: 'var(--q-blunder)' },
+  beginner: { label: 'Débutant', tone: 'success' as const },
+  intermediate: { label: 'Intermédiaire', tone: 'warning' as const },
+  advanced: { label: 'Confirmé', tone: 'danger' as const },
 }
 
 /** Chapitres repliés, conservés d'une visite à l'autre. */
@@ -147,8 +138,8 @@ export default function LearnPage() {
   )
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:py-14">
-      <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+    <div className="page">
+      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
         Apprendre les échecs
       </h1>
       {/* La consigne, en petit.
@@ -188,7 +179,7 @@ export default function LearnPage() {
             className="h-full rounded-full transition-[width] duration-500"
             style={{
               width: `${overall}%`,
-              background: 'linear-gradient(90deg, var(--accent), var(--accent-2))',
+              background: 'var(--accent)',
             }}
           />
         </div>
@@ -209,7 +200,7 @@ export default function LearnPage() {
           <div className="flex flex-wrap items-center gap-4 p-5">
             <span
               className="grid h-14 w-14 shrink-0 place-items-center rounded-[var(--radius)] text-3xl"
-              style={{ background: 'color-mix(in oklab, var(--accent-2) 16%, transparent)' }}
+              style={{ background: 'color-mix(in oklab, var(--rub-apprendre) 16%, transparent)' }}
               aria-hidden
             >
               {prochaine.lecon.icon}
@@ -307,7 +298,7 @@ export default function LearnPage() {
                   onClick={() => toggle(chapter.id)}
                   aria-expanded={!replie}
                   aria-controls={`chapitre-${chapter.id}`}
-                  style={{ '--teinte': LEVEL_LABELS[chapter.level].teinte } as CSSProperties}
+                  style={{ '--teinte': 'var(--rub-apprendre)' } as CSSProperties}
                   className="bandeau -mx-3 -mt-3 flex w-[calc(100%+1.5rem)] items-center gap-3 border-b-2 px-3 py-3 text-left transition-colors hover:bg-surface-hover sm:-mx-4 sm:-mt-4 sm:w-[calc(100%+2rem)] sm:px-4"
                 >
                   <span

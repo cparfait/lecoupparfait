@@ -458,14 +458,14 @@ function ImportScreen({
   }, [])
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:py-14">
+    <div className="page-etroite">
       {/* Titre et promesse tiennent en trois lignes sur téléphone.
 
           Ils en prenaient sept — un titre de trente-six points et quatre
           lignes de texte —, soit le quart de l'écran avant la moindre
           commande, à chaque visite. La phrase longue reste, mais à partir de
           `sm` : c'est là qu'elle ne coûte rien. */}
-      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-4xl">
+      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
         Analyse expliquée
       </h1>
       <p className="mt-1.5 max-w-2xl text-sm text-muted sm:mt-2 sm:text-base">

@@ -29,7 +29,7 @@ interface Tournament {
 }
 
 const STATUS: Record<string, { label: string; tone: string }> = {
-  running: { label: 'En cours', tone: 'text-[var(--accent-2)]' },
+  running: { label: 'En cours', tone: 'text-[var(--q-best)]' },
   scheduled: { label: 'À venir', tone: 'text-accent' },
   finished: { label: 'Terminé', tone: 'text-faint' },
 }
@@ -95,7 +95,7 @@ export default function TournamentsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    <div className="page-etroite">
       {/*
         Le tournoi solo en premier, et c'est délibéré.
         Une arène n'a d'intérêt qu'avec du monde connecté en même temps —

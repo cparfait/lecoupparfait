@@ -124,7 +124,7 @@ export default function ArenaPage() {
 
   if (data === null) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-10">
+      <div className="page-etroite">
         <EmptyState
           icon={<Trophy size={28} />}
           title="Arène introuvable"
@@ -145,7 +145,7 @@ export default function ArenaPage() {
   const running = tournament.status === 'running'
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    <div className="page-etroite">
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <Trophy size={18} className="text-accent" aria-hidden />
         <h1 className="font-display text-xl font-bold tracking-tight">{tournament.name}</h1>
@@ -181,7 +181,7 @@ export default function ArenaPage() {
             </Button>
           </div>
         ) : mine?.playing ? (
-          <p className="flex items-center gap-2 text-[14px] font-medium text-[var(--accent-2)]">
+          <p className="flex items-center gap-2 text-[14px] font-medium text-[var(--q-best)]">
             <Swords size={15} aria-hidden />
             Ta partie est en cours — tu y es conduit automatiquement.
           </p>
@@ -252,7 +252,7 @@ export default function ArenaPage() {
                   </span>
                 )}
                 {player.playing && (
-                  <Swords size={12} className="shrink-0 text-[var(--accent-2)]" aria-hidden />
+                  <Swords size={12} className="shrink-0 text-[var(--q-best)]" aria-hidden />
                 )}
                 {!player.active && !finished && (
                   <LogOut size={12} className="shrink-0 text-faint" aria-hidden />
