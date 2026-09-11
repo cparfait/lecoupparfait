@@ -77,11 +77,7 @@ export function AutresDeLaSection({
         <p className="font-display text-lg font-semibold tracking-tight">
           Aussi dans {t(section.labelKey)}
         </p>
-        <span
-          aria-hidden
-          className="h-px flex-1 rounded-full"
-          style={{ background: `color-mix(in oklab, ${section.teinte} 30%, transparent)` }}
-        />
+        <span aria-hidden className="h-px flex-1 rounded-full bg-line" />
       </div>
 
       <div className={clsx('grid gap-2', !colonne && 'sm:grid-cols-2')}>
@@ -96,11 +92,11 @@ export function AutresDeLaSection({
               href={entree.href}
               /* L'entrée se soulève au survol, comme les portes des pages de
                  rubrique : c'est le même geste, il doit se sentir pareil. */
+              /* Sans liseré de couleur sur le flanc : la pastille d'icône
+                 porte déjà la teinte, et un trait de la même couleur juste à
+                 côté d'elle ne faisait que l'épaissir. */
               className="animate-slide-up group flex min-h-14 items-center gap-3 overflow-hidden rounded-[var(--radius)] border border-line bg-surface/70 px-3 py-2.5 transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-hover"
-              style={{
-                animationDelay: `${index * 60}ms`,
-                boxShadow: `inset 3px 0 0 0 color-mix(in oklab, ${teinte} 55%, transparent)`,
-              }}
+              style={{ animationDelay: `${index * 60}ms` }}
             >
               <span
                 className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)] transition-transform duration-300 group-hover:scale-110"

@@ -39,7 +39,7 @@ export function EnTeteDeCarte({
   className,
 }: {
   titre: ReactNode
-  /** L'icône du bloc, à gauche du titre. Elle prend la couleur du titre. */
+  /** L'icône du bloc, à gauche du titre, dans sa pastille teintée. */
   icone?: ReactNode
   /**
    * Couleur du bandeau, en CSS.
@@ -76,14 +76,28 @@ export function EnTeteDeCarte({
   const contenu = (
     <>
       {/* Le titre prend toute la place restante : ce qui suit se range à droite
-          de lui-même, sans qu'aucun des deux ait à réclamer la marge. */}
-      {/* Quatorze pixels et gras, là où le reste de la page écrit ses mentions
-          en douze et demi-gras : un titre de bloc doit se voir avant ce qu'il
-          annonce, et il restait plus discret que la ligne qu'il chapeaute.
-          L'icône porte la couleur franche, le titre la garde diluée — voir
+          de lui-même, sans qu'aucun des deux ait à réclamer la marge.
+
+          La teinte tient dans la seule pastille d'icône, et le titre est en
+          pleine encre. Il était écrit dans la teinte, sur un fond de la même
+          teinte : du ton sur ton, que le rapport de contraste ne rattrape pas.
+          C'est la règle des cartes de destination, appliquée ici — voir
           `.bandeau` dans `globals.css`. */}
-      <span className="flex min-w-0 flex-1 items-center gap-2 text-[14px] font-bold tracking-[0.01em] text-[var(--teinte-texte)]">
-        {icone && <span className="shrink-0 text-[var(--bandeau-icone)]">{icone}</span>}
+      <span className="flex min-w-0 flex-1 items-center gap-2.5 text-[14px] font-bold tracking-[0.01em] text-ink">
+        {icone && (
+          <span
+            className="grid h-7 w-7 shrink-0 place-items-center rounded-[var(--radius-sm)]"
+            style={{
+              background: 'color-mix(in oklab, var(--bandeau-teinte) 16%, transparent)',
+              boxShadow:
+                'inset 0 0 0 1px color-mix(in oklab, var(--bandeau-teinte) 30%, transparent)',
+              color: 'var(--bandeau-icone)',
+            }}
+            aria-hidden
+          >
+            {icone}
+          </span>
+        )}
         <span className="truncate">{titre}</span>
       </span>
       {fin != null && <span className="shrink-0 text-[12px] tabular-nums text-muted">{fin}</span>}

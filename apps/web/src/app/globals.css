@@ -722,47 +722,38 @@ button.glass:hover {
  */
 .bandeau {
   --bandeau-teinte: var(--teinte, var(--accent));
-  --bandeau-force: 34%;
-  --bandeau-fuite: 10%;
   /*
-    Le titre tire vers le texte, l'icône vers la couleur.
+    Le fond ne porte plus la couleur, l'icône seule la porte.
 
-    Écrit à 62 % de teinte, comme les libellés des cartes teintées, il tenait le
-    seuil de contraste — 4,6:1 — et restait pourtant en retrait de la ligne
-    qu'il annonce : sur un fond qui porte déjà sa couleur, un texte de la même
-    couleur s'y fond, quel que soit le chiffre. À 40 %, il gagne un tiers de
-    contraste sans rien perdre de son identité, et c'est l'icône — qui n'a que
-    3:1 à tenir — qui porte la couleur franche.
+    Le bandeau peignait la teinte sur son fond, sur son titre et sur son
+    icône : trois fois la même couleur, l'une sur l'autre. Un titre coloré sur
+    un fond de sa propre couleur ne se détache pas, quel que soit le rapport de
+    contraste — c'était du ton sur ton, et le chapitre « Les bases » l'a montré
+    en vert sur vert.
+
+    Le fond passe donc au gris des surfaces fortes, le titre à la pleine encre,
+    et la teinte se retire sur la pastille d'icône à gauche : un seul objet
+    coloré par en-tête, celui qui n'a que 3:1 à tenir et qui peut donc porter la
+    couleur franche. C'est la même règle que les cartes de destination.
   */
-  --teinte-texte: color-mix(in oklab, var(--bandeau-teinte) 40%, var(--text));
+  --teinte-texte: var(--text);
   --bandeau-icone: color-mix(in oklab, var(--bandeau-teinte) 78%, var(--text));
-  background-image: linear-gradient(
-    90deg,
-    color-mix(in oklab, var(--bandeau-teinte) var(--bandeau-force), transparent),
-    color-mix(in oklab, var(--bandeau-teinte) var(--bandeau-fuite), transparent) 76%
-  );
-  border-color: color-mix(in oklab, var(--bandeau-teinte) 60%, var(--border));
+  background-image: linear-gradient(0deg, var(--surface-strong), var(--surface-strong));
+  /* Le filet reprend un souffle de teinte : il sépare l'en-tête du contenu
+     sans rien avoir à faire lire par-dessus. */
+  border-color: color-mix(in oklab, var(--bandeau-teinte) 30%, var(--border));
 }
 
 /*
- * Sur une carte déjà teintée, le bandeau ne fait qu'un souffle.
+ * Sur une carte déjà teintée, le bandeau n'a plus de fond du tout.
  *
- * La couleur y est partout — c'est tout l'objet de `teinte-jour` — et l'empiler
- * une seconde fois, c'est le texte qui paie : le titre des quêtes tombait à
- * 4,3:1 sur son propre bandeau à pleine force, et le compteur des points du
- * jour, qui est en `--text-muted`, descendait avec lui. À 10 % le filet et
- * l'icône suffisent à séparer l'en-tête du contenu.
- *
- * La fuite tombe à zéro : le bout droit du bandeau est justement là où se lit
- * ce compteur, et il n'a alors plus rien à payer du tout.
+ * La couleur y est partout — c'est tout l'objet de `teinte-jour` — et poser
+ * par-dessus un aplat gris découperait un rectangle dans la carte.
  */
 .glass.teinte-defi .bandeau,
 .glass.teinte-jour .bandeau,
 .glass.teinte-reussi .bandeau {
-  --bandeau-force: 10%;
-  --bandeau-fuite: 0%;
-  /* Et le titre se rapproche encore du texte, pour la même raison. */
-  --teinte-texte: color-mix(in oklab, var(--bandeau-teinte) 32%, var(--text));
+  background-image: none;
 }
 
 /*

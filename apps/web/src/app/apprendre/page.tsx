@@ -286,13 +286,14 @@ export default function LearnPage() {
               style={{ animationDelay: `${chapterIndex * 60}ms` }}
             >
               <header>
-                {/* L'en-tête prend le bandeau des cartes de l'accueil, dans la
-                    couleur du niveau : voir `.bandeau` dans `globals.css`, qui
-                    tient la recette — dégradé, filet, et `--teinte-texte` assez
-                    rapprochée du texte pour rester lisible sur les quatre
-                    thèmes. Il déborde le rembourrage du panneau par des marges
-                    négatives : un bandeau qui s'arrête avant le bord n'est
-                    qu'un rectangle de couleur de plus. */}
+                {/* L'en-tête reprend `.bandeau` : un fond gris, une pastille
+                    d'icône dans la teinte de la rubrique, et le titre en
+                    pleine encre. Il portait la couleur du niveau sur tout son
+                    fond, titre compris — sept bandeaux, trois couleurs, et un
+                    titre vert sur du vert. Le niveau se lit sur sa pastille à
+                    droite, qui est faite pour ça. Il déborde le rembourrage du
+                    panneau par des marges négatives : un bandeau qui s'arrête
+                    avant le bord n'est qu'un rectangle de plus. */}
                 <button
                   type="button"
                   onClick={() => toggle(chapter.id)}
@@ -316,7 +317,7 @@ export default function LearnPage() {
                   <div className="min-w-0 flex-1">
                     {/* Le numéro de chapitre situe la progression dans le
                         programme, et fait respirer le titre au-dessus. */}
-                    <p className="text-[12px] font-semibold text-[var(--teinte-texte)]">
+                    <p className="text-[12px] font-semibold text-muted">
                       Chapitre {chapterIndex + 1}
                       {done > 0 && (
                         <span className="ml-2 font-normal normal-case tracking-normal text-muted">
