@@ -26,6 +26,36 @@ import { toast } from '@/components/ui/Toast.tsx'
 const EMPTY = '8/8/8/8/8/8/8/8 w - - 0 1'
 const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
+/**
+ * Les droits de roque qu'une position dessinée peut encore avoir.
+ *
+ * On les déduit des pièces, et de rien d'autre : un roi sur sa case et une
+ * tour dans son coin donnent le droit de ce côté. C'est l'hypothèse la plus
+ * généreuse compatible avec la position, et la seule qu'on puisse tenir sans
+ * connaître l'histoire de la partie.
+ *
+ * Ils étaient forcés à `KQkq` quoi qu'il arrive : chess.js accepte un FEN qui
+ * promet un roque sans roi ni tour, mais l'analyse et la partie contre
+ * l'ordinateur héritaient alors d'un droit impossible.
+ */
+function droitsDeRoque(fen: string): string {
+  const board = new Chess(fen, { skipValidation: true })
+  const est = (square: Square, type: PieceSymbol, color: Color) => {
+    const piece = board.get(square)
+    return piece?.type === type && piece.color === color
+  }
+  let droits = ''
+  if (est('e1', 'k', 'w')) {
+    if (est('h1', 'r', 'w')) droits += 'K'
+    if (est('a1', 'r', 'w')) droits += 'Q'
+  }
+  if (est('e8', 'k', 'b')) {
+    if (est('h8', 'r', 'b')) droits += 'k'
+    if (est('a8', 'r', 'b')) droits += 'q'
+  }
+  return droits || '-'
+}
+
 /** Les pièces, dans l'ordre où on les pose : les plus fréquentes d'abord. */
 const PIECES: Array<{ type: PieceSymbol; white: string; black: string; nom: string }> = [
   { type: 'p', white: '♙', black: '♟', nom: 'Pion' },
@@ -86,9 +116,9 @@ export default function EditorPage() {
       setTurn(next)
       const parts = fen.split(' ')
       parts[1] = next
-      // Le roque et la prise en passant ne se devinent pas d'une position
-      // dessinée : on les remet à zéro plutôt que d'inventer des droits.
-      parts[2] = 'KQkq'
+      // Le roque se déduit des pièces ; la prise en passant, elle, ne se
+      // devine pas d'une position dessinée et reste à zéro.
+      parts[2] = droitsDeRoque(fen)
       parts[3] = '-'
       setFen(parts.join(' '))
     },
@@ -112,7 +142,7 @@ export default function EditorPage() {
 
       const parts = board.fen().split(' ')
       parts[1] = turn
-      parts[2] = 'KQkq'
+      parts[2] = droitsDeRoque(board.fen())
       parts[3] = '-'
       setFen(parts.join(' '))
     },

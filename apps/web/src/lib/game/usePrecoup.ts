@@ -31,6 +31,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Chess } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
+import { estUnePromotion } from '@/lib/game/useChessGame.ts'
 
 export interface Precoup {
   from: Square
@@ -99,11 +100,16 @@ export function usePrecoup({ fen, couleur, actif, jouer }: UsePrecoupOptions): E
     if (board.turn() !== couleur) return
 
     setPrecoup(null)
+    // Un pion qui atteint la dernière rangée sans pièce choisie : on ne
+    // promeut pas en dame à sa place. L'échiquier demande la pièce à
+    // l'enregistrement, donc ce cas ne vient que d'un appelant qui l'a omise ;
+    // le jeter vaut mieux qu'une dame que personne n'a demandée.
+    if (estUnePromotion(board, precoup.from, precoup.to) && !precoup.promotion) return
     try {
       board.move({
         from: precoup.from,
         to: precoup.to,
-        promotion: precoup.promotion ?? 'q',
+        promotion: precoup.promotion,
       })
     } catch {
       // Devenu illégal : l'adversaire n'a pas joué ce qu'on imaginait. On

@@ -41,14 +41,10 @@ import {
   squareCentre,
   squarePosition,
 } from './boardKit.ts'
-import { QUALITY_STYLES, type MoveQuality } from '@coupparfait/core'
+import { PIECE_ARTICLE, PIECE_NAMES, QUALITY_STYLES, type MoveQuality } from '@coupparfait/core'
 import { PromotionPicker } from './PromotionPicker.tsx'
-import {
-  SAFETY_COLOURS,
-  describeSafety,
-  evaluateMoveSafety,
-  type SafetyVerdict,
-} from './moveSafety.ts'
+import { SAFETY_COLOURS, evaluateMoveSafety, type SafetyVerdict } from './moveSafety.ts'
+import { playSound } from '@/lib/sound.ts'
 import { usePreferencesDe } from '@/lib/store/preferences.ts'
 import type { BoardStyleId } from '@/lib/store/preferences.ts'
 
@@ -158,6 +154,15 @@ export interface Board2DProps {
 /** Durée d'un appui long, et distance au-delà de laquelle c'est un glisser. */
 const APPUI_LONG_MS = 450
 const SEUIL_GLISSER_PX = 8
+/**
+ * Distance en deçà de laquelle un pointeur qui bouge est encore un clic.
+ *
+ * Un doigt ne se pose jamais tout à fait immobile : le premier `pointermove`
+ * arrive à un pixel du `pointerdown`, et la pièce se levait déjà. Un clic
+ * pour sélectionner devenait alors un glisser d'un pixel, relâché sur sa
+ * propre case — soit un coup nul, et la sélection perdue.
+ */
+const SEUIL_DEPLACEMENT_PX = 4
 
 type DragState = {
   piece: BoardPiece
@@ -170,6 +175,8 @@ type AnnotationDraft = {
   from: Square
   to: Square | null
   color: AnnotationColor
+  /** Le pointeur qui trace : un second doigt posé pendant le tracé n'y touche pas. */
+  pointerId: number
 }
 
 export const Board2D = memo(function Board2D({
@@ -288,6 +295,8 @@ export const Board2D = memo(function Board2D({
 
   const noeudsDesPieces = useRef(new Map<string, HTMLDivElement>())
   const rectangleSaisie = useRef<DOMRect | null>(null)
+  /** Où le pointeur s'est posé sur la pièce, pour mesurer le seuil de glisser. */
+  const departSaisie = useRef<{ x: number; y: number } | null>(null)
   const enregistrerPiece = useCallback((id: string, noeud: HTMLDivElement | null) => {
     if (noeud) noeudsDesPieces.current.set(id, noeud)
     else noeudsDesPieces.current.delete(id)
@@ -323,11 +332,31 @@ export const Board2D = memo(function Board2D({
   const [draft, setDraft] = useState<AnnotationDraft | null>(null)
 
   // Le plateau change de position : on nettoie sélection et annotations.
+  // Le sélecteur de promotion se ferme aussi — sauf pour un pré-coup, qui
+  // attend justement que la position change pour partir.
   useEffect(() => {
     setSelected(null)
     setUserArrows([])
     setUserCircles([])
+    setPromotion((current) => (current?.precoup ? current : null))
   }, [fen])
+
+  /*
+    On ne peut plus jouer : rien ne doit rester en suspens.
+
+    Le trait passe, la partie se termine, on remonte dans l'historique — et
+    une pièce restait sélectionnée, un sélecteur de promotion ouvert, ou une
+    pièce collée au doigt, sur un plateau qui n'acceptait plus rien. Le geste
+    suivant partait alors d'un état que plus rien ne justifiait.
+  */
+  useEffect(() => {
+    setSelected(null)
+    setPromotion(null)
+    setDrag(null)
+    setHoverSquare(null)
+    rectangleSaisie.current = null
+    annulerAppuiLong()
+  }, [playable, annulerAppuiLong])
 
   // Le réglage de l'utilisateur reste la référence ; une durée imposée ne peut
   // que l'allonger. Quelqu'un qui a choisi « instantané » l'a voulu.
@@ -375,6 +404,41 @@ export const Board2D = memo(function Board2D({
     [onMove, pieces],
   )
 
+  /**
+   * Le plateau dit non.
+   *
+   * Un coup illégal ne faisait rien du tout : la pièce revenait à sa place
+   * sans un mot, et l'on ne savait pas si le geste avait été compris. Un son,
+   * une vibration au doigt, et une brève secousse de la pièce en cause.
+   *
+   * La secousse passe par l'API d'animation du nœud, et non par une classe :
+   * la pièce est déjà positionnée par `transform`, et l'animation s'y ajoute
+   * (`composite: 'add'`) sans l'écraser. Elle est retenue sous
+   * `prefers-reduced-motion` — la règle globale réduit toute animation CSS à
+   * rien, mais celle-ci n'est pas du CSS, et il faut le vérifier soi-même.
+   */
+  const signalerRefus = useCallback(
+    (from: Square) => {
+      playSound('error')
+      if (typeof navigator !== 'undefined') navigator.vibrate?.(30)
+
+      const piece = pieces.find((p) => p.square === from)
+      const noeud = piece ? noeudsDesPieces.current.get(piece.id) : undefined
+      if (!noeud || typeof noeud.animate !== 'function') return
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      noeud.animate(
+        [
+          { transform: 'translateX(0)' },
+          { transform: 'translateX(-6%)' },
+          { transform: 'translateX(6%)' },
+          { transform: 'translateX(0)' },
+        ],
+        { duration: 180, easing: 'ease-in-out', composite: 'add' },
+      )
+    },
+    [pieces],
+  )
+
   const attemptMove = useCallback(
     (from: Square, to: Square) => {
       if (from === to) return
@@ -412,15 +476,20 @@ export const Board2D = memo(function Board2D({
         return
       }
 
+      signalerRefus(from)
       setSelected(null)
     },
-    [targetsFor, commitMove, pieces, prefs.premove, onPremove, canMove],
+    [targetsFor, commitMove, pieces, prefs.premove, onPremove, canMove, signalerRefus],
   )
 
   // ── Glisser-déposer ───────────────────────────────────────────────────────
 
   const handlePointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
+      // Un second doigt pendant un geste n'en commence pas un autre : il
+      // volait la pièce au premier, qui se retrouvait à lâcher dans le vide.
+      if (drag || draft) return
+
       // Clic droit ou clic secondaire : annotation.
       if (event.button === 2) {
         if (!allowAnnotations) return
@@ -435,7 +504,7 @@ export const Board2D = memo(function Board2D({
                 ? 'red'
                 : 'green'
           rectangleSaisie.current = boardRef.current?.getBoundingClientRect() ?? null
-          setDraft({ from: square, to: null, color })
+          setDraft({ from: square, to: null, color, pointerId: event.pointerId })
           boardRef.current?.setPointerCapture(event.pointerId)
         }
         return
@@ -490,6 +559,7 @@ export const Board2D = memo(function Board2D({
 
       setSelected(square)
       rectangleSaisie.current = boardRef.current?.getBoundingClientRect() ?? null
+      departSaisie.current = { x: event.clientX, y: event.clientY }
       // La variable est posée avant le rendu qui la lira : la pièce ne passe
       // jamais par une image sans position.
       poserSousLeDoigt(piece.id, point.x * 100, point.y * 100)
@@ -512,6 +582,8 @@ export const Board2D = memo(function Board2D({
       }
     },
     [
+      drag,
+      draft,
       allowAnnotations,
       relativePoint,
       orientation,
@@ -540,6 +612,7 @@ export const Board2D = memo(function Board2D({
       // ignore une valeur identique, et c'est ce qui évite un rendu par
       // millimètre parcouru.
       if (draft) {
+        if (draft.pointerId !== event.pointerId) return
         const square = squareAt(point.x, point.y, orientation)
         setDraft((current) =>
           current && current.to !== square ? { ...current, to: square } : current,
@@ -559,8 +632,20 @@ export const Board2D = memo(function Board2D({
         annulerAppuiLong()
       }
 
+      // Tant que le pointeur n'a pas franchi le seuil, la pièce reste posée :
+      // c'est encore un clic, pas un glisser. Voir `SEUIL_DEPLACEMENT_PX`.
+      if (!drag.moved) {
+        const origine = departSaisie.current
+        if (
+          origine &&
+          Math.hypot(event.clientX - origine.x, event.clientY - origine.y) <= SEUIL_DEPLACEMENT_PX
+        ) {
+          return
+        }
+        setDrag({ ...drag, moved: true })
+      }
+
       poserSousLeDoigt(drag.piece.id, point.x * 100, point.y * 100)
-      if (!drag.moved) setDrag({ ...drag, moved: true })
       setHoverSquare(squareAt(point.x, point.y, orientation))
     },
     [relativePoint, draft, drag, orientation, poserSousLeDoigt, annulerAppuiLong],
@@ -574,6 +659,7 @@ export const Board2D = memo(function Board2D({
 
       // Fin d'une annotation.
       if (draft) {
+        if (draft.pointerId !== event.pointerId) return
         if (square && square !== draft.from) {
           const arrow: Arrow = { from: draft.from, to: square, color: draft.color }
           setUserArrows((current) => toggleArrow(current, arrow))
@@ -649,7 +735,12 @@ export const Board2D = memo(function Board2D({
           return
         }
         case 'Escape':
+          // Échap défait tout ce qui est en suspens, pré-coup compris : c'est
+          // la touche qu'on presse pour « laisser tomber », et un pré-coup
+          // qui survivait à Échap partait au tour suivant contre l'intention.
           setSelected(null)
+          setPromotion(null)
+          if (premove) onPremoveCancel?.()
           return
         default:
           return
@@ -664,7 +755,7 @@ export const Board2D = memo(function Board2D({
         setFocusVisible(true)
       }
     },
-    [focusSquare, orientation, pieces, selected, attemptMove, canMove],
+    [focusSquare, orientation, pieces, selected, attemptMove, canMove, premove, onPremoveCancel],
   )
 
   // ── Rendu ─────────────────────────────────────────────────────────────────
@@ -704,9 +795,22 @@ export const Board2D = memo(function Board2D({
     if (!prefs.moveSafetyHints || !selected || selectedTargets.length === 0) {
       return new Map()
     }
+    // La position vient de changer sous la sélection — l'adversaire a joué —
+    // et l'effet qui la vide n'a pas encore tourné : évaluer les coups d'une
+    // pièce qui n'est peut-être plus là, ou plus à nous, serait du calcul
+    // pour rien.
+    const piece = pieces.find((p) => p.square === selected)
+    if (!piece || !canMove(piece)) return new Map()
     return evaluateMoveSafety(fen, selected, selectedTargets)
-  }, [prefs.moveSafetyHints, selected, selectedTargets, fen])
+  }, [prefs.moveSafetyHints, selected, selectedTargets, fen, pieces, canMove])
   const occupied = useMemo(() => new Set(pieces.map((p) => p.square)), [pieces])
+  /** La pièce de chaque case, pour nommer les cases aux lecteurs d'écran. */
+  const parCase = useMemo(() => new Map(pieces.map((p) => [p.square, p])), [pieces])
+  /** Les rangées du damier, dans l'ordre d'affichage : huit cases chacune. */
+  const rangees = useMemo(
+    () => Array.from({ length: 8 }, (_, index) => squares.slice(index * 8, index * 8 + 8)),
+    [squares],
+  )
   const allArrows = useMemo(() => [...arrows, ...userArrows], [arrows, userArrows])
   const allCircles = useMemo(() => [...circles, ...userCircles], [circles, userCircles])
   const highlightSet = useMemo(() => new Set(highlights), [highlights])
@@ -734,7 +838,15 @@ export const Board2D = memo(function Board2D({
         role="grid"
         aria-label="Échiquier"
         tabIndex={0}
-        className="absolute inset-0 touch-none outline-none"
+        // `touch-none` seulement quand on peut jouer : c'est ce qui permet de
+        // glisser une pièce sans que la page défile. Sur un plateau en lecture
+        // seule — une leçon, une analyse —, il empêchait de faire défiler la
+        // page en posant le doigt dessus, et un échiquier plein écran sur
+        // téléphone devenait une zone morte.
+        className={clsx(
+          'absolute inset-0 outline-none',
+          playable !== null ? 'touch-none' : 'touch-pan-y',
+        )}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -745,14 +857,23 @@ export const Board2D = memo(function Board2D({
         onBlur={() => setFocusVisible(false)}
       >
         {/* ── Cases ─────────────────────────────────────────────────────── */}
+        {/* Les rangées existent pour l'arbre d'accessibilité : une grille
+            ARIA sans `row` est une grille invalide. `contents` les efface de
+            la mise en page, et les cases restent posées sur la grille CSS. */}
         <div className="absolute inset-0 grid grid-cols-8 grid-rows-8">
-          {squares.map((square) => (
-            <Case
-              key={square}
-              square={square}
-              skin={skin}
-              spotlit={spotlightSet ? spotlightSet.has(square) : true}
-            />
+          {rangees.map((rangee) => (
+            <div key={rangee[0]} role="row" className="contents">
+              {rangee.map((square) => (
+                <Case
+                  key={square}
+                  square={square}
+                  libelle={libelleDeCase(square, parCase.get(square))}
+                  selectionnee={selected === square}
+                  skin={skin}
+                  spotlit={spotlightSet ? spotlightSet.has(square) : true}
+                />
+              ))}
+            </div>
           ))}
         </div>
 
@@ -902,7 +1023,6 @@ export const Board2D = memo(function Board2D({
                   key={`t-${target}`}
                   className="absolute grid place-items-center"
                   style={percentBox(target, orientation)}
-                  title={verdict ? describeSafety(verdict) : undefined}
                 >
                   {isCapture ? (
                     <span
@@ -976,13 +1096,21 @@ export const Board2D = memo(function Board2D({
 //  Sous-composants
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Une case du damier. Mémoïsée : elle ne change qu'avec l'habillage ou le projecteur. */
+/**
+ * Une case du damier. Mémoïsée : elle ne change qu'avec l'habillage, le
+ * projecteur, la pièce qu'elle porte ou la sélection.
+ */
 const Case = memo(function Case({
   square,
+  libelle,
+  selectionnee,
   skin,
   spotlit,
 }: {
   square: Square
+  /** Ce qu'annonce un lecteur d'écran : la case et ce qu'il y a dessus. */
+  libelle: string
+  selectionnee: boolean
   skin: BoardSkin
   spotlit: boolean
 }) {
@@ -990,7 +1118,8 @@ const Case = memo(function Case({
   return (
     <div
       role="gridcell"
-      aria-label={square}
+      aria-label={libelle}
+      aria-selected={selectionnee}
       className="relative"
       style={{
         background: light ? skin.light : skin.dark,
@@ -1171,7 +1300,6 @@ function VerdictDeCase({
         <span
           className="animate-piece-drop absolute -right-[14%] -top-[14%] grid h-[48%] w-[48%] place-items-center rounded-full text-[min(2.6vw,0.95rem)] font-bold leading-none shadow-[var(--shadow-md)]"
           style={{ background: '#fff', color: teinte, boxShadow: `0 0 0 2px ${teinte}` }}
-          title={`${style.label.fr} — ${style.description.fr}`}
         >
           {style.glyph}
         </span>
@@ -1399,6 +1527,21 @@ const AnnotationLayer = memo(function AnnotationLayer({
 function shift(file: number, rank: number): Square | null {
   if (file < 0 || file > 7 || rank < 0 || rank > 7) return null
   return `${String.fromCharCode(97 + file)}${rank + 1}` as Square
+}
+
+/**
+ * « e4, pion blanc » ou « e4, vide » : le nom de la case ne suffisait pas.
+ *
+ * Un lecteur d'écran lisait soixante-quatre coordonnées et rien d'autre : on
+ * ne pouvait pas savoir ce qu'il y avait dessus sans regarder. L'adjectif
+ * s'accorde — « tour blanche », « pion blanc » — grâce à l'article du cœur.
+ */
+function libelleDeCase(square: Square, piece: BoardPiece | undefined): string {
+  if (!piece) return `${square}, vide`
+  const type = piece.type as PieceSymbol
+  const feminin = PIECE_ARTICLE[type] === 'la'
+  const couleur = piece.color === 'w' ? (feminin ? 'blanche' : 'blanc') : feminin ? 'noire' : 'noir'
+  return `${square}, ${PIECE_NAMES[type].fr} ${couleur}`
 }
 
 /** Retracer la même flèche l'efface — c'est le comportement attendu. */

@@ -47,6 +47,7 @@ import {
   flaggedColor,
   formatScore,
   normalizeTimeControlId,
+  resultatAuDrapeau,
   sanToSpeech,
   remainingAt,
   stopClock,
@@ -62,7 +63,7 @@ import { PhysicalBoardPanel } from '@/components/board/PhysicalBoardPanel.tsx'
 import { EvalBar } from '@/components/game/EvalBar.tsx'
 import { MoveList } from '@/components/game/MoveList.tsx'
 import { ApprofondirCoup } from '@/components/ia/ApprofondirCoup.tsx'
-import { Menu } from '@/components/ui/Menu.tsx'
+import { Menu, MenuItem } from '@/components/ui/Menu.tsx'
 import { Defilement } from '@/components/ui/Defilement.tsx'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import { useMission } from '@/lib/daily/useMission.ts'
@@ -1597,14 +1598,24 @@ function GameScreen({
       // retard, et un navigateur peut réveiller un minuteur un cheveu trop tôt.
       if (!flagged) return
       setClock((current) => stopClock(current, now))
-      setOutcome({
-        status: 'timeout',
-        result: flagged === 'w' ? '0-1' : '1-0',
-      })
-      playResultSound(flagged === playerColor ? 'loss' : 'win')
+      // Article 6.9 : celui dont le drapeau tombe perd, sauf si l'adversaire
+      // ne pouvait plus mater — c'est alors nulle. Le cœur tranche, comme
+      // pour le serveur et la partie locale.
+      const result = resultatAuDrapeau(game.chess, flagged)
+      setOutcome({ status: 'timeout', result })
+      const nulle = result === '1/2-1/2'
+      playResultSound(nulle ? 'draw' : flagged === playerColor ? 'loss' : 'win')
       // Gagner au temps compte comme une victoire : c'est une partie gagnée.
       // Sauf depuis une position composée — même raison que ci-dessus.
-      if (!startFen) recordBotGame(level, flagged !== playerColor)
+      if (!startFen) recordBotGame(level, !nulle && flagged !== playerColor)
+      // Une partie jouée jusqu'à la chute du drapeau est une partie menée au
+      // bout, comme un mat : elle compte pour la quête du jour. L'abandon,
+      // lui, ne compte pas — c'est justement une partie qu'on n'a pas finie.
+      marquer('partie')
+      if (!nulle && flagged !== playerColor) marquer('victoire')
+      // La partie est finie : sans cet oubli, l'écran de départ proposait de
+      // la reprendre, pendule à zéro.
+      oublierPartieEnCours()
     }
 
     // `+50` : on se réveille juste après l'échéance, jamais juste avant, sans
@@ -1612,15 +1623,17 @@ function GameScreen({
     // sans que plus rien ne la surveille.
     const minuteur = setTimeout(tomber, Math.max(0, echeance) + 50)
     return () => clearTimeout(minuteur)
-  }, [clock, timed, state.isGameOver, outcome, playerColor, level, startFen])
+  }, [clock, timed, state.isGameOver, outcome, playerColor, level, startFen, game.chess, marquer])
 
   // ── Actions ─────────────────────────────────────────────────────────────
   const handleMove = useCallback(
     (from: Square, to: Square, promotion?: PieceSymbol) => {
-      if (state.turn !== playerColor || !state.isLive) return
+      // `outcome` couvre ce que le moteur de jeu ignore : l'abandon et la
+      // chute du drapeau. Sans lui, on pouvait continuer à jouer après.
+      if (state.turn !== playerColor || !state.isLive || outcome !== null) return
       play(from, to, promotion)
     },
-    [play, state.turn, state.isLive, playerColor],
+    [play, state.turn, state.isLive, playerColor, outcome],
   )
 
   /*
@@ -1652,7 +1665,7 @@ function GameScreen({
   const physicalBoard = usePhysicalBoard({
     chess: game.chess,
     fen: state.currentFen,
-    isLive: state.isLive && !state.isGameOver && state.turn === playerColor,
+    isLive: state.isLive && !state.isGameOver && outcome === null && state.turn === playerColor,
     play: handleMove,
     lastMove: state.lastMove,
   })
@@ -1673,13 +1686,22 @@ function GameScreen({
     }
   }, [state.currentFen, state.turn, playerColor])
 
+  // La fonction seule, et non `botPlayer` entier : l'objet est recréé à chaque
+  // rendu, la fonction est stable.
+  const { oublier: oublierPositionDuBot } = botPlayer
   const handleUndo = useCallback(() => {
+    // Une partie finie ne se rouvre pas : le bouton est masqué, mais un
+    // raccourci ou un rendu en retard ne doit pas ressusciter un abandon.
+    if (state.isGameOver || outcome !== null) return
     // On annule deux demi-coups : le sien et la réponse de l'ordinateur.
     const count = state.moves.length >= 2 ? 2 : 1
     undo(count)
-    setOutcome(null)
+    // La position revient à une que l'ordinateur croit déjà traitée : on la
+    // lui fait oublier, sinon il ne rejouait plus jamais après une annulation
+    // et l'écran restait sur « réfléchit… ».
+    oublierPositionDuBot()
     playSound('confirm')
-  }, [undo, state.moves.length])
+  }, [undo, state.moves.length, state.isGameOver, outcome, oublierPositionDuBot])
 
   const handleResign = useCallback(() => {
     setClock((current) => stopClock(current, Date.now()))
@@ -1691,6 +1713,9 @@ function GameScreen({
     // qu'on venait de fabriquer.
     if (!startFen) recordBotGame(level, false)
     playResultSound('loss')
+    // Une partie abandonnée n'est plus à reprendre : sans cet oubli, l'écran
+    // de départ la proposait comme si on l'avait quittée en cours.
+    oublierPartieEnCours()
   }, [playerColor, level, startFen])
 
   /**
@@ -2105,7 +2130,9 @@ function GameScreen({
           <span className="max-sm:hidden">Indice</span>
         </Button>
       )}
-      {!classee && (
+      {/* Masqué une fois la partie finie, comme sur la barre du pouce : on
+          n'annule pas un abandon ni une chute de drapeau. */}
+      {!classee && !gameOver && (
         <Button
           size="sm"
           variant="secondary"
@@ -2130,29 +2157,28 @@ function GameScreen({
         label="Options de la partie"
         declencheur={() => <MoreHorizontal size={16} aria-hidden />}
       >
-        <button
-          type="button"
+        <MenuItem
           onClick={onNewGame}
-          className="flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-left text-sm transition-colors hover:bg-surface-hover"
+          icone={<RefreshCw size={15} className="shrink-0 text-accent" aria-hidden />}
         >
-          <RefreshCw size={15} className="shrink-0 text-accent" aria-hidden />
           Nouvelle partie
-        </button>
-        <button
-          type="button"
+        </MenuItem>
+        <MenuItem
           onClick={handleResign}
           disabled={gameOver}
-          className="flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-left text-sm text-[var(--q-blunder)] transition-colors hover:bg-surface-hover disabled:opacity-40"
+          danger
+          icone={<Flag size={15} className="shrink-0" aria-hidden />}
         >
-          <Flag size={15} className="shrink-0" aria-hidden />
           Abandonner
-        </button>
+        </MenuItem>
 
         {/* Absent en partie classée, comme dans la barre du pouce : le mode y
             est neutralisé de toute façon, et un interrupteur qui ne commute
             rien se lit comme une panne. */}
         {!classee && (
-          <div className="mt-1 border-t border-line/60 pt-1">
+          <div data-garde-ouvert className="mt-1 border-t border-line/60 pt-1">
+            {/* `data-garde-ouvert` : commuter le mode commenté ne doit pas refermer
+    le menu, sinon on ne voit pas ce qu’on vient de changer. */}
             <CommentaryToggle
               active={commentaryMode}
               onChange={(value) => {
@@ -2306,7 +2332,9 @@ function GameScreen({
                 <button
                   type="button"
                   onClick={() => goTo(state.moves.length - 1)}
-                  className="shrink-0 rounded-[var(--radius-sm)] bg-accent px-2.5 py-1 text-xs font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
+                  // Au doigt, la cible fait 44 px : c'est le bouton qu'on
+                  // cherche quand l'ordinateur attend.
+                  className="shrink-0 rounded-[var(--radius-sm)] bg-accent px-2.5 py-1 text-xs font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110 pointer-coarse:min-h-11"
                 >
                   Retour à la partie
                 </button>
@@ -2418,23 +2446,22 @@ function GameScreen({
                   </span>
                 )}
               >
-                <button
-                  type="button"
+                <MenuItem
                   onClick={onNewGame}
-                  className="flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-left text-sm transition-colors hover:bg-surface-hover"
+                  icone={<RefreshCw size={15} className="shrink-0 text-accent" aria-hidden />}
                 >
-                  <RefreshCw size={15} className="shrink-0 text-accent" aria-hidden />
                   Nouvelle partie
-                </button>
-                <Link
+                </MenuItem>
+                <MenuItem
                   href="/jouer"
-                  className="flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-left text-sm transition-colors hover:bg-surface-hover"
+                  icone={<LayoutGrid size={15} className="shrink-0 text-accent" aria-hidden />}
                 >
-                  <LayoutGrid size={15} className="shrink-0 text-accent" aria-hidden />
                   Retour au menu
-                </Link>
+                </MenuItem>
                 {!classee && (
-                  <div className="mt-1 border-t border-line/60 pt-1">
+                  <div data-garde-ouvert className="mt-1 border-t border-line/60 pt-1">
+                    {/* `data-garde-ouvert` : commuter le mode commenté ne doit pas refermer
+    le menu, sinon on ne voit pas ce qu’on vient de changer. */}
                     <CommentaryToggle
                       active={commentaryMode}
                       onChange={(value) => {

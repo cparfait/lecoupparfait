@@ -13,7 +13,7 @@
  * appelle `onMove`. C'est la page qui reste maîtresse du déroulement.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { botLevel, botThinkDelayMs, pickBotMove, uciOptionsFor } from '@coupparfait/core'
 import type { BotLevel, BotPersonalityId } from '@coupparfait/core'
@@ -66,6 +66,14 @@ export interface BotPlayerState {
   error: string | null
   /** Perte du dernier coup choisi, en centipions : permet d'afficher son « style ». */
   lastCost: number | null
+  /**
+   * Oublie la position déjà traitée, pour que l'ordinateur la rejoue.
+   *
+   * À appeler après une annulation de coup : la position revient à celle que
+   * le bot avait déjà traitée, et sans cet oubli il la croyait jouée et ne
+   * répondait plus jamais — la partie restait figée sur « réfléchit… ».
+   */
+  oublier: () => void
 }
 
 export function useBotPlayer(options: UseBotPlayerOptions): BotPlayerState {
@@ -209,6 +217,13 @@ export function useBotPlayer(options: UseBotPlayerOptions): BotPlayerState {
       controller.abort()
       if (timerRef.current) clearTimeout(timerRef.current)
 
+      // Une réflexion interrompue ne « réfléchit » plus : sans cette remise à
+      // zéro, l'étiquette « réfléchit… » restait affichée après une
+      // annulation ou une fin de partie survenue pendant le calcul, puisque
+      // la branche qui l'éteignait — le minuteur — venait d'être annulée.
+      setThinking(false)
+      setLoading(false)
+
       // Une réflexion abandonnée doit pouvoir reprendre.
       //
       // `handledFen` empêche de rejouer deux fois la même position. Mais quand
@@ -230,7 +245,11 @@ export function useBotPlayer(options: UseBotPlayerOptions): BotPlayerState {
     handledFen.current = null
   }, [botColor, level])
 
-  return { bot, thinking, loading, error, lastCost }
+  const oublier = useCallback(() => {
+    handledFen.current = null
+  }, [])
+
+  return { bot, thinking, loading, error, lastCost, oublier }
 }
 
 /**

@@ -12,15 +12,15 @@
  *  - **Affichage optimiste.** Le coup s'affiche immédiatement, avant l'accusé de
  *    réception. Le serveur corrige si nécessaire — ce qui n'arrive presque
  *    jamais puisque le navigateur vérifie déjà la légalité de son côté.
- *  - **Interpolation des pendules.** Le serveur envoie des temps de référence ;
- *    le navigateur les décompte localement entre deux messages, puis se
- *    resynchronise à chaque mise à jour. Sans cela, l'horloge sauterait.
+ *  - **Pendules en horodatages.** Le serveur envoie des temps de référence ;
+ *    on les date à la réception, et c'est la pastille elle-même qui décompte
+ *    jusqu'au message suivant. Sans cela, l'horloge sauterait.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
 import type { Color, PieceSymbol, Square } from 'chess.js'
-import type { GameResult, GameStatus, TimeControl } from '@coupparfait/core'
+import type { ClockState, GameResult, GameStatus, TimeControl } from '@coupparfait/core'
 
 export interface LivePlayer {
   name: string
@@ -65,22 +65,59 @@ export interface UseLiveGameOptions {
   rated?: boolean
   /** Jeton de session, transmis par le serveur Next au montage. */
   token?: string | null
+  /**
+   * Redemande un jeton frais avant chaque `join`.
+   *
+   * Le jeton remis au navigateur ne vit que quinze minutes. Une reconnexion
+   * après ce délai — réseau coupé, onglet mis en veille — repartirait avec
+   * le jeton du montage, périmé, et le joueur reviendrait en invité dans sa
+   * propre partie. On le renouvelle donc à chaque présentation ; en cas
+   * d'échec, on se présente avec celui qu'on a.
+   */
+  obtenirJeton?: () => Promise<string | null>
+  /**
+   * Faux tant que la page n'a pas résolu ce qu'elle veut envoyer au `join`.
+   *
+   * Le jeton et le pseudo d'invité arrivent après le montage — un appel
+   * réseau, une lecture du stockage. Se connecter avant, c'était envoyer un
+   * premier `join` anonyme, puis un second une fois le jeton connu ; or le
+   * souhait de couleur est consommé au premier envoi, et c'est donc le
+   * `join` anonyme qui le dépensait. La page attend d'être prête.
+   */
+  enabled?: boolean
 }
 
-export function useLiveGame({ slug, guestName, timeControl, rated, token }: UseLiveGameOptions) {
+export function useLiveGame({
+  slug,
+  guestName,
+  timeControl,
+  rated,
+  token,
+  obtenirJeton,
+  enabled = true,
+}: UseLiveGameOptions) {
   const socketRef = useRef<Socket | null>(null)
+  const obtenirJetonRef = useRef(obtenirJeton)
+  obtenirJetonRef.current = obtenirJeton
   const [connection, setConnection] = useState<ConnectionState>('connecting')
   const [color, setColor] = useState<Color | null>(null)
   const [snapshot, setSnapshot] = useState<GameSnapshot | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [chat, setChat] = useState<ChatMessage[]>([])
 
-  /** Horloge interpolée localement entre deux messages du serveur. */
-  const [clock, setClock] = useState<{ w: number; b: number } | null>(null)
-  const clockRef = useRef<{ w: number; b: number; running: Color | null; at: number } | null>(null)
+  /**
+   * La pendule, figée en horodatages absolus.
+   *
+   * Elle ne change qu'à chaque message du serveur : c'est `PenduleVive` qui
+   * la fait battre, dans la seule pastille qui l'affiche. Avant, ce crochet
+   * tenait un compte à rebours dans son état et le décrémentait toutes les
+   * 100 ms — dix rendus par seconde de toute la page de jeu pour deux nombres.
+   */
+  const [pendule, setPendule] = useState<ClockState | null>(null)
 
   // ── Connexion ───────────────────────────────────────────────────────────
   useEffect(() => {
+    if (!enabled) return
     /*
       L'adresse du serveur de parties.
 
@@ -109,24 +146,36 @@ export function useLiveGame({ slug, guestName, timeControl, rated, token }: UseL
     socket.on('connect', () => {
       setConnection('connected')
       setError(null)
-      socket.emit('join', {
-        slug,
-        name: guestName,
-        token: token ?? undefined,
-        clientId: getClientId(),
-        // Couleur demandée par l'hôte à la création, s'il en a demandé une.
-        //
-        // Elle transite par le stockage de session et **jamais par le lien** :
-        // le lien est fait pour être envoyé, et l'invité qui l'ouvrirait
-        // réclamerait la même couleur que celui qui le lui a envoyé.
-        //
-        // Elle est consommée au premier envoi. Une reconnexion n'en a pas
-        // besoin : le serveur reconnaît un joueur déjà assis et lui rend son
-        // siège, quelle que soit la demande.
-        souhait: souhaitPourCePartie(slug),
-        timeControl,
-        rated,
-      })
+      void (async () => {
+        let jeton = token ?? undefined
+        if (obtenirJetonRef.current) {
+          try {
+            jeton = (await obtenirJetonRef.current()) ?? undefined
+          } catch {
+            // Réseau capricieux : on se présente avec le jeton qu'on a.
+          }
+        }
+        // Le socket a pu être remplacé ou fermé pendant l'attente.
+        if (socketRef.current !== socket || !socket.connected) return
+        socket.emit('join', {
+          slug,
+          name: guestName,
+          token: jeton,
+          clientId: getClientId(),
+          // Couleur demandée par l'hôte à la création, s'il en a demandé une.
+          //
+          // Elle transite par le stockage de session et **jamais par le lien** :
+          // le lien est fait pour être envoyé, et l'invité qui l'ouvrirait
+          // réclamerait la même couleur que celui qui le lui a envoyé.
+          //
+          // Elle est consommée au premier envoi. Une reconnexion n'en a pas
+          // besoin : le serveur reconnaît un joueur déjà assis et lui rend son
+          // siège, quelle que soit la demande.
+          souhait: souhaitPourCePartie(slug),
+          timeControl,
+          rated,
+        })
+      })()
     })
 
     socket.on('connect_error', () => {
@@ -158,13 +207,18 @@ export function useLiveGame({ slug, guestName, timeControl, rated, token }: UseL
     function applySnapshot(next: GameSnapshot): void {
       setSnapshot(next)
       setChat(next.chat ?? [])
-      if (next.clock) {
-        clockRef.current = { ...next.clock, at: Date.now() }
-        setClock({ w: next.clock.w, b: next.clock.b })
-      } else {
-        clockRef.current = null
-        setClock(null)
-      }
+      // Les temps reçus valent à l'instant de réception : on les date ici,
+      // et la pastille décompte depuis cette date jusqu'au message suivant.
+      setPendule(
+        next.clock
+          ? {
+              remaining: { w: next.clock.w, b: next.clock.b },
+              running: next.clock.running,
+              updatedAt: Date.now(),
+              control: next.timeControl,
+            }
+          : null,
+      )
     }
 
     return () => {
@@ -172,22 +226,7 @@ export function useLiveGame({ slug, guestName, timeControl, rated, token }: UseL
       socket.disconnect()
       socketRef.current = null
     }
-  }, [slug, guestName, timeControl, rated, token])
-
-  // ── Interpolation des pendules ──────────────────────────────────────────
-  useEffect(() => {
-    if (!clockRef.current) return
-    const interval = setInterval(() => {
-      const reference = clockRef.current
-      if (!reference?.running) return
-      const elapsed = Date.now() - reference.at
-      setClock({
-        w: reference.running === 'w' ? Math.max(0, reference.w - elapsed) : reference.w,
-        b: reference.running === 'b' ? Math.max(0, reference.b - elapsed) : reference.b,
-      })
-    }, 100)
-    return () => clearInterval(interval)
-  }, [snapshot])
+  }, [slug, guestName, timeControl, rated, token, enabled])
 
   // ── Actions ─────────────────────────────────────────────────────────────
   const move = useCallback((from: Square, to: Square, promotion?: PieceSymbol) => {
@@ -207,7 +246,7 @@ export function useLiveGame({ slug, guestName, timeControl, rated, token }: UseL
     connection,
     color,
     snapshot,
-    clock,
+    pendule,
     chat,
     error,
     dismissError: () => setError(null),

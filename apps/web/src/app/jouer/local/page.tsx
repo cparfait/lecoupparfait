@@ -193,9 +193,14 @@ export default function LocalGamePage() {
   // plateau bascule une seconde plus tard vers un joueur dont ce n'est plus le
   // tour.
   const annulerCoup = useCallback(() => {
+    const dernier = state.moves[state.moves.length - 1]
     annulerRotation()
     undo(1)
-  }, [undo, annulerRotation])
+    // Le trait revient à celui qui avait joué : avec la rotation automatique,
+    // le plateau se remet de son côté. Sans cela, il restait tourné vers
+    // l'adversaire et le coup suivant se jouait à l'envers.
+    if (autoFlip && dernier) setOrientation(dernier.color)
+  }, [undo, annulerRotation, state.moves, autoFlip])
 
   /**
    * Les actions, rendues une seule fois : sous le plateau jusqu'à `lg`, au

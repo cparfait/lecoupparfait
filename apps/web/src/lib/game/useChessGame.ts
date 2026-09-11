@@ -81,13 +81,7 @@ export function useChessGame(options: UseChessGameOptions = {}) {
   const chessRef = useRef<Chess>(null as unknown as Chess)
   if (chessRef.current === null) {
     const board = new Chess(startFen, { skipValidation: true })
-    for (const san of initialMoves) {
-      try {
-        board.move(san)
-      } catch {
-        break
-      }
-    }
+    rejouer(board, initialMoves)
     chessRef.current = board
   }
 
@@ -189,12 +183,18 @@ export function useChessGame(options: UseChessGameOptions = {}) {
   /**
    * Joue un coup. Retourne le coup joué, ou `null` s'il était illégal.
    * Jouer alors qu'on consulte l'historique ramène d'abord à la position réelle.
+   *
+   * Une promotion sans pièce est refusée, pas complétée en dame : le choix de
+   * la pièce revient à celui qui joue, et tous les appelants — échiquiers,
+   * plateau physique, ordinateur — le fournissent. Une dame posée d'office
+   * cachait précisément l'appelant qui l'avait oubliée.
    */
   const play = useCallback(
     (from: Square, to: Square, promotion?: PieceSymbol): PlayedMove | null => {
+      if (estUnePromotion(chess, from, to) && !promotion) return null
       let move: Move
       try {
-        move = chess.move({ from, to, promotion: promotion ?? 'q' })
+        move = chess.move({ from, to, promotion })
       } catch {
         return null
       }
@@ -276,21 +276,23 @@ export function useChessGame(options: UseChessGameOptions = {}) {
     [startFen],
   )
 
-  /** Charge une position ou une partie complète. */
-  const load = useCallback((fen: string, sanMoves: string[] = []): void => {
+  /**
+   * Charge une position ou une partie complète.
+   *
+   * Retourne le nombre de coups effectivement rejoués : s'il est inférieur à
+   * `sanMoves.length`, la liste s'est arrêtée sur un coup illisible, et c'est
+   * à l'appelant de le dire plutôt que d'afficher une partie tronquée comme
+   * si elle était entière.
+   */
+  const load = useCallback((fen: string, sanMoves: string[] = []): number => {
     const board = new Chess(fen, { skipValidation: true })
-    for (const san of sanMoves) {
-      try {
-        board.move(san)
-      } catch {
-        break
-      }
-    }
+    const rejoues = rejouer(board, sanMoves)
     chessRef.current = board
     const history = buildHistory(fen, board.history({ verbose: true }))
     setMoves(history)
     setCursor(history.length - 1)
     forceRender((n) => n + 1)
+    return rejoues
   }, [])
 
   // ── Navigation dans l'historique ──────────────────────────────────────────
@@ -360,6 +362,40 @@ export function toPlayedMove(move: Move): PlayedMove {
 
 function buildHistory(_startFen: string, verbose: Move[]): PlayedMove[] {
   return verbose.map(toPlayedMove)
+}
+
+/**
+ * Vrai si déplacer la pièce de `from` en `to` est une promotion.
+ *
+ * Partagée entre le jeu et le pré-coup : c'est la condition sous laquelle un
+ * coup sans pièce de promotion doit être refusé plutôt que complété en dame.
+ */
+export function estUnePromotion(board: Chess, from: Square, to: Square): boolean {
+  const piece = board.get(from)
+  if (!piece || piece.type !== 'p') return false
+  return to[1] === (piece.color === 'w' ? '8' : '1')
+}
+
+/**
+ * Rejoue une liste de coups SAN sur un échiquier, et rend le nombre rejoué.
+ *
+ * On s'arrête au premier coup illisible — continuer jouerait les suivants sur
+ * une position fausse — mais on ne le fait plus en silence : une sauvegarde
+ * corrompue reprenait au dixième coup d'une partie qui en comptait trente, et
+ * rien ne l'indiquait.
+ */
+function rejouer(board: Chess, sanMoves: string[]): number {
+  for (const [index, san] of sanMoves.entries()) {
+    try {
+      board.move(san)
+    } catch {
+      console.warn(
+        `Coup ${index + 1} illisible (« ${san} ») : la partie est rejouée jusqu'au coup ${index}.`,
+      )
+      return index
+    }
+  }
+  return sanMoves.length
 }
 
 /**

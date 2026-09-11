@@ -73,6 +73,14 @@ function cleDuMessage(message: ChatMessage): string {
   return `${message.at}·${message.from}·${message.text}`
 }
 
+/**
+ * Combien de temps un coup optimiste reste affiché sans réponse du serveur.
+ *
+ * Passé ce délai, la pièce revient : mieux vaut un retour tardif qu'une
+ * position que le serveur n'a jamais confirmée.
+ */
+const DELAI_COUP_EN_ATTENTE_MS = 3000
+
 /** Un paramètre de l'adresse, lu directement du navigateur. `null` côté serveur. */
 function parametreDeLAdresse(nom: string): string | null {
   if (typeof window === 'undefined') return null
@@ -103,8 +111,30 @@ export default function LiveGamePage() {
 
   const [guestName, setGuestName] = useState<string | undefined>()
   const [token, setToken] = useState<string | null>(null)
+  /**
+   * Vrai quand on sait sous quel nom et avec quel jeton se présenter.
+   *
+   * Le socket ne s'ouvre qu'à ce moment-là. Ouvert plus tôt, il envoyait un
+   * premier `join` sans jeton — qui consommait le souhait de couleur de
+   * l'hôte — puis un second, le bon, qui n'en avait plus. On attend que la
+   * réponse soit là, réussie ou non : sans jeton on joue en invité, mais on
+   * ne se présente qu'une fois.
+   */
+  const [pret, setPret] = useState(false)
   const [chatDraft, setChatDraft] = useState('')
   const [chatOpen, setChatOpen] = useState(false)
+
+  /**
+   * Le jeton du temps réel, demandé au serveur Next avec le cookie de session.
+   * Il ne vit que quinze minutes : le crochet de partie le redemande avant
+   * chaque `join`, donc à chaque reconnexion.
+   */
+  const obtenirJeton = useCallback(async (): Promise<string | null> => {
+    const response = await fetch('/api/auth/token', { cache: 'no-store' })
+    if (!response.ok) return null
+    const data = (await response.json()) as { token?: string | null }
+    return data.token ?? null
+  }, [])
 
   // Pseudo d'invité et jeton de session, tous deux côté navigateur.
   useEffect(() => {
@@ -113,11 +143,11 @@ export default function LiveGamePage() {
     } catch {
       // Sans stockage local, on jouera sous le nom « Invité ».
     }
-    void fetch('/api/auth/token')
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => setToken(data?.token ?? null))
+    obtenirJeton()
+      .then((jeton) => setToken(jeton))
       .catch(() => setToken(null))
-  }, [])
+      .finally(() => setPret(true))
+  }, [obtenirJeton])
 
   const game = useLiveGame({
     slug: params.slug,
@@ -125,23 +155,19 @@ export default function LiveGamePage() {
     timeControl: timeControlId,
     rated,
     token,
+    obtenirJeton,
+    enabled: pret,
   })
 
-  const { snapshot, color, clock, connection, chat } = game
+  const { snapshot, color, pendule, connection, chat } = game
 
   // ── Effets sonores ──────────────────────────────────────────────────────
+  // Le son se choisit sur la notation du dernier coup seule : rien ici n'a
+  // besoin de rejouer la partie entière pour ça.
   const lastMoveCount = useRef(0)
   useEffect(() => {
     if (!snapshot) return
     if (snapshot.moves.length > lastMoveCount.current) {
-      const board = new Chess()
-      for (const san of snapshot.moves) {
-        try {
-          board.move(san)
-        } catch {
-          break
-        }
-      }
       const last = snapshot.moves[snapshot.moves.length - 1] ?? ''
       playMoveForSan(last)
     }
@@ -315,24 +341,72 @@ export default function LiveGamePage() {
   // ── Coups légaux ────────────────────────────────────────────────────────
   // Hors de son tour, aucun : le serveur reste maître, mais autant ne pas
   // laisser croire le contraire au plateau.
+  /*
+    ── Le coup optimiste ────────────────────────────────────────────────────
+
+    Sans lui, la pièce faisait l'aller-retour : lâchée sur sa case d'arrivée,
+    elle retournait à son départ le temps que le serveur réponde, puis
+    repartait. Sur une bonne connexion c'est un clignotement ; sur la 4G,
+    c'est un coup qu'on croit refusé.
+
+    On garde donc **un** coup en attente, avec la position qu'il doit donner,
+    calculée ici avec chess.js. L'échiquier affiche cette position tant que
+    le serveur n'a pas parlé ; dès que l'instantané change — le coup accepté,
+    ou n'importe quoi d'autre —, ou qu'une erreur arrive, on l'oublie. Une
+    expiration ferme le tout si le serveur ne répond pas.
+
+    Le serveur reste maître : on n'affiche que ce qu'il va presque sûrement
+    confirmer, et jamais plus d'un coup d'avance.
+  */
+  const [coupEnAttente, setCoupEnAttente] = useState<{
+    from: Square
+    to: Square
+    fenDepart: string
+    fenAttendu: string
+  } | null>(null)
+
+  useEffect(() => {
+    if (!coupEnAttente) return
+    if (snapshot && snapshot.fen !== coupEnAttente.fenDepart) {
+      setCoupEnAttente(null)
+      return
+    }
+    const minuteur = setTimeout(() => setCoupEnAttente(null), DELAI_COUP_EN_ATTENTE_MS)
+    return () => clearTimeout(minuteur)
+  }, [coupEnAttente, snapshot])
+
+  useEffect(() => {
+    if (game.error) setCoupEnAttente(null)
+  }, [game.error])
+
+  /** La position du direct telle que l'échiquier la montre, coup en attente compris. */
+  const fenAffichee = coupEnAttente?.fenAttendu ?? snapshot?.fen
+  const dernierCoupAffiche = coupEnAttente
+    ? { from: coupEnAttente.from, to: coupEnAttente.to }
+    : (snapshot?.lastMove ?? null)
+
+  // Pendant qu'un coup attend sa confirmation, aucun n'est légal : le geste
+  // suivant retombe sur la branche pré-coup de l'échiquier, ce qui est
+  // exactement ce qu'on veut en blitz.
   const legalMoves = useLegalMoves(
     snapshot?.fen,
     Boolean(snapshot) &&
       Boolean(color) &&
       snapshot?.turn === color &&
-      snapshot?.status === 'playing',
+      snapshot?.status === 'playing' &&
+      coupEnAttente === null,
   )
 
   const checkSquare = useMemo(() => {
-    if (!snapshot) return null
+    if (!fenAffichee) return null
     try {
-      const board = new Chess(snapshot.fen, { skipValidation: true })
+      const board = new Chess(fenAffichee, { skipValidation: true })
       if (!board.inCheck()) return null
       return board.findPiece({ type: 'k', color: board.turn() })[0] ?? null
     } catch {
       return null
     }
-  }, [snapshot])
+  }, [fenAffichee])
 
   const playedMoves = useMemo<PlayedMove[]>(() => {
     if (!snapshot) return []
@@ -446,9 +520,20 @@ export default function LiveGamePage() {
 
   const handleMove = useCallback(
     (from: Square, to: Square, promotion?: PieceSymbol) => {
+      if (!snapshot || snapshot.status !== 'playing' || snapshot.turn !== color) return
+      // Un coup illégal ici ne part pas : le serveur le refuserait de toute
+      // façon, et l'échiquier a déjà signalé le refus. Sans cette garde, on
+      // afficherait une position que le serveur ne confirmera jamais.
+      const board = new Chess(snapshot.fen, { skipValidation: true })
+      try {
+        board.move({ from, to, promotion })
+      } catch {
+        return
+      }
+      setCoupEnAttente({ from, to, fenDepart: snapshot.fen, fenAttendu: board.fen() })
       game.move(from, to, promotion)
     },
-    [game],
+    [game, snapshot, color],
   )
 
   /*
@@ -483,7 +568,11 @@ export default function LiveGamePage() {
   const physicalBoard = usePhysicalBoard({
     chess: liveChess,
     fen: liveFen,
-    isLive: color !== null && snapshot?.turn === color && snapshot?.status === 'playing',
+    isLive:
+      color !== null &&
+      snapshot?.turn === color &&
+      snapshot?.status === 'playing' &&
+      coupEnAttente === null,
     play: handleMove,
     lastMove: snapshot?.lastMove ?? null,
   })
@@ -634,7 +723,7 @@ export default function LiveGamePage() {
           name={opponent?.name ?? 'En attente…'}
           rating={opponent?.rating ?? null}
           color={opponentColor}
-          timeMs={clock ? clock[opponentColor] : null}
+          clock={pendule}
           timeControl={timeControl}
           active={snapshot.turn === opponentColor && !over}
           captured={material[opponentColor]}
@@ -657,7 +746,7 @@ export default function LiveGamePage() {
               // elle reprend sa rangée sous le plateau.
 
               emplacementBascule={grandEcran ? emplacementBascule : undefined}
-              fen={revue?.fen ?? snapshot.fen}
+              fen={revue?.fen ?? fenAffichee ?? snapshot.fen}
               orientation={orientation}
               playable={
                 revue === null && color !== null && snapshot.status === 'playing' ? color : null
@@ -667,7 +756,7 @@ export default function LiveGamePage() {
               onPremove={enregistrer}
               onPremoveCancel={annuler}
               premove={precoup}
-              lastMove={revue ? revue.lastMove : snapshot.lastMove}
+              lastMove={revue ? revue.lastMove : dernierCoupAffiche}
               dernierCoupSan={snapshot.moves[snapshot.moves.length - 1] ?? null}
               checkSquare={revue ? revue.checkSquare : checkSquare}
               // Cinq autres pages l'annonçaient, celle-ci non : le mat qu'on
@@ -715,7 +804,9 @@ export default function LiveGamePage() {
               <button
                 type="button"
                 onClick={() => setRevu(null)}
-                className="shrink-0 rounded-[var(--radius-sm)] bg-accent px-2.5 py-1 text-xs font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
+                // Au doigt, la cible fait 44 px : c'est le bouton qu'on
+                // cherche en urgence, la pendule tourne.
+                className="shrink-0 rounded-[var(--radius-sm)] bg-accent px-2.5 py-1 text-xs font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110 pointer-coarse:min-h-11"
               >
                 Revenir au direct
               </button>
@@ -728,7 +819,7 @@ export default function LiveGamePage() {
           name={me?.name ?? 'Toi'}
           rating={me?.rating ?? null}
           color={orientation}
-          timeMs={clock ? clock[orientation] : null}
+          clock={pendule}
           timeControl={timeControl}
           active={snapshot.turn === orientation && !over}
           // L'état du tour, dans le bandeau : c'est lui qu'on regarde pour
@@ -891,8 +982,10 @@ export default function LiveGamePage() {
               // 4,5 % d'opacité, fait pour laisser deviner la page qu'il
               // recouvre. Posé sur un échiquier, il laissait passer les pièces
               // au travers des messages. Une surface qui recouvre est opaque.
+              // Le bas de la surcouche respecte l'encoche du téléphone : sans
+              // cela, la saisie se glissait sous la barre du système.
               tchatEnSurcouche
-                ? 'popover animate-slide-up fixed inset-x-3 bottom-3 z-[81] h-[60dvh] shadow-[var(--shadow-lg)]'
+                ? 'popover animate-slide-up fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-[81] h-[60dvh] shadow-[var(--shadow-lg)]'
                 : // Dans la colonne, le tchat prend maintenant la place que la
                   // liste des coups ne réclame plus — 224 px restent son
                   // plancher, pas son plafond.
@@ -910,7 +1003,7 @@ export default function LiveGamePage() {
                 <button
                   type="button"
                   onClick={() => setChatOpen(false)}
-                  className="rounded p-1 text-faint transition-colors hover:text-ink"
+                  className="flex items-center justify-center rounded p-1 text-faint transition-colors hover:text-ink pointer-coarse:min-h-11 pointer-coarse:min-w-11"
                   aria-label="Fermer le tchat"
                 >
                   <X size={16} aria-hidden />
@@ -954,7 +1047,13 @@ export default function LiveGamePage() {
                 aria-label="Message de tchat"
                 className="min-w-0 flex-1 rounded-[var(--radius-sm)] border border-line bg-surface px-2.5 py-1.5 text-[14px] placeholder:text-faint focus:border-accent focus:outline-none"
               />
-              <Button size="sm" type="submit" variant="secondary" aria-label="Envoyer">
+              <Button
+                size="sm"
+                type="submit"
+                variant="secondary"
+                aria-label="Envoyer"
+                className="pointer-coarse:min-h-11 pointer-coarse:min-w-11"
+              >
                 <Send size={13} aria-hidden />
               </Button>
             </form>
