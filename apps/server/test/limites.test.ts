@@ -1,0 +1,59 @@
+/**
+ * Le seau à jetons des sockets.
+ *
+ * Ce qu'on veut garantir n'est pas un chiffre mais une forme : la rafale
+ * passe, le débit soutenu ne passe pas, et le seau se remplit avec le temps —
+ * pas d'un coup à la fenêtre suivante.
+ */
+
+import { strict as assert } from 'node:assert'
+import { test } from 'node:test'
+import { creerSeau } from '../src/limites.ts'
+
+/** Une horloge qu'on avance à la main. */
+function horloge(depart = 1_000_000) {
+  let instant = depart
+  return {
+    now: () => instant,
+    avancer(ms: number) {
+      instant += ms
+    },
+  }
+}
+
+test('la rafale passe jusqu’à la capacité, puis plus rien', () => {
+  const h = horloge()
+  const seau = creerSeau(5, 60_000, h.now)
+  for (let i = 0; i < 5; i++) assert.equal(seau.prendre(), true, `jeton ${i + 1}`)
+  assert.equal(seau.prendre(), false, 'le sixième est refusé')
+  assert.equal(seau.prendre(), false, 'et insister ne change rien')
+})
+
+test('le seau se remplit au rythme de la période, jeton par jeton', () => {
+  const h = horloge()
+  // Cinq par minute : un jeton toutes les douze secondes.
+  const seau = creerSeau(5, 60_000, h.now)
+  for (let i = 0; i < 5; i++) seau.prendre()
+
+  h.avancer(11_000)
+  assert.equal(seau.prendre(), false, 'à 11 s, rien n’est revenu')
+  h.avancer(1_000)
+  assert.equal(seau.prendre(), true, 'à 12 s, un jeton est revenu')
+  assert.equal(seau.prendre(), false, 'un seul')
+})
+
+test('le seau ne déborde pas : une longue pause ne donne pas de crédit', () => {
+  const h = horloge()
+  const seau = creerSeau(3, 10_000, h.now)
+  h.avancer(3_600_000)
+  for (let i = 0; i < 3; i++) assert.equal(seau.prendre(), true)
+  assert.equal(seau.prendre(), false, 'une heure de silence ne vaut pas plus que la capacité')
+})
+
+test('une horloge qui recule ne vide pas le seau', () => {
+  const h = horloge()
+  const seau = creerSeau(2, 10_000, h.now)
+  assert.equal(seau.prendre(), true)
+  h.avancer(-5_000)
+  assert.equal(seau.prendre(), true, 'le jeton restant est toujours là')
+})

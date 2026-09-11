@@ -93,3 +93,44 @@ export function adresseDe(request: IncomingMessage): string {
 
   return request.socket.remoteAddress ?? 'inconnu'
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Seau à jetons, pour les sockets
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface Seau {
+  /** Prend un jeton. `false` si le seau est vide : l'action est à ignorer. */
+  prendre(): boolean
+}
+
+/**
+ * Un seau à jetons : `capacite` actions d'un coup, puis au rythme de
+ * `capacite` par `periodeMs`.
+ *
+ * Le limiteur à fenêtre fixe ci-dessus compte **par adresse** et sert aux
+ * routes HTTP. Une connexion Socket.IO, elle, est déjà identifiée — c'est un
+ * seau par socket et par événement, tenu dans la fermeture de la connexion,
+ * donc libéré avec elle. Rien à purger.
+ *
+ * Un seau plutôt qu'une fenêtre parce qu'un joueur en zeitnot joue dix coups
+ * en trois secondes, ce qui est légitime, et pas trois cents à la minute, ce
+ * qui ne l'est pas : le seau tolère la rafale et refuse le débit.
+ *
+ * `now` s'injecte pour les tests.
+ */
+export function creerSeau(capacite: number, periodeMs: number, now: () => number = Date.now): Seau {
+  let jetons = capacite
+  let dernier = now()
+  const parMs = capacite / periodeMs
+
+  return {
+    prendre() {
+      const maintenant = now()
+      jetons = Math.min(capacite, jetons + Math.max(0, maintenant - dernier) * parMs)
+      dernier = maintenant
+      if (jetons < 1) return false
+      jetons -= 1
+      return true
+    },
+  }
+}

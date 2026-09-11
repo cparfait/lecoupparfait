@@ -26,7 +26,13 @@ import {
   startDueTournaments,
 } from '@coupparfait/db/tournaments'
 import type { Square, PieceSymbol } from 'chess.js'
-import { parseTimeControl, type TimeControl } from '@coupparfait/core'
+import {
+  categorieDeClassement,
+  normaliserCadence,
+  parseTimeControl,
+  speedCategory,
+  type TimeControl,
+} from '@coupparfait/core'
 import { FileSaturee, getPool, disposePool } from './engine/pool.ts'
 import { analyseGamePositions, analysePosition } from './engine/analysis.ts'
 import { isTablebaseEnabled } from './engine/tablebase.ts'
@@ -36,13 +42,14 @@ import { persistFinishedGame } from './persistence.ts'
 import { pruneSessions } from '@coupparfait/db/auth'
 import { pruneEvaluations } from '@coupparfait/db/menage'
 import { verifySessionToken } from './auth.ts'
-import { adresseDe, creerLimiteur } from './limites.ts'
+import { adresseDe, creerLimiteur, creerSeau } from './limites.ts'
 import { rappelDuDefi, rappelsPossibles } from './rappels.ts'
 import {
   enregistrerSalon,
   oublierSalon,
   purgerSalonsPerimes,
   salonsAReprendre,
+  slugDejaServi,
 } from '@coupparfait/db/live'
 
 const PORT = Number(process.env.SERVER_PORT ?? 3001)
@@ -70,6 +77,12 @@ const rythmes = {
   '/analyse/partie': creerLimiteur(60_000, 3),
   '/voix': creerLimiteur(60_000, 60),
   '/maia': creerLimiteur(60_000, 60),
+  // Les routes des salons ne coûtent presque rien, mais elles parcourent tous
+  // les salons en mémoire et `/parties/miennes` vérifie un jeton en base : de
+  // quoi occuper le serveur à répondre à une boucle plutôt qu'à jouer.
+  '/parties': creerLimiteur(60_000, 60),
+  '/parties/miennes': creerLimiteur(60_000, 60),
+  '/parties/quitter': creerLimiteur(60_000, 20),
 } as const
 
 /**
@@ -95,6 +108,58 @@ function trop(
 // ─────────────────────────────────────────────────────────────────────────────
 
 const rooms = new Map<string, GameRoom>()
+
+/**
+ * Les écritures en base qu'on n'attend pas… sauf à l'arrêt.
+ *
+ * Tout ce qui s'écrit à la fin d'une partie part sans être attendu : le coup
+ * va au joueur d'abord. Mais `shutdown` finissait par `process.exit`, et une
+ * partie terminée dans la dernière seconde d'un déploiement n'était jamais
+ * enregistrée — ni son résultat, ni le classement. On garde donc chaque
+ * promesse jusqu'à ce qu'elle se règle, et l'arrêt les attend, cinq secondes
+ * au plus.
+ */
+const ecrituresEnVol = new Set<Promise<unknown>>()
+
+function suivre<T>(promesse: Promise<T>): Promise<T> {
+  ecrituresEnVol.add(promesse)
+  void promesse.finally(() => ecrituresEnVol.delete(promesse)).catch(() => {})
+  return promesse
+}
+
+/**
+ * Sans `DATABASE_URL`, le serveur joue quand même — en développement, en CI,
+ * pour le test de fumée — mais rien ne s'enregistre. Chaque écriture levait
+ * alors la même exception, avec sa trace complète, à chaque coup et à chaque
+ * fin de partie : on le dit une fois au démarrage, et l'on n'essaie plus.
+ */
+const BASE_ABSENTE = !process.env.DATABASE_URL
+
+/**
+ * Les écritures d'un même salon, dans l'ordre.
+ *
+ * `enregistrerSalon` remplace la ligne entière, et deux écritures parties à
+ * une seconde d'écart pouvaient arriver dans l'autre sens : une base un peu
+ * lente, et l'instantané d'avant le coup recouvrait celui d'après. Au
+ * redémarrage, le salon reprenait un coup en arrière. Pire, `oublierSalon` à
+ * la fin pouvait passer *avant* la dernière écriture, et la partie finie
+ * ressuscitait au démarrage suivant. Une chaîne de promesses par salon :
+ * chaque écriture attend la précédente.
+ */
+const chaines = new Map<string, Promise<void>>()
+
+function enchainer(slug: string, ecrire: () => Promise<void>): void {
+  const precedente = chaines.get(slug) ?? Promise.resolve()
+  const suivante = precedente.then(ecrire).catch((error: unknown) => {
+    console.warn('[salons] écriture en échec :', error)
+  })
+  chaines.set(slug, suivante)
+  void suivre(suivante).finally(() => {
+    // La chaîne ne se garde pas au-delà de sa dernière écriture : un serveur
+    // qui vit longtemps aurait sinon une entrée par salon jamais libérée.
+    if (chaines.get(slug) === suivante) chaines.delete(slug)
+  })
+}
 
 /**
  * Au-delà, une partie en cours n'attend plus personne.
@@ -124,19 +189,24 @@ function brancher(room: GameRoom): void {
     io.to(room.slug).emit(event.type, event)
 
     if (event.type === 'end') {
-      void persistFinishedGame(room).catch((error: unknown) => {
-        console.error('[persistance] enregistrement impossible :', error)
-      })
+      if (BASE_ABSENTE) return
+      void suivre(
+        persistFinishedGame(room).catch((error: unknown) => {
+          console.error('[persistance] enregistrement impossible :', error)
+        }),
+      )
       // La partie vit désormais dans `games` : son instantané n'a plus lieu
       // d'être, et le laisser ferait ressusciter une partie finie au prochain
-      // démarrage.
-      void oublierSalon(room.slug)
+      // démarrage. Dans la chaîne du salon, derrière la dernière écriture.
+      enchainer(room.slug, () => oublierSalon(room.slug))
       // Si ce salon appartenait à une arène, les points s'attribuent ici :
       // c'est le seul endroit qui sache qu'une partie vient de se terminer.
       // Sans effet pour les autres parties.
-      void recordResult(room.slug, event.result).catch((error: unknown) => {
-        console.error('[tournoi] résultat non enregistré :', error)
-      })
+      void suivre(
+        recordResult(room.slug, event.result).catch((error: unknown) => {
+          console.error('[tournoi] résultat non enregistré :', error)
+        }),
+      )
       return
     }
 
@@ -151,8 +221,11 @@ function brancher(room: GameRoom): void {
       `state` compte autant que `move` : c'est lui qui porte l'arrivée du
       second joueur, donc le passage à `playing` et le démarrage des pendules.
     */
-    if (event.type === 'move' || event.type === 'state') {
-      void enregistrerSalon(room.slug, room.etatPersistant() as unknown as Record<string, unknown>)
+    if ((event.type === 'move' || event.type === 'state') && !BASE_ABSENTE) {
+      // L'instantané est pris **maintenant**, pas au moment où la chaîne
+      // l'écrira : c'est cet état-là qui suit ce coup-là.
+      const etat = room.etatPersistant() as unknown as Record<string, unknown>
+      enchainer(room.slug, () => enregistrerSalon(room.slug, etat))
     }
   })
 }
@@ -197,7 +270,7 @@ setInterval(
       if (room.inactifDepuis > FENETRE_REPRISE_MS) {
         room.dispose()
         rooms.delete(slug)
-        void oublierSalon(slug)
+        enchainer(slug, () => oublierSalon(slug))
       }
     }
   },
@@ -280,6 +353,7 @@ const httpServer = createServer(async (request, response) => {
     // parties commencées — pas celles qui attendent encore un adversaire, il
     // n'y a rien à y voir.
     if (url.pathname === '/parties') {
+      if (trop('/parties', adresse, response)) return
       const live = []
       for (const room of rooms.values()) {
         const snapshot = room.snapshot()
@@ -314,6 +388,7 @@ const httpServer = createServer(async (request, response) => {
     // assis. La réponse est un POST parce qu'elle prend un jeton de session :
     // un jeton n'a rien à faire dans une adresse, qui se journalise.
     if (url.pathname === '/parties/miennes' && request.method === 'POST') {
+      if (trop('/parties/miennes', adresse, response)) return
       const body = await readJson<{ token?: string }>(request)
       const identity = await verifySessionToken(body.token)
       if (!identity) return json(response, 200, { games: [] })
@@ -345,6 +420,7 @@ const httpServer = createServer(async (request, response) => {
 
     // ── Quitter une partie sans y retourner ────────────────────────────────
     if (url.pathname === '/parties/quitter' && request.method === 'POST') {
+      if (trop('/parties/quitter', adresse, response)) return
       const body = await readJson<{ token?: string; slug?: string }>(request)
       const identity = await verifySessionToken(body.token)
       if (!identity) return json(response, 401, { error: 'Connexion requise.' })
@@ -563,8 +639,34 @@ const io = new SocketServer(httpServer, {
   pingTimeout: 25_000,
 })
 
+/** Cadence par défaut d'un salon dont le lien n'en dit pas : 10 | 5. */
+const CADENCE_PAR_DEFAUT: TimeControl = { initial: 600, increment: 5 }
+
 io.on('connection', (socket) => {
   let currentSlug: string | null = null
+
+  /*
+    Un seau par événement et par connexion.
+
+    Rien ne bornait ce qu'une connexion pouvait envoyer : un client modifié
+    faisait défiler des centaines de coups illégaux par seconde — chacun
+    validé par chess.js, chacun répondu —, ou remplissait le tchat de tout le
+    monde. Les chiffres tolèrent la rafale d'un zeitnot et refusent le débit
+    d'une boucle. Au-delà, l'événement est ignoré et le client prévenu.
+  */
+  const seaux = {
+    join: creerSeau(5, 60_000),
+    move: creerSeau(30, 10_000),
+    chat: creerSeau(10, 10_000),
+    action: creerSeau(10, 60_000),
+  }
+
+  /** `true` si l'événement doit être ignoré. Le client est prévenu une fois par refus. */
+  function tropVite(seau: keyof typeof seaux): boolean {
+    if (seaux[seau].prendre()) return false
+    socket.emit('error', { message: 'Trop d’envois d’un coup. Attends un instant.' })
+    return true
+  }
 
   socket.on(
     'join',
@@ -578,18 +680,49 @@ io.on('connection', (socket) => {
       timeControl?: string
       rated?: boolean
     }) => {
+      if (tropVite('join')) return
+
       const slug = String(payload.slug ?? '').slice(0, 12)
       if (!slug) {
         socket.emit('error', { message: 'Identifiant de partie manquant.' })
         return
       }
 
-      const identity = await verifySessionToken(payload.token)
+      // La cadence est bornée ici, et non dans le salon : c'est la seule
+      // entrée par laquelle un client en propose une. Voir `normaliserCadence`.
+      const timeControl = normaliserCadence(
+        (payload.timeControl ? parseTimeControl(payload.timeControl) : null) ?? CADENCE_PAR_DEFAUT,
+      )
+
+      // Le classement affiché est celui de la catégorie qu'on va jouer.
+      const identity = await verifySessionToken(
+        payload.token,
+        categorieDeClassement(speedCategory(timeControl)),
+      )
       const name = identity?.username ?? sanitiseName(payload.name) ?? 'Invité'
 
-      const timeControl = payload.timeControl
-        ? (parseTimeControl(payload.timeControl) ?? { initial: 600, increment: 5 })
-        : { initial: 600, increment: 5 }
+      // Un lien qui a déjà servi ne rouvre pas : la seconde partie écraserait
+      // la première en base. Seuls les salons inconnus en mémoire sont
+      // vérifiés — un salon vivant est, par construction, une partie en cours.
+      if (!rooms.has(slug) && !BASE_ABSENTE && (await slugDejaServi(slug))) {
+        socket.emit('error', {
+          message: 'Ce lien a déjà servi à une partie terminée. Crée une nouvelle partie.',
+        })
+        return
+      }
+
+      /*
+        Changer de salon sans se déconnecter.
+
+        Un même socket pouvait rejoindre un second salon en gardant son siège
+        dans le premier : l'adversaire y attendait un coup d'un joueur toujours
+        « connecté », que l'abandon automatique ne toucherait donc jamais. On
+        quitte le premier comme on le ferait en fermant l'onglet.
+      */
+      if (currentSlug && currentSlug !== slug) {
+        rooms.get(currentSlug)?.disconnect(socket.id)
+        void socket.leave(currentSlug)
+      }
 
       const room = roomFor(slug, { timeControl, rated: payload.rated ?? false })
       currentSlug = slug
@@ -614,23 +747,43 @@ io.on('connection', (socket) => {
   )
 
   socket.on('move', (payload: { from: Square; to: Square; promotion?: PieceSymbol }) => {
-    if (!currentSlug) return
+    if (!currentSlug || tropVite('move')) return
     const room = rooms.get(currentSlug)
     if (!room) return
-    const outcome = room.playMove(socket.id, payload)
+    const outcome = room.playMove(socket.id, payload ?? {})
     if (!outcome.ok) socket.emit('error', { message: outcome.reason })
   })
 
-  socket.on('resign', () => withRoom(currentSlug, (room) => room.resign(socket.id)))
-  socket.on('offerDraw', () => withRoom(currentSlug, (room) => room.offerDraw(socket.id)))
-  socket.on('declineDraw', () => withRoom(currentSlug, (room) => room.declineDraw(socket.id)))
-  socket.on('requestTakeback', () =>
-    withRoom(currentSlug, (room) => room.requestTakeback(socket.id)),
+  /** Les actions hors coups partagent un seau : aucune n'a de raison d'être répétée. */
+  const action = (faire: (room: GameRoom) => void) => () => {
+    if (tropVite('action')) return
+    withRoom(currentSlug, faire)
+  }
+
+  socket.on(
+    'resign',
+    action((room) => room.resign(socket.id)),
   )
-  socket.on('acceptTakeback', () => withRoom(currentSlug, (room) => room.acceptTakeback(socket.id)))
-  socket.on('chat', (payload: { text?: string }) =>
-    withRoom(currentSlug, (room) => room.sendChat(socket.id, String(payload?.text ?? ''))),
+  socket.on(
+    'offerDraw',
+    action((room) => room.offerDraw(socket.id)),
   )
+  socket.on(
+    'declineDraw',
+    action((room) => room.declineDraw(socket.id)),
+  )
+  socket.on(
+    'requestTakeback',
+    action((room) => room.requestTakeback(socket.id)),
+  )
+  socket.on(
+    'acceptTakeback',
+    action((room) => room.acceptTakeback(socket.id)),
+  )
+  socket.on('chat', (payload: { text?: string }) => {
+    if (tropVite('chat')) return
+    withRoom(currentSlug, (room) => room.sendChat(socket.id, String(payload?.text ?? '')))
+  })
 
   socket.on('disconnect', () => {
     if (!currentSlug) return
@@ -702,6 +855,11 @@ async function main(): Promise<void> {
 
   httpServer.listen(PORT, () => {
     console.log(`✓ Serveur Le Coup Parfait à l’écoute sur le port ${PORT}`)
+    if (BASE_ABSENTE) {
+      console.warn(
+        '⚠ DATABASE_URL est absente : les parties ne seront ni enregistrées ni classées.',
+      )
+    }
     console.log(`  origines autorisées : ${ORIGINS.join(', ')}`)
     console.log(`  moteur d’analyse : ${engineReady ? 'prêt' : 'indisponible'}`)
     console.log(`  tables de finales : ${isTablebaseEnabled() ? 'activées' : 'désactivées'}`)
@@ -728,6 +886,8 @@ async function main(): Promise<void> {
  * qu'à la fin d'une partie qui, elle, ne finira plus.
  */
 async function reprendreLesSalons(): Promise<void> {
+  // Sans base, rien à reprendre ni à purger — et rien à journaliser.
+  if (BASE_ABSENTE) return
   const perimes = await purgerSalonsPerimes(FENETRE_REPRISE_MS)
   if (perimes > 0) console.log(`  salons périmés effacés : ${perimes}`)
 
@@ -800,6 +960,17 @@ async function shutdown(signal: string): Promise<void> {
     new Promise<void>((resolve) => setTimeout(resolve, 5000).unref?.()),
   ])
 
+  // Les écritures parties avant l'arrêt — une partie finie dans la dernière
+  // seconde, le dernier instantané d'un salon — doivent arriver en base.
+  // Même plafond : une base qui ne répond pas ne retiendra pas l'arrêt.
+  if (ecrituresEnVol.size > 0) {
+    console.log(`  écritures en attente : ${ecrituresEnVol.size}`)
+    await Promise.race([
+      Promise.allSettled([...ecrituresEnVol]),
+      new Promise<void>((resolve) => setTimeout(resolve, 5000).unref?.()),
+    ])
+  }
+
   await disposePool()
   console.log(`  arrêté en ${Date.now() - debut} ms`)
   process.exit(0)
@@ -862,6 +1033,7 @@ const ARENA_TICK_MS = 3000
 const ARENA_STUCK_MS = 15 * 60_000
 
 async function arenaTick(): Promise<void> {
+  if (BASE_ABSENTE) return
   if (!(await hasRunning())) return
 
   for (const slug of await startDueTournaments()) {
@@ -979,6 +1151,7 @@ const pannesMenage = signaleurDePanne('ménage', 'les purges quotidiennes sont r
 let dernierMenage: string | null = null
 
 async function menageQuotidien(): Promise<void> {
+  if (BASE_ABSENTE) return
   const maintenant = new Date()
   if (maintenant.getHours() !== PURGE_HEURE) return
 

@@ -11,7 +11,7 @@
  */
 
 import { resolveSession } from '@coupparfait/db/auth'
-import { getRating } from '@coupparfait/db/ratings'
+import { getRating, type RatingCategory } from '@coupparfait/db/ratings'
 
 export interface Identity {
   userId: string
@@ -23,19 +23,24 @@ export interface Identity {
  * Résout un jeton de session.
  * Retourne `null` pour un invité, et n'échoue jamais : une base indisponible
  * dégrade simplement tout le monde en invité plutôt que de bloquer les parties.
+ *
+ * `category` est la catégorie de classement à afficher : celle de la cadence
+ * du salon qu'on rejoint. Le rapide reste le défaut pour les appels qui n'ont
+ * pas de cadence sous la main.
  */
-export async function verifySessionToken(token: string | undefined): Promise<Identity | null> {
+export async function verifySessionToken(
+  token: string | undefined,
+  category: RatingCategory = 'rapid',
+): Promise<Identity | null> {
   if (!token) return null
 
   try {
     const session = await resolveSession(token)
     if (!session) return null
 
-    // Le classement rapide sert d'affichage par défaut ; la catégorie réelle
-    // dépend de la cadence et n'est connue qu'au moment d'enregistrer la partie.
     let rating: number | null = null
     try {
-      rating = (await getRating(session.userId, 'rapid')).rating
+      rating = (await getRating(session.userId, category)).rating
     } catch {
       rating = null
     }

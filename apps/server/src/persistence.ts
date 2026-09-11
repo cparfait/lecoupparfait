@@ -12,8 +12,9 @@
  */
 
 import { Chess } from 'chess.js'
+import { categorieDeClassement } from '@coupparfait/core'
 import { eq, games, getDb, openings } from '@coupparfait/db'
-import { applyGameToBothPlayers, type RatingCategory } from '@coupparfait/db/ratings'
+import { applyGameToBothPlayers, getRating, type RatingCategory } from '@coupparfait/db/ratings'
 import type { GameRoom } from './realtime/gameRoom.ts'
 
 /** Enregistre une partie terminée et met à jour les classements. */
@@ -27,6 +28,17 @@ export async function persistFinishedGame(room: GameRoom): Promise<void> {
     const database = getDb()
     const identified = await identifyOpening(record.moves.split(' '))
 
+    // La catégorie de classement, pas la catégorie de cadence : il n'y a pas
+    // de classement ultra-bullet, ces parties-là comptent en bullet.
+    const categorie: RatingCategory = categorieDeClassement(record.speed)
+
+    // Le classement écrit sur la partie est celui de **sa** catégorie, à
+    // l'instant où elle finit. Le salon ne connaît que le classement rapide,
+    // lu à l'arrivée pour l'affichage ; une blitz enregistrée avec le rapide
+    // des deux joueurs racontait une autre partie.
+    const whiteRating = (await classementActuel(record.whiteId, categorie)) ?? record.whiteRating
+    const blackRating = (await classementActuel(record.blackId, categorie)) ?? record.blackRating
+
     const inserted = await database
       .insert(games)
       .values({
@@ -38,8 +50,8 @@ export async function persistFinishedGame(room: GameRoom): Promise<void> {
         blackId: record.blackId,
         whiteName: record.whiteName,
         blackName: record.blackName,
-        whiteRating: record.whiteRating,
-        blackRating: record.blackRating,
+        whiteRating,
+        blackRating,
         initialTime: record.initialTime,
         increment: record.increment,
         moves: record.moves,
@@ -52,20 +64,26 @@ export async function persistFinishedGame(room: GameRoom): Promise<void> {
         startedAt: record.startedAt,
         endedAt: record.endedAt,
       })
-      .onConflictDoUpdate({
-        target: games.slug,
-        set: {
-          moves: record.moves,
-          pgn: record.pgn,
-          status: record.status,
-          result: record.result,
-          winner: record.winner,
-          endedAt: record.endedAt,
-        },
-      })
+      /*
+        Jamais d'écrasement.
+
+        Le conflit sur l'identifiant était résolu en réécrivant la ligne : une
+        partie finie sous un lien réutilisé remplaçait la précédente — ses
+        coups, son résultat —, et le classement s'appliquait une seconde fois
+        par-dessus. Le serveur refuse désormais de rouvrir un lien qui a servi
+        (voir `slugDejaServi`) ; s'il en arrive quand même un ici, on garde la
+        première partie, on le dit, et on ne classe rien.
+      */
+      .onConflictDoNothing({ target: games.slug })
       .returning({ id: games.id })
 
     const gameId = inserted[0]?.id
+    if (!gameId) {
+      console.warn(
+        `[persistance] la partie « ${record.slug} » existe déjà en base : la nouvelle n’est pas enregistrée.`,
+      )
+      return
+    }
 
     // ── Classement ────────────────────────────────────────────────────────
     const rateable =
@@ -77,26 +95,39 @@ export async function persistFinishedGame(room: GameRoom): Promise<void> {
       record.moves.split(' ').length >= 6
 
     if (rateable) {
+      // Une nulle au temps (article 6.9) arrive ici avec `status: 'timeout'`
+      // et `result: '1/2-1/2'` : c'est un demi-point comme un autre.
       const deltas = await applyGameToBothPlayers({
         whiteId: record.whiteId,
         blackId: record.blackId,
-        category: record.speed as RatingCategory,
+        category: categorie,
         result: record.result as '1-0' | '0-1' | '1/2-1/2',
         gameId,
       })
 
-      if (gameId) {
-        await database
-          .update(games)
-          .set({
-            whiteRatingDelta: deltas.white?.delta ?? null,
-            blackRatingDelta: deltas.black?.delta ?? null,
-          })
-          .where(eq(games.id, gameId))
-      }
+      await database
+        .update(games)
+        .set({
+          whiteRatingDelta: deltas.white?.delta ?? null,
+          blackRatingDelta: deltas.black?.delta ?? null,
+        })
+        .where(eq(games.id, gameId))
     }
   } catch (error) {
     console.error('[persistance] la partie n’a pas pu être enregistrée :', error)
+  }
+}
+
+/** Le classement d'un compte dans une catégorie, ou `null` pour un invité ou une base muette. */
+async function classementActuel(
+  userId: string | null,
+  categorie: RatingCategory,
+): Promise<number | null> {
+  if (!userId) return null
+  try {
+    return (await getRating(userId, categorie)).rating
+  } catch {
+    return null
   }
 }
 

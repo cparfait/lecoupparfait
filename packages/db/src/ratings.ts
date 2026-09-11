@@ -21,28 +21,52 @@ import {
   type GameScore,
   type GlickoRating,
 } from '@coupparfait/core'
-import { getDb } from './index.ts'
+import { getDb, type Database } from './index.ts'
 import { ratingHistory, ratings, type Rating } from './schema.ts'
 
 export type RatingCategory =
   'bullet' | 'blitz' | 'rapid' | 'classical' | 'correspondence' | 'puzzle'
 
-/** Lit un classement, en le créant au besoin. */
-export async function getRating(userId: string, category: RatingCategory): Promise<Rating> {
-  const database = getDb()
-  const rows = await database
-    .select()
-    .from(ratings)
-    .where(and(eq(ratings.userId, userId), eq(ratings.category, category)))
-    .limit(1)
+/**
+ * Ce sur quoi on exécute une requête : la base, ou la transaction en cours.
+ *
+ * Les deux ont la même surface pour ce qu'on en fait ici. Le type de la
+ * transaction est dérivé de `Database.transaction` plutôt qu'importé : c'est
+ * le seul qui soit garanti d'être le bon quelle que soit la version de Drizzle.
+ */
+type Executeur = Database | Parameters<Parameters<Database['transaction']>[0]>[0]
 
-  const existing = rows[0]
+/**
+ * Lit un classement, en le créant au besoin.
+ *
+ * `verrouiller` pose un `FOR UPDATE` sur la ligne — à n'employer que dans une
+ * transaction, et c'est ce que font les mises à jour ci-dessous. Sans lui,
+ * deux parties du même joueur qui finissent à la même seconde lisaient toutes
+ * deux le classement d'avant, et la seconde écriture effaçait la première :
+ * une partie ne comptait pas, sans que rien ne le dise.
+ */
+export async function getRating(
+  userId: string,
+  category: RatingCategory,
+  executeur: Executeur = getDb(),
+  verrouiller = false,
+): Promise<Rating> {
+  const lire = () => {
+    const requete = executeur
+      .select()
+      .from(ratings)
+      .where(and(eq(ratings.userId, userId), eq(ratings.category, category)))
+      .limit(1)
+    return verrouiller ? requete.for('update') : requete
+  }
+
+  const existing = (await lire())[0]
   if (existing) return existing
 
   // Les trois classements sont écrits en clair plutôt que laissés au défaut de
   // la colonne : une base créée avant le changement de valeur de départ
   // continuerait sinon d'inscrire les nouveaux venus à 1500.
-  const inserted = await database
+  const inserted = await executeur
     .insert(ratings)
     .values({
       userId,
@@ -53,9 +77,13 @@ export async function getRating(userId: string, category: RatingCategory): Promi
     })
     .onConflictDoNothing()
     .returning()
+  if (inserted[0]) return inserted[0]
 
+  // Quelqu'un l'a créée entre notre lecture et notre écriture : on la relit,
+  // verrou compris, plutôt que de raisonner sur une valeur de départ fictive.
+  const relu = (await lire())[0]
   return (
-    inserted[0] ?? {
+    relu ?? {
       userId,
       category,
       rating: CLASSEMENT_DEPART,
@@ -83,6 +111,15 @@ export interface RatingUpdateResult {
   eloDelta: number
 }
 
+interface ResultatAAppliquer {
+  userId: string
+  category: RatingCategory
+  opponentRating: number
+  opponentDeviation: number
+  score: GameScore
+  gameId?: string
+}
+
 /**
  * Applique le résultat d'une partie au classement d'un joueur.
  *
@@ -90,18 +127,23 @@ export interface RatingUpdateResult {
  * voit son incertitude remonter, donc son classement bouger davantage. Sans
  * cela, quelqu'un qui revient après avoir beaucoup progressé mettrait des
  * dizaines de parties à rattraper son vrai niveau.
+ *
+ * Lecture et écriture vont dans une même transaction, la ligne verrouillée :
+ * voir `getRating`.
  */
-export async function applyGameResult(options: {
-  userId: string
-  category: RatingCategory
-  opponentRating: number
-  opponentDeviation: number
-  score: GameScore
-  gameId?: string
-}): Promise<RatingUpdateResult> {
-  const database = getDb()
-  const current = await getRating(options.userId, options.category)
+export async function applyGameResult(options: ResultatAAppliquer): Promise<RatingUpdateResult> {
+  return getDb().transaction(async (tx) => {
+    const current = await getRating(options.userId, options.category, tx, true)
+    return appliquer(tx, current, options)
+  })
+}
 
+/** Le calcul et l'écriture, à partir d'une ligne déjà lue — et verrouillée. */
+async function appliquer(
+  tx: Executeur,
+  current: Rating,
+  options: ResultatAAppliquer,
+): Promise<RatingUpdateResult> {
   // Inactivité depuis la dernière partie.
   const daysIdle = Math.max(0, (Date.now() - current.updatedAt.getTime()) / (24 * 60 * 60 * 1000))
   const decayed: GlickoRating = decayGlicko(
@@ -143,7 +185,7 @@ export async function applyGameResult(options: {
   const isPeak = classement > current.peak
   const now = new Date()
 
-  await database
+  await tx
     .update(ratings)
     .set({
       rating: classement,
@@ -160,7 +202,7 @@ export async function applyGameResult(options: {
     })
     .where(and(eq(ratings.userId, options.userId), eq(ratings.category, options.category)))
 
-  await database.insert(ratingHistory).values({
+  await tx.insert(ratingHistory).values({
     userId: options.userId,
     category: options.category,
     rating: classement,
@@ -199,37 +241,46 @@ export async function applyGameToBothPlayers(options: {
 }): Promise<{ white: RatingUpdateResult | null; black: RatingUpdateResult | null }> {
   const { whiteId, blackId, category, result, gameId } = options
 
-  const whiteBefore = whiteId ? await getRating(whiteId, category) : null
-  const blackBefore = blackId ? await getRating(blackId, category) : null
-
   const whiteScore: GameScore = result === '1-0' ? 1 : result === '0-1' ? 0 : 0.5
   const blackScore: GameScore = result === '0-1' ? 1 : result === '1-0' ? 0 : 0.5
 
-  const white =
-    whiteId && blackBefore
-      ? await applyGameResult({
-          userId: whiteId,
-          category,
-          opponentRating: blackBefore.rating,
-          opponentDeviation: blackBefore.deviation,
-          score: whiteScore,
-          gameId,
-        })
-      : null
+  return getDb().transaction(async (tx) => {
+    // Les deux lignes verrouillées **dans un ordre fixe**. Deux parties entre
+    // les mêmes joueurs qui finissent ensemble prendraient sinon les verrous
+    // en croix, et PostgreSQL en tuerait une.
+    const lignes = new Map<string, Rating>()
+    for (const id of [whiteId, blackId].filter((x): x is string => x !== null).sort()) {
+      if (!lignes.has(id)) lignes.set(id, await getRating(id, category, tx, true))
+    }
+    const whiteBefore = whiteId ? (lignes.get(whiteId) ?? null) : null
+    const blackBefore = blackId ? (lignes.get(blackId) ?? null) : null
 
-  const black =
-    blackId && whiteBefore
-      ? await applyGameResult({
-          userId: blackId,
-          category,
-          opponentRating: whiteBefore.rating,
-          opponentDeviation: whiteBefore.deviation,
-          score: blackScore,
-          gameId,
-        })
-      : null
+    const white =
+      whiteId && whiteBefore && blackBefore
+        ? await appliquer(tx, whiteBefore, {
+            userId: whiteId,
+            category,
+            opponentRating: blackBefore.rating,
+            opponentDeviation: blackBefore.deviation,
+            score: whiteScore,
+            gameId,
+          })
+        : null
 
-  return { white, black }
+    const black =
+      blackId && blackBefore && whiteBefore
+        ? await appliquer(tx, blackBefore, {
+            userId: blackId,
+            category,
+            opponentRating: whiteBefore.rating,
+            opponentDeviation: whiteBefore.deviation,
+            score: blackScore,
+            gameId,
+          })
+        : null
+
+    return { white, black }
+  })
 }
 
 /**

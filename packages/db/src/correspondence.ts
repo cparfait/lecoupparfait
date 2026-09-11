@@ -193,7 +193,11 @@ export async function startCorrespondence(options: {
 
 export type PlayResult =
   | { ok: true; game: CorrespondenceGame }
-  | { ok: false; reason: 'unknown' | 'notYourTurn' | 'illegal' | 'finished' }
+  | {
+      ok: false
+      /** `corrompue` : les coups enregistrés ne se rejouent plus. Voir `playCorrespondence`. */
+      reason: 'unknown' | 'notYourTurn' | 'illegal' | 'finished' | 'corrompue'
+    }
 
 /**
  * Joue un coup.
@@ -225,7 +229,15 @@ export async function playCorrespondence(
 
   const board = new Chess()
   const moves = row.moves ? row.moves.split(' ').filter(Boolean) : []
-  for (const san of moves) board.move(san)
+  // Une ligne dont un coup ne se rejoue plus — écrite à la main, ou par une
+  // autre version des règles — faisait tomber la route entière. Elle se
+  // signale, et la partie reste lisible par `toGame`, qui s'arrête au premier
+  // coup illisible.
+  try {
+    for (const san of moves) board.move(san)
+  } catch {
+    return { ok: false, reason: 'corrompue' }
+  }
 
   const colour = row.whiteId === userId ? 'w' : 'b'
   if (board.turn() !== colour) return { ok: false, reason: 'notYourTurn' }
@@ -245,13 +257,22 @@ export async function playCorrespondence(
   const over = board.isGameOver()
   const winner = board.isCheckmate() ? colour : null
   const result = !over ? '*' : winner === 'w' ? '1-0' : winner === 'b' ? '0-1' : '1/2-1/2'
+  // Les mêmes statuts que le temps réel, pour que l'archive dise pourquoi la
+  // partie est nulle : « draw » seul ne distinguait pas la répétition du
+  // matériel insuffisant. Même ordre que `resultatImpose`.
   const status = !over
     ? 'playing'
     : board.isCheckmate()
       ? 'checkmate'
       : board.isStalemate()
         ? 'stalemate'
-        : 'draw'
+        : board.isInsufficientMaterial()
+          ? 'insufficientMaterial'
+          : board.isThreefoldRepetition()
+            ? 'threefold'
+            : board.isDrawByFiftyMoves()
+              ? 'fiftyMoves'
+              : 'draw'
 
   const now = new Date()
   await db

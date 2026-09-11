@@ -1,24 +1,24 @@
 /**
- * Jeton de session pour le serveur temps réel.
+ * Jeton pour le serveur temps réel.
  *
  * Le cookie de session est `HttpOnly` : le JavaScript de la page ne peut pas le
  * lire, ce qui est exactement le but. Mais le serveur Socket.IO, potentiellement
  * sur un autre sous-domaine, a besoin de savoir qui se connecte.
  *
  * Cette route sert d'intermédiaire : elle est appelée par la page elle-même
- * (donc avec le cookie), et renvoie le jeton pour qu'il soit transmis à la
- * poignée de main WebSocket. Le jeton ne quitte jamais l'origine de
- * l'application.
+ * (donc avec le cookie), et renvoie **un jeton dédié** — pas le cookie — à
+ * transmettre à la poignée de main WebSocket. Il ne vaut qu'un quart d'heure :
+ * voir `creerJetonTempsReel`.
  */
 
 import { NextResponse } from 'next/server'
-import { getSessionToken } from '@/lib/server/session.ts'
+import { creerJetonTempsReel } from '@/lib/server/session.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  const token = await getSessionToken()
+  const token = await creerJetonTempsReel()
   return NextResponse.json(
     { token },
     {

@@ -53,6 +53,12 @@ jobs:
       - name: Tests
         run: npm test
 
+      # Le serveur temps réel de bout en bout : deux joueurs, une partie, un
+      # mat. Le script lance le serveur lui-même — sans base de données, il
+      # démarre quand même, et sur le faux moteur des tests — puis l'arrête.
+      - name: Temps réel
+        run: npm run test:realtime
+
       # En dernier : c'est l'étape la plus longue, et une erreur de typage ou
       # un test rouge se voient plus vite sans elle.
       - name: Construction

@@ -151,9 +151,13 @@ export async function GET(request: Request) {
           // c'est ce qui affichait la moitié du site comme « connectée ». Il
           // reste utile pour une seule question, celle qu'il sait réellement
           // répondre : combien d'accès une désactivation va-t-elle fermer.
+          // Les jetons du serveur temps réel vivent dans la même table, quinze
+          // minutes chacun : ce ne sont pas des appareils, on les écarte.
           sessions: sql<number>`(
             select count(*) from sessions
-            where sessions.user_id = users.id and sessions.expires_at > now()
+            where sessions.user_id = users.id
+              and sessions.expires_at > now()
+              and sessions.user_agent is distinct from 'temps réel'
           )`,
         })
         .from(users)

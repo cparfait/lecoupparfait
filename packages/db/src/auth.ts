@@ -541,15 +541,20 @@ export interface SessionIdentity {
 /**
  * Ouvre une session et retourne le jeton **en clair** — la seule et unique fois
  * où il existe sous cette forme côté serveur. Il part ensuite dans un cookie.
+ *
+ * `ttlMs` prime sur `days` : c'est ce qui permet d'ouvrir une session courte
+ * — le jeton du serveur temps réel dure un quart d'heure — avec la même table,
+ * la même empreinte et la même résolution que les sessions ordinaires.
  */
 export async function createSession(
   userId: string,
-  options: { days?: number; userAgent?: string } = {},
+  options: { days?: number; ttlMs?: number; userAgent?: string } = {},
 ): Promise<{ token: string; expiresAt: Date }> {
   const database = getDb()
   const token = randomBytes(32).toString('base64url')
   const days = options.days ?? Number(process.env.AUTH_SESSION_DAYS ?? 30)
-  const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000)
+  const ttlMs = options.ttlMs ?? days * 24 * 60 * 60 * 1000
+  const expiresAt = new Date(Date.now() + ttlMs)
 
   await database.insert(sessions).values({
     userId,

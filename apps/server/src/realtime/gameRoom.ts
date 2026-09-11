@@ -19,6 +19,7 @@ import {
   createClock,
   flaggedColor,
   remainingAt,
+  resultatAuDrapeau,
   speedCategory,
   stopClock,
   type ClockState,
@@ -109,6 +110,12 @@ export interface EtatPersistant {
   status: GameStatus
   result: GameResult
   clock: ClockState
+  /**
+   * Les pendules d'avant chaque coup, pour la reprise de coup. Facultative :
+   * un instantané écrit avant qu'elle existe se relit sans elle, et la reprise
+   * retombe alors sur la pendule courante.
+   */
+  clockHistory?: ClockState[]
   timeControl: TimeControl
   rated: boolean
   startedAt: number | null
@@ -184,6 +191,17 @@ export class GameRoom {
 
   private readonly chess: Chess
   private clock: ClockState
+  /**
+   * La pendule telle qu'elle était **avant** chaque coup joué, dans l'ordre.
+   *
+   * C'est ce qui rend la reprise de coup juste. Reculer la position de deux
+   * demi-coups sans reculer la pendule laissait tourner la pendule de celui
+   * qui venait de jouer, et ne rendait à personne le temps consommé pendant
+   * que la demande attendait. Dépiler deux fois remet exactement la pendule
+   * d'il y a deux demi-coups ; il ne reste qu'à la réancrer sur l'instant
+   * présent.
+   */
+  private clockHistory: ClockState[] = []
   private status: GameStatus = 'waiting'
   private result: GameResult = '*'
   private players: Record<Color, Participant | null> = { w: null, b: null }
@@ -208,22 +226,33 @@ export class GameRoom {
   private idleTimer: ReturnType<typeof setTimeout> | null = null
   private readonly abandonAt: number
 
+  /**
+   * L'horloge du salon.
+   *
+   * `Date.now()` par défaut, et c'est tout ce que le serveur en fait. Elle
+   * s'injecte pour les tests : une pendule qui tombe se vérifie en avançant une
+   * horloge factice, pas en attendant trois minutes.
+   */
+  private readonly now: () => number
+
   constructor(options: {
     slug: string
     timeControl: TimeControl
     rated: boolean
     startFen?: string
+    now?: () => number
   }) {
     this.slug = options.slug
     this.timeControl = options.timeControl
     this.rated = options.rated
     this.startFen = options.startFen ?? null
+    this.now = options.now ?? Date.now
     this.chess = new Chess(options.startFen, { skipValidation: true })
-    this.clock = createClock(options.timeControl, Date.now())
+    this.clock = createClock(options.timeControl, this.now())
 
     // Le décompte part de la création, pas de l'arrivée des joueurs : c'est le
     // salon créé pour rien qu'il s'agit de ramasser.
-    this.abandonAt = Date.now() + IDLE_ABORT_MS
+    this.abandonAt = this.now() + IDLE_ABORT_MS
     this.idleTimer = setTimeout(() => {
       this.idleTimer = null
       if (this.isFinished || this.chess.history().length > 0) return
@@ -294,12 +323,23 @@ export class GameRoom {
       const seated = this.players[color]
       if (!seated) continue
       const sameUser = participant.userId !== null && seated.userId === participant.userId
-      const sameGuest =
+      /*
+        Même navigateur, sans jeton valable.
+
+        Ne s'appliquait qu'entre invités. Or le jeton présenté au serveur temps
+        réel ne dure plus qu'un quart d'heure : un compte dont la connexion
+        tombe à la vingtième minute revient sans identité, et ne retrouvait
+        plus son siège — il regardait sa propre partie en spectateur pendant
+        que sa pendule tournait. L'identifiant de navigateur est un secret
+        aléatoire que seul ce navigateur connaît : c'est la même personne, au
+        même échiquier, et le siège garde le compte, le nom et le classement
+        d'origine. Un autre compte (`userId` différent) ne passe toujours pas.
+      */
+      const sameBrowser =
         participant.userId === null &&
-        seated.userId === null &&
         participant.clientId !== null &&
         seated.clientId === participant.clientId
-      if (sameUser || sameGuest) {
+      if (sameUser || sameBrowser) {
         seated.sockets.add(participant.socketId)
         seated.connected = true
         seated.disconnectedAt = null
@@ -358,7 +398,7 @@ export class GameRoom {
     // Les deux sièges occupés : la partie commence.
     if (this.players.w && this.players.b && this.status === 'waiting') {
       this.status = 'playing'
-      this.startedAt = Date.now()
+      this.startedAt = this.now()
       this.startFlagWatcher()
     }
 
@@ -380,7 +420,7 @@ export class GameRoom {
       player.sockets.delete(socketId)
       if (player.sockets.size === 0) {
         player.connected = false
-        player.disconnectedAt = Date.now()
+        player.disconnectedAt = this.now()
         this.system(`${player.name} s’est déconnecté.`)
       }
       this.broadcastState()
@@ -440,10 +480,10 @@ export class GameRoom {
     if (this.chess.turn() !== color) return { ok: false, reason: 'Ce n’est pas ton tour.' }
 
     // Le temps a-t-il expiré avant même ce coup ?
-    const now = Date.now()
+    const now = this.now()
     const flagged = flaggedColor(this.clock, now)
     if (flagged) {
-      this.finish('timeout', flagged === 'w' ? '0-1' : '1-0')
+      this.tomberAuDrapeau(flagged)
       return { ok: false, reason: 'Le temps est écoulé.' }
     }
 
@@ -466,6 +506,8 @@ export class GameRoom {
     const firstMove = this.chess.history().length === 1
     // La partie a commencé : le compte à rebours d'annulation n'a plus lieu.
     if (firstMove) this.clearIdleTimer()
+    // La pendule d'avant le coup, pour pouvoir le reprendre. Voir `clockHistory`.
+    this.clockHistory.push(this.clock)
     this.clock = applyMove(this.clock, color, now, firstMove)
 
     this.emit({
@@ -576,7 +618,10 @@ export class GameRoom {
 
   acceptTakeback(socketId: string): void {
     const color = this.colorOf(socketId)
-    if (!color || !this.takebackFrom || this.takebackFrom === color) return
+    // Une partie finie ne se rejoue pas : accepter une reprise demandée juste
+    // avant le mat aurait rouvert une position sur une partie déjà enregistrée.
+    if (!color || this.status !== 'playing') return
+    if (!this.takebackFrom || this.takebackFrom === color) return
     this.applyTakeback()
   }
 
@@ -587,6 +632,26 @@ export class GameRoom {
     const history = this.chess.history({ verbose: true })
     const last = history[history.length - 1]
     this.lastMove = last ? { from: last.from, to: last.to } : null
+
+    /*
+      La pendule recule avec la position.
+
+      On dépile deux fois : la seconde valeur est la pendule d'avant le coup
+      repris en premier, c'est-à-dire celle d'il y a deux demi-coups — avec le
+      bon camp qui décompte, et sans le temps que l'adversaire a passé à
+      réfléchir puis à répondre à la demande. Réancrée sur l'instant présent,
+      elle repart de là. Faute d'historique (salon relu d'un instantané qui n'en
+      avait pas), on garde les temps restants mais on redonne au moins le
+      décompte au camp au trait : c'est lui qui réfléchit désormais.
+    */
+    const now = this.now()
+    this.clockHistory.pop()
+    const avant = this.clockHistory.pop()
+    const running = this.chess.history().length === 0 ? null : this.chess.turn()
+    this.clock = avant
+      ? { ...avant, running, updatedAt: now }
+      : { ...stopClock(this.clock, now), running, updatedAt: now }
+
     this.system('Coup repris.')
     this.broadcastState()
   }
@@ -600,7 +665,7 @@ export class GameRoom {
     const message: ChatMessage = {
       from: player?.name ?? 'Spectateur',
       text: trimmed,
-      at: Date.now(),
+      at: this.now(),
     }
     this.chat.push(message)
     if (this.chat.length > 200) this.chat.shift()
@@ -608,7 +673,7 @@ export class GameRoom {
   }
 
   private system(text: string): void {
-    const message: ChatMessage = { from: 'Le Coup Parfait', text, at: Date.now(), system: true }
+    const message: ChatMessage = { from: 'Le Coup Parfait', text, at: this.now(), system: true }
     this.chat.push(message)
     if (this.chat.length > 200) this.chat.shift()
     this.emit({ type: 'chat', message })
@@ -624,17 +689,41 @@ export class GameRoom {
    */
   private startFlagWatcher(): void {
     if (this.flagTimer) return
-    this.flagTimer = setInterval(() => {
-      if (this.status !== 'playing') return
-      const now = Date.now()
+    this.flagTimer = setInterval(() => this.veiller(), 1000)
+    // Un salon ne retient pas le processus : c'est le serveur HTTP qui le fait.
+    this.flagTimer.unref?.()
+  }
 
-      const flagged = flaggedColor(this.clock, now)
-      if (flagged) {
-        this.finish('timeout', flagged === 'w' ? '0-1' : '1-0')
-        return
-      }
+  /**
+   * Le drapeau est tombé pour `flagged`.
+   *
+   * Article 6.9 des règles de la FIDE : la partie est perdue au temps **sauf**
+   * si l'adversaire ne peut plus mater par aucune suite de coups légaux —
+   * auquel cas elle est nulle. Un roi seul ne gagne pas au temps. Le statut
+   * reste `timeout` dans les deux cas : c'est bien la pendule qui a fini la
+   * partie, seul le résultat change.
+   */
+  private tomberAuDrapeau(flagged: Color): void {
+    this.finish('timeout', resultatAuDrapeau(this.chess, flagged))
+  }
 
-      /*
+  /**
+   * Constate ce que le temps a fait : un drapeau tombé, une absence prolongée.
+   *
+   * C'est le corps du veilleur, qui l'appelle chaque seconde. Publique pour
+   * pouvoir l'éprouver avec une horloge factice, sans attendre la seconde.
+   */
+  veiller(): void {
+    if (this.status !== 'playing') return
+    const now = this.now()
+
+    const flagged = flaggedColor(this.clock, now)
+    if (flagged) {
+      this.tomberAuDrapeau(flagged)
+      return
+    }
+
+    /*
         Abandon pour déconnexion prolongée — et seulement si quelqu'un attend.
 
         Le compte à rebours tournait dès qu'un joueur se déconnectait, quoi que
@@ -648,28 +737,27 @@ export class GameRoom {
         Trois conditions, donc : le joueur est parti, l'adversaire est là, et
         le délai de la cadence est passé.
       */
-      const limite = delaiAbandon(this.timeControl)
-      for (const color of ['w', 'b'] as const) {
-        const player = this.players[color]
-        if (!player || player.connected || player.disconnectedAt === null) continue
-        const adverse = this.players[color === 'w' ? 'b' : 'w']
-        if (!adverse?.connected) continue
-        if (now - player.disconnectedAt > limite) {
-          // Une partie sans le moindre coup ne se gagne pas : elle s'annule.
-          // Autrement, quelqu'un qui ouvre un lien puis referme son onglet
-          // offrait une « Victoire ! » sur zéro demi-coup — et, en partie
-          // classée, des points de classement pour rien.
-          if (this.chess.history().length === 0) {
-            this.system(`${player.name} n’est pas resté. La partie est annulée.`)
-            this.finish('aborted', '*')
-            return
-          }
-          this.system(`${player.name} ne s’est pas reconnecté.`)
-          this.finish('abandoned', color === 'w' ? '0-1' : '1-0')
+    const limite = delaiAbandon(this.timeControl)
+    for (const color of ['w', 'b'] as const) {
+      const player = this.players[color]
+      if (!player || player.connected || player.disconnectedAt === null) continue
+      const adverse = this.players[color === 'w' ? 'b' : 'w']
+      if (!adverse?.connected) continue
+      if (now - player.disconnectedAt > limite) {
+        // Une partie sans le moindre coup ne se gagne pas : elle s'annule.
+        // Autrement, quelqu'un qui ouvre un lien puis referme son onglet
+        // offrait une « Victoire ! » sur zéro demi-coup — et, en partie
+        // classée, des points de classement pour rien.
+        if (this.chess.history().length === 0) {
+          this.system(`${player.name} n’est pas resté. La partie est annulée.`)
+          this.finish('aborted', '*')
           return
         }
+        this.system(`${player.name} ne s’est pas reconnecté.`)
+        this.finish('abandoned', color === 'w' ? '0-1' : '1-0')
+        return
       }
-    }, 1000)
+    }
   }
 
   private finish(status: GameStatus, result: GameResult): void {
@@ -677,7 +765,11 @@ export class GameRoom {
     this.clearIdleTimer()
     this.status = status
     this.result = result
-    this.clock = stopClock(this.clock, Date.now())
+    // Une proposition ou une demande en suspens n'a plus d'objet : l'écran
+    // continuait sinon d'offrir « accepter » sur une partie finie.
+    this.drawOfferFrom = null
+    this.takebackFrom = null
+    this.clock = stopClock(this.clock, this.now())
     if (this.flagTimer) {
       clearInterval(this.flagTimer)
       this.flagTimer = null
@@ -696,7 +788,7 @@ export class GameRoom {
    * mesure, il resterait en mémoire jusqu'au prochain arrêt.
    */
   get inactifDepuis(): number {
-    return Date.now() - Math.max(this.clock.updatedAt, this.startedAt ?? 0)
+    return this.now() - Math.max(this.clock.updatedAt, this.startedAt ?? 0)
   }
 
   /** Termine la partie de l'extérieur (annulation). */
@@ -729,7 +821,7 @@ export class GameRoom {
   // ── État ──────────────────────────────────────────────────────────────────
 
   snapshot(): GameSnapshot {
-    const now = Date.now()
+    const now = this.now()
     const remaining = remainingAt(this.clock, now)
     const timed = this.timeControl.initial > 0
 
@@ -799,6 +891,7 @@ export class GameRoom {
       status: this.status,
       result: this.result,
       clock: this.clock,
+      clockHistory: this.clockHistory,
       timeControl: this.timeControl,
       rated: this.rated,
       startedAt: this.startedAt,
@@ -821,7 +914,7 @@ export class GameRoom {
    * Rend `null` si l'instantané n'est pas exploitable : mieux vaut une partie
    * perdue qu'un salon qui ment sur sa position.
    */
-  static restaurer(brut: unknown): GameRoom | null {
+  static restaurer(brut: unknown, options: { now?: () => number } = {}): GameRoom | null {
     const etat = brut as EtatPersistant | null
     if (!etat || etat.version !== 1 || typeof etat.slug !== 'string') return null
 
@@ -832,6 +925,7 @@ export class GameRoom {
         timeControl: etat.timeControl,
         rated: etat.rated,
         startFen: etat.startFen ?? undefined,
+        now: options.now,
       })
       for (const san of etat.moves ?? []) salon.chess.move(san)
     } catch {
@@ -845,6 +939,9 @@ export class GameRoom {
     salon.status = etat.status
     salon.result = etat.result
     salon.clock = etat.clock
+    // Un instantané d'avant l'historique des pendules n'en a pas : la reprise
+    // de coup se contentera alors de la pendule courante. Voir `applyTakeback`.
+    salon.clockHistory = Array.isArray(etat.clockHistory) ? etat.clockHistory : []
     salon.startedAt = etat.startedAt
     salon.lastMove = etat.lastMove
     salon.chat = Array.isArray(etat.chat) ? etat.chat : []
@@ -890,7 +987,7 @@ export class GameRoom {
       initialTime: this.timeControl.initial,
       increment: this.timeControl.increment,
       startedAt: this.startedAt ? new Date(this.startedAt) : null,
-      endedAt: new Date(),
+      endedAt: new Date(this.now()),
     }
   }
 }

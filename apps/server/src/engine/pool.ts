@@ -359,6 +359,10 @@ export function getPool(): EnginePool {
   if (!pool) {
     pool = new EnginePool({
       binary: findStockfish(),
+      // `STOCKFISH_ARGS` n'existe que pour lancer le faux moteur des tests
+      // (`node faux-stockfish.mjs bavard`) : Stockfish lui-même ne prend
+      // aucun argument.
+      args: process.env.STOCKFISH_ARGS?.split(' ').filter(Boolean),
       size: Number(process.env.ENGINE_POOL_SIZE ?? 2),
       threadsPerProcess: Number(process.env.ENGINE_THREADS ?? 2),
       hashMb: Number(process.env.ENGINE_HASH_MB ?? 256),

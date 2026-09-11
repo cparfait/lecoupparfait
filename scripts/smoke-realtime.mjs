@@ -13,13 +13,89 @@
  *
  * Ce sont exactement les points où un serveur de jeu naïf se fait berner.
  *
- * Usage :  node scripts/smoke-realtime.mjs [url]
+ * Usage :  node scripts/smoke-realtime.mjs [url]        contre un serveur lancé
+ *          node scripts/smoke-realtime.mjs --serveur    lance le sien, puis l'arrête
+ *
+ * `--serveur` est ce que la CI exécute : le serveur démarre sans base de
+ * données — chaque écriture se contente d'un avertissement — et sur le faux
+ * moteur des tests, sur un port à lui pour ne pas gêner un serveur de
+ * développement déjà là.
  */
 
+import { spawn } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 import { io } from 'socket.io-client'
 
-const URL = process.argv[2] ?? 'http://localhost:3001'
+const args = process.argv.slice(2)
+const LANCER = args.includes('--serveur')
+const PORT_PROPRE = 3911
+const ADRESSE =
+  args.find((arg) => !arg.startsWith('--')) ?? `http://localhost:${LANCER ? PORT_PROPRE : 3001}`
 const SLUG = `smoke${Math.floor(Date.now() % 1000000)}`
+
+/** Le serveur lancé par `--serveur`, à arrêter avant de sortir. */
+let serveur = null
+
+/** Arrête le serveur qu'on a lancé, puis sort. */
+async function sortir(code) {
+  if (serveur && serveur.exitCode === null) {
+    const fini = new Promise((resolve) => serveur.once('exit', resolve))
+    serveur.kill('SIGTERM')
+    await Promise.race([fini, wait(5000)])
+    if (serveur.exitCode === null) serveur.kill('SIGKILL')
+  }
+  process.exit(code)
+}
+
+/**
+ * Lance le serveur et attend que `/health` réponde.
+ *
+ * `process.execPath` et non `npm` : c'est le seul lancement qui se tue
+ * proprement sous Windows comme sous Linux, sans laisser un `npm` orphelin.
+ */
+async function lancerLeServeur() {
+  const racine = fileURLToPath(new URL('..', import.meta.url))
+  const fauxMoteur = fileURLToPath(
+    new URL('../apps/server/test/faux-stockfish.mjs', import.meta.url),
+  )
+  const env = { ...process.env }
+  // Sans base, volontairement : c'est ce qu'on veut éprouver en CI.
+  delete env.DATABASE_URL
+  serveur = spawn(process.execPath, ['--experimental-strip-types', 'apps/server/src/index.ts'], {
+    cwd: racine,
+    env: {
+      ...env,
+      SERVER_PORT: String(PORT_PROPRE),
+      NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
+      STOCKFISH_PATH: process.execPath,
+      STOCKFISH_ARGS: `${fauxMoteur} bavard`,
+      ENGINE_POOL_SIZE: '1',
+    },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+  const relayer = (flux, ecrire) => {
+    flux.setEncoding('utf8')
+    flux.on('data', (bloc) => {
+      for (const ligne of bloc.split('\n')) if (ligne.trim()) ecrire(`  [serveur] ${ligne}`)
+    })
+  }
+  relayer(serveur.stdout, console.log)
+  relayer(serveur.stderr, console.error)
+
+  const limite = Date.now() + 30_000
+  while (Date.now() < limite) {
+    if (serveur.exitCode !== null)
+      throw new Error(`le serveur s’est arrêté (code ${serveur.exitCode})`)
+    try {
+      const reponse = await fetch(`${ADRESSE}/health`)
+      if (reponse.ok) return
+    } catch {
+      // Pas encore en écoute.
+    }
+    await wait(250)
+  }
+  throw new Error('le serveur n’a pas répondu sur /health en trente secondes')
+}
 
 let failures = 0
 
@@ -32,7 +108,7 @@ function check(label, condition, detail = '') {
 /** Client de test : un joueur avec son identifiant de navigateur propre. */
 function connect(name, clientId) {
   return new Promise((resolve, reject) => {
-    const socket = io(URL, { transports: ['websocket'], reconnection: false })
+    const socket = io(ADRESSE, { transports: ['websocket'], reconnection: false })
     const state = { socket, name, color: null, snapshot: null, errors: [] }
 
     socket.on('connect', () => {
@@ -62,7 +138,17 @@ function connect(name, clientId) {
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-console.log(`Test temps réel sur ${URL} — partie « ${SLUG} »\n`)
+if (LANCER) {
+  console.log(`Lancement du serveur sur le port ${PORT_PROPRE}…`)
+  try {
+    await lancerLeServeur()
+  } catch (error) {
+    console.error(`✗ ${error.message}`)
+    await sortir(1)
+  }
+}
+
+console.log(`Test temps réel sur ${ADRESSE} — partie « ${SLUG} »\n`)
 
 let white
 let black
@@ -75,7 +161,7 @@ try {
 } catch (error) {
   console.error(`✗ Connexion impossible : ${error.message}`)
   console.error('  Le serveur est-il démarré ?  npm run dev:server')
-  process.exit(1)
+  await sortir(1)
 }
 
 // ── Attribution des couleurs ────────────────────────────────────────────────
@@ -164,4 +250,4 @@ black.socket.disconnect()
 console.log(
   `\n${failures === 0 ? '✓ Tout est conforme.' : `✗ ${failures} vérification(s) en échec.`}`,
 )
-process.exit(failures === 0 ? 0 : 1)
+await sortir(failures === 0 ? 0 : 1)

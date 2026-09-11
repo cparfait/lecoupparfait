@@ -31,6 +31,7 @@ const REASONS: Record<string, string> = {
   notYourTurn: 'Ce n’est pas à toi de jouer.',
   illegal: 'Coup illégal.',
   finished: 'Cette partie est terminée.',
+  corrompue: 'Cette partie ne se relit plus : ses coups enregistrés sont illisibles.',
 }
 
 export async function GET(request: Request) {

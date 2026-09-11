@@ -12,9 +12,9 @@
  * partie en cours.
  */
 
-import { desc, gt, eq, lt } from 'drizzle-orm'
+import { and, desc, gt, eq, lt, notInArray } from 'drizzle-orm'
 import { getDb } from './index.ts'
-import { liveGames } from './schema.ts'
+import { games, liveGames } from './schema.ts'
 
 /**
  * Écrit l'instantané d'un salon.
@@ -69,6 +69,33 @@ export async function oublierSalon(slug: string): Promise<void> {
     await getDb().delete(liveGames).where(eq(liveGames.slug, slug))
   } catch (error) {
     console.warn('[salons] ligne non supprimée :', error)
+  }
+}
+
+/**
+ * Ce lien a-t-il déjà servi à une partie terminée ?
+ *
+ * Un identifiant de salon est un lien qu'on s'envoie, et rien n'empêchait de
+ * le rouvrir une fois la partie finie : le serveur créait un salon neuf sous
+ * le même nom, et la seconde partie venait écraser la première en base. Le
+ * serveur demande donc ici avant d'ouvrir un salon qu'il n'a pas en mémoire.
+ *
+ * Une partie **en cours** en base ne bloque pas : c'est le cas d'une
+ * correspondance, qui ne passe pas par le temps réel, et de rien d'autre.
+ * Une base muette répond « non » : on préfère jouer et rater ce garde-fou
+ * plutôt que refuser tout le monde.
+ */
+export async function slugDejaServi(slug: string): Promise<boolean> {
+  try {
+    const lignes = await getDb()
+      .select({ id: games.id })
+      .from(games)
+      .where(and(eq(games.slug, slug), notInArray(games.status, ['waiting', 'playing'])))
+      .limit(1)
+    return lignes.length > 0
+  } catch (error) {
+    console.warn('[salons] vérification du lien impossible :', error)
+    return false
   }
 }
 
