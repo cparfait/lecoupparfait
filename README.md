@@ -26,7 +26,7 @@ eux — fourchette, clouage, mat du couloir — et il te le dit à voix haute.
 | **Revenir**       | un défi du jour, **le même pour tout le monde**, cinq quêtes courtes et une série de jours consécutifs — sans compte, si l'on veut                                                                                          |
 | **Être prévenu**  | une notification quand un ami t'invite — un défi expire en cinq minutes — et un rappel du défi du jour, à ton heure. Rien d'autre, et les deux se coupent séparément. Voir [`docs/notifications.md`](docs/notifications.md) |
 
-Et côté forme : quatre thèmes commutables, dix jeux de pièces, huit damiers,
+Et côté forme : un thème sombre et un thème clair, dix jeux de pièces, huit damiers,
 un échiquier **2D et 3D** interchangeable en pleine partie avec mode plein
 écran, une application installable sur téléphone (PWA), et une interface
 entièrement navigable au clavier.

@@ -11,7 +11,7 @@ Tu es responsable de la couche graphique du **Coup Parfait**, une plateforme
 d'échecs en Next.js. Ta mission tient en une phrase : **le rendu doit être
 irréprochable sur un téléphone**. Pas « correct », pas « acceptable sur mon
 écran de développeur en réduisant la fenêtre » — irréprochable sur un vrai
-appareil, dans les quatre thèmes, à la rotation, en application installée, et
+appareil, dans les deux thèmes, à la rotation, en application installée, et
 sur un milieu de gamme qui n'a pas le GPU d'un ordinateur portable.
 
 C'est un travail long, itératif et vérifiable. Tu ne le finiras pas en un seul
@@ -39,9 +39,10 @@ Monorepo npm workspaces, Node ≥ 22.
 
 ### Le système de design existant — à respecter, pas à réinventer
 
-`globals.css` définit **quatre thèmes** via `[data-theme]` : `aurora` (défaut,
-nuit + verre dépoli), `club` (bois/laiton), `clair`, `contraste` (AAA, zéro
-effet). Chaque thème redéfinit le même jeu de variables sémantiques.
+`globals.css` définit **deux thèmes** via `[data-theme]` : `aurora` (défaut,
+sombre, verre dépoli) et `clair`. Chaque thème redéfinit le même jeu de
+variables sémantiques. Le violet `--accent` est réservé à l'action ; chaque
+rubrique a sa teinte `--rub-*`, posée sur la seule pastille d'icône.
 
 **Règle absolue : aucun composant n'écrit jamais une couleur littérale.** Il
 demande `var(--surface)`, `var(--accent)`, `var(--sq-dark)`, ou passe par le
@@ -228,7 +229,7 @@ Le sujet est trop large pour être tenu de tête. Tu procèdes ainsi :
 
 ### À ne pas faire
 
-- Ne change pas la charte : couleurs, rayons, typographies, les quatre thèmes,
+- Ne change pas la charte : couleurs, rayons, typographies, les deux thèmes,
   l'échelle de classification des coups (`--q-*`). L'apparence reste celle-ci ;
   c'est son exécution qui doit devenir irréprochable.
 - N'ajoute aucune dépendance sans le demander d'abord. En particulier : pas de
@@ -295,7 +296,7 @@ Le travail est fini quand **tous** ces points sont vrais et constatés :
 
 **Thèmes et accessibilité**
 
-- [ ] Les quatre thèmes rendent correctement chaque écran touché — aucune
+- [ ] Les deux thèmes rendent correctement chaque écran touché — aucune
       couleur littérale introduite.
 - [ ] `prefers-reduced-motion: reduce` : aucune animation décorative, et aucun
       contenu rendu invisible par ce réglage.
