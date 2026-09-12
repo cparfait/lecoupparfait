@@ -19,6 +19,7 @@ import { CarteDestination } from '@/components/ui/CarteDestination.tsx'
 import { Chip, TitreDePage } from '@/components/ui/index.tsx'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import { queteFaite } from '@/lib/daily/quotidien.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 import { SECTIONS } from '@/lib/navigation.ts'
 
 const TEINTE = SECTIONS.find((s) => s.id === 'entrainer')?.teinte
@@ -27,26 +28,23 @@ const EXERCICES = [
   {
     href: '/puzzles',
     icon: Puzzle,
-    titre: 'Puzzles',
-    phrase:
-      'Une position, un coup à trouver. Le niveau suit le tien, et une erreur ne ferme pas l’exercice.',
-    detail: '6 millions de positions · 12 thèmes · classement personnel',
+    titreKey: 'train.puzzles',
+    phraseKey: 'train.puzzlesBlurb',
+    detailKey: 'train.puzzlesDetail',
   },
   {
     href: '/puzzles/rush',
     icon: Timer,
-    titre: 'Puzzle rush',
-    phrase:
-      'Le plus de positions possible avant la fin du temps. On ne réfléchit plus, on reconnaît.',
-    detail: '3 minutes, 5 minutes ou survie · trois erreurs et la manche s’arrête',
+    titreKey: 'train.rush',
+    phraseKey: 'train.rushBlurb',
+    detailKey: 'train.rushDetail',
   },
   {
     href: '/puzzles?defi=1',
     icon: Zap,
-    titre: 'Défi du jour',
-    phrase:
-      'Une seule position, la même pour tout le monde de ton niveau. La prochaine arrive à minuit.',
-    detail: 'Compte pour la série et pour les quêtes du jour',
+    titreKey: 'train.daily',
+    phraseKey: 'train.dailyBlurb',
+    detailKey: 'train.dailyDetail',
   },
   // Le test de niveau est rangé ici en plus de « Apprendre », et ce n'est pas
   // un doublon : il travaille la même matière que les trois autres — les
@@ -55,14 +53,14 @@ const EXERCICES = [
   {
     href: '/apprendre/niveau',
     icon: Gauge,
-    titre: 'Test de niveau',
-    phrase:
-      'Douze positions, plus dures ou plus simples selon tes réponses. À la fin, un niveau estimé et ce qu’il faut travailler.',
-    detail: 'Six minutes · ne touche ni à ton Elo ni à ta cote de puzzles',
+    titreKey: 'train.levelTest',
+    phraseKey: 'train.levelTestBlurb',
+    detailKey: 'train.levelTestDetail',
   },
 ] as const
 
 export default function EntrainementPage() {
+  const t = useT()
   const { etat: journee } = useQuotidien()
   // `null` tant que la journée n'est pas lue : on n'annonce pas « déjà relevé »
   // à quelqu'un qui ne l'a pas fait, le temps d'un rendu.
@@ -70,12 +68,10 @@ export default function EntrainementPage() {
 
   return (
     <div className="page">
-      <TitreDePage intro="Les mêmes positions, quatre façons de s’en servir : chercher le coup juste, le reconnaître vite, en résoudre une par jour — ou s’en servir pour mesurer son niveau.">
-        S’entraîner
-      </TitreDePage>
+      <TitreDePage intro={t('train.intro')}>{t('train.title')}</TitreDePage>
 
       <div className="grille-cartes">
-        {EXERCICES.map(({ href, icon, titre, phrase, detail }, index) => (
+        {EXERCICES.map(({ href, icon, titreKey, phraseKey, detailKey }, index) => (
           <CarteDestination
             key={href}
             href={href}
@@ -84,16 +80,16 @@ export default function EntrainementPage() {
             // et une pastille de la couleur de la rubrique aurait annoncé un
             // quatrième exercice alors que c'est une mesure.
             teinte={href.startsWith('/apprendre') ? 'var(--rub-apprendre)' : TEINTE}
-            titre={titre}
-            phrase={phrase}
-            detail={detail}
+            titre={t(titreKey)}
+            phrase={t(phraseKey)}
+            detail={t(detailKey)}
             // Le défi relevé se dit ici plutôt que sur la position : on le
             // découvrait en arrivant devant l'échiquier, une fois le geste fait.
             badge={
               href.includes('defi=1') && defiFait ? (
                 <Chip tone="success">
                   <Check size={11} aria-hidden />
-                  relevé
+                  {t('train.dailyDone')}
                 </Chip>
               ) : undefined
             }

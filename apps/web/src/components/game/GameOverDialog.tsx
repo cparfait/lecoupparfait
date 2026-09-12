@@ -24,21 +24,16 @@ import { Button } from '@/components/ui/index.tsx'
 import type { PlayedMove } from '@/lib/game/useChessGame.ts'
 import type { BilanDesCoups as Bilan } from '@/lib/game/useQualitesDesCoups.ts'
 import { BilanDesCoups } from '@/components/game/BilanDesCoups.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
-const REASONS: Record<GameStatus, string> = {
-  waiting: '',
-  playing: '',
-  checkmate: 'par échec et mat',
-  stalemate: 'par pat — le roi n’est pas en échec mais aucun coup n’est possible',
-  resign: 'par abandon',
-  timeout: 'au temps',
-  draw: 'par accord mutuel',
-  insufficientMaterial: 'matériel insuffisant pour mater',
-  threefold: 'par répétition de la position',
-  fiftyMoves: 'par la règle des cinquante coups',
-  aborted: 'partie annulée',
-  abandoned: 'partie abandonnée',
-}
+/*
+  Les deux états sans phrase restent hors du dictionnaire.
+
+  « En attente » et « en cours » ne sont pas des fins de partie : la boîte ne
+  se monte jamais dessus. Les traduire aurait demandé deux clés vides dans
+  trente-neuf langues, que personne n'aurait jamais lues.
+*/
+const SANS_RAISON = new Set<GameStatus>(['waiting', 'playing'])
 
 export function GameOverDialog({
   status,
@@ -122,6 +117,7 @@ export function GameOverDialog({
    */
   quete?: { libelle: string; faite: boolean; restantes: number }
 }) {
+  const t = useT()
   const [dismissed, setDismissed] = useState(false)
 
   /**
@@ -162,15 +158,15 @@ export function GameOverDialog({
   const title =
     playerColor === null
       ? drawn
-        ? 'Partie nulle'
+        ? t('game.over.draw')
         : result === '1-0'
-          ? 'Les Blancs gagnent'
-          : 'Les Noirs gagnent'
+          ? t('game.over.whiteWins')
+          : t('game.over.blackWins')
       : drawn
-        ? 'Partie nulle'
+        ? t('game.over.draw')
         : won
-          ? 'Victoire !'
-          : 'Défaite'
+          ? t('game.over.win')
+          : t('game.over.loss')
 
   const tone = drawn ? 'var(--q-forced)' : won ? 'var(--q-best)' : 'var(--q-blunder)'
 
@@ -197,10 +193,10 @@ export function GameOverDialog({
       })),
       {
         headers: {
-          Event: 'Partie Le Coup Parfait',
+          Event: t('game.over.pgnEvent'),
           Date: formatPgnDate(new Date()),
-          White: playerColor === 'w' ? 'Toi' : opponentName,
-          Black: playerColor === 'b' ? 'Toi' : opponentName,
+          White: playerColor === 'w' ? t('common.you') : opponentName,
+          Black: playerColor === 'b' ? t('common.you') : opponentName,
           Result: result,
         },
       },
@@ -255,7 +251,7 @@ export function GameOverDialog({
           type="button"
           onClick={() => setDismissed(true)}
           className="absolute right-1.5 top-1.5 grid h-11 w-11 place-items-center rounded text-faint transition-colors hover:text-ink"
-          aria-label="Fermer"
+          aria-label={t('game.over.close')}
         >
           <X size={16} aria-hidden />
         </button>
@@ -273,8 +269,10 @@ export function GameOverDialog({
           {/* Article 6.9 : le drapeau est tombé, mais l'adversaire n'avait plus
               de quoi mater. « Au temps » seul se lirait comme une défaite. */}
           {status === 'timeout' && result === '1/2-1/2'
-            ? 'temps écoulé, mais l’adversaire ne pouvait plus mater'
-            : REASONS[status] || result}
+            ? t('game.over.timeoutNoMate')
+            : SANS_RAISON.has(status)
+              ? result
+              : t(`game.reasons.${status}` as never)}
         </p>
 
         {ratingDelta != null && (
@@ -293,11 +291,11 @@ export function GameOverDialog({
             est dite là où on la cherche — à la place du gain qu'on attendait. */}
         {nonClassee && (
           <p className="mt-3 text-[13px] leading-relaxed text-muted">
-            Partie non classée&nbsp;: {nonClassee}
+            {t('game.over.notRated')}&nbsp;{nonClassee}
           </p>
         )}
 
-        <p className="mt-4 text-xs text-faint">{moves.length} demi-coups joués</p>
+        <p className="mt-4 text-xs text-faint">{t('game.over.halfMoves', { n: moves.length })}</p>
 
         {/* ── La pertinence des coups ───────────────────────────────────
             Avant les boutons : c'est le bilan qui décide si l'on veut
@@ -307,8 +305,18 @@ export function GameOverDialog({
           <BilanDesCoups
             bilan={bilan}
             noms={{
-              w: playerColor === null ? 'Blancs' : playerColor === 'w' ? 'Toi' : opponentName,
-              b: playerColor === null ? 'Noirs' : playerColor === 'b' ? 'Toi' : opponentName,
+              w:
+                playerColor === null
+                  ? t('settings.white')
+                  : playerColor === 'w'
+                    ? t('common.you')
+                    : opponentName,
+              b:
+                playerColor === null
+                  ? t('settings.black')
+                  : playerColor === 'b'
+                    ? t('common.you')
+                    : opponentName,
             }}
             className="mt-4"
           />
@@ -320,14 +328,12 @@ export function GameOverDialog({
             contre toi » dit où regarder à la séance suivante. */}
         {seance && (
           <div className="mt-4 rounded-[var(--radius-sm)] bg-surface px-3 py-2.5 text-left">
-            <p className="text-[12px] font-semibold text-faint">Thème de la séance</p>
+            <p className="text-[12px] font-semibold text-faint">{t('game.over.seanceTheme')}</p>
             <p className="mt-0.5 text-[14px] font-semibold">{seance.theme}</p>
 
             {seance.pour + seance.contre === 0 ? (
               <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
-                Le thème ne s’est pas présenté une seule fois dans cette partie. Ça arrive — une
-                ouverture fermée ne produit pas de colonne ouverte. La même séance sur une autre
-                partie donnera autre chose.
+                {t('game.over.seanceNever')}
               </p>
             ) : (
               <>
@@ -336,20 +342,24 @@ export function GameOverDialog({
                     <span className="block font-display text-2xl font-bold tabular-nums leading-none text-[var(--q-best)]">
                       {seance.pour}
                     </span>
-                    <span className="mt-0.5 block text-[12px] text-muted">pour toi</span>
+                    <span className="mt-0.5 block text-[12px] text-muted">
+                      {t('game.over.seanceFor')}
+                    </span>
                   </span>
                   <span>
                     <span className="block font-display text-2xl font-bold tabular-nums leading-none text-[var(--q-inaccuracy-text)]">
                       {seance.contre}
                     </span>
-                    <span className="mt-0.5 block text-[12px] text-muted">contre toi</span>
+                    <span className="mt-0.5 block text-[12px] text-muted">
+                      {t('game.over.seanceAgainst')}
+                    </span>
                   </span>
                 </div>
                 {seance.coups.length > 0 && (
                   <p className="mt-2 text-[13px] leading-relaxed text-muted">
-                    Apparu à tes coups{' '}
-                    <span className="tabular-nums text-ink">{seance.coups.join(', ')}</span> —
-                    retrouve-les dans la liste, ou en analyse.
+                    {t('game.over.seanceMovesBefore')}{' '}
+                    <span className="tabular-nums text-ink">{seance.coups.join(', ')}</span>{' '}
+                    {t('game.over.seanceMovesAfter')}
                   </p>
                 )}
               </>
@@ -367,7 +377,7 @@ export function GameOverDialog({
               quete.faite ? 'bg-[color-mix(in_oklab,var(--q-best)_14%,transparent)]' : 'bg-surface',
             )}
           >
-            <p className="text-[12px] font-semibold text-faint">Quête du jour</p>
+            <p className="text-[12px] font-semibold text-faint">{t('game.over.questTitle')}</p>
             <p className="mt-0.5 flex items-center gap-1.5 text-[14px] font-semibold">
               {quete.faite ? (
                 <Check size={14} className="shrink-0 text-[var(--q-best)]" aria-hidden />
@@ -375,14 +385,21 @@ export function GameOverDialog({
                 <Target size={14} className="shrink-0 text-faint" aria-hidden />
               )}
               {quete.libelle}
-              {quete.faite && <span className="text-[var(--q-best)]">— c’est fait</span>}
+              {quete.faite && (
+                <span className="text-[var(--q-best)]">{t('game.over.questDone')}</span>
+              )}
             </p>
             <p className="mt-1 text-[12px] leading-relaxed text-muted">
               {quete.faite
                 ? quete.restantes === 0
-                  ? 'Toutes les quêtes du jour sont faites.'
-                  : `Il te reste ${quete.restantes} quête${quete.restantes > 1 ? 's' : ''} aujourd’hui.`
-                : 'Pas encore : il faut une victoire. Une autre partie, et c’est joué.'}
+                  ? t('game.over.questAllDone')
+                  : t(
+                      quete.restantes > 1
+                        ? 'game.over.questRemainingPlural'
+                        : 'game.over.questRemaining',
+                      { n: quete.restantes },
+                    )
+                : t('game.over.questTodo')}
             </p>
           </div>
         )}
@@ -392,7 +409,7 @@ export function GameOverDialog({
           {quete?.faite && !retour && (
             <Link href="/" className="block">
               <Button variant="primary" size="lg" fullWidth icon={<Trophy size={16} />}>
-                Retour aux quêtes du jour
+                {t('game.over.backToQuests')}
               </Button>
             </Link>
           )}
@@ -408,7 +425,7 @@ export function GameOverDialog({
                 onRematch()
               }}
             >
-              Rejouer une partie
+              {t('game.over.playAgain')}
             </Button>
           )}
           {retour && (
@@ -429,7 +446,7 @@ export function GameOverDialog({
                 fullWidth
                 icon={<Gauge size={16} />}
               >
-                Analyser la partie
+                {t('game.analyse')}
               </Button>
             </Link>
           )}
@@ -445,7 +462,7 @@ export function GameOverDialog({
                   onRematch()
                 }}
               >
-                Revanche
+                {t('game.rematch')}
               </Button>
             )}
             {onNewGame && (
@@ -458,7 +475,7 @@ export function GameOverDialog({
                   onNewGame()
                 }}
               >
-                Nouvelle partie
+                {t('game.newGame')}
               </Button>
             )}
           </div>
@@ -479,7 +496,7 @@ export function GameOverDialog({
             className="mt-4 inline-flex items-center justify-center gap-1.5 text-[14px] font-medium text-muted transition-colors hover:text-ink"
           >
             <LayoutGrid size={13} aria-hidden />
-            Retour au menu
+            {t('game.over.backToMenu')}
           </Link>
         </div>
       </div>

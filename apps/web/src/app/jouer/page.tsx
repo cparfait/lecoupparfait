@@ -30,7 +30,8 @@ import { BOT_PERSONALITIES } from '@coupparfait/core'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
 import { CarteDestination } from '@/components/ui/CarteDestination.tsx'
 import { TitreDePage, TitreDeSection } from '@/components/ui/index.tsx'
-import { useT } from '@/lib/i18n/index.tsx'
+import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
+import { usePreferences } from '@/lib/store/preferences.ts'
 import { SECTIONS } from '@/lib/navigation.ts'
 
 const TEINTE = SECTIONS.find((s) => s.id === 'jouer')?.teinte
@@ -41,7 +42,7 @@ const MODES = [
     icon: Cpu,
     titleKey: 'play.vsComputer',
     blurbKey: 'play.vsComputerBlurb',
-    detail: '25 niveaux · 7 personnalités · de 100 à 3200 Elo',
+    detailKey: 'play.vsComputerDetail',
   },
   // La séance en deuxième, juste derrière la partie libre contre la machine :
   // c'est la même partie, avec un thème et un bilan. Mise plus bas, personne ne
@@ -52,63 +53,65 @@ const MODES = [
     icon: GraduationCap,
     titleKey: 'play.seance',
     blurbKey: 'play.seanceBlurb',
-    detail: '10 thèmes · adversaire calibré sur ton palier · mode commenté',
+    detailKey: 'play.seanceDetail',
   },
   {
     href: '/jouer/ami',
     icon: Users,
     titleKey: 'play.vsFriend',
     blurbKey: 'play.vsFriendBlurb',
-    detail: 'De 15 secondes à 14 jours par coup · un lien, ou un ami',
+    detailKey: 'play.vsFriendDetail',
   },
   {
     href: '/correspondance',
     icon: Mail,
     titleKey: 'play.correspondence',
     blurbKey: 'play.correspondenceBlurb',
-    detail: 'Un coup quand tu peux · de 1 à 14 jours par coup',
+    detailKey: 'play.correspondenceDetail',
   },
   {
     href: '/jouer/local',
     icon: MonitorSmartphone,
     titleKey: 'play.localGame',
     blurbKey: 'play.localBlurb',
-    detail: 'L’échiquier se retourne à chaque coup si tu le souhaites',
+    detailKey: 'play.localDetail',
   },
   {
     href: '/tournois',
     icon: Trophy,
     titleKey: 'play.arena',
     blurbKey: 'play.arenaBlurb',
-    detail: 'On arrive quand on veut, on repart quand on veut',
+    detailKey: 'play.arenaDetail',
   },
   {
     href: '/jouer/regarder',
     icon: Eye,
     titleKey: 'play.watchGame',
     blurbKey: 'play.watchBlurb',
-    detail: 'Les parties commencées, suivies coup par coup',
+    detailKey: 'play.watchDetail',
   },
   {
     href: '/carriere',
     icon: Footprints,
     titleKey: 'play.career',
     blurbKey: 'play.careerBlurb',
-    detail: '12 chapitres · une leçon, des puzzles et un duel par chapitre',
+    detailKey: 'play.careerDetail',
   },
 ] as const
 
 export default function PlayLobbyPage() {
   const t = useT()
+  /* La langue du **contenu** pour les sept portraits : leurs noms et leurs
+     phrases sont écrits dans le cœur, en français et en anglais seulement.
+     Voir `localeDuContenu`. */
+  const contenu = usePreferences((state) => localeDuContenu(state.locale))
 
   return (
     <div className="page">
-      <TitreDePage intro="Contre la machine pour t’entraîner à ton rythme, contre un ami pour le plaisir, ou à deux sur le même écran.">
-        {t('play.title')}
-      </TitreDePage>
+      <TitreDePage intro={t('play.lobbyIntro')}>{t('play.title')}</TitreDePage>
 
       <div className="grille-cartes">
-        {MODES.map(({ href, icon, titleKey, blurbKey, detail }, index) => (
+        {MODES.map(({ href, icon, titleKey, blurbKey, detailKey }, index) => (
           <CarteDestination
             key={href}
             href={href}
@@ -116,7 +119,7 @@ export default function PlayLobbyPage() {
             teinte={TEINTE}
             titre={t(titleKey)}
             phrase={t(blurbKey)}
-            detail={detail}
+            detail={t(detailKey)}
             className="animate-slide-up"
             style={{ animationDelay: `${index * 50}ms` }}
           />
@@ -126,14 +129,14 @@ export default function PlayLobbyPage() {
       {/* ── Aperçu des personnalités ─────────────────────────────────── */}
       <section className="mt-12">
         <TitreDeSection
-          hint="Chacun a un style de jeu réellement différent : leur façon de choisir un coup est biaisée en faveur de ce qu’ils aiment."
+          hint={t('play.opponentsHint')}
           action={
             <Link href="/jouer/adversaires" className="lien shrink-0">
-              Tous les portraits
+              {t('play.allPortraits')}
             </Link>
           }
         >
-          Tes adversaires artificiels
+          {t('play.opponentsTitle')}
         </TitreDeSection>
 
         {/* Sans carte : ces sept-là ne sont pas des boutons, on fait leur
@@ -147,8 +150,12 @@ export default function PlayLobbyPage() {
             >
               <PortraitAdversaire personality={personality} size={44} />
               <div className="min-w-0">
-                <p className="text-sm font-semibold group-hover:underline">{personality.name.fr}</p>
-                <p className="mt-1 text-xs leading-relaxed text-muted">{personality.blurb.fr}</p>
+                <p className="text-sm font-semibold group-hover:underline">
+                  {personality.name[contenu]}
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-muted">
+                  {personality.blurb[contenu]}
+                </p>
               </div>
             </Link>
           ))}

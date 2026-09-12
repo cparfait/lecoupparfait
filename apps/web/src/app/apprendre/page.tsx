@@ -38,6 +38,7 @@ import {
 import { ButtonLink, Card, Chip } from '@/components/ui/index.tsx'
 import { CarteDestination } from '@/components/ui/CarteDestination.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /** La teinte de la rubrique, posée une fois pour les cartes de destination. */
 const TEINTE_APPRENDRE = 'var(--rub-apprendre)'
@@ -58,6 +59,7 @@ const LEVEL_LABELS = {
 const COLLAPSED_KEY = 'coupparfait.chaptersCollapsed'
 
 export default function LearnPage() {
+  const t = useT()
   const [progress, setProgress] = useState<LessonProgress>({})
 
   /**
@@ -153,7 +155,7 @@ export default function LearnPage() {
   return (
     <div className="page">
       <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-        Apprendre les échecs
+        {t('learn.pageTitle')}
       </h1>
       {/* La consigne, en petit.
 
@@ -162,9 +164,7 @@ export default function LearnPage() {
           progression repoussée d'autant. Elle se lit une fois, à la première
           visite ; ensuite on vient reprendre un cours. */}
       <p className="mt-1.5 max-w-2xl text-[14px] leading-relaxed text-muted">
-        {CURRICULUM_STATS.lessons} leçons guidées, {CURRICULUM_STATS.steps} étapes, une voix qui
-        explique chaque coup. Tu peux commencer sans rien connaître — la première leçon part de
-        l’échiquier vide.
+        {t('learn.intro', { lecons: CURRICULUM_STATS.lessons, etapes: CURRICULUM_STATS.steps })}
       </p>
 
       {/* ── Progression globale ────────────────────────────────────────
@@ -173,13 +173,17 @@ export default function LearnPage() {
           commencé » bien mieux qu'une absence, qui ne dit rien du tout. */}
       <Card className="mt-5 overflow-hidden">
         <EnTeteDeCarte
-          titre="Ta progression"
+          titre={t('learn.yourProgress')}
           icone={<TrendingUp size={14} aria-hidden />}
           fin={
             <>
               {overall} %{' '}
               <span className="text-faint">
-                · {termineesEnTout} / {CURRICULUM_STATS.lessons} leçons
+                ·{' '}
+                {t('learn.lessonsOf', {
+                  faites: termineesEnTout,
+                  total: CURRICULUM_STATS.lessons,
+                })}
               </span>
             </>
           }
@@ -207,7 +211,7 @@ export default function LearnPage() {
       {prochaine && (
         <Card glow className="mt-4 overflow-hidden">
           <EnTeteDeCarte
-            titre={`${prochaine.entamee ? 'Reprendre où tu en étais' : 'Par où commencer'} · chapitre ${prochaine.chapitre}`}
+            titre={`${prochaine.entamee ? t('learn.resumeWhere') : t('learn.whereToStart')} · ${t('learn.chapterN', { n: prochaine.chapitre })}`}
             icone={<Play size={14} aria-hidden />}
           />
           <div className="flex flex-wrap items-center gap-4 p-5">
@@ -230,8 +234,11 @@ export default function LearnPage() {
                 {prochaine.lecon.minutes} min
                 <span aria-hidden>·</span>
                 {prochaine.entamee
-                  ? `étape ${prochaine.etapes + 1} sur ${prochaine.lecon.steps.length}`
-                  : `${prochaine.lecon.steps.length} étapes`}
+                  ? t('learn.stepOf', {
+                      n: prochaine.etapes + 1,
+                      total: prochaine.lecon.steps.length,
+                    })
+                  : t('learn.stepsCount', { n: prochaine.lecon.steps.length })}
               </p>
             </div>
             <ButtonLink
@@ -241,7 +248,7 @@ export default function LearnPage() {
               icon={<Play size={16} />}
               className="w-full sm:w-auto"
             >
-              {prochaine.entamee ? 'Reprendre' : 'Commencer'}
+              {prochaine.entamee ? t('learn.resume') : t('learn.start')}
             </ButtonLink>
           </div>
         </Card>
@@ -258,49 +265,51 @@ export default function LearnPage() {
           href="/apprendre/palier"
           icon={Target}
           teinte={TEINTE_APPRENDRE}
-          titre="Ton palier"
-          phrase="Le programme rangé par ce qui coûte le plus de points à ton niveau, et les motifs que tu rates vraiment."
-          detail="D’après ton classement, ou un test de douze positions"
+          titre={t('learn.palierTitle')}
+          phrase={t('learn.palierBlurb')}
+          detail={t('learn.palierDetail')}
           compacte
         />
         <CarteDestination
           href="/apprendre/principes"
           icon={ListChecks}
           teinte={TEINTE_APPRENDRE}
-          titre="Principes et mémo"
-          phrase="Quatre questions à se poser avant chaque coup, et les principes des trois phases — chacun avec son exception."
-          detail="Le mémo s’affiche aussi pendant tes parties"
+          titre={t('learn.principesTitle')}
+          phrase={t('learn.principesBlurb')}
+          detail={t('learn.principesDetail')}
           compacte
         />
         <CarteDestination
           href="/apprendre/ecoute"
           icon={Headphones}
           teinte={TEINTE_APPRENDRE}
-          titre="Écouter le programme"
-          phrase="Les leçons lues à voix haute, sans rien à toucher. Pour réviser en faisant autre chose."
-          detail={`${CURRICULUM_STATS.steps} étapes, enchaînées tout seul`}
+          titre={t('learn.ecouteTitle')}
+          phrase={t('learn.ecouteBlurb')}
+          detail={t('learn.ecouteDetail', { etapes: CURRICULUM_STATS.steps })}
           compacte
         />
         <CarteDestination
           href="/jouer/pedagogique"
           icon={Play}
           teinte="var(--rub-jouer)"
-          titre="Séance pédagogique"
-          phrase="Une partie avec un thème annoncé avant de commencer, et un bilan qui dit où ce thème est apparu."
-          detail="Adversaire calibré sur ton palier"
+          titre={t('learn.seanceTitle')}
+          phrase={t('learn.seanceBlurb')}
+          detail={t('learn.seanceDetail')}
           compacte
         />
       </div>
 
       {/* ── Chapitres ────────────────────────────────────────────────── */}
       <div className="mt-8 flex items-baseline justify-between gap-4">
-        <p className="text-[12px] font-semibold text-faint">{CHAPTERS.length} chapitres</p>
+        <p className="text-[12px] font-semibold text-faint">
+          {t('learn.chaptersCount', { n: CHAPTERS.length })}
+        </p>
         <button
           type="button"
           onClick={toggleAll}
           className="text-[14px] font-medium text-accent transition-colors hover:underline"
         >
-          {allCollapsed ? 'Tout déplier' : 'Tout replier'}
+          {allCollapsed ? t('learn.expandAll') : t('learn.collapseAll')}
         </button>
       </div>
 

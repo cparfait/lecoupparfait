@@ -232,13 +232,13 @@ function Hero() {
         <div className="animate-slide-up">
           <Chip tone="accent" className="mb-5">
             <Sparkles size={11} aria-hidden />
-            100 % gratuit · code libre · sans publicité
+            {t('home.badge')}
           </Chip>
 
           <h1 className="font-display text-[clamp(2.2rem,6vw,4.1rem)] font-bold leading-[1.03] tracking-tight">
-            <span className="text-gradient">Les échecs,</span>
+            <span className="text-gradient">{t('home.heroTitleTop')}</span>
             <br />
-            enfin expliqués.
+            {t('home.heroTitleBottom')}
           </h1>
 
           <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-muted">
@@ -268,17 +268,16 @@ function Hero() {
               n'a rien à donner pour commencer, la seconde ce qu'on gagne à
               revenir. Dans cet ordre, et pas l'inverse. */}
           <p className="mt-4 text-xs leading-relaxed text-faint">
-            Aucune inscription nécessaire pour jouer ou apprendre.
+            {t('home.noSignup')}
             <br />
-            Un compte —{' '}
+            {t('home.accountBefore')}{' '}
             <Link
               href="/connexion"
               className="font-semibold text-muted hover:text-ink hover:underline"
             >
-              gratuit, un pseudo et un mot de passe
+              {t('home.accountLink')}
             </Link>{' '}
-            — ajoute le défi du jour, ta série, ton classement par cadence et l’historique de tes
-            parties.
+            {t('home.accountAfter')}
           </p>
         </div>
 
@@ -334,9 +333,7 @@ function Hero() {
               <Volume2 size={14} className="text-accent" aria-hidden />
             </span>
             <div className="min-w-0">
-              <p className="text-[12px] font-semibold text-faint">
-                Le coach commente · Anderssen – Kieseritzky, Londres 1851
-              </p>
+              <p className="text-[12px] font-semibold text-faint">{t('home.demoCaption')}</p>
               <p className="mt-1 text-sm leading-relaxed">{comment}</p>
             </div>
           </Card>
@@ -418,10 +415,10 @@ function Essentiel() {
           sur une ligne, sans carte, sans icône, sans liseré. Ce qui encombrait
           n'était pas l'existence de ces chemins, c'était le mobilier autour. */}
       <nav
-        aria-label="Aller plus loin"
+        aria-label={t('home.goFurther')}
         className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line/60 pt-5 text-sm"
       >
-        <span className="text-[12px] font-semibold text-faint">Aller plus loin</span>
+        <span className="text-[12px] font-semibold text-faint">{t('home.goFurther')}</span>
         {PORTES.map(({ href, label }) => (
           <Link
             key={href}

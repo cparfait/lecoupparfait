@@ -132,6 +132,17 @@ export const fr = {
       freeBody:
         'Aucune fonctionnalité payante, aucun traqueur, aucune donnée revendue. Le code est sous licence AGPL : héberge-le toi-même si tu veux.',
     },
+    badge: '100 % gratuit · code libre · sans publicité',
+    heroTitleTop: 'Les échecs,',
+    heroTitleBottom: 'enfin expliqués.',
+    noSignup: 'Aucune inscription nécessaire pour jouer ou apprendre.',
+    accountBefore: 'Un compte —',
+    accountLink: 'gratuit, un pseudo et un mot de passe',
+    accountAfter:
+      '— ajoute le défi du jour, ta série, ton classement par cadence et l’historique de tes parties.',
+    demoCaption: 'Le coach commente · Anderssen – Kieseritzky, Londres 1851',
+    goFurther: 'Aller plus loin',
+
     statsGames: 'parties jouées',
     statsPuzzles: 'puzzles disponibles',
     statsOpenings: 'ouvertures répertoriées',
@@ -158,6 +169,21 @@ export const fr = {
     arena: 'Arène',
     arenaBlurb:
       'Un tournoi où l’on arrive et repart quand on veut, réapparié à chaque fin de partie.',
+    lobbyIntro:
+      'Contre la machine pour t’entraîner à ton rythme, contre un ami pour le plaisir, ou à deux sur le même écran.',
+    vsComputerDetail: '25 niveaux · 7 personnalités · de 100 à 3200 Elo',
+    seanceDetail: '10 thèmes · adversaire calibré sur ton palier · mode commenté',
+    vsFriendDetail: 'De 15 secondes à 14 jours par coup · un lien, ou un ami',
+    correspondenceDetail: 'Un coup quand tu peux · de 1 à 14 jours par coup',
+    localDetail: 'L’échiquier se retourne à chaque coup si tu le souhaites',
+    arenaDetail: 'On arrive quand on veut, on repart quand on veut',
+    watchDetail: 'Les parties commencées, suivies coup par coup',
+    careerDetail: '12 chapitres · une leçon, des puzzles et un duel par chapitre',
+    opponentsTitle: 'Tes adversaires artificiels',
+    opponentsHint:
+      'Chacun a un style de jeu réellement différent : leur façon de choisir un coup est biaisée en faveur de ce qu’ils aiment.',
+    allPortraits: 'Tous les portraits',
+
     quickPairing: 'Partie rapide',
     level: 'Niveau',
     difficulty: 'Difficulté',
@@ -209,6 +235,47 @@ export const fr = {
     byFiftyMoves: 'par la règle des cinquante coups',
     byInsufficientMaterial: 'matériel insuffisant',
     ratingChange: 'Classement',
+    over: {
+      whiteWins: 'Les Blancs gagnent',
+      blackWins: 'Les Noirs gagnent',
+      win: 'Victoire !',
+      loss: 'Défaite',
+      draw: 'Partie nulle',
+      close: 'Fermer',
+      halfMoves: '{n} demi-coups joués',
+      notRated: 'Partie non classée :',
+      timeoutNoMate: 'temps écoulé, mais l’adversaire ne pouvait plus mater',
+      pgnEvent: 'Partie Le Coup Parfait',
+      seanceTheme: 'Thème de la séance',
+      seanceNever:
+        'Le thème ne s’est pas présenté une seule fois dans cette partie. Ça arrive — une ouverture fermée ne produit pas de colonne ouverte. La même séance sur une autre partie donnera autre chose.',
+      seanceFor: 'pour toi',
+      seanceAgainst: 'contre toi',
+      seanceMovesBefore: 'Apparu à tes coups',
+      seanceMovesAfter: '— retrouve-les dans la liste, ou en analyse.',
+      questTitle: 'Quête du jour',
+      questDone: '— c’est fait',
+      questAllDone: 'Toutes les quêtes du jour sont faites.',
+      questRemaining: 'Il te reste {n} quête aujourd’hui.',
+      questRemainingPlural: 'Il te reste {n} quêtes aujourd’hui.',
+      questTodo: 'Pas encore : il faut une victoire. Une autre partie, et c’est joué.',
+      backToQuests: 'Retour aux quêtes du jour',
+      playAgain: 'Rejouer une partie',
+      backToMenu: 'Retour au menu',
+    },
+    reasons: {
+      checkmate: 'par échec et mat',
+      stalemate: 'par pat — le roi n’est pas en échec mais aucun coup n’est possible',
+      resign: 'par abandon',
+      timeout: 'au temps',
+      draw: 'par accord mutuel',
+      insufficientMaterial: 'matériel insuffisant pour mater',
+      threefold: 'par répétition de la position',
+      fiftyMoves: 'par la règle des cinquante coups',
+      aborted: 'partie annulée',
+      abandoned: 'partie abandonnée',
+    },
+
     view2D: 'Vue 2D',
     view3D: 'Vue 3D',
     switchView: 'Changer de vue',
@@ -255,6 +322,36 @@ export const fr = {
   learn: {
     title: 'Apprendre',
     subtitle: 'Des leçons guidées, à ton rythme, avec un échiquier et une voix.',
+    pageTitle: 'Apprendre les échecs',
+    intro:
+      '{lecons} leçons guidées, {etapes} étapes, une voix qui explique chaque coup. Tu peux commencer sans rien connaître — la première leçon part de l’échiquier vide.',
+    yourProgress: 'Ta progression',
+    lessonsOf: '{faites} / {total} leçons',
+    resumeWhere: 'Reprendre où tu en étais',
+    whereToStart: 'Par où commencer',
+    chapterN: 'chapitre {n}',
+    stepOf: 'étape {n} sur {total}',
+    stepsCount: '{n} étapes',
+    chaptersCount: '{n} chapitres',
+    expandAll: 'Tout déplier',
+    collapseAll: 'Tout replier',
+    palierTitle: 'Ton palier',
+    palierBlurb:
+      'Le programme rangé par ce qui coûte le plus de points à ton niveau, et les motifs que tu rates vraiment.',
+    palierDetail: 'D’après ton classement, ou un test de douze positions',
+    principesTitle: 'Principes et mémo',
+    principesBlurb:
+      'Quatre questions à se poser avant chaque coup, et les principes des trois phases — chacun avec son exception.',
+    principesDetail: 'Le mémo s’affiche aussi pendant tes parties',
+    ecouteTitle: 'Écouter le programme',
+    ecouteBlurb:
+      'Les leçons lues à voix haute, sans rien à toucher. Pour réviser en faisant autre chose.',
+    ecouteDetail: '{etapes} étapes, enchaînées tout seul',
+    seanceTitle: 'Séance pédagogique',
+    seanceBlurb:
+      'Une partie avec un thème annoncé avant de commencer, et un bilan qui dit où ce thème est apparu.',
+    seanceDetail: 'Adversaire calibré sur ton palier',
+
     chapters: 'Chapitres',
     lessons: 'leçons',
     minutes: 'min',
@@ -275,6 +372,29 @@ export const fr = {
       intermediate: 'Intermédiaire',
       advanced: 'Confirmé',
     },
+  },
+
+  train: {
+    title: 'S’entraîner',
+    intro:
+      'Les mêmes positions, quatre façons de s’en servir : chercher le coup juste, le reconnaître vite, en résoudre une par jour — ou s’en servir pour mesurer son niveau.',
+    puzzles: 'Puzzles',
+    puzzlesBlurb:
+      'Une position, un coup à trouver. Le niveau suit le tien, et une erreur ne ferme pas l’exercice.',
+    puzzlesDetail: '6 millions de positions · 12 thèmes · classement personnel',
+    rush: 'Puzzle rush',
+    rushBlurb:
+      'Le plus de positions possible avant la fin du temps. On ne réfléchit plus, on reconnaît.',
+    rushDetail: '3 minutes, 5 minutes ou survie · trois erreurs et la manche s’arrête',
+    daily: 'Défi du jour',
+    dailyBlurb:
+      'Une seule position, la même pour tout le monde de ton niveau. La prochaine arrive à minuit.',
+    dailyDetail: 'Compte pour la série et pour les quêtes du jour',
+    dailyDone: 'relevé',
+    levelTest: 'Test de niveau',
+    levelTestBlurb:
+      'Douze positions, plus dures ou plus simples selon tes réponses. À la fin, un niveau estimé et ce qu’il faut travailler.',
+    levelTestDetail: 'Six minutes · ne touche ni à ton Elo ni à ta cote de puzzles',
   },
 
   puzzles: {

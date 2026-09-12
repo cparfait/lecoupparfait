@@ -133,6 +133,17 @@ export const en: Dictionary = {
       freeBody:
         'No paid tier, no trackers, no data resold. The code is AGPL-licensed: host it yourself if you like.',
     },
+    badge: '100% free · open source · no ads',
+    heroTitleTop: 'Chess,',
+    heroTitleBottom: 'finally explained.',
+    noSignup: 'No sign-up needed to play or learn.',
+    accountBefore: 'An account —',
+    accountLink: 'free, a username and a password',
+    accountAfter:
+      '— adds the daily challenge, your streak, your rating per time control and the history of your games.',
+    demoCaption: 'The coach comments · Anderssen – Kieseritzky, London 1851',
+    goFurther: 'Go further',
+
     statsGames: 'games played',
     statsPuzzles: 'puzzles available',
     statsOpenings: 'openings catalogued',
@@ -157,6 +168,21 @@ export const en: Dictionary = {
     correspondenceBlurb: 'One move whenever you can, over days.',
     arena: 'Arena',
     arenaBlurb: 'A tournament you can join and leave at will.',
+    lobbyIntro:
+      'Against the machine to train at your own pace, against a friend for the fun of it, or two of you on one screen.',
+    vsComputerDetail: '25 levels · 7 personalities · from 100 to 3200 Elo',
+    seanceDetail: '10 themes · opponent matched to your tier · commentary mode',
+    vsFriendDetail: 'From 15 seconds to 14 days per move · a link, or a friend',
+    correspondenceDetail: 'A move whenever you can · 1 to 14 days per move',
+    localDetail: 'The board flips after every move if you want it to',
+    arenaDetail: 'Arrive whenever you like, leave whenever you like',
+    watchDetail: 'Games in progress, followed move by move',
+    careerDetail: '12 chapters · one lesson, some puzzles and a duel per chapter',
+    opponentsTitle: 'Your artificial opponents',
+    opponentsHint:
+      'Each one really does play differently: the way they pick a move is biased towards what they like.',
+    allPortraits: 'All the portraits',
+
     quickPairing: 'Quick game',
     level: 'Level',
     difficulty: 'Difficulty',
@@ -208,6 +234,47 @@ export const en: Dictionary = {
     byFiftyMoves: 'by the fifty-move rule',
     byInsufficientMaterial: 'insufficient material',
     ratingChange: 'Rating',
+    over: {
+      whiteWins: 'White wins',
+      blackWins: 'Black wins',
+      win: 'You won!',
+      loss: 'Defeat',
+      draw: 'Draw',
+      close: 'Close',
+      halfMoves: '{n} half-moves played',
+      notRated: 'Unrated game:',
+      timeoutNoMate: 'time ran out, but your opponent could no longer mate',
+      pgnEvent: 'Le Coup Parfait game',
+      seanceTheme: 'Theme of the session',
+      seanceNever:
+        'The theme did not come up once in this game. It happens — a closed opening produces no open file. The same session on another game will give you something else.',
+      seanceFor: 'for you',
+      seanceAgainst: 'against you',
+      seanceMovesBefore: 'Appeared on your moves',
+      seanceMovesAfter: '— find them in the move list, or in the analysis.',
+      questTitle: 'Daily quest',
+      questDone: '— done',
+      questAllDone: 'Every daily quest is done.',
+      questRemaining: 'You have {n} quest left today.',
+      questRemainingPlural: 'You have {n} quests left today.',
+      questTodo: 'Not yet: it takes a win. One more game and it is done.',
+      backToQuests: 'Back to the daily quests',
+      playAgain: 'Play another game',
+      backToMenu: 'Back to the menu',
+    },
+    reasons: {
+      checkmate: 'by checkmate',
+      stalemate: 'by stalemate — the king is not in check but no move is possible',
+      resign: 'by resignation',
+      timeout: 'on time',
+      draw: 'by agreement',
+      insufficientMaterial: 'insufficient material to mate',
+      threefold: 'by threefold repetition',
+      fiftyMoves: 'by the fifty-move rule',
+      aborted: 'game aborted',
+      abandoned: 'game abandoned',
+    },
+
     view2D: '2D view',
     view3D: '3D view',
     switchView: 'Switch view',
@@ -254,6 +321,36 @@ export const en: Dictionary = {
   learn: {
     title: 'Learn',
     subtitle: 'Guided lessons, at your pace, with a board and a voice.',
+    pageTitle: 'Learn chess',
+    intro:
+      '{lecons} guided lessons, {etapes} steps, a voice that explains every move. You can start knowing nothing — the first lesson begins with an empty board.',
+    yourProgress: 'Your progress',
+    lessonsOf: '{faites} / {total} lessons',
+    resumeWhere: 'Pick up where you left off',
+    whereToStart: 'Where to start',
+    chapterN: 'chapter {n}',
+    stepOf: 'step {n} of {total}',
+    stepsCount: '{n} steps',
+    chaptersCount: '{n} chapters',
+    expandAll: 'Expand all',
+    collapseAll: 'Collapse all',
+    palierTitle: 'Your tier',
+    palierBlurb:
+      'The curriculum ordered by what costs you the most points at your level, and the patterns you really do miss.',
+    palierDetail: 'From your rating, or a twelve-position test',
+    principesTitle: 'Principles and checklist',
+    principesBlurb:
+      'Four questions to ask before every move, and the principles of the three phases — each with its exception.',
+    principesDetail: 'The checklist also shows during your games',
+    ecouteTitle: 'Listen to the curriculum',
+    ecouteBlurb:
+      'The lessons read out loud, with nothing to touch. For revising while doing something else.',
+    ecouteDetail: '{etapes} steps, played one after another',
+    seanceTitle: 'Coaching session',
+    seanceBlurb:
+      'A game with a theme announced before you start, and a debrief telling you where that theme showed up.',
+    seanceDetail: 'Opponent matched to your tier',
+
     chapters: 'Chapters',
     lessons: 'lessons',
     minutes: 'min',
@@ -274,6 +371,29 @@ export const en: Dictionary = {
       intermediate: 'Intermediate',
       advanced: 'Advanced',
     },
+  },
+
+  train: {
+    title: 'Train',
+    intro:
+      'The same positions, four ways of using them: finding the right move, recognising it fast, solving one a day — or using them to measure your level.',
+    puzzles: 'Puzzles',
+    puzzlesBlurb:
+      'One position, one move to find. The difficulty follows yours, and a mistake does not close the exercise.',
+    puzzlesDetail: '6 million positions · 12 themes · personal rating',
+    rush: 'Puzzle rush',
+    rushBlurb:
+      'As many positions as you can before time runs out. You stop calculating and start recognising.',
+    rushDetail: '3 minutes, 5 minutes or survival · three mistakes and the run ends',
+    daily: 'Daily challenge',
+    dailyBlurb:
+      'A single position, the same one for everybody at your level. The next one arrives at midnight.',
+    dailyDetail: 'Counts towards your streak and the daily quests',
+    dailyDone: 'done',
+    levelTest: 'Level test',
+    levelTestBlurb:
+      'Twelve positions, harder or easier depending on your answers. At the end, an estimated level and what to work on.',
+    levelTestDetail: 'Six minutes · touches neither your Elo nor your puzzle rating',
   },
 
   puzzles: {
