@@ -204,23 +204,37 @@ function majuscule(texte: string): string {
 }
 
 /**
+ * Notation d'origine d'un coup à prononcer.
+ *
+ * Les deux alphabets ne se recouvrent que sur une lettre, et c'est justement
+ * celle du roi : `R` est la **tour** en anglais et le **roi** en français. Toutes
+ * les autres — `N B Q K` d'un côté, `C F T D` de l'autre — sont sans ambiguïté
+ * et se reconnaissent quelle que soit la valeur donnée ici.
+ *
+ * D'où ce paramètre : sur un `R`, il n'existe aucun moyen de deviner, et se
+ * tromper s'entend immédiatement.
+ *  - `'en'` — le coup vient de chess.js ou du moteur, format d'échange du
+ *    projet. C'est le cas courant, donc la valeur par défaut.
+ *  - `'fr'` — le coup a déjà été traduit pour l'affichage, et on relit du texte
+ *    écrit pour un lecteur français.
+ */
+export type SanDialect = 'en' | 'fr'
+
+/**
  * Notation épelée pour la synthèse vocale.
  * `Cf3` devient « cavalier f 3 », `O-O` devient « petit roque ».
  */
-export function sanToSpeech(san: string, locale: Locale): string {
+export function sanToSpeech(san: string, locale: Locale, dialect: SanDialect = 'en'): string {
   const fr = locale === 'fr'
   if (san.startsWith('O-O-O')) return fr ? 'grand roque' : 'queenside castles'
   if (san.startsWith('O-O')) return fr ? 'petit roque' : 'kingside castles'
 
-  // La notation arrive presque toujours **en anglais** : c'est ce que produit
-  // chess.js, et c'est le format d'échange du projet. On la reconnaît donc en
-  // premier, et on n'essaie la notation localisée qu'à défaut.
-  //
-  // L'ordre compte : « R » désigne la tour en anglais et le roi en français.
-  // Chercher d'abord les lettres françaises faisait lire « Cf3 » à un « Nf3 »
-  // qui n'y ressemble pas — aucune lettre ne correspondait, et tous les coups
-  // de pièce étaient annoncés « pion ».
-  const found = matchPiece(san, SAN_LETTER_EN) ?? (fr ? matchPiece(san, SAN_LETTER_FR) : null)
+  // On essaie d'abord l'alphabet annoncé, l'autre ensuite : un `Nf3` anglais
+  // resté dans un texte français se lit toujours « cavalier », puisque `N`
+  // n'existe pas en notation française. Seul le `R` dépend vraiment du dialecte.
+  const [premier, second] =
+    dialect === 'fr' ? [SAN_LETTER_FR, SAN_LETTER_EN] : [SAN_LETTER_EN, SAN_LETTER_FR]
+  const found = matchPiece(san, premier) ?? matchPiece(san, second)
 
   let rest = san
   let spoken = ''

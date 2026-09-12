@@ -33,7 +33,7 @@ import Link from 'next/link'
 import clsx from 'clsx'
 import { Chess } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
-import { motifCopy, sanToFrench, type MotifId } from '@coupparfait/core'
+import { motifCopy, sanToSpeech, type MotifId } from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, ButtonLink, Card, Chip, EmptyState, Spinner } from '@/components/ui/index.tsx'
 import { playMoveFor, playSound } from '@/lib/sound.ts'
@@ -1221,8 +1221,16 @@ function sanOf(fen: string, uci: string | undefined): string | null {
   }
 }
 
+/**
+ * Le coup de la solution, épelé pour la voix.
+ *
+ * Le coup arrive de chess.js, donc en notation anglaise : on l'épelle depuis
+ * cette notation-là. Le traduire d'abord en français le faisait relire par la
+ * synthèse, qui retombait sur le `R` partagé par les deux notations et
+ * annonçait « tour prend en d 5 » un coup de roi.
+ */
 function sanToSpeechSafe(san: string, locale: 'fr' | 'en'): string {
-  return locale === 'fr' ? sanToFrench(san) : san
+  return sanToSpeech(san, locale, 'en')
 }
 
 /**

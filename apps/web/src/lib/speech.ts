@@ -594,6 +594,7 @@ const SAN_IN_PROSE = new RegExp(String.raw`\b[CFTDRNBQK]x?[a-h][1-8][+#]?\b`, 'g
 const SQUARE = new RegExp(String.raw`\b([a-h])([1-8])\b`, 'g')
 
 function cleanForSpeech(text: string): string {
+  const { locale } = getPreferences()
   const steps = text
     .replace(/\*\*/g, '')
     .replace(/[«»"]/g, '')
@@ -617,7 +618,12 @@ function cleanForSpeech(text: string): string {
     // Un coup écrit en toutes lettres au milieu d'une phrase — « Mieux valait
     // Cf3 » — est épelé « cé eff trois ». On le confie au traducteur des
     // annonces, qui en fait « cavalier f 3 ».
-    .replace(SAN_IN_PROSE, (san) => sanToSpeech(san, getPreferences().locale))
+    //
+    // Ces phrases sont écrites pour être lues : les coups qu'elles citent sont
+    // déjà dans la notation du lecteur. Le préciser est indispensable sur le
+    // roi — « Rxd5 » se lisait « tour prend en d 5 », la seule lettre que les
+    // deux notations se disputent.
+    .replace(SAN_IN_PROSE, (san) => sanToSpeech(san, locale, locale))
     // Une case collée est lue comme un mot ; séparée, elle est épelée.
     .replace(SQUARE, '$1 $2')
 
