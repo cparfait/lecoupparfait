@@ -36,6 +36,8 @@ import { Check, Copy, Link2, Loader2, Mailbox, Share2, Swords, UserPlus, Users }
 import clsx from 'clsx'
 import { SPEED_LABELS, TIME_CONTROLS } from '@coupparfait/core'
 import { Button, Card, Chip, Input, SectionTitle, Spinner } from '@/components/ui/index.tsx'
+import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
+import { usePreferences } from '@/lib/store/preferences.ts'
 import { toast } from '@/components/ui/Toast.tsx'
 import { generateGameSlug, retenirSouhaitDeCouleur } from '@/lib/game/useLiveGame.ts'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
@@ -58,6 +60,10 @@ interface DefiEnvoye {
 
 export default function CreateFriendGamePage() {
   const router = useRouter()
+  const t = useT()
+  /* Les noms de catégorie — « blitz », « rapide » — sont écrits dans le cœur,
+     qui ne les produit qu'en français et en anglais. Voir `localeDuContenu`. */
+  const contenu = usePreferences((state) => localeDuContenu(state.locale))
   const [timeControlId, setTimeControlId] = useState('600+5')
   /**
    * Délai par coup, en jours, quand on joue par correspondance.
@@ -120,18 +126,18 @@ export default function CreateFriendGamePage() {
         })
         const data = await reponse.json().catch(() => ({}))
         if (!reponse.ok) {
-          toast.error(data.error ?? 'Création impossible.')
+          toast.error(data.error ?? t('friendGame.createFailed'))
           return
         }
-        toast.success('Partie lancée.', 'Les couleurs ont été tirées au sort.')
+        toast.success(t('friendGame.started'), t('friendGame.startedHint'))
         router.push('/correspondance')
       } catch {
-        toast.error('Le serveur est injoignable.')
+        toast.error(t('friendGame.serverUnreachable'))
       } finally {
         setEnvoi(null)
       }
     },
-    [jours, router],
+    [jours, router, t],
   )
 
   /**
@@ -160,18 +166,21 @@ export default function CreateFriendGamePage() {
         })
         const data = await reponse.json().catch(() => ({}))
         if (!reponse.ok) {
-          toast.error(data.error ?? 'Défi impossible.')
+          toast.error(data.error ?? t('friendGame.challengeFailed'))
           return
         }
-        toast.info(`Défi envoyé à ${ami.username}.`, 'On attend sa réponse.')
+        toast.info(
+          t('friendGame.challengeSent', { pseudo: ami.username }),
+          t('friendGame.challengeSentHint'),
+        )
         chargerAmis()
       } catch {
-        toast.error('Le serveur est injoignable.')
+        toast.error(t('friendGame.serverUnreachable'))
       } finally {
         setEnvoi(null)
       }
     },
-    [timeControlId, rated, couleur, chargerAmis],
+    [timeControlId, rated, couleur, chargerAmis, t],
   )
 
   /** Retire un défi qu'on a envoyé : se tromper de cadence doit se rattraper. */
@@ -230,20 +239,20 @@ export default function CreateFriendGamePage() {
     try {
       await navigator.clipboard.writeText(url)
       setCopied(true)
-      toast.success('Lien copié', 'Envoie-le à ton adversaire.')
+      toast.success(t('friendGame.linkCopied'), t('friendGame.linkCopiedHint'))
       setTimeout(() => setCopied(false), 2500)
     } catch {
-      toast.warning('Copie impossible', 'Sélectionne le lien et copie-le à la main.')
+      toast.warning(t('friendGame.copyFailed'), t('friendGame.copyFailedHint'))
     }
-  }, [url])
+  }, [url, t])
 
   const share = useCallback(async () => {
     if (!url) return
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Partie d’échecs sur Le Coup Parfait',
-          text: 'Viens jouer une partie !',
+          title: t('friendGame.shareTitle'),
+          text: t('friendGame.shareText'),
           url,
         })
         return
@@ -252,7 +261,7 @@ export default function CreateFriendGamePage() {
       }
     }
     void copy()
-  }, [url, copy])
+  }, [url, copy, t])
 
   /** Le lien de parrainage : il s'inscrit, et vous êtes amis. */
   const inviteUrl =
@@ -265,8 +274,8 @@ export default function CreateFriendGamePage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Rejoins-moi sur Le Coup Parfait',
-          text: 'Viens jouer aux échecs avec moi.',
+          title: t('friendGame.inviteTitle'),
+          text: t('friendGame.inviteText'),
           url: inviteUrl,
         })
         return
@@ -277,25 +286,27 @@ export default function CreateFriendGamePage() {
     try {
       await navigator.clipboard.writeText(inviteUrl)
       setInviteCopie(true)
-      toast.success('Lien d’invitation copié')
+      toast.success(t('friendGame.inviteCopied'))
       setTimeout(() => setInviteCopie(false), 2500)
     } catch {
-      toast.warning('Copie impossible', 'Sélectionne le lien et copie-le à la main.')
+      toast.warning(t('friendGame.copyFailed'), t('friendGame.copyFailedHint'))
     }
-  }, [inviteUrl])
+  }, [inviteUrl, t])
 
   return (
     <div className="page-etroite">
       <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-        Jouer contre quelqu’un
+        {t('friendGame.title')}
       </h1>
       {/* La phrase suit la cadence choisie : les deux mécanismes n'ont ni les
           mêmes gestes ni les mêmes exigences, et annoncer « ton ami n'a besoin
           d'aucun compte » sur une correspondance serait faux. */}
       <p className="mt-1.5 text-sm text-muted">
         {jours === null
-          ? 'Choisis une cadence, puis envoie un lien ou défie quelqu’un de ton carnet.'
-          : `Un coup tous les ${jours} jour${jours > 1 ? 's' : ''}. Il faut un compte des deux côtés — la partie doit pouvoir t’attendre.`}
+          ? t('friendGame.introLive')
+          : jours > 1
+            ? t('friendGame.introDays', { jours })
+            : t('friendGame.introOneDay')}
       </p>
 
       {slug ? (
@@ -317,8 +328,8 @@ export default function CreateFriendGamePage() {
             {/* Une règle abstraite ne se retient pas ; un exemple lu une fois
                 suffit. « 3 | 2 » reste incompréhensible tant qu'on ne l'a pas
                 vu déplié. */}
-            <SectionTitle hint="« 3 | 2 » se lit : 3 minutes au départ, et 2 secondes ajoutées à ta pendule à chaque coup que tu joues.">
-              Cadence
+            <SectionTitle hint={t('friendGame.timeControlHint')}>
+              {t('friendGame.timeControl')}
             </SectionTitle>
             <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
               {TIME_CONTROLS.filter((tc) =>
@@ -352,7 +363,7 @@ export default function CreateFriendGamePage() {
                       jour à la fin de la partie. */}
                   <span className="block text-[12px] font-normal leading-tight text-faint">
                     <span aria-hidden>{SPEED_LABELS[tc.category].icon}</span>{' '}
-                    {SPEED_LABELS[tc.category].fr}
+                    {SPEED_LABELS[tc.category][contenu]}
                   </span>
                   <span className="mt-0.5 block text-sm">{tc.label}</span>
                 </button>
@@ -367,7 +378,7 @@ export default function CreateFriendGamePage() {
               savoir à quel rythme on voulait jouer.
             */}
             <p className="mb-1.5 mt-4 text-[12px] font-semibold text-faint">
-              Ou sur plusieurs jours
+              {t('friendGame.orOverDays')}
             </p>
             <div className="grid grid-cols-5 gap-1.5">
               {[1, 2, 3, 7, 14].map((n) => (
@@ -384,11 +395,9 @@ export default function CreateFriendGamePage() {
                   )}
                 >
                   <span className="block text-[12px] font-normal leading-tight text-faint">
-                    <span aria-hidden>📬</span> corresp.
+                    <span aria-hidden>📬</span> {t('friendGame.daysShort')}
                   </span>
-                  <span className="mt-0.5 block text-sm">
-                    {n} j{n > 1 ? '' : ''}
-                  </span>
+                  <span className="mt-0.5 block text-sm">{t('friendGame.dayUnit', { n })}</span>
                 </button>
               ))}
             </div>
@@ -406,27 +415,23 @@ export default function CreateFriendGamePage() {
           <div className="mt-4 space-y-2">
             <RangeeAction
               icone={<Link2 size={18} />}
-              titre="Envoyer un lien de partie"
-              detail="Une partie avec n’importe qui. Ton adversaire n’a besoin d’aucun compte : il clique, il joue."
+              titre={t('friendGame.sendLink')}
+              detail={t('friendGame.sendLinkDetail')}
               onClick={create}
               // Une correspondance ne se joue pas par lien anonyme : il faut
               // quelqu'un à qui attribuer les coups pendant deux semaines.
               desactive={jours !== null}
-              raison={
-                jours !== null
-                  ? 'Sur plusieurs jours, il faut désigner quelqu’un du carnet.'
-                  : undefined
-              }
+              raison={jours !== null ? t('friendGame.sendLinkImpossible') : undefined}
               principal
             />
 
             {moi && (
               <RangeeAction
                 icone={<UserPlus size={18} />}
-                titre="Inviter quelqu’un à te rejoindre"
-                detail="Envoie ton lien de parrainage : il s’inscrit, et vous êtes amis sans rien de plus à faire."
+                titre={t('friendGame.inviteSomeone')}
+                detail={t('friendGame.inviteSomeoneDetail')}
                 onClick={() => void inviter()}
-                marque={inviteCopie ? 'Copié' : undefined}
+                marque={inviteCopie ? t('common.copied') : undefined}
               />
             )}
 
@@ -436,8 +441,8 @@ export default function CreateFriendGamePage() {
             {moi === null && (
               <RangeeAction
                 icone={<Users size={18} />}
-                titre="Se connecter pour défier un ami"
-                detail="Sans compte, la partie par lien fonctionne très bien — mais il n’y a pas de carnet où ranger quelqu’un."
+                titre={t('friendGame.signInToChallenge')}
+                detail={t('friendGame.signInToChallengeDetail')}
                 onClick={() => router.push('/connexion')}
               />
             )}
@@ -447,17 +452,17 @@ export default function CreateFriendGamePage() {
           {moi && (
             <section className="mt-6">
               <div className="mb-2 flex items-baseline gap-2 px-1">
-                <h2 className="text-sm font-semibold">Tes amis</h2>
+                <h2 className="text-sm font-semibold">{t('friendGame.yourFriends')}</h2>
                 {amis && (
                   <span className="text-[12px] text-faint">
-                    {amis.length === 0 ? 'personne pour l’instant' : amis.length}
+                    {amis.length === 0 ? t('friendGame.nobodyYet') : amis.length}
                   </span>
                 )}
                 <Link
                   href="/amis"
                   className="ml-auto text-[12px] font-medium text-accent hover:underline"
                 >
-                  Gérer le carnet
+                  {t('friendGame.manageBook')}
                 </Link>
               </div>
 
@@ -468,11 +473,11 @@ export default function CreateFriendGamePage() {
               ) : amis.length === 0 ? (
                 <Card className="p-4">
                   <p className="text-[14px] leading-relaxed text-muted">
-                    Ton carnet est vide. Envoie le lien d’invitation ci-dessus, ou{' '}
+                    {t('friendGame.emptyBookBefore')}{' '}
                     <Link href="/amis" className="font-semibold text-accent hover:underline">
-                      cherche quelqu’un par son pseudo
+                      {t('friendGame.emptyBookLink')}
                     </Link>{' '}
-                    s’il est déjà inscrit.
+                    {t('friendGame.emptyBookAfter')}
                   </p>
                 </Card>
               ) : (
@@ -493,7 +498,7 @@ export default function CreateFriendGamePage() {
                           {ami.online && (
                             <span
                               className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[var(--q-best)] ring-2 ring-[var(--bg-elev)]"
-                              aria-label="en ligne"
+                              aria-label={t('friendGame.online')}
                             />
                           )}
                         </span>
@@ -502,7 +507,7 @@ export default function CreateFriendGamePage() {
                           <span className="block truncate text-sm font-medium">{ami.username}</span>
                           <span className="block text-[12px] text-faint">
                             {ami.rating != null && `${ami.rating} · `}
-                            {ami.online ? 'en ligne' : 'hors ligne'}
+                            {ami.online ? t('friendGame.online') : t('friendGame.offline')}
                           </span>
                         </span>
 
@@ -527,7 +532,11 @@ export default function CreateFriendGamePage() {
                                 : void lancerCorrespondance(ami)
                           }
                         >
-                          {attente ? 'Annuler' : jours === null ? 'Défier' : `${jours} j`}
+                          {attente
+                            ? t('common.cancel')
+                            : jours === null
+                              ? t('friendGame.challenge')
+                              : t('friendGame.dayUnit', { n: jours })}
                         </Button>
                       </div>
                     )
@@ -544,12 +553,12 @@ export default function CreateFriendGamePage() {
               revenait à faire remplir un formulaire pour un geste qui tient en
               un clic. */}
           <Card className={clsx('mt-4 p-4 sm:p-5', jours !== null && 'hidden')}>
-            <SectionTitle>Ta couleur</SectionTitle>
+            <SectionTitle>{t('friendGame.yourColour')}</SectionTitle>
             <div className="grid grid-cols-3 gap-1.5">
               {[
-                { valeur: 'random' as const, label: '🎲 Hasard' },
-                { valeur: 'w' as const, label: '♔ Blancs' },
-                { valeur: 'b' as const, label: '♚ Noirs' },
+                { valeur: 'random' as const, label: t('friendGame.colourRandom') },
+                { valeur: 'w' as const, label: t('friendGame.colourWhite') },
+                { valeur: 'b' as const, label: t('friendGame.colourBlack') },
               ].map((choix) => (
                 <button
                   key={choix.valeur}
@@ -567,22 +576,20 @@ export default function CreateFriendGamePage() {
                 </button>
               ))}
             </div>
-            <p className="mt-2 text-xs text-faint">
-              Ton adversaire prendra l’autre couleur. Une fois la partie ouverte, elle est fixée.
-            </p>
+            <p className="mt-2 text-xs text-faint">{t('friendGame.colourNote')}</p>
 
             {/* Le pseudo ne concerne que la partie par lien : une personne du
                 carnet a déjà un nom. */}
             {moi === null && (
               <div className="mt-4 border-t border-line/60 pt-4">
                 <Input
-                  label="Ton pseudo (facultatif)"
+                  label={t('friendGame.guestName')}
                   name="guestName"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  placeholder="Invité"
+                  placeholder={t('common.guest')}
                   maxLength={20}
-                  hint="Sert uniquement à ce que ton adversaire sache qui il affronte."
+                  hint={t('friendGame.guestNameHint')}
                 />
               </div>
             )}
@@ -601,33 +608,24 @@ export default function CreateFriendGamePage() {
                 className="mt-0.5 h-4 w-4 accent-[var(--accent)]"
               />
               <span>
-                <span className="block text-sm font-medium">Partie classée</span>
-                <span className="mt-0.5 block text-xs text-muted">
-                  Le classement des deux joueurs sera mis à jour. Nécessite que vous ayez tous les
-                  deux un compte.
-                </span>
+                <span className="block text-sm font-medium">{t('friendGame.ratedLabel')}</span>
+                <span className="mt-0.5 block text-xs text-muted">{t('friendGame.ratedHint')}</span>
               </span>
             </label>
 
             {moi === null && (
               <p className="mt-3 border-t border-line/60 pt-3 text-xs leading-relaxed text-muted">
-                Tu joues sans compte : la partie fonctionnera, mais elle ne sera ni classée ni
-                retrouvable ensuite.{' '}
+                {t('friendGame.noAccountBefore')}{' '}
                 <Link href="/connexion" className="font-semibold text-accent hover:underline">
-                  Se connecter ou créer un compte
+                  {t('friendGame.noAccountLink')}
                 </Link>{' '}
-                — un pseudo, un mot de passe, c’est tout.
+                {t('friendGame.noAccountAfter')}
               </p>
             )}
           </Card>
 
           <p className="mt-4 px-1 text-xs leading-relaxed text-muted">
-            La catégorie se déduit de la durée qu’aurait une partie de quarante coups : moins de
-            trois minutes c’est du <strong className="font-semibold">bullet</strong>, moins de huit
-            du <strong className="font-semibold">blitz</strong>, moins de vingt-cinq du{' '}
-            <strong className="font-semibold">rapide</strong>, au-delà du{' '}
-            <strong className="font-semibold">classique</strong>. Chacune tient son propre
-            classement : on peut voir clair en rapide et s’effondrer en blitz.
+            {t('friendGame.categoryNote')}
           </p>
         </>
       )}
@@ -721,6 +719,8 @@ function PartiePrete({
   timeControlId: string
   rated: boolean
 }) {
+  const t = useT()
+
   return (
     <Card glow className="mt-6 overflow-hidden">
       <div className="p-5 text-center sm:p-6">
@@ -731,10 +731,8 @@ function PartiePrete({
         >
           <Users size={24} className="text-accent" />
         </span>
-        <h2 className="font-display text-xl font-semibold">La partie est prête</h2>
-        <p className="mt-1.5 text-sm text-muted">
-          Envoie ce lien à ton adversaire. La partie commencera dès qu’il l’ouvrira.
-        </p>
+        <h2 className="font-display text-xl font-semibold">{t('friendGame.ready')}</h2>
+        <p className="mt-1.5 text-sm text-muted">{t('friendGame.readyHint')}</p>
 
         <div className="mt-5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-line bg-surface p-2">
           <code className="min-w-0 flex-1 truncate px-1 text-left font-mono text-[12px]">
@@ -746,16 +744,16 @@ function PartiePrete({
             icon={copied ? <Check size={14} /> : <Copy size={14} />}
             onClick={onCopy}
           >
-            {copied ? 'Copié' : 'Copier'}
+            {copied ? t('common.copied') : t('common.copy')}
           </Button>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
           <Button variant="ghost" icon={<Share2 size={15} />} onClick={onShare} fullWidth>
-            Partager
+            {t('common.share')}
           </Button>
           <Button variant="primary" fullWidth onClick={onEntrer}>
-            Entrer dans la partie
+            {t('friendGame.enterGame')}
           </Button>
         </div>
 
@@ -767,7 +765,9 @@ function PartiePrete({
             }{' '}
             {TIME_CONTROLS.find((tc) => tc.id === timeControlId)?.label}
           </Chip>
-          <Chip tone={rated ? 'accent' : 'neutral'}>{rated ? 'Classée' : 'Amicale'}</Chip>
+          <Chip tone={rated ? 'accent' : 'neutral'}>
+            {rated ? t('friendGame.rated') : t('friendGame.casual')}
+          </Chip>
         </div>
       </div>
     </Card>

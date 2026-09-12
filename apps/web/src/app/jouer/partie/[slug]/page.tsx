@@ -57,7 +57,7 @@ import { playMoveForSan, playResultSound, playSound } from '@/lib/sound.ts'
 import { useCurrentOpening, useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { useQualitesDesCoups } from '@/lib/game/useQualitesDesCoups.ts'
 import { useGrandEcran } from '@/lib/useMediaQuery.ts'
-import { localeDuContenu } from '@/lib/i18n/index.tsx'
+import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import type { ChatMessage } from '@/lib/game/useLiveGame.ts'
 import { toPlayedMove, type PlayedMove } from '@/lib/game/useChessGame.ts'
@@ -92,6 +92,7 @@ function parametreDeLAdresse(nom: string): string | null {
 }
 
 export default function LiveGamePage() {
+  const t = useT()
   const params = useParams<{ slug: string }>()
   const search = useSearchParams()
   /*
@@ -217,9 +218,9 @@ export default function LiveGamePage() {
       setFlecheIndice({ from: indice.from, to: indice.to, color: 'orange', weight: 'bold' })
       playSound('notify')
     } catch {
-      toast.error('Impossible de calculer un indice pour le moment.')
+      toast.error(t('live.hintFailed'))
     }
-  }, [snapshot, color, game])
+  }, [snapshot, color, game, t])
 
   // La flèche ne survit pas au coup suivant : elle pointerait des cases qui ont
   // changé, ce qui est pire que pas de flèche du tout.
@@ -290,8 +291,8 @@ export default function LiveGamePage() {
     if (!snapshot?.drawOfferFrom || !color) return
     if (snapshot.drawOfferFrom === color) return
     playSound('notify')
-    toast.info('Ton adversaire propose la nulle.', 'Accepte ou refuse ci-dessous.')
-  }, [snapshot?.drawOfferFrom, color])
+    toast.info(t('live.drawOffered'), t('live.drawOfferedHint'))
+  }, [snapshot?.drawOfferFrom, color, t])
 
   useEffect(() => {
     if (game.error) {
@@ -660,8 +661,8 @@ export default function LiveGamePage() {
       <div className="mx-auto grid min-h-[60vh] max-w-md place-items-center px-4">
         <Card className="w-full p-8 text-center">
           <Spinner size={26} className="mx-auto text-accent" />
-          <p className="mt-4 text-sm font-medium">Connexion à la partie…</p>
-          <p className="mt-1 text-xs text-muted">Partie {params.slug}</p>
+          <p className="mt-4 text-sm font-medium">{t('live.connecting')}</p>
+          <p className="mt-1 text-xs text-muted">{t('live.gameLabel', { slug: params.slug })}</p>
         </Card>
       </div>
     )
@@ -672,13 +673,10 @@ export default function LiveGamePage() {
       <div className="mx-auto grid min-h-[60vh] max-w-md place-items-center px-4">
         <Card className="w-full p-8 text-center">
           <WifiOff size={28} className="mx-auto text-[var(--q-blunder)]" aria-hidden />
-          <p className="mt-4 font-medium">Serveur de parties injoignable</p>
-          <p className="mt-2 text-sm leading-relaxed text-muted">
-            Le service temps réel ne répond pas. Vérifie qu’il est démarré, ou joue contre
-            l’ordinateur en attendant — cela fonctionne entièrement dans ton navigateur.
-          </p>
+          <p className="mt-4 font-medium">{t('live.serverDown')}</p>
+          <p className="mt-2 text-sm leading-relaxed text-muted">{t('live.serverDownHint')}</p>
           <Button variant="secondary" className="mt-5" onClick={() => window.location.reload()}>
-            Réessayer
+            {t('common.retry')}
           </Button>
         </Card>
       </div>
@@ -749,27 +747,27 @@ export default function LiveGamePage() {
             size="sm"
             variant="primary"
             icon={<Swords size={14} />}
-            title="Nouvelle partie"
+            title={t('game.newGame')}
           >
-            <span className="max-sm:hidden">Nouvelle partie</span>
+            <span className="max-sm:hidden">{t('game.newGame')}</span>
           </ButtonLink>
           <ButtonLink
             href="/jouer"
             size="sm"
             variant="ghost"
             icon={<LayoutGrid size={14} />}
-            title="Menu"
+            title={t('nav.menu')}
           >
-            <span className="max-sm:hidden">Menu</span>
+            <span className="max-sm:hidden">{t('nav.menu')}</span>
           </ButtonLink>
         </>
       ) : drawOfferedToMe ? (
         <>
           <Button size="sm" variant="primary" onClick={game.offerDraw}>
-            Accepter la nulle
+            {t('game.acceptDraw')}
           </Button>
           <Button size="sm" variant="ghost" onClick={game.declineDraw}>
-            Refuser
+            {t('game.declineDraw')}
           </Button>
         </>
       ) : (
@@ -779,11 +777,13 @@ export default function LiveGamePage() {
           icon={<Handshake size={14} />}
           onClick={game.offerDraw}
           disabled={over || waiting || color === null}
-          title={snapshot.drawOfferFrom === color ? 'Nulle proposée' : 'Proposer nulle'}
-          aria-label={snapshot.drawOfferFrom === color ? 'Nulle proposée' : 'Proposer nulle'}
+          title={snapshot.drawOfferFrom === color ? t('game.drawOffered') : t('game.offerDraw')}
+          aria-label={
+            snapshot.drawOfferFrom === color ? t('game.drawOffered') : t('game.offerDraw')
+          }
         >
           <span className="max-sm:hidden">
-            {snapshot.drawOfferFrom === color ? 'Nulle proposée' : 'Proposer nulle'}
+            {snapshot.drawOfferFrom === color ? t('game.drawOffered') : t('game.offerDraw')}
           </span>
         </Button>
       )}
@@ -814,14 +814,10 @@ export default function LiveGamePage() {
         icon={<Lightbulb size={14} />}
         onClick={demanderIndice}
         disabled={over || waiting || color === null || snapshot.turn !== color}
-        title={
-          indiceAnnonce
-            ? 'Ton adversaire a déjà été prévenu. Demander un autre indice.'
-            : 'Demander le meilleur coup au moteur. Ton adversaire en sera informé.'
-        }
-        aria-label="Demander un indice"
+        title={indiceAnnonce ? t('live.hintAlreadyTold') : t('live.hintWillTell')}
+        aria-label={t('live.hintAria')}
       >
-        <span className="max-sm:hidden">Indice</span>
+        <span className="max-sm:hidden">{t('game.hint')}</span>
       </Button>
 
       <Button
@@ -829,13 +825,13 @@ export default function LiveGamePage() {
         variant="secondary"
         icon={<Flag size={14} />}
         onClick={() => {
-          if (confirm('Abandonner la partie ?')) game.resign()
+          if (confirm(t('live.resignConfirm'))) game.resign()
         }}
         disabled={over || waiting || color === null}
-        title="Abandonner"
-        aria-label="Abandonner la partie"
+        title={t('game.resign')}
+        aria-label={t('live.resignAria')}
       >
-        <span className="max-sm:hidden">Abandonner</span>
+        <span className="max-sm:hidden">{t('game.resign')}</span>
       </Button>
     </>
   )
@@ -845,8 +841,7 @@ export default function LiveGamePage() {
       {connection === 'disconnected' && (
         <div className="mb-3 flex items-center gap-2 rounded-[var(--radius-sm)] bg-[color-mix(in_oklab,var(--q-inaccuracy)_16%,transparent)] px-3 py-2 text-sm text-[var(--q-inaccuracy)]">
           <Loader2 size={14} className="animate-spin" aria-hidden />
-          Connexion perdue — reconnexion en cours. Ta place est gardée : tu ne perds la partie que
-          si ton adversaire attend, et pas avant la moitié de la cadence.
+          {t('live.reconnecting')}
         </div>
       )}
 
@@ -864,7 +859,7 @@ export default function LiveGamePage() {
         {/* ── Échiquier ──────────────────────────────────────────── */}
         <PlayerBar
           className="[grid-area:pion]"
-          name={opponent?.name ?? 'En attente…'}
+          name={opponent?.name ?? t('live.waitingPlayer')}
           rating={opponent?.rating ?? null}
           color={opponentColor}
           clock={pendule}
@@ -874,7 +869,7 @@ export default function LiveGamePage() {
           materialLead={
             opponentColor === 'w' ? Math.max(0, material.balance) : Math.max(0, -material.balance)
           }
-          status={opponent && !opponent.connected ? 'déconnecté' : undefined}
+          status={opponent && !opponent.connected ? t('live.disconnected') : undefined}
         />
 
         <div className="[grid-area:plateau] flex min-h-0 min-w-0 flex-col">
@@ -944,9 +939,7 @@ export default function LiveGamePage() {
                 {/* La pendule ne tourne plus quand la partie est finie :
                   l'écrire quand même ferait courir un temps qui n'existe
                   pas, et presserait quelqu'un qui a tout le sien. */}
-                {over
-                  ? 'Tu revois un coup passé. La partie est terminée, rien ne presse.'
-                  : 'Tu revois un coup passé. La pendule, elle, continue.'}
+                {over ? t('live.reviewOver') : t('live.reviewLive')}
               </span>
               <button
                 type="button"
@@ -955,7 +948,7 @@ export default function LiveGamePage() {
                 // cherche en urgence, la pendule tourne.
                 className="shrink-0 rounded-[var(--radius-sm)] bg-accent px-2.5 py-1 text-xs font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110 pointer-coarse:min-h-11"
               >
-                Revenir au direct
+                {t('live.backToLive')}
               </button>
             </div>
           )}
@@ -963,7 +956,7 @@ export default function LiveGamePage() {
 
         <PlayerBar
           className="[grid-area:moi]"
-          name={me?.name ?? 'Toi'}
+          name={me?.name ?? t('common.you')}
           rating={me?.rating ?? null}
           color={orientation}
           clock={pendule}
@@ -971,7 +964,9 @@ export default function LiveGamePage() {
           active={snapshot.turn === orientation && !over}
           // L'état du tour, dans le bandeau : c'est lui qu'on regarde pour
           // savoir si c'est à soi.
-          status={snapshot.turn === orientation && !over && !waiting ? 'À toi de jouer' : undefined}
+          status={
+            snapshot.turn === orientation && !over && !waiting ? t('game.yourTurn') : undefined
+          }
           captured={material[orientation]}
           materialLead={
             orientation === 'w' ? Math.max(0, material.balance) : Math.max(0, -material.balance)
@@ -1050,7 +1045,7 @@ export default function LiveGamePage() {
           <div className="flex flex-wrap gap-1.5">
             <Chip>{formatTimeControl(timeControl)}</Chip>
             <Chip tone={snapshot.rated ? 'accent' : 'neutral'}>
-              {snapshot.rated ? 'Classée' : 'Amicale'}
+              {snapshot.rated ? t('friendGame.rated') : t('friendGame.casual')}
             </Chip>
             {opening && <Chip>{opening.eco}</Chip>}
           </div>
@@ -1122,7 +1117,7 @@ export default function LiveGamePage() {
             ref={cadreDuChat}
             role={tchatEnSurcouche ? 'dialog' : undefined}
             aria-modal={tchatEnSurcouche ? true : undefined}
-            aria-label={tchatEnSurcouche ? 'Tchat de la partie' : undefined}
+            aria-label={tchatEnSurcouche ? t('live.chatDialog') : undefined}
             className={clsx(
               'flex flex-col overflow-hidden',
               // `popover` et non `glass` en surcouche : le verre est un voile à
@@ -1146,12 +1141,12 @@ export default function LiveGamePage() {
                 tchat est bordé par ses voisins et n'a rien à annoncer. */}
             {tchatEnSurcouche && (
               <div className="flex items-center justify-between border-b border-line/60 px-3 py-2">
-                <p className="text-[12px] font-semibold text-faint">Tchat</p>
+                <p className="text-[12px] font-semibold text-faint">{t('live.chat')}</p>
                 <button
                   type="button"
                   onClick={() => setChatOpen(false)}
                   className="flex items-center justify-center rounded p-1 text-faint transition-colors hover:text-ink pointer-coarse:min-h-11 pointer-coarse:min-w-11"
-                  aria-label="Fermer le tchat"
+                  aria-label={t('live.chatClose')}
                 >
                   <X size={16} aria-hidden />
                 </button>
@@ -1162,7 +1157,7 @@ export default function LiveGamePage() {
               className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3 text-[14px]"
             >
               {chat.length === 0 ? (
-                <p className="text-xs text-faint">Dis bonjour à ton adversaire.</p>
+                <p className="text-xs text-faint">{t('live.chatEmpty')}</p>
               ) : (
                 chat.map((message, index) => (
                   <p
@@ -1189,16 +1184,16 @@ export default function LiveGamePage() {
                 ref={saisieDuChat}
                 value={chatDraft}
                 onChange={(event) => setChatDraft(event.target.value)}
-                placeholder="Message…"
+                placeholder={t('live.chatPlaceholder')}
                 maxLength={300}
-                aria-label="Message de tchat"
+                aria-label={t('live.chatAria')}
                 className="min-w-0 flex-1 rounded-[var(--radius-sm)] border border-line bg-surface px-2.5 py-1.5 text-[14px] placeholder:text-faint focus:border-accent focus:outline-none"
               />
               <Button
                 size="sm"
                 type="submit"
                 variant="secondary"
-                aria-label="Envoyer"
+                aria-label={t('live.chatSend')}
                 className="pointer-coarse:min-h-11 pointer-coarse:min-w-11"
               >
                 <Send size={13} aria-hidden />
@@ -1224,9 +1219,9 @@ export default function LiveGamePage() {
         <div className="pointer-events-none fixed inset-0 z-[70] grid place-items-center p-4">
           <div className="popover pointer-events-auto animate-slide-up w-full max-w-xs p-5 text-center shadow-[var(--shadow-lg)]">
             <Spinner size={22} className="mx-auto text-accent" />
-            <p className="mt-3 text-sm font-medium">En attente de ton adversaire…</p>
+            <p className="mt-3 text-sm font-medium">{t('live.waitingOpponent')}</p>
             <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
-              Partage l’adresse de cette page. La partie démarrera dès qu’il arrivera.
+              {t('live.waitingOpponentHint')}
             </p>
             <Button
               size="sm"
@@ -1234,10 +1229,10 @@ export default function LiveGamePage() {
               className="mt-4"
               onClick={() => {
                 void navigator.clipboard.writeText(window.location.href)
-                toast.success('Lien copié')
+                toast.success(t('friendGame.linkCopied'))
               }}
             >
-              Copier le lien
+              {t('live.copyLink')}
             </Button>
           </div>
         </div>
