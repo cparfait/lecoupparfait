@@ -76,6 +76,20 @@ export interface Preferences {
    * besoin.
    */
   moveSafetyHints: boolean
+  /**
+   * Affiche le mémo d'avant chaque coup sous l'échiquier.
+   *
+   * Quatre questions — ce que son coup a changé, ce qu'il attaque, ce que mon
+   * coup laisse en prise, ce que tient son coup le plus méchant. Même nature
+   * que les autres aides : une béquille qu'on allume le temps d'acquérir le
+   * réflexe, et qu'on coupe ensuite. La liste vit dans
+   * `lib/apprendre/principes.ts`, qui la partage avec la page qui l'explique.
+   *
+   * Éteint par défaut. Un panneau de plus sous l'échiquier, imposé à tout le
+   * monde, coûterait plus cher à ceux qui n'en ont pas besoin qu'il ne
+   * rapporterait à ceux qui l'ignorent.
+   */
+  memoAvantCoup: boolean
   highlightLastMove: boolean
   highlightCheck: boolean
   /** Durée d'animation d'un déplacement, en millisecondes. `0` = instantané. */
@@ -217,6 +231,7 @@ const DEFAULTS: Preferences = {
   showCoordinates: true,
   showLegalMoves: true,
   moveSafetyHints: false,
+  memoAvantCoup: false,
   highlightLastMove: true,
   highlightCheck: true,
   animationMs: 190,

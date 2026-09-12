@@ -79,6 +79,9 @@ import {
   type Alternative,
 } from '@/components/game/LiveCommentary.tsx'
 import { PourquoiPanel } from '@/components/game/PourquoiPanel.tsx'
+import { AideMemoire } from '@/components/game/AideMemoire.tsx'
+import { RappelDeSeance } from '@/components/game/RappelDeSeance.tsx'
+import { noterSeance, releverLeTheme, seanceDeLUrl, type Seance } from '@/lib/game/seance.ts'
 import { LEGEND, legendFor, type LegendItem } from '@/components/board/ArrowLegend.tsx'
 import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
 import {
@@ -216,6 +219,22 @@ export default function PlayComputerPage() {
   const [duel, setDuel] = useState<Chapitre | null>(null)
   const duelLance = useRef(false)
   /**
+   * Arrivé par une séance pédagogique : même parti pris que la carrière.
+   *
+   * L'écran de préparation a déjà répondu aux deux seules questions qui
+   * comptent — à quel palier, sur quel thème — et il en a déduit le niveau de
+   * l'adversaire. Repasser par le curseur de 1 à 25 annulerait exactement ce
+   * que la séance venait d'épargner.
+   *
+   * `commente` voyage à part plutôt que d'écrire dans les préférences : allumer
+   * le mode commenté pour une séance ne doit pas changer le réglage de
+   * quelqu'un pour toutes ses parties suivantes. Voir son traitement dans
+   * `GameScreen`.
+   */
+  const [seance, setSeance] = useState<Seance | null>(null)
+  const [seanceCommentee, setSeanceCommentee] = useState(false)
+  const seanceLancee = useRef(false)
+  /**
    * Cette partie appartient-elle à un tournoi contre l'ordinateur ?
    *
    * Même principe que le duel de carrière : le tournoi a déjà choisi
@@ -327,6 +346,36 @@ export default function PlayComputerPage() {
       setPhase('playing')
       playSound('start')
     }
+  }, [])
+
+  useEffect(() => {
+    if (seanceLancee.current) return
+    const demandee = seanceDeLUrl(window.location.search)
+    if (!demandee) return
+
+    seanceLancee.current = true
+    setSeance(demandee)
+    setSeanceCommentee(new URLSearchParams(window.location.search).get('commente') === '1')
+
+    setSetup({
+      level: demandee.palier.niveauBot,
+      color: 'random',
+      timeControlId: '600+5',
+      // Stockfish et non Maia : la séance annonce une force en Elo, et c'est le
+      // barème des niveaux qui la garantit.
+      human: false,
+      // Jamais classée, et pour la même raison que le duel de carrière : on y
+      // joue avec le mode commenté allumé, c'est-à-dire avec le moteur qui
+      // montre le meilleur coup. Porter cela au classement n'aurait aucun sens.
+      classee: false,
+    })
+    setResolvedColor(Math.random() < 0.5 ? 'w' : 'b')
+    setCoupsRepris(undefined)
+    setHorlogeReprise(null)
+    oublierPartieEnCours()
+    setGameKey((key) => key + 1)
+    setPhase('playing')
+    playSound('start')
   }, [])
 
   /**
@@ -451,6 +500,8 @@ export default function PlayComputerPage() {
     <GameScreen
       key={gameKey}
       duel={duel}
+      seance={seance}
+      seanceCommentee={seanceCommentee}
       startFen={fenImposee}
       tournoi={tournoi}
       styleImpose={styleImpose}
@@ -1270,6 +1321,8 @@ function Etape({
 
 function GameScreen({
   duel,
+  seance,
+  seanceCommentee,
   tournoi,
   styleImpose,
   startFen,
@@ -1285,6 +1338,16 @@ function GameScreen({
 }: {
   /** Chapitre de carrière en cours, quand la partie en est le duel. */
   duel: Chapitre | null
+  /** Séance pédagogique en cours : un palier, et un thème annoncé. */
+  seance: Seance | null
+  /**
+   * La séance a demandé le mode commenté.
+   *
+   * Un drapeau de partie, et non la préférence : on allume le commentaire pour
+   * *cette* séance sans toucher au réglage de quelqu'un qui joue d'habitude
+   * sans. Il se coupe comme l'autre, par le même bouton.
+   */
+  seanceCommentee: boolean
   /** Vrai quand la partie est une ronde de tournoi contre l'ordinateur. */
   tournoi: boolean
   /** Style imposé par le tournoi, en dépit de celui du barème. */
@@ -1305,13 +1368,14 @@ function GameScreen({
   onNewGame: () => void
   onRematch: () => void
 }) {
-  // Sept réglages nommés, et non tout le store : régler la profondeur du
+  // Huit réglages nommés, et non tout le store : régler la profondeur du
   // moteur ou le volume re-rendait tout l'écran de jeu.
   const prefs = usePreferencesDe(
     'commentaryMode',
     'commentaryOpponent',
     'commentaryPauses',
     'locale',
+    'memoAvantCoup',
     'set',
     'showEvalDuringGame',
     'whiteAlwaysBottom',
@@ -1332,6 +1396,63 @@ function GameScreen({
     result: GameResult
   } | null>(null)
   const [hintArrow, setHintArrow] = useState<Arrow | null>(null)
+  /**
+   * Une aide du moteur a-t-elle servi dans cette partie ?
+   *
+   * Si oui, la partie ne va au classement sous aucun prétexte — ni pour y
+   * gagner des points, ni pour en faire perdre à l'adversaire.
+   *
+   * ── Pourquoi un état, alors que les boutons sont déjà masqués ────────────
+   *
+   * L'interface cache « Indice » et « Annuler » dès qu'une partie est classée,
+   * et c'est très bien tant que l'interface est la seule porte. Ce n'en est pas
+   * une garantie : la règle n'existait nulle part ailleurs que dans deux
+   * conditions d'affichage, à deux endroits différents — la barre du pouce et
+   * celle du grand écran —, et il suffisait qu'un rendu en retard, un raccourci
+   * clavier ou une refonte en oublie une pour qu'une partie assistée arrive au
+   * classement sans que rien ne s'y oppose.
+   *
+   * La règle est donc écrite là où elle se décide : au moment d'archiver. Le
+   * serveur a d'ailleurs toujours décrit une partie classée comme une partie
+   * jouée « sans Annuler, sans Indice et sans le mode commenté » — c'est cette
+   * phrase-là qui devient exécutable.
+   *
+   * On retient **laquelle** des deux aides a servi : la boîte de fin le dit,
+   * et « ta partie n'est pas classée » sans raison passe pour une panne.
+   */
+  const [aideUtilisee, setAideUtilisee] = useState<'indice' | 'annulation' | null>(null)
+  /**
+   * La même chose, lisible depuis les rappels du moteur de jeu.
+   *
+   * `onGameOver` est passé à `useChessGame` et capture les valeurs du rendu où
+   * il a été créé : y lire l'état donnerait celui d'avant l'indice, c'est-à-dire
+   * exactement le contraire de la règle. Le renvoi, lui, dit toujours la vérité.
+   */
+  const aideRef = useRef<'indice' | 'annulation' | null>(null)
+  const noterAide = useCallback((quoi: 'indice' | 'annulation') => {
+    // La première suffit : on retient laquelle, pas combien.
+    aideRef.current ??= quoi
+    setAideUtilisee((deja) => deja ?? quoi)
+  }, [])
+
+  /**
+   * Les parties où le moteur ne souffle rien : ni indice, ni reprise de coup.
+   *
+   * Trois situations, et une seule raison : **il y a un résultat qui compte
+   * pour quelqu'un d'autre que soi.** Une partie classée déplace un
+   * classement, une ronde de tournoi décide un tableau. Contre un ami, la
+   * question ne se pose même pas — l'écran de partie en direct n'a jamais eu
+   * ces boutons, et c'est délibéré : ce serait de l'assistance moteur en
+   * direct contre quelqu'un qui n'en a pas.
+   *
+   * Restent les parties libres, la carrière et les séances : là, l'aide est le
+   * but. Elle coûte simplement les points de la partie — voir `aideUtilisee`.
+   *
+   * Une seule valeur pour les trois endroits qui affichent ces boutons — la
+   * barre du grand écran, celle du pouce, le menu : la règle vivait en trois
+   * conditions recopiées, et il suffisait d'en oublier une.
+   */
+  const sansAide = classee || tournoi
   /** Variation de classement d'une partie classée, une fois le serveur consulté. */
   const [variationClassement, setVariationClassement] = useState<number | null>(null)
   // Lue par les effets d'analyse, qui s'exécutent avant que `gameOver` ne soit
@@ -1361,7 +1482,16 @@ function GameScreen({
     panneau du coach, la voix — s'éteint du même coup, puisque tout part de
     cette valeur.
   */
-  const commentaryMode = prefs.commentaryMode && !classee
+  /*
+    La séance l'allume sans l'écrire dans les réglages.
+
+    `commenteParSeance` part à `true` quand la séance l'a demandé, et tombe dès
+    qu'on coupe le commentaire — sans quoi la croix du panneau n'aurait aucun
+    effet ici, puisqu'elle éteint la préférence et que le drapeau de séance
+    reprendrait la main au rendu suivant.
+  */
+  const [commenteParSeance, setCommenteParSeance] = useState(seanceCommentee)
+  const commentaryMode = (prefs.commentaryMode || commenteParSeance) && !classee
   const [hoveredAlternative, setHoveredAlternative] = useState<Alternative | null>(null)
   const [commentaryPaused, setCommentaryPaused] = useState(false)
   // Vrai tant que le coach prononce son commentaire. L'adversaire s'y range :
@@ -1381,6 +1511,7 @@ function GameScreen({
    */
   const couperLeCommentaire = useCallback(() => {
     prefs.set('commentaryMode', false)
+    setCommenteParSeance(false)
     setCommentaryPaused(false)
     setCoachSpeaking(false)
   }, [prefs])
@@ -1413,10 +1544,20 @@ function GameScreen({
       // Une partie partie d'une position composée ne fait avancer aucune
       // échelle : rien n'empêche de s'y donner une dame de plus.
       if (!startFen) recordBotGame(level, won)
-      // Une partie menée jusqu'au bout compte, gagnée ou non : la quête
-      // récompense d'avoir joué, pas d'avoir eu de la chance.
-      marquer('partie')
-      if (won) marquer('victoire')
+      /*
+        Une partie menée jusqu'au bout compte, gagnée ou non : la quête
+        récompense d'avoir joué, pas d'avoir eu de la chance.
+
+        Sauf si le moteur a soufflé. Une seule règle, la même partout : une
+        partie jouée avec une aide ne rapporte rien — ni classement, ni
+        progression de carrière, ni quête, ni série. Un demi-crédit — la quête
+        « joue une partie » oui, « gagne une partie » non — serait plus subtil
+        et impossible à expliquer en une phrase.
+      */
+      if (aideRef.current === null) {
+        marquer('partie')
+        if (won) marquer('victoire')
+      }
       // La partie est finie : il n'y a plus rien à reprendre.
       oublierPartieEnCours()
     },
@@ -1611,8 +1752,11 @@ function GameScreen({
       // Une partie jouée jusqu'à la chute du drapeau est une partie menée au
       // bout, comme un mat : elle compte pour la quête du jour. L'abandon,
       // lui, ne compte pas — c'est justement une partie qu'on n'a pas finie.
-      marquer('partie')
-      if (!nulle && flagged !== playerColor) marquer('victoire')
+      // Et une partie jouée avec une aide du moteur ne compte pas non plus.
+      if (aideRef.current === null) {
+        marquer('partie')
+        if (!nulle && flagged !== playerColor) marquer('victoire')
+      }
       // La partie est finie : sans cet oubli, l'écran de départ proposait de
       // la reprendre, pendule à zéro.
       oublierPartieEnCours()
@@ -1675,6 +1819,10 @@ function GameScreen({
     try {
       const hint = await requestHint(state.currentFen, 16)
       if (hint) {
+        // Le moteur a parlé : cette partie ne comptera plus. Marqué ici et non
+        // au clic, pour qu'un indice qui n'a rien rendu — moteur injoignable —
+        // ne coûte pas une partie.
+        noterAide('indice')
         // Orange, et non bleu : le bleu est déjà celui du coup conseillé par le
         // mode commenté. Deux sens pour une même couleur, c'est une couleur
         // qui n'en a plus aucun.
@@ -1684,7 +1832,7 @@ function GameScreen({
     } catch {
       toast.error('Impossible de calculer un indice pour le moment.')
     }
-  }, [state.currentFen, state.turn, playerColor])
+  }, [state.currentFen, state.turn, playerColor, noterAide])
 
   // La fonction seule, et non `botPlayer` entier : l'objet est recréé à chaque
   // rendu, la fonction est stable.
@@ -1695,13 +1843,17 @@ function GameScreen({
     if (state.isGameOver || outcome !== null) return
     // On annule deux demi-coups : le sien et la réponse de l'ordinateur.
     const count = state.moves.length >= 2 ? 2 : 1
+    // Reprendre un coup est une aide au même titre qu'un indice : on rejoue
+    // une position en sachant ce qu'elle donne. La partie ne rapporte donc
+    // plus rien, comme le serveur l'a toujours décrit.
+    noterAide('annulation')
     undo(count)
     // La position revient à une que l'ordinateur croit déjà traitée : on la
     // lui fait oublier, sinon il ne rejouait plus jamais après une annulation
     // et l'écran restait sur « réfléchit… ».
     oublierPositionDuBot()
     playSound('confirm')
-  }, [undo, state.moves.length, state.isGameOver, outcome, oublierPositionDuBot])
+  }, [undo, state.moves.length, state.isGameOver, outcome, oublierPositionDuBot, noterAide])
 
   const handleResign = useCallback(() => {
     setClock((current) => stopClock(current, Date.now()))
@@ -1786,7 +1938,7 @@ function GameScreen({
       main, et c'est précisément ce qu'il ne faut pas perdre. On dépose ensuite
       les gains pour que la carte les fête au retour.
     */
-    if (duel) {
+    if (duel && aideRef.current === null) {
       void signalerCarriere({
         type: 'partie',
         gagnee: issue === (playerColor === 'w' ? '1-0' : '0-1'),
@@ -1794,13 +1946,30 @@ function GameScreen({
       }).then((gains) => deposerGains(gains, duel.titre))
     }
 
-    // Le tournoi attend son résultat : on le dépose, le tableau le déroulera
-    // au retour. Le sens est celui des Blancs, comme partout ailleurs.
-    if (tournoi) deposerResultat(issue)
+    /*
+      Le tournoi attend son résultat : on le dépose, le tableau le déroulera
+      au retour. Le sens est celui des Blancs, comme partout ailleurs.
+
+      Sauf si le moteur a aidé. Le tournoi masque déjà ses boutons — voir
+      `sansAide` —, ce garde-fou couvre donc un cas qui ne devrait pas se
+      produire ; c'est exactement pourquoi il est écrit ici plutôt que laissé à
+      une condition d'affichage. Ne rien déposer laisse la ronde à jouer, ce
+      que `deposerResultat` documente déjà comme sa panne bénigne.
+    */
+    if (tournoi && aideRef.current === null) deposerResultat(issue)
 
     void archiverPartie({
       mode: 'computer',
-      classee,
+      /*
+        Une aide du moteur retire la partie du classement.
+
+        C'est la règle, et elle est ici plutôt que dans une condition
+        d'affichage : celui qui a vu le meilleur coup, ou rejoué un coup en
+        sachant ce qu'il donnait, n'a pas joué la même partie que son
+        classement prétend mesurer. Ni pour gagner des points, ni pour en faire
+        perdre à l'adversaire.
+      */
+      classee: classee && aideUtilisee === null,
       moves: state.moves.map((coup) => coup.san),
       result: issue,
       status: outcome?.status ?? state.status,
@@ -1833,6 +2002,35 @@ function GameScreen({
     verdicts, y compris ceux des coups du bot.
   */
   const { parRang: qualites, bilan } = useQualitesDesCoups({ moves: state.moves, book })
+
+  /*
+    Le relevé du thème de la séance, une fois la partie finie.
+
+    Calculé à la fin et pas à chaque coup : le relevé rejoue toute la partie
+    pour interroger chaque position, et le refaire quarante fois pour n'afficher
+    le résultat qu'une seule, à l'arrivée, serait du travail jeté. Aucun appel
+    au moteur là-dedans — `detectPositionMotifs` lit un plateau.
+
+    La séance est notée au même moment, dans le navigateur : c'est ce qui permet
+    à l'écran de préparation d'afficher « 3 séances » sur un thème déjà
+    travaillé.
+  */
+  const releveDeSeance = useMemo(() => {
+    if (!seance || !gameOver || state.moves.length === 0) return null
+    return releverLeTheme(
+      state.moves.map((coup) => coup.san),
+      playerColor,
+      seance.theme.motifs,
+      startFen ?? undefined,
+    )
+  }, [seance, gameOver, state.moves, playerColor, startFen])
+
+  const seanceNotee = useRef(false)
+  useEffect(() => {
+    if (!seance || !gameOver || seanceNotee.current) return
+    seanceNotee.current = true
+    noterSeance(seance.theme.id)
+  }, [seance, gameOver])
 
   // Les coups tels que le ruban les attend : le numéro se déduit du rang.
   const rubanCoups = useMemo(
@@ -2116,7 +2314,7 @@ function GameScreen({
             <span className="max-sm:hidden">Menu</span>
           </ButtonLink>
         </>
-      ) : classee ? null : (
+      ) : sansAide ? null : (
         <Button
           size="sm"
           variant="secondary"
@@ -2132,7 +2330,7 @@ function GameScreen({
       )}
       {/* Masqué une fois la partie finie, comme sur la barre du pouce : on
           n'annule pas un abandon ni une chute de drapeau. */}
-      {!classee && !gameOver && (
+      {!sansAide && !gameOver && (
         <Button
           size="sm"
           variant="secondary"
@@ -2494,7 +2692,7 @@ function GameScreen({
                     onClick={handleResign}
                     danger
                   />
-                  {!classee && (
+                  {!sansAide && (
                     <>
                       <ActionDuPouce
                         icone={<Lightbulb size={19} aria-hidden />}
@@ -2525,6 +2723,30 @@ function GameScreen({
             coups depuis le départ standard, et on ne part pas du départ.
           */}
           {!startFen && <OpeningBanner opening={opening} moveCount={state.moves.length} />}
+
+          {/* ── Le mémo d'avant chaque coup ───────────────────────────────
+              La seule aide de la page qui n'appelle pas le moteur : elle pose
+              quatre questions et ne répond à aucune. C'est pour cela qu'elle
+              reste là même en partie classée, là où le mode commenté et le
+              bouton « pourquoi ce coup ? » sont coupés — lire « qu'est-ce
+              qu'il attaque ? » n'est pas une assistance.
+
+              Elle disparaît une fois la partie finie : il n'y a plus de coup à
+              préparer, et la place revient au bilan. */}
+          {prefs.memoAvantCoup && !gameOver && <AideMemoire actif={state.turn === playerColor} />}
+
+          {/* ── Le thème de la séance, rappelé pendant la partie ──────────
+              Une séance sans rappel n'est qu'une partie : on lit la consigne
+              sur l'écran de préparation, on joue quarante coups, et au
+              vingtième on ne sait plus ce qu'on cherchait. Le bandeau reste
+              donc là, replié ou non, jusqu'à la fin. */}
+          {seance && !gameOver && (
+            <RappelDeSeance
+              nom={seance.theme.nom}
+              icone={seance.theme.icone}
+              consigne={seance.theme.consigne}
+            />
+          )}
 
           {/* ── Le coach, seulement si on l'a demandé ─────────────────────
               Le panneau était posé sans condition : mode commenté éteint et
@@ -2630,12 +2852,36 @@ function GameScreen({
               ? { href: '/carriere', libelle: `Retour au chapitre ${duel.numero}` }
               : tournoi
                 ? { href: '/tournois/ordinateur', libelle: 'Retour au tournoi' }
-                : undefined
+                : seance
+                  ? // On ne renvoie pas aux réglages de partie, qu'on vient
+                    // justement d'épargner : on renvoie au choix du thème, qui
+                    // est la seule décision d'une séance.
+                    { href: '/jouer/pedagogique', libelle: 'Autre séance' }
+                  : undefined
           }
           playerColor={playerColor}
           opponentName={personality.name.fr}
           moves={state.moves}
           bilan={bilan}
+          // Dit seulement si l'on attendait des points : une partie
+          // d'entraînement n'a rien à justifier.
+          nonClassee={
+            aideUtilisee
+              ? aideUtilisee === 'indice'
+                ? 'tu as demandé un indice au moteur. Ni classement, ni carrière, ni quête du jour — et rien n’est retiré à personne non plus.'
+                : 'tu as repris un coup. Ni classement, ni carrière, ni quête du jour — et rien n’est retiré à personne non plus.'
+              : null
+          }
+          seance={
+            seance && releveDeSeance
+              ? {
+                  theme: `${seance.theme.icone} ${seance.theme.nom}`,
+                  pour: releveDeSeance.pour,
+                  contre: releveDeSeance.contre,
+                  coups: releveDeSeance.coups.slice(0, 8),
+                }
+              : undefined
+          }
           ratingDelta={variationClassement}
           quete={
             mission.quete

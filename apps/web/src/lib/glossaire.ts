@@ -208,3 +208,118 @@ export const FAMILIES = [
   'Phases de la partie',
   'Évaluation et jeu',
 ] as const
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Le lexique de ceux qui cherchent
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Les mots qu'on tape, et les termes qu'ils désignent.
+ *
+ * Le glossaire définit le vocabulaire **juste** : « échec et mat », « pat »,
+ * « clouage », « fou de mauvaise couleur ». Ce n'est pas celui qu'on tape dans
+ * une barre de recherche. On tape « mat en 1 », « nulle », « épingle », « je
+ * donne toujours mes pièces » — et la recherche ne rendait rien, ce qui laissait
+ * croire que l'application ne connaissait pas le sujet.
+ *
+ * La table va donc du mot familier vers les termes à remonter. Trois natures
+ * mélangées, volontairement :
+ *
+ *  - les **synonymes régionaux ou d'usage** — « épingle » pour clouage,
+ *    « échange » pour qualité ;
+ *  - les **formulations de débutant** — « je perds mes pièces », « bloqué » ;
+ *  - les **mots anglais**, parce que tout le monde a appris sur une interface
+ *    anglophone avant d'arriver ici.
+ *
+ * Une seule règle pour l'entretenir : on n'ajoute un mot que parce que quelqu'un
+ * l'a réellement tapé. Une liste de synonymes inventés à la table n'aide
+ * personne et finit par ramener n'importe quoi.
+ */
+export const SYNONYMES: Record<string, string[]> = {
+  // Les pièces et les coups, en langage courant.
+  epingle: ['Clouage'],
+  epingler: ['Clouage'],
+  brochette: ['Enfilade'],
+  embrochement: ['Enfilade'],
+  echange: ['Qualité', 'Valeur des pièces'],
+  qualite: ['Qualité'],
+  'double attaque': ['Fourchette'],
+  'attaque double': ['Fourchette'],
+  'petit roque': ['Roque'],
+  'grand roque': ['Roque'],
+  'prise en l air': ['Prise en passant'],
+  'pion qui devient dame': ['Promotion'],
+  'dame a la place du pion': ['Promotion'],
+
+  // Les fins de partie, qu'on nomme de travers dans les deux sens.
+  nulle: ['Pat', 'Nulle par répétition', 'Règle des cinquante coups'],
+  'match nul': ['Pat', 'Nulle par répétition'],
+  egalite: ['Pat', 'Nulle par répétition'],
+  'mat en 1': ['Échec et mat'],
+  'mat en un': ['Échec et mat'],
+  'echec perpetuel': ['Nulle par répétition'],
+
+  // Ce que les gens décrivent au lieu de le nommer.
+  'je perds mes pieces': ['Valeur des pièces'],
+  'je donne mes pieces': ['Valeur des pièces'],
+  gaffe: ['Valeur des pièces'],
+  bloque: ['Elo', 'Glicko-2'],
+  'je stagne': ['Elo', 'Glicko-2'],
+  classement: ['Elo', 'Glicko-2'],
+  niveau: ['Elo', 'Glicko-2'],
+
+  // L'anglais, parce qu'on a presque tous appris dessus.
+  checkmate: ['Échec et mat'],
+  stalemate: ['Pat'],
+  draw: ['Pat', 'Nulle par répétition'],
+  castling: ['Roque'],
+  castle: ['Roque'],
+  pin: ['Clouage'],
+  skewer: ['Enfilade'],
+  fork: ['Fourchette'],
+  'en passant': ['Prise en passant'],
+  promotion: ['Promotion'],
+  blunder: ['Valeur des pièces'],
+  rating: ['Elo', 'Glicko-2'],
+  'time control': ['Cadence'],
+  increment: ['Incrément'],
+  'bad bishop': ['Mauvais fou'],
+  'bishop pair': ['Paire de fous'],
+  'passed pawn': ['Pion passé'],
+  'open file': ['Colonne ouverte'],
+  tempo: ['Tempo'],
+  initiative: ['Initiative'],
+}
+
+/**
+ * Les termes que cette recherche désigne, en plus de ce qu'elle trouve seule.
+ *
+ * Comparaison sur une forme normalisée — sans accents, sans casse, sans
+ * ponctuation — et par inclusion dans les deux sens : « epingl » doit trouver
+ * « épingle », et « je stagne à 1000 » doit trouver « je stagne ». La recherche
+ * du glossaire normalise déjà de son côté ; la table est écrite directement sous
+ * la forme normalisée pour que les deux soient comparables sans détour.
+ */
+export function termesSynonymes(recherche: string): string[] {
+  const aiguille = normaliserPourLexique(recherche)
+  if (aiguille.length < 3) return []
+
+  const trouves = new Set<string>()
+  for (const [mot, termes] of Object.entries(SYNONYMES)) {
+    const cle = normaliserPourLexique(mot)
+    if (aiguille.includes(cle) || cle.includes(aiguille)) {
+      for (const terme of termes) trouves.add(terme)
+    }
+  }
+  return [...trouves]
+}
+
+function normaliserPourLexique(valeur: string): string {
+  return valeur
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/['’\-_]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}

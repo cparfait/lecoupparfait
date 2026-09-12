@@ -242,6 +242,23 @@ export function useLiveGame({
     if (text.trim()) socketRef.current?.emit('chat', { text })
   }, [])
 
+  /**
+   * Annonce à la table qu'on vient de demander un indice au moteur.
+   *
+   * Ce n'est pas une demande d'autorisation : l'indice est calculé dans le
+   * navigateur de celui qui le demande, et rien ne pourrait l'en empêcher — un
+   * moteur d'analyse tourne dans l'autre onglet. Ce qu'on peut faire, et qu'on
+   * fait ici, c'est **le dire**. Une partie amicale où l'un des deux se fait
+   * souffler reste une partie amicale ; une partie amicale où l'un se fait
+   * souffler en cachette, non.
+   *
+   * L'annonce part du client parce que lui seul sait qu'il a cliqué. Un joueur
+   * malintentionné peut donc ne pas l'envoyer — mais un joueur malintentionné
+   * n'utiliserait pas le bouton, il ouvrirait un autre onglet. On s'adresse à
+   * celui qui joue de bonne foi, et pour lui le bouton est la voie facile.
+   */
+  const annoncerIndice = useCallback(() => socketRef.current?.emit('indice'), [])
+
   return {
     connection,
     color,
@@ -257,6 +274,7 @@ export function useLiveGame({
     requestTakeback,
     acceptTakeback,
     sendChat,
+    annoncerIndice,
   }
 }
 

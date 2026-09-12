@@ -17,7 +17,16 @@ import { useCallback, useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
-import { Check, ChevronDown, Clock, Play, TrendingUp } from 'lucide-react'
+import {
+  Check,
+  ChevronDown,
+  Clock,
+  Headphones,
+  ListChecks,
+  Play,
+  Target,
+  TrendingUp,
+} from 'lucide-react'
 import clsx from 'clsx'
 import {
   CHAPTERS,
@@ -27,7 +36,11 @@ import {
   type LessonProgress,
 } from '@/lib/lessons/index.ts'
 import { ButtonLink, Card, Chip } from '@/components/ui/index.tsx'
+import { CarteDestination } from '@/components/ui/CarteDestination.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
+
+/** La teinte de la rubrique, posée une fois pour les cartes de destination. */
+const TEINTE_APPRENDRE = 'var(--rub-apprendre)'
 
 /**
  * Le niveau donne son étiquette au chapitre : la pastille à droite, en vert,
@@ -233,6 +246,51 @@ export default function LearnPage() {
           </div>
         </Card>
       )}
+
+      {/* ── Trois autres façons d'entrer dans le programme ──────────────
+          Le sommaire répond à « qu'est-ce qu'il y a à apprendre ? ». Ce n'est
+          pas la question qu'on se pose en arrivant — on se demande « qu'est-ce
+          qui me coûte des points ? », « qu'est-ce que je dois me dire avant de
+          jouer ? », et parfois « je n'ai pas les mains libres ». Trois portes,
+          sur le même contenu, rangé autrement. */}
+      <div className="mt-6 grille-cartes">
+        <CarteDestination
+          href="/apprendre/palier"
+          icon={Target}
+          teinte={TEINTE_APPRENDRE}
+          titre="Ton palier"
+          phrase="Le programme rangé par ce qui coûte le plus de points à ton niveau, et les motifs que tu rates vraiment."
+          detail="D’après ton classement, ou un test de douze positions"
+          compacte
+        />
+        <CarteDestination
+          href="/apprendre/principes"
+          icon={ListChecks}
+          teinte={TEINTE_APPRENDRE}
+          titre="Principes et mémo"
+          phrase="Quatre questions à se poser avant chaque coup, et les principes des trois phases — chacun avec son exception."
+          detail="Le mémo s’affiche aussi pendant tes parties"
+          compacte
+        />
+        <CarteDestination
+          href="/apprendre/ecoute"
+          icon={Headphones}
+          teinte={TEINTE_APPRENDRE}
+          titre="Écouter le programme"
+          phrase="Les leçons lues à voix haute, sans rien à toucher. Pour réviser en faisant autre chose."
+          detail={`${CURRICULUM_STATS.steps} étapes, enchaînées tout seul`}
+          compacte
+        />
+        <CarteDestination
+          href="/jouer/pedagogique"
+          icon={Play}
+          teinte="var(--rub-jouer)"
+          titre="Séance pédagogique"
+          phrase="Une partie avec un thème annoncé avant de commencer, et un bilan qui dit où ce thème est apparu."
+          detail="Adversaire calibré sur ton palier"
+          compacte
+        />
+      </div>
 
       {/* ── Chapitres ────────────────────────────────────────────────── */}
       <div className="mt-8 flex items-baseline justify-between gap-4">

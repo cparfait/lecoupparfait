@@ -10,7 +10,18 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Ouvertures',
+  /*
+    Un objet et non une chaîne : ce dossier a maintenant une page en dessous de
+    lui — les fiches d'enjeux. Un `title` en chaîne consomme le gabarit de la
+    mise en page racine et n'en repose aucun, si bien que la page fille se
+    retrouverait sans le suffixe « · Le Coup Parfait », son onglet s'appelant
+    simplement « Les enjeux des ouvertures ». Même correctif que dans
+    `/apprendre`, pour la même raison.
+  */
+  title: {
+    default: 'Ouvertures',
+    template: '%s · Le Coup Parfait',
+  },
   description: 'L’explorateur : 3 970 ouvertures répertoriées.',
 }
 

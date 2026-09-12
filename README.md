@@ -12,19 +12,26 @@ eux — fourchette, clouage, mat du couloir — et il te le dit à voix haute.
 
 ## Ce que ça fait
 
-|                   |                                                                                                                                                                                                                             |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Jouer**         | 25 niveaux d'ordinateur (250 → 3200 Elo) avec 7 personnalités distinctes · parties entre amis en temps réel via un simple lien · partie locale à deux sur un écran                                                          |
-| **Mode commenté** | après **chaque** coup, les trois meilleures options avec leur évaluation et la raison de chacune, le coup proposé fléché sur l'échiquier, et l'explication lue à voix haute — réécoutable                                   |
-| **Apprendre**     | 36 leçons guidées en 7 chapitres, de « voici un échiquier » au répertoire d'ouvertures, avec un coach qui parle et un échiquier interactif                                                                                  |
-| **S'entraîner**   | jusqu'à 6 057 356 puzzles tactiques notés et étiquetés, avec classement Glicko-2 dédié                                                                                                                                      |
-| **Finales**       | 3 568 positions classées en 8 familles : on donne l'objectif — gagner ou tenir la nulle — et l'ordinateur défend au mieux                                                                                                   |
-| **Analyser**      | Stockfish 18 natif côté serveur · chaque coup classé (brillant → gaffe), meilleur coup fléché, **explication rédigée**                                                                                                      |
-| **Importer**      | tes parties Chess.com et Lichess, à partir du seul pseudo : rien à installer, aucun compte à créer, et rien n'est conservé                                                                                                  |
-| **Explorer**      | 3 810 ouvertures nommées, reconnues même par transposition                                                                                                                                                                  |
-| **Progresser**    | comptes, classement Glicko-2 par cadence, Elo classique affiché en parallèle, courbe de progression                                                                                                                         |
-| **Revenir**       | un défi du jour, **le même pour tout le monde**, cinq quêtes courtes et une série de jours consécutifs — sans compte, si l'on veut                                                                                          |
-| **Être prévenu**  | une notification quand un ami t'invite — un défi expire en cinq minutes — et un rappel du défi du jour, à ton heure. Rien d'autre, et les deux se coupent séparément. Voir [`docs/notifications.md`](docs/notifications.md) |
+|                    |                                                                                                                                                                                                                                         |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Jouer**          | 25 niveaux d'ordinateur (250 → 3200 Elo) avec 7 personnalités distinctes · parties entre amis en temps réel via un simple lien · partie locale à deux sur un écran                                                                      |
+| **Mode commenté**  | après **chaque** coup, les trois meilleures options avec leur évaluation et la raison de chacune, le coup proposé fléché sur l'échiquier, et l'explication lue à voix haute — réécoutable                                               |
+| **Apprendre**      | 48 leçons guidées en 9 chapitres, de « voici un échiquier » aux pièges d'ouverture tendus et déjoués, avec un coach qui parle et un échiquier interactif                                                                                |
+| **Ton palier**     | le programme rangé non plus par chapitres mais par **ce qui coûte des points à ton niveau** : six paliers, quatre ou cinq leviers chacun, et les motifs que tu rates vraiment — mesurés sur tes puzzles                                 |
+| **Test de niveau** | douze positions notées, en escalier adaptatif : un niveau estimé en six minutes, sans toucher à aucun classement                                                                                                                        |
+| **Séances**        | une partie contre un adversaire calibré sur ton palier, avec un **thème annoncé avant de commencer** et un bilan qui compte où ce thème est apparu dans ta partie                                                                       |
+| **Principes**      | 38 principes de conduite pour les trois phases, **chacun avec son exception**, et un mémo de quatre questions à se poser avant chaque coup — affichable pendant la partie                                                               |
+| **Écouter**        | les 328 étapes du programme lues à voix haute et enchaînées tout seul, l'échiquier qui suit : pour réviser sans les mains                                                                                                               |
+| **S'entraîner**    | jusqu'à 6 057 356 puzzles tactiques notés et étiquetés, avec classement Glicko-2 dédié                                                                                                                                                  |
+| **Finales**        | 3 568 positions classées en 8 familles : on donne l'objectif — gagner ou tenir la nulle — et l'ordinateur défend au mieux                                                                                                               |
+| **Analyser**       | Stockfish 18 natif côté serveur · chaque coup classé (brillant → gaffe), meilleur coup fléché, **explication rédigée**, puis « et maintenant ? » : la phase la plus faible et trois puzzles sur le motif exact qui a coûté la partie    |
+| **Importer**       | tes parties Chess.com et Lichess, à partir du seul pseudo : rien à installer, aucun compte à créer, et rien n'est conservé                                                                                                              |
+| **Explorer**       | 3 810 ouvertures nommées, reconnues même par transposition. Les noms cités au fil des textes — « sauf l'est-indienne et la sicilienne » — mènent à leur fiche d'un clic                                                                 |
+| **Les enjeux**     | 25 fiches d'ouverture expliquées par ce qu'elles **cherchent** et non par leurs variantes : l'idée, la structure de pions, le plan de chaque camp, le piège des dix premiers coups. Elles apparaissent d'elles-mêmes dans l'explorateur |
+| **Regarder**       | les parties en cours, **celles de tes amis en tête** et signalées comme telles, avec un filtre pour ne voir qu'elles — et un bouton « Regarder » sur la fiche de chaque ami qui joue                                                    |
+| **Progresser**     | comptes, classement Glicko-2 par cadence, Elo classique affiché en parallèle, courbe de progression                                                                                                                                     |
+| **Revenir**        | un défi du jour, **le même pour tout le monde**, cinq quêtes courtes et une série de jours consécutifs — sans compte, si l'on veut                                                                                                      |
+| **Être prévenu**   | une notification quand un ami t'invite — un défi expire en cinq minutes — et un rappel du défi du jour, à ton heure. Rien d'autre, et les deux se coupent séparément. Voir [`docs/notifications.md`](docs/notifications.md)             |
 
 Et côté forme : un thème sombre et un thème clair, dix jeux de pièces, huit damiers,
 un échiquier **2D et 3D** interchangeable en pleine partie avec mode plein
@@ -33,16 +40,37 @@ entièrement navigable au clavier.
 
 ### Les aides à l'apprentissage — toutes désactivables
 
-| Aide                   | Ce qu'elle fait                                                                                                                                                                                                                                           |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Coups colorés**      | à la sélection d'une pièce, chaque case d'arrivée se colore : vert si la pièce y est en sécurité, rouge si elle serait perdue, doré si le coup gagne du matériel. Le verdict vient d'un échange statique complet, pas d'un simple test « case attaquée ». |
-| **Nom de l'ouverture** | affiché et mis à jour à chaque coup pendant la partie, y compris par transposition. On retient les noms parce qu'on les voit sur ses propres parties.                                                                                                     |
-| **Mode commenté**      | l'analyse après chaque coup, avec les alternatives et le coup proposé.                                                                                                                                                                                    |
-| **Pourquoi ce coup ?** | l'inverse du mode commenté : rien ne s'affiche tant qu'on ne demande pas. Même moteur, même explication — seul le déclencheur change.                                                                                                                     |
-| **Voix du coach**      | narration de toutes les explications, avec réécoute. Voix neuronale Piper si elle est installée, sinon celle du navigateur.                                                                                                                               |
+| Aide                   | Ce qu'elle fait                                                                                                                                                                                                                                                                                                            |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Coups colorés**      | à la sélection d'une pièce, chaque case d'arrivée se colore : vert si la pièce y est en sécurité, rouge si elle serait perdue, doré si le coup gagne du matériel. Le verdict vient d'un échange statique complet, pas d'un simple test « case attaquée ».                                                                  |
+| **Nom de l'ouverture** | affiché et mis à jour à chaque coup pendant la partie, y compris par transposition. On retient les noms parce qu'on les voit sur ses propres parties.                                                                                                                                                                      |
+| **Mode commenté**      | l'analyse après chaque coup, avec les alternatives et le coup proposé.                                                                                                                                                                                                                                                     |
+| **Pourquoi ce coup ?** | l'inverse du mode commenté : rien ne s'affiche tant qu'on ne demande pas. Même moteur, même explication — seul le déclencheur change.                                                                                                                                                                                      |
+| **Voix du coach**      | narration de toutes les explications, avec réécoute. Voix neuronale Piper si elle est installée, sinon celle du navigateur.                                                                                                                                                                                                |
+| **Mémo avant le coup** | quatre questions sous l'échiquier : ce que son coup a changé, ce qu'il attaque, ce que ton coup laisse en prise, ce que tient son coup le plus méchant. C'est la seule aide qui **ne consulte pas le moteur** — elle ne répond à aucune question, elle les pose — et donc la seule qui reste disponible en partie classée. |
 
 Chacune se coupe d'un clic depuis les préférences ou depuis la partie. C'est
 le but : on s'en sert le temps d'acquérir le réflexe, puis on s'en passe.
+
+### Ce qu'une aide du moteur coûte
+
+**Une partie jouée avec « Indice » ou « Annuler » ne rapporte rien.** Ni
+classement, ni progression de carrière, ni quête du jour, ni résultat de
+tournoi — et elle n'en retire à personne non plus. Celui qui a vu le meilleur
+coup, ou rejoué un coup en sachant ce qu'il donnait, n'a pas joué la partie que
+le classement prétend mesurer.
+
+La règle est écrite au moment d'archiver la partie, et non dans une condition
+d'affichage. Les deux boutons sont bien masqués là où le résultat compte pour
+quelqu'un d'autre — partie classée, ronde de tournoi —, mais une règle qui
+n'existe que dans trois conditions d'affichage recopiées finit par en perdre
+une.
+
+**Contre un ami, l'indice existe — à découvert.** L'interdire ne l'empêche pas :
+le moteur tourne dans le navigateur et la page d'analyse est à un onglet. Ce
+que l'application peut garantir, ce n'est pas l'absence d'aide, c'est la
+transparence. Le bouton demande confirmation, et l'adversaire est prévenu dans
+le tchat de la partie à l'instant où on s'en sert.
 
 ### L'assistant IA — facultatif, avec ta clé
 
@@ -131,7 +159,7 @@ npm run setup
 Elle crée le fichier `.env` **avec des secrets engendrés aléatoirement**, puis
 télécharge les jeux de pièces et bruitages, le moteur Stockfish WebAssembly,
 l'index des 3 810 ouvertures, les 3 568 finales, et engendre les icônes. Elle
-finit par valider les 189 étapes de leçons. Chaque étape est facultative :
+finit par valider les 328 étapes de leçons. Chaque étape est facultative :
 si l'une échoue, l'application démarre quand même, avec cette ressource en
 moins.
 

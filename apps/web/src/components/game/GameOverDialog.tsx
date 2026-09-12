@@ -48,10 +48,12 @@ export function GameOverDialog({
   moves,
   bilan,
   ratingDelta,
+  nonClassee,
   onRematch,
   onNewGame,
   retour,
   quete,
+  seance,
 }: {
   status: GameStatus
   result: GameResult
@@ -69,6 +71,14 @@ export function GameOverDialog({
   bilan?: Bilan
   /** Variation de classement, si la partie était classée. */
   ratingDelta?: number | null
+  /**
+   * Pourquoi la partie ne compte pas, quand elle devait compter.
+   *
+   * Une phrase, sans majuscule ni point : elle s'insère après « Partie non
+   * classée : ». Laissé vide quand la partie n'était pas classée au départ —
+   * il n'y a alors rien à expliquer, personne n'attendait de points.
+   */
+  nonClassee?: string | null
   onRematch?: () => void
   onNewGame?: () => void
   /**
@@ -81,6 +91,24 @@ export function GameOverDialog({
    * partie », qui le renvoyait aux réglages qu'on lui avait justement épargnés.
    */
   retour?: { href: string; libelle: string }
+  /**
+   * Le relevé du thème, quand la partie était une séance pédagogique.
+   *
+   * C'est la promesse faite avant de commencer : « le bilan comptera les
+   * positions où ce thème est apparu ». Une promesse tenue dans la boîte de fin
+   * plutôt que sur une page séparée, parce que c'est le seul moment où on la
+   * lira — trois clics plus loin, la partie est déjà oubliée.
+   *
+   * Les chiffres viennent de `releverLeTheme`, qui rejoue la partie et
+   * interroge chaque position. Aucun appel au moteur : c'est une lecture de
+   * plateau, et elle dit donc la vérité même hors ligne.
+   */
+  seance?: {
+    theme: string
+    pour: number
+    contre: number
+    coups: number[]
+  }
   /**
    * La quête du jour qui a envoyé jouer, s'il y en a une.
    *
@@ -259,6 +287,16 @@ export function GameOverDialog({
           </p>
         )}
 
+        {/* ── Pourquoi cette partie ne compte pas ────────────────────────
+            On avait coché « classée », on a gagné, et il ne se passe rien :
+            sans un mot, cela ressemble à une panne et on recommence. La raison
+            est dite là où on la cherche — à la place du gain qu'on attendait. */}
+        {nonClassee && (
+          <p className="mt-3 text-[13px] leading-relaxed text-muted">
+            Partie non classée&nbsp;: {nonClassee}
+          </p>
+        )}
+
         <p className="mt-4 text-xs text-faint">{moves.length} demi-coups joués</p>
 
         {/* ── La pertinence des coups ───────────────────────────────────
@@ -274,6 +312,49 @@ export function GameOverDialog({
             }}
             className="mt-4"
           />
+        )}
+
+        {/* ── Le thème de la séance ─────────────────────────────────────
+            Les deux nombres côte à côte, et non un seul : « tu as créé quatre
+            avant-postes » flatte sans rien apprendre, « quatre pour toi, six
+            contre toi » dit où regarder à la séance suivante. */}
+        {seance && (
+          <div className="mt-4 rounded-[var(--radius-sm)] bg-surface px-3 py-2.5 text-left">
+            <p className="text-[12px] font-semibold text-faint">Thème de la séance</p>
+            <p className="mt-0.5 text-[14px] font-semibold">{seance.theme}</p>
+
+            {seance.pour + seance.contre === 0 ? (
+              <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+                Le thème ne s’est pas présenté une seule fois dans cette partie. Ça arrive — une
+                ouverture fermée ne produit pas de colonne ouverte. La même séance sur une autre
+                partie donnera autre chose.
+              </p>
+            ) : (
+              <>
+                <div className="mt-2 flex gap-6">
+                  <span>
+                    <span className="block font-display text-2xl font-bold tabular-nums leading-none text-[var(--q-best)]">
+                      {seance.pour}
+                    </span>
+                    <span className="mt-0.5 block text-[12px] text-muted">pour toi</span>
+                  </span>
+                  <span>
+                    <span className="block font-display text-2xl font-bold tabular-nums leading-none text-[var(--q-inaccuracy-text)]">
+                      {seance.contre}
+                    </span>
+                    <span className="mt-0.5 block text-[12px] text-muted">contre toi</span>
+                  </span>
+                </div>
+                {seance.coups.length > 0 && (
+                  <p className="mt-2 text-[13px] leading-relaxed text-muted">
+                    Apparu à tes coups{' '}
+                    <span className="tabular-nums text-ink">{seance.coups.join(', ')}</span> —
+                    retrouve-les dans la liste, ou en analyse.
+                  </p>
+                )}
+              </>
+            )}
+          </div>
         )}
 
         {/* ── La quête du jour ──────────────────────────────────────────

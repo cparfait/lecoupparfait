@@ -364,6 +364,12 @@ const httpServer = createServer(async (request, response) => {
           black: snapshot.players.b?.name ?? '?',
           whiteRating: snapshot.players.w?.rating ?? null,
           blackRating: snapshot.players.b?.rating ?? null,
+          // Inscrit ou invité. La liste des parties sert à retrouver celles de
+          // ses amis, reconnus par leur pseudo ; sans cette distinction, un
+          // visiteur qui taperait le pseudo d'un ami apparaîtrait comme lui.
+          // On n'expose que le fait, jamais l'identifiant de compte.
+          whiteInscrit: snapshot.players.w?.inscrit ?? false,
+          blackInscrit: snapshot.players.b?.inscrit ?? false,
           moves: snapshot.moves.length,
           timeControl: snapshot.timeControl,
           rated: snapshot.rated,
@@ -783,6 +789,21 @@ io.on('connection', (socket) => {
   socket.on('chat', (payload: { text?: string }) => {
     if (tropVite('chat')) return
     withRoom(currentSlug, (room) => room.sendChat(socket.id, String(payload?.text ?? '')))
+  })
+
+  /*
+    Un joueur annonce qu'il a demandé un indice.
+
+    Le serveur ne calcule rien et n'autorise rien : l'indice sort du moteur qui
+    tourne dans le navigateur du demandeur. Il relaie l'annonce à la table, pour
+    que l'adversaire l'apprenne pendant la partie et non en la relisant.
+
+    Limité comme le tchat : c'est un message de plus dans le salon, et le salon
+    n'a pas à distinguer par quel bouton on le lui envoie.
+  */
+  socket.on('indice', () => {
+    if (tropVite('chat')) return
+    withRoom(currentSlug, (room) => room.annoncerIndice(socket.id))
   })
 
   socket.on('disconnect', () => {

@@ -28,6 +28,7 @@ import {
   Home,
   Info,
   LayoutGrid,
+  ListChecks,
   Mail,
   Monitor,
   Puzzle,
@@ -124,6 +125,15 @@ export const SECTIONS: SectionNav[] = [
       // trouver un cadenas en première ligne donne le ton inverse de celui du
       // projet, où l'essentiel s'utilise sans rien créer. Elle passe donc
       // derrière les deux façons de jouer une partie tout de suite.
+      // La séance pédagogique avant la carrière : elle ne demande pas de compte,
+      // et c'est la façon la plus directe de jouer une partie qui apprend
+      // quelque chose — un thème annoncé, le commentaire allumé, un bilan.
+      {
+        href: '/jouer/pedagogique',
+        labelKey: 'nav.seance',
+        icon: GraduationCap,
+        hintKey: 'nav.seanceHint',
+      },
       { href: '/carriere', labelKey: 'nav.career', icon: Trophy, hintKey: 'nav.careerHint' },
       {
         href: '/jouer/local',
@@ -165,6 +175,23 @@ export const SECTIONS: SectionNav[] = [
         labelKey: 'nav.lessons',
         icon: GraduationCap,
         hintKey: 'nav.lessonsHint',
+      },
+      // « Ton palier » juste après les leçons, et devant tout le reste : c'est
+      // la réponse à la question qu'on se pose en arrivant — « je suis à 900,
+      // qu'est-ce qui me coûte des points ? » — là où le sommaire des leçons
+      // répond à « qu'est-ce qu'il y a à apprendre ? ». Les deux sont utiles,
+      // mais ce n'est pas la même question, et la seconde vient après.
+      {
+        href: '/apprendre/palier',
+        labelKey: 'nav.palier',
+        icon: Target,
+        hintKey: 'nav.palierHint',
+      },
+      {
+        href: '/apprendre/principes',
+        labelKey: 'nav.principes',
+        icon: ListChecks,
+        hintKey: 'nav.principesHint',
       },
       {
         href: '/ouvertures',

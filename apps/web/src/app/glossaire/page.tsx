@@ -23,7 +23,7 @@ import { Grid3x3, Search } from 'lucide-react'
 import clsx from 'clsx'
 import { motifGlossary } from '@coupparfait/core'
 import { Card, Chip } from '@/components/ui/index.tsx'
-import { FAMILIES, TERMS } from '@/lib/glossaire.ts'
+import { FAMILIES, TERMS, termesSynonymes } from '@/lib/glossaire.ts'
 import { POSITIONS_DU_GLOSSAIRE } from '@/lib/glossaire-positions.ts'
 import { BoiteTerme } from '@/components/glossaire/BoiteTerme.tsx'
 import { BoutonEcouter } from '@/components/ui/BoutonEcouter.tsx'
@@ -150,10 +150,39 @@ export default function GlossaryPage() {
     return [...TERMS, ...motifs]
   }, [locale])
 
+  /**
+   * Les termes que le lexique ajoute à la recherche.
+   *
+   * Le glossaire définit le vocabulaire juste ; ce n'est pas celui qu'on tape.
+   * On cherche « épingle », « nulle », « mat en 1 », « je stagne », ou le mot
+   * anglais qu'on a appris sur une autre interface — et la page ne rendait rien,
+   * ce qui laisse croire qu'elle ne connaît pas le sujet. Voir `SYNONYMES`.
+   */
+  const parLexique = useMemo(() => termesSynonymes(query), [query])
+
   const filtered = useMemo(() => {
     const needle = normalise(query.trim())
     if (needle.length < 2) return entries
     return entries.filter(
+      (entry) =>
+        normalise(entry.name).includes(needle) ||
+        normalise(entry.definition).includes(needle) ||
+        parLexique.includes(entry.name),
+    )
+  }, [entries, query, parLexique])
+
+  /**
+   * Le lexique a-t-il trouvé ce que la recherche littérale ne trouvait pas ?
+   *
+   * Sert à le dire. Quelqu'un qui tape « épingle » et voit apparaître
+   * « Clouage » doit comprendre pourquoi, sans quoi il croit à un bug de
+   * recherche — et il n'apprend pas que le mot juste est « clouage », ce qui
+   * était tout l'intérêt.
+   */
+  const litteral = useMemo(() => {
+    const needle = normalise(query.trim())
+    if (needle.length < 2) return true
+    return entries.some(
       (entry) =>
         normalise(entry.name).includes(needle) || normalise(entry.definition).includes(needle),
     )
@@ -210,6 +239,22 @@ export default function GlossaryPage() {
           className="h-11 w-full rounded-[var(--radius-sm)] border border-line bg-surface pl-9 pr-3 text-sm placeholder:text-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--accent)_30%,transparent)]"
         />
       </div>
+
+      {/* Le lexique a répondu à la place de la recherche littérale : on le dit,
+          et on nomme le mot juste. C'est la moitié de l'intérêt — on vient avec
+          « épingle » et on repart en sachant qu'on dit « clouage ». */}
+      {!litteral && parLexique.length > 0 && (
+        <p className="mt-3 text-[13px] leading-relaxed text-muted">
+          Le mot « {query.trim()} » n’est pas celui qu’on emploie ici. Ce que tu cherches s’appelle{' '}
+          {parLexique.map((terme, rang) => (
+            <span key={terme}>
+              {rang > 0 && (rang === parLexique.length - 1 ? ' ou ' : ', ')}
+              <strong className="text-ink">{terme}</strong>
+            </span>
+          ))}
+          .
+        </p>
+      )}
 
       {groups.length === 0 && (
         <p className="mt-8 text-center text-sm text-muted">

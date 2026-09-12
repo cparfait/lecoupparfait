@@ -63,6 +63,7 @@ import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { positionEnPng, telecharger } from '@/lib/board/imagePosition.ts'
 import { ImportEnLigne } from '@/components/import/ImportEnLigne.tsx'
+import { EtMaintenant } from '@/components/analysis/EtMaintenant.tsx'
 import { MesAnalyses } from '@/components/analysis/MesAnalyses.tsx'
 import { MesParties } from '@/components/analysis/MesParties.tsx'
 import { RelectureGuidee } from '@/components/analysis/RelectureGuidee.tsx'
@@ -1590,6 +1591,25 @@ export function ReviewScreen({
             pour les retrouver.
           */}
             <KeyMoments report={report} format={format} onSeek={setCursor} />
+
+            {/* ── Et maintenant ? ────────────────────────────────────────
+                L'analyse s'arrêtait sur un constat. Le cœur rédigeait déjà un
+                axe de travail et comptait les motifs qui avaient coûté la
+                partie — deux champs que personne ne lisait. Ils deviennent
+                trois puzzles sur le motif exact, ce qui est la seule façon de
+                transformer une relecture en progrès.
+
+                Le camp est celui du joueur quand la partie est la sienne, et
+                sinon celui qu'on regarde : relire la partie de quelqu'un
+                d'autre vue des Noirs et recevoir les conseils destinés aux
+                Blancs n'aurait aucun sens. */}
+            <EtMaintenant
+              report={report}
+              camp={side ?? orientation}
+              focus={coach[side ?? orientation].focus}
+              motifs={coach[side ?? orientation].suggestedThemes}
+              locale={locale}
+            />
 
             {/* Verdict du coup courant */}
             {move && style && explanation && (

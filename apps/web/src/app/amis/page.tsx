@@ -18,6 +18,7 @@ import Link from 'next/link'
 import {
   Check,
   Copy,
+  Eye,
   Link2,
   Loader2,
   Search,
@@ -30,7 +31,15 @@ import {
 } from 'lucide-react'
 import clsx from 'clsx'
 import { SPEED_LABELS, TIME_CONTROLS } from '@coupparfait/core'
-import { Button, Card, EmptyState, Input, SectionTitle, Spinner } from '@/components/ui/index.tsx'
+import {
+  Button,
+  ButtonLink,
+  Card,
+  EmptyState,
+  Input,
+  SectionTitle,
+  Spinner,
+} from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 
@@ -45,6 +54,21 @@ interface Friend {
 interface PendingRequest {
   id: string
   user: Friend
+}
+
+/**
+ * Une partie en cours sur le serveur temps réel.
+ *
+ * Le strict nécessaire pour reconnaître un ami et pointer vers son salon : la
+ * page ne montre pas la position, seulement qui joue contre qui.
+ */
+interface PartieEnCours {
+  slug: string
+  white: string
+  black: string
+  /** Le siège est-il tenu par un compte, plutôt que par un visiteur ? */
+  whiteInscrit?: boolean
+  blackInscrit?: boolean
 }
 
 interface OutgoingChallenge {
@@ -113,12 +137,26 @@ function FriendsBook() {
     if (identite !== undefined) setMe(identite)
   }, [identite])
 
+  /**
+   * Les parties en cours, pour savoir lesquels de mes amis jouent.
+   *
+   * Relues avec le carnet, au même rythme : une partie commence et se termine
+   * pendant qu'on regarde la page, et un bouton « Regarder » qui pointerait sur
+   * une partie finie serait pire que pas de bouton.
+   *
+   * La liste vient du serveur temps réel, qui ne connaît pas mes amis : c'est
+   * donc ici qu'on recoupe, sur le pseudo et sur le fait d'être inscrit — un
+   * visiteur choisit son nom d'affichage librement.
+   */
+  const [enCours, setEnCours] = useState<PartieEnCours[]>([])
+
   // ── Carnet ──────────────────────────────────────────────────────────────
   const refresh = useCallback(async () => {
     try {
-      const [book, duels] = await Promise.all([
+      const [book, duels, parties] = await Promise.all([
         fetch('/api/amis').then((r) => (r.ok ? r.json() : null)),
         fetch('/api/defis').then((r) => (r.ok ? r.json() : null)),
+        fetch('/api/parties').then((r) => (r.ok ? r.json() : null)),
       ])
       if (book) {
         setFriends(book.friends ?? [])
@@ -126,10 +164,30 @@ function FriendsBook() {
         setOutgoing(book.outgoing ?? [])
       }
       if (duels) setSent(duels.outgoing ?? [])
+      // Le serveur temps réel peut être arrêté sans que le reste le soit : on
+      // vide alors la liste plutôt que de garder des parties périmées.
+      setEnCours(parties?.games ?? [])
     } finally {
       setLoading(false)
     }
   }, [])
+
+  /** La partie que joue ce pseudo en ce moment, s'il en joue une. */
+  const partieDe = useCallback(
+    (pseudo: string): { slug: string; adversaire: string } | null => {
+      const cible = pseudo.toLowerCase()
+      for (const partie of enCours) {
+        if (partie.whiteInscrit && partie.white.toLowerCase() === cible) {
+          return { slug: partie.slug, adversaire: partie.black }
+        }
+        if (partie.blackInscrit && partie.black.toLowerCase() === cible) {
+          return { slug: partie.slug, adversaire: partie.white }
+        }
+      }
+      return null
+    },
+    [enCours],
+  )
 
   useEffect(() => {
     if (me === undefined || me === null) return
@@ -437,6 +495,8 @@ function FriendsBook() {
               const waiting = sent.find(
                 (entry) => entry.to === friend.id && entry.status === 'pending',
               )
+              // La partie qu'il est en train de jouer, s'il en joue une.
+              const enPartie = partieDe(friend.username)
               return (
                 <div key={friend.id} className="flex items-center gap-2.5 py-0.5">
                   <Avatar friend={friend} />
@@ -445,6 +505,25 @@ function FriendsBook() {
                     <span className="shrink-0 text-[12px] tabular-nums text-faint">
                       {friend.rating}
                     </span>
+                  )}
+                  {/* ── Regarder sa partie ─────────────────────────────────
+                      Savoir qu'un ami est en ligne ne servait à rien : on
+                      pouvait le défier, et c'est tout. S'il est déjà en train
+                      de jouer, le défi partira sans réponse — alors que la
+                      partie, elle, se regarde tout de suite. Le bouton n'existe
+                      que s'il y a quelque chose à voir, et il remplace le défi
+                      dans l'ordre de lecture parce qu'il est plus utile à cet
+                      instant précis. */}
+                  {enPartie && (
+                    <ButtonLink
+                      href={`/jouer/partie/${enPartie.slug}`}
+                      size="sm"
+                      variant="secondary"
+                      icon={<Eye size={14} />}
+                      title={`Regarder la partie de ${friend.username} contre ${enPartie.adversaire}`}
+                    >
+                      Regarder
+                    </ButtonLink>
                   )}
                   <Button
                     size="sm"

@@ -11,6 +11,7 @@
 
 import { basicsChapter } from './basics.ts'
 import { matesChapter, openingMatesChapter } from './mats.ts'
+import { piegesChapter } from './pieges.ts'
 import { tacticsChapter } from './tactics.ts'
 import { endgameChapter, middlegameChapter, openingChapter } from './strategy.ts'
 import { repertoireChapter } from './repertoire.ts'
@@ -28,6 +29,12 @@ export const CHAPTERS: Chapter[] = [
   tacticsChapter,
   openingChapter,
   repertoireChapter,
+  // Les pièges après les ouvertures, et pas avant : chacun d'eux vit dans une
+  // ouverture précise — l'espagnole, le gambit dame, le Budapest — et on ne
+  // comprend pas pourquoi le fou s'enferme en b3 si l'on ne sait pas encore ce
+  // que l'espagnole cherche à faire. Ils viennent donc quand les six grandes
+  // ouvertures ont été vues.
+  piegesChapter,
   middlegameChapter,
   endgameChapter,
 ]

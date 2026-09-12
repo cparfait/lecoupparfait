@@ -21,6 +21,7 @@ import {
   Flag,
   Handshake,
   LayoutGrid,
+  Lightbulb,
   Loader2,
   MessageSquare,
   Send,
@@ -60,6 +61,8 @@ import { usePreferences } from '@/lib/store/preferences.ts'
 import type { ChatMessage } from '@/lib/game/useLiveGame.ts'
 import { toPlayedMove, type PlayedMove } from '@/lib/game/useChessGame.ts'
 import { useLegalMoves } from '@/lib/game/useLegalMoves.ts'
+import { requestHint } from '@/lib/game/useBotPlayer.ts'
+import type { Arrow } from '@/components/board/boardKit.ts'
 import { useDialogue } from '@/lib/useDialogue.ts'
 
 /**
@@ -122,6 +125,16 @@ export default function LiveGamePage() {
    */
   const [pret, setPret] = useState(false)
   const [chatDraft, setChatDraft] = useState('')
+  /**
+   * La flèche du dernier indice demandé, et le fait de l'avoir annoncé.
+   *
+   * L'indice existe ici à découvert : on peut le demander, et l'adversaire est
+   * prévenu dans le tchat de la partie. Interdire l'aide ne l'empêche pas — le
+   * moteur tourne dans le navigateur, la page d'analyse est à un onglet — alors
+   * que l'annoncer, si.
+   */
+  const [flecheIndice, setFlecheIndice] = useState<Arrow | null>(null)
+  const [indiceAnnonce, setIndiceAnnonce] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
 
   /**
@@ -160,6 +173,54 @@ export default function LiveGamePage() {
   })
 
   const { snapshot, color, pendule, connection, chat } = game
+
+  /**
+   * Demander le meilleur coup au moteur, et le dire à l'adversaire.
+   *
+   * L'ordre compte : on annonce **avant** d'afficher la flèche, pour que le
+   * message parte même si le moteur met deux secondes ou échoue. Annoncer après
+   * coup laisserait une fenêtre — courte, mais réelle — où l'on a vu le coup
+   * sans que l'autre le sache.
+   *
+   * La confirmation n'est pas une formalité : c'est le seul moment où l'on peut
+   * renoncer, et le libellé dit exactement ce qui va se passer.
+   */
+  const demanderIndice = useCallback(async () => {
+    if (!snapshot || color === null || snapshot.turn !== color) return
+    if (
+      !confirm(
+        'Demander le meilleur coup au moteur ?\n\nTon adversaire en sera informé dans le tchat de la partie.',
+      )
+    ) {
+      return
+    }
+
+    game.annoncerIndice()
+    setIndiceAnnonce(true)
+
+    try {
+      const indice = await requestHint(snapshot.fen, 14)
+      if (!indice) return
+      // Orange, comme dans la partie contre l'ordinateur : une seule couleur
+      // pour une seule idée, d'un écran à l'autre.
+      setFlecheIndice({ from: indice.from, to: indice.to, color: 'orange', weight: 'bold' })
+      playSound('notify')
+    } catch {
+      toast.error('Impossible de calculer un indice pour le moment.')
+    }
+  }, [snapshot, color, game])
+
+  // La flèche ne survit pas au coup suivant : elle pointerait des cases qui ont
+  // changé, ce qui est pire que pas de flèche du tout.
+  const coupsAuDernierIndice = useRef(0)
+  useEffect(() => {
+    if (!snapshot) return
+    if (flecheIndice === null) {
+      coupsAuDernierIndice.current = snapshot.moves.length
+      return
+    }
+    if (snapshot.moves.length !== coupsAuDernierIndice.current) setFlecheIndice(null)
+  }, [snapshot, flecheIndice])
 
   // ── Effets sonores ──────────────────────────────────────────────────────
   // Le son se choisit sur la notation du dernier coup seule : rien ici n'a
@@ -682,6 +743,41 @@ export default function LiveGamePage() {
         </Button>
       )}
 
+      {/* ── L'indice, à découvert ────────────────────────────────────────
+          Il n'existait pas ici, et pour une bonne raison : demander le meilleur
+          coup au moteur pendant qu'on joue contre quelqu'un, c'est jouer à deux
+          contre un.
+
+          Sauf que l'interdire ne l'empêche pas. Le moteur tourne dans le
+          navigateur, la page d'analyse est à un onglet, et celui qui veut
+          tricher trichait déjà — sans que l'autre en sache rien. La seule chose
+          que l'application puisse vraiment garantir, ce n'est pas l'absence
+          d'aide, c'est **la transparence** : le bouton existe, et l'adversaire
+          est prévenu à l'instant où on l'utilise, par un message dans le tchat
+          de la partie.
+
+          D'où la confirmation avant : ce n'est pas un geste anodin, et personne
+          ne doit l'apprendre après coup.
+
+          Le premier clic suffit à prévenir — le serveur n'annonce qu'une fois
+          par joueur et par partie —, mais le bouton reste utilisable ensuite :
+          l'information est déjà passée, et une aide qui se refuse au deuxième
+          coup n'aurait aucun sens. */}
+      <Button
+        size="sm"
+        variant="secondary"
+        icon={<Lightbulb size={14} />}
+        onClick={demanderIndice}
+        disabled={over || waiting || color === null || snapshot.turn !== color}
+        title={
+          indiceAnnonce
+            ? 'Ton adversaire a déjà été prévenu. Demander un autre indice.'
+            : 'Demander le meilleur coup au moteur. Ton adversaire en sera informé.'
+        }
+      >
+        <span className="max-sm:hidden">Indice</span>
+      </Button>
+
       <Button
         size="sm"
         variant="secondary"
@@ -763,6 +859,9 @@ export default function LiveGamePage() {
               // vient de porter à un ami passait donc inaperçu, alors que
               // c'est le seul moment de la partie qui mérite une animation.
               checkmate={snapshot.status === 'checkmate'}
+              // La flèche de l'indice, quand on en a demandé un. Elle s'efface
+              // au coup suivant : voir `demanderIndice`.
+              arrows={flecheIndice ? [flecheIndice] : undefined}
             />
           </div>
 

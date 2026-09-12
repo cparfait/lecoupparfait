@@ -67,8 +67,8 @@ export interface GameSnapshot {
   status: GameStatus
   result: GameResult
   players: {
-    w: { name: string; rating: number | null; connected: boolean } | null
-    b: { name: string; rating: number | null; connected: boolean } | null
+    w: { name: string; rating: number | null; connected: boolean; inscrit: boolean } | null
+    b: { name: string; rating: number | null; connected: boolean; inscrit: boolean } | null
   }
   clock: { w: number; b: number; running: Color | null } | null
   timeControl: TimeControl
@@ -672,6 +672,37 @@ export class GameRoom {
     this.emit({ type: 'chat', message })
   }
 
+  /**
+   * Annonce qu'un joueur a demandé un indice au moteur.
+   *
+   * L'indice n'est ni calculé ni autorisé ici : il l'est dans le navigateur de
+   * celui qui le demande, et rien ne pourrait l'en empêcher — le même moteur
+   * tourne dans l'onglet d'à côté. Ce que le salon peut faire, c'est le
+   * **dire**, pour que l'autre l'apprenne au moment où ça se produit plutôt que
+   * de le soupçonner en relisant la partie.
+   *
+   * Message système, comme les arrivées et les déconnexions : il n'est pas
+   * attribuable à quelqu'un qui parle, il constate.
+   *
+   * Un seul par joueur et par partie. Répété à chaque clic, un joueur agacé
+   * pourrait noyer le tchat de son adversaire — et surtout l'information est la
+   * même : à partir du premier, la partie est assistée.
+   */
+  annoncerIndice(socketId: string): void {
+    if (this.status !== 'playing') return
+    const color = this.colorOf(socketId)
+    if (!color) return
+
+    if (this.indicesAnnonces.has(color)) return
+    this.indicesAnnonces.add(color)
+
+    const player = this.players[color]
+    this.system(`${player?.name ?? 'Un joueur'} a demandé un indice au moteur.`)
+  }
+
+  /** Les camps dont l'indice a déjà été annoncé. Voir `annoncerIndice`. */
+  private readonly indicesAnnonces = new Set<Color>()
+
   private system(text: string): void {
     const message: ChatMessage = { from: 'Le Coup Parfait', text, at: this.now(), system: true }
     this.chat.push(message)
@@ -839,6 +870,19 @@ export class GameRoom {
               name: this.players.w.name,
               rating: this.players.w.rating,
               connected: this.players.w.connected,
+              /*
+                Le nom vient d'un compte, ou d'un visiteur qui l'a tapé.
+
+                Un invité choisit son nom d'affichage librement : rien ne
+                l'empêche d'écrire le pseudo de quelqu'un d'autre. Tant qu'il
+                s'agissait de l'afficher au-dessus de l'échiquier, c'était sans
+                conséquence. Depuis que la liste des parties reconnaît les amis
+                par leur pseudo, ça en a une — sans ce drapeau, n'importe qui
+                pourrait faire apparaître « ton ami joue » dans ta liste. On
+                expose le fait d'être inscrit, et jamais l'identifiant : il
+                n'apparaît pas dans une route publique.
+              */
+              inscrit: this.players.w.userId !== null,
             }
           : null,
         b: this.players.b
@@ -846,6 +890,7 @@ export class GameRoom {
               name: this.players.b.name,
               rating: this.players.b.rating,
               connected: this.players.b.connected,
+              inscrit: this.players.b.userId !== null,
             }
           : null,
       },

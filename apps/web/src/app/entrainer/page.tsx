@@ -3,14 +3,18 @@
 /**
  * Sommaire de l'entraînement.
  *
- * Trois écrans qui travaillent la même matière — six millions de positions
+ * Quatre écrans qui travaillent la même matière — six millions de positions
  * notées — mais pas la même compétence : les puzzles apprennent à *chercher*,
- * la manche chronométrée à *reconnaître*, le défi du jour à *revenir*.
+ * la manche chronométrée à *reconnaître*, le défi du jour à *revenir*. Le
+ * quatrième n'apprend rien et c'est son rôle : il **mesure**. Les positions de
+ * Lichess portent leur propre cote, établie sur des millions de tentatives, ce
+ * qui en fait le seul instrument calibré dont l'application dispose.
  *
- * Trois portes de la même forme, dans la teinte de la rubrique.
+ * Quatre portes de la même forme, dans la teinte de la rubrique — sauf la
+ * dernière, qui emprunte celle d'« Apprendre » parce qu'elle y conduit.
  */
 
-import { Check, Puzzle, Timer, Zap } from 'lucide-react'
+import { Check, Gauge, Puzzle, Timer, Zap } from 'lucide-react'
 import { CarteDestination } from '@/components/ui/CarteDestination.tsx'
 import { Chip, TitreDePage } from '@/components/ui/index.tsx'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
@@ -44,6 +48,18 @@ const EXERCICES = [
       'Une seule position, la même pour tout le monde de ton niveau. La prochaine arrive à minuit.',
     detail: 'Compte pour la série et pour les quêtes du jour',
   },
+  // Le test de niveau est rangé ici en plus de « Apprendre », et ce n'est pas
+  // un doublon : il travaille la même matière que les trois autres — les
+  // positions notées — et c'est depuis cet écran qu'on se demande « à quel
+  // niveau je devrais m'entraîner ? ». Il ne touche à aucun classement.
+  {
+    href: '/apprendre/niveau',
+    icon: Gauge,
+    titre: 'Test de niveau',
+    phrase:
+      'Douze positions, plus dures ou plus simples selon tes réponses. À la fin, un niveau estimé et ce qu’il faut travailler.',
+    detail: 'Six minutes · ne touche ni à ton Elo ni à ta cote de puzzles',
+  },
 ] as const
 
 export default function EntrainementPage() {
@@ -54,7 +70,7 @@ export default function EntrainementPage() {
 
   return (
     <div className="page">
-      <TitreDePage intro="Les mêmes positions, trois façons de les travailler : chercher le coup juste, le reconnaître vite, ou en résoudre une par jour.">
+      <TitreDePage intro="Les mêmes positions, quatre façons de s’en servir : chercher le coup juste, le reconnaître vite, en résoudre une par jour — ou s’en servir pour mesurer son niveau.">
         S’entraîner
       </TitreDePage>
 
@@ -64,7 +80,10 @@ export default function EntrainementPage() {
             key={href}
             href={href}
             icon={icon}
-            teinte={TEINTE}
+            // Le test de niveau porte la teinte d'« Apprendre » : il mène là-bas,
+            // et une pastille de la couleur de la rubrique aurait annoncé un
+            // quatrième exercice alors que c'est une mesure.
+            teinte={href.startsWith('/apprendre') ? 'var(--rub-apprendre)' : TEINTE}
             titre={titre}
             phrase={phrase}
             detail={detail}

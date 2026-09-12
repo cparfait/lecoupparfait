@@ -14,6 +14,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import Link from 'next/link'
 import { BookOpen, RotateCcw, Search, Undo2 } from 'lucide-react'
 import clsx from 'clsx'
 import { Chess } from 'chess.js'
@@ -21,6 +22,8 @@ import type { PieceSymbol, Square } from 'chess.js'
 import { ECO_VOLUMES, toEpd } from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, Card, Chip, EmptyState, Spinner } from '@/components/ui/index.tsx'
+import { CarteEnjeux } from '@/components/ouvertures/CarteEnjeux.tsx'
+import { ficheDeLaPartie, ficheEnjeux } from '@/lib/ouvertures/enjeux.ts'
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { useMoveStats, useOpeningStats, type StatsBand } from '@/lib/game/useOpeningStats.ts'
 import { playMoveFor } from '@/lib/sound.ts'
@@ -89,6 +92,39 @@ export default function OpeningsPage() {
     if (demande) setQuery(demande)
   }, [])
 
+  /*
+    La fiche d'enjeux demandée par l'adresse.
+
+    « Voir sur l'échiquier », depuis la page des enjeux, envoie ici sur
+    `?fiche=sicilienne` : on rejoue la suite qui définit l'ouverture, et la
+    fiche se reconnaît alors d'elle-même sur la position obtenue — rien à
+    transmettre de plus que son identifiant.
+  */
+  useEffect(() => {
+    const demande = new URLSearchParams(window.location.search).get('fiche')
+    if (!demande) return
+    const fiche = ficheEnjeux(demande)
+    if (!fiche) return
+
+    const echiquier = new Chess()
+    const joues: string[] = []
+    for (const san of fiche.coups) {
+      try {
+        joues.push(echiquier.move(san).san)
+      } catch {
+        // Une fiche dont la suite n'est pas jouable est un bug de contenu, que
+        // `check:enjeux` refuse déjà. On s'arrête là plutôt que d'afficher une
+        // position tronquée sans le dire.
+        break
+      }
+    }
+    setFen(echiquier.fen())
+    setHistory(joues)
+    const detaille = echiquier.history({ verbose: true })
+    const dernier = detaille[detaille.length - 1]
+    setLastMove(dernier ? { from: dernier.from, to: dernier.to } : null)
+  }, [])
+
   // ── Ouverture de la position courante ───────────────────────────────────
   const current = useMemo(() => book?.lookup(fen, locale) ?? null, [book, fen, locale])
   /** Clé de la position affichée, pour reconnaître la ligne choisie. */
@@ -107,6 +143,16 @@ export default function OpeningsPage() {
   }, [book, query, volume, locale])
 
   const legalMoves = useLegalMoves(fen)
+
+  /**
+   * La fiche d'enjeux de ce qu'on vient de jouer, s'il y en a une.
+   *
+   * L'explorateur savait déjà nommer l'ouverture ; il ne disait pas ce qu'elle
+   * cherche. Pour les vingt-cinq qui se jouent en club, la fiche apparaît donc
+   * dès que la suite correspond — c'est-à-dire au moment exact où la question
+   * se pose, la main sur les pièces.
+   */
+  const fiche = useMemo(() => ficheDeLaPartie(history), [history])
 
   /**
    * Continuations théoriques depuis la position courante.
@@ -244,6 +290,12 @@ export default function OpeningsPage() {
           ne répond à ta place : c’est un plateau d’étude, pas une partie. Avance coup par coup, sur
           l’échiquier ou en cliquant dans les listes, et vois où mène chaque branche.
         </p>
+        {/* Le lien vers les fiches, ici et pas seulement dans le menu : c'est
+            en explorant qu'on se demande « oui, mais qu'est-ce que je cherche
+            avec ça ? », et la réponse est à un clic. */}
+        <Link href="/ouvertures/enjeux" className="lien mt-1.5 inline-block paysage:hidden">
+          Les enjeux des 25 ouvertures qui se jouent en club →
+        </Link>
       </div>
 
       <div className="etude-corps grid gap-4 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
@@ -352,6 +404,25 @@ export default function OpeningsPage() {
 
         {/* ── Panneau de droite ────────────────────────────────────── */}
         <div className="etude-aside flex min-w-0 flex-col gap-3">
+          {/* ── Les enjeux de l'ouverture jouée ───────────────────────────
+              En tête du panneau, et avant les statistiques : savoir que 58 %
+              des joueurs de ton niveau jouent ce coup n'apprend rien si l'on ne
+              sait pas ce que l'ouverture cherche. Vingt-cinq fiches seulement,
+              donc la carte est le plus souvent absente — c'est normal, et c'est
+              pour cela qu'un lien mène à la liste complète.
+
+              En paysage sur téléphone, la colonne est déjà pleine : la fiche
+              s'y replierait sur dix lignes de texte, et on la lit mieux sur sa
+              page. */}
+          {fiche && (
+            <CarteEnjeux
+              fiche={fiche}
+              versEchiquier={false}
+              ecrire={format}
+              className="paysage:hidden"
+            />
+          )}
+
           {/* Ce que les joueurs jouent vraiment ici */}
           {stats && (
             <PopularMoves

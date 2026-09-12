@@ -1,0 +1,242 @@
+'use client'
+
+/**
+ * Préparer une séance pédagogique.
+ *
+ * Deux questions, et pas douze : à quel palier, et sur quel thème. Le niveau de
+ * l'adversaire, la cadence et le mode commenté en découlent — c'est tout
+ * l'intérêt, puisque régler soi-même un curseur de 1 à 25 avant de jouer est
+ * exactement ce qui empêche de commencer.
+ *
+ * Le palier arrive prérempli : depuis la page « Ton palier » il est dans
+ * l'adresse, sinon on le déduit du test de niveau conservé dans le navigateur.
+ * On peut toujours le changer — personne n'a à se justifier de vouloir jouer
+ * plus fort ou plus faible que son classement.
+ */
+
+import { useEffect, useMemo, useState } from 'react'
+import { Crown, GraduationCap, MessageSquare, Play, Shuffle, Target } from 'lucide-react'
+import clsx from 'clsx'
+import { botLevel } from '@coupparfait/core'
+import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
+import { Button, ButtonLink, Card, Chip, TitreDePage, Toggle } from '@/components/ui/index.tsx'
+import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
+import { PALIERS, lireNiveauEstime } from '@/lib/apprendre/palier.ts'
+import {
+  lienDeSeance,
+  lireSeances,
+  palierParDefaut,
+  themesPour,
+  type SeancesFaites,
+} from '@/lib/game/seance.ts'
+
+export default function SeancePage() {
+  const [palierId, setPalierId] = useState<string | null>(null)
+  const [themeId, setThemeId] = useState<string | null>(null)
+  const [commente, setCommente] = useState(true)
+  const [faites, setFaites] = useState<SeancesFaites>({})
+
+  /*
+    Le palier de départ.
+
+    Trois sources dans cet ordre : l'adresse — on arrive de « Ton palier », qui
+    sait déjà lequel c'est —, le test de niveau, puis le repli de
+    `palierParDefaut`. Lu dans un effet plutôt qu'avec `useSearchParams` : le
+    paramètre ne sert qu'au premier rendu, et cette forme évite d'imposer une
+    frontière de suspense à toute la page pour une chaîne de caractères.
+  */
+  useEffect(() => {
+    setFaites(lireSeances())
+
+    const demande = new URLSearchParams(window.location.search).get('palier')
+    if (demande && PALIERS.some((palier) => palier.id === demande)) {
+      setPalierId(demande)
+      return
+    }
+    setPalierId(palierParDefaut(lireNiveauEstime()?.elo ?? null).id)
+  }, [])
+
+  const palier = PALIERS.find((entree) => entree.id === palierId) ?? null
+  const themes = useMemo(() => (palier ? themesPour(palier.id) : []), [palier])
+
+  // Changer de palier peut rendre le thème choisi hors sujet : on le relâche
+  // plutôt que de lancer une séance d'avant-postes à un joueur de 500 Elo.
+  useEffect(() => {
+    if (themeId && !themes.some((theme) => theme.id === themeId)) setThemeId(null)
+  }, [themes, themeId])
+
+  const theme = themes.find((entree) => entree.id === themeId) ?? null
+  const adversaire = palier ? botLevel(palier.niveauBot) : null
+
+  return (
+    <div className="page">
+      <TitreDePage
+        retour={{ href: '/jouer', label: 'Jouer' }}
+        intro="Une partie contre l’ordinateur, avec un adversaire calibré sur ton niveau, un thème annoncé avant de commencer, et un bilan qui dit où ce thème est apparu dans ta partie."
+      >
+        Séance pédagogique
+      </TitreDePage>
+
+      {/* ── 1. Le palier ────────────────────────────────────────────────── */}
+      <Card className="overflow-hidden">
+        <EnTeteDeCarte
+          titre="À quel niveau"
+          icone={<Target size={14} aria-hidden />}
+          teinte="var(--rub-jouer)"
+          fin={adversaire ? `${adversaire.elo} Elo · niveau ${adversaire.level}` : undefined}
+        />
+        <div className="p-4">
+          <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+            {PALIERS.map((entree) => (
+              <button
+                key={entree.id}
+                type="button"
+                onClick={() => setPalierId(entree.id)}
+                aria-pressed={entree.id === palierId}
+                className={clsx(
+                  'rounded-[var(--radius-sm)] border p-3 text-left transition-colors',
+                  entree.id === palierId
+                    ? 'border-accent bg-[color-mix(in_oklab,var(--accent)_12%,transparent)]'
+                    : 'border-line bg-bg-elev hover:bg-surface-hover',
+                )}
+              >
+                <span className="block text-[12px] tabular-nums text-faint">
+                  {entree.max === Number.POSITIVE_INFINITY
+                    ? `${entree.min} +`
+                    : `${entree.min} – ${entree.max}`}
+                </span>
+                <span className="mt-0.5 block text-[13px] font-semibold leading-snug">
+                  {entree.nom}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {palier && adversaire && (
+            <p className="mt-3 text-[13px] leading-relaxed text-muted">
+              Ton adversaire sera <strong className="text-ink">{adversaire.name.fr}</strong>,
+              annoncé à {adversaire.elo} Elo — c’est-à-dire à peu près ton niveau. Une séance n’est
+              pas un exercice de force : si l’adversaire est trop fort, le thème n’a jamais le temps
+              d’apparaître.
+            </p>
+          )}
+        </div>
+      </Card>
+
+      {/* ── 2. Le thème ─────────────────────────────────────────────────── */}
+      <Card className="mt-4 overflow-hidden">
+        <EnTeteDeCarte
+          titre="Sur quel thème"
+          icone={<GraduationCap size={14} aria-hidden />}
+          teinte="var(--rub-apprendre)"
+          fin={`${themes.length} à ce palier`}
+        />
+        <div className="p-4">
+          <div className="grid gap-1.5 sm:grid-cols-2">
+            {themes.map((entree) => {
+              const deja = faites[entree.id] ?? 0
+              return (
+                <button
+                  key={entree.id}
+                  type="button"
+                  onClick={() => setThemeId(entree.id)}
+                  aria-pressed={entree.id === themeId}
+                  className={clsx(
+                    'flex items-start gap-3 rounded-[var(--radius-sm)] border p-3 text-left transition-colors',
+                    entree.id === themeId
+                      ? 'border-accent bg-[color-mix(in_oklab,var(--accent)_12%,transparent)]'
+                      : 'border-line bg-bg-elev hover:bg-surface-hover',
+                  )}
+                >
+                  <span className="text-xl" aria-hidden>
+                    {entree.icone}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex flex-wrap items-center gap-2">
+                      <span className="text-[14px] font-semibold">{entree.nom}</span>
+                      {deja > 0 && (
+                        <Chip tone="success">
+                          {deja} séance{deja > 1 ? 's' : ''}
+                        </Chip>
+                      )}
+                    </span>
+                    <span className="mt-1 block text-[13px] leading-relaxed text-muted">
+                      {entree.consigne}
+                    </span>
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              const tire = themes[Math.floor(Math.random() * themes.length)]
+              if (tire) setThemeId(tire.id)
+            }}
+            className="lien mt-3 inline-flex items-center gap-1.5"
+          >
+            <Shuffle size={13} aria-hidden />
+            Choisis pour moi
+          </button>
+        </div>
+      </Card>
+
+      {/* ── 3. Lancer ───────────────────────────────────────────────────── */}
+      <Card className="mt-4 overflow-hidden">
+        <EnTeteDeCarte
+          titre="Avant de commencer"
+          icone={<MessageSquare size={14} aria-hidden />}
+          teinte="var(--rub-analyser)"
+        />
+        <div className="p-4">
+          <div className="rounded-[var(--radius-sm)] border border-line bg-surface px-3.5 py-1.5">
+            <Toggle
+              checked={commente}
+              onChange={setCommente}
+              label="Commenter chaque coup"
+              description="Après chacun de tes coups, les trois meilleures options avec la raison de chacune, et le coup proposé fléché. C’est ce qui fait d’une partie une séance — mais elle reste jouable sans."
+            />
+          </div>
+
+          {/* La promesse du bilan, dite avant et non après : c'est elle qui
+              donne une raison de tenir le thème pendant quarante coups. */}
+          {theme && (
+            <div className="mt-4 rounded-[var(--radius)] border border-line bg-bg-deep p-4">
+              <p className="text-[13px] font-semibold text-faint">Ce que tu regardes</p>
+              <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{theme.aRegarder}</p>
+              <p className="mt-3 text-[13px] font-semibold text-faint">À la fin</p>
+              <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
+                Le bilan comptera les positions où « {theme.nom.toLowerCase()} » est apparu dans ta
+                partie — pour toi et contre toi — et dira à quels coups.
+              </p>
+            </div>
+          )}
+
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            {palier && theme ? (
+              <ButtonLink
+                href={`${lienDeSeance(palier.id, theme.id)}${commente ? '&commente=1' : ''}`}
+                variant="primary"
+                size="lg"
+                icon={<Play size={16} />}
+              >
+                Commencer la séance
+              </ButtonLink>
+            ) : (
+              <Button variant="primary" size="lg" icon={<Play size={16} />} disabled>
+                Choisis un thème
+              </Button>
+            )}
+            <ButtonLink href="/apprendre/palier" size="lg" icon={<Crown size={15} />}>
+              Voir mon palier
+            </ButtonLink>
+          </div>
+        </div>
+      </Card>
+
+      <AutresDeLaSection section="jouer" />
+    </div>
+  )
+}

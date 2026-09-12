@@ -411,6 +411,17 @@ export default function PreferencesPage() {
                   onChange={(value) => set('moveSafetyHints', value)}
                   disabled={!prefs.showLegalMoves}
                 />
+                {/* Le mémo est rangé avec les autres béquilles, juste après
+                    les coups colorés : ce sont les deux seules aides qui
+                    s'adressent au moment *avant* le coup. La différence, et
+                    elle mérite d'être dite ici, est que celle-ci ne consulte
+                    pas le moteur — d'où sa présence même en partie classée. */}
+                <Toggle
+                  label="Mémo avant chaque coup"
+                  description="Quatre questions sous l’échiquier : ce que son coup a changé, ce qu’il attaque, ce que ton coup laisse en prise, ce que tient son coup le plus méchant. Aucune réponse donnée — c’est une discipline, pas une assistance, et elle reste disponible en partie classée."
+                  checked={prefs.memoAvantCoup}
+                  onChange={(value) => set('memoAvantCoup', value)}
+                />
                 <Toggle
                   label="Nom de l’ouverture en partie"
                   description="Affiche le nom de l’ouverture jouée, mis à jour à chaque coup. C’est la façon la plus efficace d’apprendre les noms : on les voit sur ses propres parties."
