@@ -12,7 +12,7 @@
 
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
-import { I18nProvider } from '@/lib/i18n/index.tsx'
+import { I18nProvider, langue } from '@/lib/i18n/index.tsx'
 import { detectEffectsCapability, usePreferences } from '@/lib/store/preferences.ts'
 import { unlockAudio } from '@/lib/sound.ts'
 import { loadNeuralVoices, loadVoices } from '@/lib/speech.ts'
@@ -26,10 +26,25 @@ export function Providers({ children }: { children: ReactNode }) {
   const hydrated = usePreferences((state) => state.hydrated)
   const patch = usePreferences((state) => state.patch)
 
-  // Répercute thème et langue sur l'élément racine, où le CSS les lit.
+  /*
+    Répercute thème, langue et sens de lecture sur l'élément racine.
+
+    `lang` portait le code seul — « fr », « ar » — et vaut mieux avec sa
+    région : c'est cette étiquette que lisent la synthèse vocale du navigateur,
+    les correcteurs orthographiques et les lecteurs d'écran.
+
+    `dir` est nouveau, et c'est le plus important des trois : l'arabe, l'hébreu
+    et le persan se lisent de droite à gauche. Une interface affichée dans
+    l'autre sens ne se lit pas — les boutons sont inversés, les listes se
+    déroulent du mauvais côté, la ponctuation atterrit en tête de phrase. Le
+    seul attribut suffit : tout le reste est en flux normal, et le navigateur
+    retourne la mise en page.
+  */
   useEffect(() => {
+    const choisie = langue(locale)
     document.documentElement.dataset.theme = theme
-    document.documentElement.lang = locale
+    document.documentElement.lang = choisie.bcp47
+    document.documentElement.dir = choisie.rtl ? 'rtl' : 'ltr'
   }, [theme, locale])
 
   useEffect(() => {

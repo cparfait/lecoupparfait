@@ -30,14 +30,24 @@ import { nl } from './nl.ts'
 import { ru } from './ru.ts'
 import { pl } from './pl.ts'
 import { tr } from './tr.ts'
+import { uk } from './uk.ts'
+import { cs } from './cs.ts'
+import { hu } from './hu.ts'
+import { ro } from './ro.ts'
+import { sv } from './sv.ts'
+import { el } from './el.ts'
+import { zh } from './zh.ts'
+import { ja } from './ja.ts'
+import { hi } from './hi.ts'
+import { ar } from './ar.ts'
 
 /**
  * Les langues traduites à ce jour.
  *
- * Huit, choisies pour le nombre de joueurs qu'elles couvrent. Les vingt-huit
- * autres du registre sont proposées et fonctionnent : elles s'affichent en
- * anglais, et `check:langues` les compte à zéro pour cent — un état visible
- * vaut mieux qu'une langue absente de la liste.
+ * Choisies pour le nombre de joueurs qu'elles couvrent. Les autres langues du
+ * registre sont proposées et fonctionnent : elles s'affichent en anglais, et
+ * `check:langues` les compte à zéro pour cent — un état visible vaut mieux
+ * qu'une langue absente de la liste.
  */
 export const TRADUCTIONS: Record<string, Traduction> = {
   es,
@@ -48,4 +58,14 @@ export const TRADUCTIONS: Record<string, Traduction> = {
   ru,
   pl,
   tr,
+  uk,
+  cs,
+  hu,
+  ro,
+  sv,
+  el,
+  zh,
+  ja,
+  hi,
+  ar,
 }

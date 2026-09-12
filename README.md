@@ -37,10 +37,14 @@ eux — fourchette, clouage, mat du couloir — et il te le dit à voix haute.
 
 L'interface est proposée en **41 langues** — celles où l'on joue : les grandes
 langues européennes, le Caucase (arménien, azerbaïdjanais, géorgien), l'Asie et
-les écritures de droite à gauche. Dix sont complètes ; les autres sont
+les écritures de droite à gauche. Vingt sont complètes ; les autres sont
 proposées, fonctionnent, et affichent en anglais ce qui n'est pas encore
 traduit — **phrase par phrase**, pas écran par écran. `npm run check:langues`
 affiche la couverture de chacune.
+
+L'arabe, l'hébreu et le persan basculent l'interface **de droite à gauche** :
+tout le reste est en flux normal, et le seul attribut `dir` suffit à retourner
+la mise en page.
 
 Une distinction compte, et l'application la tient partout : l'**interface** se
 traduit, le **contenu** se rédige. Les 48 leçons, les explications de coups, les
