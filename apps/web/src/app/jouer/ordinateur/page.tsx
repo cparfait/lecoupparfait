@@ -125,6 +125,7 @@ import {
 import { useCurrentOpening, useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { playMoveSound, playResultSound, playSound } from '@/lib/sound.ts'
 import { localeDuContenu } from '@/lib/i18n/dictionary.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 import { usePreferences, usePreferencesDe } from '@/lib/store/preferences.ts'
 import { speak } from '@/lib/speech.ts'
 import type { Arrow } from '@/components/board/boardKit.ts'
@@ -153,6 +154,7 @@ interface Setup {
 }
 
 export default function PlayComputerPage() {
+  const t = useT()
   const [phase, setPhase] = useState<Phase>('setup')
 
   /**
@@ -415,10 +417,7 @@ export default function PlayComputerPage() {
     try {
       position = new Chess(brut).fen()
     } catch {
-      toast.error(
-        'Cette position n’est pas jouable.',
-        'Il manque peut-être un roi, ou un camp est déjà en échec. La partie commence normalement.',
-      )
+      toast.error(t('computer.badFen'), t('computer.badFenHint'))
       return
     }
 
@@ -435,7 +434,8 @@ export default function PlayComputerPage() {
     setGameKey((key) => key + 1)
     setPhase('playing')
     playSound('start')
-  }, [])
+    // `t` : le message de position illisible, au début du même effet.
+  }, [t])
 
   /**
    * Le curseur a-t-il déjà été arbitré par le joueur ?
@@ -584,6 +584,11 @@ function SetupScreen({
    */
   personnaliteVoulue?: BotPersonalityId | null
 }) {
+  const t = useT()
+  /* La langue du **contenu** pour les sept adversaires : leurs noms et leurs
+     phrases sont écrits dans le cœur, qui ne les produit qu'en français et en
+     anglais. Voir `localeDuContenu`. */
+  const contenu = usePreferences((state) => localeDuContenu(state.locale))
   const [level, setLevel] = useState(() =>
     personnaliteVoulue ? niveauProche(personnaliteVoulue, initial.level) : initial.level,
   )
@@ -772,7 +777,12 @@ function SetupScreen({
   }).join(', ')
 
   const cadence = TIME_CONTROLS.find((tc) => tc.id === timeControlId)
-  const couleurChoisie = color === 'w' ? 'Blancs' : color === 'b' ? 'Noirs' : 'Couleur au hasard'
+  const couleurChoisie =
+    color === 'w'
+      ? t('settings.white')
+      : color === 'b'
+        ? t('settings.black')
+        : t('computer.randomColour')
 
   return (
     /* Une seule colonne, trois pas, et un résumé qui suit.
@@ -794,15 +804,13 @@ function SetupScreen({
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
       >
         <ArrowLeft size={15} aria-hidden />
-        Retour au choix du mode
+        {t('computer.back')}
       </Link>
 
       <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-        Contre l’ordinateur
+        {t('nav.vsComputer')}
       </h1>
-      <p className="mt-1.5 text-muted">
-        Vingt-cinq niveaux, sept personnalités. Choisis un adversaire un peu au-dessus de toi.
-      </p>
+      <p className="mt-1.5 text-muted">{t('computer.intro')}</p>
 
       {/* ── Reprendre ──────────────────────────────────────────────────
           En tête, avant les réglages : quelqu'un qui a une partie en cours
@@ -826,11 +834,15 @@ function SetupScreen({
               ses voisins à la ligne, et la phrase se pliait à un mot par
               ligne sur téléphone. Le plancher rend le repli possible. */}
           <div className="min-w-[14rem] flex-1">
-            <p className="font-display text-lg font-semibold">Tu as une partie en cours</p>
+            <p className="font-display text-lg font-semibold">{t('computer.resume')}</p>
             <p className="mt-0.5 text-sm text-muted">
-              Contre {reprise.human ? 'Maia' : 'Stockfish'}, niveau {reprise.level} · avec les{' '}
-              {reprise.playerColor === 'w' ? 'Blancs' : 'Noirs'} · {reprise.moves.length} demi-coups
-              joués, {depuis(reprise.enregistreLe)}.
+              {t('computer.resumeDetail', {
+                moteur: reprise.human ? 'Maia' : 'Stockfish',
+                niveau: reprise.level,
+                couleur: reprise.playerColor === 'w' ? t('settings.white') : t('settings.black'),
+                coups: reprise.moves.length,
+                depuis: depuis(reprise.enregistreLe),
+              })}
             </p>
           </div>
           <div className="flex w-full gap-2 sm:w-auto">
@@ -839,7 +851,7 @@ function SetupScreen({
               icon={<Play size={16} />}
               onClick={() => onReprendre(reprise)}
             >
-              Reprendre
+              {t('learn.resume')}
             </Button>
             <Button
               variant="ghost"
@@ -850,14 +862,14 @@ function SetupScreen({
                 location.reload()
               }}
             >
-              Oublier
+              {t('computer.forget')}
             </Button>
           </div>
         </Card>
       )}
 
       {/* ── 1. L'adversaire ────────────────────────────────────────────── */}
-      <Etape numero={1} titre="Qui affrontes-tu ?">
+      <Etape numero={1} titre={t('computer.step1')}>
         {/* Les personnalités défilent sur une rangée : sept vignettes, une
             par adversaire, et l'on voit d'un coup d'œil l'échelle entière.
             Choisir une vignette pose le curseur sur le niveau le plus proche
@@ -870,7 +882,7 @@ function SetupScreen({
              qui dépasse. */
           classeRangee="gap-3 px-4 py-3 sm:px-6"
           role="radiogroup"
-          label="Adversaire"
+          label={t('computer.opponentGroup')}
         >
           {personnalites.map((entree) => {
             const actif = entree.id === bot.personality
@@ -925,7 +937,7 @@ function SetupScreen({
           <div className="min-w-0 flex-1">
             <div className="flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-2">
               <h3 className="font-display text-xl font-semibold leading-tight">
-                {personality.name.fr}
+                {personality.name[contenu]}
               </h3>
               <span className="flex flex-wrap gap-2">
                 <Chip tone="accent">≈ {bot.elo} Elo</Chip>
@@ -933,7 +945,7 @@ function SetupScreen({
               </span>
             </div>
             <p className="mt-1 min-h-[3lh] text-sm leading-relaxed text-muted sm:min-h-[2lh]">
-              {personality.blurb.fr}
+              {personality.blurb[contenu]}
             </p>
           </div>
         </div>
@@ -960,7 +972,7 @@ function SetupScreen({
               }}
               aria-hidden
             >
-              {bot.level} · {personality.name.fr}
+              {bot.level} · {personality.name[contenu]}
             </span>
           </div>
           {/* ── Le rail, peint adversaire par adversaire ───────────────────
@@ -1024,8 +1036,8 @@ function SetupScreen({
             ))}
           </div>
           <div className="mt-1.5 flex justify-between text-[12px] text-faint">
-            <span>1 · débutant complet (100)</span>
-            <span>25 · surhumain (3200)</span>
+            <span>{t('computer.scaleLow')}</span>
+            <span>{t('computer.scaleHigh')}</span>
           </div>
 
           {/* Cinq raccourcis nommés d'après le joueur. « Je débute » vaut 1 :
@@ -1033,11 +1045,11 @@ function SetupScreen({
               l'échelle qui lui correspond, pas deux crans au-dessus. */}
           <div className="mt-3 flex flex-wrap gap-1.5">
             {[
-              { label: 'Je débute', level: 1 },
-              { label: 'Occasionnel', level: 7 },
-              { label: 'Club', level: 12 },
-              { label: 'Fort', level: 18 },
-              { label: 'Sans pitié', level: 25 },
+              { label: t('computer.presetBeginner'), level: 1 },
+              { label: t('computer.presetCasual'), level: 7 },
+              { label: t('computer.presetClub'), level: 12 },
+              { label: t('computer.presetStrong'), level: 18 },
+              { label: t('computer.presetRuthless'), level: 25 },
             ].map((preset) => {
               /* Chaque raccourci porte la teinte de l'adversaire qu'il
                  désigne : le chip « Fort » est du bronze parce que c'est
@@ -1072,16 +1084,16 @@ function SetupScreen({
           <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-muted">
             <Trophy size={15} className="shrink-0 text-accent" aria-hidden />
             {progress.defeated === 0 ? (
-              <span>
-                Aucun niveau battu pour l’instant. Commence par le premier — il apprend en même
-                temps que toi.
-              </span>
+              <span>{t('computer.noneBeaten')}</span>
             ) : (
               <span>
-                Plus haut niveau battu :{' '}
+                {t('computer.bestBeaten')}{' '}
                 <strong className="font-semibold text-ink">{progress.defeated}</strong> (
-                {botLevel(progress.defeated).elo} Elo) · {progress.wins} victoire
-                {progress.wins > 1 ? 's' : ''} sur {progress.attempts} parties.
+                {botLevel(progress.defeated).elo} Elo) ·{' '}
+                {t(progress.wins > 1 ? 'computer.winsOf' : 'computer.oneWinOf', {
+                  victoires: progress.wins,
+                  parties: progress.attempts,
+                })}
               </span>
             )}
             {progress.defeated < BOT_LEVELS.length && (
@@ -1090,8 +1102,9 @@ function SetupScreen({
                 onClick={() => choisirNiveau(Math.min(BOT_LEVELS.length, progress.defeated + 1))}
                 className="font-semibold text-accent hover:underline"
               >
-                Affronter le niveau {Math.min(BOT_LEVELS.length, progress.defeated + 1)}, le
-                prochain à battre
+                {t('computer.nextToBeat', {
+                  niveau: Math.min(BOT_LEVELS.length, progress.defeated + 1),
+                })}
               </button>
             )}
           </p>
@@ -1107,22 +1120,22 @@ function SetupScreen({
         {maiaReady && (
           <div className="mt-5 border-t border-line/60 pt-4">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <span className="text-sm font-medium">Style de jeu</span>
+              <span className="text-sm font-medium">{t('computer.playStyle')}</span>
               <SegmentedControl
                 size="sm"
                 value={humainRetenu ? 'humain' : 'moteur'}
                 onChange={(valeur) => setHuman(valeur === 'humain')}
-                label="Style de jeu"
+                label={t('computer.playStyle')}
                 options={[
                   {
                     value: 'humain' as const,
-                    label: 'Humain (Maia)',
-                    title: 'Réseau entraîné sur des millions de parties réelles',
+                    label: t('computer.styleHuman'),
+                    title: t('computer.styleHumanHint'),
                   },
                   {
                     value: 'moteur' as const,
-                    label: 'Moteur (Stockfish)',
-                    title: 'Le plus fort du monde, bridé au niveau voulu',
+                    label: t('computer.styleEngine'),
+                    title: t('computer.styleEngineHint'),
                   },
                 ]}
               />
@@ -1130,32 +1143,36 @@ function SetupScreen({
             <p className="mt-2 text-xs leading-relaxed text-muted">
               {maiaPossible
                 ? humainRetenu
-                  ? 'Maia se trompe comme on se trompe vraiment à ce niveau.'
-                  : 'Stockfish joue juste, puis lâche un coup faible d’un coup.'
-                : `Maia a appris sur des parties humaines de ${MAIA_MIN_ELO} à ${MAIA_MAX_ELO} Elo et ne sait rien jouer en dehors : au niveau ${bot.level}, c’est Stockfish qui joue. Pour affronter Maia, choisis un niveau entre ${premierNiveauMaia} et ${dernierNiveauMaia}.`}
+                  ? t('computer.styleHumanNote')
+                  : t('computer.styleEngineNote')
+                : t('computer.styleOutOfRange', {
+                    min: MAIA_MIN_ELO,
+                    max: MAIA_MAX_ELO,
+                    niveau: bot.level,
+                    premier: premierNiveauMaia,
+                    dernier: dernierNiveauMaia,
+                  })}
             </p>
           </div>
         )}
       </Etape>
 
       {/* ── 2. Les conditions ──────────────────────────────────────────── */}
-      <Etape numero={2} titre="Ta couleur et la cadence">
+      <Etape numero={2} titre={t('computer.step2')}>
         <div className="flex flex-wrap gap-x-10 gap-y-5">
           <div>
-            <SectionTitle>Ta couleur</SectionTitle>
+            <SectionTitle>{t('computer.yourColour')}</SectionTitle>
             <SegmentedControl
               value={color}
               onChange={setColor}
-              label="Couleur"
+              label={t('computer.colour')}
               options={[
-                { value: 'w' as const, label: '♔ Blancs' },
-                { value: 'b' as const, label: '♚ Noirs' },
-                { value: 'random' as const, label: '🎲 Hasard' },
+                { value: 'w' as const, label: t('friendGame.colourWhite') },
+                { value: 'b' as const, label: t('friendGame.colourBlack') },
+                { value: 'random' as const, label: t('friendGame.colourRandom') },
               ]}
             />
-            <p className="mt-2 text-xs text-faint">
-              Les Blancs commencent. Pour apprendre, alterne.
-            </p>
+            <p className="mt-2 text-xs text-faint">{t('computer.whiteStarts')}</p>
           </div>
 
           {/* `min-w-[19rem]` et non `min-w-0` : une colonne qui s'autorise à
@@ -1169,7 +1186,7 @@ function SetupScreen({
               la vraie condition : à côté de la couleur seulement s'il reste
               de quoi poser trois pastilles, sinon en pleine largeur dessous. */}
           <div className="min-w-[19rem] flex-1">
-            <SectionTitle>Cadence</SectionTitle>
+            <SectionTitle>{t('friendGame.timeControl')}</SectionTitle>
             <div className="flex flex-wrap gap-1.5">
               {TIME_CONTROLS.filter((tc) =>
                 ['180+0', '300+0', '300+3', '600+0', '600+5', '900+10', '1800+0', '0+0'].includes(
@@ -1195,24 +1212,22 @@ function SetupScreen({
             {/* Ramenée à un exemple : la règle générale se déduit de
                 l'exemple, et prenait trois lignes pour le dire. */}
             <p className="mt-2 text-xs leading-relaxed text-faint">
-              « 5 | 3 » : cinq minutes au départ, trois secondes gagnées à chaque coup.
+              {t('computer.timeControlExample')}
             </p>
           </div>
         </div>
       </Etape>
 
       {/* ── 3. Les aides ───────────────────────────────────────────────── */}
-      <Etape numero={3} titre="Pendant la partie">
+      <Etape numero={3} titre={t('computer.step3')}>
         {/* La partie classée en tête, parce qu'elle commande les autres :
             cochée, elle retire le mode commenté, l'indice et l'annulation.
             Ce n'est pas une punition, c'est ce qui rend le résultat
             interprétable. Éteinte par défaut : on vient d'abord s'entraîner. */}
         <Toggle
-          label="Partie classée"
+          label={t('friendGame.ratedLabel')}
           description={
-            connecte === false
-              ? 'Demande un compte : c’est lui qui porte le classement.'
-              : 'Le résultat met à jour ton classement dans cette cadence. En échange, pas d’annulation, pas d’indice, pas de commentaires.'
+            connecte === false ? t('computer.ratedNeedsAccount') : t('computer.ratedHint')
           }
           checked={classee && connecte !== false}
           disabled={connecte === false}
@@ -1221,12 +1236,8 @@ function SetupScreen({
 
         <div className="mt-3 border-t border-line/60 pt-3">
           <Toggle
-            label="Commenter chaque coup"
-            description={
-              classee
-                ? 'Indisponible en partie classée : le commentaire montre le meilleur coup.'
-                : 'Ce que vaut ton coup, les meilleures options et leur raison, lus à voix haute. Recommandé pour débuter.'
-            }
+            label={t('computer.commentaryEach')}
+            description={classee ? t('computer.commentaryRated') : t('computer.commentaryHint')}
             checked={commentaryMode && !classee}
             disabled={classee}
             onChange={(valeur) => setPreference('commentaryMode', valeur)}
@@ -1236,8 +1247,8 @@ function SetupScreen({
           {commentaryMode && !classee && (
             <div className="mt-3 border-t border-line/60 pt-3">
               <Toggle
-                label="Commenter aussi l’adversaire"
-                description="Deux fois plus de commentaires. Pour décortiquer une partie plutôt que la jouer."
+                label={t('computer.commentaryOpponent')}
+                description={t('computer.commentaryOpponentHint')}
                 checked={commentaryOpponent}
                 onChange={(valeur) => setPreference('commentaryOpponent', valeur)}
               />
@@ -1254,13 +1265,13 @@ function SetupScreen({
       <div className="sticky bottom-0 z-20 -mx-4 mt-6 border-t border-line-strong bg-[var(--flottant)]/95 px-4 py-3 backdrop-blur-xl safe-bottom sm:-mx-6 sm:px-6">
         <div className="flex items-center gap-4">
           <p className="hidden min-w-0 flex-1 truncate text-sm text-muted sm:block">
-            <strong className="font-semibold text-ink">{personality.name.fr}</strong> · ≈ {bot.elo}{' '}
-            Elo · {couleurChoisie} · {cadence?.label ?? timeControlId} ·{' '}
+            <strong className="font-semibold text-ink">{personality.name[contenu]}</strong> · ≈{' '}
+            {bot.elo} Elo · {couleurChoisie} · {cadence?.label ?? timeControlId} ·{' '}
             {classee && connecte === true
-              ? 'partie classée'
+              ? t('computer.summaryRated')
               : commentaryMode
-                ? 'coach activé'
-                : 'sans commentaire'}
+                ? t('computer.summaryCoach')
+                : t('computer.summaryPlain')}
           </p>
           <Button
             variant="primary"
@@ -1277,7 +1288,7 @@ function SetupScreen({
               })
             }
           >
-            Commencer la partie
+            {t('play.start')}
           </Button>
         </div>
       </div>
@@ -1381,6 +1392,8 @@ function GameScreen({
     'showEvalDuringGame',
     'whiteAlwaysBottom',
   )
+  const t = useT()
+  const contenu = localeDuContenu(prefs.locale)
   const { book } = useOpeningBook()
   const botColor: Color = playerColor === 'w' ? 'b' : 'w'
 
@@ -1831,9 +1844,9 @@ function GameScreen({
         playSound('notify')
       }
     } catch {
-      toast.error('Impossible de calculer un indice pour le moment.')
+      toast.error(t('computer.hintFailed'))
     }
-  }, [state.currentFen, state.turn, playerColor, noterAide])
+  }, [state.currentFen, state.turn, playerColor, noterAide, t])
 
   // La fonction seule, et non `botPlayer` entier : l'objet est recréé à chaque
   // rendu, la fonction est stable.
@@ -1975,7 +1988,7 @@ function GameScreen({
       result: issue,
       status: outcome?.status ?? state.status,
       playerColor,
-      opponentName: personality.name.fr,
+      opponentName: personality.name[contenu],
       botLevel: level,
       initialTime: timeControl.initial,
       increment: timeControl.increment,
@@ -2136,23 +2149,29 @@ function GameScreen({
       if (!alternative) return
 
       const san = formatMove(alternative.san)
-      const role = alternative.played ? 'Ton coup' : `Coup conseillé (n°${alternative.rank})`
+      const role = alternative.played
+        ? t('computer.yourMove')
+        : t('computer.advisedMove', { rang: alternative.rank })
 
       const parts = [
-        alternative.reason ?? 'Le moteur le place en tête à cette profondeur.',
-        `Évaluation : ${formatScore(alternative.score, playerColor)}.`,
+        alternative.reason ?? t('computer.engineTop'),
+        t('computer.evaluation', { score: formatScore(alternative.score, playerColor) }),
       ]
       // La suite s'écrivait telle que le moteur la rend, c'est-à-dire en anglais :
       // « Suite prévue : Nf3 Nc6 Bb5 » sous un titre qui disait « Cf3 ».
       if (alternative.line.length > 1) {
-        parts.push(`Suite prévue : ${alternative.line.slice(0, 4).map(formatMove).join(' ')}.`)
+        parts.push(
+          t('computer.expectedLine', {
+            coups: alternative.line.slice(0, 4).map(formatMove).join(' '),
+          }),
+        )
       }
 
       toast.info(`${san} — ${role}`, parts.join(' '))
       // La voix épelle le coup : un glyphe de figurine ne se prononce pas.
       speak(`${sanToSpeech(alternative.san, localeDuContenu(prefs.locale))}. ${parts[0]}`)
     },
-    [reviewedMove, reviewedCommentary, commentary, prefs.locale, playerColor, formatMove],
+    [reviewedMove, reviewedCommentary, commentary, prefs.locale, playerColor, formatMove, t],
   )
 
   const arrowLegend = useMemo<LegendItem[]>(() => {
@@ -2273,7 +2292,7 @@ function GameScreen({
   const pastilleClassee = (
     <Chip tone="accent">
       <Trophy size={11} aria-hidden />
-      Classée
+      {t('friendGame.rated')}
     </Chip>
   )
 
@@ -2335,8 +2354,8 @@ function GameScreen({
           icon={<Lightbulb size={14} />}
           onClick={handleHint}
           disabled={state.turn !== playerColor}
-          title="Demander le meilleur coup au moteur"
-          aria-label="Demander un indice"
+          title={t('computer.hintTitle')}
+          aria-label={t('live.hintAria')}
         >
           {/* Le libellé disparaît sous `sm` : l'icône est parlante, le titre
               reste, et la barre tient sur une ligne au lieu de trois. */}
@@ -2354,8 +2373,8 @@ function GameScreen({
           disabled={state.moves.length === 0}
           // « Reprendre » est le terme du jeu, mais il se lit aussi
           // « reprendre la partie ». On dit donc ce que fait le bouton.
-          title="Annule ton dernier coup et la réponse de l’ordinateur"
-          aria-label="Annuler ton dernier coup"
+          title={t('computer.undoTitle')}
+          aria-label={t('computer.undoAria')}
         >
           <span className="max-sm:hidden">Annuler</span>
         </Button>
@@ -2368,7 +2387,7 @@ function GameScreen({
         align="right"
         sens="haut"
         largeur="w-60"
-        label="Options de la partie"
+        label={t('computer.gameOptions')}
         declencheur={() => <MoreHorizontal size={16} aria-hidden />}
       >
         <MenuItem
@@ -2433,7 +2452,7 @@ function GameScreen({
         {/* ── Plateau ──────────────────────────────────────────────── */}
         <PlayerBar
           className="[grid-area:pion]"
-          name={personality.name.fr}
+          name={personality.name[contenu]}
           rating={bot.elo}
           color={botColor}
           avatar={personality.portrait}
@@ -2443,13 +2462,16 @@ function GameScreen({
           {...matiereAffichee(botColor)}
           status={
             botPlayer.loading
-              ? 'Chargement du moteur…'
+              ? t('computer.engineLoading')
               : botPlayer.thinking
-                ? 'réfléchit…'
+                ? t('computer.thinking')
                 : // Le moteur reste affiché pendant toute la partie :
                   // choisi une fois à la configuration, on l'oublie
                   // aussitôt, et l'on ne sait plus qui l'on affronte.
-                  `${human ? 'Maia' : 'Stockfish'} · niveau ${bot.level}`
+                  t('computer.engineLevel', {
+                    moteur: human ? 'Maia' : 'Stockfish',
+                    niveau: bot.level,
+                  })
           }
         />
         <div className="[grid-area:plateau] flex min-h-0 min-w-0 gap-2">
@@ -2550,7 +2572,7 @@ function GameScreen({
                   // cherche quand l'ordinateur attend.
                   className="shrink-0 rounded-[var(--radius-sm)] bg-accent px-2.5 py-1 text-xs font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110 pointer-coarse:min-h-11"
                 >
-                  Retour à la partie
+                  {t('computer.backToGame')}
                 </button>
               </div>
             )}
@@ -2564,7 +2586,7 @@ function GameScreen({
                     className="flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-accent px-4 text-sm font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
                   >
                     <Play size={15} aria-hidden />
-                    Continuer — {personality.name.fr} joue
+                    {t('computer.continuePlays', { adversaire: personality.name[contenu] })}
                   </button>
                 )}
               </div>
@@ -2574,7 +2596,7 @@ function GameScreen({
 
         <PlayerBar
           className="[grid-area:moi]"
-          name="Toi"
+          name={t('common.you')}
           color={playerColor}
           avatar="🙂"
           clock={timed ? clock : null}
@@ -2583,7 +2605,7 @@ function GameScreen({
           {...matiereAffichee(playerColor)}
           // L'état du tour, dans le bandeau plutôt qu'en ligne à part : c'est
           // ce bandeau qu'on regarde pour savoir si c'est à soi.
-          status={!gameOver && state.turn === playerColor ? 'À toi de jouer' : undefined}
+          status={!gameOver && state.turn === playerColor ? t('game.yourTurn') : undefined}
         />
 
         {/* ── Barre d'actions ──────────────────────────────────────── */}
@@ -2638,7 +2660,7 @@ function GameScreen({
               {classee && (
                 <Chip tone="accent">
                   <Trophy size={11} aria-hidden />
-                  Classée
+                  {t('friendGame.rated')}
                 </Chip>
               )}
               <div ref={setEmplacementBascule} className="ml-auto" />
@@ -2651,7 +2673,7 @@ function GameScreen({
                 align="right"
                 sens="haut"
                 largeur="w-60"
-                label="Options de la partie"
+                label={t('computer.gameOptions')}
                 className="flex-1"
                 declencheur={() => (
                   <span className="flex min-h-11 w-full flex-col items-center justify-center gap-0.5">
@@ -2670,7 +2692,7 @@ function GameScreen({
                   href="/jouer"
                   icone={<LayoutGrid size={15} className="shrink-0 text-accent" aria-hidden />}
                 >
-                  Retour au menu
+                  {t('game.over.backToMenu')}
                 </MenuItem>
                 {!classee && (
                   <div data-garde-ouvert className="mt-1 border-t border-line/60 pt-1">
@@ -2865,18 +2887,18 @@ function GameScreen({
           result={outcome?.result ?? state.result}
           retour={
             duel
-              ? { href: '/carriere', libelle: `Retour au chapitre ${duel.numero}` }
+              ? { href: '/carriere', libelle: t('computer.backToChapter', { n: duel.numero }) }
               : tournoi
-                ? { href: '/tournois/ordinateur', libelle: 'Retour au tournoi' }
+                ? { href: '/tournois/ordinateur', libelle: t('computer.backToTournament') }
                 : seance
                   ? // On ne renvoie pas aux réglages de partie, qu'on vient
                     // justement d'épargner : on renvoie au choix du thème, qui
                     // est la seule décision d'une séance.
-                    { href: '/jouer/pedagogique', libelle: 'Autre séance' }
+                    { href: '/jouer/pedagogique', libelle: t('computer.otherSession') }
                   : undefined
           }
           playerColor={playerColor}
-          opponentName={personality.name.fr}
+          opponentName={personality.name[contenu]}
           moves={state.moves}
           bilan={bilan}
           // Dit seulement si l'on attendait des points : une partie
@@ -2884,8 +2906,8 @@ function GameScreen({
           nonClassee={
             aideUtilisee
               ? aideUtilisee === 'indice'
-                ? 'tu as demandé un indice au moteur. Ni classement, ni carrière, ni quête du jour — et rien n’est retiré à personne non plus.'
-                : 'tu as repris un coup. Ni classement, ni carrière, ni quête du jour — et rien n’est retiré à personne non plus.'
+                ? t('computer.usedHint')
+                : t('computer.usedTakeback')
               : null
           }
           seance={
@@ -3012,6 +3034,7 @@ function LegendeDuVerdict({
   /** Le coup qu'il fallait jouer, celui qu'on a joué, et ce que le premier fait. */
   conseil?: { conseille: string; joue: string; pourquoi?: string | null } | null
 }) {
+  const contenu = usePreferences((state) => localeDuContenu(state.locale))
   const style = QUALITY_STYLES[quality]
   const teinte = `var(--q-${style.token})`
 
@@ -3019,9 +3042,9 @@ function LegendeDuVerdict({
     <div className="mb-1.5">
       <p className="flex items-baseline gap-1.5 text-[14px] leading-snug" style={{ color: teinte }}>
         <span aria-hidden>{style.glyph}</span>
-        <span className="font-semibold">{style.label.fr}</span>
+        <span className="font-semibold">{style.label[contenu]}</span>
         <span className="hidden min-w-0 flex-1 truncate font-normal text-muted sm:inline">
-          {style.description.fr}
+          {style.description[contenu]}
         </span>
       </p>
 
