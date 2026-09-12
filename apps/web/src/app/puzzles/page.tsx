@@ -38,7 +38,7 @@ import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, ButtonLink, Card, Chip, EmptyState, Spinner } from '@/components/ui/index.tsx'
 import { playMoveFor, playSound } from '@/lib/sound.ts'
 import { speak } from '@/lib/speech.ts'
-import { localeDuContenu } from '@/lib/i18n/index.tsx'
+import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { useSan } from '@/lib/notation.ts'
 import { VoiceQuickToggle } from '@/components/layout/VoiceQuickToggle.tsx'
@@ -71,21 +71,29 @@ interface Puzzle {
 
 type Status = 'loading' | 'playing' | 'solved' | 'failed' | 'error'
 
-/** Thèmes proposés en filtre, avec leur libellé français. */
-const THEMES: Array<{ id: string; label: string }> = [
-  { id: 'all', label: 'Tous' },
-  { id: 'fork', label: 'Fourchette' },
-  { id: 'pin', label: 'Clouage' },
-  { id: 'skewer', label: 'Enfilade' },
-  { id: 'discoveredAttack', label: 'Découverte' },
-  { id: 'hangingPiece', label: 'Pièce en prise' },
-  { id: 'mateIn1', label: 'Mat en 1' },
-  { id: 'mateIn2', label: 'Mat en 2' },
-  { id: 'backRankMate', label: 'Mat du couloir' },
-  { id: 'sacrifice', label: 'Sacrifice' },
-  { id: 'promotion', label: 'Promotion' },
-  { id: 'zugzwang', label: 'Zugzwang' },
-]
+/*
+  Les thèmes proposés en filtre.
+
+  Seuls les identifiants sont ici : le libellé se lit dans le dictionnaire,
+  sous `puzzles.themeNames`. Il aurait pu venir de `motifCopy`, qui les nomme
+  déjà — mais le cœur ne les écrit qu'en français et en anglais, alors que ce
+  sont douze étiquettes de menu comme les autres, traduisibles dans les
+  quarante et une langues.
+*/
+const THEMES = [
+  'all',
+  'fork',
+  'pin',
+  'skewer',
+  'discoveredAttack',
+  'hangingPiece',
+  'mateIn1',
+  'mateIn2',
+  'backRankMate',
+  'sacrifice',
+  'promotion',
+  'zugzwang',
+] as const
 
 /**
  * Comment on sort du défi du jour.
@@ -101,9 +109,10 @@ const THEMES: Array<{ id: string; label: string }> = [
  * une ligne. Un seul endroit, pour que les trois boutons qui font cela le
  * disent pareil.
  */
-const SORTIE_DU_DEFI = 'Autres puzzles'
+const SORTIE_DU_DEFI = 'puzzles.leaveDaily' as const
 
 export default function PuzzlesPage() {
+  const t = useT()
   /*
     La langue du **contenu**, et non celle de l'interface.
 
@@ -326,7 +335,7 @@ export default function PuzzlesPage() {
       dans l'adresse laisserait un filtre actif que rien n'affiche.
     */
     const demande = params.get('theme')
-    if (demande && THEMES.some((entree) => entree.id === demande)) setTheme(demande)
+    if (demande && (THEMES as readonly string[]).includes(demande)) setTheme(demande)
 
     /*
       La difficulté imposée par un chapitre de carrière.
@@ -374,7 +383,7 @@ export default function PuzzlesPage() {
       if (demande !== generation.current) return
 
       if (!response.ok) {
-        setErrorMessage(data.error ?? 'Impossible de charger un puzzle.')
+        setErrorMessage(data.error ?? t('puzzles.loadFailed'))
         setStatus('error')
         return
       }
@@ -408,9 +417,7 @@ export default function PuzzlesPage() {
             pas jouable. On le dit, et on en propose un autre.
           */
           setPuzzleIllisible(true)
-          setErrorMessage(
-            'La position de ce puzzle ne correspond pas à sa solution — il est inutilisable. Le suivant sera bon.',
-          )
+          setErrorMessage(t('puzzles.unusableHint'))
           setStatus('error')
           return
         }
@@ -425,17 +432,13 @@ export default function PuzzlesPage() {
       startedAt.current = Date.now()
 
       if (voiceEnabled) {
-        speak(
-          board.turn() === 'w'
-            ? 'Les Blancs jouent. Trouve le meilleur coup.'
-            : 'Les Noirs jouent. Trouve le meilleur coup.',
-        )
+        speak(board.turn() === 'w' ? t('puzzles.spokenWhite') : t('puzzles.spokenBlack'))
       }
     } catch {
-      setErrorMessage('Le service de puzzles est injoignable.')
+      setErrorMessage(t('puzzles.serviceDown'))
       setStatus('error')
     }
-  }, [theme, voiceEnabled, modeDefi, retenirPuzzle, coteDemandee, trancheDefi])
+  }, [theme, voiceEnabled, modeDefi, retenirPuzzle, coteDemandee, trancheDefi, t])
 
   useEffect(() => {
     // On attend de savoir si l'on vient du défi du jour : charger d'abord un
@@ -716,14 +719,11 @@ export default function PuzzlesPage() {
         <Card>
           <EmptyState
             icon={<Target size={30} />}
-            title={puzzleIllisible ? 'Ce puzzle est inutilisable' : 'Aucun puzzle disponible'}
-            description={
-              errorMessage ??
-              'La base de puzzles est vide. Lance l’import depuis le serveur pour récupérer les six millions de positions de Lichess.'
-            }
+            title={t(puzzleIllisible ? 'puzzles.unusable' : 'puzzles.noneAvailable')}
+            description={errorMessage ?? t('puzzles.emptyBase')}
             action={
               <Button variant="secondary" onClick={() => void load()}>
-                {puzzleIllisible ? 'Puzzle suivant' : 'Réessayer'}
+                {t(puzzleIllisible ? 'puzzles.next' : 'common.retry')}
               </Button>
             }
           />
@@ -757,12 +757,12 @@ export default function PuzzlesPage() {
             séance d'entraînement libre. C'est ce qui rendait « Puzzle suivant »
             crédible là où il n'y a pas de suivant. */}
           <h1 className="font-display text-2xl font-bold tracking-tight">
-            {modeDefi ? 'Défi du jour' : 'Puzzles'}
+            {t(modeDefi ? 'puzzles.dailyPuzzle' : 'puzzles.title')}
           </h1>
           {modeDefi ? (
             <Chip tone={defiDejaFait ? 'success' : 'accent'}>
               {defiDejaFait ? <Check size={11} aria-hidden /> : <Swords size={11} aria-hidden />}
-              {defiDejaFait ? 'déjà relevé aujourd’hui' : 'une seule position'}
+              {t(defiDejaFait ? 'puzzles.dailyAlreadyDone' : 'puzzles.dailyOnlyOne')}
             </Chip>
           ) : (
             /* L'autre façon de travailler les mêmes puzzles : vite, et à la
@@ -773,7 +773,7 @@ export default function PuzzlesPage() {
               className="flex h-7 items-center gap-1.5 rounded-full bg-accent/15 px-2.5 text-[12px] font-semibold text-accent transition-colors hover:bg-accent/25"
             >
               <Timer size={12} aria-hidden />
-              Manche chronométrée
+              {t('puzzles.timedRun')}
             </Link>
           )}
           {playerRating !== null && (
@@ -829,23 +829,23 @@ export default function PuzzlesPage() {
           className={clsx('-mx-3 mb-4 sm:mx-0 lg:hidden', modeDefi && 'hidden')}
           classeRangee="gap-1.5 px-3 sm:flex-wrap sm:overflow-visible sm:px-0"
         >
-          {THEMES.map((entry) => (
+          {THEMES.map((entree) => (
             <button
-              key={entry.id}
+              key={entree}
               type="button"
-              onClick={() => setTheme(entry.id)}
+              onClick={() => setTheme(entree)}
               /* `min-h-9` : les pastilles mesuraient 26 points de haut, soit
                presque moitié moins que le pouce qui les vise. On ne les
                agrandit pas en typographie — elles resteraient discrètes, ce
                qui est leur rôle — mais en zone touchable. */
               className={clsx(
                 'inline-flex min-h-9 shrink-0 items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors',
-                theme === entry.id
+                theme === entree
                   ? 'border-accent bg-accent/15 text-ink'
                   : 'border-line text-muted hover:bg-surface-hover',
               )}
             >
-              {entry.label}
+              {t(`puzzles.themeNames.${entree}` as never)}
             </button>
           ))}
         </Defilement>
@@ -883,10 +883,10 @@ export default function PuzzlesPage() {
                 aria-hidden
               />
               <span className="whitespace-nowrap">
-                {orientation === 'w' ? 'Les Blancs jouent' : 'Les Noirs jouent'}
+                {t(orientation === 'w' ? 'puzzles.whiteToPlay' : 'puzzles.blackToPlay')}
               </span>
               <span className="min-w-0 flex-1 truncate font-normal text-muted">
-                — trouve le meilleur coup
+                {t('puzzles.findBest')}
               </span>
               <CategorieDuPuzzle
                 puzzle={puzzle}
@@ -947,7 +947,7 @@ export default function PuzzlesPage() {
                     aria-hidden
                   />
                   <p className="font-display text-base font-semibold tracking-tight">
-                    {orientation === 'w' ? 'Les Blancs jouent' : 'Les Noirs jouent'}
+                    {t(orientation === 'w' ? 'puzzles.whiteToPlay' : 'puzzles.blackToPlay')}
                   </p>
                   <CategorieDuPuzzle
                     puzzle={puzzle}
@@ -959,17 +959,18 @@ export default function PuzzlesPage() {
                   />
                 </div>
                 <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
-                  Trouve le meilleur coup. Il y en a un seul.
+                  {t('puzzles.onlyOne')}
                 </p>
                 {wrongAttempts > 0 && (
                   <p className="mt-2 flex items-center gap-1.5 text-[14px] text-[var(--q-blunder)]">
                     <X size={13} aria-hidden />
-                    Ce n’est pas ça. Encore un essai.
+                    {t('puzzles.notIt')}
                   </p>
                 )}
                 {revealedSan && (
                   <p className="mt-2 rounded-[var(--radius-sm)] bg-surface px-2.5 py-2 text-[14px]">
-                    Solution : <strong className="text-accent">{format(revealedSan)}</strong>
+                    {t('puzzles.solutionIs')}{' '}
+                    <strong className="text-accent">{format(revealedSan)}</strong>
                   </p>
                 )}
               </>
@@ -985,17 +986,17 @@ export default function PuzzlesPage() {
                 </span>
                 <div>
                   <p className="text-sm font-semibold text-[var(--q-best)]">
-                    {modeDefi ? 'Défi du jour relevé !' : 'Résolu !'}
+                    {t(modeDefi ? 'puzzles.dailyDone' : 'puzzles.solvedTitle')}
                   </p>
                   {/* Dans le défi, on ne conseille pas « refais-en un du même
                       thème » : il n'y a pas de suivant avant demain, et c'est
                       justement la promesse du format. */}
                   <p className="mt-1 text-[14px] leading-relaxed text-muted">
                     {modeDefi
-                      ? 'C’était la position du jour, la même pour tout le monde de ton niveau. La prochaine arrive à minuit.'
+                      ? t('puzzles.solvedDaily')
                       : wrongAttempts === 0 && !revealed
-                        ? 'Trouvé du premier coup. C’est exactement ce qu’il fallait voir.'
-                        : 'Bien joué. Refais-en un du même thème pour ancrer le motif.'}
+                        ? t('puzzles.solvedFirstTry')
+                        : t('puzzles.solvedAfterTries')}
                   </p>
                 </div>
               </div>
@@ -1010,7 +1011,9 @@ export default function PuzzlesPage() {
                   <X size={14} className="text-[var(--q-blunder)]" />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-[var(--q-blunder)]">Raté</p>
+                  <p className="text-sm font-semibold text-[var(--q-blunder)]">
+                    {t('puzzles.failedTitle')}
+                  </p>
                   {/* La solution reste offerte, jamais imposée.
 
                       Elle s'affichait d'elle-même dès la seconde erreur, et
@@ -1021,14 +1024,12 @@ export default function PuzzlesPage() {
                       chercher. */}
                   {solutionRatee && revealed && (
                     <p className="mt-1.5 rounded-[var(--radius-sm)] bg-surface px-2.5 py-2 text-[14px]">
-                      Il fallait jouer{' '}
+                      {t('puzzles.shouldHavePlayed')}{' '}
                       <strong className="text-accent">{format(solutionRatee)}</strong>
                     </p>
                   )}
                   <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
-                    {revealed
-                      ? 'Rejoue la position : c’est en refaisant le coup soi-même qu’on finit par reconnaître le motif d’instinct.'
-                      : 'Rejoue la position, ou demande la solution si tu sèches : c’est en refaisant le coup soi-même qu’on finit par reconnaître le motif d’instinct.'}
+                    {t(revealed ? 'puzzles.replayRevealed' : 'puzzles.replayOrReveal')}
                   </p>
                 </div>
               </div>
@@ -1038,7 +1039,7 @@ export default function PuzzlesPage() {
           {/* Thèmes : révélés seulement après coup */}
           {(status === 'solved' || status === 'failed') && puzzle && (
             <Card className="p-4">
-              <p className="mb-2 text-[12px] font-semibold text-faint">Ce qu’il fallait voir</p>
+              <p className="mb-2 text-[12px] font-semibold text-faint">{t('puzzles.whatToSee')}</p>
               <div className="flex flex-wrap gap-1.5">
                 {puzzle.themes.slice(0, 6).map((themeId) => {
                   const copy = motifCopy(themeId as MotifId, locale)
@@ -1054,7 +1055,9 @@ export default function PuzzlesPage() {
                   {motifCopy(puzzle.themes[0] as MotifId, locale)?.definition}
                 </p>
               )}
-              <p className="mt-3 text-[12px] text-faint">Niveau du puzzle : {puzzle.rating}</p>
+              <p className="mt-3 text-[12px] text-faint">
+                {t('puzzles.puzzleRating', { cote: puzzle.rating })}
+              </p>
             </Card>
           )}
 
@@ -1079,7 +1082,7 @@ export default function PuzzlesPage() {
                 onClick={reveal}
                 className="min-w-[8rem] flex-1"
               >
-                Solution
+                {t('puzzles.showSolution')}
               </Button>
             )}
             {/* Une sortie de secours, toujours disponible.
@@ -1098,7 +1101,7 @@ export default function PuzzlesPage() {
                 onClick={modeDefi ? quitterLeDefi : () => void load()}
                 className="min-w-[8rem] flex-1"
               >
-                {modeDefi ? SORTIE_DU_DEFI : 'Passer'}
+                {t(modeDefi ? SORTIE_DU_DEFI : 'puzzles.skip')}
               </Button>
             )}
             {/* « Recommencer » d'abord, et il ne recharge rien : c'est la même
@@ -1112,7 +1115,7 @@ export default function PuzzlesPage() {
                 onClick={recommencer}
                 className="min-w-[8rem] flex-1"
               >
-                Recommencer
+                {t('puzzles.restart')}
               </Button>
             )}
             {/* ── La sortie, une fois la position finie ────────────────
@@ -1132,7 +1135,7 @@ export default function PuzzlesPage() {
                   icon={<Home size={15} />}
                   className="min-w-[8rem] flex-1"
                 >
-                  Mes quêtes
+                  {t('puzzles.myQuests')}
                 </ButtonLink>
                 <Button
                   variant={status === 'failed' ? 'ghost' : 'primary'}
@@ -1140,7 +1143,7 @@ export default function PuzzlesPage() {
                   onClick={quitterLeDefi}
                   className="min-w-[8rem] flex-1"
                 >
-                  {SORTIE_DU_DEFI}
+                  {t(SORTIE_DU_DEFI)}
                 </Button>
               </>
             )}
@@ -1151,7 +1154,7 @@ export default function PuzzlesPage() {
                 onClick={() => void load()}
                 className="min-w-[8rem] flex-1"
               >
-                Puzzle suivant
+                {t('puzzles.next')}
               </Button>
             )}
           </div>
@@ -1163,15 +1166,15 @@ export default function PuzzlesPage() {
               il se pilote au clavier, s'ouvre au doigt, et ne réclame rien. */}
           {!modeDefi && (
             <label className="hidden items-center justify-between gap-3 rounded-[var(--radius)] border border-line bg-surface px-3.5 py-2 text-sm lg:flex">
-              <span className="text-muted">Thème</span>
+              <span className="text-muted">{t('puzzles.themes')}</span>
               <select
                 value={theme}
                 onChange={(event) => setTheme(event.target.value)}
                 className="min-w-0 cursor-pointer bg-transparent text-right font-semibold text-ink outline-none"
               >
-                {THEMES.map((entry) => (
-                  <option key={entry.id} value={entry.id}>
-                    {entry.label}
+                {THEMES.map((entree) => (
+                  <option key={entree} value={entree}>
+                    {t(`puzzles.themeNames.${entree}` as never)}
                   </option>
                 ))}
               </select>
@@ -1180,8 +1183,7 @@ export default function PuzzlesPage() {
 
           {playerRating === null && status !== 'loading' && (
             <p className="text-center text-[12px] leading-relaxed text-faint">
-              Crée un compte pour suivre ton classement puzzles et éviter de revoir les mêmes
-              positions.
+              {t('puzzles.accountHint')}
             </p>
           )}
 
@@ -1199,7 +1201,7 @@ export default function PuzzlesPage() {
           quete={mission.quete}
           restantes={mission.restantes}
           serie={journee?.serie}
-          libelleContinuer={mission.quete.id === 'defi' ? SORTIE_DU_DEFI : 'Puzzle suivant'}
+          libelleContinuer={t(mission.quete.id === 'defi' ? SORTIE_DU_DEFI : 'puzzles.next')}
           onContinuer={() => {
             mission.fermer()
             // Le défi du jour n'a pas de suivant : on sort vers les puzzles
@@ -1280,14 +1282,17 @@ function CategorieDuPuzzle({
   onDemander: () => void
   className?: string
 }) {
+  const t = useT()
   if (!puzzle) return null
 
   const choisi = filtre !== 'all' && puzzle.themes.includes(filtre) ? filtre : null
   const motif =
-    choisi ?? THEMES.find((entree) => entree.id !== 'all' && puzzle.themes.includes(entree.id))?.id
+    choisi ?? THEMES.find((entree) => entree !== 'all' && puzzle.themes.includes(entree))
   if (!motif) return null
 
-  const label = THEMES.find((entree) => entree.id === motif)?.label ?? motif
+  const label = (THEMES as readonly string[]).includes(motif)
+    ? t(`puzzles.themeNames.${motif}` as never)
+    : motif
   const definition = motifCopy(motif as MotifId, locale)?.definition
 
   if (!choisi && !visible) {
@@ -1301,7 +1306,7 @@ function CategorieDuPuzzle({
           className,
         )}
       >
-        Voir la catégorie
+        {t('puzzles.seeCategory')}
       </button>
     )
   }
