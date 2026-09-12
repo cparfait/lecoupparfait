@@ -217,6 +217,11 @@ export default function LocalGamePage() {
    * Les actions, rendues une seule fois : sous le plateau jusqu'à `lg`, au
    * pied de la colonne des coups au-delà — voir la partie contre
    * l'ordinateur, qui suit la même règle.
+   *
+   * Les libellés tombent sous `sm` : quatre boutons à texte plein
+   * débordaient sur une seconde ligne, qui poussait l'échiquier hors de
+   * l'écran sur un téléphone. Les icônes restent, et `title` avec elles —
+   * voir la barre de la partie en ligne, qui applique la même règle.
    */
   const actions = (
     <>
@@ -231,8 +236,10 @@ export default function LocalGamePage() {
           annulerRotation()
           setOrientation((value) => (value === 'w' ? 'b' : 'w'))
         }}
+        title="Retourner l’échiquier"
+        aria-label="Retourner l’échiquier"
       >
-        Retourner
+        <span className="max-sm:hidden">Retourner</span>
       </Button>
       <Button
         size="sm"
@@ -240,11 +247,20 @@ export default function LocalGamePage() {
         icon={<Undo2 size={14} />}
         onClick={annulerCoup}
         disabled={state.moves.length === 0}
+        title="Annuler le dernier coup"
+        aria-label="Annuler le dernier coup"
       >
-        Annuler
+        <span className="max-sm:hidden">Annuler</span>
       </Button>
-      <Button size="sm" variant="ghost" icon={<RefreshCw size={14} />} onClick={newGame}>
-        Nouvelle partie
+      <Button
+        size="sm"
+        variant="ghost"
+        icon={<RefreshCw size={14} />}
+        onClick={newGame}
+        title="Nouvelle partie"
+        aria-label="Nouvelle partie"
+      >
+        <span className="max-sm:hidden">Nouvelle partie</span>
       </Button>
       <CommentaryToggle
         active={commentaryMode}

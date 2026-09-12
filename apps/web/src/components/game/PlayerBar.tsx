@@ -102,25 +102,36 @@ export const PlayerBar = memo(function PlayerBar({
 
   return (
     /*
-      Un bandeau accroché au plateau, et non une carte posée à côté.
+      Un bandeau accroché au plateau, mais qui se détache du fond.
 
-      Les deux bandeaux ont été des cartes — fond, liseré, filet d'accent —
-      séparées de l'échiquier par un écart. Trois objets empilés avec du vide
-      entre eux : l'œil lisait trois choses, alors qu'il n'y en a qu'une, la
-      partie. Ils perdent leur boîte et se posent contre le plateau, à sa
-      largeur exacte quand la page la connaît (voir `--cote-plateau`).
+      Les deux bandeaux ont d'abord été des cartes pleines, séparées de
+      l'échiquier par un écart : trois objets empilés avec du vide entre eux,
+      là où il n'y a qu'une chose, la partie. On a donc retiré la boîte — et
+      on est tombé dans l'excès inverse : sans aucune surface, le bandeau
+      n'était plus qu'un avatar et deux lignes de texte flottant sur la page,
+      si bien qu'on ne voyait plus où commençait le joueur et où finissait le
+      fond. C'était surtout vrai sur les thèmes clairs, où `--surface` et
+      `--bg` sont presque la même valeur.
 
-      Celui qui a le trait se voit toujours, mais autrement : l'avatar prend
-      un anneau d'accent, le nom passe en gras, et l'étiquette d'état — « à
-      toi de jouer », « réfléchit… » — s'écrit dans la couleur d'accent. C'est
-      l'information qu'on cherche du coin de l'œil pendant qu'on regarde
-      ailleurs, et un anneau lumineux se repère mieux qu'un fond à peine plus
-      clair que la page.
+      Il garde donc son écart nul avec le plateau et sa largeur exacte (voir
+      `--cote-plateau`), mais reprend un fond et un liseré : assez pour qu'on
+      lise « voici un joueur », pas assez pour redevenir une carte autonome.
+
+      Celui qui a le trait se voit deux fois : par le fond, teinté d'accent,
+      et par les détails — anneau sur l'avatar, nom en gras, étiquette d'état
+      (« à toi de jouer », « réfléchit… ») dans la couleur d'accent. Le fond
+      seul ne suffisait pas — dix pour cent d'accent, c'est discret de loin —
+      et les détails seuls ne suffisaient pas non plus, puisqu'il faut
+      d'abord repérer le bandeau avant d'en lire les détails.
     */
     <div
       className={clsx(
-        'relative flex max-w-full items-center gap-2.5 px-1 py-1.5 transition-colors',
+        'relative flex max-w-full items-center gap-2.5 px-2.5 py-2 transition-colors',
         'w-[var(--cote-plateau,100%)] justify-self-center',
+        'rounded-[var(--radius-sm)] ring-1',
+        active
+          ? 'bg-accent/10 ring-accent/40 shadow-[0_0_24px_-14px_var(--accent)]'
+          : 'bg-surface ring-line',
         className,
       )}
     >

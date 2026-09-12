@@ -2308,10 +2308,23 @@ function GameScreen({
     <>
       {gameOver ? (
         <>
-          <Button size="sm" variant="primary" icon={<RefreshCw size={14} />} onClick={onNewGame}>
+          <Button
+            size="sm"
+            variant="primary"
+            icon={<RefreshCw size={14} />}
+            onClick={onNewGame}
+            title="Nouvelle partie"
+            aria-label="Nouvelle partie"
+          >
             <span className="max-sm:hidden">Nouvelle partie</span>
           </Button>
-          <ButtonLink href="/jouer" size="sm" variant="ghost" icon={<LayoutGrid size={14} />}>
+          <ButtonLink
+            href="/jouer"
+            size="sm"
+            variant="ghost"
+            icon={<LayoutGrid size={14} />}
+            title="Menu"
+          >
             <span className="max-sm:hidden">Menu</span>
           </ButtonLink>
         </>
@@ -2323,6 +2336,7 @@ function GameScreen({
           onClick={handleHint}
           disabled={state.turn !== playerColor}
           title="Demander le meilleur coup au moteur"
+          aria-label="Demander un indice"
         >
           {/* Le libellé disparaît sous `sm` : l'icône est parlante, le titre
               reste, et la barre tient sur une ligne au lieu de trois. */}
@@ -2341,6 +2355,7 @@ function GameScreen({
           // « Reprendre » est le terme du jeu, mais il se lit aussi
           // « reprendre la partie ». On dit donc ce que fait le bouton.
           title="Annule ton dernier coup et la réponse de l’ordinateur"
+          aria-label="Annuler ton dernier coup"
         >
           <span className="max-sm:hidden">Annuler</span>
         </Button>

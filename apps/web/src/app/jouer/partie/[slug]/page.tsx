@@ -722,15 +722,45 @@ export default function LiveGamePage() {
    * revient à négocier le résultat une fois le coup vu. Le geste existe
    * toujours côté serveur ; simplement, plus rien ici ne le propose.
    */
+  /*
+    ── Les libellés disparaissent sous `sm` ───────────────────────────────
+
+    Quatre boutons à libellé plein — « Proposer nulle », « Indice »,
+    « Abandonner » — ne tiennent pas sur les trois cent soixante-quinze pixels
+    d'un téléphone : la barre passait sur deux lignes, et la seconde poussait
+    l'échiquier hors de l'écran au moment précis où l'on joue.
+
+    On garde l'icône, qui suffit pour ces trois gestes-là — une poignée de main,
+    une ampoule, un drapeau blanc sont compris sans texte — et le libellé revient
+    dès qu'il y a la place. Le `title` et l'`aria-label` restent à toutes les
+    tailles : l'icône seule ne dit rien à un lecteur d'écran, et une infobulle
+    reste utile à la souris.
+
+    Les deux boutons de réponse à une proposition de nulle, eux, gardent leur
+    texte : « accepter » et « refuser » n'ont pas d'icône évidente, et se
+    tromper de bouton y coûte une demi-partie.
+  */
   const actions = (
     <>
       {over ? (
         <>
-          <ButtonLink href="/jouer/ami" size="sm" variant="primary" icon={<Swords size={14} />}>
-            Nouvelle partie
+          <ButtonLink
+            href="/jouer/ami"
+            size="sm"
+            variant="primary"
+            icon={<Swords size={14} />}
+            title="Nouvelle partie"
+          >
+            <span className="max-sm:hidden">Nouvelle partie</span>
           </ButtonLink>
-          <ButtonLink href="/jouer" size="sm" variant="ghost" icon={<LayoutGrid size={14} />}>
-            Menu
+          <ButtonLink
+            href="/jouer"
+            size="sm"
+            variant="ghost"
+            icon={<LayoutGrid size={14} />}
+            title="Menu"
+          >
+            <span className="max-sm:hidden">Menu</span>
           </ButtonLink>
         </>
       ) : drawOfferedToMe ? (
@@ -749,8 +779,12 @@ export default function LiveGamePage() {
           icon={<Handshake size={14} />}
           onClick={game.offerDraw}
           disabled={over || waiting || color === null}
+          title={snapshot.drawOfferFrom === color ? 'Nulle proposée' : 'Proposer nulle'}
+          aria-label={snapshot.drawOfferFrom === color ? 'Nulle proposée' : 'Proposer nulle'}
         >
-          {snapshot.drawOfferFrom === color ? 'Nulle proposée' : 'Proposer nulle'}
+          <span className="max-sm:hidden">
+            {snapshot.drawOfferFrom === color ? 'Nulle proposée' : 'Proposer nulle'}
+          </span>
         </Button>
       )}
 
@@ -785,6 +819,7 @@ export default function LiveGamePage() {
             ? 'Ton adversaire a déjà été prévenu. Demander un autre indice.'
             : 'Demander le meilleur coup au moteur. Ton adversaire en sera informé.'
         }
+        aria-label="Demander un indice"
       >
         <span className="max-sm:hidden">Indice</span>
       </Button>
@@ -797,8 +832,10 @@ export default function LiveGamePage() {
           if (confirm('Abandonner la partie ?')) game.resign()
         }}
         disabled={over || waiting || color === null}
+        title="Abandonner"
+        aria-label="Abandonner la partie"
       >
-        Abandonner
+        <span className="max-sm:hidden">Abandonner</span>
       </Button>
     </>
   )
