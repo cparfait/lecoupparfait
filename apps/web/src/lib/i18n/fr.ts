@@ -580,6 +580,93 @@ export const fr = {
     levelTestDetail: 'Six minutes · ne touche ni à ton Elo ni à ta cote de puzzles',
   },
 
+  level: {
+    title: 'Test de niveau',
+    intro:
+      'Douze positions, de plus en plus dures ou de plus en plus simples selon tes réponses. À la fin, un niveau estimé et la liste de ce qui te fait gagner des points maintenant.',
+    howItWorks: 'Comment ça marche',
+    how1: 'Une position, un coup à trouver, et on passe à la suivante. Si tu trouves, la suivante est plus dure ; sinon, plus simple. Il n’y a pas d’indice et pas de second essai — c’est ce qui rend la mesure utilisable.',
+    how2: 'Les positions viennent du catalogue de Lichess, et chacune porte sa propre cote, établie sur des millions de tentatives. Ce n’est donc pas un avis sur ton jeu, c’est une mesure.',
+    how3: 'Rien n’est envoyé au classement : ce test ne touche ni à ta cote de puzzles, ni à ton Elo. Compte six minutes.',
+    lastTest: 'Dernier test : {elo} le {date}. Le refaire remplacera ce résultat.',
+    start: 'Commencer le test',
+    seeMyTier: 'Voir mon palier',
+    loadFailed: 'Impossible de charger une position.',
+    serviceDown: 'Le service de puzzles est injoignable.',
+    needsCatalogue:
+      'Le test a besoin du catalogue de puzzles. S’il n’est pas encore importé, la commande est dans le fichier README.',
+    levelSetFailed: 'Ton niveau est mesuré, mais l’adversaire de départ n’a pas pu être réglé.',
+    positionOf: 'Position {n} sur {total}',
+    positionRating: 'cote {cote}',
+    whiteToPlay: 'Les Blancs jouent — trouve le meilleur coup.',
+    blackToPlay: 'Les Noirs jouent — trouve le meilleur coup.',
+    found: 'Trouvé',
+    missed: 'Raté',
+    theMoveWas: 'Le coup était',
+    nothingToFix:
+      'Rien à corriger maintenant : le test mesure, il n’enseigne pas. Tu retrouveras ce motif dans la liste de la fin.',
+    nextPosition: 'Position suivante',
+    seeMyLevel: 'Voir mon niveau',
+    whereWeAre: 'Où en est la mesure',
+    nextAround: 'Prochaine position visée autour de',
+    narrowing: 'L’estimation se resserre à chaque réponse.',
+    yourLevel: 'Ton niveau estimé',
+    foundOf: '{reussies} / {total} trouvés',
+    inGame: 'en partie, environ — l’échelle du classement de l’application',
+    onPuzzleScale: 'sur l’échelle des puzzles',
+    twoNumbers:
+      'Les deux nombres diffèrent et c’est normal : un puzzle annonce qu’il y a quelque chose à trouver, une partie ne l’annonce jamais. Le premier est celui à retenir pour choisir ses adversaires ; le second pour choisir ses exercices.',
+    yourTier: 'Ton palier',
+    firstOpponentBefore: 'Premier adversaire proposé contre l’ordinateur :',
+    firstOpponentAfter:
+      'Les {paliers} paliers restent accessibles au curseur, dans les deux sens, et ton classement, lui, ne bouge qu’en jouant.',
+    whatProgresses: 'Ce qui me fait progresser maintenant',
+    playAtThisLevel: 'Jouer à ce niveau',
+    retake: 'Refaire le test',
+  },
+
+  tier: {
+    title: 'Ton palier',
+    intro:
+      'Le programme rangé non plus par chapitres, mais par ce qui coûte le plus de points à ton niveau. Rien de nouveau à apprendre ici — seulement l’ordre dans lequel le faire.',
+    yourLevel: 'Ton niveau',
+    nextTierFrom: 'Palier suivant à partir de {min} : {nom}.',
+    takeTest: 'Faire le test de niveau',
+    retake: 'Refaire le test',
+    fromDeclaration:
+      'Ce nombre vient de ta réponse à l’inscription, pas d’une mesure. Douze positions suffisent à le vérifier.',
+    stale:
+      'Ta mesure date de {jours} jours. Si tu as travaillé depuis, ce programme n’est plus le tien.',
+    testNeutral:
+      'Douze positions, six minutes. Le test ne touche ni à ton classement ni à ta cote de puzzles.',
+    unknown:
+      'On ne sait pas encore où tu en es — aucune partie classée, aucun puzzle. Douze positions suffisent à le savoir, et le test ne touche à aucun classement.',
+    showAnyway: 'Je débute, montre-moi quand même',
+    weaknesses: 'Ce que tu rates vraiment',
+    weaknessesCount: '{n} motifs mesurés',
+    weaknessesHint:
+      'Calculé sur tes puzzles, motif par motif. Les motifs vus moins de cinq fois ne sont pas comptés : deux échecs sur deux ne veulent rien dire.',
+    bestReturn: 'Ce qui rapporte le plus, maintenant',
+    tierNamed: 'Palier',
+    eloAndAbove: '{min} Elo et plus',
+    eloRange: '{min} – {max} Elo',
+    leversCount: '{n} leviers, dans l’ordre de rendement',
+    practise: 'Le mettre en pratique',
+    practiseHint:
+      'Une partie pédagogique à ton palier : un adversaire calibré, un thème annoncé avant de commencer, le mode commenté allumé, et un bilan qui dit où le thème est apparu.',
+    session: 'Séance pédagogique',
+    sixTiers: 'Les six paliers',
+    backToMine: 'Revenir à mon palier',
+    alreadySeen: 'déjà vue',
+    lessonNamed: 'Leçon · {titre}',
+    guidedLesson: 'Leçon guidée',
+    puzzlesOnTheme: 'Puzzles sur ce thème',
+    inGameSpeed: 'en {cadence}, sur {parties} parties',
+    inGameSpeedOne: 'en {cadence}, sur {parties} partie',
+    provisional: '— encore provisoire',
+    testedOn: ' du {date}',
+  },
+
   puzzles: {
     title: 'Puzzles',
     subtitle: 'Six millions de positions tactiques, triées par thème et par niveau.',

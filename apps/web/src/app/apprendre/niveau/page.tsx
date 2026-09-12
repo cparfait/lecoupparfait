@@ -61,6 +61,7 @@ import {
 } from '@/lib/apprendre/palier.ts'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useSan } from '@/lib/notation.ts'
+import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
 
 /**
  * Le pas de l'escalier, position après position.
@@ -104,6 +105,10 @@ type Phase = 'intro' | 'chargement' | 'jeu' | 'verdict' | 'fini' | 'panne'
 
 export default function TestDeNiveauPage() {
   const format = useSan()
+  const t = useT()
+  /* La date du dernier test s'écrit dans la langue de l'interface : voir
+     `langue()`, qui porte l'étiquette BCP 47 de chacune. */
+  const bcp47 = langue(useI18n().locale).bcp47
 
   const [phase, setPhase] = useState<Phase>('intro')
   const [erreur, setErreur] = useState<string | null>(null)
@@ -139,7 +144,7 @@ export default function TestDeNiveauPage() {
       )
       const data = await reponse.json()
       if (!reponse.ok) {
-        setErreur(data.error ?? 'Impossible de charger une position.')
+        setErreur(data.error ?? t('level.loadFailed'))
         setPhase('panne')
         return
       }
@@ -174,10 +179,10 @@ export default function TestDeNiveauPage() {
       setOrientation(echiquier.turn())
       setPhase('jeu')
     } catch {
-      setErreur('Le service de puzzles est injoignable.')
+      setErreur(t('level.serviceDown'))
       setPhase('panne')
     }
-  }, [])
+  }, [t])
 
   const commencer = useCallback(() => {
     vus.current = []
@@ -289,9 +294,9 @@ export default function TestDeNiveauPage() {
     }).catch(() => {
       // Le dépôt du niveau n'est pas le résultat : on ne gâche pas l'écran de
       // fin pour une requête ratée, le curseur se déplace à la main.
-      toast.error('Ton niveau est mesuré, mais l’adversaire de départ n’a pas pu être réglé.')
+      toast.error(t('level.levelSetFailed'))
     })
-  }, [phase, estimation, etapes.length])
+  }, [phase, estimation, etapes.length, t])
 
   const dejaFait = useMemo(() => (phase === 'intro' ? lireNiveauEstime() : null), [phase])
 
@@ -300,52 +305,39 @@ export default function TestDeNiveauPage() {
 
   return (
     <div className="page">
-      <TitreDePage
-        retour={{ href: '/apprendre', label: 'Apprendre' }}
-        intro="Douze positions, de plus en plus dures ou de plus en plus simples selon tes réponses. À la fin, un niveau estimé et la liste de ce qui te fait gagner des points maintenant."
-      >
-        Test de niveau
+      <TitreDePage retour={{ href: '/apprendre', label: 'Apprendre' }} intro={t('level.intro')}>
+        {t('level.title')}
       </TitreDePage>
 
       {/* ── Avant de commencer ──────────────────────────────────────────── */}
       {phase === 'intro' && (
         <Card className="overflow-hidden">
           <EnTeteDeCarte
-            titre="Comment ça marche"
+            titre={t('level.howItWorks')}
             icone={<Gauge size={14} aria-hidden />}
             teinte="var(--rub-apprendre)"
           />
           <div className="space-y-3 p-5 text-[14px] leading-relaxed text-muted">
-            <p>
-              Une position, un coup à trouver, et on passe à la suivante. Si tu trouves, la suivante
-              est plus dure ; sinon, plus simple. Il n’y a pas d’indice et pas de second essai —
-              c’est ce qui rend la mesure utilisable.
-            </p>
-            <p>
-              Les positions viennent du catalogue de Lichess, et chacune porte sa propre cote,
-              établie sur des millions de tentatives. Ce n’est donc pas un avis sur ton jeu, c’est
-              une mesure.
-            </p>
-            <p className="text-faint">
-              Rien n’est envoyé au classement : ce test ne touche ni à ta cote de puzzles, ni à ton
-              Elo. Compte six minutes.
-            </p>
+            <p>{t('level.how1')}</p>
+            <p>{t('level.how2')}</p>
+            <p className="text-faint">{t('level.how3')}</p>
 
             {dejaFait && (
               <p className="rounded-[var(--radius-sm)] border border-line bg-surface px-3 py-2 text-[13px] text-ink">
-                Dernier test : <strong>{dejaFait.elo}</strong> le{' '}
-                {new Date(dejaFait.le).toLocaleDateString('fr-FR')}. Le refaire remplacera ce
-                résultat.
+                {t('level.lastTest', {
+                  elo: dejaFait.elo,
+                  date: new Date(dejaFait.le).toLocaleDateString(bcp47),
+                })}
               </p>
             )}
 
             <div className="flex flex-wrap gap-2 pt-1">
               <Button variant="primary" size="lg" icon={<Target size={16} />} onClick={commencer}>
-                Commencer le test
+                {t('level.start')}
               </Button>
               {dejaFait && (
                 <ButtonLink href="/apprendre/palier" size="lg">
-                  Voir mon palier
+                  {t('level.seeMyTier')}
                 </ButtonLink>
               )}
             </div>
@@ -357,12 +349,9 @@ export default function TestDeNiveauPage() {
       {phase === 'panne' && (
         <Card className="p-5">
           <p className="text-[14px] text-ink">{erreur}</p>
-          <p className="mt-1.5 text-[13px] text-muted">
-            Le test a besoin du catalogue de puzzles. S’il n’est pas encore importé, la commande est
-            dans le fichier README.
-          </p>
+          <p className="mt-1.5 text-[13px] text-muted">{t('level.needsCatalogue')}</p>
           <Button className="mt-4" onClick={commencer} icon={<RotateCcw size={14} />}>
-            Réessayer
+            {t('common.retry')}
           </Button>
         </Card>
       )}
@@ -399,11 +388,17 @@ export default function TestDeNiveauPage() {
                 encore à l'écran alors qu'elle est déjà comptée : on annonçait
                 « position 2 sur 12 » au-dessus de la première. */}
             <p className="mb-3 text-[13px] text-muted">
-              Position {Math.min(verdict ? index : index + 1, PAS.length)} sur {PAS.length}
+              {t('level.positionOf', {
+                n: Math.min(verdict ? index : index + 1, PAS.length),
+                total: PAS.length,
+              })}
               {position && phase !== 'chargement' && (
                 <>
                   {' '}
-                  · <span className="text-faint">cote {position.rating}</span>
+                  ·{' '}
+                  <span className="text-faint">
+                    {t('level.positionRating', { cote: position.rating })}
+                  </span>
                 </>
               )}
             </p>
@@ -425,9 +420,7 @@ export default function TestDeNiveauPage() {
 
             <p className="mt-3 text-center text-[14px] font-medium">
               {phase === 'jeu' &&
-                (orientation === 'w'
-                  ? 'Les Blancs jouent — trouve le meilleur coup.'
-                  : 'Les Noirs jouent — trouve le meilleur coup.')}
+                t(orientation === 'w' ? 'level.whiteToPlay' : 'level.blackToPlay')}
             </p>
           </div>
 
@@ -453,13 +446,13 @@ export default function TestDeNiveauPage() {
                   >
                     {verdict.juste ? <Check size={14} /> : <X size={14} />}
                   </span>
-                  {verdict.juste ? 'Trouvé' : 'Raté'}
+                  {t(verdict.juste ? 'level.found' : 'level.missed')}
                 </p>
                 {!verdict.juste && (
                   <p className="mt-2 text-[14px] leading-relaxed text-muted">
-                    Le coup était <strong className="text-ink">{format(verdict.attendu)}</strong>.
-                    Rien à corriger maintenant : le test mesure, il n’enseigne pas. Tu retrouveras
-                    ce motif dans la liste de la fin.
+                    {t('level.theMoveWas')}{' '}
+                    <strong className="text-ink">{format(verdict.attendu)}</strong>.{' '}
+                    {t('level.nothingToFix')}
                   </p>
                 )}
                 <Button
@@ -469,7 +462,7 @@ export default function TestDeNiveauPage() {
                   icon={<ArrowRight size={15} />}
                   onClick={suivante}
                 >
-                  {termine ? 'Voir mon niveau' : 'Position suivante'}
+                  {t(termine ? 'level.seeMyLevel' : 'level.nextPosition')}
                 </Button>
               </Card>
             )}
@@ -477,15 +470,15 @@ export default function TestDeNiveauPage() {
             {etapes.length > 0 && (
               <Card className="overflow-hidden">
                 <EnTeteDeCarte
-                  titre="Où en est la mesure"
+                  titre={t('level.whereWeAre')}
                   teinte="var(--rub-apprendre)"
                   fin={`${reussies} / ${etapes.length}`}
                 />
                 <div className="p-4">
                   <p className="text-[13px] leading-relaxed text-muted">
-                    Prochaine position visée autour de{' '}
-                    <strong className="text-ink tabular-nums">{Math.round(visee.current)}</strong>.
-                    L’estimation se resserre à chaque réponse.
+                    {t('level.nextAround')}{' '}
+                    <strong className="text-ink tabular-nums">{Math.round(visee.current)}</strong>.{' '}
+                    {t('level.narrowing')}
                   </p>
                 </div>
               </Card>
@@ -528,41 +521,38 @@ function Resultat({
   total: number
   onRefaire: () => void
 }) {
+  const t = useT()
   const palier = palierPour(partie)
   const niveauBot = suggestedLevel(partie)
 
   return (
     <Card className="overflow-hidden">
       <EnTeteDeCarte
-        titre="Ton niveau estimé"
+        titre={t('level.yourLevel')}
         icone={<Gauge size={14} aria-hidden />}
         teinte="var(--rub-apprendre)"
-        fin={`${reussies} / ${total} trouvés`}
+        fin={t('level.foundOf', { reussies, total })}
       />
       <div className="p-5">
         <div className="flex flex-wrap items-end gap-x-8 gap-y-4">
           <div>
             <p className="font-display text-5xl font-bold leading-none tabular-nums">{partie}</p>
-            <p className="mt-1.5 text-[13px] text-muted">
-              en partie, environ — l’échelle du classement de l’application
-            </p>
+            <p className="mt-1.5 text-[13px] text-muted">{t('level.inGame')}</p>
           </div>
           <div>
             <p className="font-display text-3xl font-bold leading-none tabular-nums text-muted">
               {cotePuzzle}
             </p>
-            <p className="mt-1.5 text-[13px] text-faint">sur l’échelle des puzzles</p>
+            <p className="mt-1.5 text-[13px] text-faint">{t('level.onPuzzleScale')}</p>
           </div>
         </div>
 
         <p className="mt-4 max-w-2xl text-[14px] leading-relaxed text-muted">
-          Les deux nombres diffèrent et c’est normal : un puzzle annonce qu’il y a quelque chose à
-          trouver, une partie ne l’annonce jamais. Le premier est celui à retenir pour choisir ses
-          adversaires ; le second pour choisir ses exercices.
+          {t('level.twoNumbers')}
         </p>
 
         <div className="mt-5 rounded-[var(--radius)] border border-line bg-bg-deep p-4">
-          <Chip tone="accent">Ton palier</Chip>
+          <Chip tone="accent">{t('level.yourTier')}</Chip>
           <h2 className="mt-2 font-display text-xl font-bold tracking-tight">{palier.nom}</h2>
           <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{palier.promesse}</p>
         </div>
@@ -570,11 +560,15 @@ function Resultat({
         {/* Ce que la mesure change tout de suite, dit en clair : un test dont
             on ne voit aucun effet passe pour un questionnaire de magazine. */}
         <p className="mt-4 rounded-[var(--radius-sm)] bg-surface-strong px-3 py-2 text-[13px] leading-relaxed text-muted">
-          Premier adversaire proposé contre l’ordinateur :{' '}
-          <strong className="font-semibold text-ink">niveau {niveauBot}</strong>, environ{' '}
-          <strong className="font-semibold text-ink">{botLevel(niveauBot).elo} Elo</strong>. Les{' '}
-          {BOT_LEVELS.length} paliers restent accessibles au curseur, dans les deux sens, et ton
-          classement, lui, ne bouge qu’en jouant.
+          {t('level.firstOpponentBefore')}{' '}
+          <strong className="font-semibold text-ink">
+            {t('auth.firstOpponentLevel', { niveau: niveauBot })}
+          </strong>
+          ,{' '}
+          <strong className="font-semibold text-ink">
+            {t('auth.firstOpponentElo', { elo: botLevel(niveauBot).elo })}
+          </strong>
+          . {t('level.firstOpponentAfter', { paliers: BOT_LEVELS.length })}
         </p>
 
         <div className="mt-5 flex flex-wrap gap-2">
@@ -584,13 +578,13 @@ function Resultat({
             size="lg"
             icon={<ArrowRight size={16} />}
           >
-            Ce qui me fait progresser maintenant
+            {t('level.whatProgresses')}
           </ButtonLink>
           <ButtonLink href="/jouer/ordinateur" size="lg" icon={<Swords size={16} />}>
-            Jouer à ce niveau
+            {t('level.playAtThisLevel')}
           </ButtonLink>
           <Button size="lg" icon={<RotateCcw size={15} />} onClick={onRefaire}>
-            Refaire le test
+            {t('level.retake')}
           </Button>
         </div>
       </div>

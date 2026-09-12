@@ -575,6 +575,93 @@ export const en: Dictionary = {
     levelTestDetail: 'Six minutes · touches neither your Elo nor your puzzle rating',
   },
 
+  level: {
+    title: 'Level test',
+    intro:
+      'Twelve positions, harder or easier depending on your answers. At the end, an estimated level and the list of what earns you points right now.',
+    howItWorks: 'How it works',
+    how1: 'One position, one move to find, and on to the next. If you find it, the next is harder; if not, easier. There is no hint and no second try — that is what makes the measurement usable.',
+    how2: 'The positions come from the Lichess catalogue, and each carries its own rating, established over millions of attempts. So this is not an opinion about your play, it is a measurement.',
+    how3: 'Nothing is sent to any rating: this test touches neither your puzzle rating nor your Elo. Allow six minutes.',
+    lastTest: 'Last test: {elo} on {date}. Taking it again will replace that result.',
+    start: 'Start the test',
+    seeMyTier: 'See my tier',
+    loadFailed: 'Could not load a position.',
+    serviceDown: 'The puzzle service is unreachable.',
+    needsCatalogue:
+      'The test needs the puzzle catalogue. If it has not been imported yet, the command is in the README.',
+    levelSetFailed: 'Your level is measured, but the starting opponent could not be set.',
+    positionOf: 'Position {n} of {total}',
+    positionRating: 'rating {cote}',
+    whiteToPlay: 'White to play — find the best move.',
+    blackToPlay: 'Black to play — find the best move.',
+    found: 'Found',
+    missed: 'Missed',
+    theMoveWas: 'The move was',
+    nothingToFix:
+      'Nothing to fix right now: the test measures, it does not teach. You will meet this pattern again in the list at the end.',
+    nextPosition: 'Next position',
+    seeMyLevel: 'See my level',
+    whereWeAre: 'How the measurement stands',
+    nextAround: 'Next position aimed at around',
+    narrowing: 'The estimate narrows with every answer.',
+    yourLevel: 'Your estimated level',
+    foundOf: '{reussies} / {total} found',
+    inGame: 'in games, roughly — the scale of the app’s rating',
+    onPuzzleScale: 'on the puzzle scale',
+    twoNumbers:
+      'The two numbers differ, and that is normal: a puzzle announces there is something to find, a game never does. Keep the first to pick opponents; the second to pick exercises.',
+    yourTier: 'Your tier',
+    firstOpponentBefore: 'First opponent offered against the computer:',
+    firstOpponentAfter:
+      'All {paliers} steps stay reachable with the slider, in both directions, and your rating only moves by playing.',
+    whatProgresses: 'What makes me progress now',
+    playAtThisLevel: 'Play at this level',
+    retake: 'Take the test again',
+  },
+
+  tier: {
+    title: 'Your tier',
+    intro:
+      'The curriculum ordered not by chapters but by what costs you the most points at your level. Nothing new to learn here — only the order in which to do it.',
+    yourLevel: 'Your level',
+    nextTierFrom: 'Next tier from {min}: {nom}.',
+    takeTest: 'Take the level test',
+    retake: 'Take the test again',
+    fromDeclaration:
+      'This number comes from your answer at sign-up, not from a measurement. Twelve positions are enough to check it.',
+    stale:
+      'Your measurement is {jours} days old. If you have worked since, this programme is no longer yours.',
+    testNeutral:
+      'Twelve positions, six minutes. The test touches neither your rating nor your puzzle rating.',
+    unknown:
+      'We do not know where you are yet — no rated game, no puzzle. Twelve positions are enough to find out, and the test touches no rating.',
+    showAnyway: 'I am a beginner, show me anyway',
+    weaknesses: 'What you really do miss',
+    weaknessesCount: '{n} patterns measured',
+    weaknessesHint:
+      'Worked out from your puzzles, pattern by pattern. Patterns seen fewer than five times are not counted: two failures out of two mean nothing.',
+    bestReturn: 'What pays off most, right now',
+    tierNamed: 'Tier',
+    eloAndAbove: '{min} Elo and above',
+    eloRange: '{min} – {max} Elo',
+    leversCount: '{n} levers, in order of return',
+    practise: 'Putting it into practice',
+    practiseHint:
+      'A coaching game at your tier: a matched opponent, a theme announced before you start, commentary mode on, and a debrief telling you where the theme showed up.',
+    session: 'Coaching session',
+    sixTiers: 'The six tiers',
+    backToMine: 'Back to my tier',
+    alreadySeen: 'already seen',
+    lessonNamed: 'Lesson · {titre}',
+    guidedLesson: 'Guided lesson',
+    puzzlesOnTheme: 'Puzzles on this theme',
+    inGameSpeed: 'in {cadence}, over {parties} games',
+    inGameSpeedOne: 'in {cadence}, over {parties} game',
+    provisional: '— still provisional',
+    testedOn: ' of {date}',
+  },
+
   puzzles: {
     title: 'Puzzles',
     subtitle: 'Six million tactical positions, sorted by theme and rating.',

@@ -55,7 +55,7 @@ import {
   type NiveauEstime,
 } from '@/lib/apprendre/palier.ts'
 import { findLesson, loadProgress, type LessonProgress } from '@/lib/lessons/index.ts'
-import { localeDuContenu } from '@/lib/i18n/index.tsx'
+import { langue, localeDuContenu, useI18n, useT } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
 const TEINTE = 'var(--rub-apprendre)'
@@ -86,6 +86,10 @@ export default function PalierPage() {
     qui n'existent pas.
   */
   const locale = usePreferences((state) => localeDuContenu(state.locale))
+  const t = useT()
+  /* La date de la dernière mesure s'écrit dans la langue de l'interface, et
+     non dans celle du contenu : c'est une date, pas une phrase rédigée. */
+  const bcp47 = langue(useI18n().locale).bcp47
   const [diagnostic, setDiagnostic] = useState<Diagnostic | null>(null)
   const [test, setTest] = useState<NiveauEstime | null>(null)
   const [progres, setProgres] = useState<LessonProgress>({})
@@ -145,11 +149,8 @@ export default function PalierPage() {
 
   return (
     <div className="page">
-      <TitreDePage
-        retour={{ href: '/apprendre', label: 'Apprendre' }}
-        intro="Le programme rangé non plus par chapitres, mais par ce qui coûte le plus de points à ton niveau. Rien de nouveau à apprendre ici — seulement l’ordre dans lequel le faire."
-      >
-        Ton palier
+      <TitreDePage retour={{ href: '/apprendre', label: 'Apprendre' }} intro={t('tier.intro')}>
+        {t('tier.title')}
       </TitreDePage>
 
       {/* ── Le niveau retenu, et d'où il vient ─────────────────────────────
@@ -158,7 +159,7 @@ export default function PalierPage() {
           jamais en note de bas de page. */}
       <Card className="overflow-hidden">
         <EnTeteDeCarte
-          titre="Ton niveau"
+          titre={t('tier.yourLevel')}
           icone={<Gauge size={14} aria-hidden />}
           teinte={TEINTE}
           fin={
@@ -181,13 +182,17 @@ export default function PalierPage() {
                 {diagnostic?.partie && niveau.source === 'partie' && (
                   <>
                     {' '}
-                    en {SPEED_LABELS[diagnostic.partie.categorie].fr.toLowerCase()}, sur{' '}
-                    {diagnostic.partie.parties} partie{diagnostic.partie.parties > 1 ? 's' : ''}
-                    {diagnostic.partie.provisoire && ' — encore provisoire'}
+                    {t(diagnostic.partie.parties > 1 ? 'tier.inGameSpeed' : 'tier.inGameSpeedOne', {
+                      cadence: SPEED_LABELS[diagnostic.partie.categorie][locale].toLowerCase(),
+                      parties: diagnostic.partie.parties,
+                    })}
+                    {diagnostic.partie.provisoire && ` ${t('tier.provisional')}`}
                   </>
                 )}
                 {niveau.source === 'test' &&
-                  ` du ${new Date(niveau.le).toLocaleDateString('fr-FR')}`}
+                  t('tier.testedOn', {
+                    date: new Date(niveau.le).toLocaleDateString(bcp47),
+                  })}
               </p>
             </div>
 
@@ -198,7 +203,7 @@ export default function PalierPage() {
 
             {suivant && (
               <p className="mt-3 text-[13px] text-faint">
-                Palier suivant à partir de {suivant.min} : {suivant.nom.toLowerCase()}.
+                {t('tier.nextTierFrom', { min: suivant.min, nom: suivant.nom.toLowerCase() })}
               </p>
             )}
 
@@ -211,14 +216,14 @@ export default function PalierPage() {
                 variant={aVerifier ? 'primary' : 'secondary'}
                 icon={<Target size={15} />}
               >
-                {niveau.source === 'test' ? 'Refaire le test' : 'Faire le test de niveau'}
+                {t(niveau.source === 'test' ? 'tier.retake' : 'tier.takeTest')}
               </ButtonLink>
               <p className="max-w-md text-[12px] leading-relaxed text-faint">
                 {niveau.source === 'declare'
-                  ? 'Ce nombre vient de ta réponse à l’inscription, pas d’une mesure. Douze positions suffisent à le vérifier.'
+                  ? t('tier.fromDeclaration')
                   : niveau.source === 'test' && anciennete != null && anciennete >= PEREMPTION_JOURS
-                    ? `Ta mesure date de ${anciennete} jours. Si tu as travaillé depuis, ce programme n’est plus le tien.`
-                    : 'Douze positions, six minutes. Le test ne touche ni à ton classement ni à ta cote de puzzles.'}
+                    ? t('tier.stale', { jours: anciennete })
+                    : t('tier.testNeutral')}
               </p>
             </div>
           </div>
@@ -228,10 +233,7 @@ export default function PalierPage() {
              fois sur six, et la page perdrait toute sa crédibilité au premier
              levier hors sujet. */
           <div className="p-5">
-            <p className="max-w-2xl text-[15px] leading-relaxed text-muted">
-              On ne sait pas encore où tu en es — aucune partie classée, aucun puzzle. Douze
-              positions suffisent à le savoir, et le test ne touche à aucun classement.
-            </p>
+            <p className="max-w-2xl text-[15px] leading-relaxed text-muted">{t('tier.unknown')}</p>
             <div className="mt-4 flex flex-wrap gap-2">
               <ButtonLink
                 href="/apprendre/niveau"
@@ -239,10 +241,10 @@ export default function PalierPage() {
                 size="lg"
                 icon={<Target size={16} />}
               >
-                Faire le test de niveau
+                {t('tier.takeTest')}
               </ButtonLink>
               <Button size="lg" onClick={() => setForce('pieces-en-prise')}>
-                Je débute, montre-moi quand même
+                {t('tier.showAnyway')}
               </Button>
             </div>
           </div>
@@ -255,15 +257,14 @@ export default function PalierPage() {
       {faiblesses.length > 0 && (
         <Card className="mt-4 overflow-hidden">
           <EnTeteDeCarte
-            titre="Ce que tu rates vraiment"
+            titre={t('tier.weaknesses')}
             icone={<TrendingUp size={14} aria-hidden />}
             teinte="var(--rub-entrainer)"
-            fin={`${faiblesses.length} motifs mesurés`}
+            fin={t('tier.weaknessesCount', { n: faiblesses.length })}
           />
           <div className="p-4">
             <p className="mb-3 text-[13px] leading-relaxed text-muted">
-              Calculé sur tes puzzles, motif par motif. Les motifs vus moins de cinq fois ne sont
-              pas comptés : deux échecs sur deux ne veulent rien dire.
+              {t('tier.weaknessesHint')}
             </p>
 
             <ul className="space-y-1.5">
@@ -328,7 +329,7 @@ export default function PalierPage() {
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
             <div className="min-w-0">
               <h2 className="font-display text-xl font-bold tracking-tight">
-                Ce qui rapporte le plus, maintenant
+                {t('tier.bestReturn')}
               </h2>
               {/* Le palier est nommé ici aussi, et pas seulement dans la carte
                   du haut : celle-ci s'effaçait quand aucun niveau n'est connu —
@@ -337,17 +338,17 @@ export default function PalierPage() {
                   on consulte un autre palier que le sien, le rappel évite de
                   croire qu'on lit toujours le sien. */}
               <p className="mt-0.5 text-[13px] text-muted">
-                Palier{' '}
+                {t('tier.tierNamed')}{' '}
                 <strong className="font-semibold text-ink">{palier.nom.toLowerCase()}</strong> ·{' '}
                 <span className="tabular-nums">
                   {palier.max === Number.POSITIVE_INFINITY
-                    ? `${palier.min} Elo et plus`
-                    : `${palier.min} – ${palier.max} Elo`}
+                    ? t('tier.eloAndAbove', { min: palier.min })
+                    : t('tier.eloRange', { min: palier.min, max: palier.max })}
                 </span>
               </p>
             </div>
             <p className="text-[12px] text-faint">
-              {palier.leviers.length} leviers, dans l’ordre de rendement
+              {t('tier.leversCount', { n: palier.leviers.length })}
             </p>
           </div>
 
@@ -379,21 +380,20 @@ export default function PalierPage() {
               curseur au hasard. */}
           <Card className="mt-4 overflow-hidden">
             <EnTeteDeCarte
-              titre="Le mettre en pratique"
+              titre={t('tier.practise')}
               icone={<Crown size={14} aria-hidden />}
               teinte="var(--rub-jouer)"
             />
             <div className="flex flex-wrap items-center gap-4 p-5">
               <p className="min-w-[14rem] flex-1 text-[14px] leading-relaxed text-muted">
-                Une partie pédagogique à ton palier : un adversaire calibré, un thème annoncé avant
-                de commencer, le mode commenté allumé, et un bilan qui dit où le thème est apparu.
+                {t('tier.practiseHint')}
               </p>
               <ButtonLink
                 href={`/jouer/pedagogique?palier=${palier.id}`}
                 variant="primary"
                 icon={<ArrowRight size={15} />}
               >
-                Séance pédagogique
+                {t('tier.session')}
               </ButtonLink>
             </div>
           </Card>
@@ -405,7 +405,9 @@ export default function PalierPage() {
           et quelqu'un qui aide un enfant veut pouvoir regarder le palier d'en
           dessous. On ne verrouille rien, ici comme dans les leçons. */}
       <section className="mt-10">
-        <h2 className="mb-3 font-display text-lg font-semibold tracking-tight">Les six paliers</h2>
+        <h2 className="mb-3 font-display text-lg font-semibold tracking-tight">
+          {t('tier.sixTiers')}
+        </h2>
         <div className="flex flex-wrap gap-1.5">
           {PALIERS.map((entree) => (
             <button
@@ -430,7 +432,7 @@ export default function PalierPage() {
         </div>
         {niveau && force && force !== palierPour(niveau.elo).id && (
           <button type="button" onClick={() => setForce(null)} className="lien mt-3 inline-block">
-            Revenir à mon palier
+            {t('tier.backToMine')}
           </button>
         )}
       </section>
@@ -461,6 +463,7 @@ function CarteLevier({
   cible: CibleLevier
   progres: LessonProgress
 }) {
+  const t = useT()
   const destination = hrefDeLaCible(cible)
   const lecon = cible.type === 'lecon' ? findLesson(cible.id) : null
   const faite = cible.type === 'lecon' ? (progres[cible.id]?.completed ?? false) : false
@@ -494,7 +497,7 @@ function CarteLevier({
       <span className="min-w-0 flex-1">
         <span className="flex flex-wrap items-center gap-2">
           <span className="text-[15px] font-semibold">{titre}</span>
-          {faite && <Chip tone="success">déjà vue</Chip>}
+          {faite && <Chip tone="success">{t('tier.alreadySeen')}</Chip>}
         </span>
         {/* Pas de nom d'ouverture cliquable ici, contrairement à la page des
             principes : la carte entière **est** un lien, et un lien dans un
@@ -503,7 +506,7 @@ function CarteLevier({
         <span className="mt-1 block text-[14px] leading-relaxed text-muted">{pourquoi}</span>
         <span className="mt-2 flex items-center gap-1.5 text-[12px] font-medium text-accent">
           <Icone size={12} aria-hidden />
-          {libelleDeLaCible(cible, lecon?.title ?? null)}
+          {libelleDeLaCible(cible, lecon?.title ?? null, t)}
         </span>
       </span>
 
@@ -523,12 +526,23 @@ function hrefDeLaCible(cible: CibleLevier): string {
   }
 }
 
-function libelleDeLaCible(cible: CibleLevier, titreLecon: string | null): string {
+/*
+  Le traducteur passe en argument.
+
+  La fonction est pure et vit hors de tout composant : elle ne peut pas
+  appeler `useT()` elle-même, et la remonter dans le composant appelant
+  l'aurait mêlée au rendu pour trois lignes de texte.
+*/
+function libelleDeLaCible(
+  cible: CibleLevier,
+  titreLecon: string | null,
+  t: ReturnType<typeof useT>,
+): string {
   switch (cible.type) {
     case 'lecon':
-      return titreLecon ? `Leçon · ${titreLecon}` : 'Leçon guidée'
+      return titreLecon ? t('tier.lessonNamed', { titre: titreLecon }) : t('tier.guidedLesson')
     case 'puzzle':
-      return 'Puzzles sur ce thème'
+      return t('tier.puzzlesOnTheme')
     case 'page':
       return cible.label
   }
