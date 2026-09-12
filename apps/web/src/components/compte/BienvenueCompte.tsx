@@ -40,10 +40,12 @@ import {
   Palette,
   Share,
   Smile,
+  Target,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { BOT_LEVELS, botLevel, suggestedLevel } from '@coupparfait/core'
 import { Button, Card, Toggle } from '@/components/ui/index.tsx'
+import { aujourdhui, enregistrerNiveauEstime } from '@/lib/apprendre/palier.ts'
 import { toast } from '@/components/ui/Toast.tsx'
 import { AVATAR_FAMILIES, DEFAULT_AVATAR } from '@/lib/avatars.ts'
 import { iosSansInstallation, useNotifications } from '@/lib/notifications.ts'
@@ -77,12 +79,22 @@ export function BienvenueCompte({
   pseudo,
   avatar,
   onTermine,
+  onTest,
 }: {
   pseudo: string
   /** L'avatar tiré au sort par le serveur à la création du compte. */
   avatar: string | null
   /** Appelé quand il n'y a plus rien à demander : la page reprend la main. */
   onTermine: () => void
+  /**
+   * Appelé quand on préfère mesurer son niveau plutôt que le déclarer.
+   *
+   * La mise en route s'arrête là et l'on part au test : six minutes
+   * d'échiquier ne se logent pas dans une étape d'un formulaire, et le reste
+   * des réglages — thème, coach, notifications — se retrouve ensuite dans les
+   * préférences et dans le bandeau de mise en route.
+   */
+  onTest: () => void
 }) {
   const notifications = useNotifications()
   const installation = useInstallation()
@@ -170,7 +182,7 @@ export function BienvenueCompte({
         </div>
 
         {etape === 'avatar' && <EtapeAvatar depart={avatar} />}
-        {etape === 'niveau' && <EtapeNiveau />}
+        {etape === 'niveau' && <EtapeNiveau onTest={onTest} />}
         {etape === 'theme' && <EtapeTheme />}
         {etape === 'coach' && <EtapeCoach />}
         {etape === 'notifications' && <EtapeNotifications notifications={notifications} />}
@@ -365,7 +377,7 @@ const REPERES: Array<{ id: string; label: string; detail: string; elo: number | 
   },
 ]
 
-function EtapeNiveau() {
+function EtapeNiveau({ onTest }: { onTest: () => void }) {
   const [choix, setChoix] = useState<string | null>(null)
   const [elo, setElo] = useState('')
 
@@ -385,16 +397,27 @@ function EtapeNiveau() {
    * l'écran « contre l'ordinateur », et revenir en arrière le corrige.
    */
   useEffect(() => {
-    if (niveau === null) return
+    if (niveau === null || eloRetenu === null) return
     const minuteur = setTimeout(() => {
       void fetch('/api/progression', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ action: 'declarer', level: niveau }),
       }).catch(() => undefined)
+      /*
+        La même réponse sert aussi au côté « apprendre ».
+
+        La page « Ton palier » ne savait rien d'un compte neuf — aucune partie
+        classée, aucun puzzle — et s'ouvrait donc sur « on ne sait pas encore
+        où tu en es » à quelqu'un qui venait de le dire deux écrans plus tôt.
+        On conserve la déclaration comme telle, `source: 'declare'`, la plus
+        faible des sources : la première partie classée la remplacera sans
+        qu'on ait à l'effacer.
+      */
+      enregistrerNiveauEstime({ elo: eloRetenu, source: 'declare', le: aujourdhui() })
     }, 400)
     return () => clearTimeout(minuteur)
-  }, [niveau])
+  }, [niveau, eloRetenu])
 
   return (
     <Etage
@@ -441,6 +464,26 @@ function EtapeNiveau() {
           className="h-8 w-24 rounded-[var(--radius-sm)] border border-line bg-surface px-2 text-sm tabular-nums placeholder:text-faint focus:border-accent focus:outline-none"
         />
       </label>
+
+      {/* Pour qui ne sait pas répondre — et c'est le cas le plus fréquent chez
+          quelqu'un qui débute : les cinq repères demandent déjà de se situer,
+          ce qui est justement ce qu'on ne sait pas faire. Le test, lui, ne
+          demande rien : il mesure. On le propose ici plutôt que de laisser
+          deviner, quitte à quitter la mise en route. */}
+      <button
+        type="button"
+        onClick={onTest}
+        className="mt-3 w-full rounded-[var(--radius-sm)] border border-dashed border-line px-3 py-2.5 text-left transition-colors hover:bg-surface-hover"
+      >
+        <span className="flex items-center gap-2 text-[14px] font-medium">
+          <Target size={15} className="shrink-0 text-accent" aria-hidden />
+          Je ne sais pas — mesure-le
+        </span>
+        <span className="mt-0.5 block text-[12px] leading-snug text-faint">
+          Douze positions, six minutes. Aucune réponse à trouver sur soi-même, et rien n’est envoyé
+          à ton classement.
+        </span>
+      </button>
 
       {niveau !== null && (
         <p className="mt-3 rounded-[var(--radius-sm)] bg-surface-strong px-3 py-2 text-[12px] leading-relaxed text-muted">

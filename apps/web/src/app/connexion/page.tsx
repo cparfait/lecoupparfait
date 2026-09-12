@@ -227,6 +227,16 @@ function AuthForm() {
               router.push(destination)
               router.refresh()
             }}
+            /* Le test de niveau remplace la destination habituelle : on ne
+               renvoie pas au jeu quelqu'un qui vient de demander à être
+               mesuré. Les réglages restants ne sont pas perdus — ils vivent
+               dans les préférences, et le bandeau de mise en route reposera
+               les deux questions du navigateur. */
+            onTest={() => {
+              setBienvenue(null)
+              router.push('/apprendre/niveau')
+              router.refresh()
+            }}
           />
         </div>
       </div>

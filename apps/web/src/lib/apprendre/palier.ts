@@ -350,7 +350,7 @@ export function palierSuivant(palier: Palier): Palier | null {
 const CLE_NIVEAU = 'coupparfait.niveauEstime'
 
 /** D'où vient le nombre qu'on affiche. On ne l'écrit jamais sans le dire. */
-export type SourceNiveau = 'test' | 'partie' | 'puzzle'
+export type SourceNiveau = 'test' | 'partie' | 'puzzle' | 'declare'
 
 export interface NiveauEstime {
   elo: number
@@ -409,12 +409,31 @@ export function puzzleVersPartie(cote: number): number {
 }
 
 /**
+ * Un test plus vieux que cela mérite d'être refait.
+ *
+ * Trois mois : c'est le temps au bout duquel quelqu'un qui travaille a
+ * changé de palier, et celui au bout duquel quelqu'un qui n'a pas joué a
+ * perdu la main. Dans les deux cas, le programme proposé porte sur un joueur
+ * qui n'existe plus.
+ */
+export const PEREMPTION_JOURS = 90
+
+/** Depuis combien de jours la mesure date-t-elle ? `null` si la date est illisible. */
+export function ancienneteEnJours(niveau: NiveauEstime): number | null {
+  const quand = Date.parse(niveau.le)
+  if (!Number.isFinite(quand)) return null
+  return Math.max(0, Math.floor((Date.now() - quand) / 86_400_000))
+}
+
+/**
  * Le niveau qu'on retient, et pourquoi celui-là.
  *
  * L'ordre n'est pas négociable : une mesure faite sur de vraies parties vaut
  * mieux qu'une mesure faite sur des puzzles, qui vaut mieux qu'un test de
- * douze positions. On rend donc la meilleure disponible, et sa source, pour
- * que l'affichage puisse la nommer.
+ * douze positions — qui vaut lui-même mieux que rien, c'est-à-dire mieux que
+ * la déclaration faite à l'inscription, que personne ne vérifie. On rend donc
+ * la meilleure disponible, et sa source, pour que l'affichage puisse la
+ * nommer.
  */
 export function niveauRetenu(sources: {
   /** Classement en partie le plus représentatif — le plus joué, pas le plus haut. */
@@ -441,4 +460,5 @@ export const LIBELLE_SOURCE: Record<SourceNiveau, string> = {
   partie: 'd’après ton classement en partie',
   puzzle: 'estimé d’après ton classement de puzzles',
   test: 'd’après ton test de niveau',
+  declare: 'd’après ce que tu as déclaré à l’inscription',
 }

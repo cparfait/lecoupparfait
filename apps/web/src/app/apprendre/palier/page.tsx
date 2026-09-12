@@ -45,6 +45,8 @@ import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import {
   LIBELLE_SOURCE,
   PALIERS,
+  PEREMPTION_JOURS,
+  ancienneteEnJours,
   lireNiveauEstime,
   niveauRetenu,
   palierPour,
@@ -121,6 +123,26 @@ export default function PalierPage() {
   const suivant = palier ? palierSuivant(palier) : null
   const faiblesses = diagnostic?.faiblesses ?? []
 
+  /*
+    Quand faut-il proposer de refaire la mesure ?
+
+    Le test n'était offert qu'à ceux dont on ne savait rien : une fois un
+    niveau connu, le bouton disparaissait, et le seul moyen de le refaire
+    était de retrouver l'adresse à la main. Or c'est précisément le cas où
+    l'on veut vérifier — on a travaillé trois mois et l'on aimerait savoir si
+    ça se voit.
+
+    Le bouton est donc toujours là. Ce qui change, c'est ce qu'on en dit : on
+    insiste quand la mesure est vieille (voir `PEREMPTION_JOURS`) ou quand
+    elle ne repose sur rien de mesuré — une déclaration d'inscription que
+    personne n'a vérifiée.
+  */
+  const anciennete = niveau ? ancienneteEnJours(niveau) : null
+  const aVerifier =
+    niveau != null &&
+    (niveau.source === 'declare' ||
+      (niveau.source === 'test' && anciennete != null && anciennete >= PEREMPTION_JOURS))
+
   return (
     <div className="page">
       <TitreDePage
@@ -179,6 +201,26 @@ export default function PalierPage() {
                 Palier suivant à partir de {suivant.min} : {suivant.nom.toLowerCase()}.
               </p>
             )}
+
+            {/* Refaire la mesure, toujours possible. En bas de la carte et non
+                dans son en-tête : c'est une action de vérification, elle ne
+                doit pas concurrencer le nombre qu'on vient de lire. */}
+            <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-line/60 pt-4">
+              <ButtonLink
+                href="/apprendre/niveau"
+                variant={aVerifier ? 'primary' : 'secondary'}
+                icon={<Target size={15} />}
+              >
+                {niveau.source === 'test' ? 'Refaire le test' : 'Faire le test de niveau'}
+              </ButtonLink>
+              <p className="max-w-md text-[12px] leading-relaxed text-faint">
+                {niveau.source === 'declare'
+                  ? 'Ce nombre vient de ta réponse à l’inscription, pas d’une mesure. Douze positions suffisent à le vérifier.'
+                  : niveau.source === 'test' && anciennete != null && anciennete >= PEREMPTION_JOURS
+                    ? `Ta mesure date de ${anciennete} jours. Si tu as travaillé depuis, ce programme n’est plus le tien.`
+                    : 'Douze positions, six minutes. Le test ne touche ni à ton classement ni à ta cote de puzzles.'}
+              </p>
+            </div>
           </div>
         ) : (
           /* Aucune mesure : on ne devine pas. Proposer « le programme des

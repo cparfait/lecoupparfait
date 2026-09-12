@@ -29,13 +29,24 @@
  *    séquences complètes en vingt.
  *  - **Il ne bloque rien.** Le résultat oriente la page « Ton palier », il ne
  *    verrouille aucune leçon.
+ *
+ * ── Ce qu'il règle, en revanche ─────────────────────────────────────────────
+ *
+ * Le premier adversaire proposé contre l'ordinateur. L'échelle des bots
+ * démarrait au palier le plus faible pour tout le monde : quelqu'un qui joue
+ * en club devait gagner une douzaine de parties sans intérêt avant d'affronter
+ * sa mesure. Le test, lui, l'a mesurée — il serait absurde de la mesurer pour
+ * ne pas s'en servir. C'est le même dépôt que la déclaration d'inscription
+ * (`action: 'declarer'`), qui ne fait jamais reculer personne et ne touche à
+ * aucun classement.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Chess } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
-import { ArrowRight, Check, Gauge, RotateCcw, Target, X } from 'lucide-react'
+import { ArrowRight, Check, Gauge, RotateCcw, Swords, Target, X } from 'lucide-react'
 import clsx from 'clsx'
+import { BOT_LEVELS, botLevel, suggestedLevel } from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, ButtonLink, Card, Chip, Spinner, TitreDePage } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
@@ -48,6 +59,7 @@ import {
   palierPour,
   puzzleVersPartie,
 } from '@/lib/apprendre/palier.ts'
+import { toast } from '@/components/ui/Toast.tsx'
 import { useSan } from '@/lib/notation.ts'
 
 /**
@@ -256,6 +268,12 @@ export default function TestDeNiveauPage() {
 
   // Le résultat est conservé dès qu'il existe : quitter la page sans cliquer
   // « voir mon palier » ne doit pas effacer six minutes de travail.
+  //
+  // Et il est déposé au compte dans le même souffle, s'il y en a un : le test
+  // sert à choisir le premier adversaire, or l'écran « contre l'ordinateur »
+  // ne lit pas le navigateur, il lit la progression. Sans compte, la route
+  // répond poliment `tracked: false` et il ne se passe rien — le test doit
+  // marcher avant l'inscription, c'est même là qu'il est le plus utile.
   useEffect(() => {
     if (phase !== 'fini' || !estimation) return
     enregistrerNiveauEstime({
@@ -263,6 +281,15 @@ export default function TestDeNiveauPage() {
       source: 'test',
       le: aujourdhui(),
       positions: etapes.length,
+    })
+    void fetch('/api/progression', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'declarer', level: suggestedLevel(estimation.partie) }),
+    }).catch(() => {
+      // Le dépôt du niveau n'est pas le résultat : on ne gâche pas l'écran de
+      // fin pour une requête ratée, le curseur se déplace à la main.
+      toast.error('Ton niveau est mesuré, mais l’adversaire de départ n’a pas pu être réglé.')
     })
   }, [phase, estimation, etapes.length])
 
@@ -502,6 +529,7 @@ function Resultat({
   onRefaire: () => void
 }) {
   const palier = palierPour(partie)
+  const niveauBot = suggestedLevel(partie)
 
   return (
     <Card className="overflow-hidden">
@@ -539,6 +567,16 @@ function Resultat({
           <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{palier.promesse}</p>
         </div>
 
+        {/* Ce que la mesure change tout de suite, dit en clair : un test dont
+            on ne voit aucun effet passe pour un questionnaire de magazine. */}
+        <p className="mt-4 rounded-[var(--radius-sm)] bg-surface-strong px-3 py-2 text-[13px] leading-relaxed text-muted">
+          Premier adversaire proposé contre l’ordinateur :{' '}
+          <strong className="font-semibold text-ink">niveau {niveauBot}</strong>, environ{' '}
+          <strong className="font-semibold text-ink">{botLevel(niveauBot).elo} Elo</strong>. Les{' '}
+          {BOT_LEVELS.length} paliers restent accessibles au curseur, dans les deux sens, et ton
+          classement, lui, ne bouge qu’en jouant.
+        </p>
+
         <div className="mt-5 flex flex-wrap gap-2">
           <ButtonLink
             href="/apprendre/palier"
@@ -547,6 +585,9 @@ function Resultat({
             icon={<ArrowRight size={16} />}
           >
             Ce qui me fait progresser maintenant
+          </ButtonLink>
+          <ButtonLink href="/jouer/ordinateur" size="lg" icon={<Swords size={16} />}>
+            Jouer à ce niveau
           </ButtonLink>
           <Button size="lg" icon={<RotateCcw size={15} />} onClick={onRefaire}>
             Refaire le test
