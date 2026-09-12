@@ -12,9 +12,13 @@
  *  - **un niveau de difficulté** déduit du nombre de coups au mat et du
  *    matériel restant, pour proposer une progression plutôt qu'une liste ;
  *  - **une vérification de chaque position** : toute FEN illégale est écartée
- *    plutôt que de faire échouer l'entraînement en pleine session.
+ *    plutôt que de faire échouer l'entraînement en pleine session ;
+ *  - **deux configurations qui manquaient à la base amont** : les deux fous et
+ *    le fou et cavalier contre roi seul, sans quoi « Mats élémentaires » n'en
+ *    proposait que trois sur cinq. Voir `SUPPLEMENTS`.
  *
- * Sortie : apps/web/public/data/endgames.json
+ * Sortie : apps/web/public/data/endgames.json — 3 597 positions, 8 familles,
+ * 134 configurations.
  *
  * Usage :  node scripts/build-endgames.mjs
  */
@@ -42,7 +46,7 @@ const FAMILIES = {
   Basic: {
     fr: 'Mats élémentaires',
     blurb:
-      'Mater un roi seul avec une dame, une tour, ou deux tours. Ce sont les premières techniques à connaître par cœur : sans elles, gagner du matériel ne sert à rien.',
+      'Mater un roi seul : à la dame, à la tour, à deux tours, aux deux fous, et enfin au fou et cavalier — le seul qui demande une vraie méthode. Sans ces techniques, gagner du matériel ne sert à rien.',
     icon: '👑',
     order: 1,
   },
@@ -95,6 +99,81 @@ const FAMILIES = {
     icon: '♛',
     order: 8,
   },
+}
+
+/**
+ * Les deux mats élémentaires que la base amont ne contient pas.
+ *
+ * « Mats élémentaires » s'arrêtait à la dame, la tour et les deux tours. Le
+ * canon en compte cinq : il manquait **les deux fous** et **le fou et
+ * cavalier**. L'annonce de la famille promettait pourtant les premières
+ * techniques à connaître par cœur, et deux des cinq n'étaient nulle part —
+ * ni ici, ni dans les leçons.
+ *
+ * Ces positions sont écrites à la main, et leur `mateIn` **n'est pas estimé** :
+ * chacun vient des tables de finales Syzygy, interrogées une fois via le
+ * service public de Lichess — le même que `apps/server/src/engine/tablebase.ts`
+ * utilise pour l'analyse. Les valeurs sont figées ici pour que la compilation
+ * reste hors ligne et déterministe, comme le reste du script.
+ *
+ * La conversion, vérifiée sur trois positions amont dont le `mateIn` était
+ * connu : les tables renvoient une distance en demi-coups qui compte le coup
+ * de mat, d'où `mateIn = (dtm + 1) / 2`. Un mateIn de 6 correspond à dtm 11,
+ * 8 à 15, 9 à 17.
+ *
+ * Le classement par difficulté est ensuite celui de tout le monde, calculé par
+ * `difficultyOf`. Les deux fous vont de 1 à 3 étoiles, le fou et cavalier de 1
+ * à 4 : c'est la seule technique élémentaire qui dépasse vingt coups, et elle
+ * se joue sous la menace de la règle des cinquante coups. Les positions les
+ * plus dures partent d'un roi noir au centre et d'un cavalier mal placé.
+ */
+const SUPPLEMENTS = {
+  Basic: [
+    {
+      name: 'Two Bishops',
+      nameFr: 'deux fous',
+      // dtm relevés : 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31.
+      games: [
+        { fen: '8/8/8/8/8/3BB3/4K3/7k w - - 0 1', target: 'checkmate', mateIn: 4 },
+        { fen: '8/8/8/3BB3/4K3/8/8/7k w - - 0 1', target: 'checkmate', mateIn: 5 },
+        { fen: '8/8/8/8/8/8/2BB4/k3K3 w - - 0 1', target: 'checkmate', mateIn: 6 },
+        { fen: '8/8/8/7k/8/3BB3/4K3/8 w - - 0 1', target: 'checkmate', mateIn: 7 },
+        { fen: '8/8/8/8/7k/8/2BB4/4K3 w - - 0 1', target: 'checkmate', mateIn: 8 },
+        { fen: '3k4/8/8/3BB3/4K3/8/8/8 w - - 0 1', target: 'checkmate', mateIn: 9 },
+        { fen: '7k/8/8/8/8/8/2BB4/4K3 w - - 0 1', target: 'checkmate', mateIn: 10 },
+        { fen: '6k1/8/8/8/8/3BB3/4K3/8 w - - 0 1', target: 'checkmate', mateIn: 11 },
+        { fen: '8/1k6/8/8/8/3BB3/4K3/8 w - - 0 1', target: 'checkmate', mateIn: 12 },
+        { fen: '8/8/2k5/8/2BB4/4K3/8/8 w - - 0 1', target: 'checkmate', mateIn: 13 },
+        { fen: '8/8/8/3k4/8/3BB3/4K3/8 w - - 0 1', target: 'checkmate', mateIn: 14 },
+        { fen: '8/8/8/4k3/8/3BB3/4K3/8 w - - 0 1', target: 'checkmate', mateIn: 15 },
+        { fen: '8/8/8/4k3/8/8/2BB4/4K3 w - - 0 1', target: 'checkmate', mateIn: 16 },
+      ],
+    },
+    {
+      name: 'Bishop and Knight',
+      nameFr: 'fou et cavalier',
+      // dtm relevés : 11, 13, 15, 17, 19, 23, 25, 27, 31, 33, 35, 39, 41, 45,
+      // 53, 57.
+      games: [
+        { fen: '8/8/8/8/8/5N2/4K3/1kB5 w - - 0 1', target: 'checkmate', mateIn: 6 },
+        { fen: '8/8/8/8/8/8/3BN3/k3K3 w - - 0 1', target: 'checkmate', mateIn: 7 },
+        { fen: '8/8/8/8/8/3B1N2/4K3/7k w - - 0 1', target: 'checkmate', mateIn: 8 },
+        { fen: '8/8/8/8/2B1N3/3K4/8/7k w - - 0 1', target: 'checkmate', mateIn: 9 },
+        { fen: '7k/8/8/3KN3/3B4/8/8/8 w - - 0 1', target: 'checkmate', mateIn: 10 },
+        { fen: '8/8/8/3KN3/3B4/8/8/1k6 w - - 0 1', target: 'checkmate', mateIn: 12 },
+        { fen: '8/8/8/8/k7/8/3BN3/4K3 w - - 0 1', target: 'checkmate', mateIn: 13 },
+        { fen: '7k/8/8/8/5BN1/5K2/8/8 w - - 0 1', target: 'checkmate', mateIn: 14 },
+        { fen: 'k7/8/8/8/8/1BN5/2K5/8 w - - 0 1', target: 'checkmate', mateIn: 16 },
+        { fen: '8/8/8/7k/5BN1/5K2/8/8 w - - 0 1', target: 'checkmate', mateIn: 17 },
+        { fen: '4k3/8/8/3KN3/3B4/8/8/8 w - - 0 1', target: 'checkmate', mateIn: 18 },
+        { fen: '4k3/8/8/8/5BN1/5K2/8/8 w - - 0 1', target: 'checkmate', mateIn: 20 },
+        { fen: '3k4/8/8/8/2B1N3/3K4/8/8 w - - 0 1', target: 'checkmate', mateIn: 21 },
+        { fen: 'k7/8/8/8/8/3B1N2/4K3/8 w - - 0 1', target: 'checkmate', mateIn: 23 },
+        { fen: '4k3/8/8/8/8/5N2/4K3/2B5 w - - 0 1', target: 'checkmate', mateIn: 27 },
+        { fen: '8/8/8/4k3/8/8/3BN3/4K3 w - - 0 1', target: 'checkmate', mateIn: 29 },
+      ],
+    },
+  ],
 }
 
 /** Traduction mot à mot des configurations de matériel. */
@@ -168,8 +247,14 @@ for (const category of source.categories ?? []) {
     continue
   }
 
+  // Les configurations ajoutées à la main passent par la même boucle que
+  // celles de la base amont : même vérification de légalité, même calcul de
+  // difficulté, même tri. Les traiter à part aurait produit des positions
+  // notées autrement que leurs voisines.
+  const subcategories = [...(category.subcategories ?? []), ...(SUPPLEMENTS[category.name] ?? [])]
+
   const groups = []
-  for (const subcategory of category.subcategories ?? []) {
+  for (const subcategory of subcategories) {
     const positions = []
 
     for (const game of subcategory.games ?? []) {
@@ -208,7 +293,12 @@ for (const category of source.categories ?? []) {
     groups.push({
       id: slug(subcategory.name),
       name: subcategory.name,
-      nameFr: translateConfiguration(subcategory.name),
+      // La traduction mot à mot suffit pour les cent trente-deux
+      // configurations amont, dont les noms sont des listes de pièces. Elle
+      // achoppe sur les nôtres : « Bishop and Knight » donnerait « fou and
+      // cavalier ». D'où le nom français facultatif, porté par la
+      // configuration elle-même.
+      nameFr: subcategory.nameFr ?? translateConfiguration(subcategory.name),
       positions,
     })
   }
