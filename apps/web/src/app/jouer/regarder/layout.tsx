@@ -10,7 +10,16 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Regarder une partie',
+  /*
+    Un objet et non une chaîne : ce dossier a maintenant une page en dessous de
+    lui — la partie d'un ami, suivie en lecture seule. Un `title` en chaîne
+    consomme le gabarit de la mise en page racine sans en reposer aucun, et
+    l'onglet de la page fille perdrait le suffixe « · Le Coup Parfait ».
+  */
+  title: {
+    default: 'Regarder une partie',
+    template: '%s · Le Coup Parfait',
+  },
   description: 'Les parties en cours sur cette instance.',
 }
 

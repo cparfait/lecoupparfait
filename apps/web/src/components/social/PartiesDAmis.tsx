@@ -26,7 +26,7 @@
  * coup d'œil, pas une retransmission.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import Link from 'next/link'
 import { Chess } from 'chess.js'
 import { Cpu, Eye } from 'lucide-react'
@@ -35,10 +35,7 @@ import { Card, Chip } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
-/** Assez vif pour suivre, assez lent pour ne pas marteler le serveur. */
-const RYTHME_MS = 8000
-
-interface PartieDAmi {
+export interface PartieDAmi {
   pseudo: string
   avatar: string | null
   coups: string[]
@@ -48,28 +45,17 @@ interface PartieDAmi {
   dernierCoupLe: string
 }
 
-export function PartiesDAmis() {
-  const [parties, setParties] = useState<PartieDAmi[]>([])
+/**
+ * La liste est passée en propriété, pas relue ici.
+ *
+ * Elle l'était, et les comptes divergeaient : le filtre « Mes amis » de l'écran
+ * « Regarder » annonçait zéro pendant qu'une partie d'ami s'affichait
+ * juste au-dessus. Deux composants qui interrogent le serveur chacun de leur
+ * côté finissent toujours par se contredire ; c'est la page qui compte, et elle
+ * ne peut compter que ce qu'elle tient.
+ */
+export function PartiesDAmis({ parties }: { parties: PartieDAmi[] }) {
   const habillage = usePreferences((state) => state.boardStyle)
-  const jeuDePieces = usePreferences((state) => state.pieceSet)
-
-  const relire = useCallback(async () => {
-    try {
-      const reponse = await fetch('/api/amis/parties', { cache: 'no-store' })
-      if (!reponse.ok) return
-      const data = (await reponse.json()) as { parties?: PartieDAmi[] }
-      setParties(data.parties ?? [])
-    } catch {
-      // Hors ligne ou sans compte : la section disparaît, le reste de l'écran
-      // continue de fonctionner.
-    }
-  }, [])
-
-  useEffect(() => {
-    void relire()
-    const minuteur = setInterval(() => void relire(), RYTHME_MS)
-    return () => clearInterval(minuteur)
-  }, [relire])
 
   if (parties.length === 0) return null
 
@@ -83,27 +69,14 @@ export function PartiesDAmis() {
       />
       <div className="grid gap-3 p-4 sm:grid-cols-2">
         {parties.map((partie) => (
-          <PartieDUnAmi
-            key={partie.pseudo}
-            partie={partie}
-            habillage={habillage}
-            jeuDePieces={jeuDePieces}
-          />
+          <PartieDUnAmi key={partie.pseudo} partie={partie} habillage={habillage} />
         ))}
       </div>
     </Card>
   )
 }
 
-function PartieDUnAmi({
-  partie,
-  habillage,
-  jeuDePieces,
-}: {
-  partie: PartieDAmi
-  habillage: string
-  jeuDePieces: string
-}) {
+function PartieDUnAmi({ partie, habillage }: { partie: PartieDAmi; habillage: string }) {
   /**
    * La position, rejouée depuis le départ.
    *
@@ -127,15 +100,16 @@ function PartieDUnAmi({
   const coupsEntiers = Math.ceil(partie.coups.length / 2)
 
   return (
-    <div className="rounded-[var(--radius)] border border-line bg-bg-elev p-3">
+    /* Toute la vignette est un lien vers la partie en grand : on regarde une
+       position de deux cents pixels, on veut la voir en entier, et chercher un
+       bouton pour ça n'a aucun sens. */
+    <Link
+      href={`/jouer/regarder/${encodeURIComponent(partie.pseudo)}`}
+      className="block rounded-[var(--radius)] border border-line bg-bg-elev p-3 transition-colors hover:bg-surface-hover"
+    >
       <div className="mb-2 flex items-center gap-2">
         <span className="min-w-0 flex-1">
-          <Link
-            href={`/profil/${encodeURIComponent(partie.pseudo)}`}
-            className="block truncate text-[14px] font-semibold hover:underline"
-          >
-            {partie.pseudo}
-          </Link>
+          <span className="block truncate text-[14px] font-semibold">{partie.pseudo}</span>
           <span className="mt-0.5 block truncate text-[12px] text-faint">
             contre {partie.adversaire?.nom ?? 'l’ordinateur'}
             {partie.adversaire && ` · ${partie.adversaire.elo} Elo`}
@@ -169,9 +143,9 @@ function PartieDUnAmi({
             très bien être en pause devant un café, et l'annoncer comme un
             direct serait mentir sur ce qu'on regarde. */}
         dernier coup {ilYA(partie.dernierCoupLe)}
-        {jeuDePieces ? '' : ''}
+        <span className="ml-auto text-accent">suivre la partie →</span>
       </p>
-    </div>
+    </Link>
   )
 }
 

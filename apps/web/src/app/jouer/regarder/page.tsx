@@ -47,7 +47,7 @@ import {
   SegmentedControl,
   Spinner,
 } from '@/components/ui/index.tsx'
-import { PartiesDAmis } from '@/components/social/PartiesDAmis.tsx'
+import { PartiesDAmis, type PartieDAmi } from '@/components/social/PartiesDAmis.tsx'
 
 interface LiveGame {
   slug: string
@@ -89,17 +89,41 @@ export default function WatchPage() {
    */
   const [amis, setAmis] = useState<Set<string> | null>(null)
   const [filtre, setFiltre] = useState<'tout' | 'amis'>('tout')
+  /**
+   * Les parties de mes amis contre l'ordinateur.
+   *
+   * Relues ici et non dans le composant qui les affiche : le filtre les compte,
+   * et deux fetches concurrents finissaient par se contredire — « Mes amis (0) »
+   * s'affichait au-dessus d'une partie d'ami bien visible.
+   */
+  const [solo, setSolo] = useState<PartieDAmi[]>([])
 
   const refresh = useCallback(async () => {
-    try {
-      const response = await fetch('/api/parties')
-      const data: { games?: LiveGame[] } = await response.json()
-      setOffline(!response.ok)
-      setGames(data.games ?? [])
-    } catch {
+    // Les deux sources en parallèle : les salons du serveur temps réel, et les
+    // parties solo que le serveur Next connaît par `active_games`. Deux origines
+    // très différentes, un seul rafraîchissement — sinon les comptes divergent.
+    const [enDirect, contreOrdinateur] = await Promise.allSettled([
+      fetch('/api/parties').then(async (reponse) => ({
+        ok: reponse.ok,
+        data: (await reponse.json()) as { games?: LiveGame[] },
+      })),
+      fetch('/api/amis/parties', { cache: 'no-store' }).then(async (reponse) =>
+        reponse.ok ? ((await reponse.json()) as { parties?: PartieDAmi[] }) : { parties: [] },
+      ),
+    ])
+
+    if (enDirect.status === 'fulfilled') {
+      setOffline(!enDirect.value.ok)
+      setGames(enDirect.value.data.games ?? [])
+    } else {
       setOffline(true)
       setGames([])
     }
+
+    // Sans compte, la route rend une liste vide : ce n'est pas une panne, et
+    // le serveur temps réel peut très bien être debout pendant que celle-ci
+    // échoue. Les deux pannes ne se mélangent pas.
+    setSolo(contreOrdinateur.status === 'fulfilled' ? (contreOrdinateur.value.parties ?? []) : [])
   }, [])
 
   useEffect(() => {
@@ -146,9 +170,16 @@ export default function WatchPage() {
     return [...retenues].sort((a, b) => Number(Boolean(b.ami)) - Number(Boolean(a.ami)))
   }, [games, amiDansLaPartie, filtre])
 
+  /**
+   * Combien de parties d'amis, toutes origines confondues.
+   *
+   * Les parties solo en font partie : elles sont **par construction** celles
+   * d'un ami — la route n'en rend pas d'autres. Les compter à part donnerait
+   * exactement l'incohérence qu'on vient de corriger.
+   */
   const partiesDAmis = useMemo(
-    () => (games ?? []).filter((partie) => amiDansLaPartie(partie)).length,
-    [games, amiDansLaPartie],
+    () => (games ?? []).filter((partie) => amiDansLaPartie(partie)).length + solo.length,
+    [games, amiDansLaPartie, solo.length],
   )
 
   if (games === null) {
@@ -169,7 +200,7 @@ export default function WatchPage() {
           Elles ne passent pas par le serveur temps réel — une partie contre
           l'ordinateur se joue dans le navigateur — et n'apparaissaient donc
           nulle part. Le composant s'efface tout seul quand personne ne joue. */}
-      <PartiesDAmis />
+      <PartiesDAmis parties={solo} />
 
       {/* Le filtre n'apparaît qu'à ceux qui ont des amis : proposer « Mes amis »
           à quelqu'un dont le carnet est vide, c'est offrir un bouton qui ne
@@ -195,7 +226,7 @@ export default function WatchPage() {
           title="Serveur de parties injoignable"
           description="Impossible de savoir qui joue en ce moment. Vérifie que le serveur temps réel tourne."
         />
-      ) : affichees.length === 0 ? (
+      ) : affichees.length === 0 && solo.length === 0 ? (
         /* Deux vides différents, et ils ne se soignent pas pareil : « personne
            ne joue » se subit, « aucun de tes amis ne joue » se corrige en
            revenant à la liste complète. */
