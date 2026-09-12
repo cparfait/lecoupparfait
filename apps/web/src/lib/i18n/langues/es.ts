@@ -345,7 +345,6 @@ export const es: Traduction = {
     sound: 'Sonido',
     soundEffects: 'Efectos de sonido',
     volume: 'Volumen',
-    voice: 'Voz del entrenador',
     voiceEnabled: 'Comentario hablado',
     voiceSelect: 'Voz',
     voiceRate: 'Velocidad',

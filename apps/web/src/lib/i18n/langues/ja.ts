@@ -342,7 +342,6 @@ export const ja: Traduction = {
     sound: '音',
     soundEffects: '効果音',
     volume: '音量',
-    voice: 'コーチの声',
     voiceEnabled: '音声解説',
     voiceSelect: '声',
     voiceRate: '話す速さ',

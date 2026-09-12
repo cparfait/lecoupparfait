@@ -340,7 +340,6 @@ export const cs: Traduction = {
     sound: 'Zvuk',
     soundEffects: 'Zvukové efekty',
     volume: 'Hlasitost',
-    voice: 'Hlas trenéra',
     voiceEnabled: 'Mluvený komentář',
     voiceSelect: 'Hlas',
     voiceRate: 'Rychlost řeči',

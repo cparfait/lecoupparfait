@@ -62,11 +62,11 @@ const DEMO_FEN = 'r2q1rk1/pp2bppp/2n1bn2/2pp4/3P4/2N1PN2/PP2BPPP/R1BQ1RK1 w - - 
  * encore faut-il qu'il y ait un « où ».
  */
 const ONGLETS = [
-  { id: 'apparence', label: 'Apparence', icon: Palette },
-  { id: 'echiquier', label: 'Échiquier', icon: Grid3x3 },
-  { id: 'son', label: 'Son et voix', icon: Volume2 },
-  { id: 'ia', label: 'Assistant IA', icon: BrainCircuit },
-  { id: 'notifications', label: 'Notifications', icon: Bell },
+  { id: 'apparence', icon: Palette },
+  { id: 'echiquier', icon: Grid3x3 },
+  { id: 'son', icon: Volume2 },
+  { id: 'ia', icon: BrainCircuit },
+  { id: 'notifications', icon: Bell },
 ] as const
 
 type OngletId = (typeof ONGLETS)[number]['id']
@@ -123,10 +123,10 @@ export default function PreferencesPage() {
 
   return (
     <div className="page">
-      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Préférences</h1>
-      <p className="mt-2 text-muted">
-        Tout s’applique immédiatement et reste enregistré dans ton navigateur.
-      </p>
+      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+        {t('settings.title')}
+      </h1>
+      <p className="mt-2 text-muted">{t('settings.subtitle')}</p>
 
       {/* ── Onglets ──────────────────────────────────────────────────
           Horizontaux et non en colonne latérale : la colonne de droite est
@@ -135,7 +135,7 @@ export default function PreferencesPage() {
           les réglages à un couloir. */}
       <div
         role="tablist"
-        aria-label="Familles de réglages"
+        aria-label={t('settings.tabsLabel')}
         className="mt-6 flex gap-1 overflow-x-auto border-b border-line pb-px"
       >
         {ONGLETS.map((entry) => {
@@ -165,7 +165,7 @@ export default function PreferencesPage() {
               )}
             >
               <Icone size={15} aria-hidden />
-              {entry.label}
+              {t(`settings.tabs.${entry.id}` as never)}
               {actif && (
                 <span className="absolute inset-x-2 -bottom-px h-[2px] rounded-full bg-accent" />
               )}
@@ -180,10 +180,10 @@ export default function PreferencesPage() {
           {/* Thème */}
           {onglet === 'apparence' && (
             <Card className="p-5">
-              <SectionTitle hint="Change l’ambiance de toute l’application.">
+              <SectionTitle hint={t('settings.themeHint')}>
                 <span className="flex items-center gap-2">
                   <Palette size={16} className="text-accent" aria-hidden />
-                  Thème
+                  {t('settings.theme')}
                 </span>
               </SectionTitle>
               <div className="grid max-w-md grid-cols-2 gap-2">
@@ -220,7 +220,7 @@ export default function PreferencesPage() {
           {/* Échiquier */}
           {onglet === 'echiquier' && (
             <Card className="p-5">
-              <SectionTitle>Damier</SectionTitle>
+              <SectionTitle>{t('settings.boardTexture')}</SectionTitle>
               <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
                 {BOARD_STYLES.map((style) => (
                   <button
@@ -246,11 +246,8 @@ export default function PreferencesPage() {
                 ))}
               </div>
 
-              <SectionTitle
-                hint="Tous sous licence libre — voir la page Crédits."
-                action={undefined}
-              >
-                <span className="mt-5 block">Jeu de pièces</span>
+              <SectionTitle hint={t('settings.pieceSetHint')} action={undefined}>
+                <span className="mt-5 block">{t('settings.pieceSet')}</span>
               </SectionTitle>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
                 {PIECE_SETS.map((entry) => (
@@ -288,14 +285,14 @@ export default function PreferencesPage() {
           {/* Affichage */}
           {onglet === 'echiquier' && (
             <Card className="p-5">
-              <SectionTitle>Affichage</SectionTitle>
+              <SectionTitle>{t('settings.display')}</SectionTitle>
 
               <div className="mb-3">
-                <p className="mb-1.5 text-sm font-medium">Vue par défaut</p>
+                <p className="mb-1.5 text-sm font-medium">{t('settings.defaultView')}</p>
                 <SegmentedControl
                   value={prefs.view}
                   onChange={(value) => set('view', value)}
-                  label="Vue par défaut"
+                  label={t('settings.defaultView')}
                   options={[
                     { value: '2d' as const, label: '2D' },
                     { value: '3d' as const, label: '3D' },
@@ -306,11 +303,11 @@ export default function PreferencesPage() {
               {prefs.view === '3d' && (
                 <>
                   <div className="mb-3">
-                    <p className="mb-1.5 text-sm font-medium">Matériau des pièces</p>
+                    <p className="mb-1.5 text-sm font-medium">{t('settings.pieceMaterial')}</p>
                     <SegmentedControl
                       value={prefs.pieceMaterial}
                       onChange={(value) => set('pieceMaterial', value)}
-                      label="Matériau"
+                      label={t('settings.material')}
                       options={PIECE_MATERIALS.map((material) => ({
                         value: material.id,
                         label: material.label,
@@ -319,7 +316,7 @@ export default function PreferencesPage() {
                   </div>
 
                   <div className="mb-3">
-                    <p className="mb-1.5 text-sm font-medium">Couleur des pièces</p>
+                    <p className="mb-1.5 text-sm font-medium">{t('settings.pieceColours')}</p>
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                       {PIECE_COLOURS.map((entry) => (
                         <button
@@ -371,9 +368,9 @@ export default function PreferencesPage() {
                             value={prefs.pieceWhiteCustom}
                             onChange={(event) => set('pieceWhiteCustom', event.target.value)}
                             className="h-8 w-12 cursor-pointer rounded border border-line bg-transparent"
-                            aria-label="Couleur des pièces blanches"
+                            aria-label={t('settings.whitePiecesColour')}
                           />
-                          Blancs
+                          {t('settings.white')}
                         </label>
                         <label className="flex items-center gap-2 text-xs">
                           <input
@@ -381,16 +378,15 @@ export default function PreferencesPage() {
                             value={prefs.pieceBlackCustom}
                             onChange={(event) => set('pieceBlackCustom', event.target.value)}
                             className="h-8 w-12 cursor-pointer rounded border border-line bg-transparent"
-                            aria-label="Couleur des pièces noires"
+                            aria-label={t('settings.blackPiecesColour')}
                           />
-                          Noirs
+                          {t('settings.black')}
                         </label>
                       </div>
                     )}
 
                     <p className="mt-2 text-xs leading-relaxed text-faint">
-                      Ne concerne que la vue 3D : les pièces 2D sont des dessins vectoriels aux
-                      couleurs fixes.
+                      {t('settings.colours3dOnly')}
                     </p>
                   </div>
                 </>
@@ -398,20 +394,20 @@ export default function PreferencesPage() {
 
               <div className="divide-y divide-line/50">
                 <Toggle
-                  label="Coordonnées"
-                  description="Lettres et chiffres sur les bords de l’échiquier."
+                  label={t('settings.coordinates')}
+                  description={t('settings.coordinatesHint')}
                   checked={prefs.showCoordinates}
                   onChange={(value) => set('showCoordinates', value)}
                 />
                 <Toggle
-                  label="Coups légaux"
-                  description="Affiche les cases où la pièce sélectionnée peut aller."
+                  label={t('settings.legalMoveHints')}
+                  description={t('settings.legalMoveHintsHint')}
                   checked={prefs.showLegalMoves}
                   onChange={(value) => set('showLegalMoves', value)}
                 />
                 <Toggle
-                  label="Coups colorés selon le danger"
-                  description="Vert : la pièce y est en sécurité. Rouge : elle serait perdue. Doré : le coup gagne du matériel. Une béquille d’apprentissage — désactive-la dès que tu vois ces choses tout seul."
+                  label={t('settings.safetyHints')}
+                  description={t('settings.safetyHintsHint')}
                   checked={prefs.moveSafetyHints}
                   onChange={(value) => set('moveSafetyHints', value)}
                   disabled={!prefs.showLegalMoves}
@@ -422,45 +418,45 @@ export default function PreferencesPage() {
                     elle mérite d'être dite ici, est que celle-ci ne consulte
                     pas le moteur — d'où sa présence même en partie classée. */}
                 <Toggle
-                  label="Mémo avant chaque coup"
-                  description="Quatre questions sous l’échiquier : ce que son coup a changé, ce qu’il attaque, ce que ton coup laisse en prise, ce que tient son coup le plus méchant. Aucune réponse donnée — c’est une discipline, pas une assistance, et elle reste disponible en partie classée."
+                  label={t('settings.memo')}
+                  description={t('settings.memoHint')}
                   checked={prefs.memoAvantCoup}
                   onChange={(value) => set('memoAvantCoup', value)}
                 />
                 <Toggle
-                  label="Nom de l’ouverture en partie"
-                  description="Affiche le nom de l’ouverture jouée, mis à jour à chaque coup. C’est la façon la plus efficace d’apprendre les noms : on les voit sur ses propres parties."
+                  label={t('settings.openingName')}
+                  description={t('settings.openingNameHint')}
                   checked={prefs.showOpeningName}
                   onChange={(value) => set('showOpeningName', value)}
                 />
                 <Toggle
-                  label="Annoncer l’ouverture à voix haute"
-                  description="Le coach prononce le nom quand il change."
+                  label={t('settings.announceOpening')}
+                  description={t('settings.announceOpeningHint')}
                   checked={prefs.announceOpenings}
                   onChange={(value) => set('announceOpenings', value)}
                   disabled={!prefs.showOpeningName || !prefs.voiceEnabled}
                 />
                 <Toggle
-                  label="Mode commenté"
-                  description="Après chaque coup, le moteur montre ce que tu aurais pu jouer, avec les trois meilleures options et la raison de chacune. Indisponible en partie contre un ami."
+                  label={t('settings.commentary')}
+                  description={t('settings.commentaryHint')}
                   checked={prefs.commentaryMode}
                   onChange={(value) => set('commentaryMode', value)}
                 />
                 <Toggle
-                  label="Attendre que tu aies lu"
-                  description="En mode commenté, l’adversaire patiente après chaque coup jusqu’à ce que tu dises « Continuer ». Sans cette pause il répond en une seconde, et le commentaire décrit une position déjà dépassée."
+                  label={t('settings.commentaryPause')}
+                  description={t('settings.commentaryPauseHint')}
                   checked={prefs.commentaryPauses}
                   onChange={(value) => set('commentaryPauses', value)}
                   disabled={!prefs.commentaryMode}
                 />
                 <Toggle
-                  label="Surligner le dernier coup"
+                  label={t('settings.lastMoveHighlight')}
                   checked={prefs.highlightLastMove}
                   onChange={(value) => set('highlightLastMove', value)}
                 />
                 <div className="py-2">
                   <label htmlFor="notation" className="mb-1.5 block text-sm font-medium">
-                    Écriture des coups
+                    {t('settings.notation')}
                   </label>
                   <select
                     id="notation"
@@ -470,49 +466,46 @@ export default function PreferencesPage() {
                     }
                     className="h-10 w-full rounded-[var(--radius-sm)] border border-line bg-surface px-3 text-sm focus:border-accent focus:outline-none"
                   >
-                    <option value="lettres">Lettres — Cf3, Dxd5+</option>
-                    <option value="figurine">Figurine — ♘f3, ♕xd5+</option>
+                    <option value="lettres">{t('settings.notationLetters')}</option>
+                    <option value="figurine">{t('settings.notationFigurine')}</option>
                   </select>
-                  <p className="mt-1.5 text-xs text-faint">
-                    La notation figurine est celle des livres et des revues : elle ne dépend
-                    d’aucune langue, et on apprend au passage des symboles qu’on retrouve partout.
-                  </p>
+                  <p className="mt-1.5 text-xs text-faint">{t('settings.notationHint')}</p>
                 </div>
 
                 <Toggle
-                  label="Les Blancs toujours en bas"
-                  description="Fige le sens de l’échiquier au lieu de le retourner selon ta couleur. Les diagrammes des livres et des leçons sont presque tous vus des Blancs."
+                  label={t('settings.whiteAlwaysBottom')}
+                  description={t('settings.whiteAlwaysBottomHint')}
                   checked={prefs.whiteAlwaysBottom}
                   onChange={(value) => set('whiteAlwaysBottom', value)}
                 />
                 <Toggle
-                  label="Signaler l’échec"
-                  description="Halo rouge autour du roi attaqué."
+                  label={t('settings.highlightCheck')}
+                  description={t('settings.highlightCheckHint')}
                   checked={prefs.highlightCheck}
                   onChange={(value) => set('highlightCheck', value)}
                 />
                 <Toggle
-                  label="Pré-coups"
-                  description="Jouer pendant le tour de l’adversaire ; le coup part dès qu’il a joué."
+                  label={t('settings.premove')}
+                  description={t('settings.premoveHint')}
                   checked={prefs.premove}
                   onChange={(value) => set('premove', value)}
                 />
                 <Toggle
-                  label="Barre d’évaluation en partie"
-                  description="Déconseillé : voir l’évaluation pendant qu’on joue empêche d’apprendre à évaluer soi-même."
+                  label={t('settings.evalBarInGame')}
+                  description={t('settings.evalBarInGameHint')}
                   checked={prefs.showEvalDuringGame}
                   onChange={(value) => set('showEvalDuringGame', value)}
                 />
               </div>
 
               <Slider
-                label="Vitesse d’animation"
+                label={t('settings.animationSpeed')}
                 value={prefs.animationMs}
                 onChange={(value) => set('animationMs', value)}
                 min={0}
                 max={500}
                 step={10}
-                format={(value) => (value === 0 ? 'instantané' : `${value} ms`)}
+                format={(value) => (value === 0 ? t('settings.animationInstant') : `${value} ms`)}
               />
             </Card>
           )}
@@ -520,25 +513,23 @@ export default function PreferencesPage() {
           {/* Effets */}
           {onglet === 'apparence' && (
             <Card className="p-5">
-              <SectionTitle hint="Réduis les effets si l’interface saccade.">
+              <SectionTitle hint={t('settings.effectsHint')}>
                 <span className="flex items-center gap-2">
                   <Zap size={16} className="text-accent" aria-hidden />
-                  Effets visuels
+                  {t('settings.effects')}
                 </span>
               </SectionTitle>
               <SegmentedControl
                 value={prefs.effects}
                 onChange={(value) => set('effects', value)}
-                label="Effets visuels"
+                label={t('settings.effects')}
                 options={[
-                  { value: 'high' as const, label: 'Spectaculaires' },
-                  { value: 'low' as const, label: 'Performance' },
+                  { value: 'high' as const, label: t('settings.effectsHigh') },
+                  { value: 'low' as const, label: t('settings.effectsLow') },
                 ]}
               />
               <p className="mt-2.5 text-xs leading-relaxed text-muted">
-                En mode spectaculaire : verre dépoli, ombres portées, halos, reflets et ombres de
-                contact en 3D. En mode performance, tout cela est désactivé — l’application reste
-                identique, simplement plus sobre et beaucoup plus légère.
+                {t('settings.effectsDetail')}
               </p>
             </Card>
           )}
@@ -549,14 +540,14 @@ export default function PreferencesPage() {
               <SectionTitle>
                 <span className="flex items-center gap-2">
                   <Volume2 size={16} className="text-accent" aria-hidden />
-                  Son et voix
+                  {t('settings.sound')}
                 </span>
               </SectionTitle>
 
               <div className="divide-y divide-line/50">
                 <Toggle
-                  label="Bruitages"
-                  description="Un son différent selon qu’on déplace, capture ou donne échec."
+                  label={t('settings.soundEffects')}
+                  description={t('settings.soundEffectsHint')}
                   checked={prefs.soundEnabled}
                   onChange={(value) => {
                     set('soundEnabled', value)
@@ -564,8 +555,8 @@ export default function PreferencesPage() {
                   }}
                 />
                 <Toggle
-                  label="Commentaire vocal"
-                  description="Le coach lit ses explications à voix haute pendant les leçons et l’analyse."
+                  label={t('settings.voiceEnabled')}
+                  description={t('settings.voiceEnabledHint')}
                   checked={prefs.voiceEnabled}
                   onChange={(value) => set('voiceEnabled', value)}
                 />
@@ -573,7 +564,7 @@ export default function PreferencesPage() {
 
               {prefs.soundEnabled && (
                 <Slider
-                  label="Volume"
+                  label={t('settings.volume')}
                   value={Math.round(prefs.volume * 100)}
                   onChange={(value) => {
                     set('volume', value / 100)
@@ -590,7 +581,7 @@ export default function PreferencesPage() {
                   {neuralForLocale.length > 0 && (
                     <div className="mt-3">
                       <label htmlFor="engine" className="mb-1.5 block text-sm font-medium">
-                        Moteur de synthèse
+                        {t('settings.speechEngine')}
                       </label>
                       <select
                         id="engine"
@@ -600,21 +591,17 @@ export default function PreferencesPage() {
                         }
                         className="h-10 w-full rounded-[var(--radius-sm)] border border-line bg-surface px-3 text-sm focus:border-accent focus:outline-none"
                       >
-                        <option value="neural">Voix neuronale (recommandé)</option>
-                        <option value="system">Voix du navigateur</option>
+                        <option value="neural">{t('settings.engineNeural')}</option>
+                        <option value="system">{t('settings.engineSystem')}</option>
                       </select>
-                      <p className="mt-1.5 text-xs text-faint">
-                        La voix neuronale est calculée par ton propre serveur, hors ligne et sans
-                        service tiers. Elle est nettement plus naturelle, mais démarre avec une
-                        fraction de seconde de retard.
-                      </p>
+                      <p className="mt-1.5 text-xs text-faint">{t('settings.engineHint')}</p>
                     </div>
                   )}
 
                   {neuralForLocale.length > 0 && prefs.voiceEngine === 'neural' && (
                     <div className="mt-3">
                       <label htmlFor="neural-voice" className="mb-1.5 block text-sm font-medium">
-                        Voix neuronale
+                        {t('settings.neuralVoice')}
                       </label>
                       <select
                         id="neural-voice"
@@ -622,7 +609,7 @@ export default function PreferencesPage() {
                         onChange={(event) => set('neuralVoice', event.target.value || null)}
                         className="h-10 w-full rounded-[var(--radius-sm)] border border-line bg-surface px-3 text-sm focus:border-accent focus:outline-none"
                       >
-                        <option value="">Première voix disponible</option>
+                        <option value="">{t('settings.neuralVoiceFirst')}</option>
                         {neuralForLocale.map((voice) => (
                           <option key={voice.id} value={voice.id}>
                             {voice.label}
@@ -634,7 +621,9 @@ export default function PreferencesPage() {
 
                   <div className="mt-3">
                     <label htmlFor="voice" className="mb-1.5 block text-sm font-medium">
-                      {neuralForLocale.length > 0 ? 'Voix du navigateur (secours)' : 'Voix'}
+                      {neuralForLocale.length > 0
+                        ? t('settings.browserVoiceFallback')
+                        : t('settings.voiceSelect')}
                     </label>
                     <select
                       id="voice"
@@ -642,23 +631,20 @@ export default function PreferencesPage() {
                       onChange={(event) => set('voiceName', event.target.value || null)}
                       className="h-10 w-full rounded-[var(--radius-sm)] border border-line bg-surface px-3 text-sm focus:border-accent focus:outline-none"
                     >
-                      <option value="">Voix par défaut du système</option>
+                      <option value="">{t('settings.systemDefaultVoice')}</option>
                       {voices.map((voice) => (
                         <option key={voice.name} value={voice.name}>
-                          {voice.name} {voice.localService ? '' : '(en ligne)'}
+                          {voice.name} {voice.localService ? '' : t('settings.voiceOnline')}
                         </option>
                       ))}
                     </select>
                     {voices.length === 0 && (
-                      <p className="mt-1.5 text-xs text-faint">
-                        Aucune voix française détectée. Installe un pack vocal depuis les réglages
-                        de ton système.
-                      </p>
+                      <p className="mt-1.5 text-xs text-faint">{t('settings.noVoices')}</p>
                     )}
                   </div>
 
                   <Slider
-                    label="Débit"
+                    label={t('settings.voiceRate')}
                     value={Math.round(prefs.voiceRate * 100)}
                     onChange={(value) => set('voiceRate', value / 100)}
                     min={60}
@@ -666,7 +652,7 @@ export default function PreferencesPage() {
                     format={(value) => `${(value / 100).toFixed(2)}×`}
                   />
                   <Slider
-                    label="Hauteur"
+                    label={t('settings.voicePitch')}
                     value={Math.round(prefs.voicePitch * 100)}
                     onChange={(value) => set('voicePitch', value / 100)}
                     min={50}
@@ -683,8 +669,8 @@ export default function PreferencesPage() {
                   voix qu'il s'agit.
                 */}
                   <Toggle
-                    label="Annoncer chaque coup"
-                    description="Lit à voix haute le coup joué — « cavalier f3 », « prend en e5 », « échec ». Utile pour jouer sans regarder l’écran en permanence."
+                    label={t('settings.announceMoves')}
+                    description={t('settings.announceMovesHint')}
                     checked={prefs.announceMoves}
                     onChange={(value) => set('announceMoves', value)}
                   />
@@ -698,27 +684,26 @@ export default function PreferencesPage() {
                       // l'on écoute vraiment la voix qu'on a choisie.
                       void testVoice(localeDuContenu(prefs.locale)).then((result) => {
                         if (result.engine === 'neural') {
-                          toast.success('Voix neuronale', result.voice)
+                          toast.success(t('settings.testVoiceNeural'), result.voice)
                         } else {
                           toast.info(
-                            'Voix du navigateur',
+                            t('settings.testVoiceBrowser'),
                             [result.voice, result.reason].filter(Boolean).join(' — '),
                           )
                         }
                       })
                     }}
                   >
-                    Tester la voix
+                    {t('settings.testVoice')}
                   </Button>
 
                   {/* État de la voix neuronale, toujours visible : une panne
                     silencieuse se confond avec un défaut de qualité. */}
                   {neuralProbed && neuralForLocale.length === 0 && (
                     <p className="mt-2 text-xs text-faint">
-                      Voix neuronale indisponible : le serveur ne propose aucune voix installée.
-                      Lance{' '}
+                      {t('settings.neuralUnavailable')}{' '}
                       <code className="rounded bg-surface px-1 py-0.5">npm run voice:install</code>{' '}
-                      puis redémarre le serveur.
+                      {t('settings.neuralUnavailableAfter')}
                     </p>
                   )}
                 </>
@@ -752,13 +737,13 @@ export default function PreferencesPage() {
               `Drapeau`. */}
           {onglet === 'apparence' && (
             <Card className="p-5">
-              <SectionTitle hint="L’interface. Les leçons, les explications de coups et le glossaire restent en français ou en anglais — ce sont des textes rédigés, pas des étiquettes.">
-                Langue
+              <SectionTitle hint={t('settings.languageHint')}>
+                {t('settings.language')}
               </SectionTitle>
 
               <div
                 role="radiogroup"
-                aria-label="Langue de l’interface"
+                aria-label={t('settings.languageGroupLabel')}
                 className="grid grid-cols-2 gap-1 sm:grid-cols-3"
               >
                 {LANGUES.map((langue) => {
@@ -792,8 +777,7 @@ export default function PreferencesPage() {
                   l'application ; annoncée, elle donne au contraire envie d'aider
                   à la finir. */}
               <p className="mt-3 text-xs leading-relaxed text-faint">
-                Le français et l’anglais sont complets. Les autres langues sont en cours : ce qui
-                n’est pas encore traduit s’affiche en anglais, phrase par phrase.
+                {t('settings.languageCoverage')}
               </p>
             </Card>
           )}
@@ -802,16 +786,16 @@ export default function PreferencesPage() {
             variant="ghost"
             icon={<RotateCcw size={15} />}
             onClick={() => {
-              if (confirm('Rétablir tous les réglages par défaut ?')) reset()
+              if (confirm(t('settings.resetConfirm'))) reset()
             }}
           >
-            Rétablir les réglages par défaut
+            {t('settings.reset')}
           </Button>
         </div>
 
         {/* ── Aperçu ───────────────────────────────────────────────── */}
         <div className="lg:sticky lg:top-20 lg:self-start">
-          <p className="mb-2 text-[12px] font-semibold text-faint">Aperçu en direct</p>
+          <p className="mb-2 text-[12px] font-semibold text-faint">{t('settings.preview')}</p>
           <Board2D
             fen={DEMO_FEN}
             playable="both"
@@ -819,9 +803,10 @@ export default function PreferencesPage() {
             allowAnnotations={false}
           />
           <p className="mt-2 text-xs leading-relaxed text-faint">
-            Damier « {BOARD_STYLES.find((style) => style.id === prefs.boardStyle)?.label} », pièces
-            « {PIECE_SETS.find((entry) => entry.id === prefs.pieceSet)?.label} ». Clique une pièce
-            pour voir les indications de coups légaux.
+            {t('settings.previewHint', {
+              damier: BOARD_STYLES.find((style) => style.id === prefs.boardStyle)?.label ?? '',
+              pieces: PIECE_SETS.find((entry) => entry.id === prefs.pieceSet)?.label ?? '',
+            })}
           </p>
         </div>
       </div>

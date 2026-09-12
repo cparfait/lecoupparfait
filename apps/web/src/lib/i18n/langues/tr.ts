@@ -342,7 +342,6 @@ export const tr: Traduction = {
     sound: 'Ses',
     soundEffects: 'Ses efektleri',
     volume: 'Ses düzeyi',
-    voice: 'Antrenör sesi',
     voiceEnabled: 'Sesli yorum',
     voiceSelect: 'Ses',
     voiceRate: 'Konuşma hızı',

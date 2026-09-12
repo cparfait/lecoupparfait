@@ -344,7 +344,6 @@ export const ar: Traduction = {
     sound: 'الصوت',
     soundEffects: 'المؤثرات الصوتية',
     volume: 'مستوى الصوت',
-    voice: 'صوت المدرّب',
     voiceEnabled: 'تعليق منطوق',
     voiceSelect: 'الصوت',
     voiceRate: 'سرعة الكلام',

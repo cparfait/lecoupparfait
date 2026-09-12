@@ -342,7 +342,6 @@ export const zh: Traduction = {
     sound: '声音',
     soundEffects: '音效',
     volume: '音量',
-    voice: '教练语音',
     voiceEnabled: '语音讲解',
     voiceSelect: '语音',
     voiceRate: '语速',

@@ -340,7 +340,6 @@ export const hu: Traduction = {
     sound: 'Hang',
     soundEffects: 'Hangeffektek',
     volume: 'Hangerő',
-    voice: 'Az edző hangja',
     voiceEnabled: 'Hangos kommentár',
     voiceSelect: 'Hang',
     voiceRate: 'Beszédsebesség',

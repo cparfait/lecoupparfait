@@ -342,7 +342,6 @@ export const it: Traduction = {
     sound: 'Suono',
     soundEffects: 'Effetti sonori',
     volume: 'Volume',
-    voice: 'Voce dell’allenatore',
     voiceEnabled: 'Commento vocale',
     voiceSelect: 'Voce',
     voiceRate: 'Velocità',

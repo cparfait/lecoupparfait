@@ -341,7 +341,6 @@ export const nl: Traduction = {
     sound: 'Geluid',
     soundEffects: 'Geluidseffecten',
     volume: 'Volume',
-    voice: 'Stem van de coach',
     voiceEnabled: 'Gesproken commentaar',
     voiceSelect: 'Stem',
     voiceRate: 'Snelheid',

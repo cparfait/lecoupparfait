@@ -343,7 +343,6 @@ export const pl: Traduction = {
     sound: 'Dźwięk',
     soundEffects: 'Efekty dźwiękowe',
     volume: 'Głośność',
-    voice: 'Głos trenera',
     voiceEnabled: 'Komentarz głosowy',
     voiceSelect: 'Głos',
     voiceRate: 'Tempo mowy',

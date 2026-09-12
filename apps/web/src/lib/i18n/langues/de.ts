@@ -345,7 +345,6 @@ export const de: Traduction = {
     sound: 'Ton',
     soundEffects: 'Geräusche',
     volume: 'Lautstärke',
-    voice: 'Trainerstimme',
     voiceEnabled: 'Gesprochener Kommentar',
     voiceSelect: 'Stimme',
     voiceRate: 'Tempo',

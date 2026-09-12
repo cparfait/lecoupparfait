@@ -327,35 +327,130 @@ export const en: Dictionary = {
 
   settings: {
     title: 'Settings',
+    subtitle: 'Everything applies right away and stays saved in your browser.',
+    tabsLabel: 'Groups of settings',
+    tabs: {
+      apparence: 'Appearance',
+      echiquier: 'Board',
+      son: 'Sound and voice',
+      ia: 'AI assistant',
+      notifications: 'Notifications',
+    },
+
     appearance: 'Appearance',
     theme: 'Theme',
+    themeHint: 'Changes the mood of the whole app.',
     themes: {
       aurora: 'Dark',
       clair: 'Light',
     },
+
     board: 'Board',
+    boardTexture: 'Squares',
     pieceSet: 'Piece set',
-    boardTexture: 'Board style',
+    pieceSetHint: 'All free-licensed — see the Credits page.',
+    display: 'Display',
     defaultView: 'Default view',
-    coordinates: 'Show coordinates',
-    lastMoveHighlight: 'Highlight last move',
-    legalMoveHints: 'Show legal moves',
+    pieceMaterial: 'Piece material',
+    material: 'Material',
+    pieceColours: 'Piece colours',
+    whitePiecesColour: 'Colour of the white pieces',
+    blackPiecesColour: 'Colour of the black pieces',
+    white: 'White',
+    black: 'Black',
+    colours3dOnly:
+      'Applies to the 3D view only: the 2D pieces are vector drawings with fixed colours.',
+
+    coordinates: 'Coordinates',
+    coordinatesHint: 'Letters and numbers along the edges of the board.',
+    legalMoveHints: 'Legal moves',
+    legalMoveHintsHint: 'Shows the squares the selected piece can go to.',
+    safetyHints: 'Colour moves by danger',
+    safetyHintsHint:
+      'Green: the piece is safe there. Red: it would be lost. Gold: the move wins material. A learning crutch — turn it off as soon as you see these things on your own.',
+    memo: 'Checklist before every move',
+    memoHint:
+      'Four questions under the board: what their move changed, what it attacks, what your move leaves hanging, what their nastiest reply holds. No answers given — it is a discipline, not an assistance, and it stays available in rated games.',
+    openingName: 'Opening name during the game',
+    openingNameHint:
+      'Shows the name of the opening being played, updated on every move. It is the most efficient way to learn the names: you see them on your own games.',
+    announceOpening: 'Say the opening out loud',
+    announceOpeningHint: 'The coach says the name whenever it changes.',
+    commentary: 'Commentary mode',
+    commentaryHint:
+      'After every move, the engine shows what you could have played, with the three best options and the reason for each. Not available against a friend.',
+    commentaryPause: 'Wait until you have read it',
+    commentaryPauseHint:
+      'In commentary mode, your opponent waits after each move until you say “Continue”. Without that pause they reply in a second, and the commentary describes a position that has already moved on.',
+    lastMoveHighlight: 'Highlight the last move',
+    notation: 'Move notation',
+    notationLetters: 'Letters — Nf3, Qxd5+',
+    notationFigurine: 'Figurine — ♘f3, ♕xd5+',
+    notationHint:
+      'Figurine notation is the one used by books and magazines: it does not depend on any language, and you pick up symbols you will find everywhere.',
+    whiteAlwaysBottom: 'White always at the bottom',
+    whiteAlwaysBottomHint:
+      'Freezes the orientation of the board instead of flipping it to your colour. Diagrams in books and lessons are nearly always seen from White.',
+    highlightCheck: 'Signal check',
+    highlightCheckHint: 'Red halo around the attacked king.',
+    premove: 'Premoves',
+    premoveHint: 'Play during your opponent’s turn; the move fires as soon as they have played.',
+    evalBarInGame: 'Evaluation bar during the game',
+    evalBarInGameHint:
+      'Not recommended: seeing the evaluation while you play stops you from learning to evaluate yourself.',
     animationSpeed: 'Animation speed',
+    animationInstant: 'instant',
+
     effects: 'Visual effects',
+    effectsHint: 'Reduce the effects if the interface stutters.',
     effectsHigh: 'Spectacular',
     effectsLow: 'Performance',
-    sound: 'Sound',
+    effectsDetail:
+      'In spectacular mode: frosted glass, drop shadows, glows, reflections and contact shadows in 3D. In performance mode all of that is off — the app is identical, simply plainer and much lighter.',
+
+    sound: 'Sound and voice',
     soundEffects: 'Sound effects',
-    volume: 'Volume',
-    voice: 'Coach voice',
+    soundEffectsHint: 'A different sound for a move, a capture and a check.',
     voiceEnabled: 'Spoken commentary',
+    voiceEnabledHint: 'The coach reads its explanations out loud during lessons and analysis.',
+    volume: 'Volume',
+    speechEngine: 'Speech engine',
+    engineNeural: 'Neural voice (recommended)',
+    engineSystem: 'Browser voice',
+    engineHint:
+      'The neural voice is computed by your own server, offline and without any third-party service. It is markedly more natural, but starts a fraction of a second later.',
+    neuralVoice: 'Neural voice',
+    neuralVoiceFirst: 'First available voice',
+    browserVoiceFallback: 'Browser voice (fallback)',
     voiceSelect: 'Voice',
+    systemDefaultVoice: 'System default voice',
+    voiceOnline: '(online)',
+    noVoices:
+      'No voice detected for this language. Install a speech pack from your system settings.',
     voiceRate: 'Rate',
     voicePitch: 'Pitch',
-    testVoice: 'Test voice',
+    announceMoves: 'Say every move',
+    announceMovesHint:
+      'Reads the move out loud — “knight f3”, “takes on e5”, “check”. Useful for playing without staring at the screen.',
+    testVoice: 'Test the voice',
+    testVoiceNeural: 'Neural voice',
+    testVoiceBrowser: 'Browser voice',
+    neuralUnavailable: 'Neural voice unavailable: the server offers no installed voice. Run',
+    neuralUnavailableAfter: 'then restart the server.',
+
     language: 'Language',
+    languageHint:
+      'The interface. Lessons, move explanations and the glossary stay in French or English — those are written texts, not labels.',
+    languageGroupLabel: 'Interface language',
+    languageCoverage:
+      'French and English are complete. The other languages are under way: whatever is not translated yet shows in English, sentence by sentence.',
+
     account: 'Account',
-    premove: 'Allow premoves',
+    reset: 'Restore the default settings',
+    resetConfirm: 'Restore every setting to its default?',
+    preview: 'Live preview',
+    previewHint:
+      'Squares “{damier}”, pieces “{pieces}”. Click a piece to see the legal-move hints.',
   },
 
   auth: {

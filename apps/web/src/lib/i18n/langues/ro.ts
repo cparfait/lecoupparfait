@@ -346,7 +346,6 @@ export const ro: Traduction = {
     sound: 'Sunet',
     soundEffects: 'Efecte sonore',
     volume: 'Volum',
-    voice: 'Vocea antrenorului',
     voiceEnabled: 'Comentariu vocal',
     voiceSelect: 'Voce',
     voiceRate: 'Viteza vorbirii',

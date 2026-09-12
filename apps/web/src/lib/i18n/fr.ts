@@ -328,35 +328,131 @@ export const fr = {
 
   settings: {
     title: 'Préférences',
+    subtitle: 'Tout s’applique immédiatement et reste enregistré dans ton navigateur.',
+    tabsLabel: 'Familles de réglages',
+    tabs: {
+      apparence: 'Apparence',
+      echiquier: 'Échiquier',
+      son: 'Son et voix',
+      ia: 'Assistant IA',
+      notifications: 'Notifications',
+    },
+
     appearance: 'Apparence',
     theme: 'Thème',
+    themeHint: 'Change l’ambiance de toute l’application.',
     themes: {
       aurora: 'Sombre',
       clair: 'Clair',
     },
+
     board: 'Échiquier',
-    pieceSet: 'Jeu de pièces',
     boardTexture: 'Damier',
+    pieceSet: 'Jeu de pièces',
+    pieceSetHint: 'Tous sous licence libre — voir la page Crédits.',
+    display: 'Affichage',
     defaultView: 'Vue par défaut',
-    coordinates: 'Afficher les coordonnées',
+    pieceMaterial: 'Matériau des pièces',
+    material: 'Matériau',
+    pieceColours: 'Couleur des pièces',
+    whitePiecesColour: 'Couleur des pièces blanches',
+    blackPiecesColour: 'Couleur des pièces noires',
+    white: 'Blancs',
+    black: 'Noirs',
+    colours3dOnly:
+      'Ne concerne que la vue 3D : les pièces 2D sont des dessins vectoriels aux couleurs fixes.',
+
+    coordinates: 'Coordonnées',
+    coordinatesHint: 'Lettres et chiffres sur les bords de l’échiquier.',
+    legalMoveHints: 'Coups légaux',
+    legalMoveHintsHint: 'Affiche les cases où la pièce sélectionnée peut aller.',
+    safetyHints: 'Coups colorés selon le danger',
+    safetyHintsHint:
+      'Vert : la pièce y est en sécurité. Rouge : elle serait perdue. Doré : le coup gagne du matériel. Une béquille d’apprentissage — désactive-la dès que tu vois ces choses tout seul.',
+    memo: 'Mémo avant chaque coup',
+    memoHint:
+      'Quatre questions sous l’échiquier : ce que son coup a changé, ce qu’il attaque, ce que ton coup laisse en prise, ce que tient son coup le plus méchant. Aucune réponse donnée — c’est une discipline, pas une assistance, et elle reste disponible en partie classée.',
+    openingName: 'Nom de l’ouverture en partie',
+    openingNameHint:
+      'Affiche le nom de l’ouverture jouée, mis à jour à chaque coup. C’est la façon la plus efficace d’apprendre les noms : on les voit sur ses propres parties.',
+    announceOpening: 'Annoncer l’ouverture à voix haute',
+    announceOpeningHint: 'Le coach prononce le nom quand il change.',
+    commentary: 'Mode commenté',
+    commentaryHint:
+      'Après chaque coup, le moteur montre ce que tu aurais pu jouer, avec les trois meilleures options et la raison de chacune. Indisponible en partie contre un ami.',
+    commentaryPause: 'Attendre que tu aies lu',
+    commentaryPauseHint:
+      'En mode commenté, l’adversaire patiente après chaque coup jusqu’à ce que tu dises « Continuer ». Sans cette pause il répond en une seconde, et le commentaire décrit une position déjà dépassée.',
     lastMoveHighlight: 'Surligner le dernier coup',
-    legalMoveHints: 'Montrer les coups légaux',
+    notation: 'Écriture des coups',
+    notationLetters: 'Lettres — Cf3, Dxd5+',
+    notationFigurine: 'Figurine — ♘f3, ♕xd5+',
+    notationHint:
+      'La notation figurine est celle des livres et des revues : elle ne dépend d’aucune langue, et on apprend au passage des symboles qu’on retrouve partout.',
+    whiteAlwaysBottom: 'Les Blancs toujours en bas',
+    whiteAlwaysBottomHint:
+      'Fige le sens de l’échiquier au lieu de le retourner selon ta couleur. Les diagrammes des livres et des leçons sont presque tous vus des Blancs.',
+    highlightCheck: 'Signaler l’échec',
+    highlightCheckHint: 'Halo rouge autour du roi attaqué.',
+    premove: 'Pré-coups',
+    premoveHint: 'Jouer pendant le tour de l’adversaire ; le coup part dès qu’il a joué.',
+    evalBarInGame: 'Barre d’évaluation en partie',
+    evalBarInGameHint:
+      'Déconseillé : voir l’évaluation pendant qu’on joue empêche d’apprendre à évaluer soi-même.',
     animationSpeed: 'Vitesse d’animation',
+    animationInstant: 'instantané',
+
     effects: 'Effets visuels',
+    effectsHint: 'Réduis les effets si l’interface saccade.',
     effectsHigh: 'Spectaculaires',
     effectsLow: 'Performance',
-    sound: 'Son',
+    effectsDetail:
+      'En mode spectaculaire : verre dépoli, ombres portées, halos, reflets et ombres de contact en 3D. En mode performance, tout cela est désactivé — l’application reste identique, simplement plus sobre et beaucoup plus légère.',
+
+    sound: 'Son et voix',
     soundEffects: 'Bruitages',
-    volume: 'Volume',
-    voice: 'Voix du coach',
+    soundEffectsHint: 'Un son différent selon qu’on déplace, capture ou donne échec.',
     voiceEnabled: 'Commentaire vocal',
+    voiceEnabledHint: 'Le coach lit ses explications à voix haute pendant les leçons et l’analyse.',
+    volume: 'Volume',
+    speechEngine: 'Moteur de synthèse',
+    engineNeural: 'Voix neuronale (recommandé)',
+    engineSystem: 'Voix du navigateur',
+    engineHint:
+      'La voix neuronale est calculée par ton propre serveur, hors ligne et sans service tiers. Elle est nettement plus naturelle, mais démarre avec une fraction de seconde de retard.',
+    neuralVoice: 'Voix neuronale',
+    neuralVoiceFirst: 'Première voix disponible',
+    browserVoiceFallback: 'Voix du navigateur (secours)',
     voiceSelect: 'Voix',
+    systemDefaultVoice: 'Voix par défaut du système',
+    voiceOnline: '(en ligne)',
+    noVoices:
+      'Aucune voix détectée pour cette langue. Installe un pack vocal depuis les réglages de ton système.',
     voiceRate: 'Débit',
     voicePitch: 'Hauteur',
+    announceMoves: 'Annoncer chaque coup',
+    announceMovesHint:
+      'Lit à voix haute le coup joué — « cavalier f3 », « prend en e5 », « échec ». Utile pour jouer sans regarder l’écran en permanence.',
     testVoice: 'Tester la voix',
+    testVoiceNeural: 'Voix neuronale',
+    testVoiceBrowser: 'Voix du navigateur',
+    neuralUnavailable:
+      'Voix neuronale indisponible : le serveur ne propose aucune voix installée. Lance',
+    neuralUnavailableAfter: 'puis redémarre le serveur.',
+
     language: 'Langue',
+    languageHint:
+      'L’interface. Les leçons, les explications de coups et le glossaire restent en français ou en anglais — ce sont des textes rédigés, pas des étiquettes.',
+    languageGroupLabel: 'Langue de l’interface',
+    languageCoverage:
+      'Le français et l’anglais sont complets. Les autres langues sont en cours : ce qui n’est pas encore traduit s’affiche en anglais, phrase par phrase.',
+
     account: 'Compte',
-    premove: 'Autoriser les pré-coups',
+    reset: 'Rétablir les réglages par défaut',
+    resetConfirm: 'Rétablir tous les réglages par défaut ?',
+    preview: 'Aperçu en direct',
+    previewHint:
+      'Damier « {damier} », pièces « {pieces} ». Clique une pièce pour voir les indications de coups légaux.',
   },
 
   auth: {

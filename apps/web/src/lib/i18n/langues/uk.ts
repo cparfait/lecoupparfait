@@ -341,7 +341,6 @@ export const uk: Traduction = {
     sound: 'Звук',
     soundEffects: 'Звукові ефекти',
     volume: 'Гучність',
-    voice: 'Голос тренера',
     voiceEnabled: 'Голосовий коментар',
     voiceSelect: 'Голос',
     voiceRate: 'Швидкість мовлення',

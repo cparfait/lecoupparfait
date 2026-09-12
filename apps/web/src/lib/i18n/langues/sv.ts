@@ -340,7 +340,6 @@ export const sv: Traduction = {
     sound: 'Ljud',
     soundEffects: 'Ljudeffekter',
     volume: 'Volym',
-    voice: 'Tränarens röst',
     voiceEnabled: 'Talad kommentar',
     voiceSelect: 'Röst',
     voiceRate: 'Talhastighet',

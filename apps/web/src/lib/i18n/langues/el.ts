@@ -342,7 +342,6 @@ export const el: Traduction = {
     sound: 'Ήχος',
     soundEffects: 'Ηχητικά εφέ',
     volume: 'Ένταση',
-    voice: 'Φωνή του προπονητή',
     voiceEnabled: 'Προφορικό σχόλιο',
     voiceSelect: 'Φωνή',
     voiceRate: 'Ταχύτητα ομιλίας',

@@ -342,7 +342,6 @@ export const hi: Traduction = {
     sound: 'ध्वनि',
     soundEffects: 'ध्वनि प्रभाव',
     volume: 'आवाज़',
-    voice: 'प्रशिक्षक की आवाज़',
     voiceEnabled: 'बोली हुई टिप्पणी',
     voiceSelect: 'आवाज़',
     voiceRate: 'बोलने की गति',

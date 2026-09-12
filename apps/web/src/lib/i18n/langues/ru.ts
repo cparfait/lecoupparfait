@@ -345,7 +345,6 @@ export const ru: Traduction = {
     sound: 'Звук',
     soundEffects: 'Звуковые эффекты',
     volume: 'Громкость',
-    voice: 'Голос тренера',
     voiceEnabled: 'Голосовой комментарий',
     voiceSelect: 'Голос',
     voiceRate: 'Скорость речи',
