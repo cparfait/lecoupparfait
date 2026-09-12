@@ -51,7 +51,7 @@ import { AVATAR_FAMILIES, DEFAULT_AVATAR } from '@/lib/avatars.ts'
 import { iosSansInstallation, useNotifications } from '@/lib/notifications.ts'
 import { useInstallation } from '@/lib/pwa.ts'
 import { THEME_LIST, usePreferences } from '@/lib/store/preferences.ts'
-import { useT } from '@/lib/i18n/index.tsx'
+import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 
 /**
  * Les mêmes clés que le bandeau de mise en route.
@@ -96,6 +96,7 @@ export function BienvenueCompte({
    */
   onTest: () => void
 }) {
+  const t = useT()
   const notifications = useNotifications()
   const installation = useInstallation()
   const ios = iosSansInstallation()
@@ -171,10 +172,10 @@ export function BienvenueCompte({
             <Check size={18} strokeWidth={2.6} />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="font-display text-lg font-bold leading-tight">Bienvenue, {pseudo}.</p>
-            <p className="text-[14px] text-muted">
-              Ton compte est créé. Quelques réglages, et tu joues.
+            <p className="font-display text-lg font-bold leading-tight">
+              {t('auth.welcome', { pseudo })}
             </p>
+            <p className="text-[14px] text-muted">{t('auth.welcomeHint')}</p>
           </div>
           <span className="shrink-0 pt-1 text-[12px] tabular-nums text-faint">
             {index + 1} / {etapes.length}
@@ -196,7 +197,7 @@ export function BienvenueCompte({
               icon={<ArrowLeft size={14} />}
               onClick={() => setIndex((valeur) => Math.max(0, valeur - 1))}
             >
-              Retour
+              {t('common.back')}
             </Button>
           )}
           <Button
@@ -206,7 +207,7 @@ export function BienvenueCompte({
             icon={<ArrowRight size={16} />}
             onClick={suivant}
           >
-            {index + 1 >= etapes.length ? 'Aller jouer' : 'Suivant'}
+            {index + 1 >= etapes.length ? t('nav.play') : t('common.next')}
           </Button>
         </div>
 
@@ -215,11 +216,11 @@ export function BienvenueCompte({
           onClick={passerTout}
           className="mt-3 block w-full text-center text-[12px] font-medium text-muted transition-colors hover:text-ink"
         >
-          Passer, je réglerai plus tard
+          {t('auth.skipAll')}
         </button>
 
         <p className="mt-3 text-center text-[12px] leading-relaxed text-faint">
-          Tout se retrouve dans tes préférences et sur ton profil. Rien n’est définitif.
+          {t('auth.nothingFinal')}
         </p>
       </div>
     </Card>
@@ -239,6 +240,7 @@ export function BienvenueCompte({
  * qu'une consigne.
  */
 function EtapeAvatar({ depart }: { depart: string | null }) {
+  const t = useT()
   const [choisi, setChoisi] = useState(depart ?? DEFAULT_AVATAR)
   const [famille, setFamille] = useState(() => {
     const trouve = AVATAR_FAMILIES.findIndex((entree) =>
@@ -260,21 +262,21 @@ function EtapeAvatar({ depart }: { depart: string | null }) {
         })
         if (!reponse.ok) {
           setChoisi(avant)
-          toast.error('Changement impossible.')
+          toast.error(t('auth.avatarFailed'))
         }
       } catch {
         setChoisi(avant)
-        toast.error('Le serveur est injoignable.')
+        toast.error(t('auth.serverUnreachable'))
       }
     },
-    [choisi],
+    [choisi, t],
   )
 
   return (
     <Etage
       icone={<Smile size={18} aria-hidden />}
-      titre="Voici ton avatar"
-      detail="Tiré au sort, pour que ta ligne se repère dans une liste d’amis dès le premier jour. Touche-en un autre si celui-là ne te va pas."
+      titre={t('auth.avatarTitle')}
+      detail={t('auth.avatarHint')}
     >
       <div className="mb-3 flex items-center gap-3">
         <span
@@ -310,7 +312,7 @@ function EtapeAvatar({ depart }: { depart: string | null }) {
             type="button"
             onClick={() => void choisir(emoji)}
             aria-pressed={emoji === choisi}
-            title={emoji === choisi ? 'Ton avatar' : 'Choisir cet avatar'}
+            title={emoji === choisi ? t('auth.avatarYours') : t('auth.avatarPick')}
             className={clsx(
               'grid aspect-square place-items-center rounded-[var(--radius-sm)] text-xl transition-colors',
               emoji === choisi
@@ -344,40 +346,46 @@ function EtapeAvatar({ depart }: { depart: string | null }) {
  * départ, rien d'autre. Aucun classement n'est touché — une déclaration que
  * personne ne vérifie n'a rien à faire dans un tableau.
  */
-const REPERES: Array<{ id: string; label: string; detail: string; elo: number | null }> = [
+const REPERES: Array<{
+  id: string
+  labelKey: TranslationKey
+  detailKey: TranslationKey
+  elo: number | null
+}> = [
   {
     id: 'debut',
-    label: 'Je débute',
-    detail: 'Je découvre, ou je connais juste les règles.',
+    labelKey: 'auth.levelBeginner',
+    detailKey: 'auth.levelBeginnerHint',
     elo: 250,
   },
   {
     id: 'occasionnel',
-    label: 'Je joue de temps en temps',
-    detail: 'En famille, entre amis, sans travailler.',
+    labelKey: 'auth.levelCasual',
+    detailKey: 'auth.levelCasualHint',
     elo: 900,
   },
   {
     id: 'regulier',
-    label: 'Je joue régulièrement',
-    detail: 'En ligne, je gagne à peu près une partie sur deux.',
+    labelKey: 'auth.levelRegular',
+    detailKey: 'auth.levelRegularHint',
     elo: 1300,
   },
   {
     id: 'club',
-    label: 'Je joue en club',
-    detail: 'J’ai des ouvertures, je vois les tactiques courantes.',
+    labelKey: 'auth.levelClub',
+    detailKey: 'auth.levelClubHint',
     elo: 1700,
   },
   {
     id: 'fort',
-    label: 'Je suis un joueur fort',
-    detail: 'Classé, ou l’équivalent en ligne.',
+    labelKey: 'auth.levelStrong',
+    detailKey: 'auth.levelStrongHint',
     elo: 2100,
   },
 ]
 
 function EtapeNiveau({ onTest }: { onTest: () => void }) {
+  const t = useT()
   const [choix, setChoix] = useState<string | null>(null)
   const [elo, setElo] = useState('')
 
@@ -422,8 +430,8 @@ function EtapeNiveau({ onTest }: { onTest: () => void }) {
   return (
     <Etage
       icone={<Gauge size={18} aria-hidden />}
-      titre="Tu en es où, à peu près ?"
-      detail="Ça règle l’adversaire qu’on te proposera en premier. Sans réponse, on part du plus faible — ce qui n’a aucun intérêt si tu joues déjà. Ton classement, lui, se gagnera en jouant."
+      titre={t('auth.levelTitle')}
+      detail={t('auth.levelHint')}
     >
       <div className="space-y-1.5">
         {REPERES.map((repere) => (
@@ -442,8 +450,8 @@ function EtapeNiveau({ onTest }: { onTest: () => void }) {
                 : 'border-line hover:bg-surface-hover',
             )}
           >
-            <span className="block text-[14px] font-medium">{repere.label}</span>
-            <span className="block text-[12px] leading-snug text-faint">{repere.detail}</span>
+            <span className="block text-[14px] font-medium">{t(repere.labelKey)}</span>
+            <span className="block text-[12px] leading-snug text-faint">{t(repere.detailKey)}</span>
           </button>
         ))}
       </div>
@@ -451,7 +459,7 @@ function EtapeNiveau({ onTest }: { onTest: () => void }) {
       {/* Pour qui connaît son chiffre : plus précis que n'importe quel repère,
           et c'est aussi la seule façon de viser entre deux paliers. */}
       <label className="mt-3 flex items-center gap-2 text-[12px] text-muted">
-        <span className="shrink-0">Ou ton classement :</span>
+        <span className="shrink-0">{t('auth.orYourRating')}</span>
         <input
           type="number"
           inputMode="numeric"
@@ -460,7 +468,7 @@ function EtapeNiveau({ onTest }: { onTest: () => void }) {
           value={elo}
           onChange={(event) => setElo(event.target.value)}
           placeholder="1450"
-          aria-label="Ton classement Elo"
+          aria-label={t('auth.yourEloAria')}
           className="h-8 w-24 rounded-[var(--radius-sm)] border border-line bg-surface px-2 text-sm tabular-nums placeholder:text-faint focus:border-accent focus:outline-none"
         />
       </label>
@@ -477,20 +485,24 @@ function EtapeNiveau({ onTest }: { onTest: () => void }) {
       >
         <span className="flex items-center gap-2 text-[14px] font-medium">
           <Target size={15} className="shrink-0 text-accent" aria-hidden />
-          Je ne sais pas — mesure-le
+          {t('auth.dontKnow')}
         </span>
         <span className="mt-0.5 block text-[12px] leading-snug text-faint">
-          Douze positions, six minutes. Aucune réponse à trouver sur soi-même, et rien n’est envoyé
-          à ton classement.
+          {t('auth.dontKnowHint')}
         </span>
       </button>
 
       {niveau !== null && (
         <p className="mt-3 rounded-[var(--radius-sm)] bg-surface-strong px-3 py-2 text-[12px] leading-relaxed text-muted">
-          Premier adversaire proposé :{' '}
-          <strong className="font-semibold text-ink">niveau {niveau}</strong>, environ{' '}
-          <strong className="font-semibold text-ink">{botLevel(niveau).elo} Elo</strong>. Les{' '}
-          {BOT_LEVELS.length} paliers restent accessibles au curseur, dans les deux sens.
+          {t('auth.firstOpponentBefore')}{' '}
+          <strong className="font-semibold text-ink">
+            {t('auth.firstOpponentLevel', { niveau })}
+          </strong>
+          ,{' '}
+          <strong className="font-semibold text-ink">
+            {t('auth.firstOpponentElo', { elo: botLevel(niveau).elo })}
+          </strong>
+          . {t('auth.firstOpponentAfter', { paliers: BOT_LEVELS.length })}
         </p>
       )}
     </Etage>
@@ -509,8 +521,8 @@ function EtapeTheme() {
   return (
     <Etage
       icone={<Palette size={18} aria-hidden />}
-      titre="Choisis ton ambiance"
-      detail="Le changement est immédiat, tu vois ce que tu choisis. « Contraste » est là pour les écrans en plein soleil et pour les vues fatiguées."
+      titre={t('auth.themeTitle')}
+      detail={t('auth.themeHint')}
     >
       <div className="grid grid-cols-2 gap-1.5">
         {THEME_LIST.map((entree) => (
@@ -561,6 +573,7 @@ function EtapeTheme() {
  * Beaucoup de gens ne les ont jamais vus.
  */
 function EtapeCoach() {
+  const t = useT()
   const voix = usePreferences((state) => state.voiceEnabled)
   const commentaire = usePreferences((state) => state.commentaryMode)
   const set = usePreferences((state) => state.set)
@@ -568,21 +581,21 @@ function EtapeCoach() {
   return (
     <Etage
       icone={<MessageSquareText size={18} aria-hidden />}
-      titre="Le coach doit-il t’accompagner ?"
-      detail="C’est ce qui distingue cette application d’un simple échiquier : après chaque coup, ce qu’il valait, ce que tu pouvais jouer, et pourquoi."
+      titre={t('auth.coachTitle')}
+      detail={t('auth.coachHint')}
     >
       <div className="divide-y divide-line rounded-[var(--radius-sm)] border border-line px-3">
         <Toggle
           checked={commentaire}
           onChange={(valeur) => set('commentaryMode', valeur)}
-          label="Commenter chaque coup"
-          description="Recommandé pour débuter. Ça se coupe en pleine partie, d’un clic sur le panneau."
+          label={t('computer.commentaryEach')}
+          description={t('auth.coachCommentaryHint')}
         />
         <Toggle
           checked={voix}
           onChange={(valeur) => set('voiceEnabled', valeur)}
-          label="Lire les explications à voix haute"
-          description="Pratique pour garder les yeux sur l’échiquier. Sans effet si ton appareil est en silencieux."
+          label={t('auth.coachVoice')}
+          description={t('auth.coachVoiceHint')}
         />
       </div>
     </Etage>
@@ -598,18 +611,19 @@ function EtapeNotifications({
 }: {
   notifications: ReturnType<typeof useNotifications>
 }) {
+  const t = useT()
   const { etat, occupe, erreur, activer } = notifications
 
   return (
     <Etage
       icone={<Bell size={18} aria-hidden />}
-      titre="Être prévenu quand un ami t’invite"
-      detail="Une invitation expire en cinq minutes : sans notification, elle meurt dans un téléphone resté dans une poche. Rien d’autre ne te sera envoyé — ni actualités, ni relances."
+      titre={t('auth.notificationsTitle')}
+      detail={t('auth.notificationsHint')}
     >
       {etat === 'actif' ? (
         <p className="flex items-center gap-2 rounded-[var(--radius-sm)] bg-surface-strong px-3 py-2 text-[14px] text-ink">
           <Check size={15} className="shrink-0 text-[var(--q-best)]" aria-hidden />
-          C’est activé sur cet appareil.
+          {t('auth.notificationsOn')}
         </p>
       ) : (
         <>
@@ -623,13 +637,12 @@ function EtapeNotifications({
             // geste est rejetée par Firefox et enterrée par Chrome.
             onClick={() => void activer()}
           >
-            Activer les notifications
+            {t('auth.notificationsEnable')}
           </Button>
           {etat === 'refuse' && (
             <p className="mt-2 flex items-start gap-2 text-[12px] leading-relaxed text-muted">
               <BellOff size={14} className="mt-0.5 shrink-0" aria-hidden />
-              Ton navigateur les a refusées pour ce site et ne redemandera pas. Ça se réautorise à
-              côté de l’adresse du site.
+              {t('auth.notificationsRefused')}
             </p>
           )}
         </>
@@ -658,16 +671,17 @@ function EtapeInstallation({
   installation: ReturnType<typeof useInstallation>
   ios: boolean
 }) {
+  const t = useT()
+
   if (installation.manuelle || ios) {
     return (
       <Etage
         icone={<Share size={18} aria-hidden />}
-        titre="Pose-la sur ton écran d’accueil"
-        detail="Touche le bouton de partage de ton navigateur, puis « Sur l’écran d’accueil ». Sur iPhone et iPad, c’est aussi ce qui débloque les notifications — sans quoi tu ne sauras pas qu’un ami t’a invité."
+        titre={t('auth.installManualTitle')}
+        detail={t('auth.installManualHint')}
       >
         <p className="rounded-[var(--radius-sm)] bg-surface-strong px-3 py-2 text-[12px] leading-relaxed text-muted">
-          Rien à télécharger sur un magasin : c’est le même site, posé à côté de tes autres
-          applications.
+          {t('auth.installNoStore')}
         </p>
       </Etage>
     )
@@ -676,8 +690,8 @@ function EtapeInstallation({
   return (
     <Etage
       icone={<Download size={18} aria-hidden />}
-      titre="Installe l’application"
-      detail="Une icône sur ton écran d’accueil, plein écran, sans barre d’adresse. Rien à télécharger sur un magasin : c’est le même site."
+      titre={t('auth.installTitle')}
+      detail={t('auth.installHint')}
     >
       {installation.possible ? (
         <Button
@@ -687,11 +701,11 @@ function EtapeInstallation({
           icon={<Download size={16} />}
           onClick={() => void installation.installer()}
         >
-          Installer
+          {t('auth.install')}
         </Button>
       ) : (
         <p className="rounded-[var(--radius-sm)] bg-surface-strong px-3 py-2 text-[12px] leading-relaxed text-muted">
-          C’est fait, ou ton navigateur s’en charge depuis son propre menu.
+          {t('auth.installDone')}
         </p>
       )}
     </Etage>

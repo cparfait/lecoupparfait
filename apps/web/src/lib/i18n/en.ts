@@ -820,6 +820,92 @@ export const en: Dictionary = {
     emailOptional: 'optional — only used to reset your password',
     usernameHint: '3 to 20 characters: letters, digits, dash and underscore.',
     passwordHint: '8 characters minimum.',
+    signInTitle: 'Good to see you again',
+    signUpTitle: 'Join Le Coup Parfait',
+    signInBlurb: 'Pick up your rating, your games and your progress.',
+    signUpBlurb: 'A username, a password. That is all, and it is free forever.',
+    usernameHintLong: '3 to 20 characters: letters, digits, hyphen, underscore.',
+    passwordHintLong: '8 characters minimum. Length counts for more than symbols.',
+    forgotPassword: 'Forgotten your password?',
+    emailHint:
+      'Optional. Only to recover your password if you forget it — you will confirm it from your profile, whenever you like. Never passed on to anyone.',
+    emailHintNoMail:
+      'Optional — and for now unused: this server does not send email yet, so a lost password cannot be recovered. Pick one you will remember.',
+    trySuggestion: 'Try “{pseudo}”',
+    continueWithout: 'or carry on without an account →',
+    whatAccountAdds:
+      'Playing, learning, solving puzzles and analysing your games all work entirely without signing up. The account adds career mode, your saved analyses, the daily challenge, your streak, your rating per time control and the history of your games.',
+    invitesYou: '{pseudo} invites you to play',
+    pickNameAndPlay: 'Pick a name and step into the game. No account needed.',
+    yourName: 'Your name',
+    play: 'Play',
+    orSignUpBelow:
+      'Or create an account below: {pseudo} joins your book, and you keep your rating from one game to the next.',
+    gameFailed: 'Could not start the game.',
+    serverUnreachable: 'The server is unreachable.',
+    accountsUnreachable:
+      'The accounts service is unreachable. You can carry on playing without one.',
+    welcome: 'Welcome, {pseudo}.',
+    welcomeHint: 'Your account is created. A few settings, and you play.',
+    skipAll: 'Skip, I will set this up later',
+    nothingFinal: 'Everything lives in your settings and on your profile. Nothing is final.',
+    avatarTitle: 'Here is your avatar',
+    avatarHint:
+      'Drawn at random, so your line stands out in a friends list from day one. Touch another if this one does not suit you.',
+    avatarYours: 'Your avatar',
+    avatarPick: 'Choose this avatar',
+    avatarFailed: 'Could not change it.',
+    levelTitle: 'Roughly where are you?',
+    levelHint:
+      'This sets the first opponent we offer you. Without an answer we start from the weakest — which is of no interest if you already play. Your rating, meanwhile, is earned by playing.',
+    levelBeginner: 'I am starting out',
+    levelBeginnerHint: 'I am discovering the game, or I just know the rules.',
+    levelCasual: 'I play now and then',
+    levelCasualHint: 'With family, with friends, without studying.',
+    levelRegular: 'I play regularly',
+    levelRegularHint: 'Online, I win about one game in two.',
+    levelClub: 'I play at a club',
+    levelClubHint: 'I have openings, I see the common tactics.',
+    levelStrong: 'I am a strong player',
+    levelStrongHint: 'Rated, or the online equivalent.',
+    orYourRating: 'Or your rating:',
+    yourEloAria: 'Your Elo rating',
+    dontKnow: 'I do not know — measure it',
+    dontKnowHint:
+      'Twelve positions, six minutes. No answers to find about yourself, and nothing is sent to your rating.',
+    firstOpponentBefore: 'First opponent offered:',
+    firstOpponentLevel: 'level {niveau}',
+    firstOpponentElo: 'about {elo} Elo',
+    firstOpponentAfter: 'All {paliers} steps stay reachable with the slider, in both directions.',
+    themeTitle: 'Choose your mood',
+    themeHint:
+      'The change is immediate, you see what you pick. “Contrast” is there for screens in full sunlight and for tired eyes.',
+    coachTitle: 'Should the coach come along?',
+    coachHint:
+      'This is what sets this app apart from a plain chessboard: after every move, what it was worth, what you could have played, and why.',
+    coachCommentaryHint:
+      'Recommended when starting out. It switches off mid-game, with one click on the panel.',
+    coachVoice: 'Read the explanations out loud',
+    coachVoiceHint:
+      'Handy for keeping your eyes on the board. No effect if your device is on silent.',
+    notificationsTitle: 'Be told when a friend invites you',
+    notificationsHint:
+      'An invitation expires in five minutes: without a notification it dies in a phone left in a pocket. Nothing else will be sent to you — no news, no reminders.',
+    notificationsOn: 'It is on for this device.',
+    notificationsEnable: 'Turn on notifications',
+    notificationsRefused:
+      'Your browser has refused them for this site and will not ask again. You can allow them again next to the site address.',
+    installManualTitle: 'Put it on your home screen',
+    installManualHint:
+      'Touch your browser’s share button, then “Add to Home Screen”. On iPhone and iPad that is also what unlocks notifications — without it you will not know a friend has invited you.',
+    installNoStore:
+      'Nothing to download from a store: it is the same site, sitting next to your other apps.',
+    installTitle: 'Install the app',
+    installHint:
+      'An icon on your home screen, full screen, without an address bar. Nothing to download from a store: it is the same site.',
+    install: 'Install',
+    installDone: 'It is done, or your browser handles it from its own menu.',
+
     errors: {
       usernameTaken: 'That username is taken.',
       invalidCredentials: 'Wrong username or password.',

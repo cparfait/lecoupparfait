@@ -826,6 +826,92 @@ export const fr = {
     emailOptional: 'facultatif — sert uniquement à récupérer ton mot de passe',
     usernameHint: '3 à 20 caractères : lettres, chiffres, tiret et souligné.',
     passwordHint: '8 caractères minimum.',
+    signInTitle: 'Content de te revoir',
+    signUpTitle: 'Rejoins Le Coup Parfait',
+    signInBlurb: 'Retrouve ton classement, tes parties et ta progression.',
+    signUpBlurb: 'Un pseudo, un mot de passe. C’est tout, et c’est gratuit pour toujours.',
+    usernameHintLong: '3 à 20 caractères : lettres, chiffres, tiret, souligné.',
+    passwordHintLong: '8 caractères minimum. La longueur compte plus que les symboles.',
+    forgotPassword: 'Mot de passe oublié ?',
+    emailHint:
+      'Facultatif. Uniquement pour récupérer ton mot de passe si tu l’oublies — tu la confirmeras depuis ton profil, quand tu voudras. Jamais transmise à personne.',
+    emailHintNoMail:
+      'Facultatif — et pour l’instant sans usage : ce serveur n’envoie pas encore de courriel, donc un mot de passe perdu ne peut pas être récupéré. Choisis-en un dont tu te souviendras.',
+    trySuggestion: 'Essayer « {pseudo} »',
+    continueWithout: 'ou continue sans compte →',
+    whatAccountAdds:
+      'Jouer, apprendre, résoudre des puzzles et analyser tes parties fonctionne entièrement sans inscription. Le compte ajoute le mode carrière, tes analyses conservées, le défi du jour, ta série, ton classement par cadence et l’historique de tes parties.',
+    invitesYou: '{pseudo} t’invite à jouer',
+    pickNameAndPlay: 'Choisis un pseudo et entre dans la partie. Pas besoin de compte.',
+    yourName: 'Ton pseudo',
+    play: 'Jouer',
+    orSignUpBelow:
+      'Ou crée un compte ci-dessous : {pseudo} entrera dans ton carnet, et tu garderas ton classement d’une partie à l’autre.',
+    gameFailed: 'Impossible de lancer la partie.',
+    serverUnreachable: 'Le serveur est injoignable.',
+    accountsUnreachable:
+      'Le service de comptes est injoignable. Tu peux continuer à jouer sans compte.',
+    welcome: 'Bienvenue, {pseudo}.',
+    welcomeHint: 'Ton compte est créé. Quelques réglages, et tu joues.',
+    skipAll: 'Passer, je réglerai plus tard',
+    nothingFinal: 'Tout se retrouve dans tes préférences et sur ton profil. Rien n’est définitif.',
+    avatarTitle: 'Voici ton avatar',
+    avatarHint:
+      'Tiré au sort, pour que ta ligne se repère dans une liste d’amis dès le premier jour. Touche-en un autre si celui-là ne te va pas.',
+    avatarYours: 'Ton avatar',
+    avatarPick: 'Choisir cet avatar',
+    avatarFailed: 'Changement impossible.',
+    levelTitle: 'Tu en es où, à peu près ?',
+    levelHint:
+      'Ça règle l’adversaire qu’on te proposera en premier. Sans réponse, on part du plus faible — ce qui n’a aucun intérêt si tu joues déjà. Ton classement, lui, se gagnera en jouant.',
+    levelBeginner: 'Je débute',
+    levelBeginnerHint: 'Je découvre, ou je connais juste les règles.',
+    levelCasual: 'Je joue de temps en temps',
+    levelCasualHint: 'En famille, entre amis, sans travailler.',
+    levelRegular: 'Je joue régulièrement',
+    levelRegularHint: 'En ligne, je gagne à peu près une partie sur deux.',
+    levelClub: 'Je joue en club',
+    levelClubHint: 'J’ai des ouvertures, je vois les tactiques courantes.',
+    levelStrong: 'Je suis un joueur fort',
+    levelStrongHint: 'Classé, ou l’équivalent en ligne.',
+    orYourRating: 'Ou ton classement :',
+    yourEloAria: 'Ton classement Elo',
+    dontKnow: 'Je ne sais pas — mesure-le',
+    dontKnowHint:
+      'Douze positions, six minutes. Aucune réponse à trouver sur soi-même, et rien n’est envoyé à ton classement.',
+    firstOpponentBefore: 'Premier adversaire proposé :',
+    firstOpponentLevel: 'niveau {niveau}',
+    firstOpponentElo: 'environ {elo} Elo',
+    firstOpponentAfter: 'Les {paliers} paliers restent accessibles au curseur, dans les deux sens.',
+    themeTitle: 'Choisis ton ambiance',
+    themeHint:
+      'Le changement est immédiat, tu vois ce que tu choisis. « Contraste » est là pour les écrans en plein soleil et pour les vues fatiguées.',
+    coachTitle: 'Le coach doit-il t’accompagner ?',
+    coachHint:
+      'C’est ce qui distingue cette application d’un simple échiquier : après chaque coup, ce qu’il valait, ce que tu pouvais jouer, et pourquoi.',
+    coachCommentaryHint:
+      'Recommandé pour débuter. Ça se coupe en pleine partie, d’un clic sur le panneau.',
+    coachVoice: 'Lire les explications à voix haute',
+    coachVoiceHint:
+      'Pratique pour garder les yeux sur l’échiquier. Sans effet si ton appareil est en silencieux.',
+    notificationsTitle: 'Être prévenu quand un ami t’invite',
+    notificationsHint:
+      'Une invitation expire en cinq minutes : sans notification, elle meurt dans un téléphone resté dans une poche. Rien d’autre ne te sera envoyé — ni actualités, ni relances.',
+    notificationsOn: 'C’est activé sur cet appareil.',
+    notificationsEnable: 'Activer les notifications',
+    notificationsRefused:
+      'Ton navigateur les a refusées pour ce site et ne redemandera pas. Ça se réautorise à côté de l’adresse du site.',
+    installManualTitle: 'Pose-la sur ton écran d’accueil',
+    installManualHint:
+      'Touche le bouton de partage de ton navigateur, puis « Sur l’écran d’accueil ». Sur iPhone et iPad, c’est aussi ce qui débloque les notifications — sans quoi tu ne sauras pas qu’un ami t’a invité.',
+    installNoStore:
+      'Rien à télécharger sur un magasin : c’est le même site, posé à côté de tes autres applications.',
+    installTitle: 'Installe l’application',
+    installHint:
+      'Une icône sur ton écran d’accueil, plein écran, sans barre d’adresse. Rien à télécharger sur un magasin : c’est le même site.',
+    install: 'Installer',
+    installDone: 'C’est fait, ou ton navigateur s’en charge depuis son propre menu.',
+
     errors: {
       usernameTaken: 'Ce pseudo est déjà pris.',
       invalidCredentials: 'Pseudo ou mot de passe incorrect.',

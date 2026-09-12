@@ -20,6 +20,7 @@ import { Button, Card, Input } from '@/components/ui/index.tsx'
 import { BienvenueCompte } from '@/components/compte/BienvenueCompte.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useCourrielDisponible, useIdentite } from '@/lib/auth/useIdentite.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 type Mode = 'signin' | 'signup'
 
@@ -33,6 +34,7 @@ export default function AuthPage() {
 }
 
 function AuthForm() {
+  const t = useT()
   const router = useRouter()
   const params = useSearchParams()
   /**
@@ -129,7 +131,7 @@ function AuthForm() {
       })
       const data = await response.json()
       if (!response.ok) {
-        setError(data.error ?? 'Impossible de lancer la partie.')
+        setError(data.error ?? t('auth.gameFailed'))
         return
       }
       try {
@@ -142,11 +144,11 @@ function AuthForm() {
         `/jouer/partie/${challenge.slug}?tc=${challenge.initialTime}+${challenge.increment}`,
       )
     } catch {
-      setError('Le serveur est injoignable.')
+      setError(t('auth.serverUnreachable'))
     } finally {
       setBusy(false)
     }
-  }, [guestName, referrer, router])
+  }, [guestName, referrer, router, t])
 
   const submit = useCallback(
     async (event: React.FormEvent) => {
@@ -168,7 +170,7 @@ function AuthForm() {
         const data = await response.json()
 
         if (!response.ok) {
-          setError(data.error ?? 'Quelque chose s’est mal passé.')
+          setError(data.error ?? t('auth.errors.generic'))
           setSuggestion(data.suggestion ?? null)
           return
         }
@@ -188,7 +190,7 @@ function AuthForm() {
           répondu, ou déjà refusé.
         */
         if (mode === 'signup') {
-          toast.success(`Bienvenue, ${data.user.username} !`)
+          toast.success(t('auth.welcome', { pseudo: data.user.username }))
           setBienvenue({ pseudo: data.user.username, avatar: data.user.avatar ?? null })
           router.refresh()
           return
@@ -200,12 +202,12 @@ function AuthForm() {
         router.push(destination)
         router.refresh()
       } catch {
-        setError('Le service de comptes est injoignable. Tu peux continuer à jouer sans compte.')
+        setError(t('auth.accountsUnreachable'))
       } finally {
         setBusy(false)
       }
     },
-    [mode, username, password, email, destination, router],
+    [mode, username, password, email, destination, router, t],
   )
 
   /*
@@ -256,9 +258,11 @@ function AuthForm() {
                 <Swords size={17} />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold leading-snug">{referrer} t’invite à jouer</p>
+                <p className="text-sm font-semibold leading-snug">
+                  {t('auth.invitesYou', { pseudo: referrer })}
+                </p>
                 <p className="mt-0.5 text-[14px] leading-relaxed text-muted">
-                  Choisis un pseudo et entre dans la partie. Pas besoin de compte.
+                  {t('auth.pickNameAndPlay')}
                 </p>
 
                 <form
@@ -274,8 +278,8 @@ function AuthForm() {
                     <Input
                       value={guestName}
                       onChange={(event) => setGuestName(event.target.value)}
-                      placeholder="Ton pseudo"
-                      aria-label="Ton pseudo"
+                      placeholder={t('auth.yourName')}
+                      aria-label={t('auth.yourName')}
                       maxLength={20}
                     />
                   </div>
@@ -284,13 +288,12 @@ function AuthForm() {
                     variant="primary"
                     disabled={busy || guestName.trim().length < 2}
                   >
-                    Jouer
+                    {t('auth.play')}
                   </Button>
                 </form>
 
                 <p className="mt-2.5 text-[12px] leading-relaxed text-faint">
-                  Ou crée un compte ci-dessous : {referrer} entrera dans ton carnet, et tu garderas
-                  ton classement d’une partie à l’autre.
+                  {t('auth.orSignUpBelow', { pseudo: referrer })}
                 </p>
               </div>
             </div>
@@ -312,19 +315,17 @@ function AuthForm() {
               lire. `LogoMark` reste utilisé par l'en-tête, où il a un sens :
               y revenir d'un clic. */}
           <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-            {mode === 'signin' ? 'Content de te revoir' : 'Rejoins Le Coup Parfait'}
+            {t(mode === 'signin' ? 'auth.signInTitle' : 'auth.signUpTitle')}
           </h1>
           <p className="mt-1.5 text-sm text-muted">
-            {mode === 'signin'
-              ? 'Retrouve ton classement, tes parties et ta progression.'
-              : 'Un pseudo, un mot de passe. C’est tout, et c’est gratuit pour toujours.'}
+            {t(mode === 'signin' ? 'auth.signInBlurb' : 'auth.signUpBlurb')}
           </p>
         </div>
 
         <Card glow className="p-6">
           <form onSubmit={submit} className="space-y-4">
             <Input
-              label="Pseudo"
+              label={t('auth.username')}
               name="username"
               value={username}
               onChange={(event) => setUsername(event.target.value)}
@@ -334,15 +335,11 @@ function AuthForm() {
               required
               minLength={3}
               maxLength={20}
-              hint={
-                mode === 'signup'
-                  ? '3 à 20 caractères : lettres, chiffres, tiret, souligné.'
-                  : undefined
-              }
+              hint={mode === 'signup' ? t('auth.usernameHintLong') : undefined}
             />
 
             <Input
-              label="Mot de passe"
+              label={t('auth.password')}
               name="password"
               type="password"
               value={password}
@@ -350,11 +347,7 @@ function AuthForm() {
               autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
               required
               minLength={8}
-              hint={
-                mode === 'signup'
-                  ? '8 caractères minimum. La longueur compte plus que les symboles.'
-                  : undefined
-              }
+              hint={mode === 'signup' ? t('auth.passwordHintLong') : undefined}
             />
 
             {/* À la connexion seulement : proposer « oublié » pendant qu'on
@@ -372,24 +365,20 @@ function AuthForm() {
                   href="/mot-de-passe-oublie"
                   className="text-xs text-muted transition-colors hover:text-accent"
                 >
-                  Mot de passe oublié ?
+                  {t('auth.forgotPassword')}
                 </Link>
               </p>
             )}
 
             {mode === 'signup' && (
               <Input
-                label="Adresse e-mail"
+                label={t('auth.email')}
                 name="email"
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"
-                hint={
-                  courriel
-                    ? 'Facultatif. Uniquement pour récupérer ton mot de passe si tu l’oublies — tu la confirmeras depuis ton profil, quand tu voudras. Jamais transmise à personne.'
-                    : 'Facultatif — et pour l’instant sans usage : ce serveur n’envoie pas encore de courriel, donc un mot de passe perdu ne peut pas être récupéré. Choisis-en un dont tu te souviendras.'
-                }
+                hint={courriel ? t('auth.emailHint') : t('auth.emailHintNoMail')}
               />
             )}
 
@@ -413,7 +402,7 @@ function AuthForm() {
                       }}
                       className="font-semibold underline underline-offset-2"
                     >
-                      Essayer « {suggestion} »
+                      {t('auth.trySuggestion', { pseudo: suggestion })}
                     </button>
                   </>
                 )}
@@ -428,12 +417,12 @@ function AuthForm() {
               loading={busy}
               icon={busy ? undefined : <ArrowRight size={16} />}
             >
-              {mode === 'signin' ? 'Se connecter' : 'Créer mon compte'}
+              {t(mode === 'signin' ? 'auth.submitSignIn' : 'auth.submitSignUp')}
             </Button>
           </form>
 
           <p className="mt-5 text-center text-sm text-muted">
-            {mode === 'signin' ? 'Pas encore de compte ?' : 'Déjà inscrit ?'}{' '}
+            {t(mode === 'signin' ? 'auth.noAccount' : 'auth.hasAccount')}{' '}
             <button
               type="button"
               onClick={() => {
@@ -442,7 +431,7 @@ function AuthForm() {
               }}
               className="font-medium text-accent hover:underline"
             >
-              {mode === 'signin' ? 'Créer un compte' : 'Se connecter'}
+              {t(mode === 'signin' ? 'auth.signUp' : 'auth.submitSignIn')}
             </button>
           </p>
         </Card>
@@ -452,7 +441,7 @@ function AuthForm() {
             href="/jouer"
             className="text-sm font-medium text-muted transition-colors hover:text-ink"
           >
-            ou continue sans compte →
+            {t('auth.continueWithout')}
           </Link>
           {/*
             La liste doit rester juste.
@@ -463,9 +452,7 @@ function AuthForm() {
             un autre — et celui-là coûte des inscriptions.
           */}
           <p className="mx-auto mt-2 max-w-sm text-xs leading-relaxed text-faint">
-            Jouer, apprendre, résoudre des puzzles et analyser tes parties fonctionne entièrement
-            sans inscription. Le compte ajoute le mode carrière, tes analyses conservées, le défi du
-            jour, ta série, ton classement par cadence et l’historique de tes parties.
+            {t('auth.whatAccountAdds')}
           </p>
         </div>
       </div>
