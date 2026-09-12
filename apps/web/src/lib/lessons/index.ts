@@ -2,14 +2,16 @@
  * Le programme complet.
  *
  * L'ordre des chapitres est celui dans lequel on apprend réellement : les
- * règles, puis savoir conclure, puis la tactique — qui est ce qui fait gagner
- * des parties — et seulement ensuite l'ouverture et la stratégie. Beaucoup de
- * débutants font l'inverse et passent des heures sur des variantes d'ouverture
- * avant de savoir mater avec une tour.
+ * règles, puis savoir conclure, puis les quatre mats qu'on prend dans la
+ * figure pendant ses premières parties, puis la tactique — qui est ce qui fait
+ * gagner des parties — et seulement ensuite l'ouverture et la stratégie.
+ * Beaucoup de débutants font l'inverse et passent des heures sur des variantes
+ * d'ouverture avant de savoir mater avec une tour.
  */
 
 import { basicsChapter } from './basics.ts'
-import { matesChapter, tacticsChapter } from './tactics.ts'
+import { matesChapter, openingMatesChapter } from './mats.ts'
+import { tacticsChapter } from './tactics.ts'
 import { endgameChapter, middlegameChapter, openingChapter } from './strategy.ts'
 import { repertoireChapter } from './repertoire.ts'
 import type { Chapter, Lesson } from './types.ts'
@@ -19,6 +21,10 @@ export * from './types.ts'
 export const CHAPTERS: Chapter[] = [
   basicsChapter,
   matesChapter,
+  // Les mats de l'ouverture juste après : ce sont les seuls qu'on subit
+  // vraiment dans ses dix premières parties, et on les subit avant d'avoir
+  // appris quoi que ce soit d'autre.
+  openingMatesChapter,
   tacticsChapter,
   openingChapter,
   repertoireChapter,

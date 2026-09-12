@@ -1,147 +1,17 @@
 /**
- * Chapitres 2 et 3 — mats élémentaires et tactique.
+ * La tactique — les figures qui gagnent du matériel.
  *
  * C'est ici qu'un débutant gagne le plus vite. La très grande majorité des
  * parties en dessous de 1500 Elo se décide sur une pièce laissée en prise ou
  * une fourchette non vue : reconnaître ces cinq ou six figures fait gagner
  * plusieurs centaines de points de classement, bien avant toute connaissance
  * d'ouverture.
+ *
+ * Le fichier portait aussi les chapitres du mat, qui pesaient le double du
+ * sien : ils vivent maintenant dans `mats.ts`.
  */
 
 import type { Chapter } from './types.ts'
-
-export const matesChapter: Chapter = {
-  id: 'mats',
-  title: 'Savoir mater',
-  description:
-    'Gagner une dame ne sert à rien si l’on ne sait pas conclure. Voici les mats qu’il faut connaître par cœur, du plus simple au plus utile.',
-  level: 'beginner',
-  icon: '👑',
-  lessons: [
-    {
-      id: 'mat-couloir',
-      title: 'Le mat du couloir',
-      summary: 'Le mat le plus fréquent de tous. Et le plus facile à subir.',
-      level: 'beginner',
-      minutes: 5,
-      icon: '🚪',
-      steps: [
-        {
-          kind: 'show',
-          fen: '6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1',
-          say: "Regarde le roi noir. Il a roqué, il est bien à l'abri… sauf que ses propres pions lui bouchent toute sortie. Il est enfermé sur sa dernière rangée.",
-          highlight: ['f7', 'g7', 'h7'],
-        },
-        {
-          kind: 'play',
-          say: 'Une tour qui arrive sur cette rangée fait mat immédiatement. Vas-y.',
-          instruction: 'Trouve le mat en un coup',
-          answers: ['Ra8#'],
-          hint: 'La tour monte tout en haut de sa colonne.',
-        },
-        {
-          kind: 'show',
-          say: "Échec et mat. Le roi ne peut pas monter — il est déjà en haut — et pas descendre, ses pions occupent les cases. Ça s'appelle le mat du couloir.",
-        },
-        {
-          kind: 'show',
-          fen: '6k1/5pp1/7p/8/8/8/8/R5K1 w - - 0 1',
-          say: "La parade tient en un coup : avancer un pion pour créer une case d'air. Ici les Noirs ont joué h6, et leur roi peut désormais s'échapper en h7.",
-          highlight: ['h7'],
-        },
-        {
-          kind: 'show',
-          say: "Prends l'habitude, dès que tes tours quittent la dernière rangée : fais une case d'air à ton roi. Ça t'évitera de perdre des parties gagnées.",
-        },
-      ],
-    },
-    {
-      id: 'mat-escalier',
-      title: 'Le mat de l’escalier',
-      summary: 'Deux tours, aucun calcul : la technique se répète jusqu’au mat.',
-      level: 'beginner',
-      minutes: 6,
-      icon: '🪜',
-      steps: [
-        {
-          kind: 'show',
-          // Le roi noir démarre en rangée 7 : c'est ce qui rend l'escalier
-          // visible. Placé d'emblée en rangée 8, il n'a nulle part où monter et
-          // la leçon perd son sujet.
-          fen: '8/4k3/8/8/8/8/R7/1R5K w - - 0 1',
-          say: "Deux tours suffisent à mater un roi nu, sans même l'aide du sien. Le principe : une tour repousse le roi, l'autre l'empêche de revenir.",
-        },
-        {
-          kind: 'play',
-          say: 'Commence par donner échec avec la tour de a2, sur la rangée 7. Le roi noir devra monter.',
-          instruction: 'Joue la tour en a7',
-          answers: ['Ra7+'],
-          hint: 'La tour de a2 monte jusqu’en a7.',
-        },
-        {
-          kind: 'show',
-          say: "Le roi noir n'a d'autre choix que de monter en rangée 8. La tour de a7 lui interdit désormais de redescendre.",
-          reply: 'Ke8',
-        },
-        {
-          kind: 'play',
-          say: "Maintenant l'autre tour vient donner échec sur la rangée 8. C'est mat.",
-          instruction: 'Joue la tour en b8',
-          answers: ['Rb8#'],
-          hint: 'La tour de b1 monte tout en haut.',
-        },
-        {
-          kind: 'show',
-          say: "Voilà l'escalier : les tours montent une marche à tour de rôle, le roi recule, et il finit acculé. Aucun calcul, juste la méthode. Quand le roi s'approche d'une tour, on l'éloigne à l'autre bout de sa rangée.",
-        },
-      ],
-    },
-    {
-      id: 'mat-dame-roi',
-      title: 'Mater avec la dame',
-      summary: 'La finale la plus fréquente après une promotion. À maîtriser absolument.',
-      level: 'beginner',
-      minutes: 7,
-      icon: '♕',
-      steps: [
-        {
-          kind: 'show',
-          fen: '8/8/8/4k3/8/8/8/3QK3 w - - 0 1',
-          say: 'Roi et dame contre roi seul. La méthode : on rétrécit la cage autour du roi adverse avec la dame, puis on amène son propre roi pour donner le coup final.',
-        },
-        {
-          // Le texte disait « place ta dame » sur une étape où rien n'est
-          // jouable, et parlait d'un cavalier sur un échiquier qui n'en a
-          // aucun. On cherchait la pièce au lieu de voir la figure.
-          kind: 'show',
-          say: "Une astuce de repérage, et elle porte un nom trompeur : **le saut de cavalier**. Il n'y a aucun cavalier ici — c'est de sa **forme de déplacement** qu'on parle, le L. Les huit cases marquées sont à un saut de cavalier du roi noir. Une dame posée sur l'une d'elles lui retire presque tout, sans jamais l'enfermer complètement : c'est ce qui évite le pat.",
-          highlight: ['d3', 'f3', 'c4', 'g4', 'c6', 'g6', 'd7', 'f7'],
-        },
-        {
-          kind: 'play',
-          say: "Parmi ces huit cases, ta dame en d1 n'en atteint que quatre : d3, f3, g4 et d7. Prends **d3** — deux cases droit devant elle.",
-          instruction: 'Joue la dame en d3',
-          answers: ['Qd3'],
-          hint: 'La dame monte de deux cases sur sa colonne : de d1 à d3.',
-          highlight: ['d3'],
-        },
-        {
-          kind: 'show',
-          say: "Regarde le résultat : le roi noir avait huit cases, il n'en a plus que trois — e6, f6 et f4. Et il n'est pas en échec, donc pas de pat. Tu répètes l'opération à chaque fois qu'il bouge, et la cage se referme d'elle-même.",
-        },
-        {
-          kind: 'show',
-          fen: '8/8/8/8/8/5k2/5Q2/6K1 b - - 0 1',
-          say: "Attention au piège : ici, la dame en f2 colle le roi noir, mais c'est aux Noirs de jouer et ils n'ont aucun coup. Pat. Nulle. Une dame de plus, et zéro point.",
-        },
-        {
-          kind: 'show',
-          say: "La règle d'or : ne colle jamais ta dame au roi adverse sans que ton propre roi la défende. Amène-le d'abord, mate ensuite.",
-        },
-      ],
-    },
-  ],
-}
 
 export const tacticsChapter: Chapter = {
   id: 'tactique',
