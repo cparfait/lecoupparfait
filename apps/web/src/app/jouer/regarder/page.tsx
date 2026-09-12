@@ -7,9 +7,16 @@
  * quand les deux places sont prises — mais rien ne permettait d'en trouver un :
  * il fallait connaître l'adresse. Cette page les liste.
  *
- * Seules les parties commencées y figurent. Une partie qui attend encore son
- * adversaire n'a rien à montrer, et s'y installer prendrait la place de celui
- * qu'on attend.
+ * Trois choses s'y trouvent, et elles ne se font pas du tout pareil :
+ *
+ *  - les parties **commencées**, qu'on regarde ;
+ *  - les parties **ouvertes qui cherchent un adversaire**, qu'on rejoint. Elles
+ *    en étaient écartées au motif qu'il n'y a rien à y voir — ce qui est vrai —
+ *    et que s'y installer prendrait la place de celui qu'on attend — ce qui est
+ *    faux : c'est exactement la place qu'on cherche ;
+ *  - les parties de ses amis **contre l'ordinateur**, qui ne passent pas par le
+ *    serveur temps réel et n'apparaissaient donc nulle part. Voir
+ *    `PartiesDAmis`.
  *
  * ── Les parties de ses amis ─────────────────────────────────────────────────
  *
@@ -29,7 +36,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Eye, Users } from 'lucide-react'
+import { Eye, Swords, Users } from 'lucide-react'
 import clsx from 'clsx'
 import { SPEED_LABELS, speedCategory, type TimeControl } from '@coupparfait/core'
 import {
@@ -40,9 +47,18 @@ import {
   SegmentedControl,
   Spinner,
 } from '@/components/ui/index.tsx'
+import { PartiesDAmis } from '@/components/social/PartiesDAmis.tsx'
 
 interface LiveGame {
   slug: string
+  /**
+   * `waiting` : la partie est ouverte et attend son adversaire.
+   *
+   * Ces parties-là étaient écartées de la liste — il n'y a rien à y regarder —
+   * et c'est précisément celles qu'on cherche quand un ami vient d'en lancer
+   * une. On ne les regarde pas, on les rejoint.
+   */
+  statut?: 'waiting' | 'playing'
   white: string
   black: string
   whiteRating: number | null
@@ -145,9 +161,15 @@ export default function WatchPage() {
 
   return (
     <div className="page-etroite">
-      <SectionTitle hint="Les parties commencées, telles qu’elles se jouent en ce moment.">
+      <SectionTitle hint="Les parties en cours, celles qui cherchent un adversaire, et ce que tes amis jouent contre l’ordinateur.">
         Regarder
       </SectionTitle>
+
+      {/* ── Les parties solo de ses amis ─────────────────────────────────
+          Elles ne passent pas par le serveur temps réel — une partie contre
+          l'ordinateur se joue dans le navigateur — et n'apparaissaient donc
+          nulle part. Le composant s'efface tout seul quand personne ne joue. */}
+      <PartiesDAmis />
 
       {/* Le filtre n'apparaît qu'à ceux qui ont des amis : proposer « Mes amis »
           à quelqu'un dont le carnet est vide, c'est offrir un bouton qui ne
@@ -214,22 +236,29 @@ export default function WatchPage() {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-medium">
                         <span className={clsx(ami === game.white && 'text-accent')}>
-                          {game.white}
+                          {game.white === '?' ? 'place libre' : game.white}
                         </span>
                         {game.whiteRating != null && (
                           <span className="text-faint"> {game.whiteRating}</span>
                         )}
                         <span className="mx-1.5 text-faint">contre</span>
                         <span className={clsx(ami === game.black && 'text-accent')}>
-                          {game.black}
+                          {game.black === '?' ? 'place libre' : game.black}
                         </span>
                         {game.blackRating != null && (
                           <span className="text-faint"> {game.blackRating}</span>
                         )}
                       </span>
                       <span className="mt-0.5 block text-[12px] text-faint">
-                        {SPEED_LABELS[speed]?.icon} {SPEED_LABELS[speed]?.fr} · {game.moves}{' '}
-                        demi-coup{game.moves > 1 ? 's' : ''}
+                        {SPEED_LABELS[speed]?.icon} {SPEED_LABELS[speed]?.fr}
+                        {game.statut === 'waiting' ? (
+                          ' · une place libre'
+                        ) : (
+                          <>
+                            {' · '}
+                            {game.moves} demi-coup{game.moves > 1 ? 's' : ''}
+                          </>
+                        )}
                         {game.rated ? ' · classée' : ''}
                       </span>
                     </span>
@@ -237,6 +266,15 @@ export default function WatchPage() {
                     {ami && (
                       <Chip tone="accent" className="shrink-0">
                         ton ami
+                      </Chip>
+                    )}
+
+                    {/* « Rejoindre » et non « regarder » : le siège est libre,
+                        et c'est la seule différence qui compte entre les deux
+                        sortes de lignes de cette liste. */}
+                    {game.statut === 'waiting' && (
+                      <Chip tone="success" className="shrink-0">
+                        rejoindre
                       </Chip>
                     )}
 
@@ -249,7 +287,11 @@ export default function WatchPage() {
                         {game.spectators}
                       </span>
                     )}
-                    <Eye size={16} className="shrink-0 text-accent" aria-hidden />
+                    {game.statut === 'waiting' ? (
+                      <Swords size={16} className="shrink-0 text-accent" aria-hidden />
+                    ) : (
+                      <Eye size={16} className="shrink-0 text-accent" aria-hidden />
+                    )}
                   </div>
                 </Card>
               </Link>

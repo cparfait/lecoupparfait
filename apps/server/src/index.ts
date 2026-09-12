@@ -346,20 +346,39 @@ const httpServer = createServer(async (request, response) => {
       return json(response, 200, { uci, rating })
     }
 
-    // ── Parties en cours, pour les regarder ────────────────────────────────
-    //
-    // Le salon acceptait déjà un troisième arrivant, mais rien ne permettait
-    // d'en trouver un : il fallait connaître l'adresse. On liste donc les
-    // parties commencées — pas celles qui attendent encore un adversaire, il
-    // n'y a rien à y voir.
+    /*
+      ── Parties en cours, pour les regarder — et celles qui attendent ───────
+
+      Le salon acceptait déjà un troisième arrivant, mais rien ne permettait
+      d'en trouver un : il fallait connaître l'adresse. On les liste donc.
+
+      Les parties **en attente** y figurent aussi, et c'est un changement de
+      parti pris. Elles en étaient écartées au motif qu'il n'y a rien à y
+      regarder — ce qui est vrai — et que s'y installer prendrait la place de
+      celui qu'on attend — ce qui est faux : cette place est précisément ce
+      qu'on cherche. Quelqu'un dont un ami vient de lancer une partie ne la
+      voyait nulle part, et l'ami attendait devant un échiquier vide en croyant
+      son lien cassé.
+
+      Elles partent donc avec leur état, et l'écran distingue les deux : on
+      regarde les unes, on rejoint les autres.
+    */
     if (url.pathname === '/parties') {
       if (trop('/parties', adresse, response)) return
       const live = []
       for (const room of rooms.values()) {
         const snapshot = room.snapshot()
-        if (snapshot.status !== 'playing') continue
+        if (snapshot.status !== 'playing' && snapshot.status !== 'waiting') continue
+
+        // Un salon vide n'est pas une partie qui attend : c'est une partie que
+        // son créateur a quittée. La proposer enverrait sur un échiquier où
+        // personne ne viendra jamais.
+        const quelquUn = snapshot.players.w !== null || snapshot.players.b !== null
+        if (!quelquUn) continue
+
         live.push({
           slug: snapshot.slug,
+          statut: snapshot.status,
           white: snapshot.players.w?.name ?? '?',
           black: snapshot.players.b?.name ?? '?',
           whiteRating: snapshot.players.w?.rating ?? null,
@@ -376,9 +395,18 @@ const httpServer = createServer(async (request, response) => {
           spectators: snapshot.spectators,
         })
       }
-      // La plus avancée d'abord : une partie de trente coups est plus
-      // intéressante à regarder qu'une qui vient de commencer.
-      live.sort((a, b) => b.moves - a.moves)
+      /*
+        Les parties qui attendent d'abord, la plus avancée ensuite.
+
+        Une place libre est plus urgente qu'un beau milieu de partie : elle
+        disparaît dès que quelqu'un s'y assoit, et quelqu'un attend derrière.
+        À statut égal, la partie de trente coups passe devant celle qui vient de
+        commencer — c'est elle qu'on a envie de regarder.
+      */
+      live.sort((a, b) => {
+        if (a.statut !== b.statut) return a.statut === 'waiting' ? -1 : 1
+        return b.moves - a.moves
+      })
       return json(response, 200, { games: live })
     }
 
