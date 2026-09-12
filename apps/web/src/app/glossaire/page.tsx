@@ -26,6 +26,7 @@ import { Card, Chip } from '@/components/ui/index.tsx'
 import { FAMILIES, TERMS } from '@/lib/glossaire.ts'
 import { POSITIONS_DU_GLOSSAIRE } from '@/lib/glossaire-positions.ts'
 import { BoiteTerme } from '@/components/glossaire/BoiteTerme.tsx'
+import { BoutonEcouter } from '@/components/glossaire/BoutonEcouter.tsx'
 import { renderBold } from '@/lib/gras.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
@@ -189,7 +190,8 @@ export default function GlossaryPage() {
       <p className="mt-2 max-w-2xl text-muted max-lg:text-[14px] max-lg:leading-relaxed">
         {entries.length} termes définis en français clair — les règles, le matériel, les phases de
         la partie, et les motifs que le coach sait reconnaître et nommer dans tes parties.{' '}
-        {illustres} d’entre eux se montrent sur un échiquier : leur nom porte une pastille.
+        {illustres} d’entre eux se montrent sur un échiquier : leur nom porte une pastille. Le
+        haut-parleur, à droite de chaque mot, lit la définition à voix haute.
       </p>
 
       {/* ── Recherche ────────────────────────────────────────────────── */}
@@ -236,26 +238,36 @@ export default function GlossaryPage() {
                     key={`${family}-${entry.name}`}
                     className={clsx('p-4', 'transition-colors hover:bg-surface-hover')}
                   >
-                    <dt className="text-sm font-semibold text-ink">
-                      {position ? (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setMontre({ name: entry.name, definition: entry.definition })
-                          }
-                          className="group inline-flex items-center gap-1.5 text-left transition-colors hover:text-accent"
-                          aria-label={`Voir « ${entry.name} » sur l’échiquier`}
-                        >
-                          <span className="group-hover:underline">{entry.name}</span>
-                          <Grid3x3
-                            size={12}
-                            className="shrink-0 text-faint transition-colors group-hover:text-accent"
-                            aria-hidden
-                          />
-                        </button>
-                      ) : (
-                        entry.name
-                      )}
+                    {/* Le nom à gauche, le haut-parleur à droite : la
+                        définition se lit ou s'écoute, et le choix se prend sur
+                        la même ligne. */}
+                    <dt className="flex items-start gap-2 text-sm font-semibold text-ink">
+                      <span className="min-w-0 flex-1 pt-1">
+                        {position ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setMontre({ name: entry.name, definition: entry.definition })
+                            }
+                            className="group inline-flex items-center gap-1.5 text-left transition-colors hover:text-accent"
+                            aria-label={`Voir « ${entry.name} » sur l’échiquier`}
+                          >
+                            <span className="group-hover:underline">{entry.name}</span>
+                            <Grid3x3
+                              size={12}
+                              className="shrink-0 text-faint transition-colors group-hover:text-accent"
+                              aria-hidden
+                            />
+                          </button>
+                        ) : (
+                          entry.name
+                        )}
+                      </span>
+                      <BoutonEcouter
+                        quoi={entry.name}
+                        texte={`${entry.name}. ${entry.definition}`}
+                        className="-mr-1 -mt-1"
+                      />
                     </dt>
                     <Definition texte={entry.definition} />
                   </Card>

@@ -138,6 +138,16 @@ function pickVoice(locale: 'fr' | 'en', preferred: string | null): SpeechSynthes
 export interface SpeakOptions {
   /** Interrompt ce qui est en cours. Par défaut : oui. */
   interrupt?: boolean
+  /**
+   * Parle même si la voix est coupée dans les préférences.
+   *
+   * Ce réglage fait taire ce qui parle **tout seul** : le coach, les annonces
+   * de coups, les commentaires. Un bouton « écouter » est d'une autre nature —
+   * c'est une demande, faite à l'instant, sur un texte précis. La refuser au
+   * motif que le commentaire automatique est coupé donnerait un bouton mort,
+   * sans rien dire de la raison.
+   */
+  force?: boolean
   /** Débit et hauteur, sinon ceux des préférences. */
   rate?: number
   pitch?: number
@@ -210,7 +220,7 @@ function armUnlock(): void {
 export function speak(text: string, options: SpeakOptions = {}): void {
   const speech = synth()
   const prefs = getPreferences()
-  if (!speech || !prefs.voiceEnabled || !text.trim()) return
+  if (!speech || (!prefs.voiceEnabled && !options.force) || !text.trim()) return
 
   if (options.interrupt !== false) speech.cancel()
 
@@ -233,7 +243,7 @@ export function speak(text: string, options: SpeakOptions = {}): void {
 function utter(text: string, options: SpeakOptions): void {
   const speech = synth()
   const prefs = getPreferences()
-  if (!speech || !prefs.voiceEnabled) return
+  if (!speech || (!prefs.voiceEnabled && !options.force)) return
 
   // La voix neuronale prend la main quand elle est disponible ; en cas d'échec
   // elle rappelle `utterSystem`, pour qu'un serveur momentanément indisponible
@@ -252,7 +262,7 @@ function utter(text: string, options: SpeakOptions): void {
 function utterSystem(text: string, options: SpeakOptions): void {
   const speech = synth()
   const prefs = getPreferences()
-  if (!speech || !prefs.voiceEnabled) return
+  if (!speech || (!prefs.voiceEnabled && !options.force)) return
 
   const utterance = new SpeechSynthesisUtterance(cleanForSpeech(text))
   utterance.lang = prefs.locale === 'fr' ? 'fr-FR' : 'en-GB'

@@ -23,6 +23,7 @@ import { Chess } from 'chess.js'
 import type { Square } from 'chess.js'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button } from '@/components/ui/index.tsx'
+import { BoutonEcouter } from '@/components/glossaire/BoutonEcouter.tsx'
 import { useDialogue } from '@/lib/useDialogue.ts'
 import { renderBold } from '@/lib/gras.tsx'
 import { playMoveFor } from '@/lib/sound.ts'
@@ -128,9 +129,17 @@ export function BoiteTerme({
           <X size={16} aria-hidden />
         </button>
 
-        <h2 id="terme-titre" className="pr-8 font-display text-xl font-bold tracking-tight">
-          {nom}
-        </h2>
+        {/* Le haut-parleur reste avec le mot qu'il lit, à gauche de la croix
+            de fermeture — deux gestes voisins, mais l'un ne ferme rien. */}
+        <div className="flex items-start gap-2 pr-8">
+          <h2
+            id="terme-titre"
+            className="min-w-0 flex-1 font-display text-xl font-bold tracking-tight"
+          >
+            {nom}
+          </h2>
+          <BoutonEcouter quoi={nom} texte={`${nom}. ${definition}`} className="-mt-1" />
+        </div>
         <p className="mt-2 text-[14px] leading-relaxed text-muted">{renderBold(definition)}</p>
 
         {/* L'échiquier est bridé à trois cent vingt points : au-delà, il pousse

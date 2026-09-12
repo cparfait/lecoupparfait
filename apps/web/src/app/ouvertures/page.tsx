@@ -13,12 +13,12 @@
  * Le jeu de données compte 3 810 ouvertures nommées, sous licence CC0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BookOpen, RotateCcw, Search, Undo2 } from 'lucide-react'
 import clsx from 'clsx'
 import { Chess } from 'chess.js'
 import type { PieceSymbol, Square } from 'chess.js'
-import { ECO_VOLUMES } from '@coupparfait/core'
+import { ECO_VOLUMES, toEpd } from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, Card, Chip, EmptyState, Spinner } from '@/components/ui/index.tsx'
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
@@ -51,6 +51,28 @@ export default function OpeningsPage() {
   const [query, setQuery] = useState('')
   const [volume, setVolume] = useState<string | null>(null)
 
+  const plateau = useRef<HTMLDivElement>(null)
+
+  /**
+   * Ramène l'échiquier à l'écran.
+   *
+   * Sur téléphone, les listes se rangent **sous** le plateau : quand on choisit
+   * une ouverture, elle est deux écrans plus haut. La position changeait bien,
+   * mais rien ne bougeait là où l'on regardait — on tapait, on retapait, et on
+   * concluait que ces lignes n'étaient pas cliquables.
+   *
+   * Le défilement ne part que si le plateau est hors de vue : sur grand écran
+   * il est déjà dans la colonne d'à côté, et sauter à chaque clic serait pire
+   * que le mal.
+   */
+  const montrerLePlateau = useCallback(() => {
+    const element = plateau.current
+    if (!element) return
+    const { top, bottom } = element.getBoundingClientRect()
+    if (top >= 0 && bottom <= window.innerHeight) return
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [])
+
   /*
     Le nom demandé par l'adresse.
 
@@ -69,6 +91,8 @@ export default function OpeningsPage() {
 
   // ── Ouverture de la position courante ───────────────────────────────────
   const current = useMemo(() => book?.lookup(fen, locale) ?? null, [book, fen, locale])
+  /** Clé de la position affichée, pour reconnaître la ligne choisie. */
+  const epdCourant = useMemo(() => toEpd(fen), [fen])
 
   const deepest = useMemo(() => {
     if (!book || history.length === 0) return null
@@ -143,28 +167,33 @@ export default function OpeningsPage() {
    * Le format compact stocke la suite en UCI plutôt qu'en PGN : c'est plus
    * court et sans ambiguïté à rejouer.
    */
-  const loadLine = useCallback((uci: string) => {
-    const board = new Chess()
-    const played: string[] = []
-    for (const token of uci.split(' ').filter(Boolean)) {
-      try {
-        played.push(
-          board.move({
-            from: token.slice(0, 2) as Square,
-            to: token.slice(2, 4) as Square,
-            promotion: (token[4] as PieceSymbol) ?? undefined,
-          }).san,
-        )
-      } catch {
-        break
+  const loadLine = useCallback(
+    (uci: string) => {
+      const board = new Chess()
+      const played: string[] = []
+      for (const token of uci.split(' ').filter(Boolean)) {
+        try {
+          played.push(
+            board.move({
+              from: token.slice(0, 2) as Square,
+              to: token.slice(2, 4) as Square,
+              promotion: (token[4] as PieceSymbol) ?? undefined,
+            }).san,
+          )
+        } catch {
+          break
+        }
       }
-    }
-    setFen(board.fen())
-    setHistory(played)
-    const verbose = board.history({ verbose: true })
-    const last = verbose[verbose.length - 1]
-    setLastMove(last ? { from: last.from, to: last.to } : null)
-  }, [])
+      setFen(board.fen())
+      setHistory(played)
+      const verbose = board.history({ verbose: true })
+      const last = verbose[verbose.length - 1]
+      setLastMove(last ? { from: last.from, to: last.to } : null)
+      // Choisir une ouverture, c'est demander à la voir : on va la montrer.
+      montrerLePlateau()
+    },
+    [montrerLePlateau],
+  )
 
   const undo = useCallback(() => {
     if (history.length === 0) return
@@ -219,7 +248,13 @@ export default function OpeningsPage() {
 
       <div className="etude-corps grid gap-4 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
         {/* ── Échiquier ────────────────────────────────────────────── */}
-        <div className="etude-plateau min-w-0">
+        {/* La marge de défilement tient compte de l'en-tête collant : sans
+            elle, remonter au plateau le glisse sous la barre de navigation. */}
+        <div
+          ref={plateau}
+          className="etude-plateau min-w-0"
+          style={{ scrollMarginTop: 'calc(var(--entete) + 0.5rem)' }}
+        >
           <div className="etude-cadre">
             <ChessBoard
               fitParentHeight
@@ -419,28 +454,41 @@ export default function OpeningsPage() {
               />
             ) : (
               <ul className="max-h-[520px] overflow-y-auto">
-                {results.map((match) => (
-                  <li key={match.epd}>
-                    <button
-                      type="button"
-                      onClick={() => loadLine(match.uci)}
-                      className="flex w-full items-baseline gap-2.5 border-b border-line/40 px-4 py-2.5 text-left transition-colors last:border-0 hover:bg-surface-hover"
-                    >
-                      <span className="w-9 shrink-0 font-mono text-[12px] font-semibold text-accent">
-                        {match.eco}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[14px] font-medium">
-                          {match.label}
+                {results.map((match) => {
+                  // Celle qui est sur l'échiquier se voit dans la liste : c'est
+                  // la réponse au clic qu'on a sous les yeux quand le plateau,
+                  // lui, est plus haut. Elle s'allume aussi quand on atteint la
+                  // position en jouant les coups — c'est la même chose.
+                  const actif = match.epd === epdCourant
+                  return (
+                    <li key={match.epd}>
+                      <button
+                        type="button"
+                        onClick={() => loadLine(match.uci)}
+                        aria-current={actif ? 'true' : undefined}
+                        className={clsx(
+                          'flex w-full items-baseline gap-2.5 border-b border-line/40 px-4 py-2.5 text-left transition-colors last:border-0 hover:bg-surface-hover',
+                          actif && 'bg-accent/15 font-medium',
+                        )}
+                      >
+                        <span className="w-9 shrink-0 font-mono text-[12px] font-semibold text-accent">
+                          {match.eco}
                         </span>
-                        <span className="block truncate text-[12px] text-faint">{match.name}</span>
-                      </span>
-                      <span className="shrink-0 text-[12px] tabular-nums text-faint">
-                        {Math.ceil(match.ply / 2)} coups
-                      </span>
-                    </button>
-                  </li>
-                ))}
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[14px] font-medium">
+                            {match.label}
+                          </span>
+                          <span className="block truncate text-[12px] text-faint">
+                            {match.name}
+                          </span>
+                        </span>
+                        <span className="shrink-0 text-[12px] tabular-nums text-faint">
+                          {Math.ceil(match.ply / 2)} coups
+                        </span>
+                      </button>
+                    </li>
+                  )
+                })}
               </ul>
             )}
           </Card>
