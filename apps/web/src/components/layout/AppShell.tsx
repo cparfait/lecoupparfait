@@ -7,9 +7,11 @@
  *  - sur **grand écran**, une barre supérieure : le nom du site qui ramène à
  *    l'accueil, six menus déroulants — un par rubrique —, et à droite une seule
  *    commande, le compte, qui porte aussi les préférences et les pages du site ;
- *  - sur **mobile**, une barre inférieure fixe à cinq onglets, à portée de
- *    pouce, qui reste visible pendant une partie. Le cinquième, « Plus », est
- *    une page pleine qui montre ce que la barre ne porte pas.
+ *  - sur **mobile**, une barre inférieure fixe à six onglets, à portée de
+ *    pouce, qui reste visible pendant une partie. Le premier ramène à
+ *    l'accueil — le nom du site, en haut, ne se signale pas sans survol — et
+ *    le dernier, « Plus », est une page pleine qui montre ce que la barre ne
+ *    porte pas.
  *
  * Le classement des rubriques est **par verbe** — jouer, apprendre,
  * s'entraîner, analyser — parce qu'on ouvre l'application en sachant ce qu'on
@@ -24,7 +26,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronRight, Lock } from 'lucide-react'
+import { ChevronRight, Home, Lock } from 'lucide-react'
 import clsx from 'clsx'
 import { AccountButton } from '@/components/layout/AccountButton.tsx'
 import { ChallengeWatcher } from '@/components/social/ChallengeWatcher.tsx'
@@ -38,7 +40,13 @@ import type { ReactNode } from 'react'
 import { useT } from '@/lib/i18n/index.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { avantagePour, type AvantageCompte } from '@/lib/compte/avantages.ts'
-import { PAGES_APPLICATION, RACCOURCIS_MOBILES, SECTIONS, sectionActive } from '@/lib/navigation.ts'
+import {
+  estActif,
+  PAGES_APPLICATION,
+  RACCOURCIS_MOBILES,
+  SECTIONS,
+  sectionActive,
+} from '@/lib/navigation.ts'
 
 /**
  * Ce qu'il y a à dire avant d'ouvrir cette rubrique, s'il y a quelque chose.
@@ -102,17 +110,38 @@ export function AppShell({ children }: { children: ReactNode }) {
             SE. On récupère la place sur les marges et les écarts, qui ne se
             voient pas, plutôt qu'en retirant une commande, qui se verrait. */}
         <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center gap-2 px-3 [@media(max-width:359px)]:px-1.5 sm:px-5">
-          {/* Le nom seul, sans vignette, et il ramène à l'accueil.
+          {/* Le nom, précédé d'une maison, et il ramène à l'accueil.
 
               Il ouvrait un menu — accueil, préférences, à propos, crédits —
               que rien n'annonçait, et l'accueil se cachait derrière un chevron.
               Le nom d'un site est le lien vers sa première page : c'est ce
               que tout le monde essaie en premier. Ce qui concerne le site
-              lui-même vit dans le menu du compte, à droite, et sur « Plus ». */}
+              lui-même vit dans le menu du compte, à droite, et sur « Plus ».
+
+              Le nom seul ne suffisait pourtant pas. Écrit sans cadre ni
+              pictogramme, il ne se distingue d'un titre que par un fond au
+              survol — c'est-à-dire par rien du tout sur un écran tactile, et
+              par peu de chose au premier coup d'œil sur un ordinateur. On le
+              cherchait sans le voir. La maison ne prend que vingt points et
+              dit ce que le mot ne disait pas : ceci est un bouton, et il mène
+              chez soi. Elle porte l'infobulle ; le nom reste le nom
+              accessible du lien.
+
+              Mais à partir de `lg` seulement, car la maison n'habite qu'un
+              endroit à la fois : celui de la navigation qui est à l'écran.
+              En dessous, une autre surface porte déjà l'accueil sous la même
+              maison — la barre du bas, ou sa rangée d'icônes en paysage — et
+              deux maisons dans la même vue mènent au même endroit sans que
+              rien distingue l'une de l'autre. C'est le cas d'une fenêtre
+              d'ordinateur rétrécie sous mille vingt-quatre points : la barre
+              du bas y apparaît, et l'en-tête doit alors rendre sa maison.
+              Au-delà, il n'y a plus qu'elle, et c'est là qu'elle sert. */}
           <Link
             href="/"
-            className="shrink-0 rounded-[var(--radius-sm)] px-2 py-1.5 font-display text-[15px] font-semibold tracking-tight text-ink transition-colors hover:bg-surface-hover sm:text-[17px]"
+            title="Accueil"
+            className="flex shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] px-2 py-1.5 font-display text-[15px] font-semibold tracking-tight text-ink transition-colors hover:bg-surface-hover sm:text-[17px]"
           >
+            <Home size={16} className="hidden shrink-0 text-accent lg:block" aria-hidden />
             Le Coup Parfait
           </Link>
 
@@ -168,16 +197,20 @@ export function AppShell({ children }: { children: ReactNode }) {
                 *voir*, ce qui est exactement le geste qu'une navigation doit
                 éviter de demander.
 
-                Les cinq rubriques tiennent en icônes, à même la barre. Elles
-                sont nommées pour les lecteurs d'écran et par leur infobulle,
-                et l'on voit d'un coup d'œil laquelle est ouverte. Rien n'est
-                plus replié nulle part. */}
+                Les six onglets de la barre du bas tiennent en icônes, à même
+                la barre — accueil compris, car cette rangée remplace la barre
+                du bas et non l'en-tête : ce qui disparaît en bas doit
+                reparaître ici, sinon l'accueil n'a plus d'onglet du tout dans
+                la seule disposition où l'on joue à deux mains. Et il n'y a pas
+                deux maisons pour autant : celle du nom du site ne s'allume
+                qu'à partir de `lg`, c'est-à-dire jamais en même temps que
+                cette rangée. Les icônes sont nommées pour les lecteurs d'écran
+                et par leur infobulle, et l'on voit d'un coup d'œil laquelle
+                est ouverte. Rien n'est plus replié nulle part. */}
             <nav className="hidden items-center gap-0.5 max-lg:paysage:flex" aria-label="Rubriques">
               {RACCOURCIS_MOBILES.map((entree) => {
                 const Icone = entree.icon
-                const active = [entree.href, ...(entree.actifSur ?? [])].some((chemin) =>
-                  pathname.startsWith(chemin),
-                )
+                const active = estActif(entree, pathname)
                 return (
                   <Link
                     key={entree.href}
@@ -399,13 +432,15 @@ function MenuSection({
 // ─────────────────────────────────────────────────────────────────────────────
 
 /*
-  Cinq onglets, et rien à déplier.
+  Six onglets, et rien à déplier.
 
-  Six onglets se touchaient sur un téléphone étroit. Les quatre rubriques
-  qu'on ouvre le plus gardent leur place ; « Plus » est une page pleine — pas
-  un panneau — qui montre la communauté, les outils, le compte et les réglages
-  en grand, à taille de doigt. En paysage, où la barre s'efface pour rendre sa
-  hauteur à l'échiquier, les cinq onglets passent en icônes dans l'en-tête.
+  Ils se touchaient, autrefois, sur un téléphone étroit — mais parce que le
+  libellé n'avait pas de largeur à respecter, pas parce qu'ils étaient six.
+  L'accueil ouvre la rangée, les quatre rubriques qu'on ouvre le plus gardent
+  leur place, et « Plus » est une page pleine — pas un panneau — qui montre la
+  communauté, les outils, le compte et les réglages en grand, à taille de
+  doigt. En paysage, où la barre s'efface pour rendre sa hauteur à
+  l'échiquier, les six onglets passent en icônes dans l'en-tête.
 */
 
 function BottomBar({ pathname }: { pathname: string }) {
@@ -415,8 +450,8 @@ function BottomBar({ pathname }: { pathname: string }) {
     <nav
       // En paysage sur téléphone, soixante-sept pixels sur trois cent
       // quatre-vingt-dix : la barre prenait un sixième de la hauteur, et
-      // recouvrait le bas de l'échiquier. C'est le seul cas où le hamburger
-      // de l'en-tête reparaît, et la seule raison qui le fait vivre encore.
+      // recouvrait le bas de l'échiquier. C'est le seul cas où la rangée
+      // d'icônes de l'en-tête reparaît, et la seule raison qui la fait vivre.
       // Même matière que l'en-tête et les menus : la barre du bas portait la
       // couleur de la page, et sur un écran sombre elle ne se détachait que par
       // un filet à 9 % de blanc. Une barre de navigation posée par-dessus le
@@ -429,14 +464,13 @@ function BottomBar({ pathname }: { pathname: string }) {
           const Icone = entree.icon
           // Un onglet reste allumé sur les écrans qu'il propose : « S'entraîner »
           // mène au sommaire `/entrainer`, dont les trois portes vivent sous
-          // `/puzzles`. Voir `actifSur`.
-          const active = [entree.href, ...(entree.actifSur ?? [])].some((chemin) =>
-            pathname.startsWith(chemin),
-          )
+          // `/puzzles`. Voir `actifSur` — et `estActif` pour le cas de
+          // l'accueil, que la comparaison par préfixe allumerait partout.
+          const active = estActif(entree, pathname)
           return (
             /* ── La barre du bas, enfin visible ─────────────────────────
                Elle était en `text-faint` — la couleur des mentions
-               secondaires — sur un fond translucide : cinq pictogrammes gris
+               secondaires — sur un fond translucide : des pictogrammes gris
                pâle qu'on ne distinguait ni du fond ni les uns des autres, et
                dont on ne savait pas lequel était actif sans les comparer.
                C'est pourtant la navigation principale sur téléphone.
@@ -450,7 +484,14 @@ function BottomBar({ pathname }: { pathname: string }) {
               href={entree.href}
               aria-current={active ? 'page' : undefined}
               className={clsx(
-                'flex min-w-0 flex-1 flex-col items-center gap-1 rounded-[var(--radius-sm)] px-1 pb-1.5 pt-1 transition-colors',
+                'flex min-w-0 flex-1 flex-col items-center gap-1 rounded-[var(--radius-sm)] pb-1.5 pt-1 transition-colors',
+                // Pas de marge intérieure horizontale : l'onglet est en
+                // `flex-1`, donc ses huit points de `px-1` ne changeaient rien
+                // à la cible du doigt — ils les prenaient au seul libellé.
+                // Mesuré sur un écran de 375 px : le libellé disposait de
+                // 53 points là où « Apprendre » en demande 55 et
+                // « S'entraîner » 56. Deux onglets sur six tronqués pour une
+                // marge que personne ne voit ; la rangée garde la sienne.
                 active ? 'text-accent' : 'text-muted',
               )}
             >
@@ -469,12 +510,26 @@ function BottomBar({ pathname }: { pathname: string }) {
               </span>
               {/* Onze pixels, pas dix : c'est du texte qu'on lit, et dix est
                   sous le seuil où l'on distingue encore « Apprendre » de
-                  « Analyser » d'un coup d'œil. « S'entraîner », le plus long,
-                  tient dans les 64 px d'un onglet à 360 px grâce à
-                  l'interlettrage resserré ; `truncate` garde le reste. */}
+                  « Analyser » d'un coup d'œil. Sous 360 px, en revanche, les
+                  six onglets ne laissent plus que cinquante-deux points chacun
+                  — même sans marge intérieure — et il faut bien céder quelque
+                  chose : ce sera un pixel de corps, pas un onglet. Et un cran
+                  d'interlettrage avec, car à dix pixels « S'entraîner » mesure
+                  encore cinquante points et demi dans une case de
+                  cinquante-deux : il tient, mais il frôle son voisin — et
+                  frôler est ce qu'on cherchait à corriger.
+
+                  `w-full` n'est pas décoratif. Sans lui, le libellé se
+                  dimensionne sur son contenu et déborde de l'onglet des deux
+                  côtés — `truncate` ne coupe que ce qui a une largeur à
+                  respecter. C'est très exactement ainsi que « Communauté » et
+                  « S'entraîner » se touchaient, du temps où ils étaient six :
+                  le texte ne débordait pas parce qu'il y avait six onglets,
+                  mais parce que rien ne le retenait. */}
               <span
                 className={clsx(
-                  'truncate text-[11px] leading-none tracking-[-0.01em]',
+                  'w-full truncate text-center text-[11px] leading-none tracking-[-0.01em]',
+                  '[@media(max-width:359px)]:text-[10px] [@media(max-width:359px)]:tracking-[-0.03em]',
                   active ? 'font-bold' : 'font-medium',
                 )}
               >

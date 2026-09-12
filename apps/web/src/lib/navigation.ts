@@ -25,6 +25,7 @@ import {
   GraduationCap,
   Grid3x3,
   Handshake,
+  Home,
   Info,
   LayoutGrid,
   Mail,
@@ -309,16 +310,24 @@ export const PAGES_APPLICATION: EntreeNav[] = [
 export const SECTIONS_DANS_PLUS = ['communaute', 'outils'] as const
 
 /**
- * Barre inférieure sur téléphone : quatre rubriques, et « Plus ».
+ * Barre inférieure sur téléphone : l'accueil, quatre rubriques, et « Plus ».
  *
- * Six onglets se disputaient trois cent soixante-quinze pixels : « Communauté »
- * et « S'entraîner » se touchaient, et rien ne pouvait plus s'y ajouter. Les
- * quatre rubriques qu'on ouvre le plus — jouer, apprendre, s'entraîner,
- * analyser — gardent leur place. « Plus » n'est pas un panneau à déplier mais
- * une page pleine : elle montre la communauté, les outils, le compte et les
- * réglages en grand, à taille de doigt.
+ * Six onglets se disputaient autrefois trois cent soixante-quinze pixels :
+ * « Communauté » et « S'entraîner » se touchaient, et l'on était redescendu à
+ * cinq. « Communauté » est donc passée dans « Plus » — et la place ainsi
+ * gagnée revient ici à l'accueil, qui n'était plus atteignable que par le nom
+ * du site, en haut à gauche : un lien que rien ne signale sur un écran tactile,
+ * faute de survol. Personne ne le trouvait.
+ *
+ * « Accueil » tient là où « Communauté » débordait — sept lettres contre dix,
+ * et c'est le plus court des six.
+ *
+ * `href: '/'` demande un soin particulier : tous les chemins commencent par
+ * une barre oblique, donc la comparaison par préfixe qui allume les autres
+ * onglets allumerait celui-ci partout. Voir `estActif`.
  */
 export const RACCOURCIS_MOBILES: EntreeNav[] = [
+  { href: '/', labelKey: 'nav.home', icon: Home },
   {
     href: '/jouer',
     labelKey: 'nav.play',
@@ -369,4 +378,19 @@ export function sectionActive(section: SectionNav, pathname: string): boolean {
     const chemin = entree.href.split(/[?#]/)[0] ?? entree.href
     return chemin === '/' ? pathname === '/' : pathname.startsWith(chemin)
   })
+}
+
+/**
+ * Vrai si l'onglet éclaire le chemin courant.
+ *
+ * La barre du bas et la rangée d'icônes du paysage tenaient chacune sa copie
+ * de ce calcul, et toutes deux comparaient par préfixe. L'accueil est le seul
+ * chemin qui exige mieux : `'/'` préfixe absolument tout, si bien que son
+ * onglet se serait allumé sur chaque page, à côté de celui de la rubrique
+ * ouverte — deux onglets actifs, donc aucune information.
+ */
+export function estActif(entree: EntreeNav, pathname: string): boolean {
+  return [entree.href, ...(entree.actifSur ?? [])].some((chemin) =>
+    chemin === '/' ? pathname === '/' : pathname.startsWith(chemin),
+  )
 }
