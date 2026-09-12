@@ -14,6 +14,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react'
+import { localeDuContenu } from '@/lib/i18n/dictionary.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { getProvider } from './providers/index.ts'
 import { setCustomProviders } from './providers/custom.ts'
@@ -89,7 +90,10 @@ export function useAssistant(): Assistant {
           provider: courant,
           model,
           apiKey: getCle(courant.id),
-          locale,
+          // L'assistant, lui, parle toutes les langues : on lui donne celle de
+          // l'interface et non celle du contenu. C'est la seule frontière du
+          // projet où la distinction ne s'applique pas.
+          locale: localeDuContenu(locale),
           messages: historique,
           maxTokens,
           onFragment,

@@ -33,6 +33,21 @@ eux — fourchette, clouage, mat du couloir — et il te le dit à voix haute.
 | **Revenir**        | un défi du jour, **le même pour tout le monde**, cinq quêtes courtes et une série de jours consécutifs — sans compte, si l'on veut                                                                                                      |
 | **Être prévenu**   | une notification quand un ami t'invite — un défi expire en cinq minutes — et un rappel du défi du jour, à ton heure. Rien d'autre, et les deux se coupent séparément. Voir [`docs/notifications.md`](docs/notifications.md)             |
 
+### Les langues
+
+L'interface est proposée en **41 langues** — celles où l'on joue : les grandes
+langues européennes, le Caucase (arménien, azerbaïdjanais, géorgien), l'Asie et
+les écritures de droite à gauche. Dix sont complètes ; les autres sont
+proposées, fonctionnent, et affichent en anglais ce qui n'est pas encore
+traduit — **phrase par phrase**, pas écran par écran. `npm run check:langues`
+affiche la couverture de chacune.
+
+Une distinction compte, et l'application la tient partout : l'**interface** se
+traduit, le **contenu** se rédige. Les 48 leçons, les explications de coups, les
+définitions de motifs et les fiches d'ouverture n'existent qu'en français et en
+anglais ; toute autre langue les lit en anglais. Mélanger les deux donnerait un
+écran en polonais où le coach commenterait des phrases qui n'existent pas.
+
 Et côté forme : un thème sombre et un thème clair, dix jeux de pièces, huit damiers,
 un échiquier **2D et 3D** interchangeable en pleine partie avec mode plein
 écran, une application installable sur téléphone (PWA), et une interface

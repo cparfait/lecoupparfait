@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react'
 import { use } from 'react'
 import { rejouerAnalyse, type AnalysisOutcome } from '@/lib/analysis/runner.ts'
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
+import { localeDuContenu } from '@/lib/i18n/dictionary.ts'
 import { usePreferencesDe } from '@/lib/store/preferences.ts'
 import { Card, EmptyState, Skeleton } from '@/components/ui/index.tsx'
 import { ButtonLink } from '@/components/ui/index.tsx'
@@ -32,7 +33,9 @@ interface AnalysePartagee {
 
 export default function AnalysePartageePage({ params }: { params: Promise<{ partage: string }> }) {
   const { partage } = use(params)
-  const { locale, notation } = usePreferencesDe('locale', 'notation')
+  const { locale: langue, notation } = usePreferencesDe('locale', 'notation')
+  // Le rapport est rédigé par le cœur : français ou anglais.
+  const locale = localeDuContenu(langue)
   const { book } = useOpeningBook()
 
   const [outcome, setOutcome] = useState<AnalysisOutcome | null>(null)

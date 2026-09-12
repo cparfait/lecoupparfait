@@ -14,6 +14,7 @@
 
 import { useCallback } from 'react'
 import { describeMoveInWords, localiseSan } from '@coupparfait/core'
+import { localeDuContenu } from './i18n/dictionary.ts'
 import { usePreferences } from './store/preferences.ts'
 
 /**
@@ -25,7 +26,9 @@ import { usePreferences } from './store/preferences.ts'
  * ```
  */
 export function useSan(): (san: string) => string {
-  const locale = usePreferences((state) => state.locale)
+  // Le cœur écrit les coups en français ou en anglais ; les trente-quatre
+  // autres langues de l'interface lisent l'anglais. Voir `localeDuContenu`.
+  const locale = usePreferences((state) => localeDuContenu(state.locale))
   const notation = usePreferences((state) => state.notation)
 
   return useCallback((san: string) => localiseSan(san, locale, notation), [locale, notation])
@@ -44,7 +47,9 @@ export function useSan(): (san: string) => string {
  * ```
  */
 export function useMoveWords(): (san: string) => string {
-  const locale = usePreferences((state) => state.locale)
+  // Le cœur écrit les coups en français ou en anglais ; les trente-quatre
+  // autres langues de l'interface lisent l'anglais. Voir `localeDuContenu`.
+  const locale = usePreferences((state) => localeDuContenu(state.locale))
   return useCallback((san: string) => describeMoveInWords(san, locale), [locale])
 }
 
@@ -56,5 +61,5 @@ export function useMoveWords(): (san: string) => string {
  */
 export function formatSan(san: string): string {
   const { locale, notation } = usePreferences.getState()
-  return localiseSan(san, locale, notation)
+  return localiseSan(san, localeDuContenu(locale), notation)
 }

@@ -23,6 +23,7 @@ import clsx from 'clsx'
 import { ChevronDown } from 'lucide-react'
 import type { Color } from 'chess.js'
 import { QUALITY_STYLES, type MoveQuality } from '@coupparfait/core'
+import { localeDuContenu } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import type { BilanDesCoups as Bilan } from '@/lib/game/useQualitesDesCoups.ts'
 
@@ -72,7 +73,17 @@ export function BilanDesCoups({
   noms: Record<Color, string>
   className?: string
 }) {
-  const locale = usePreferences((state) => state.locale)
+  /*
+    La langue du **contenu**, et non celle de l'interface.
+
+    L'interface existe dans trente-six langues ; les explications de coups, les
+    définitions de motifs et les noms d'ouvertures sont rédigés, pas traduits,
+    et le cœur ne les produit qu'en français et en anglais. Toute frontière vers
+    le cœur passe donc par `localeDuContenu`, qui ramène les trente-quatre
+    autres à l'anglais. Sans cela, choisir le polonais produirait des phrases
+    qui n'existent pas.
+  */
+  const locale = usePreferences((state) => localeDuContenu(state.locale))
   const [deplie, setDeplie] = useState(false)
 
   // Sans un seul verdict, il n'y a pas de bilan à montrer : mieux vaut ne rien

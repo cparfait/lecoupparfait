@@ -6,27 +6,110 @@
  * qu'une dépendance, et le typage garantit qu'aucune clé n'est inventée.
  *
  * Le français est la langue de référence : c'est lui qui définit la forme du
- * dictionnaire, l'anglais doit s'y conformer.
+ * dictionnaire, toutes les autres s'y conforment.
  *
- * Les deux langues vivaient ici, dans un seul fichier de sept cent soixante
- * lignes où l'on ne trouvait plus une clé sans faire défiler la moitié de
- * l'autre. Elles sont maintenant dans `fr.ts` et `en.ts` ; ce fichier ne garde
- * que ce qui les assemble.
+ * ── Deux régimes, et c'est le point du fichier ──────────────────────────────
+ *
+ * L'**anglais** est typé `Dictionary`, c'est-à-dire exactement la forme du
+ * français : une clé ajoutée là-bas et oubliée ici casse la compilation. C'est
+ * le seul mécanisme qui empêche la traduction de référence de dériver en
+ * silence, et il vaut qu'on le garde sur une langue au moins — celle qui sert
+ * de repli à toutes les autres.
+ *
+ * Les **trente-quatre autres** sont typées `Traduction`, c'est-à-dire un
+ * dictionnaire partiel. Exiger d'elles les trois cent vingt-deux clés d'un
+ * coup reviendrait à interdire qu'une langue existe avant d'être finie, et
+ * aucune ne serait jamais commencée. Ce qui manque remonte à l'anglais, puis au
+ * français (voir `resolve` dans `index.tsx`) ; ce qui est inventé reste refusé
+ * par le typage.
+ *
+ * Les deux langues complètes vivent dans `fr.ts` et `en.ts` ; les autres dans
+ * `langues/<code>.ts`, un fichier par langue.
  */
 
 import { fr } from './fr.ts'
 import { en } from './en.ts'
+import { LANGUES } from './langues.ts'
+import { TRADUCTIONS } from './langues/index.ts'
 
 export { fr } from './fr.ts'
 export { en } from './en.ts'
 export type { Dictionary } from './fr.ts'
 
-export const dictionaries = { fr, en } as const
-export type Locale = keyof typeof dictionaries
-export const LOCALES: Locale[] = ['fr', 'en']
+import type { Dictionary } from './fr.ts'
+
+/**
+ * Un dictionnaire partiel : chaque section et chaque clé peuvent manquer.
+ *
+ * Récursif, parce que le dictionnaire l'est : une langue peut avoir traduit
+ * `nav` en entier et n'avoir que trois clés de `settings`.
+ */
+export type Traduction = {
+  [K in keyof Dictionary]?: Dictionary[K] extends string
+    ? string
+    : { [S in keyof Dictionary[K]]?: Dictionary[K][S] }
+}
+
+/**
+ * Les dictionnaires, par code de langue.
+ *
+ * Le français et l'anglais sont complets ; les autres arrivent du dossier
+ * `langues/`, et celles qui n'ont pas encore de fichier reçoivent un
+ * dictionnaire vide — elles s'affichent donc intégralement en anglais, ce qui
+ * est le comportement voulu tant que personne ne les a traduites.
+ */
+export const dictionaries: Record<string, Dictionary | Traduction> = {
+  fr,
+  en,
+  ...Object.fromEntries(
+    LANGUES.filter((langue) => langue.code !== 'fr' && langue.code !== 'en').map((langue) => [
+      langue.code,
+      TRADUCTIONS[langue.code] ?? {},
+    ]),
+  ),
+}
+
+/**
+ * Le code d'une langue de l'interface.
+ *
+ * Une chaîne et non plus une union fermée de deux valeurs : la liste vit dans
+ * `langues.ts` et change, et un type qui l'énumère obligerait à la recopier.
+ * Ce qui compte — qu'un code inconnu ne casse rien — est garanti ailleurs, par
+ * `langue()` qui retombe sur le français.
+ */
+export type Locale = string
+
+export const LOCALES: Locale[] = LANGUES.map((langue) => langue.code)
 export const DEFAULT_LOCALE: Locale = 'fr'
 
-export const LOCALE_LABELS: Record<Locale, { label: string; flag: string }> = {
-  fr: { label: 'Français', flag: '🇫🇷' },
-  en: { label: 'English', flag: '🇬🇧' },
+/**
+ * La langue dans laquelle le **contenu** est disponible.
+ *
+ * Il y a deux choses très différentes derrière le mot « langue » ici :
+ *
+ *  - l'**interface** — les boutons, les titres, les messages — qui vit dans ce
+ *    dictionnaire et peut exister dans autant de langues qu'on en traduit ;
+ *  - le **contenu** — les explications de coups, les définitions de motifs, les
+ *    leçons, les fiches d'ouverture — qui est rédigé, pas traduit, et que le
+ *    cœur ne sait produire qu'en français et en anglais.
+ *
+ * Les confondre donnerait un écran en polonais où le coach commenterait en
+ * polonais des phrases qui n'existent pas. Toute frontière vers le cœur passe
+ * donc par ici, et une langue non couverte lit le contenu en anglais.
+ */
+export type LocaleDuContenu = 'fr' | 'en'
+
+export function localeDuContenu(locale: Locale): LocaleDuContenu {
+  return locale === 'fr' ? 'fr' : 'en'
 }
+
+/**
+ * Étiquettes des langues, conservées sous leur ancien nom.
+ *
+ * `flag` porte désormais le code du fichier SVG de `public/drapeaux/`, ou une
+ * chaîne vide quand la langue n'a pas de drapeau honnête — voir l'en-tête de
+ * `langues.ts`. Le composant `Drapeau` s'occupe des deux cas.
+ */
+export const LOCALE_LABELS: Record<Locale, { label: string; flag: string }> = Object.fromEntries(
+  LANGUES.map((langue) => [langue.code, { label: langue.nom, flag: langue.drapeau ?? '' }]),
+)

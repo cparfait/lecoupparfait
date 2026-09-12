@@ -60,6 +60,7 @@ import {
 } from '@/lib/analysis/runner.ts'
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
+import { localeDuContenu } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { positionEnPng, telecharger } from '@/lib/board/imagePosition.ts'
 import { ImportEnLigne } from '@/components/import/ImportEnLigne.tsx'
@@ -155,7 +156,17 @@ function ImportScreen({
    */
   const [depth, setDepth] = useState(18)
   const { book } = useOpeningBook()
-  const locale = usePreferences((state) => state.locale)
+  /*
+    La langue du **contenu**, et non celle de l'interface.
+
+    L'interface existe dans trente-six langues ; les explications de coups, les
+    définitions de motifs et les noms d'ouvertures sont rédigés, pas traduits,
+    et le cœur ne les produit qu'en français et en anglais. Toute frontière vers
+    le cœur passe donc par `localeDuContenu`, qui ramène les trente-quatre
+    autres à l'anglais. Sans cela, choisir le polonais produirait des phrases
+    qui n'existent pas.
+  */
+  const locale = usePreferences((state) => localeDuContenu(state.locale))
   const notation = usePreferences((state) => state.notation)
   const { marquer } = useQuotidien()
 
@@ -844,7 +855,12 @@ export function ReviewScreen({
   lectureSeule?: boolean
 }) {
   const { report, coach, source } = outcome
-  const locale = usePreferences((state) => state.locale)
+  /*
+    La langue du **contenu** : le rapport, les explications et les définitions
+    de motifs sont rédigés par le cœur, en français ou en anglais. Les
+    trente-quatre autres langues de l'interface les lisent en anglais.
+  */
+  const locale = usePreferences((state) => localeDuContenu(state.locale))
   const notation = usePreferences((state) => state.notation)
   const voiceEnabled = usePreferences((state) => state.voiceEnabled)
   const setPreference = usePreferences((state) => state.set)

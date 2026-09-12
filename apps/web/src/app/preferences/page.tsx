@@ -36,7 +36,9 @@ import {
   type PieceColourId,
   type PieceSetId,
 } from '@/lib/store/preferences.ts'
-import { LOCALE_LABELS, LOCALES, useT } from '@/lib/i18n/index.tsx'
+import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
+import { LANGUES } from '@/lib/i18n/langues.ts'
+import { Drapeau } from '@/components/ui/Drapeau.tsx'
 import {
   listVoices,
   loadNeuralVoices,
@@ -79,7 +81,10 @@ export default function PreferencesPage() {
   const [neural, setNeural] = useState<NeuralVoice[]>([])
 
   useEffect(() => {
-    void listVoices(prefs.locale).then(setVoices)
+    // Les voix du système, pour la langue du contenu : la synthèse ne parle
+    // que ce que le cœur écrit, et proposer une voix polonaise pour lire une
+    // phrase anglaise ne servirait personne.
+    void listVoices(localeDuContenu(prefs.locale)).then(setVoices)
   }, [prefs.locale])
 
   // Voix neuronales servies par le serveur. Leur absence est le cas normal sur
@@ -691,7 +696,7 @@ export default function PreferencesPage() {
                     onClick={() => {
                       // On annonce qui parle : c'est la seule façon de savoir si
                       // l'on écoute vraiment la voix qu'on a choisie.
-                      void testVoice(prefs.locale).then((result) => {
+                      void testVoice(localeDuContenu(prefs.locale)).then((result) => {
                         if (result.engine === 'neural') {
                           toast.success('Voix neuronale', result.voice)
                         } else {
@@ -735,19 +740,61 @@ export default function PreferencesPage() {
             </>
           )}
 
-          {/* Langue */}
+          {/* ── Langue ───────────────────────────────────────────────────
+              Deux boutons côte à côte convenaient à deux langues. À
+              trente-six, il faut une liste : une grille de vignettes, chacune
+              portant le nom de la langue **dans cette langue** — personne ne
+              cherche « allemand », on cherche « Deutsch ».
+
+              Les drapeaux sont des images et non des émojis : Windows n'a pas
+              de police de drapeaux et affichait « FR » et « GB » en petites
+              capitales, ce qui ressemblait à un affichage cassé. Voir
+              `Drapeau`. */}
           {onglet === 'apparence' && (
             <Card className="p-5">
-              <SectionTitle>Langue</SectionTitle>
-              <SegmentedControl
-                value={prefs.locale}
-                onChange={(value) => set('locale', value)}
-                label="Langue"
-                options={LOCALES.map((code) => ({
-                  value: code,
-                  label: `${LOCALE_LABELS[code].flag} ${LOCALE_LABELS[code].label}`,
-                }))}
-              />
+              <SectionTitle hint="L’interface. Les leçons, les explications de coups et le glossaire restent en français ou en anglais — ce sont des textes rédigés, pas des étiquettes.">
+                Langue
+              </SectionTitle>
+
+              <div
+                role="radiogroup"
+                aria-label="Langue de l’interface"
+                className="grid grid-cols-2 gap-1 sm:grid-cols-3"
+              >
+                {LANGUES.map((langue) => {
+                  const choisie = prefs.locale === langue.code
+                  return (
+                    <button
+                      key={langue.code}
+                      type="button"
+                      role="radio"
+                      aria-checked={choisie}
+                      onClick={() => set('locale', langue.code)}
+                      className={clsx(
+                        'flex items-center gap-2 rounded-[var(--radius-sm)] border px-2.5 py-2 text-left transition-colors',
+                        'pointer-coarse:min-h-11',
+                        choisie
+                          ? 'border-accent bg-[color-mix(in_oklab,var(--accent)_14%,transparent)]'
+                          : 'border-line bg-bg-elev hover:bg-surface-hover',
+                      )}
+                    >
+                      <Drapeau code={langue.drapeau ?? ''} langue={langue.nom} />
+                      <span className="min-w-0 flex-1 truncate text-[13px] font-medium">
+                        {langue.nom}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* La couverture, dite franchement. Une langue à moitié traduite
+                  qui se présente comme complète fait douter du reste de
+                  l'application ; annoncée, elle donne au contraire envie d'aider
+                  à la finir. */}
+              <p className="mt-3 text-xs leading-relaxed text-faint">
+                Le français et l’anglais sont complets. Les autres langues sont en cours : ce qui
+                n’est pas encore traduit s’affiche en anglais, phrase par phrase.
+              </p>
             </Card>
           )}
 

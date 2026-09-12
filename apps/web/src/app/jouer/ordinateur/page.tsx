@@ -124,6 +124,7 @@ import {
 } from '@coupparfait/core'
 import { useCurrentOpening, useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { playMoveSound, playResultSound, playSound } from '@/lib/sound.ts'
+import { localeDuContenu } from '@/lib/i18n/dictionary.ts'
 import { usePreferences, usePreferencesDe } from '@/lib/store/preferences.ts'
 import { speak } from '@/lib/speech.ts'
 import type { Arrow } from '@/components/board/boardKit.ts'
@@ -1601,7 +1602,7 @@ function GameScreen({
     reviewedFen !== state.currentFen
   const opening = useCurrentOpening(
     state.moves.map((m) => m.san),
-    prefs.locale,
+    localeDuContenu(prefs.locale),
   )
 
   // ── Coach ───────────────────────────────────────────────────────────────
@@ -2149,7 +2150,7 @@ function GameScreen({
 
       toast.info(`${san} — ${role}`, parts.join(' '))
       // La voix épelle le coup : un glyphe de figurine ne se prononce pas.
-      speak(`${sanToSpeech(alternative.san, prefs.locale)}. ${parts[0]}`)
+      speak(`${sanToSpeech(alternative.san, localeDuContenu(prefs.locale))}. ${parts[0]}`)
     },
     [reviewedMove, reviewedCommentary, commentary, prefs.locale, playerColor, formatMove],
   )

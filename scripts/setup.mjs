@@ -74,11 +74,15 @@ if (existsSync(envPath)) {
 
 // ── Ressources ───────────────────────────────────────────────────────────────
 run('Jeux de pièces et bruitages libres', 'fetch-assets.mjs', true)
+// Facultatif comme le reste : sans les drapeaux, le sélecteur de langue affiche
+// deux lettres à la place de la vignette, et rien d'autre ne change.
+run('Drapeaux des langues', 'fetch-drapeaux.mjs', true)
 run('Moteur Stockfish WebAssembly', 'setup-engine.mjs')
 run('Index des ouvertures ECO', 'build-openings.mjs')
 run('Base de positions de finales', 'build-endgames.mjs', true)
 run('Icônes de l’application', 'build-icons.mjs', true)
 run('Vérification du contenu pédagogique', 'check-lessons.mjs', true)
+run('Vérification des dictionnaires de langues', 'check-langues.mjs', true)
 
 // ── Récapitulatif ────────────────────────────────────────────────────────────
 const failed = steps.filter((step) => !step.ok)

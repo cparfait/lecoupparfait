@@ -60,6 +60,7 @@ import { Card, Chip } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { analyserAvecLeNavigateur } from '@/lib/analysis/runner.ts'
 import { speak, stopSpeaking } from '@/lib/speech.ts'
+import { localeDuContenu } from '@/lib/i18n/dictionary.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { useSan } from '@/lib/notation.ts'
 import type { PlayedMove } from '@/lib/game/useChessGame.ts'
@@ -173,6 +174,9 @@ export function useLiveCommentary({
   book,
 }: UseLiveCommentaryOptions) {
   const prefs = usePreferences()
+  // Le commentaire est rédigé par le cœur : français ou anglais, jamais l'une
+  // des trente-quatre autres langues de l'interface.
+  const locale = localeDuContenu(prefs.locale)
   const [commentary, setCommentary] = useState<Commentary | null>(null)
   // Commentaires déjà produits, indexés par la position obtenue après le coup.
   // Cette clé-là, contrairement à un numéro de demi-coup, survit à une reprise :
@@ -241,12 +245,12 @@ export function useLiveCommentary({
         const bestUci = topLine?.pv[0] ?? null
         const bestSan = bestUci ? (uciLineToSan(move.before, [bestUci])[0] ?? null) : null
         const bestLine = topLine ? uciLineToSan(move.before, topLine.pv.slice(0, 6)) : []
-        const opening = book?.lookup(move.after, prefs.locale) ?? null
+        const opening = book?.lookup(move.after, locale) ?? null
         const newOpening = opening && opening.label !== announcedOpening.current
         if (opening) announcedOpening.current = opening.label
 
         const explanation = explainMove({
-          locale: prefs.locale,
+          locale,
           notation: prefs.notation,
           lecteur,
           suiteDetaillee,
@@ -280,7 +284,7 @@ export function useLiveCommentary({
             move.color,
             before.lines,
             alternatives,
-            prefs.locale,
+            locale,
           ),
           highlights: explanation.highlights,
           scoreBefore,
@@ -308,7 +312,7 @@ export function useLiveCommentary({
     alternatives,
     book,
     prefs.clientDepth,
-    prefs.locale,
+    locale,
     prefs.notation,
   ])
 
@@ -517,7 +521,7 @@ export function CommentaryPanel({
   onToggleBestMove?: () => void
   className?: string
 }) {
-  const locale = usePreferences((state) => state.locale)
+  const locale = usePreferences((state) => localeDuContenu(state.locale))
   const voixPreferee = usePreferences((state) => state.voiceEnabled)
   const voiceEnabled = voixPreferee && voix
   const setPreference = usePreferences((state) => state.set)

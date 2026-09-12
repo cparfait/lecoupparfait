@@ -25,6 +25,7 @@
 import { useEffect, useRef } from 'react'
 import { sanToSpeech } from '@coupparfait/core'
 import { speakMove } from '@/lib/speech.ts'
+import { localeDuContenu } from '@/lib/i18n/dictionary.ts'
 import { usePreferencesDe } from '@/lib/store/preferences.ts'
 
 export function AnnonceDuCoup({ san }: { san: string | null | undefined }) {
@@ -47,7 +48,7 @@ export function AnnonceDuCoup({ san }: { san: string | null | undefined }) {
 
   return (
     <div aria-live="polite" aria-atomic="true" className="sr-only">
-      {san ? sanToSpeech(san, locale) : ''}
+      {san ? sanToSpeech(san, localeDuContenu(locale)) : ''}
     </div>
   )
 }

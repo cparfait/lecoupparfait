@@ -27,6 +27,7 @@ import { ficheDeLaPartie, ficheEnjeux } from '@/lib/ouvertures/enjeux.ts'
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { useMoveStats, useOpeningStats, type StatsBand } from '@/lib/game/useOpeningStats.ts'
 import { playMoveFor } from '@/lib/sound.ts'
+import { localeDuContenu } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { useMoveWords, useSan } from '@/lib/notation.ts'
 import { useLegalMoves } from '@/lib/game/useLegalMoves.ts'
@@ -35,7 +36,17 @@ const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
 export default function OpeningsPage() {
   const { book, ready } = useOpeningBook()
-  const locale = usePreferences((state) => state.locale)
+  /*
+    La langue du **contenu**, et non celle de l'interface.
+
+    L'interface existe dans trente-six langues ; les explications de coups, les
+    définitions de motifs et les noms d'ouvertures sont rédigés, pas traduits,
+    et le cœur ne les produit qu'en français et en anglais. Toute frontière vers
+    le cœur passe donc par `localeDuContenu`, qui ramène les trente-quatre
+    autres à l'anglais. Sans cela, choisir le polonais produirait des phrases
+    qui n'existent pas.
+  */
+  const locale = usePreferences((state) => localeDuContenu(state.locale))
 
   const format = useSan()
   const dire = useMoveWords()

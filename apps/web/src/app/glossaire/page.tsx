@@ -28,6 +28,7 @@ import { POSITIONS_DU_GLOSSAIRE } from '@/lib/glossaire-positions.ts'
 import { BoiteTerme } from '@/components/glossaire/BoiteTerme.tsx'
 import { BoutonEcouter } from '@/components/ui/BoutonEcouter.tsx'
 import { renderBold } from '@/lib/gras.tsx'
+import { localeDuContenu } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
 /** Ignore accents et casse : on cherche « echec » et on trouve « échec ». */
@@ -110,7 +111,17 @@ function couperEnDeux(texte: string): { chapeau: string; suite: string | null } 
 }
 
 export default function GlossaryPage() {
-  const locale = usePreferences((state) => state.locale)
+  /*
+    La langue du **contenu**, et non celle de l'interface.
+
+    L'interface existe dans trente-six langues ; les explications de coups, les
+    définitions de motifs et les noms d'ouvertures sont rédigés, pas traduits,
+    et le cœur ne les produit qu'en français et en anglais. Toute frontière vers
+    le cœur passe donc par `localeDuContenu`, qui ramène les trente-quatre
+    autres à l'anglais. Sans cela, choisir le polonais produirait des phrases
+    qui n'existent pas.
+  */
+  const locale = usePreferences((state) => localeDuContenu(state.locale))
   const [query, setQuery] = useState('')
   /**
    * Le terme qu'on veut voir sur l'échiquier.

@@ -57,6 +57,7 @@ import { playMoveForSan, playResultSound, playSound } from '@/lib/sound.ts'
 import { useCurrentOpening, useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { useQualitesDesCoups } from '@/lib/game/useQualitesDesCoups.ts'
 import { useGrandEcran } from '@/lib/useMediaQuery.ts'
+import { localeDuContenu } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import type { ChatMessage } from '@/lib/game/useLiveGame.ts'
 import { toPlayedMove, type PlayedMove } from '@/lib/game/useChessGame.ts'
@@ -93,7 +94,17 @@ function parametreDeLAdresse(nom: string): string | null {
 export default function LiveGamePage() {
   const params = useParams<{ slug: string }>()
   const search = useSearchParams()
-  const locale = usePreferences((state) => state.locale)
+  /*
+    La langue du **contenu**, et non celle de l'interface.
+
+    L'interface existe dans trente-six langues ; les explications de coups, les
+    définitions de motifs et les noms d'ouvertures sont rédigés, pas traduits,
+    et le cœur ne les produit qu'en français et en anglais. Toute frontière vers
+    le cœur passe donc par `localeDuContenu`, qui ramène les trente-quatre
+    autres à l'anglais. Sans cela, choisir le polonais produirait des phrases
+    qui n'existent pas.
+  */
+  const locale = usePreferences((state) => localeDuContenu(state.locale))
 
   /**
    * La cadence demandée, lue sans jamais se contenter du défaut.

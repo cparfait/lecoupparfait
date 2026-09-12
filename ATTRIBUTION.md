@@ -62,6 +62,22 @@ rejoue à l’identique, et rien n’est téléversé nulle part.
 | Base d’évaluations (394 M positions) | [database.lichess.org](https://database.lichess.org/)                       | CC0-1.0       |
 | Tables de finales Syzygy (API)       | [tablebase.lichess.ovh](https://tablebase.lichess.ovh/)                     | libre d’accès |
 
+## Drapeaux
+
+| Fichiers                | Auteur                                                                   | Licence |
+| ----------------------- | ------------------------------------------------------------------------ | ------- |
+| `public/drapeaux/*.svg` | Panayiotis Lipiridis ([flag-icons](https://github.com/lipis/flag-icons)) | MIT     |
+
+> Ils servent uniquement de vignettes dans le sélecteur de langue. Une langue
+> n’est pas un pays : celles qu’aucun drapeau ne représente honnêtement —
+> l’arabe, l’espagnol, le portugais — n’en portent aucun, et affichent les deux
+> premières lettres de leur nom à la place. Voir l’en-tête de
+> `lib/i18n/langues.ts`.
+>
+> Des images et non des émojis, parce que Windows n’embarque aucune police de
+> drapeaux et affiche les deux lettres du code régional à leur place — ce qui
+> ressemble à un défaut d’affichage.
+
 ## Moteur
 
 | Composant                             | Auteur                       | Licence          |

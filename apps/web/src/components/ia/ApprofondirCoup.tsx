@@ -17,6 +17,7 @@
 import type { Commentary } from '@/components/game/LiveCommentary.tsx'
 import { QuestionLibre } from './QuestionLibre.tsx'
 import { contexteDuCoup, questionApprofondir } from '@/lib/ia/contexte.ts'
+import { localeDuContenu } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
 export function ApprofondirCoup({
@@ -26,7 +27,17 @@ export function ApprofondirCoup({
   commentary: Commentary | null
   openingName?: string | null
 }) {
-  const locale = usePreferences((state) => state.locale)
+  /*
+    La langue du **contenu**, et non celle de l'interface.
+
+    L'interface existe dans trente-six langues ; les explications de coups, les
+    définitions de motifs et les noms d'ouvertures sont rédigés, pas traduits,
+    et le cœur ne les produit qu'en français et en anglais. Toute frontière vers
+    le cœur passe donc par `localeDuContenu`, qui ramène les trente-quatre
+    autres à l'anglais. Sans cela, choisir le polonais produirait des phrases
+    qui n'existent pas.
+  */
+  const locale = usePreferences((state) => localeDuContenu(state.locale))
   const notation = usePreferences((state) => state.notation)
 
   if (!commentary) return null

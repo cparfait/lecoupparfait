@@ -10,7 +10,7 @@
 
 import { createContext, useCallback, useContext, useMemo } from 'react'
 import type { ReactNode } from 'react'
-import { DEFAULT_LOCALE, dictionaries, type Dictionary, type Locale } from './dictionary.ts'
+import { dictionaries, fr, type Dictionary, type Locale, type Traduction } from './dictionary.ts'
 
 /**
  * Tous les chemins pointés valides du dictionnaire, calculés par le typage.
@@ -27,20 +27,49 @@ export type TranslationKey = Path<Dictionary>
 interface I18nValue {
   locale: Locale
   t: (key: TranslationKey, vars?: Record<string, string | number>) => string
-  dictionary: Dictionary
+  /**
+   * Le dictionnaire de la langue choisie, éventuellement partiel.
+   *
+   * `Traduction` et non `Dictionary` : trente-quatre langues sur trente-six le
+   * sont. Ce qui manque ne se lit pas d'ici mais par `t()`, qui remonte la
+   * chaîne clé par clé — c'est donc `t()` qu'il faut employer, et cet objet
+   * n'est exposé que pour les rares parcours d'une section entière.
+   */
+  dictionary: Dictionary | Traduction
 }
 
 const I18nContext = createContext<I18nValue | null>(null)
 
 export function I18nProvider({ locale, children }: { locale: Locale; children: ReactNode }) {
-  const dictionary = dictionaries[locale] ?? dictionaries[DEFAULT_LOCALE]
+  // `?? fr` et non `?? dictionaries[DEFAULT_LOCALE]` : l'index rend
+  // `Dictionary | Traduction | undefined`, et le repli doit être typé pour de
+  // bon — un code de langue inconnu ne doit pas produire un dictionnaire vide.
+  const dictionary: Dictionary | Traduction = dictionaries[locale] ?? fr
 
+  /**
+   * La chaîne de repli, clé par clé.
+   *
+   * Trente-quatre des trente-six langues sont partielles par construction (voir
+   * l'en-tête de `dictionary.ts`), et une clé manquante ne doit surtout pas
+   * afficher son chemin : « settings.theme » au milieu d'un écran est pire que
+   * la même phrase en anglais.
+   *
+   * L'ordre n'est pas indifférent. L'anglais avant le français parce qu'il est
+   * la seconde langue de la quasi-totalité des gens qui ne parlent ni l'un ni
+   * l'autre ; le français en dernier parce qu'il est la langue de référence et
+   * qu'il a donc, par construction, toutes les clés. Le repli se fait **par
+   * clé** et non par dictionnaire : une langue à moitié traduite reste à moitié
+   * traduite à l'écran, au lieu de basculer entièrement en anglais à la
+   * première clé manquante.
+   */
   const t = useCallback(
     (key: TranslationKey, vars?: Record<string, string | number>) => {
-      const raw = resolve(dictionary, key)
+      const raw = resolve(dictionary, key) ?? resolve(dictionaries.en, key) ?? resolve(fr, key)
+
       if (raw === null) {
         // Un chemin invalide ne doit jamais casser l'affichage : on montre la
         // clé, ce qui rend le problème visible sans faire tomber la page.
+        // Le typage l'interdit déjà ; il reste les appels dynamiques.
         if (process.env.NODE_ENV !== 'production') {
           console.warn(`[i18n] clé manquante : ${key}`)
         }
@@ -102,5 +131,6 @@ export function renderEmphasis(text: string): ReactNode[] {
   )
 }
 
-export { DEFAULT_LOCALE, LOCALES, LOCALE_LABELS } from './dictionary.ts'
-export type { Locale } from './dictionary.ts'
+export { DEFAULT_LOCALE, LOCALES, LOCALE_LABELS, localeDuContenu } from './dictionary.ts'
+export type { Locale, LocaleDuContenu } from './dictionary.ts'
+export { LANGUES, langue } from './langues.ts'

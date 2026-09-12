@@ -16,6 +16,8 @@
  */
 
 import { sanToSpeech } from '@coupparfait/core'
+import { localeDuContenu } from './i18n/dictionary.ts'
+import { langue } from './i18n/langues.ts'
 import { getPreferences } from './store/preferences.ts'
 
 export interface VoiceOption {
@@ -265,12 +267,21 @@ function utterSystem(text: string, options: SpeakOptions): void {
   if (!speech || (!prefs.voiceEnabled && !options.force)) return
 
   const utterance = new SpeechSynthesisUtterance(cleanForSpeech(text))
-  utterance.lang = prefs.locale === 'fr' ? 'fr-FR' : 'en-GB'
+  /*
+    L'étiquette de langue de la voix.
+
+    Elle vient du registre des langues et non d'un ternaire : la synthèse du
+    navigateur choisit sa voix là-dessus, et servir « en-GB » à quelqu'un qui a
+    mis l'interface en polonais lui donnerait un accent anglais sur des noms de
+    cases. Les langues sans voix installée retombent d'elles-mêmes sur la voix
+    par défaut du système — c'est le comportement de l'API, et il est bon.
+  */
+  utterance.lang = langue(prefs.locale).bcp47
   utterance.rate = options.rate ?? prefs.voiceRate
   utterance.pitch = options.pitch ?? prefs.voicePitch
   utterance.volume = 1
 
-  const voice = pickVoice(prefs.locale, prefs.voiceName)
+  const voice = pickVoice(localeDuContenu(prefs.locale), prefs.voiceName)
   if (voice) utterance.voice = voice
 
   const token = speechToken
@@ -316,7 +327,7 @@ function utterSystem(text: string, options: SpeakOptions): void {
 /** Annonce un coup joué : « cavalier f 3 ». */
 export function speakMove(san: string, options: SpeakOptions = {}): void {
   const prefs = getPreferences()
-  speak(sanToSpeech(san, prefs.locale), options)
+  speak(sanToSpeech(san, localeDuContenu(prefs.locale)), options)
 }
 
 /** Enchaîne plusieurs phrases avec une respiration entre chacune. */
@@ -604,7 +615,10 @@ const SAN_IN_PROSE = new RegExp(String.raw`\b[CFTDRNBQK]x?[a-h][1-8][+#]?\b`, 'g
 const SQUARE = new RegExp(String.raw`\b([a-h])([1-8])\b`, 'g')
 
 function cleanForSpeech(text: string): string {
-  const { locale } = getPreferences()
+  // La langue du contenu : ce sont les coups cités dans la phrase qu'on
+  // convertit ici — « Cf3 » en « cavalier f 3 » — et le cœur ne sait le faire
+  // qu'en français et en anglais.
+  const locale = localeDuContenu(getPreferences().locale)
   const steps = text
     .replace(/\*\*/g, '')
     .replace(/[«»"]/g, '')

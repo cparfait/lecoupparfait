@@ -53,6 +53,7 @@ import {
   type NiveauEstime,
 } from '@/lib/apprendre/palier.ts'
 import { findLesson, loadProgress, type LessonProgress } from '@/lib/lessons/index.ts'
+import { localeDuContenu } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
 const TEINTE = 'var(--rub-apprendre)'
@@ -72,7 +73,17 @@ interface Diagnostic {
 }
 
 export default function PalierPage() {
-  const locale = usePreferences((state) => state.locale)
+  /*
+    La langue du **contenu**, et non celle de l'interface.
+
+    L'interface existe dans trente-six langues ; les explications de coups, les
+    définitions de motifs et les noms d'ouvertures sont rédigés, pas traduits,
+    et le cœur ne les produit qu'en français et en anglais. Toute frontière vers
+    le cœur passe donc par `localeDuContenu`, qui ramène les trente-quatre
+    autres à l'anglais. Sans cela, choisir le polonais produirait des phrases
+    qui n'existent pas.
+  */
+  const locale = usePreferences((state) => localeDuContenu(state.locale))
   const [diagnostic, setDiagnostic] = useState<Diagnostic | null>(null)
   const [test, setTest] = useState<NiveauEstime | null>(null)
   const [progres, setProgres] = useState<LessonProgress>({})
