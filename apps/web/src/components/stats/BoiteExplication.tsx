@@ -28,6 +28,7 @@ import { Chess } from 'chess.js'
 import type { Square, PieceSymbol } from 'chess.js'
 import { ECO_VOLUMES } from '@coupparfait/core'
 import { Chip, Spinner } from '@/components/ui/index.tsx'
+import { BoutonEcouter } from '@/components/ui/BoutonEcouter.tsx'
 import { useDialogue } from '@/lib/useDialogue.ts'
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { useSan } from '@/lib/notation.ts'
@@ -117,9 +118,22 @@ function TexteEcrit({
 
   return (
     <>
-      <h2 id="explication-titre" className="pr-8 font-display text-xl font-bold tracking-tight">
-        {explication.titre}
-      </h2>
+      {/* Ces définitions viennent du glossaire, qui se laisse écouter depuis
+          sa page : elles s'écoutent donc ici aussi, sans quoi le même texte
+          serait lisible à voix haute d'un côté et muet de l'autre. */}
+      <div className="flex items-start gap-2 pr-8">
+        <h2
+          id="explication-titre"
+          className="min-w-0 flex-1 font-display text-xl font-bold tracking-tight"
+        >
+          {explication.titre}
+        </h2>
+        <BoutonEcouter
+          quoi={explication.titre}
+          texte={`${explication.titre}. ${explication.texte}`}
+          className="-mt-1"
+        />
+      </div>
       <p className="mt-3 text-[14px] leading-relaxed text-muted">{renderBold(explication.texte)}</p>
 
       {demande.type === 'cadence' && demande.parties !== undefined && (

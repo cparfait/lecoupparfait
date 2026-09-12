@@ -26,7 +26,7 @@ import { Card, Chip } from '@/components/ui/index.tsx'
 import { FAMILIES, TERMS } from '@/lib/glossaire.ts'
 import { POSITIONS_DU_GLOSSAIRE } from '@/lib/glossaire-positions.ts'
 import { BoiteTerme } from '@/components/glossaire/BoiteTerme.tsx'
-import { BoutonEcouter } from '@/components/glossaire/BoutonEcouter.tsx'
+import { BoutonEcouter } from '@/components/ui/BoutonEcouter.tsx'
 import { renderBold } from '@/lib/gras.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 

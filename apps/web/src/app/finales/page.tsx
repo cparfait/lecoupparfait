@@ -29,6 +29,7 @@ import clsx from 'clsx'
 import type { Color } from 'chess.js'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, Card, Chip, EmptyState, Spinner } from '@/components/ui/index.tsx'
+import { BoutonEcouter } from '@/components/ui/BoutonEcouter.tsx'
 import {
   familyProgress,
   loadEndgameProgress,
@@ -307,6 +308,21 @@ function GroupList({
   )
 }
 
+/**
+ * Ce que le coach annonce en arrivant sur une position.
+ *
+ * Le camp d'abord : c'est ce qui manque le plus vite quand on ne regarde pas
+ * encore l'échiquier. Le mat annoncé ensuite, quand il est connu — savoir
+ * qu'on cherche un mat en cinq n'est pas un indice, c'est la différence entre
+ * chercher et tâtonner.
+ */
+function consigneParlee(position: EndgamePosition, camp: Color): string {
+  const couleur = camp === 'w' ? 'les Blancs' : 'les Noirs'
+  if (position.target === 'draw') return `Tu joues ${couleur}. Tiens la nulle.`
+  const mat = position.mateIn ? ` Il y a mat en ${position.mateIn} coups au mieux.` : ''
+  return `Tu joues ${couleur}. Gagne cette position.${mat}`
+}
+
 function describePosition(position: EndgamePosition): string {
   const objective = position.target === 'checkmate' ? 'Gagner' : 'Tenir la nulle'
   const mate = position.mateIn ? ` · mat en ${position.mateIn}` : ''
@@ -385,6 +401,25 @@ function EndgameTrainer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [position.fen, attempt])
 
+  /**
+   * La consigne, à voix haute, en arrivant sur la position.
+   *
+   * L'écran portait déjà le bouton qui coupe la voix, à côté de l'objectif —
+   * et ne disait pourtant rien avant la fin de l'exercice. On coupait donc une
+   * voix qu'on n'avait jamais entendue, et la seule phrase qu'elle réservait
+   * — « Gagné » — arrivait quand la technique était trouvée, c'est-à-dire
+   * quand on n'en avait plus besoin. La consigne, elle, est ce qu'il faut
+   * savoir avant de jouer : de quel camp on est, et ce qu'on doit obtenir.
+   *
+   * Comme ailleurs, `speak` respecte lui-même le réglage de voix, et diffère
+   * la phrase au premier geste si le navigateur refuse de parler avant qu'on
+   * ait touché la page. Elle ne repart pas à chaque tentative : on relance une
+   * position qu'on vient d'entendre.
+   */
+  useEffect(() => {
+    speak(consigneParlee(position, playerColor))
+  }, [position, playerColor])
+
   // L'adversaire défend au maximum de ses moyens : une finale ne s'apprend pas
   // contre un adversaire complaisant.
   useBotPlayer({
@@ -400,6 +435,8 @@ function EndgameTrainer({
     position.target === 'checkmate'
       ? `Gagner${position.mateIn ? ` — mat en ${position.mateIn} coups au mieux` : ''}`
       : 'Tenir la nulle'
+
+  const voix = consigneParlee(position, playerColor)
 
   return (
     <div className="etude mx-auto w-full max-w-[1200px] px-3 py-4 sm:px-5 lg:py-8">
@@ -444,7 +481,17 @@ function EndgameTrainer({
         <div className="etude-aside flex flex-col gap-3">
           {/* ── Objectif ─────────────────────────────────────────── */}
           <Card glow className="p-4">
-            <p className="text-[12px] font-semibold text-faint">Ton objectif</p>
+            <div className="flex items-start gap-2">
+              <p className="min-w-0 flex-1 text-[12px] font-semibold text-faint">Ton objectif</p>
+              {/* Réentendre la consigne : elle est dite une fois, à l'arrivée,
+                  et on arrive parfois avant d'écouter. */}
+              <BoutonEcouter
+                quoi="cet exercice"
+                annonce="Écouter la consigne"
+                texte={voix}
+                className="-mr-1 -mt-1.5"
+              />
+            </div>
             <p className="mt-1.5 flex items-center gap-2 text-lg font-semibold">
               {position.target === 'checkmate' ? (
                 <Trophy size={18} className="text-accent" aria-hidden />

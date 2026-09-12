@@ -3,11 +3,13 @@
 /**
  * Écouter une définition.
  *
- * Le glossaire définit soixante-quatorze mots en trois à huit lignes chacun,
- * et c'est un mur de texte pour qui lit mal, lit lentement, ou apprend le
+ * Le glossaire définit soixante-cinq mots en trois à huit lignes chacun, et
+ * c'est un mur de texte pour qui lit mal, lit lentement, ou apprend le
  * vocabulaire dans une langue qui n'est pas la sienne. Tout le reste de
  * l'application se dit à voix haute — les leçons, les coups, l'analyse ; il n'y
- * avait qu'ici qu'il fallait lire.
+ * avait que les définitions qu'il fallait lire. Celles des statistiques —
+ * cadences, fins de partie — sont de la même eau, d'où ce bouton rangé dans
+ * `ui` plutôt que dans `glossaire`.
  *
  * La lecture part sur demande, jamais toute seule : on ouvre une page de
  * définitions pour les parcourir des yeux, et une voix qui se déclenche à
@@ -35,12 +37,18 @@ let lecteurEnCours: (() => void) | null = null
 export function BoutonEcouter({
   texte,
   quoi,
+  annonce,
   className,
 }: {
   /** Le texte prononcé. */
   texte: string
   /** Ce qu'on écoute, pour l'annoncer aux lecteurs d'écran : « pion passé ». */
   quoi: string
+  /**
+   * Ce que le bouton propose, quand « écouter la définition » ne convient
+   * pas — la consigne d'un exercice, par exemple.
+   */
+  annonce?: string
   className?: string
 }) {
   const [parle, setParle] = useState(false)
@@ -95,8 +103,10 @@ export function BoutonEcouter({
     <button
       type="button"
       onClick={basculer}
-      aria-label={parle ? 'Arrêter la lecture' : `Écouter la définition de « ${quoi} »`}
-      title={parle ? 'Arrêter la lecture' : 'Écouter la définition'}
+      aria-label={
+        parle ? 'Arrêter la lecture' : (annonce ?? `Écouter la définition de « ${quoi} »`)
+      }
+      title={parle ? 'Arrêter la lecture' : (annonce ?? 'Écouter la définition')}
       aria-pressed={parle}
       className={clsx(
         // Trente-deux points de côté : la plus petite cible qu'on vise au
