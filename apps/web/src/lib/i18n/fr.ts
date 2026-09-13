@@ -6176,6 +6176,7 @@ export const fr = {
     readFailed: 'Lecture impossible.',
     tryAgain: 'Réessaie dans un instant.',
     serverDown: 'Le serveur est injoignable.',
+    badResponse: 'Réponse inattendue du serveur ({code}).',
     done: 'C’est fait.',
     loggedInJournal: 'L’acte est consigné dans le journal.',
     modeComputer: 'Contre l’ordinateur',

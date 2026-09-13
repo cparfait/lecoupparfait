@@ -6142,6 +6142,7 @@ export const en: Dictionary = {
     readFailed: 'Cannot read.',
     tryAgain: 'Try again in a moment.',
     serverDown: 'The server is unreachable.',
+    badResponse: 'Unexpected response from the server ({code}).',
     done: 'Done.',
     loggedInJournal: 'The act is recorded in the log.',
     modeComputer: 'Against the computer',

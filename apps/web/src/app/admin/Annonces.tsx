@@ -84,9 +84,18 @@ export function Annonces() {
           jours: Number(jours) || 0,
         }),
       })
-      const donnees = await reponse.json().catch(() => ({}))
+      /*
+        Une réponse illisible n'est pas un serveur injoignable.
+
+        Le repli disait « le serveur est injoignable » dès que le corps n'était
+        pas du JSON — ce qui arrive quand la route n'existe pas dans la version
+        servie et que Next rend sa page 404 en HTML. On accusait le réseau d'une
+        panne de déploiement, et il n'y avait rien à chercher du bon côté. Le
+        code HTTP est donc dit tel quel.
+      */
+      const donnees = (await reponse.json().catch(() => null)) as { error?: string } | null
       if (!reponse.ok) {
-        toast.error(donnees.error ?? t('admin.serverDown'))
+        toast.error(donnees?.error ?? t('admin.badResponse', { code: reponse.status }))
         return
       }
       toast.success(
@@ -112,7 +121,8 @@ export function Annonces() {
           method: 'DELETE',
         })
         if (!reponse.ok) {
-          toast.error(t('admin.deleteImpossible'))
+          const donnees = (await reponse.json().catch(() => null)) as { error?: string } | null
+          toast.error(donnees?.error ?? t('admin.badResponse', { code: reponse.status }))
           return
         }
         toast.success(t('admin.announceWithdrawn'), t('admin.loggedInJournal'))
