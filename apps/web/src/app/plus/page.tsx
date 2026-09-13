@@ -91,6 +91,7 @@ export default function PlusPage() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'signout' }),
                   })
+                  // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- Rechargement complet et non `router.push` : la déconnexion doit vider tout l'état client — identité partagée, préférences, caches — qu'une navigation cliente conserverait.
                   window.location.assign('/')
                 }}
               />

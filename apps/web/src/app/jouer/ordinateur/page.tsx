@@ -1420,11 +1420,21 @@ function GameScreen({
   */
   useEffect(() => {
     if (!classee) return
-    annoncerPartieClassee({
+    void annoncerPartieClassee({
       botLevel: level,
       playerColor,
       initialTime: timeControl.initial,
       increment: timeControl.increment,
+    }).then((faite) => {
+      if (faite) return
+      /*
+        L'annonce n'est pas passée : cette partie ne sera pas classée, et il
+        faut le dire **maintenant**. Découvrir à la fin qu'une partie de vingt
+        minutes ne compte pas, sans avoir rien fait de mal, est le genre de
+        silence qui passe pour une panne — et c'en est une.
+      */
+      setAnnonceManquee(true)
+      toast.error(t('computer.ratedAnnounceFailed'), t('computer.ratedAnnounceFailedHint'))
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -1493,6 +1503,10 @@ function GameScreen({
   const sansAide = classee || tournoi
   /** Variation de classement d'une partie classée, une fois le serveur consulté. */
   const [variationClassement, setVariationClassement] = useState<number | null>(null)
+  /** L'annonce de partie classée n'est pas passée : la partie ne comptera pas. */
+  const [annonceManquee, setAnnonceManquee] = useState(false)
+  /** Pourquoi le serveur n'a pas classé la partie, une fois qu'elle est finie. */
+  const [refusClassement, setRefusClassement] = useState<string | null>(null)
   // Lue par les effets d'analyse, qui s'exécutent avant que `gameOver` ne soit
   // recalculé dans le corps du composant.
   const gameOverRef = useRef(false)
@@ -2018,10 +2032,12 @@ function GameScreen({
       increment: timeControl.increment,
       eco: opening?.eco ?? null,
       opening: opening?.name ?? null,
-    }).then((classement) => {
+    }).then(({ classement, raison }) => {
       // Rien à annoncer sur une partie d'entraînement : le serveur ne renvoie
-      // de variation que pour une partie classée.
+      // de variation que pour une partie classée, et de raison que si l'on en
+      // attendait une.
       if (classement) setVariationClassement(classement.variation)
+      if (raison) setRefusClassement(raison)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameOver])
@@ -2937,12 +2953,23 @@ function GameScreen({
           bilan={bilan}
           // Dit seulement si l'on attendait des points : une partie
           // d'entraînement n'a rien à justifier.
+          /*
+            Pourquoi cette partie ne compte pas, quand on attendait qu'elle
+            compte. L'aide du moteur d'abord — c'est la seule raison que le
+            joueur a lui-même provoquée, et la seule qu'il puisse éviter la
+            prochaine fois —, puis le verdict du serveur, qui ne parlait à
+            personne : sa réponse était jetée à l'arrivée.
+          */
           nonClassee={
             aideUtilisee
               ? aideUtilisee === 'indice'
                 ? t('computer.usedHint')
                 : t('computer.usedTakeback')
-              : null
+              : refusClassement
+                ? motifDeRefus(t, refusClassement)
+                : annonceManquee && classee
+                  ? t('computer.ratedAnnounceFailed')
+                  : null
           }
           seance={
             seance && releveDeSeance
@@ -3099,4 +3126,38 @@ function LegendeDuVerdict({
       )}
     </div>
   )
+}
+
+/**
+ * Le refus du serveur, en une phrase que le joueur peut lire.
+ *
+ * La route rend un code — `trop-courte`, `non-annoncee`… — et non une phrase :
+ * elle parlerait français à quelqu'un qui lit l'application en japonais. La
+ * correspondance est ici, et le cas inconnu rend une phrase générique plutôt
+ * que rien : un code qu'on aurait ajouté côté serveur sans passer par ici ne
+ * doit pas redevenir un silence.
+ */
+function motifDeRefus(t: ReturnType<typeof useT>, code: string): string {
+  switch (code) {
+    case 'adversaire-sans-classement':
+      return t('computer.unratedNoOpponent')
+    case 'resultat-non-verifiable':
+      return t('computer.unratedUnverifiable')
+    case 'position-imposee':
+      return t('computer.unratedSetupPosition')
+    case 'non-annoncee':
+      return t('computer.unratedNotAnnounced')
+    case 'annonce-differente':
+      return t('computer.unratedMismatch')
+    case 'trop-rapide':
+      return t('computer.unratedTooFast')
+    case 'trop-courte':
+      return t('computer.unratedTooShort')
+    case 'trop-frequente':
+      return t('computer.unratedTooSoon')
+    case 'classement-indisponible':
+      return t('computer.unratedUnavailable')
+    default:
+      return t('computer.unratedUnknown')
+  }
 }

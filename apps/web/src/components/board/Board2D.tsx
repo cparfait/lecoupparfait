@@ -1184,6 +1184,7 @@ const Piece = memo(function Piece({
         zIndex: saisie ? 30 : 10,
       }}
     >
+      {/* eslint-disable-next-line @next/next/no-img-element -- Les pièces sont des SVG locaux, dimensionnés en CSS et déplacés par `transform` : `next/image` n'optimiserait rien et son enveloppe casserait l'animation. */}
       <img
         src={url}
         alt=""

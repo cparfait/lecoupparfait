@@ -79,23 +79,29 @@ export function enregistrerPartieEnCours(moves: string[], state: EtatPartieEnCou
  * les fige pendant qu'ils ne servent encore à rien, et la fin de partie ne
  * classe que ce qui leur ressemble.
  *
- * Silencieux et sans blocage, comme ses voisines : la partie commence, annonce
- * partie ou non. Une annonce perdue coûte le classement de cette partie-là, pas
- * la partie.
+ * **Sans blocage, mais pas silencieux.** La partie commence dans tous les cas —
+ * on ne retient personne sur un aller-retour réseau. Mais l'appelant apprend
+ * que l'annonce a échoué, et doit le dire : jouer vingt minutes une partie
+ * qu'on croit classée pour découvrir à la fin qu'elle ne l'est pas est pire que
+ * de l'apprendre au premier coup, où il est encore temps de recommencer.
  */
-export function annoncerPartieClassee(annonce: {
+export async function annoncerPartieClassee(annonce: {
   botLevel: number
   playerColor: Color
   initialTime: number
   increment: number
-}): void {
-  void fetch('/api/parties/classee', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(annonce),
-  }).catch(() => {
-    // Silence volontaire : voir l'en-tête du fichier.
-  })
+}): Promise<boolean> {
+  try {
+    const reponse = await fetch('/api/parties/classee', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(annonce),
+    })
+    const donnees = (await reponse.json()) as { ok?: boolean }
+    return donnees.ok === true
+  } catch {
+    return false
+  }
 }
 
 /** Oublie la partie enregistrée — partie finie, abandonnée, ou remplacée. */
@@ -155,6 +161,17 @@ export interface VariationClassement {
   variation: number
 }
 
+/** Ce que devient une partie qu'on a envoyée : classée, ou non, et pourquoi. */
+export interface SortDeLaPartie {
+  classement: VariationClassement | null
+  /**
+   * Le code du refus, quand on avait demandé le classement et qu'il n'a pas eu
+   * lieu — `trop-courte`, `non-annoncee`, `position-imposee`… Traduit à
+   * l'affichage : voir `computer.unrated*` dans le dictionnaire.
+   */
+  raison: string | null
+}
+
 /**
  * Range une partie terminée dans l'historique du compte.
  *
@@ -164,25 +181,31 @@ export interface VariationClassement {
  * et « Parties récentes » restait vide pour quelqu'un qui avait joué toute la
  * soirée.
  *
- * Silencieux et sans blocage, pour la même raison qu'au-dessus : le résultat
- * est déjà affiché, l'archivage n'a pas à s'inviter dans ce moment-là.
+ * Sans blocage : le résultat est déjà affiché, l'archivage n'a pas à s'inviter
+ * dans ce moment-là. Mais il rend ce que le serveur a décidé — la variation de
+ * classement, **et la raison quand il n'y en a pas**. Cette raison était
+ * renvoyée depuis toujours et jetée ici même : quelqu'un qui avait demandé une
+ * partie classée voyait sa partie finir sans un mot, ce qui ressemble à une
+ * panne et n'apprend rien.
  */
-export async function archiverPartie(partie: PartieTerminee): Promise<VariationClassement | null> {
-  if (partie.moves.length === 0) return null
+export async function archiverPartie(partie: PartieTerminee): Promise<SortDeLaPartie> {
+  if (partie.moves.length === 0) return { classement: null, raison: null }
   try {
     const reponse = await fetch('/api/parties/terminee', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(partie),
     })
-    // La variation de classement n'existe que pour une partie classée ; pour
-    // toutes les autres, l'appel reste ce qu'il était — silencieux et sans
-    // conséquence à l'écran.
-    const data = (await reponse.json()) as { classement?: VariationClassement }
-    return data.classement ?? null
+    const data = (await reponse.json()) as {
+      classement?: VariationClassement
+      raison?: string
+    }
+    return { classement: data.classement ?? null, raison: data.raison ?? null }
   } catch {
-    // Silence volontaire : voir l'en-tête du fichier.
-    return null
+    // Le réseau a lâché après la partie : on ne sait pas ce qu'elle est
+    // devenue, et prétendre le contraire dans un sens ou dans l'autre serait
+    // pire que de se taire.
+    return { classement: null, raison: null }
   }
 }
 

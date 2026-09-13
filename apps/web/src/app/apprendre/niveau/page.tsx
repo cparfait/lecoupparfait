@@ -71,7 +71,9 @@ import { playMoveFor, playSound } from '@/lib/sound.ts'
 import {
   aujourdhui,
   enregistrerNiveauEstime,
+  enregistrerReleveEnAttente,
   lireNiveauEstime,
+  oublierReleveEnAttente,
   palierPour,
   puzzleVersPartie,
 } from '@/lib/apprendre/palier.ts'
@@ -321,17 +323,23 @@ export default function TestDeNiveauPage() {
       positions: etapes.length,
     })
 
+    const releve = etapes.map((etape) => ({ id: etape.id, reussie: etape.reussie }))
+    // Gardé en attendant qu'il y ait un compte : sans cela, se mesurer *puis*
+    // s'inscrire — l'ordre que l'écran d'inscription recommande lui-même —
+    // perdait la mesure. Voir `ReleveEnAttente`.
+    enregistrerReleveEnAttente(releve)
+
     void fetch('/api/niveau', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        positions: etapes.map((etape) => ({ id: etape.id, reussie: etape.reussie })),
-      }),
+      body: JSON.stringify({ positions: releve }),
     })
       .then((reponse) => (reponse.ok ? reponse.json() : null))
-      .then((donnees: Mesure | null) => {
+      .then((donnees: (Mesure & { enregistre?: boolean }) | null) => {
         if (!donnees || !Number.isFinite(donnees.partie)) return
         setMesureServeur(donnees)
+        // Repris par un compte : il n'y a plus rien à garder pour plus tard.
+        if (donnees.enregistre) oublierReleveEnAttente()
         enregistrerNiveauEstime({
           elo: donnees.partie,
           source: 'test',

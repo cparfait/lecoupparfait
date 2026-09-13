@@ -188,6 +188,7 @@ export function PromotionPicker({
                 animation: `slide-up .18s cubic-bezier(.16,1,.3,1) ${index * 35}ms both`,
               }}
             >
+              {/* eslint-disable-next-line @next/next/no-img-element -- Les pièces sont des SVG locaux, dimensionnés en CSS et déplacés par `transform` : `next/image` n'optimiserait rien et son enveloppe casserait l'animation. */}
               <img
                 src={pieceUrl(pieceSet, color, type)}
                 alt=""
@@ -249,6 +250,7 @@ export function PromotionPicker({
                 background: color === 'b' ? 'var(--sq-light)' : 'var(--sq-dark)',
               }}
             />
+            {/* eslint-disable-next-line @next/next/no-img-element -- Les pièces sont des SVG locaux, dimensionnés en CSS et déplacés par `transform` : `next/image` n'optimiserait rien et son enveloppe casserait l'animation. */}
             <img
               src={pieceUrl(pieceSet, color, type)}
               alt=""

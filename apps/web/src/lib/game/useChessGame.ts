@@ -117,18 +117,28 @@ export function useChessGame(options: UseChessGameOptions = {}) {
     if (chess.isThreefoldRepetition()) return 'threefold'
     if (chess.isDrawByFiftyMoves()) return 'fiftyMoves'
     return 'playing'
+    // `currentFen` n'est pas lu dans le calcul, et il est pourtant la seule
+    // dépendance qui bouge : `chess` est un objet muté en place, dont
+    // l'identité ne change jamais. Sans lui, le statut resterait celui du
+    // premier rendu.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chess, currentFen])
 
   const result = useMemo<GameResult>(() => {
     if (status === 'checkmate') return chess.turn() === 'w' ? '0-1' : '1-0'
     if (status === 'playing') return '*'
     return '1/2-1/2'
+    // Même raison qu'au-dessus : `chess` est muté en place.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, chess, currentFen])
 
   const checkSquare = useMemo<Square | null>(() => {
     const board = isLive ? chess : new Chess(displayedFen, { skipValidation: true })
     if (!board.inCheck()) return null
     return board.findPiece({ type: 'k', color: board.turn() })[0] ?? null
+    // Même raison qu'au-dessus : `chess` est muté en place, `currentFen` est
+    // ce qui dit qu'il a bougé.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chess, currentFen, isLive, displayedFen])
 
   const material = useMemo(() => {

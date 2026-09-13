@@ -90,7 +90,9 @@ export function Annonces() {
         return
       }
       toast.success(
-        pseudo.trim() ? t('admin.announceSentTo', { pseudo: pseudo.trim() }) : t('admin.announceSentAll'),
+        pseudo.trim()
+          ? t('admin.announceSentTo', { pseudo: pseudo.trim() })
+          : t('admin.announceSentAll'),
         t('admin.loggedInJournal'),
       )
       setMessage('')

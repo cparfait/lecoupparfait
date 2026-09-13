@@ -236,6 +236,10 @@ function ImportScreen({
     } catch {
       // Stockage de session indisponible : sans conséquence.
     }
+    // Au montage seulement : cet effet consomme ce qu'une autre page a déposé
+    // dans `sessionStorage` et l'efface aussitôt. Le relancer parce que le
+    // parent a recréé `onSide` relirait des clés déjà retirées.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const parsed = useMemo(() => (input.trim() ? parseAnalysisInput(input) : null), [input])
@@ -1198,7 +1202,9 @@ export function ReviewScreen({
       })
     }
     return list
-  }, [move, demo])
+    // `etatEnigme` en dépendance : les flèches sont masquées tant que l'énigme
+    // est ouverte, et sans lui elles restaient dans l'état d'avant la réponse.
+  }, [move, demo, etatEnigme])
 
   const check = useMemo(() => {
     if (!move) return { square: null, mate: false }

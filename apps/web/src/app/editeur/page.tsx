@@ -158,6 +158,7 @@ export default function EditorPage() {
     } catch {
       // Stockage refusé : on collera la position à la main.
     }
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- Rechargement complet : ce qu'on vient de déposer dans `sessionStorage` doit être lu au montage de l'écran d'analyse, qui peut déjà être monté et n'y reviendrait pas.
     window.location.assign('/analyse')
   }, [fen, verdict, t])
 

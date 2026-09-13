@@ -141,6 +141,7 @@ export default function ProfilePage() {
       body: JSON.stringify({ action: 'signout' }),
     })
     toast.success(t('profile.seeYouSoon'))
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- Rechargement complet et non `router.push` : la déconnexion doit vider tout l'état client — identité partagée, préférences, caches — qu'une navigation cliente conserverait.
     window.location.assign('/')
   }, [t])
 
@@ -212,6 +213,7 @@ export default function ProfilePage() {
         setEnvoi(null)
         return
       }
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- Rechargement complet : ce qu'on vient de déposer dans `sessionStorage` doit être lu au montage de l'écran d'analyse, qui peut déjà être monté et n'y reviendrait pas.
       window.location.assign('/analyse')
     },
     [t],

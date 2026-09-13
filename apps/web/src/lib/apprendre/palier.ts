@@ -384,6 +384,76 @@ export function lireNiveauEstime(): NiveauEstime | null {
   }
 }
 
+/**
+ * Le relevé du dernier test, gardé en attendant qu'il y ait un compte.
+ *
+ * ── Pourquoi il faut le garder ───────────────────────────────────────────────
+ *
+ * Le test se passe très bien sans compte, et l'inscription y envoie
+ * explicitement ceux qui ne savent pas quel niveau déclarer. Mais la mesure
+ * n'amorce le classement que pour un compte connecté : quelqu'un qui se mesurait
+ * à 1 400 *puis* s'inscrivait repartait de 100, et sa mesure ne vivait plus que
+ * dans son navigateur. L'ordre recommandé par l'application était celui qui
+ * perdait le résultat.
+ *
+ * On garde donc le **relevé** — les positions vues et ce qu'on en a fait — et
+ * non la mesure : c'est le serveur qui mesure, à partir des cotes réelles du
+ * catalogue, et lui envoyer un nombre rouvrirait la porte du « je déclare 2 400 ».
+ * Voir `POST /api/niveau`.
+ *
+ * Il s'efface dès qu'il a été repris, ou après quinze jours : au-delà, le
+ * relevé décrit quelqu'un d'autre.
+ */
+const CLE_RELEVE = 'coupparfait.releveTest'
+const RELEVE_PERIME_JOURS = 15
+
+export interface ReleveEnAttente {
+  positions: Array<{ id: string; reussie: boolean }>
+  /** Date du test, au format ISO court. */
+  le: string
+}
+
+export function enregistrerReleveEnAttente(
+  positions: Array<{ id: string; reussie: boolean }>,
+): void {
+  if (typeof window === 'undefined') return
+  try {
+    const valeur: ReleveEnAttente = { positions, le: aujourdhui() }
+    window.localStorage.setItem(CLE_RELEVE, JSON.stringify(valeur))
+  } catch {
+    // Stockage refusé : la mesure ne suivra pas l'inscription, le test reste
+    // juste. Rien à réparer côté appelant.
+  }
+}
+
+export function lireReleveEnAttente(): ReleveEnAttente | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const brut = window.localStorage.getItem(CLE_RELEVE)
+    if (!brut) return null
+    const valeur = JSON.parse(brut) as ReleveEnAttente
+    if (!Array.isArray(valeur?.positions) || valeur.positions.length === 0) return null
+    const jours = (Date.now() - Date.parse(valeur.le)) / 86_400_000
+    if (!Number.isFinite(jours) || jours > RELEVE_PERIME_JOURS) {
+      oublierReleveEnAttente()
+      return null
+    }
+    return valeur
+  } catch {
+    return null
+  }
+}
+
+export function oublierReleveEnAttente(): void {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.removeItem(CLE_RELEVE)
+  } catch {
+    // Sans conséquence : au pire le relevé sera renvoyé une fois de trop, et
+    // la route se contente de réécrire la même mesure.
+  }
+}
+
 export function enregistrerNiveauEstime(valeur: NiveauEstime): void {
   if (typeof window === 'undefined') return
   try {

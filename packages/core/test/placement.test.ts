@@ -150,13 +150,7 @@ test('un relevé serré autour du niveau est plus sûr qu’un relevé qui file'
   // Six positions à la mesure du joueur : chacune informe au maximum.
   const serre = mesurerNiveau(releve(1200, 'oxoxox'), DEPART)!
   // Six positions hors de portée : on n'apprend presque rien de chacune.
-  const hasard = mesurerNiveau(
-    [
-      ...releve(2600, 'xxx'),
-      ...releve(2600, 'xxx'),
-    ],
-    DEPART,
-  )!
+  const hasard = mesurerNiveau([...releve(2600, 'xxx'), ...releve(2600, 'xxx')], DEPART)!
   assert.ok(
     serre.sigma < hasard.sigma,
     `un relevé serré doit être plus sûr (${serre.sigma} contre ${hasard.sigma})`,

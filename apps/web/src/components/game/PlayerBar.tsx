@@ -287,6 +287,7 @@ function CapturedRow({
   return (
     <span className="flex items-center" role="img" aria-label={t('bits.capturedPieces')}>
       {sorted.map((type, index) => (
+        // eslint-disable-next-line @next/next/no-img-element -- Les pièces sont des SVG locaux, dimensionnés en CSS et déplacés par `transform` : `next/image` n'optimiserait rien et son enveloppe casserait l'animation.
         <img
           key={`${type}-${index}`}
           src={pieceUrl(pieceSet, color, type)}

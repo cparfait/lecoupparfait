@@ -25,15 +25,7 @@
  */
 
 import { NextResponse } from 'next/server'
-import {
-  announcementReads,
-  announcements,
-  desc,
-  eq,
-  getDb,
-  sql,
-  users,
-} from '@coupparfait/db'
+import { announcementReads, announcements, desc, eq, getDb, sql, users } from '@coupparfait/db'
 import { getAdmin } from '@/lib/server/admin.ts'
 import { journaliser } from '@/lib/server/audit.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
@@ -112,7 +104,9 @@ export async function POST(request: Request) {
     annonce générale, elle, gagne à s'éteindre toute seule, et l'écran propose
     sept jours.
   */
-  const jours = Number.isFinite(corps.jours) ? Math.min(365, Math.max(0, Math.round(corps.jours!))) : 0
+  const jours = Number.isFinite(corps.jours)
+    ? Math.min(365, Math.max(0, Math.round(corps.jours!)))
+    : 0
   const expiresAt = jours > 0 ? new Date(Date.now() + jours * 86_400_000) : null
 
   try {

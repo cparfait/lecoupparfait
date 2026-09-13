@@ -1242,6 +1242,7 @@ export default function LiveGamePage() {
           opponentName={opponent?.name ?? 'Adversaire'}
           moves={playedMoves}
           bilan={bilan}
+          // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- Rechargement complet : on quitte une partie en direct, dont le socket et l'état de salon doivent disparaître avec la page.
           onNewGame={() => window.location.assign('/jouer/ami')}
         />
       )}

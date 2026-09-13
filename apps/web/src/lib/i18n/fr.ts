@@ -323,6 +323,27 @@ export const fr = {
       'tu as demandé un indice au moteur. Ni classement, ni carrière, ni quête du jour — et rien n’est retiré à personne non plus.',
     usedTakeback:
       'tu as repris un coup. Ni classement, ni carrière, ni quête du jour — et rien n’est retiré à personne non plus.',
+
+    // ── Pourquoi une partie annoncée classée ne l'est pas ────────────────
+    // Le serveur rend un code, ces phrases le disent. Elles se lisent à la
+    // suite de « Partie non classée : », d'où la minuscule initiale.
+    ratedAnnounceFailed: 'cette partie ne sera pas classée',
+    ratedAnnounceFailedHint:
+      'Le serveur n’a pas pu enregistrer l’annonce. Reviens en arrière et relance la partie pour qu’elle compte.',
+    unratedNoOpponent: 'l’adversaire n’a pas de classement annoncé.',
+    unratedUnverifiable:
+      'une victoire au temps ou par abandon de l’ordinateur ne se lit pas sur l’échiquier : rien ne permet de la vérifier.',
+    unratedSetupPosition: 'la partie ne commençait pas à la position initiale.',
+    unratedNotAnnounced:
+      'elle n’avait pas été annoncée avant de commencer. Relance-la depuis l’écran de réglages.',
+    unratedMismatch:
+      'elle ne correspond pas à ce qui avait été annoncé — niveau, cadence ou couleur ont changé en route.',
+    unratedTooFast: 'elle s’est déroulée trop vite pour avoir été jouée.',
+    unratedTooShort: 'elle fait moins de dix demi-coups.',
+    unratedTooSoon: 'une seule partie classée par minute.',
+    unratedUnavailable:
+      'le classement était indisponible. La partie est archivée, elle ne compte pas.',
+    unratedUnknown: 'le serveur ne l’a pas comptée.',
   },
 
   live: {

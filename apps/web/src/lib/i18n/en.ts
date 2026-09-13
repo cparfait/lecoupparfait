@@ -320,6 +320,25 @@ export const en: Dictionary = {
       'you asked the engine for a hint. No rating, no career, no daily quest — and nothing is taken from anyone either.',
     usedTakeback:
       'you took a move back. No rating, no career, no daily quest — and nothing is taken from anyone either.',
+
+    // ── Why a game announced as rated is not ─────────────────────────────
+    ratedAnnounceFailed: 'this game will not be rated',
+    ratedAnnounceFailedHint:
+      'The server could not record the announcement. Go back and start the game again for it to count.',
+    unratedNoOpponent: 'the opponent has no announced rating.',
+    unratedUnverifiable:
+      'a win on time or by the computer resigning cannot be read on the board: nothing can verify it.',
+    unratedSetupPosition: 'the game did not start from the initial position.',
+    unratedNotAnnounced:
+      'it had not been announced before starting. Start it again from the setup screen.',
+    unratedMismatch:
+      'it does not match what was announced — level, time control or colour changed along the way.',
+    unratedTooFast: 'it went by too fast to have been played.',
+    unratedTooShort: 'it is under ten half-moves.',
+    unratedTooSoon: 'only one rated game per minute.',
+    unratedUnavailable:
+      'the rating service was unavailable. The game is archived, it does not count.',
+    unratedUnknown: 'the server did not count it.',
   },
 
   live: {

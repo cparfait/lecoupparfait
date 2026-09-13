@@ -18,7 +18,17 @@
  */
 
 import { NextResponse } from 'next/server'
-import { and, announcementReads, announcements, desc, eq, getDb, isNull, or, sql } from '@coupparfait/db'
+import {
+  and,
+  announcementReads,
+  announcements,
+  desc,
+  eq,
+  getDb,
+  isNull,
+  or,
+  sql,
+} from '@coupparfait/db'
 import { getCurrentUser } from '@/lib/server/session.ts'
 
 export const runtime = 'nodejs'

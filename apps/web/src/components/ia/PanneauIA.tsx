@@ -51,6 +51,9 @@ export function PanneauIA() {
   // Il faut le faire avant tout rendu qui les cherche dans le registre, d'où
   // l'exécution pendant le rendu plutôt que dans un effet.
   const customSignature = JSON.stringify(customDefs)
+  // La signature JSON *est* la dépendance : comparer `customDefs` par identité
+  // relancerait l'enregistrement à chaque rendu, l'objet étant reconstruit.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useMemo(() => setCustomProviders(customDefs), [customSignature])
 
   const provider = getProvider(providerId)

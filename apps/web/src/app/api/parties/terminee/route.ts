@@ -252,25 +252,31 @@ export async function POST(request: Request) {
     sans « Indice » et sans le mode commenté : un silence, ici, passerait pour
     une panne. On ne le renvoie que s'il a demandé le classement — dans tous
     les autres cas il n'y a rien à expliquer.
+
+    **Un code, et non une phrase.** Ces valeurs étaient des phrases françaises,
+    et elles n'étaient lues par personne : l'écran de fin jetait la réponse.
+    Maintenant qu'il l'affiche, elle doit exister dans les vingt langues de
+    l'interface — donc être une clé, traduite côté client, et non du texte
+    fabriqué ici.
   */
   const raison =
     classee || body.classee !== true
       ? undefined
       : body.mode !== 'computer' || niveau === null || niveau < 1
-        ? 'adversaire sans classement'
+        ? 'adversaire-sans-classement'
         : !verifiable
-          ? 'résultat non vérifiable'
+          ? 'resultat-non-verifiable'
           : !depuisLeDebut
-            ? 'position de départ imposée'
+            ? 'position-imposee'
             : annonce === null
-              ? 'partie non annoncée'
+              ? 'non-annoncee'
               : !conforme
-                ? 'annonce et partie ne concordent pas'
+                ? 'annonce-differente'
                 : !assezLente
-                  ? 'partie trop rapide'
+                  ? 'trop-rapide'
                   : moves.length < MIN_COUPS_CLASSEE
-                    ? 'partie trop courte'
-                    : 'une partie classée par minute'
+                    ? 'trop-courte'
+                    : 'trop-frequente'
 
   try {
     const rangee = await getDb()
@@ -371,7 +377,7 @@ export async function POST(request: Request) {
         ok: true,
         classee: false,
         niveau: niveauRetenu,
-        raison: 'classement indisponible',
+        raison: 'classement-indisponible',
       })
     }
 

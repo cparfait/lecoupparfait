@@ -72,6 +72,7 @@ export function AccountButton() {
       body: JSON.stringify({ action: 'signout' }),
     })
     toast.success(t('rest.seeYouSoon'))
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- Rechargement complet et non `router.push` : la déconnexion doit vider tout l'état client — identité partagée, préférences, caches — qu'une navigation cliente conserverait.
     window.location.assign('/')
   }, [t])
 
