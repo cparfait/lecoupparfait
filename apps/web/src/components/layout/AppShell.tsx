@@ -32,6 +32,7 @@ import { AccountButton } from '@/components/layout/AccountButton.tsx'
 import { ChallengeWatcher } from '@/components/social/ChallengeWatcher.tsx'
 import { PastilleSerie } from '@/components/daily/PastilleSerie.tsx'
 import { MiseEnRoute } from '@/components/layout/MiseEnRoute.tsx'
+import { TitreTraduit } from '@/lib/titreOnglet.ts'
 import { Presence } from '@/components/layout/Presence.tsx'
 import { RepriseEnLigne } from '@/components/social/RepriseEnLigne.tsx'
 import { Menu } from '@/components/ui/Menu.tsx'
@@ -266,6 +267,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Le battement de présence, dans la coque pour la même raison que le
           guetteur : il vaut sur tous les écrans. Il ne rend rien. */}
+      {/* Rien à l'écran : il nomme l'onglet dans la langue de l'interface, que
+          les métadonnées du serveur ne connaissent pas. Voir `titreOnglet.ts`. */}
+      <TitreTraduit />
+
       <Presence />
 
       {/* Un ami peut proposer une partie pendant qu'on lit une leçon : le
