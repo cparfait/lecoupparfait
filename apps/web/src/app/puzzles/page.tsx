@@ -58,6 +58,7 @@ import { useRouter } from 'next/navigation'
 import { jourLocal, queteFaite } from '@/lib/daily/quotidien.ts'
 import type { LocaleDuContenu as Locale } from '@/lib/i18n/dictionary.ts'
 import { useLegalMoves } from '@/lib/game/useLegalMoves.ts'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 interface Puzzle {
   id: string
@@ -1044,15 +1045,19 @@ export default function PuzzlesPage() {
                 {puzzle.themes.slice(0, 6).map((themeId) => {
                   const copy = motifCopy(themeId as MotifId, locale)
                   return (
-                    <Chip key={themeId} tone="accent" title={copy?.definition}>
-                      {copy?.name ?? themeId}
+                    <Chip
+                      key={themeId}
+                      tone="accent"
+                      title={copy ? tCoeur(t, copy.definition) : undefined}
+                    >
+                      {copy ? tCoeur(t, copy.name) : themeId}
                     </Chip>
                   )
                 })}
               </div>
               {puzzle.themes[0] && (
                 <p className="mt-2.5 text-[12px] leading-relaxed text-muted">
-                  {motifCopy(puzzle.themes[0] as MotifId, locale)?.definition}
+                  {tCoeur(t, motifCopy(puzzle.themes[0] as MotifId, locale)?.definition ?? '')}
                 </p>
               )}
               <p className="mt-3 text-[12px] text-faint">
@@ -1293,7 +1298,8 @@ function CategorieDuPuzzle({
   const label = (THEMES as readonly string[]).includes(motif)
     ? t(`puzzles.themeNames.${motif}` as never)
     : motif
-  const definition = motifCopy(motif as MotifId, locale)?.definition
+  const cleDeDefinition = motifCopy(motif as MotifId, locale)?.definition
+  const definition = cleDeDefinition ? tCoeur(t, cleDeDefinition) : undefined
 
   if (!choisi && !visible) {
     return (

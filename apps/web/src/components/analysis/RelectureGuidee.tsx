@@ -32,8 +32,8 @@ import {
 import type { MoveExplanation } from '@coupparfait/core'
 import { Button } from '@/components/ui/index.tsx'
 import { TexteAvecTermes } from './TexteAvecTermes.tsx'
-import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
-import { usePreferences } from '@/lib/store/preferences.ts'
+import { useT } from '@/lib/i18n/index.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 export function RelectureGuidee({
   echiquier,
@@ -75,7 +75,6 @@ export function RelectureGuidee({
   onReveler: () => void
 }) {
   const t = useT()
-  const contenu = usePreferences((state) => localeDuContenu(state.locale))
   const style = move ? QUALITY_STYLES[move.quality] : null
   const dernier = cursor >= report.moves.length - 1
 
@@ -151,7 +150,7 @@ export function RelectureGuidee({
                     background: `color-mix(in oklab, var(--q-${style.token}) 20%, transparent)`,
                     color: `var(--q-${style.token})`,
                   }}
-                  title={`${style.label[contenu]} — ${style.description[contenu]}`}
+                  title={`${tCoeur(t, style.label)} — ${tCoeur(t, style.description)}`}
                 >
                   {style.glyph}
                 </span>

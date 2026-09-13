@@ -20,6 +20,9 @@
 import { useMemo } from 'react'
 import { motifGlossary } from '@coupparfait/core'
 import { TERMS } from '@/lib/glossaire.ts'
+import type { Traducteur } from '@/lib/i18n/resoudre.ts'
+import { localeDuContenu, useI18n } from '@/lib/i18n/index.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 interface Terme {
   nom: string
@@ -36,21 +39,23 @@ interface Terme {
  * Trié par longueur décroissante : sans cela « pion » l'emporterait sur « pion
  * passé », et l'on définirait le mauvais des deux.
  */
-function construireDictionnaire(): Terme[] {
+function construireDictionnaire(t: Traducteur): Terme[] {
   const par = new Map<string, Terme>()
 
-  for (const motif of motifGlossary('fr')) {
-    const cle = motif.name.toLowerCase()
-    if (!par.has(cle)) par.set(cle, { nom: motif.name, definition: motif.definition })
+  for (const motif of motifGlossary()) {
+    const nom = tCoeur(t, motif.name)
+    const cle = nom.toLowerCase()
+    if (!par.has(cle)) par.set(cle, { nom, definition: tCoeur(t, motif.definition) })
   }
   for (const terme of TERMS) {
-    const cle = terme.name.toLowerCase()
+    const nom = t(terme.name)
+    const cle = nom.toLowerCase()
     if (!par.has(cle)) {
       par.set(cle, {
-        nom: terme.name,
+        nom,
         // Les définitions du glossaire portent du gras Markdown, utile sur sa
         // page et parasite dans une infobulle.
-        definition: terme.definition.replace(/\*\*/g, ''),
+        definition: t(terme.definition).replace(/\*\*/g, ''),
       })
     }
   }
@@ -60,7 +65,16 @@ function construireDictionnaire(): Terme[] {
     .sort((a, b) => b.nom.length - a.nom.length)
 }
 
-let dictionnaire: Terme[] | null = null
+/**
+ * Une table par langue.
+ *
+ * Elle était construite une fois pour toute l'application, ce qui allait tant
+ * que les termes étaient écrits en français dans le code. Traduits, un cache
+ * unique aurait gardé les mots de la première langue affichée et cessé de
+ * reconnaître quoi que ce soit ensuite. Même correctif que pour le repéreur
+ * d'ouvertures, et pour la même raison.
+ */
+const tables = new Map<string, Terme[]>()
 
 /**
  * L'expression qui repère les termes.
@@ -79,7 +93,9 @@ function construireMotif(termes: Terme[]): RegExp {
 let motif: RegExp | null = null
 
 export function TexteAvecTermes({ texte, className }: { texte: string; className?: string }) {
-  const morceaux = useMemo(() => decouper(texte), [texte])
+  const { t, locale } = useI18n()
+  const contenu = localeDuContenu(locale)
+  const morceaux = useMemo(() => decouper(texte, locale, contenu, t), [texte, locale, contenu, t])
 
   return (
     <p className={className}>
@@ -110,8 +126,17 @@ export function TexteAvecTermes({ texte, className }: { texte: string; className
 }
 
 /** Découpe un texte en morceaux bruts et en termes reconnus. */
-function decouper(texte: string): Array<string | { mot: string; definition: string }> {
-  dictionnaire ??= construireDictionnaire()
+function decouper(
+  texte: string,
+  locale: string,
+  contenu: 'fr' | 'en',
+  t: Traducteur,
+): Array<string | { mot: string; definition: string }> {
+  let dictionnaire = tables.get(locale)
+  if (!dictionnaire) {
+    dictionnaire = construireDictionnaire(t)
+    tables.set(locale, dictionnaire)
+  }
   motif ??= construireMotif(dictionnaire)
 
   const morceaux: Array<string | { mot: string; definition: string }> = []

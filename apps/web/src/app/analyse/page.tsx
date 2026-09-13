@@ -80,6 +80,7 @@ import { playSound } from '@/lib/sound.ts'
 import type { Arrow } from '@/components/board/boardKit.ts'
 import type { PlayedMove } from '@/lib/game/useChessGame.ts'
 import { useLegalMoves } from '@/lib/game/useLegalMoves.ts'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 export default function AnalysisPage() {
   const [outcome, setOutcome] = useState<AnalysisOutcome | null>(null)
@@ -1624,7 +1625,7 @@ export function ReviewScreen({
                         color: `var(--q-${style.token})`,
                       }}
                       aria-hidden
-                      title={`${style.label.fr} — ${style.description.fr}`}
+                      title={`${tCoeur(t, style.label)} — ${tCoeur(t, style.description)}`}
                     >
                       {style.glyph}
                     </span>
@@ -1990,7 +1991,7 @@ function AccuracySummary({
               <div
                 key={quality}
                 className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 rounded-[var(--radius-sm)] px-1 py-1"
-                title={`${style.label.fr} — ${style.description.fr}`}
+                title={`${tCoeur(t, style.label)} — ${tCoeur(t, style.description)}`}
               >
                 <span
                   className="text-left text-[14px] font-semibold tabular-nums"
@@ -2009,7 +2010,7 @@ function AccuracySummary({
                   >
                     {style.glyph}
                   </span>
-                  <span className="text-[12px] text-muted">{style.label.fr}</span>
+                  <span className="text-[12px] text-muted">{tCoeur(t, style.label)}</span>
                 </span>
                 <span
                   className="text-right text-[14px] font-semibold tabular-nums"
@@ -2075,7 +2076,7 @@ function KeyMoments({
               <span
                 className="shrink-0 font-bold"
                 style={{ color: `var(--q-${style.token})` }}
-                title={`${style.label.fr} — ${style.description.fr}`}
+                title={`${tCoeur(t, style.label)} — ${tCoeur(t, style.description)}`}
               >
                 {style.glyph}
               </span>
@@ -2190,7 +2191,7 @@ function PlayerReport({
                   background: `color-mix(in oklab, var(--q-${style.token}) 16%, transparent)`,
                   color: `var(--q-${style.token})`,
                 }}
-                title={`${style.label.fr} — ${style.description.fr}`}
+                title={`${tCoeur(t, style.label)} — ${tCoeur(t, style.description)}`}
               >
                 {style.glyph} {counts[quality]}
               </span>

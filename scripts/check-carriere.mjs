@@ -29,6 +29,23 @@ const {
 } = await import('../packages/core/src/carriere.ts')
 const { BOT_LEVELS, BOT_PERSONALITIES } = await import('../packages/core/src/bots.ts')
 const { ALL_LESSONS } = await import('../apps/web/src/lib/lessons/index.ts')
+const { fr } = await import('../apps/web/src/lib/i18n/fr.ts')
+
+/**
+ * Le texte d'une clé du cœur.
+ *
+ * Les noms d'adversaires vivent dans le dictionnaire depuis qu'ils existent en
+ * plusieurs langues ; le cœur n'en porte plus que la clé. Ce contrôle affiche du
+ * français, comme le reste de sa sortie.
+ */
+function resoudre(chemin) {
+  let courant = fr
+  for (const segment of String(chemin).split('.')) {
+    if (!courant || typeof courant !== 'object') return String(chemin)
+    courant = courant[segment]
+  }
+  return typeof courant === 'string' ? courant : String(chemin)
+}
 
 let checks = 0
 let failures = 0
@@ -93,7 +110,7 @@ for (const c of CHAPITRES) {
   ) {
     const elo = BOT_LEVELS[c.niveau - 1].elo
     console.log(
-      `  ✓ ${String(c.numero).padStart(2)}. ${c.titre.padEnd(30)} ${BOT_PERSONALITIES[c.adversaire].name.fr.padEnd(9)} ${String(elo).padStart(4)} Elo`,
+      `  ✓ ${String(c.numero).padStart(2)}. ${c.titre.padEnd(30)} ${resoudre(BOT_PERSONALITIES[c.adversaire].name).padEnd(9)} ${String(elo).padStart(4)} Elo`,
     )
   }
 }

@@ -125,15 +125,17 @@ function TexteEcrit({
           id="explication-titre"
           className="min-w-0 flex-1 font-display text-xl font-bold tracking-tight"
         >
-          {explication.titre}
+          {t(explication.titre)}
         </h2>
         <BoutonEcouter
-          quoi={explication.titre}
-          texte={`${explication.titre}. ${explication.texte}`}
+          quoi={t(explication.titre)}
+          texte={`${t(explication.titre)}. ${t(explication.texte)}`}
           className="-mt-1"
         />
       </div>
-      <p className="mt-3 text-[14px] leading-relaxed text-muted">{renderBold(explication.texte)}</p>
+      <p className="mt-3 text-[14px] leading-relaxed text-muted">
+        {renderBold(t(explication.texte))}
+      </p>
 
       {demande.type === 'cadence' && demande.parties !== undefined && (
         <p className="mt-4 rounded-[var(--radius-sm)] bg-surface px-3 py-2 text-[14px]">
@@ -159,7 +161,7 @@ function TexteEcrit({
           className="mt-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-accent hover:underline"
         >
           <BookOpen size={13} aria-hidden />
-          {t('explain.inGlossary', { terme: explication.terme })}
+          {t('explain.inGlossary', { terme: t(explication.terme) })}
         </Link>
       )}
     </>

@@ -20,9 +20,8 @@ import { QUALITY_STYLES, isNotableQuality } from '@coupparfait/core'
 import { groupMoves, type PlayedMove } from '@/lib/game/useChessGame.ts'
 import { useNavigationClavier } from './GameNav.tsx'
 import { useMoveWords, useSan } from '@/lib/notation.ts'
-import { localeDuContenu } from '@/lib/i18n/index.tsx'
-import { usePreferences } from '@/lib/store/preferences.ts'
 import { useT } from '@/lib/i18n/index.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 export interface MoveListProps {
   moves: PlayedMove[]
@@ -94,7 +93,6 @@ export function MoveList({
     autres à l'anglais. Sans cela, choisir le polonais produirait des phrases
     qui n'existent pas.
   */
-  const locale = usePreferences((state) => localeDuContenu(state.locale))
   const format = useSan()
   const dire = useMoveWords()
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -284,7 +282,6 @@ export function MoveList({
                   ply={row.whitePly}
                   active={cursor === row.whitePly}
                   quality={qualities?.[row.whitePly]}
-                  locale={locale}
                   format={format}
                   dire={dire}
                   onSeek={onSeek}
@@ -295,7 +292,6 @@ export function MoveList({
                   ply={row.blackPly}
                   active={cursor === row.blackPly}
                   quality={qualities?.[row.blackPly]}
-                  locale={locale}
                   format={format}
                   dire={dire}
                   onSeek={onSeek}
@@ -315,7 +311,6 @@ const MoveCell = function MoveCell({
   ply,
   active,
   quality,
-  locale,
   format,
   dire,
   onSeek,
@@ -325,7 +320,6 @@ const MoveCell = function MoveCell({
   ply: number
   active: boolean
   quality?: MoveQuality
-  locale: 'fr' | 'en'
   /** Écriture des coups, accordée aux préférences. */
   format: (san: string) => string
   /** Le même coup en français ordinaire, pour l'info-bulle. */
@@ -333,6 +327,7 @@ const MoveCell = function MoveCell({
   onSeek: (ply: number) => void
   ref?: React.Ref<HTMLButtonElement>
 }) {
+  const t = useT()
   if (!move) return <span className="px-2 py-1.5" />
 
   const san = format(move.san)
@@ -377,7 +372,7 @@ const MoveCell = function MoveCell({
       // survolant qu'on l'apprend.
       // Et le verdict avec, sans quoi la couleur reste une devinette : « rouge,
       // d'accord, mais rouge de quoi ? ».
-      title={style ? `${dire(move.san)} — ${style.label[locale]}` : dire(move.san)}
+      title={style ? `${dire(move.san)} — ${tCoeur(t, style.label)}` : dire(move.san)}
       className={clsx(
         // Au doigt, la ligne s'épaissit jusqu'à la taille d'un pouce ; la
         // liste s'allonge d'autant, mais elle défile.
@@ -398,7 +393,7 @@ const MoveCell = function MoveCell({
         <span
           className="ml-auto shrink-0 text-[12px] font-bold leading-none"
           style={{ color: `var(--q-${style.token})` }}
-          title={`${style.label[locale]} — ${style.description[locale]}`}
+          title={`${tCoeur(t, style.label)} — ${tCoeur(t, style.description)}`}
         >
           {style.glyph}
         </span>

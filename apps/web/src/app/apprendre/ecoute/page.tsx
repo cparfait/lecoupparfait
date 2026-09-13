@@ -39,6 +39,7 @@ import Link from 'next/link'
 import { Headphones, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react'
 import clsx from 'clsx'
 import { useT } from '@/lib/i18n/index.tsx'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, Card, Chip, TitreDePage } from '@/components/ui/index.tsx'
@@ -65,7 +66,7 @@ const SILENCE_MS = 1000
 
 interface Piste {
   lesson: Lesson
-  chapitre: string
+  chapitre: TranslationKey
   /** Index de l'étape dans la leçon. */
   etape: number
 }
@@ -291,7 +292,7 @@ export default function EcoutePage() {
             <span aria-hidden className="mr-1.5">
               {chapitre.icon}
             </span>
-            {chapitre.title}
+            {t(chapitre.title)}
           </button>
         ))}
       </div>
@@ -328,7 +329,7 @@ export default function EcoutePage() {
                 fin={`étape ${piste.etape + 1} / ${piste.lesson.steps.length}`}
               />
               <div className="p-4">
-                <Chip>{piste.chapitre}</Chip>
+                <Chip>{t(piste.chapitre)}</Chip>
                 {/* La phrase en grand : c'est ce qu'on entend, et quelqu'un qui
                     regarde l'écran doit pouvoir suivre sans tendre l'oreille. */}
                 <p className="mt-3 text-[16px] leading-relaxed">{t(etape.say)}</p>

@@ -90,7 +90,7 @@ function Section({ titre, credits }: { titre: string; credits: Credit[] }) {
                 {credit.licence}
               </span>
             </div>
-            <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{credit.note}</p>
+            <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{t(credit.note)}</p>
           </Card>
         ))}
       </div>

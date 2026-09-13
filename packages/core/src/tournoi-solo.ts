@@ -21,7 +21,7 @@
  */
 
 import { botLevel, BOT_LEVELS, BOT_PERSONALITIES } from './bots.ts'
-import type { BotPersonalityId } from './types.ts'
+import type { BotPersonalityId, CleDeTexte } from './types.ts'
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Le plateau de participants
@@ -30,7 +30,16 @@ import type { BotPersonalityId } from './types.ts'
 export interface Concurrent {
   /** `humain` pour le joueur, sinon l'indice du bot dans la grille. */
   id: string
-  nom: string
+  /**
+   * Le nom du joueur, écrit tel quel.
+   *
+   * `null` pour un adversaire artificiel, dont le nom vit dans le dictionnaire :
+   * voir `nomKey`. Les deux ne se résolvent pas de la même façon, et les
+   * confondre afficherait « bots.pion.name » à la place d'un pseudo.
+   */
+  nom: string | null
+  /** La clé du nom, pour un adversaire artificiel. */
+  nomKey?: CleDeTexte
   /** Niveau du barème, 1 à 25. `null` pour l'humain. */
   niveau: number | null
   elo: number
@@ -149,7 +158,8 @@ export function composerPlateau(
     const personnalite = CARACTERES[i % CARACTERES.length]!
     bots.push({
       id: `bot-${niveau}`,
-      nom: BOT_PERSONALITIES[personnalite].name.fr,
+      nom: null,
+      nomKey: BOT_PERSONALITIES[personnalite].name,
       niveau,
       elo: palier.elo,
       personnalite,

@@ -101,7 +101,7 @@ export async function GET() {
           /** Camp de l'ami, pour orienter l'échiquier de son côté. */
           camp: entree.etat.playerColor === 'b' ? 'b' : 'w',
           adversaire: niveau
-            ? { nom: niveau.name.fr, elo: niveau.elo, niveau: niveau.level }
+            ? { nomKey: niveau.nomKey, elo: niveau.elo, niveau: niveau.level }
             : null,
           cadence: entree.etat.timeControlId ?? null,
           /** Instant du dernier coup enregistré, en ISO. */

@@ -23,10 +23,10 @@ import {
   SAN_LETTER_FR,
   SIMPLE_VALUES,
 } from './board.ts'
-import { QUALITY_STYLES } from './classify.ts'
+import { VERDICT_PHRASE } from './classify.ts'
 import { detectMoveMotifs, detectPositionMotifs } from './motifs.ts'
 import { advantageLabel } from './eval.ts'
-import type { DetectedMotif, MotifId, MoveQuality, Score } from './types.ts'
+import type { CleDeTexte, DetectedMotif, MotifId, MoveQuality, Score } from './types.ts'
 
 export type Locale = 'fr' | 'en'
 
@@ -415,10 +415,10 @@ function materialWord(centipawns: number, locale: Locale): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface MotifCopy {
-  /** Nom court du motif, pour les étiquettes. */
-  name: string
-  /** Définition générale, affichée en info-bulle et dans le glossaire. */
-  definition: string
+  /** Nom court du motif, pour les étiquettes. Clé de dictionnaire. */
+  name: CleDeTexte
+  /** Définition générale, en info-bulle et au glossaire. Clé de dictionnaire. */
+  definition: CleDeTexte
   /** Phrase contextualisée dans la position courante. */
   sentence: (m: DetectedMotif, ctx: ExplainContext) => string
 }
@@ -582,9 +582,8 @@ function pieceAt(ctx: ExplainContext, square: Square | undefined): string {
  */
 const MOTIFS_FR: Partial<Record<MotifId, MotifCopy>> = {
   hangingPiece: {
-    name: 'Pièce en prise',
-    definition:
-      "Une pièce attaquée qui n'est pas suffisamment défendue : l'adversaire peut la prendre en gagnant du matériel.",
+    name: 'motifs.hangingPiece.name',
+    definition: 'motifs.hangingPiece.definition',
     sentence: (m, ctx) => {
       const type = (m.detail?.piece as PieceSymbol) ?? 'p'
       const square = m.squares[0]
@@ -596,9 +595,8 @@ const MOTIFS_FR: Partial<Record<MotifId, MotifCopy>> = {
     },
   },
   fork: {
-    name: 'Fourchette',
-    definition:
-      'Une seule pièce attaque simultanément deux cibles ou plus. Comme on ne peut sauver qu’une chose à la fois, on gagne l’autre.',
+    name: 'motifs.fork.name',
+    definition: 'motifs.fork.definition',
     sentence: (m, _ctx) => {
       const type = (m.detail?.piece as PieceSymbol) ?? 'n'
       const count = Number(m.detail?.targetCount ?? 2)
@@ -607,9 +605,8 @@ const MOTIFS_FR: Partial<Record<MotifId, MotifCopy>> = {
     },
   },
   pin: {
-    name: 'Clouage',
-    definition:
-      'Une pièce ne peut pas bouger sans exposer une pièce plus précieuse placée derrière elle. Si c’est le roi qui est derrière, elle ne peut légalement pas bouger du tout.',
+    name: 'motifs.pin.name',
+    definition: 'motifs.pin.definition',
     sentence: (m, ctx) => {
       const front = m.squares[1]
       const back = m.squares[2]
@@ -620,95 +617,86 @@ const MOTIFS_FR: Partial<Record<MotifId, MotifCopy>> = {
     },
   },
   skewer: {
-    name: 'Enfilade',
-    definition:
-      'L’inverse du clouage : la pièce de valeur est devant. Elle doit fuir, et en fuyant elle abandonne celle qui se trouvait derrière.',
+    name: 'motifs.skewer.name',
+    definition: 'motifs.skewer.definition',
     sentence: (m, ctx) =>
       `Enfilade : ${pieceAt(ctx, m.squares[1])} en ${m.squares[1]} doit s'écarter, et en partant elle laisse tomber ${pieceAt(ctx, m.squares[2])} en ${m.squares[2]}.`,
   },
   discoveredAttack: {
-    name: 'Attaque à la découverte',
-    definition:
-      'En déplaçant une pièce, on dégage la ligne d’une autre qui frappe soudain une cible. Deux menaces naissent d’un seul coup.',
+    name: 'motifs.discoveredAttack.name',
+    definition: 'motifs.discoveredAttack.definition',
     sentence: (m, ctx) =>
       m.detail?.check
         ? `Échec à la découverte : en libérant ${m.squares[1]}, ${sujet(m, ctx, 'ouvrir')} la ligne de ${pieceAt(ctx, m.squares[0])} en ${m.squares[0]} sur le roi. Il faut parer l'échec, et rien d'autre n'est possible.`
         : `Attaque à la découverte : la case ${m.squares[1]} libérée ouvre la ligne de ${pieceAt(ctx, m.squares[0])} sur ${m.squares[2]}.`,
   },
   doubleCheck: {
-    name: 'Échec double',
-    definition:
-      'Deux pièces donnent échec en même temps. Aucune parade ne suffit : le roi est obligé de bouger.',
+    name: 'motifs.doubleCheck.name',
+    definition: 'motifs.doubleCheck.definition',
     sentence: () =>
       `Échec double ! Impossible de capturer ou d'interposer quoi que ce soit : le roi doit se déplacer, un point c'est tout.`,
   },
   removingTheDefender: {
-    name: 'Élimination du défenseur',
-    definition:
-      'On capture ou on chasse la pièce qui défendait une cible, laquelle tombe au coup suivant.',
+    name: 'motifs.removingTheDefender.name',
+    definition: 'motifs.removingTheDefender.definition',
     sentence: (m, _ctx) =>
       `Élimination du défenseur : la prise en ${m.squares[0]} retire le gardien de ${m.squares.slice(1).join(' et ')}, qui devient prenable.`,
   },
   overloadedPiece: {
-    name: 'Pièce surchargée',
-    definition:
-      'Une pièce assure seule deux tâches défensives. Détourne-la d’un côté et l’autre s’effondre.',
+    name: 'motifs.overloadedPiece.name',
+    definition: 'motifs.overloadedPiece.definition',
     sentence: (m, ctx) =>
       `${capitalise(pieceAt(ctx, m.squares[0]))} en ${m.squares[0]} est surchargée : elle défend à la fois ${m.squares.slice(1).join(' et ')}. Attaque l'une des deux, et l'autre tombe.`,
   },
   trappedPiece: {
-    name: 'Pièce piégée',
-    definition:
-      'Une pièce attaquée qui n’a plus aucune case de fuite sûre : elle est perdue, même si personne ne l’a encore prise.',
+    name: 'motifs.trappedPiece.name',
+    definition: 'motifs.trappedPiece.definition',
     sentence: (m, ctx) =>
       `${capitalise(pieceAt(ctx, m.squares[0]))} en ${m.squares[0]} est piégée : toutes ses cases de fuite sont couvertes. Elle est condamnée.`,
   },
   backRankMate: {
-    name: 'Mat du couloir',
-    definition:
-      'Le roi roqué est enfermé par ses propres pions sur sa dernière rangée. Une tour ou une dame qui arrive sur cette rangée fait mat.',
+    name: 'motifs.backRankMate.name',
+    definition: 'motifs.backRankMate.definition',
     sentence: (m) =>
       `Attention au couloir : le roi en ${m.squares[0]} est enfermé par ses propres pions. Une tour ou une dame sur cette rangée donne mat immédiatement.`,
   },
   smotheredMate: {
-    name: 'Mat étouffé',
-    definition:
-      'Le roi est totalement entouré de ses propres pièces ; seul un cavalier peut alors le mater, car lui seul saute par-dessus.',
+    name: 'motifs.smotheredMate.name',
+    definition: 'motifs.smotheredMate.definition',
     sentence: () =>
       `Mat étouffé : le roi est prisonnier de ses propres pièces, et le cavalier saute par-dessus toutes les défenses.`,
   },
   mateIn1: {
-    name: 'Mat en un',
-    definition: 'Un seul coup met fin à la partie.',
+    name: 'motifs.mateIn1.name',
+    definition: 'motifs.mateIn1.definition',
     sentence: (m, ctx) =>
       pourLeJoueur(m, ctx)
         ? `Il y a mat en un coup, et il est pour toi.`
         : `Attention : ton adversaire a mat en un coup.`,
   },
   mateIn2: {
-    name: 'Mat en deux',
-    definition: 'Un mat forcé en deux coups, quelles que soient les réponses adverses.',
+    name: 'motifs.mateIn2.name',
+    definition: 'motifs.mateIn2.definition',
     sentence: (m, ctx) =>
       `${quiA(m, ctx)} un mat forcé en deux coups${m.detail?.line ? ` : ${(m.detail.line as string[]).map((s) => citer(s, ctx)).join(' ')}` : ''}.`,
   },
   mateIn3: {
-    name: 'Mat en trois',
-    definition: 'Un mat forcé en trois coups : aucune défense ne le repousse.',
+    name: 'motifs.mateIn3.name',
+    definition: 'motifs.mateIn3.definition',
     sentence: (m, ctx) =>
       `${quiA(m, ctx)} un mat forcé en trois coups${m.detail?.line ? ` : ${(m.detail.line as string[]).map((s) => citer(s, ctx)).join(' ')}` : ''}.`,
   },
   mateThreat: {
-    name: 'Menace de mat',
-    definition: 'Un mat arrive au coup suivant si rien n’est fait.',
+    name: 'motifs.mateThreat.name',
+    definition: 'motifs.mateThreat.definition',
     sentence: (m, ctx) =>
       pourLeJoueur(m, ctx)
         ? `Tu menaces le mat : si l'adversaire ne pare pas, c'est fini.`
         : `Il y a une menace de mat contre toi : il faut la parer immédiatement.`,
   },
   sacrifice: {
-    name: 'Sacrifice',
-    definition:
-      'On abandonne volontairement du matériel pour obtenir autre chose : une attaque, une ligne ouverte, un roi exposé.',
+    name: 'motifs.sacrifice.name',
+    definition: 'motifs.sacrifice.definition',
     /*
      * Trois défauts dans la rédaction précédente, et le premier suffisait :
      * « Sacrifice de 2 points de matériel en e5 — le matériel n'est pas ce qui
@@ -748,134 +736,119 @@ const MOTIFS_FR: Partial<Record<MotifId, MotifCopy>> = {
     },
   },
   promotion: {
-    name: 'Promotion',
-    definition: 'Un pion qui atteint la dernière rangée se transforme, presque toujours en dame.',
+    name: 'motifs.promotion.name',
+    definition: 'motifs.promotion.definition',
     sentence: (m) => `Le pion arrive en ${m.squares[0]} et devient dame.`,
   },
   underPromotion: {
-    name: 'Sous-promotion',
-    definition:
-      'Promouvoir en autre chose qu’une dame — souvent un cavalier pour donner un échec décisif, ou une tour pour éviter le pat.',
+    name: 'motifs.underPromotion.name',
+    definition: 'motifs.underPromotion.definition',
     sentence: (m) =>
       `Sous-promotion en ${m.detail?.to === 'n' ? 'cavalier' : m.detail?.to === 'r' ? 'tour' : 'fou'} : la dame ne conviendrait pas ici.`,
   },
   enPassant: {
-    name: 'Prise en passant',
-    definition:
-      'Un pion qui avance de deux cases peut être capturé par un pion adverse comme s’il n’en avait avancé qu’une — et seulement au coup suivant.',
+    name: 'motifs.enPassant.name',
+    definition: 'motifs.enPassant.definition',
     sentence: (m) => `Prise en passant : ${m.squares[0]} capture le pion qui venait de doubler.`,
   },
   passedPawn: {
-    name: 'Pion passé',
-    definition:
-      'Un pion qu’aucun pion adverse ne peut plus arrêter ni sur sa colonne, ni sur les colonnes voisines. Il vaut de l’or en finale.',
+    name: 'motifs.passedPawn.name',
+    definition: 'motifs.passedPawn.definition',
     sentence: (m) =>
       `Pion passé en ${m.squares[0]} : plus aucun pion adverse ne peut l'arrêter. En finale, c'est souvent décisif.`,
   },
   protectedPassedPawn: {
-    name: 'Pion passé protégé',
-    definition:
-      'Un pion passé soutenu par un autre pion : l’adversaire ne peut même pas le bloquer avec son roi sans perdre.',
+    name: 'motifs.protectedPassedPawn.name',
+    definition: 'motifs.protectedPassedPawn.definition',
     sentence: (m) =>
       `Pion passé **protégé** en ${m.squares[0]} — soutenu par un pion, c'est l'un des meilleurs atouts qui existent.`,
   },
   isolatedPawn: {
-    name: 'Pion isolé',
-    definition:
-      'Un pion sans voisin sur les colonnes adjacentes : aucun pion ne peut le défendre, il faut une pièce pour ça.',
+    name: 'motifs.isolatedPawn.name',
+    definition: 'motifs.isolatedPawn.definition',
     sentence: (m) =>
       `Pion isolé en ${m.squares[0]} : aucun pion ami ne pourra jamais le défendre. C'est une cible à long terme.`,
   },
   doubledPawns: {
-    name: 'Pions doublés',
-    definition:
-      'Deux pions sur la même colonne : ils se gênent, avancent mal et défendent moins bien.',
+    name: 'motifs.doubledPawns.name',
+    definition: 'motifs.doubledPawns.definition',
     sentence: (m) => `Pions doublés en ${m.squares[0]} : ils se bloquent l'un l'autre.`,
   },
   backwardPawn: {
-    name: 'Pion arriéré',
-    definition:
-      'Un pion resté en arrière que ses voisins ne peuvent plus soutenir, et dont la case d’avance est contrôlée par l’adversaire.',
+    name: 'motifs.backwardPawn.name',
+    definition: 'motifs.backwardPawn.definition',
     sentence: (m) =>
       `Pion arriéré en ${m.squares[0]} : il ne peut plus être soutenu par un pion et la case devant lui est tenue.`,
   },
   outpost: {
-    name: 'Avant-poste',
-    definition:
-      'Une case avancée, défendue par un pion, qu’aucun pion adverse ne peut attaquer. Un cavalier y est presque intouchable.',
+    name: 'motifs.outpost.name',
+    definition: 'motifs.outpost.definition',
     sentence: (m) =>
       `Avant-poste en ${m.squares[0]} : la pièce y est soutenue par un pion et aucun pion adverse ne peut la déloger.`,
   },
   bishopPair: {
-    name: 'Paire de fous',
-    definition:
-      'Posséder les deux fous alors que l’adversaire n’en a qu’un : ils couvrent toutes les cases et deviennent redoutables en position ouverte.',
+    name: 'motifs.bishopPair.name',
+    definition: 'motifs.bishopPair.definition',
     sentence: (m, ctx) =>
       pourLeJoueur(m, ctx)
         ? `Tu as la paire de fous : ouvre la position, ils vaudront de plus en plus cher.`
         : `Ton adversaire a la paire de fous : garde la position fermée, sinon ils vaudront de plus en plus cher.`,
   },
   badBishop: {
-    name: 'Mauvais fou',
-    definition: 'Un fou bloqué par ses propres pions, tous placés sur des cases de sa couleur.',
+    name: 'motifs.badBishop.name',
+    definition: 'motifs.badBishop.definition',
     sentence: (m, ctx) =>
       `Mauvais fou en ${m.squares[0]} : ${possessif(m, ctx, 'tes')} pions occupent les cases de sa couleur et l'étouffent.`,
   },
   openFile: {
-    name: 'Colonne ouverte',
-    definition:
-      'Une colonne sans aucun pion : c’est l’autoroute des tours, qui y pénètrent dans le camp adverse.',
+    name: 'motifs.openFile.name',
+    definition: 'motifs.openFile.definition',
     sentence: (m, ctx) =>
       `${capitalise(possessif(m, ctx, 'ta'))} tour en ${m.squares[0]} occupe une colonne ouverte — c'est sa place idéale.`,
   },
   semiOpenFile: {
-    name: 'Colonne semi-ouverte',
-    definition: 'Une colonne sans pion à soi mais avec un pion adverse : une cible à attaquer.',
+    name: 'motifs.semiOpenFile.name',
+    definition: 'motifs.semiOpenFile.definition',
     sentence: (m) =>
       `Colonne semi-ouverte pour la tour en ${m.squares[0]} : le pion adverse de cette colonne est une cible.`,
   },
   seventhRank: {
-    name: 'Tour à la septième',
-    definition:
-      'Une tour sur la 7ᵉ rangée (2ᵉ pour les Noirs) mange les pions et enferme le roi. Deux tours y sont souvent gagnantes à elles seules.',
+    name: 'motifs.seventhRank.name',
+    definition: 'motifs.seventhRank.definition',
     sentence: (m) =>
       `Tour à la septième en ${m.squares[0]} : elle ratisse les pions et cloue le roi sur sa dernière rangée.`,
   },
   exposedKing: {
-    name: 'Roi exposé',
-    definition:
-      'Un roi sans bouclier de pions et entouré de cases contrôlées par l’adversaire : l’attaque est en route.',
+    name: 'motifs.exposedKing.name',
+    definition: 'motifs.exposedKing.definition',
     sentence: (m) =>
       `Le roi adverse en ${m.squares[0]} est à découvert. C'est le moment d'amener des pièces vers lui plutôt que de compter le matériel.`,
   },
   kingSafety: {
-    name: 'Roi en sécurité',
-    definition: 'Un roi roqué, protégé par ses pions, loin des lignes ouvertes.',
+    name: 'motifs.kingSafety.name',
+    definition: 'motifs.kingSafety.definition',
     sentence: (m, ctx) =>
       pourLeJoueur(m, ctx)
         ? `Ton roi est bien à l'abri : tu peux jouer sur les ailes sans crainte.`
         : `Le roi adverse est bien à l'abri : une attaque directe contre lui coûtera cher.`,
   },
   development: {
-    name: 'Retard de développement',
-    definition:
-      'Des pièces encore sur leur case de départ. Chaque coup d’ouverture devrait en sortir une nouvelle.',
+    name: 'motifs.development.name',
+    definition: 'motifs.development.definition',
     sentence: (m) =>
       `Il reste ${m.squares.length} pièces sur leur case de départ (${squares(m)}). Sors-les avant de lancer une attaque.`,
   },
   centreControl: {
-    name: 'Contrôle du centre',
-    definition:
-      'Les quatre cases centrales : qui les tient dirige la partie, parce que les pièces y rayonnent dans toutes les directions.',
+    name: 'motifs.centreControl.name',
+    definition: 'motifs.centreControl.definition',
     sentence: (m, ctx) =>
       pourLeJoueur(m, ctx)
         ? `Tu domines le centre — tes pièces ont plus de cases que celles de l'adversaire.`
         : `Ton adversaire domine le centre — ses pièces ont plus de cases que les tiennes.`,
   },
   oppositeCastling: {
-    name: 'Roques opposés',
-    definition:
-      'Les rois ont roqué de côtés opposés : chacun peut lancer ses pions à l’assaut du roi adverse sans exposer le sien. Les parties deviennent très tranchantes.',
+    name: 'motifs.oppositeCastling.name',
+    definition: 'motifs.oppositeCastling.definition',
     // Les roques opposés ne profitent à personne en particulier : les deux
     // camps attaquent, et le conseil vaut pour le lecteur quel que soit
     // l'auteur du coup. On ne le décline donc pas.
@@ -883,76 +856,74 @@ const MOTIFS_FR: Partial<Record<MotifId, MotifCopy>> = {
       `Roques opposés : lance tes pions sur le roi adverse, et compte les tempos — c'est une course.`,
   },
   fianchetto: {
-    name: 'Fianchetto',
-    definition:
-      'Un fou développé en b2/g2 (ou b7/g7), derrière un pion avancé, qui balaie la grande diagonale.',
+    name: 'motifs.fianchetto.name',
+    definition: 'motifs.fianchetto.definition',
     sentence: (m) => `Fou en fianchetto en ${m.squares[0]} : il tient toute la grande diagonale.`,
   },
   opposition: {
-    name: 'Opposition',
-    definition:
-      'En finale de rois et pions, les rois se font face à une case d’écart. Celui qui n’a pas le trait gagne du terrain — c’est souvent tout ce qui décide la partie.',
+    name: 'motifs.opposition.name',
+    definition: 'motifs.opposition.definition',
     sentence: (m, ctx) =>
       pourLeJoueur(m, ctx)
         ? `Tu as l'opposition : c'est l'adversaire qui doit céder du terrain avec son roi.`
         : `Ton adversaire a l'opposition : c'est toi qui devras céder du terrain avec ton roi.`,
   },
   rookBehindPasser: {
-    name: 'Tour derrière le pion passé',
-    definition:
-      'Règle de Tarrasch : les tours se placent derrière les pions passés — les siens pour les pousser, ceux de l’adversaire pour les retenir.',
+    name: 'motifs.rookBehindPasser.name',
+    definition: 'motifs.rookBehindPasser.definition',
     sentence: (m, ctx) =>
       `${capitalise(possessif(m, ctx, 'ta'))} tour en ${m.squares[0]} est derrière le pion passé, exactement là où elle doit être.`,
   },
   wrongBishop: {
-    name: 'Fou de mauvaise couleur',
-    definition:
-      'Avec un pion de colonne « a » ou « h » et un fou qui ne contrôle pas la case de promotion, la finale est nulle même avec un pion de plus.',
+    name: 'motifs.wrongBishop.name',
+    definition: 'motifs.wrongBishop.definition',
     sentence: (m, ctx) =>
       `Fou de mauvaise couleur : ${possessif(m, ctx, 'ton')} fou ne contrôle pas la case de promotion, la finale est théoriquement nulle.`,
   },
   kingActivity: {
-    name: 'Roi actif',
-    definition:
-      'En finale, le roi devient une pièce d’attaque. Le centraliser vaut souvent plus qu’un pion.',
+    name: 'motifs.kingActivity.name',
+    definition: 'motifs.kingActivity.definition',
     // Conseil de finale, vrai pour les deux camps : on le laisse au lecteur.
     sentence: () => `En finale, avance ton roi : il vaut une pièce mineure de plus.`,
   },
   zugzwang: {
-    name: 'Zugzwang',
-    definition:
-      'Être obligé de jouer alors que tout coup dégrade sa position. Passer son tour sauverait — mais c’est interdit.',
+    name: 'motifs.zugzwang.name',
+    definition: 'motifs.zugzwang.definition',
     sentence: () => `Zugzwang : l'adversaire est obligé de jouer, et tout coup empire sa position.`,
   },
   blockade: {
-    name: 'Blocus',
-    definition:
-      'Poser une pièce juste devant un pion passé adverse pour l’immobiliser. Le cavalier est le meilleur bloqueur.',
+    name: 'motifs.blockade.name',
+    definition: 'motifs.blockade.definition',
     sentence: (m) => `Blocus en ${m.squares[0]} : le pion passé adverse est stoppé net.`,
   },
   spaceAdvantage: {
-    name: 'Avantage d’espace',
-    definition:
-      'Contrôler plus de cases que l’adversaire : ses pièces se marchent dessus, les tiennes manœuvrent.',
+    name: 'motifs.spaceAdvantage.name',
+    definition: 'motifs.spaceAdvantage.definition',
     sentence: (m, ctx) =>
       pourLeJoueur(m, ctx)
         ? `Tu as l'espace : évite les échanges, l'adversaire manque de cases.`
         : `Ton adversaire a l'espace : cherche les échanges, tes pièces manquent de cases.`,
   },
   xRayAttack: {
-    name: 'Attaque en rayon X',
-    definition:
-      'Une pièce à longue portée agit à travers une autre : la menace existe déjà, avant même que la ligne soit dégagée.',
+    name: 'motifs.xRayAttack.name',
+    definition: 'motifs.xRayAttack.definition',
     sentence: (m) => `Attaque en rayon X sur ${m.squares.join(' – ')}.`,
   },
 }
 
-/** Textes anglais. Même structure, ton légèrement plus neutre. */
-const MOTIFS_EN: Partial<Record<MotifId, MotifCopy>> = {
+/**
+ * Les phrases anglaises, quand elles diffèrent d'une traduction mot à mot.
+ *
+ * Cette table portait aussi le nom et la définition de chaque motif, en clair.
+ * Ils sont passés au dictionnaire, qui les rend dans les quarante et une
+ * langues : les garder ici revenait à tenir une seconde version anglaise que
+ * personne n'affichait plus, et que personne n'aurait pensé à corriger.
+ *
+ * Ce qui reste est du code de grammaire, pas du texte à traduire : accord,
+ * article contracté, pluriel. Voir `MOTIFS_FR` pour la table complète.
+ */
+const PHRASES_EN: Partial<Record<MotifId, Pick<MotifCopy, 'sentence'>>> = {
   hangingPiece: {
-    name: 'Hanging piece',
-    definition:
-      'An attacked piece that is not defended enough — the opponent can simply take it and win material.',
     sentence: (m) => {
       const type = (m.detail?.piece as PieceSymbol) ?? 'p'
       const gain = Number(m.detail?.gain ?? 0)
@@ -962,93 +933,75 @@ const MOTIFS_EN: Partial<Record<MotifId, MotifCopy>> = {
     },
   },
   fork: {
-    name: 'Fork',
-    definition:
-      'One piece attacks two or more targets at once. Only one can be saved, so the other falls.',
     sentence: (m) =>
       `Fork: the ${PIECE_NAMES[(m.detail?.piece as PieceSymbol) ?? 'n'].en} on ${m.squares[0]} hits ${m.detail?.targetCount ?? 2} pieces at once (${m.squares.slice(1).join(', ')}).`,
   },
   pin: {
-    name: 'Pin',
-    definition:
-      'A piece cannot move without exposing a more valuable one behind it. If the king is behind, it cannot legally move at all.',
     sentence: (m) =>
       m.detail?.absolute
         ? `Absolute pin: the piece on ${m.squares[1]} is stuck in front of its king on ${m.squares[2]} and cannot move at all.`
         : `Pin: the piece on ${m.squares[1]} cannot step aside without losing the piece on ${m.squares[2]}.`,
   },
   skewer: {
-    name: 'Skewer',
-    definition:
-      'The reverse of a pin: the valuable piece is in front. It must move, abandoning what stands behind it.',
     sentence: (m) =>
       `Skewer: the piece on ${m.squares[1]} must move and gives up the one on ${m.squares[2]}.`,
   },
   discoveredAttack: {
-    name: 'Discovered attack',
-    definition:
-      'Moving one piece opens the line of another, which suddenly hits a target. Two threats from one move.',
     sentence: (m) =>
       m.detail?.check
         ? `Discovered check: vacating ${m.squares[1]} opens the line from ${m.squares[0]} onto the king.`
         : `Discovered attack: vacating ${m.squares[1]} opens the line from ${m.squares[0]} onto ${m.squares[2]}.`,
   },
   doubleCheck: {
-    name: 'Double check',
-    definition: 'Two pieces give check at once. Nothing can block or capture — the king must move.',
     sentence: () => `Double check — the king is forced to move, nothing else is legal.`,
   },
   backRankMate: {
-    name: 'Back-rank mate',
-    definition:
-      'A castled king boxed in by its own pawns. A rook or queen reaching that rank is mate.',
     sentence: (m) => `Back-rank danger: the king on ${m.squares[0]} has no escape squares.`,
   },
   fianchetto: {
-    name: 'Fianchetto',
-    definition: 'A bishop developed to b2/g2 (or b7/g7), raking the long diagonal.',
     sentence: (m) => `Fianchettoed bishop on ${m.squares[0]}, controlling the long diagonal.`,
   },
   passedPawn: {
-    name: 'Passed pawn',
-    definition:
-      'A pawn no enemy pawn can stop, on its file or the adjacent ones. Gold in the endgame.',
     sentence: (m) => `Passed pawn on ${m.squares[0]} — no enemy pawn can stop it any more.`,
   },
   outpost: {
-    name: 'Outpost',
-    definition:
-      'An advanced square defended by a pawn that no enemy pawn can attack. A knight there is untouchable.',
     sentence: (m) => `Outpost on ${m.squares[0]}: pawn-protected and unassailable by pawns.`,
   },
   seventhRank: {
-    name: 'Rook on the seventh',
-    definition:
-      'A rook on the 7th rank eats pawns and traps the king. Two rooks there often win on their own.',
     sentence: (m) =>
       `Rook on the seventh from ${m.squares[0]} — it rakes pawns and cages the king.`,
   },
   exposedKing: {
-    name: 'Exposed king',
-    definition: 'A king with no pawn shelter, surrounded by squares the opponent controls.',
     sentence: (m) => `The king on ${m.squares[0]} is exposed — bring pieces towards it.`,
   },
 }
 
 /** Catalogue par langue, avec repli sur le français si un texte manque. */
 export function motifCopy(id: MotifId, locale: Locale): MotifCopy | null {
-  const table = locale === 'en' ? MOTIFS_EN : MOTIFS_FR
-  return table[id] ?? MOTIFS_FR[id] ?? null
+  const motif = MOTIFS_FR[id]
+  if (!motif) return null
+  const anglaise = locale === 'en' ? PHRASES_EN[id] : undefined
+  return anglaise ? { ...motif, sentence: anglaise.sentence } : motif
 }
 
-/** Glossaire complet, pour la page « Motifs » de l'application. */
-export function motifGlossary(
-  locale: Locale,
-): Array<{ id: MotifId; name: string; definition: string }> {
-  const table = locale === 'en' ? { ...MOTIFS_FR, ...MOTIFS_EN } : MOTIFS_FR
-  return (Object.entries(table) as Array<[MotifId, MotifCopy]>)
-    .map(([id, copy]) => ({ id, name: copy.name, definition: copy.definition }))
-    .sort((a, b) => a.name.localeCompare(b.name, locale))
+/**
+ * Glossaire complet, pour la page « Motifs » de l'application.
+ *
+ * Il prenait une langue et triait sur le nom. Les noms étant devenus des clés,
+ * ce tri ordonnait `motifs.backRankMate.name` avant `motifs.fork.name` — soit
+ * l'ordre de l'identifiant anglais, quelle que soit la langue lue. Le tri
+ * appartient désormais à l'appelant, seul endroit où le nom existe vraiment.
+ */
+export function motifGlossary(): Array<{
+  id: MotifId
+  name: CleDeTexte
+  definition: CleDeTexte
+}> {
+  return (Object.entries(MOTIFS_FR) as Array<[MotifId, MotifCopy]>).map(([id, copy]) => ({
+    id,
+    name: copy.name,
+    definition: copy.definition,
+  }))
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1426,7 +1379,7 @@ function explainBetterMove(input: MoveExplanationInput, localisedBest: string): 
 }
 
 function buildHeadline(input: MoveExplanationInput, san: string, fr: boolean): string {
-  const label = QUALITY_STYLES[input.quality].label[fr ? 'fr' : 'en']
+  const label = VERDICT_PHRASE[input.quality][fr ? 'fr' : 'en']
   switch (input.quality) {
     case 'brilliant':
       return fr ? `${san} — brillant !` : `${san} — brilliant!`
@@ -1763,7 +1716,7 @@ function buildSpeech(
   fr: boolean,
 ): string {
   const spoken = sanToSpeech(input.san, fr ? 'fr' : 'en')
-  const verdict = QUALITY_STYLES[input.quality].label[fr ? 'fr' : 'en']
+  const verdict = VERDICT_PHRASE[input.quality][fr ? 'fr' : 'en']
   // Les coups cités dans la phrase reviennent à leur lettre : un glyphe ne se
   // prononce pas, et la voix sautait le mot entier.
   const first = body[0] ? figurinesEnLettres(stripMarkup(body[0]), input.locale) : ''

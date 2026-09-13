@@ -26,6 +26,7 @@ import type {
   EngineLine,
   StyleBias,
   UciMove,
+  CleDeTexte,
 } from './types.ts'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -34,8 +35,8 @@ import type {
 
 export interface BotPersonality {
   id: BotPersonalityId
-  name: { fr: string; en: string }
-  blurb: { fr: string; en: string }
+  name: CleDeTexte
+  blurb: CleDeTexte
   /**
    * Portrait de l'adversaire : une déclinaison de Cavale, la mascotte, produite
    * par `scripts/build-cavale.mjs`. Les sept partagent la même sculpture, la
@@ -56,7 +57,7 @@ export interface BotPersonality {
   /**
    * Ce qu'il dirait s'il parlait. Une ligne, dans sa voix.
    */
-  devise: string
+  devise: CleDeTexte
   /**
    * D'où il vient, en deux paragraphes.
    *
@@ -104,128 +105,79 @@ const NEUTRAL: StyleBias = {
 export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonality> = {
   novice: {
     id: 'novice',
-    name: { fr: 'Pion', en: 'Pip' },
-    blurb: {
-      fr: 'Apprend en même temps que toi. Il adore prendre des pièces, même quand il ne devrait pas.',
-      en: 'Learning alongside you. Loves grabbing pieces, even when it should not.',
-    },
+    name: 'bots.novice.name',
+    blurb: 'bots.novice.blurb',
     portrait: '/brand/adversaires/novice.webp',
     emoji: '🐣',
-    devise: 'Je peux la prendre ?',
-    lore: [
-      'Le premier tirage de la série, et le seul qu’on n’ait pas retouché. Le tilleul porte encore les traces de la gouge, les oreilles sont trop grandes pour l’encolure, et l’ensemble penche vers l’avant. Le sculpteur n’a rien corrigé : c’est de ce déséquilibre que vient l’air de vouloir avancer.',
-      'Au tableau, cela donne quelqu’un qui voit une pièce à prendre et qui la prend. Pas par gourmandise — par confiance. Il n’a pas encore appris qu’une pièce peut être posée là exprès. C’est l’adversaire des premières parties, et il apprendra en même temps que toi.',
-    ],
-    contre:
-      'Laisse-lui du matériel là où tu le reprends au coup suivant : il mord presque à chaque fois. Et développe tes pièces pendant qu’il ramasse — c’est la seule chose qu’il oublie de faire.',
+    devise: 'bots.novice.devise',
+    lore: ['bots.novice.lore1', 'bots.novice.lore2'],
+    contre: 'bots.novice.contre',
     bias: { ...NEUTRAL, capture: 90, check: 40, development: -30 },
   },
   prudent: {
     id: 'prudent',
-    name: { fr: 'Rempart', en: 'Bulwark' },
-    blurb: {
-      fr: 'Solide et patient. Il roque tôt, échange volontiers et ne prend aucun risque.',
-      en: 'Solid and patient. Castles early, trades happily, takes no risks.',
-    },
+    name: 'bots.prudent.name',
+    blurb: 'bots.prudent.blurb',
     portrait: '/brand/adversaires/prudent.webp',
     emoji: '🛡️',
-    devise: 'Après vous.',
-    lore: [
-      'Taillé dans un bloc de granit gris-bleu qui avait passé l’hiver dehors ; la mousse prise dans les creux n’a pas été retirée. Les plaques de fer rivetées sur l’encolure n’ont jamais servi à rien — rien n’est jamais arrivé jusqu’à lui.',
-      'Il roque tôt, échange dès qu’on le lui propose, et refuse tout ce qui ressemble à un risque. On ne perd pas contre Rempart sur une combinaison : on perd de fatigue, après avoir cherché pendant quarante coups une ouverture qui n’existait pas.',
-    ],
-    contre:
-      'Ne lui donne pas les échanges qu’il attend : garde tes pièces, prends de l’espace, et ouvre un second front. Sa solidité tient tant qu’il n’a qu’un seul endroit à défendre.',
+    devise: 'bots.prudent.devise',
+    lore: ['bots.prudent.lore1', 'bots.prudent.lore2'],
+    contre: 'bots.prudent.contre',
     bias: { ...NEUTRAL, quiet: 35, development: 40, sacrifice: -80, capture: -10 },
   },
   fonceur: {
     id: 'fonceur',
-    name: { fr: 'Brasier', en: 'Blaze' },
-    blurb: {
-      fr: "Attaque d'abord, réfléchit ensuite. Il pousse ses pions vers ton roi sans se retourner.",
-      en: 'Attacks first, thinks later. Storms pawns at your king and never looks back.',
-    },
+    name: 'bots.fonceur.name',
+    blurb: 'bots.fonceur.blurb',
     portrait: '/brand/adversaires/fonceur.webp',
     emoji: '🔥',
-    devise: 'On verra après.',
-    lore: [
-      'Coulé trop chaud, refroidi trop vite. Le bronze s’est fendu en séchant et la lumière sort encore des fissures. Le sculpteur a gardé la pièce ratée : aucune des suivantes n’avait ce mouvement — oreilles couchées, naseaux ouverts, déjà lancé.',
-      'Il pousse ses pions vers ton roi sans se demander ce qu’il laisse derrière. Souvent cela passe, parce qu’une attaque qui arrive vite trouve rarement une défense prête. Quand cela ne passe pas, il ne lui reste plus de position du tout.',
-    ],
-    contre:
-      'Ne recule pas devant les pions qui montent : chaque pion poussé est un pion qui ne reviendra pas défendre. Échange ses attaquants, tiens le centre, et son assaut devient une rangée de faiblesses.',
+    devise: 'bots.fonceur.devise',
+    lore: ['bots.fonceur.lore1', 'bots.fonceur.lore2'],
+    contre: 'bots.fonceur.contre',
     bias: { ...NEUTRAL, check: 70, pawnPush: 50, sacrifice: 45, quiet: -40 },
   },
   tacticien: {
     id: 'tacticien',
-    name: { fr: 'Éclair', en: 'Spark' },
-    blurb: {
-      fr: 'Voit les combinaisons partout. Laisse une pièce en prise et tu le regretteras.',
-      en: 'Sees combinations everywhere. Hang a piece and you will regret it.',
-    },
+    name: 'bots.tacticien.name',
+    blurb: 'bots.tacticien.blurb',
     portrait: '/brand/adversaires/tacticien.webp',
     emoji: '⚡',
-    devise: 'Tu as vu ce que tu viens de laisser ?',
-    lore: [
-      'Cristal givré, taillé à facettes franches. Une seule fêlure traverse l’encolure de part en part : elle est arrivée au démoulage, elle n’était pas prévue, et c’est elle qu’on regarde en premier.',
-      'Il ne cherche pas à mieux placer ses pièces — il attend. Une pièce non défendue, deux pièces sur la même diagonale, un roi qui a bougé une fois de trop : il trouve, et il trouve avant toi. Contre une position saine il n’a rien de particulier à dire ; c’est le désordre qu’il mange.',
-    ],
-    contre:
-      'Une seule discipline suffit : après chacun de ses coups, regarde ce qui est en prise et ce qui vise quoi. Il ne crée pas les failles, il les ramasse.',
+    devise: 'bots.tacticien.devise',
+    lore: ['bots.tacticien.lore1', 'bots.tacticien.lore2'],
+    contre: 'bots.tacticien.contre',
     bias: { ...NEUTRAL, capture: 25, check: 35, sacrifice: 25 },
   },
   positionnel: {
     id: 'positionnel',
-    name: { fr: 'Boussole', en: 'Compass' },
-    blurb: {
-      fr: "Joue lentement, améliore ses pièces une à une, et t'étouffe sans que tu t'en aperçoives.",
-      en: 'Plays slowly, improves piece by piece, and squeezes you without you noticing.',
-    },
+    name: 'bots.positionnel.name',
+    blurb: 'bots.positionnel.blurb',
     portrait: '/brand/adversaires/positionnel.webp',
     emoji: '🧭',
-    devise: 'Rien ne presse.',
-    lore: [
-      'Laiton patiné et palissandre sombre, monté d’aplomb au fil à plomb. Une rose des vents est gravée sur le côté de l’encolure ; elle indique une direction que rien, dans la sculpture, ne suit. C’est un instrument, pas un voyageur.',
-      'Il ne t’attaquera pas. Il améliorera une pièce, puis une autre, puis prendra une case dont tu ne voyais pas l’intérêt. Trente coups plus tard, tu chercheras un coup à jouer et il n’y en aura plus.',
-    ],
-    contre:
-      'Ne le laisse pas ranger tranquillement. Prends de l’espace tôt, crée un déséquilibre pendant qu’il finit son développement : il joue mal les positions qu’on ne peut pas mettre en ordre.',
+    devise: 'bots.positionnel.devise',
+    lore: ['bots.positionnel.lore1', 'bots.positionnel.lore2'],
+    contre: 'bots.positionnel.contre',
     bias: { ...NEUTRAL, quiet: 45, development: 30, capture: -20, pawnPush: -15 },
   },
   gambiteur: {
     id: 'gambiteur',
-    name: { fr: 'Mirage', en: 'Mirage' },
-    blurb: {
-      fr: "Offre du matériel dès l'ouverture pour ouvrir des lignes. Accepte à tes risques.",
-      en: 'Offers material from move one to open lines. Accept at your own risk.',
-    },
+    name: 'bots.gambiteur.name',
+    blurb: 'bots.gambiteur.blurb',
     portrait: '/brand/adversaires/gambiteur.webp',
     emoji: '🎭',
-    devise: 'Prends-le donc.',
-    lore: [
-      'Résine fumée, coulée deux fois : le contour se dédouble, la couleur se décale d’un cheveu, et l’arrière de l’encolure se dissout dans l’air. Personne n’a jamais su dire exactement où l’objet s’arrête — le détourage automatique non plus.',
-      'Il offre un pion dès l’ouverture, parfois une pièce. Ce n’est pas de la générosité : ce qu’il achète, ce sont des lignes ouvertes et deux temps d’avance, et il sait quoi en faire. Refuser est souvent le bon choix. C’est rarement celui qu’on fait.',
-    ],
-    contre:
-      'Tu peux accepter, à une condition : rendre le matériel dès qu’il commence à te coûter des temps. Un pion de plus ne vaut rien contre trois pièces développées et une colonne ouverte sur ton roi.',
+    devise: 'bots.gambiteur.devise',
+    lore: ['bots.gambiteur.lore1', 'bots.gambiteur.lore2'],
+    contre: 'bots.gambiteur.contre',
     bias: { ...NEUTRAL, sacrifice: 90, pawnPush: 30, development: 35, quiet: -25 },
   },
   machine: {
     id: 'machine',
-    name: { fr: 'Oracle', en: 'Oracle' },
-    blurb: {
-      fr: 'Aucun style, aucune pitié. Le meilleur coup, à chaque fois. Bonne chance.',
-      en: 'No style, no mercy. The best move, every time. Good luck.',
-    },
+    name: 'bots.machine.name',
+    blurb: 'bots.machine.blurb',
     portrait: '/brand/adversaires/machine.webp',
     emoji: '🜛',
-    devise: 'Rien à ajouter.',
-    lore: [
-      'Obsidienne polie, sans grain, sans une trace d’outil. C’est le seul de la série qui regarde droit devant, et le seul rigoureusement symétrique : il n’existe aucun angle sous lequel il soit plus flatteur qu’un autre.',
-      'Aucun biais, aucune préférence, aucun mauvais jour. Il joue le meilleur coup que le moteur trouve, ni plus ni moins, et il le joue aussi bien contre toi que contre n’importe qui. Les six autres ont été bridés pour te ressembler un peu. Lui, non.',
-    ],
-    contre:
-      'Il n’y a pas de défaut de style à exploiter, et c’est tout l’intérêt : baisse le niveau si tu veux gagner, garde-le au plus haut si tu veux savoir où tu en es. Une défaite contre Oracle ne dit rien de toi.',
+    devise: 'bots.machine.devise',
+    lore: ['bots.machine.lore1', 'bots.machine.lore2'],
+    contre: 'bots.machine.contre',
     bias: NEUTRAL,
   },
 }
@@ -239,18 +191,18 @@ export const BOT_PERSONALITIES: Record<BotPersonalityId, BotPersonality> = {
  * `capture: -20` ne se racontent pas avec la même phrase.
  */
 const AXES: Record<keyof StyleBias, { attire: string; repousse: string }> = {
-  capture: { attire: 'prendre du matériel', repousse: 'laisser passer une prise' },
-  check: { attire: 'donner échec', repousse: 'éviter les échecs' },
-  pawnPush: { attire: 'pousser ses pions', repousse: 'garder ses pions en place' },
-  development: { attire: 'sortir ses pièces', repousse: 'négliger son développement' },
-  sacrifice: { attire: 'sacrifier du matériel', repousse: 'refuser tout sacrifice' },
-  quiet: { attire: 'jouer des coups tranquilles', repousse: 'ne jamais rester tranquille' },
+  capture: { attire: 'axes.capture.attire', repousse: 'axes.capture.repousse' },
+  check: { attire: 'axes.check.attire', repousse: 'axes.check.repousse' },
+  pawnPush: { attire: 'axes.pawnPush.attire', repousse: 'axes.pawnPush.repousse' },
+  development: { attire: 'axes.development.attire', repousse: 'axes.development.repousse' },
+  sacrifice: { attire: 'axes.sacrifice.attire', repousse: 'axes.sacrifice.repousse' },
+  quiet: { attire: 'axes.quiet.attire', repousse: 'axes.quiet.repousse' },
 }
 
 export interface Penchant {
   axe: keyof StyleBias
-  /** Le trait, formulé selon le signe. */
-  libelle: string
+  /** Le trait, formulé selon le signe — une clé de dictionnaire, à résoudre. */
+  libelle: CleDeTexte
   /** Le biais brut, en centipions. Négatif pour un rejet. */
   poids: number
 }
@@ -591,10 +543,10 @@ export const BOT_LEVELS: BotLevel[] = LEVEL_TABLE.map((spec, index) => {
     level,
     elo: spec.elo,
     personality: spec.personality,
-    name: {
-      fr: `${personality.name.fr} · niveau ${level}`,
-      en: `${personality.name.en} · level ${level}`,
-    },
+    // Le nom du niveau se compose à l'affichage : « Pion · niveau 3 » ne se
+    // monte pas de la même façon dans toutes les langues, et le cœur n'a pas
+    // de dictionnaire pour le dire.
+    nomKey: personality.name,
     blurb: personality.blurb,
     engine: {
       uciElo: useUciElo ? spec.elo : undefined,

@@ -23,8 +23,8 @@ import { ArrowLeft, ArrowRight, Swords, Target } from 'lucide-react'
 import { BOT_LEVELS, BOT_PERSONALITIES, penchants, type BotPersonalityId } from '@coupparfait/core'
 import { ButtonLink, Card } from '@/components/ui/index.tsx'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
-import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
-import { usePreferences } from '@/lib/store/preferences.ts'
+import { useT } from '@/lib/i18n/index.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 const IDS = Object.keys(BOT_PERSONALITIES) as BotPersonalityId[]
 
@@ -47,7 +47,6 @@ function niveauxDe(id: BotPersonalityId) {
 
 export function FicheAdversaire({ id }: { id: BotPersonalityId }) {
   const t = useT()
-  const contenu = usePreferences((state) => localeDuContenu(state.locale))
   const personnalite = BOT_PERSONALITIES[id]!
 
   const niveaux = niveauxDe(personnalite.id)
@@ -73,18 +72,18 @@ export function FicheAdversaire({ id }: { id: BotPersonalityId }) {
         <PortraitAdversaire personality={personnalite} size={128} />
         <div className="min-w-0 flex-1">
           <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-            {personnalite.name[contenu]}
+            {tCoeur(t, personnalite.name)}
           </h1>
-          <p className="mt-1 text-lg italic text-accent">« {personnalite.devise} »</p>
+          <p className="mt-1 text-lg italic text-accent">« {tCoeur(t, personnalite.devise)} »</p>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
-            {personnalite.blurb[contenu]}
+            {tCoeur(t, personnalite.blurb)}
           </p>
         </div>
       </header>
 
       <div className="mt-7 space-y-4 text-[15px] leading-relaxed">
-        {personnalite.lore.map((paragraphe) => (
-          <p key={paragraphe.slice(0, 24)}>{paragraphe}</p>
+        {personnalite.lore.map((cle) => (
+          <p key={cle}>{tCoeur(t, cle)}</p>
         ))}
       </div>
 
@@ -108,7 +107,7 @@ export function FicheAdversaire({ id }: { id: BotPersonalityId }) {
             size="sm"
             icon={<Swords size={14} />}
           >
-            {t('opponent.playAgainst', { nom: personnalite.name[contenu] })}
+            {t('opponent.playAgainst', { nom: tCoeur(t, personnalite.name) })}
           </ButtonLink>
         </div>
       </Card>
@@ -129,7 +128,7 @@ export function FicheAdversaire({ id }: { id: BotPersonalityId }) {
           <ul className="mt-3 space-y-2">
             {traits.map((trait) => (
               <li key={trait.axe} className="flex items-center gap-3">
-                <span className="w-52 shrink-0 text-[14px]">{trait.libelle}</span>
+                <span className="w-52 shrink-0 text-[14px]">{tCoeur(t, trait.libelle)}</span>
                 <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-strong">
                   <span
                     className="block h-full rounded-full"
@@ -158,7 +157,7 @@ export function FicheAdversaire({ id }: { id: BotPersonalityId }) {
           <Target size={13} aria-hidden />
           {t('opponent.howToBeat')}
         </p>
-        <p className="mt-1.5 text-[14px] leading-relaxed">{personnalite.contre}</p>
+        <p className="mt-1.5 text-[14px] leading-relaxed">{tCoeur(t, personnalite.contre)}</p>
       </Card>
 
       {/* ── Les voisins ───────────────────────────────────────────────
@@ -171,13 +170,13 @@ export function FicheAdversaire({ id }: { id: BotPersonalityId }) {
         >
           <ArrowLeft size={14} className="shrink-0" aria-hidden />
           <PortraitAdversaire personality={precedent} size={28} />
-          <span className="truncate">{precedent.name[contenu]}</span>
+          <span className="truncate">{tCoeur(t, precedent.name)}</span>
         </Link>
         <Link
           href={`/jouer/adversaires/${suivant.id}`}
           className="group flex min-w-0 items-center gap-2 text-[14px] text-muted transition-colors hover:text-ink"
         >
-          <span className="truncate">{suivant.name[contenu]}</span>
+          <span className="truncate">{tCoeur(t, suivant.name)}</span>
           <PortraitAdversaire personality={suivant} size={28} />
           <ArrowRight size={14} className="shrink-0" aria-hidden />
         </Link>

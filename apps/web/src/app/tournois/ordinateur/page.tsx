@@ -52,6 +52,7 @@ import {
 } from '@/lib/game/tournoiSolo.ts'
 import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 export default function TournoiOrdinateurPage() {
   const t = useT()
@@ -367,7 +368,7 @@ function Tableau({ tournoi, onAbandonner }: { tournoi: TournoiSolo; onAbandonner
                 <VisageDuConcurrent concurrent={ligne.concurrent} taille={38} />
                 <span className="min-w-0 flex-1">
                   <span className={clsx('block truncate text-sm', moiMeme && 'font-bold')}>
-                    {ligne.concurrent.nom}
+                    {ligne.concurrent.nom ?? tCoeur(t, ligne.concurrent.nomKey ?? '')}
                   </span>
                   <span className="block text-[12px] text-faint">
                     {ligne.concurrent.elo} Elo ·{' '}

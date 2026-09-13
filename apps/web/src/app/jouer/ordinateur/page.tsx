@@ -133,6 +133,7 @@ import type { Arrow } from '@/components/board/boardKit.ts'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { useFetchJson } from '@/lib/useFetchJson.ts'
 import { useGrandEcran } from '@/lib/useMediaQuery.ts'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 type Phase = 'setup' | 'playing'
 
@@ -590,7 +591,6 @@ function SetupScreen({
   /* La langue du **contenu** pour les sept adversaires : leurs noms et leurs
      phrases sont écrits dans le cœur, qui ne les produit qu'en français et en
      anglais. Voir `localeDuContenu`. */
-  const contenu = usePreferences((state) => localeDuContenu(state.locale))
   const [level, setLevel] = useState(() =>
     personnaliteVoulue ? niveauProche(personnaliteVoulue, initial.level) : initial.level,
   )
@@ -939,7 +939,7 @@ function SetupScreen({
           <div className="min-w-0 flex-1">
             <div className="flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-2">
               <h3 className="font-display text-xl font-semibold leading-tight">
-                {personality.name[contenu]}
+                {tCoeur(t, personality.name)}
               </h3>
               <span className="flex flex-wrap gap-2">
                 <Chip tone="accent">≈ {bot.elo} Elo</Chip>
@@ -947,7 +947,7 @@ function SetupScreen({
               </span>
             </div>
             <p className="mt-1 min-h-[3lh] text-sm leading-relaxed text-muted sm:min-h-[2lh]">
-              {personality.blurb[contenu]}
+              {tCoeur(t, personality.blurb)}
             </p>
           </div>
         </div>
@@ -974,7 +974,7 @@ function SetupScreen({
               }}
               aria-hidden
             >
-              {bot.level} · {personality.name[contenu]}
+              {bot.level} · {tCoeur(t, personality.name)}
             </span>
           </div>
           {/* ── Le rail, peint adversaire par adversaire ───────────────────
@@ -1267,7 +1267,7 @@ function SetupScreen({
       <div className="sticky bottom-0 z-20 -mx-4 mt-6 border-t border-line-strong bg-[var(--flottant)]/95 px-4 py-3 backdrop-blur-xl safe-bottom sm:-mx-6 sm:px-6">
         <div className="flex items-center gap-4">
           <p className="hidden min-w-0 flex-1 truncate text-sm text-muted sm:block">
-            <strong className="font-semibold text-ink">{personality.name[contenu]}</strong> · ≈{' '}
+            <strong className="font-semibold text-ink">{tCoeur(t, personality.name)}</strong> · ≈{' '}
             {bot.elo} Elo · {couleurChoisie} · {cadence?.label ?? timeControlId} ·{' '}
             {classee && connecte === true
               ? t('computer.summaryRated')
@@ -1395,7 +1395,6 @@ function GameScreen({
     'whiteAlwaysBottom',
   )
   const t = useT()
-  const contenu = localeDuContenu(prefs.locale)
   const { book } = useOpeningBook()
   const botColor: Color = playerColor === 'w' ? 'b' : 'w'
 
@@ -1990,7 +1989,7 @@ function GameScreen({
       result: issue,
       status: outcome?.status ?? state.status,
       playerColor,
-      opponentName: personality.name[contenu],
+      opponentName: tCoeur(t, personality.name),
       botLevel: level,
       initialTime: timeControl.initial,
       increment: timeControl.increment,
@@ -2462,7 +2461,7 @@ function GameScreen({
         {/* ── Plateau ──────────────────────────────────────────────── */}
         <PlayerBar
           className="[grid-area:pion]"
-          name={personality.name[contenu]}
+          name={tCoeur(t, personality.name)}
           rating={bot.elo}
           color={botColor}
           avatar={personality.portrait}
@@ -2596,7 +2595,7 @@ function GameScreen({
                     className="flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-accent px-4 text-sm font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
                   >
                     <Play size={15} aria-hidden />
-                    {t('computer.continuePlays', { adversaire: personality.name[contenu] })}
+                    {t('computer.continuePlays', { adversaire: tCoeur(t, personality.name) })}
                   </button>
                 )}
               </div>
@@ -2792,9 +2791,9 @@ function GameScreen({
               donc là, replié ou non, jusqu'à la fin. */}
           {seance && !gameOver && (
             <RappelDeSeance
-              nom={seance.theme.nom}
+              nom={t(seance.theme.nom)}
               icone={seance.theme.icone}
-              consigne={seance.theme.consigne}
+              consigne={t(seance.theme.consigne)}
             />
           )}
 
@@ -2910,7 +2909,7 @@ function GameScreen({
                   : undefined
           }
           playerColor={playerColor}
-          opponentName={personality.name[contenu]}
+          opponentName={tCoeur(t, personality.name)}
           moves={state.moves}
           bilan={bilan}
           // Dit seulement si l'on attendait des points : une partie
@@ -2925,7 +2924,7 @@ function GameScreen({
           seance={
             seance && releveDeSeance
               ? {
-                  theme: `${seance.theme.icone} ${seance.theme.nom}`,
+                  theme: `${seance.theme.icone} ${t(seance.theme.nom)}`,
                   pour: releveDeSeance.pour,
                   contre: releveDeSeance.contre,
                   coups: releveDeSeance.coups.slice(0, 8),
@@ -3046,7 +3045,7 @@ function LegendeDuVerdict({
   /** Le coup qu'il fallait jouer, celui qu'on a joué, et ce que le premier fait. */
   conseil?: { conseille: string; joue: string; pourquoi?: string | null } | null
 }) {
-  const contenu = usePreferences((state) => localeDuContenu(state.locale))
+  const t = useT()
   const style = QUALITY_STYLES[quality]
   const teinte = `var(--q-${style.token})`
 
@@ -3054,9 +3053,9 @@ function LegendeDuVerdict({
     <div className="mb-1.5">
       <p className="flex items-baseline gap-1.5 text-[14px] leading-snug" style={{ color: teinte }}>
         <span aria-hidden>{style.glyph}</span>
-        <span className="font-semibold">{style.label[contenu]}</span>
+        <span className="font-semibold">{tCoeur(t, style.label)}</span>
         <span className="hidden min-w-0 flex-1 truncate font-normal text-muted sm:inline">
-          {style.description[contenu]}
+          {tCoeur(t, style.description)}
         </span>
       </p>
 

@@ -16,15 +16,10 @@ import { BOT_LEVELS, BOT_PERSONALITIES, CHAPITRES, motifGlossary } from '@couppa
 import { Card, Chip } from '@/components/ui/index.tsx'
 import { CURRICULUM_STATS } from '@/lib/lessons/index.ts'
 import { TERMS } from '@/lib/glossaire.ts'
-import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
-import { usePreferences } from '@/lib/store/preferences.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export default function AboutPage() {
   const t = useT()
-  /* Le glossaire des motifs est écrit dans le cœur : il n'existe qu'en
-     français et en anglais. Voir `localeDuContenu`. */
-  const contenu = usePreferences((state) => localeDuContenu(state.locale))
-
   /* Les chiffres se comptent, ils ne se recopient pas.
 
      « 30 leçons guidées » était écrit à la main, et le programme en comptait
@@ -41,7 +36,7 @@ export default function AboutPage() {
     { value: String(Object.keys(BOT_PERSONALITIES).length), label: t('about.personalities') },
     { value: String(CHAPITRES.length), label: t('about.chapters') },
     {
-      value: String(TERMS.length + motifGlossary(contenu).length),
+      value: String(TERMS.length + motifGlossary().length),
       label: t('about.words'),
     },
     { value: '7', label: t('about.tablebases') },

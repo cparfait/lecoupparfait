@@ -27,6 +27,7 @@ import { localeDuContenu } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import type { BilanDesCoups as Bilan } from '@/lib/game/useQualitesDesCoups.ts'
 import { useT } from '@/lib/i18n/index.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 /**
  * Le barème, dans l'ordre du meilleur au pire.
@@ -205,7 +206,7 @@ export function BilanDesCoups({
                   <li
                     key={quality}
                     className="grid grid-cols-[1.75rem_1fr_1.75rem] items-center gap-2 text-[12px]"
-                    title={`${style.label[locale]} — ${style.description[locale]}`}
+                    title={`${tCoeur(t, style.label)} — ${tCoeur(t, style.description)}`}
                   >
                     <span className="text-center font-semibold tabular-nums">
                       {bilan.w.comptes[quality]}
@@ -218,7 +219,7 @@ export function BilanDesCoups({
                       }}
                     >
                       <span aria-hidden>{style.glyph}</span>
-                      <span className="truncate">{style.label[locale]}</span>
+                      <span className="truncate">{tCoeur(t, style.label)}</span>
                     </span>
                     <span className="text-center font-semibold tabular-nums">
                       {bilan.b.comptes[quality]}

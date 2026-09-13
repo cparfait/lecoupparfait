@@ -57,6 +57,7 @@ import {
 import { findLesson, loadProgress, type LessonProgress } from '@/lib/lessons/index.ts'
 import { langue, localeDuContenu, useI18n, useT } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 const TEINTE = 'var(--rub-apprendre)'
 
@@ -196,14 +197,17 @@ export default function PalierPage() {
               </p>
             </div>
 
-            <h2 className="mt-5 font-display text-2xl font-bold tracking-tight">{palier.nom}</h2>
+            <h2 className="mt-5 font-display text-2xl font-bold tracking-tight">{t(palier.nom)}</h2>
             <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-muted">
-              {palier.promesse}
+              {t(palier.promesse)}
             </p>
 
             {suivant && (
               <p className="mt-3 text-[13px] text-faint">
-                {t('tier.nextTierFrom', { min: suivant.min, nom: suivant.nom.toLowerCase() })}
+                {t('tier.nextTierFrom', {
+                  min: suivant.min,
+                  nom: t(suivant.nom).toLowerCase(),
+                })}
               </p>
             )}
 
@@ -280,7 +284,7 @@ export default function PalierPage() {
                     <Link
                       href={`/puzzles?theme=${encodeURIComponent(faiblesse.motif)}`}
                       className="flex items-center gap-3 rounded-[var(--radius-sm)] border border-line bg-bg-elev px-3 py-2.5 transition-colors hover:bg-surface-hover"
-                      title={copy?.definition}
+                      title={copy ? tCoeur(t, copy.definition) : undefined}
                     >
                       <span className="min-w-0 flex-1">
                         <span className="block text-[14px] font-semibold">
@@ -339,7 +343,7 @@ export default function PalierPage() {
                   croire qu'on lit toujours le sien. */}
               <p className="mt-0.5 text-[13px] text-muted">
                 {t('tier.tierNamed')}{' '}
-                <strong className="font-semibold text-ink">{palier.nom.toLowerCase()}</strong> ·{' '}
+                <strong className="font-semibold text-ink">{t(palier.nom).toLowerCase()}</strong> ·{' '}
                 <span className="tabular-nums">
                   {palier.max === Number.POSITIVE_INFINITY
                     ? t('tier.eloAndAbove', { min: palier.min })
@@ -357,17 +361,17 @@ export default function PalierPage() {
               ici, parce que c'est elle qui dit à qui s'adressent ces leviers. */}
           {!niveau && (
             <p className="mb-3 max-w-2xl text-[14px] leading-relaxed text-muted">
-              {palier.promesse}
+              {t(palier.promesse)}
             </p>
           )}
 
           <ol className="space-y-2">
             {palier.leviers.map((levier, rang) => (
-              <li key={levier.titre}>
+              <li key={levier.id}>
                 <CarteLevier
                   rang={rang + 1}
-                  titre={levier.titre}
-                  pourquoi={levier.pourquoi}
+                  titre={t(levier.titre)}
+                  pourquoi={t(levier.pourquoi)}
                   cible={levier.cible}
                   progres={progres}
                 />
@@ -426,7 +430,7 @@ export default function PalierPage() {
                   ? `${entree.min} +`
                   : `${entree.min} – ${entree.max}`}
               </span>
-              <span className="block text-[13px] font-semibold">{entree.nom}</span>
+              <span className="block text-[13px] font-semibold">{t(entree.nom)}</span>
             </button>
           ))}
         </div>

@@ -241,7 +241,7 @@ function PanneauSerie({ etat, serie }: { etat: EtatQuotidien | null; serie: numb
                 `hashchange`, sans recharger quoi que ce soit tant qu'on est
                 déjà sur la page. Depuis une autre page, elle recharge — c'est
                 une navigation de toute façon. */}
-            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+            {}
             <a
               href="/#aujourdhui"
               className="mt-1 flex items-center justify-between rounded-[var(--radius-sm)] px-1 py-1.5 text-[14px] font-medium transition-colors hover:bg-surface-hover"

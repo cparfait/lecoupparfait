@@ -42,6 +42,7 @@ import { Card, Chip } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { themesDePuzzles } from '@/lib/analysis/versLesPuzzles.ts'
 import { useT } from '@/lib/i18n/index.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 /**
  * En dessous de cette note, la phase mérite d'être nommée.
@@ -129,11 +130,11 @@ export function EtMaintenant({
                     <Link
                       href={`/puzzles?theme=${encodeURIComponent(theme)}`}
                       className="flex items-center gap-2.5 rounded-[var(--radius-sm)] border border-line bg-bg-elev px-3 py-2.5 transition-colors hover:bg-surface-hover"
-                      title={copy?.definition}
+                      title={copy ? tCoeur(t, copy.definition) : undefined}
                     >
                       <Puzzle size={14} className="shrink-0 text-faint" aria-hidden />
                       <span className="min-w-0 flex-1 text-[14px] font-medium">
-                        {copy?.name ?? theme}
+                        {copy ? tCoeur(t, copy.name) : theme}
                       </span>
                       <Chip tone="accent">{t('last.train')}</Chip>
                       <ArrowRight size={14} className="shrink-0 text-faint" aria-hidden />

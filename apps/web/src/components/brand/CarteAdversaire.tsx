@@ -21,6 +21,8 @@ import type { PointerEvent } from 'react'
 import clsx from 'clsx'
 import type { BotPersonality } from '@coupparfait/core'
 import { PortraitAdversaire } from './PortraitAdversaire.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /** Inclinaison maximale, en degrés. Au-delà, la carte a l'air de tomber. */
 const INCLINAISON = 9
@@ -41,6 +43,7 @@ export function CarteAdversaire({
   niveau: number
   onClick: () => void
 }) {
+  const t = useT()
   const carte = useRef<HTMLButtonElement>(null)
 
   const suivre = useCallback((event: PointerEvent<HTMLButtonElement>) => {
@@ -135,7 +138,7 @@ export function CarteAdversaire({
         )}
         style={{ transform: 'translateZ(12px)' }}
       >
-        {personnalite.name.fr}
+        {tCoeur(t, personnalite.name)}
       </span>
       <span
         className={clsx(

@@ -156,6 +156,8 @@ export const fr = {
   },
 
   opponent: {
+    notFound: 'Adversaire introuvable',
+    metaTitle: '{nom} — adversaire artificiel',
     all: 'Tous les adversaires',
     galleryIntro:
       'Sept caractères, répartis sur les vingt-cinq niveaux. Leur style n’est pas un habillage : chacun évalue les coups avec une préférence propre, et sa fiche montre les nombres qui la produisent — avec ce qu’il faut faire pour le battre.',
@@ -890,6 +892,8 @@ export const fr = {
       'Mode commenté actif. Après chaque coup, tu verras ce que tu aurais pu jouer, avec les trois meilleures options et la raison de chacune.',
     staleBefore: 'Porte sur ton coup',
     staleAfter: '— la position a changé depuis.',
+    check: 'Échec',
+    mate: 'Mat',
     review: 'Revoir',
     analysing: 'Analyse du coup…',
     muteVoice: 'Couper la voix',
@@ -2563,6 +2567,374 @@ export const fr = {
     purgedSessions: 'sessions expirées',
     purgedEvaluations: 'évaluations sous 14 demi-coups, trop peu profondes pour resservir',
     purgedEmptyAccounts: 'comptes sans aucune partie ni analyse, inactifs depuis six mois',
+  },
+  motifs: {
+    hangingPiece: {
+      name: 'Pièce en prise',
+      definition:
+        "Une pièce attaquée qui n'est pas suffisamment défendue : l'adversaire peut la prendre en gagnant du matériel.",
+    },
+    fork: {
+      name: 'Fourchette',
+      definition:
+        'Une seule pièce attaque simultanément deux cibles ou plus. Comme on ne peut sauver qu’une chose à la fois, on gagne l’autre.',
+    },
+    pin: {
+      name: 'Clouage',
+      definition:
+        'Une pièce ne peut pas bouger sans exposer une pièce plus précieuse placée derrière elle. Si c’est le roi qui est derrière, elle ne peut légalement pas bouger du tout.',
+    },
+    skewer: {
+      name: 'Enfilade',
+      definition:
+        'L’inverse du clouage : la pièce de valeur est devant. Elle doit fuir, et en fuyant elle abandonne celle qui se trouvait derrière.',
+    },
+    discoveredAttack: {
+      name: 'Attaque à la découverte',
+      definition:
+        'En déplaçant une pièce, on dégage la ligne d’une autre qui frappe soudain une cible. Deux menaces naissent d’un seul coup.',
+    },
+    doubleCheck: {
+      name: 'Échec double',
+      definition:
+        'Deux pièces donnent échec en même temps. Aucune parade ne suffit : le roi est obligé de bouger.',
+    },
+    removingTheDefender: {
+      name: 'Élimination du défenseur',
+      definition:
+        'On capture ou on chasse la pièce qui défendait une cible, laquelle tombe au coup suivant.',
+    },
+    overloadedPiece: {
+      name: 'Pièce surchargée',
+      definition:
+        'Une pièce assure seule deux tâches défensives. Détourne-la d’un côté et l’autre s’effondre.',
+    },
+    trappedPiece: {
+      name: 'Pièce piégée',
+      definition:
+        'Une pièce attaquée qui n’a plus aucune case de fuite sûre : elle est perdue, même si personne ne l’a encore prise.',
+    },
+    backRankMate: {
+      name: 'Mat du couloir',
+      definition:
+        'Le roi roqué est enfermé par ses propres pions sur sa dernière rangée. Une tour ou une dame qui arrive sur cette rangée fait mat.',
+    },
+    smotheredMate: {
+      name: 'Mat étouffé',
+      definition:
+        'Le roi est totalement entouré de ses propres pièces ; seul un cavalier peut alors le mater, car lui seul saute par-dessus.',
+    },
+    mateIn1: {
+      name: 'Mat en un',
+      definition: 'Un seul coup met fin à la partie.',
+    },
+    mateIn2: {
+      name: 'Mat en deux',
+      definition: 'Un mat forcé en deux coups, quelles que soient les réponses adverses.',
+    },
+    mateIn3: {
+      name: 'Mat en trois',
+      definition: 'Un mat forcé en trois coups : aucune défense ne le repousse.',
+    },
+    mateThreat: {
+      name: 'Menace de mat',
+      definition: 'Un mat arrive au coup suivant si rien n’est fait.',
+    },
+    sacrifice: {
+      name: 'Sacrifice',
+      definition:
+        'On abandonne volontairement du matériel pour obtenir autre chose : une attaque, une ligne ouverte, un roi exposé.',
+    },
+    promotion: {
+      name: 'Promotion',
+      definition: 'Un pion qui atteint la dernière rangée se transforme, presque toujours en dame.',
+    },
+    underPromotion: {
+      name: 'Sous-promotion',
+      definition:
+        'Promouvoir en autre chose qu’une dame — souvent un cavalier pour donner un échec décisif, ou une tour pour éviter le pat.',
+    },
+    enPassant: {
+      name: 'Prise en passant',
+      definition:
+        'Un pion qui avance de deux cases peut être capturé par un pion adverse comme s’il n’en avait avancé qu’une — et seulement au coup suivant.',
+    },
+    passedPawn: {
+      name: 'Pion passé',
+      definition:
+        'Un pion qu’aucun pion adverse ne peut plus arrêter ni sur sa colonne, ni sur les colonnes voisines. Il vaut de l’or en finale.',
+    },
+    protectedPassedPawn: {
+      name: 'Pion passé protégé',
+      definition:
+        'Un pion passé soutenu par un autre pion : l’adversaire ne peut même pas le bloquer avec son roi sans perdre.',
+    },
+    isolatedPawn: {
+      name: 'Pion isolé',
+      definition:
+        'Un pion sans voisin sur les colonnes adjacentes : aucun pion ne peut le défendre, il faut une pièce pour ça.',
+    },
+    doubledPawns: {
+      name: 'Pions doublés',
+      definition:
+        'Deux pions sur la même colonne : ils se gênent, avancent mal et défendent moins bien.',
+    },
+    backwardPawn: {
+      name: 'Pion arriéré',
+      definition:
+        'Un pion resté en arrière que ses voisins ne peuvent plus soutenir, et dont la case d’avance est contrôlée par l’adversaire.',
+    },
+    outpost: {
+      name: 'Avant-poste',
+      definition:
+        'Une case avancée, défendue par un pion, qu’aucun pion adverse ne peut attaquer. Un cavalier y est presque intouchable.',
+    },
+    bishopPair: {
+      name: 'Paire de fous',
+      definition:
+        'Posséder les deux fous alors que l’adversaire n’en a qu’un : ils couvrent toutes les cases et deviennent redoutables en position ouverte.',
+    },
+    badBishop: {
+      name: 'Mauvais fou',
+      definition: 'Un fou bloqué par ses propres pions, tous placés sur des cases de sa couleur.',
+    },
+    openFile: {
+      name: 'Colonne ouverte',
+      definition:
+        'Une colonne sans aucun pion : c’est l’autoroute des tours, qui y pénètrent dans le camp adverse.',
+    },
+    semiOpenFile: {
+      name: 'Colonne semi-ouverte',
+      definition: 'Une colonne sans pion à soi mais avec un pion adverse : une cible à attaquer.',
+    },
+    seventhRank: {
+      name: 'Tour à la septième',
+      definition:
+        'Une tour sur la 7ᵉ rangée (2ᵉ pour les Noirs) mange les pions et enferme le roi. Deux tours y sont souvent gagnantes à elles seules.',
+    },
+    exposedKing: {
+      name: 'Roi exposé',
+      definition:
+        'Un roi sans bouclier de pions et entouré de cases contrôlées par l’adversaire : l’attaque est en route.',
+    },
+    kingSafety: {
+      name: 'Roi en sécurité',
+      definition: 'Un roi roqué, protégé par ses pions, loin des lignes ouvertes.',
+    },
+    development: {
+      name: 'Retard de développement',
+      definition:
+        'Des pièces encore sur leur case de départ. Chaque coup d’ouverture devrait en sortir une nouvelle.',
+    },
+    centreControl: {
+      name: 'Contrôle du centre',
+      definition:
+        'Les quatre cases centrales : qui les tient dirige la partie, parce que les pièces y rayonnent dans toutes les directions.',
+    },
+    oppositeCastling: {
+      name: 'Roques opposés',
+      definition:
+        'Les rois ont roqué de côtés opposés : chacun peut lancer ses pions à l’assaut du roi adverse sans exposer le sien. Les parties deviennent très tranchantes.',
+    },
+    fianchetto: {
+      name: 'Fianchetto',
+      definition:
+        'Un fou développé en b2/g2 (ou b7/g7), derrière un pion avancé, qui balaie la grande diagonale.',
+    },
+    opposition: {
+      name: 'Opposition',
+      definition:
+        'En finale de rois et pions, les rois se font face à une case d’écart. Celui qui n’a pas le trait gagne du terrain — c’est souvent tout ce qui décide la partie.',
+    },
+    rookBehindPasser: {
+      name: 'Tour derrière le pion passé',
+      definition:
+        'Règle de Tarrasch : les tours se placent derrière les pions passés — les siens pour les pousser, ceux de l’adversaire pour les retenir.',
+    },
+    wrongBishop: {
+      name: 'Fou de mauvaise couleur',
+      definition:
+        'Avec un pion de colonne « a » ou « h » et un fou qui ne contrôle pas la case de promotion, la finale est nulle même avec un pion de plus.',
+    },
+    kingActivity: {
+      name: 'Roi actif',
+      definition:
+        'En finale, le roi devient une pièce d’attaque. Le centraliser vaut souvent plus qu’un pion.',
+    },
+    zugzwang: {
+      name: 'Zugzwang',
+      definition:
+        'Être obligé de jouer alors que tout coup dégrade sa position. Passer son tour sauverait — mais c’est interdit.',
+    },
+    blockade: {
+      name: 'Blocus',
+      definition:
+        'Poser une pièce juste devant un pion passé adverse pour l’immobiliser. Le cavalier est le meilleur bloqueur.',
+    },
+    spaceAdvantage: {
+      name: 'Avantage d’espace',
+      definition:
+        'Contrôler plus de cases que l’adversaire : ses pièces se marchent dessus, les tiennes manœuvrent.',
+    },
+    xRayAttack: {
+      name: 'Attaque en rayon X',
+      definition:
+        'Une pièce à longue portée agit à travers une autre : la menace existe déjà, avant même que la ligne soit dégagée.',
+    },
+  },
+  qualites: {
+    brilliant: {
+      label: 'Brillant',
+      description: 'Un sacrifice sain : du matériel donné, et la position le rend au centuple.',
+    },
+    great: {
+      label: 'Coup unique',
+      description: "Le seul coup qui tenait — toute autre option perdait une part de l'avantage.",
+    },
+    best: {
+      label: 'Meilleur coup',
+      description: 'Le premier choix du moteur.',
+    },
+    excellent: {
+      label: 'Excellent',
+      description: 'Aussi bon que le meilleur, à un écart imperceptible.',
+    },
+    good: {
+      label: 'Bon coup',
+      description: 'Un coup correct, qui ne coûte presque rien.',
+    },
+    book: {
+      label: 'Théorie',
+      description: "Un coup de la théorie d'ouverture, joué et rejoué depuis longtemps.",
+    },
+    forced: {
+      label: 'Coup forcé',
+      description: "Le seul coup légal : il n'y avait pas de choix à faire.",
+    },
+    inaccuracy: {
+      label: 'Imprécision',
+      description: "Jouable, mais inférieur : une part de l'avantage s'en va.",
+    },
+    mistake: {
+      label: 'Erreur',
+      description: "Une faute nette : l'évaluation bascule sensiblement.",
+    },
+    blunder: {
+      label: 'Gaffe',
+      description: "Une gaffe : du matériel perdu, ou la position compromise d'un coup.",
+    },
+    miss: {
+      label: 'Occasion manquée',
+      description: 'Une occasion manquée : un gain ou un mat était à portée.',
+    },
+  },
+  bots: {
+    novice: {
+      devise: 'Je peux la prendre ?',
+      contre:
+        'Laisse-lui du matériel là où tu le reprends au coup suivant : il mord presque à chaque fois. Et développe tes pièces pendant qu’il ramasse — c’est la seule chose qu’il oublie de faire.',
+      lore1:
+        'Le premier tirage de la série, et le seul qu’on n’ait pas retouché. Le tilleul porte encore les traces de la gouge, les oreilles sont trop grandes pour l’encolure, et l’ensemble penche vers l’avant. Le sculpteur n’a rien corrigé : c’est de ce déséquilibre que vient l’air de vouloir avancer.',
+      lore2:
+        'Au tableau, cela donne quelqu’un qui voit une pièce à prendre et qui la prend. Pas par gourmandise — par confiance. Il n’a pas encore appris qu’une pièce peut être posée là exprès. C’est l’adversaire des premières parties, et il apprendra en même temps que toi.',
+      name: 'Pion',
+      blurb:
+        'Apprend en même temps que toi. Il adore prendre des pièces, même quand il ne devrait pas.',
+    },
+    prudent: {
+      devise: 'Après vous.',
+      contre:
+        'Ne lui donne pas les échanges qu’il attend : garde tes pièces, prends de l’espace, et ouvre un second front. Sa solidité tient tant qu’il n’a qu’un seul endroit à défendre.',
+      lore1:
+        'Taillé dans un bloc de granit gris-bleu qui avait passé l’hiver dehors ; la mousse prise dans les creux n’a pas été retirée. Les plaques de fer rivetées sur l’encolure n’ont jamais servi à rien — rien n’est jamais arrivé jusqu’à lui.',
+      lore2:
+        'Il roque tôt, échange dès qu’on le lui propose, et refuse tout ce qui ressemble à un risque. On ne perd pas contre Rempart sur une combinaison : on perd de fatigue, après avoir cherché pendant quarante coups une ouverture qui n’existait pas.',
+      name: 'Rempart',
+      blurb: 'Solide et patient. Il roque tôt, échange volontiers et ne prend aucun risque.',
+    },
+    fonceur: {
+      devise: 'On verra après.',
+      contre:
+        'Ne recule pas devant les pions qui montent : chaque pion poussé est un pion qui ne reviendra pas défendre. Échange ses attaquants, tiens le centre, et son assaut devient une rangée de faiblesses.',
+      lore1:
+        'Coulé trop chaud, refroidi trop vite. Le bronze s’est fendu en séchant et la lumière sort encore des fissures. Le sculpteur a gardé la pièce ratée : aucune des suivantes n’avait ce mouvement — oreilles couchées, naseaux ouverts, déjà lancé.',
+      lore2:
+        'Il pousse ses pions vers ton roi sans se demander ce qu’il laisse derrière. Souvent cela passe, parce qu’une attaque qui arrive vite trouve rarement une défense prête. Quand cela ne passe pas, il ne lui reste plus de position du tout.',
+      name: 'Brasier',
+      blurb:
+        "Attaque d'abord, réfléchit ensuite. Il pousse ses pions vers ton roi sans se retourner.",
+    },
+    tacticien: {
+      devise: 'Tu as vu ce que tu viens de laisser ?',
+      contre:
+        'Une seule discipline suffit : après chacun de ses coups, regarde ce qui est en prise et ce qui vise quoi. Il ne crée pas les failles, il les ramasse.',
+      lore1:
+        'Cristal givré, taillé à facettes franches. Une seule fêlure traverse l’encolure de part en part : elle est arrivée au démoulage, elle n’était pas prévue, et c’est elle qu’on regarde en premier.',
+      lore2:
+        'Il ne cherche pas à mieux placer ses pièces — il attend. Une pièce non défendue, deux pièces sur la même diagonale, un roi qui a bougé une fois de trop : il trouve, et il trouve avant toi. Contre une position saine il n’a rien de particulier à dire ; c’est le désordre qu’il mange.',
+      name: 'Éclair',
+      blurb: 'Voit les combinaisons partout. Laisse une pièce en prise et tu le regretteras.',
+    },
+    positionnel: {
+      devise: 'Rien ne presse.',
+      contre:
+        'Ne le laisse pas ranger tranquillement. Prends de l’espace tôt, crée un déséquilibre pendant qu’il finit son développement : il joue mal les positions qu’on ne peut pas mettre en ordre.',
+      lore1:
+        'Laiton patiné et palissandre sombre, monté d’aplomb au fil à plomb. Une rose des vents est gravée sur le côté de l’encolure ; elle indique une direction que rien, dans la sculpture, ne suit. C’est un instrument, pas un voyageur.',
+      lore2:
+        'Il ne t’attaquera pas. Il améliorera une pièce, puis une autre, puis prendra une case dont tu ne voyais pas l’intérêt. Trente coups plus tard, tu chercheras un coup à jouer et il n’y en aura plus.',
+      name: 'Boussole',
+      blurb:
+        "Joue lentement, améliore ses pièces une à une, et t'étouffe sans que tu t'en aperçoives.",
+    },
+    gambiteur: {
+      devise: 'Prends-le donc.',
+      contre:
+        'Tu peux accepter, à une condition : rendre le matériel dès qu’il commence à te coûter des temps. Un pion de plus ne vaut rien contre trois pièces développées et une colonne ouverte sur ton roi.',
+      lore1:
+        'Résine fumée, coulée deux fois : le contour se dédouble, la couleur se décale d’un cheveu, et l’arrière de l’encolure se dissout dans l’air. Personne n’a jamais su dire exactement où l’objet s’arrête — le détourage automatique non plus.',
+      lore2:
+        'Il offre un pion dès l’ouverture, parfois une pièce. Ce n’est pas de la générosité : ce qu’il achète, ce sont des lignes ouvertes et deux temps d’avance, et il sait quoi en faire. Refuser est souvent le bon choix. C’est rarement celui qu’on fait.',
+      name: 'Mirage',
+      blurb: "Offre du matériel dès l'ouverture pour ouvrir des lignes. Accepte à tes risques.",
+    },
+    machine: {
+      devise: 'Rien à ajouter.',
+      contre:
+        'Il n’y a pas de défaut de style à exploiter, et c’est tout l’intérêt : baisse le niveau si tu veux gagner, garde-le au plus haut si tu veux savoir où tu en es. Une défaite contre Oracle ne dit rien de toi.',
+      lore1:
+        'Obsidienne polie, sans grain, sans une trace d’outil. C’est le seul de la série qui regarde droit devant, et le seul rigoureusement symétrique : il n’existe aucun angle sous lequel il soit plus flatteur qu’un autre.',
+      lore2:
+        'Aucun biais, aucune préférence, aucun mauvais jour. Il joue le meilleur coup que le moteur trouve, ni plus ni moins, et il le joue aussi bien contre toi que contre n’importe qui. Les six autres ont été bridés pour te ressembler un peu. Lui, non.',
+      name: 'Oracle',
+      blurb: 'Aucun style, aucune pitié. Le meilleur coup, à chaque fois. Bonne chance.',
+    },
+  },
+  axes: {
+    capture: {
+      attire: 'prendre du matériel',
+      repousse: 'laisser passer une prise',
+    },
+    check: {
+      attire: 'donner échec',
+      repousse: 'éviter les échecs',
+    },
+    pawnPush: {
+      attire: 'pousser ses pions',
+      repousse: 'garder ses pions en place',
+    },
+    development: {
+      attire: 'sortir ses pièces',
+      repousse: 'négliger son développement',
+    },
+    sacrifice: {
+      attire: 'sacrifier du matériel',
+      repousse: 'refuser tout sacrifice',
+    },
+    quiet: {
+      attire: 'jouer des coups tranquilles',
+      repousse: 'ne jamais rester tranquille',
+    },
   },
   arbitrage: {
     title: 'Aide-mémoire d’arbitrage',

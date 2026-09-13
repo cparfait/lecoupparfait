@@ -79,6 +79,21 @@ const TEXTE_EN_LIGNE = />\s*([A-ZÀ-ÿ][^<>{}\n]{1,})\s*</g
  */
 const TEXTE_SEUL = /^[ \t]*([A-ZÀ-ÿ][^<>{}\n,:;=]*[^\s<>{},:;=])[ \t]*$/
 
+/**
+ * Le texte collé à une interpolation.
+ *
+ * Troisième angle mort, et le plus coûteux des trois : `{n} jour{n > 1 ? 's' :
+ * ''} d’affilée`. Aucun des deux motifs ci-dessus ne le voit — il n'est ni seul
+ * sur sa ligne, ni précédé d'un chevron — et pourtant c'est du français écrit en
+ * dur, avec en prime une règle de pluriel qui n'est celle d'aucune autre langue.
+ * On retient donc ce qui sépare deux accolades, ou une accolade d'une balise.
+ *
+ * Réservé aux `.tsx` : dans un `.ts`, la même forme décrit une annotation de
+ * type — `): Promise<void>` — et rien d'autre. La classe exclut par ailleurs la
+ * ponctuation du code, pour la même raison.
+ */
+const TEXTE_COLLE = /[>}][ \t\n]*([^<>{}\n=:;()|$"'`]*[A-Za-zÀ-ÿ]{2,}[^<>{}\n=:;()|$"'`]*)[<{]/g
+
 function textesNus(src) {
   const lignes = src.split('\n')
   const sortie = []
@@ -141,19 +156,24 @@ for (const chemin of fichiers(RACINE)) {
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/^\s*\/\/.*$/gm, '')
 
-  const candidats = [...textesNus(src)]
-  for (const motif of [ATTRIBUTS, TEXTE_EN_LIGNE]) {
+  // `colle` marque les fragments venus de `TEXTE_COLLE`. Ils échappent au filtre
+  // des identifiants : « jour » entre deux accolades est un mot de phrase, pas
+  // un nom de variable — et c'est exactement la moitié qui manquait.
+  const candidats = [...textesNus(src)].map((valeur) => [valeur, false])
+  const motifs = [ATTRIBUTS, TEXTE_EN_LIGNE]
+  if (rel.endsWith('.tsx')) motifs.push(TEXTE_COLLE)
+  for (const motif of motifs) {
     motif.lastIndex = 0
     let m
-    while ((m = motif.exec(src))) candidats.push(m[2] ?? m[1])
+    while ((m = motif.exec(src))) candidats.push([m[2] ?? m[1], motif === TEXTE_COLLE])
   }
 
   const trouves = new Set()
-  for (const brut of candidats) {
+  for (const [brut, colle] of candidats) {
     const valeur = brut.trim()
     if (!valeur || TECHNIQUE.test(valeur)) continue
     if (valeur.startsWith('http') || valeur.startsWith('/') || valeur.includes('--')) continue
-    if (/^[a-z][a-zA-Z]*$/.test(valeur)) continue
+    if (!colle && /^[a-z][a-zA-Z]*$/.test(valeur)) continue
     // Du code et non du texte : un appel, une conjonction logique, une constante
     // en capitales, ou un type de la bibliothèque standard. Un mot capitalisé
     // seul, lui, est retenu : « Pause », « Menu », « Erreur » sont des boutons.

@@ -30,9 +30,9 @@ import { BOT_PERSONALITIES } from '@coupparfait/core'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
 import { CarteDestination } from '@/components/ui/CarteDestination.tsx'
 import { TitreDePage, TitreDeSection } from '@/components/ui/index.tsx'
-import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
-import { usePreferences } from '@/lib/store/preferences.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 import { SECTIONS } from '@/lib/navigation.ts'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 const TEINTE = SECTIONS.find((s) => s.id === 'jouer')?.teinte
 
@@ -104,7 +104,6 @@ export default function PlayLobbyPage() {
   /* La langue du **contenu** pour les sept portraits : leurs noms et leurs
      phrases sont écrits dans le cœur, en français et en anglais seulement.
      Voir `localeDuContenu`. */
-  const contenu = usePreferences((state) => localeDuContenu(state.locale))
 
   return (
     <div className="page">
@@ -151,10 +150,10 @@ export default function PlayLobbyPage() {
               <PortraitAdversaire personality={personality} size={44} />
               <div className="min-w-0">
                 <p className="text-sm font-semibold group-hover:underline">
-                  {personality.name[contenu]}
+                  {tCoeur(t, personality.name)}
                 </p>
                 <p className="mt-1 text-xs leading-relaxed text-muted">
-                  {personality.blurb[contenu]}
+                  {tCoeur(t, personality.blurb)}
                 </p>
               </div>
             </Link>

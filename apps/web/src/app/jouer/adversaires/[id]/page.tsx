@@ -20,6 +20,8 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { BOT_PERSONALITIES, type BotPersonalityId } from '@coupparfait/core'
 import { FicheAdversaire } from '@/components/brand/FicheAdversaire.tsx'
+import { tDesMetadonnees } from '@/lib/i18n/metadonnees.ts'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 const IDS = Object.keys(BOT_PERSONALITIES) as BotPersonalityId[]
 
@@ -34,10 +36,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params
   const personnalite = BOT_PERSONALITIES[id as BotPersonalityId]
-  if (!personnalite) return { title: 'Adversaire introuvable' }
+  const t = await tDesMetadonnees()
+  if (!personnalite) return { title: t('opponent.notFound') }
   return {
-    title: `${personnalite.name.fr} — adversaire artificiel`,
-    description: personnalite.blurb.fr,
+    title: t('opponent.metaTitle', { nom: tCoeur(t, personnalite.name) }),
+    description: tCoeur(t, personnalite.blurb),
   }
 }
 

@@ -28,10 +28,9 @@ import { POSITIONS_DU_GLOSSAIRE } from '@/lib/glossaire-positions.ts'
 import { BoiteTerme } from '@/components/glossaire/BoiteTerme.tsx'
 import { BoutonEcouter } from '@/components/ui/BoutonEcouter.tsx'
 import { renderBold } from '@/lib/gras.tsx'
-import { localeDuContenu } from '@/lib/i18n/index.tsx'
-import { usePreferences } from '@/lib/store/preferences.ts'
 import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
 import type { TranslationKey } from '@/lib/i18n/index.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 /** Ignore accents et casse : on cherche « echec » et on trouve « échec ». */
 function normalise(value: string): string {
@@ -131,17 +130,6 @@ const CLE_FAMILLE: Record<string, TranslationKey> = {
 
 export default function GlossaryPage() {
   const t = useT()
-  /*
-    La langue du **contenu**, et non celle de l'interface.
-
-    L'interface existe dans trente-six langues ; les explications de coups, les
-    définitions de motifs et les noms d'ouvertures sont rédigés, pas traduits,
-    et le cœur ne les produit qu'en français et en anglais. Toute frontière vers
-    le cœur passe donc par `localeDuContenu`, qui ramène les trente-quatre
-    autres à l'anglais. Sans cela, choisir le polonais produirait des phrases
-    qui n'existent pas.
-  */
-  const locale = usePreferences((state) => localeDuContenu(state.locale))
   const bcp47 = langue(useI18n().locale).bcp47
   const [query, setQuery] = useState('')
   /**
@@ -190,16 +178,16 @@ export default function GlossaryPage() {
       family: terme.family,
     }))
     const connus = new Set(termes.map((terme) => terme.name))
-    const motifs = motifGlossary(locale)
-      .filter((motif) => !connus.has(motif.name))
+    const motifs = motifGlossary()
       .map((motif) => ({
         cle: motif.id as string,
-        name: motif.name,
-        definition: motif.definition,
+        name: tCoeur(t, motif.name),
+        definition: tCoeur(t, motif.definition),
         family: 'Motifs tactiques' as const,
       }))
+      .filter((motif) => !connus.has(motif.name))
     return [...termes, ...motifs]
-  }, [locale, t])
+  }, [t])
 
   /**
    * Les termes que le lexique ajoute à la recherche.

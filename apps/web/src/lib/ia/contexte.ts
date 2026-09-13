@@ -12,7 +12,7 @@
  * seulement à reformuler et à répondre à la question posée.
  */
 
-import { formatScore, localiseSan, QUALITY_STYLES } from '@coupparfait/core'
+import { formatScore, localiseSan, VERDICT_PHRASE } from '@coupparfait/core'
 import type { Traducteur } from '@/lib/i18n/resoudre.ts'
 import type {
   AnalysedMove,
@@ -83,10 +83,13 @@ export function contexteDuCoup(coup: CoupCommente, options: ContexteOptions): st
   lignes.push(
     fr ? `Coup joué : ${san(coup.san)} par ${camp}.` : `Move played: ${san(coup.san)} by ${camp}.`,
   )
+  // Le verdict en un mot, pris à la table de composition du cœur et non au
+  // dictionnaire : ce bloc est une amorce pour le modèle, pas de l'affichage,
+  // et il est rédigé dans la langue du contenu.
   lignes.push(
     fr
-      ? `Verdict du moteur : ${QUALITY_STYLES[coup.quality].label.fr}.`
-      : `Engine verdict: ${QUALITY_STYLES[coup.quality].label.en}.`,
+      ? `Verdict du moteur : ${VERDICT_PHRASE[coup.quality].fr}.`
+      : `Engine verdict: ${VERDICT_PHRASE[coup.quality].en}.`,
   )
   lignes.push(
     fr

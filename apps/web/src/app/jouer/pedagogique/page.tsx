@@ -29,12 +29,11 @@ import {
   themesPour,
   type SeancesFaites,
 } from '@/lib/game/seance.ts'
-import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
-import { usePreferences } from '@/lib/store/preferences.ts'
+import { useT } from '@/lib/i18n/index.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 export default function SeancePage() {
   const t = useT()
-  const contenu = usePreferences((state) => localeDuContenu(state.locale))
   const [palierId, setPalierId] = useState<string | null>(null)
   const [themeId, setThemeId] = useState<string | null>(null)
   const [commente, setCommente] = useState(true)
@@ -107,7 +106,7 @@ export default function SeancePage() {
                     : `${entree.min} – ${entree.max}`}
                 </span>
                 <span className="mt-0.5 block text-[13px] font-semibold leading-snug">
-                  {entree.nom}
+                  {t(entree.nom)}
                 </span>
               </button>
             ))}
@@ -116,7 +115,7 @@ export default function SeancePage() {
           {palier && adversaire && (
             <p className="mt-3 text-[13px] leading-relaxed text-muted">
               {t('session.opponentBefore')}{' '}
-              <strong className="text-ink">{adversaire.name[contenu]}</strong>
+              <strong className="text-ink">{tCoeur(t, adversaire.nomKey)}</strong>
               {t('session.opponentAfter', { elo: adversaire.elo })}
             </p>
           )}
@@ -153,7 +152,7 @@ export default function SeancePage() {
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex flex-wrap items-center gap-2">
-                      <span className="text-[14px] font-semibold">{entree.nom}</span>
+                      <span className="text-[14px] font-semibold">{t(entree.nom)}</span>
                       {deja > 0 && (
                         <Chip tone="success">
                           {deja} séance{deja > 1 ? 's' : ''}
@@ -205,10 +204,10 @@ export default function SeancePage() {
           {theme && (
             <div className="mt-4 rounded-[var(--radius)] border border-line bg-bg-deep p-4">
               <p className="text-[13px] font-semibold text-faint">{t('session.whatYouWatch')}</p>
-              <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{theme.aRegarder}</p>
+              <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{t(theme.aRegarder)}</p>
               <p className="mt-3 text-[13px] font-semibold text-faint">{t('session.atTheEnd')}</p>
               <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
-                {t('session.debriefPromise', { theme: theme.nom.toLowerCase() })}
+                {t('session.debriefPromise', { theme: t(theme.nom).toLowerCase() })}
               </p>
             </div>
           )}

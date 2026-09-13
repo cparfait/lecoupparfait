@@ -157,6 +157,8 @@ export const en: Dictionary = {
   },
 
   opponent: {
+    notFound: 'Opponent not found',
+    metaTitle: '{nom} — artificial opponent',
     all: 'All the opponents',
     galleryIntro:
       'Seven characters, spread over the twenty-five levels. Their style is not decoration: each evaluates moves with a preference of its own, and its page shows the numbers that produce it — along with what to do to beat it.',
@@ -879,6 +881,8 @@ export const en: Dictionary = {
       'Commentary mode is on. After every move you will see what you could have played, with the three best options and the reason for each.',
     staleBefore: 'About your move',
     staleAfter: '— the position has changed since.',
+    check: 'Check',
+    mate: 'Mate',
     review: 'Look again',
     analysing: 'Analysing the move…',
     muteVoice: 'Mute the voice',
@@ -2542,6 +2546,374 @@ export const en: Dictionary = {
     purgedSessions: 'expired sessions',
     purgedEvaluations: 'evaluations under 14 plies, too shallow to be reused',
     purgedEmptyAccounts: 'accounts with no game and no analysis, inactive for six months',
+  },
+  motifs: {
+    hangingPiece: {
+      name: 'Hanging piece',
+      definition:
+        'A piece that is attacked and not sufficiently defended: the opponent can take it and win material.',
+    },
+    fork: {
+      name: 'Fork',
+      definition:
+        'A single piece attacks two or more targets at once. Since only one thing can be saved at a time, the other is won.',
+    },
+    pin: {
+      name: 'Pin',
+      definition:
+        'A piece cannot move without exposing a more valuable one behind it. If the king is behind, it cannot legally move at all.',
+    },
+    skewer: {
+      name: 'Skewer',
+      definition:
+        'The reverse of a pin: the valuable piece is in front. It has to flee, and in fleeing it abandons the one behind it.',
+    },
+    discoveredAttack: {
+      name: 'Discovered attack',
+      definition:
+        'Moving one piece clears the line of another, which suddenly strikes a target. Two threats are born of a single move.',
+    },
+    doubleCheck: {
+      name: 'Double check',
+      definition:
+        'Two pieces give check at the same time. No block will do: the king is obliged to move.',
+    },
+    removingTheDefender: {
+      name: 'Removing the defender',
+      definition:
+        'You capture or drive away the piece defending a target, which falls on the next move.',
+    },
+    overloadedPiece: {
+      name: 'Overloaded piece',
+      definition:
+        'One piece is single-handedly doing two defensive jobs. Distract it on one side and the other collapses.',
+    },
+    trappedPiece: {
+      name: 'Trapped piece',
+      definition:
+        'An attacked piece with no safe square left: it is lost, even though nobody has taken it yet.',
+    },
+    backRankMate: {
+      name: 'Back-rank mate',
+      definition:
+        'The castled king is shut in by his own pawns on his back rank. A rook or queen arriving on that rank mates.',
+    },
+    smotheredMate: {
+      name: 'Smothered mate',
+      definition:
+        'The king is entirely surrounded by his own pieces; only a knight can mate him then, because only a knight jumps over them.',
+    },
+    mateIn1: {
+      name: 'Mate in one',
+      definition: 'A single move ends the game.',
+    },
+    mateIn2: {
+      name: 'Mate in two',
+      definition: 'A forced mate in two moves, whatever the opponent replies.',
+    },
+    mateIn3: {
+      name: 'Mate in three',
+      definition: 'A forced mate in three moves: no defence holds it off.',
+    },
+    mateThreat: {
+      name: 'Mate threat',
+      definition: 'Mate arrives next move if nothing is done.',
+    },
+    sacrifice: {
+      name: 'Sacrifice',
+      definition:
+        'Material is given up deliberately to get something else: an attack, an open line, an exposed king.',
+    },
+    promotion: {
+      name: 'Promotion',
+      definition: 'A pawn reaching the last rank turns into something else, almost always a queen.',
+    },
+    underPromotion: {
+      name: 'Underpromotion',
+      definition:
+        'Promoting to something other than a queen — often a knight to give a decisive check, or a rook to avoid stalemate.',
+    },
+    enPassant: {
+      name: 'En passant',
+      definition:
+        'A pawn advancing two squares can be captured by an enemy pawn as if it had advanced only one — and only on the very next move.',
+    },
+    passedPawn: {
+      name: 'Passed pawn',
+      definition:
+        'A pawn no enemy pawn can stop, neither on its file nor on the neighbouring ones. It is worth its weight in gold in the endgame.',
+    },
+    protectedPassedPawn: {
+      name: 'Protected passed pawn',
+      definition:
+        'A passed pawn supported by another pawn: the opponent cannot even blockade it with their king without losing.',
+    },
+    isolatedPawn: {
+      name: 'Isolated pawn',
+      definition:
+        'A pawn with no neighbour on the adjacent files: no pawn can defend it, so a piece has to.',
+    },
+    doubledPawns: {
+      name: 'Doubled pawns',
+      definition:
+        'Two pawns on the same file: they get in each other’s way, advance badly and defend less well.',
+    },
+    backwardPawn: {
+      name: 'Backward pawn',
+      definition:
+        'A pawn left behind that its neighbours can no longer support, and whose advance square the opponent controls.',
+    },
+    outpost: {
+      name: 'Outpost',
+      definition:
+        'An advanced square, defended by a pawn, that no enemy pawn can attack. A knight there is all but untouchable.',
+    },
+    bishopPair: {
+      name: 'Bishop pair',
+      definition:
+        'Having both bishops when the opponent has only one: they cover every square and become formidable in an open position.',
+    },
+    badBishop: {
+      name: 'Bad bishop',
+      definition:
+        'A bishop blocked in by its own pawns, all of them sitting on squares of its colour.',
+    },
+    openFile: {
+      name: 'Open file',
+      definition:
+        'A file with no pawn at all on it: the rooks’ motorway, through which they get into the enemy camp.',
+    },
+    semiOpenFile: {
+      name: 'Half-open file',
+      definition: 'A file with no pawn of your own but an enemy pawn on it: a target to attack.',
+    },
+    seventhRank: {
+      name: 'Rook on the seventh',
+      definition:
+        'A rook on the 7th rank (2nd for Black) eats pawns and shuts the king in. Two rooks there often win on their own.',
+    },
+    exposedKing: {
+      name: 'Exposed king',
+      definition:
+        'A king with no pawn shield, surrounded by squares the opponent controls: the attack is on its way.',
+    },
+    kingSafety: {
+      name: 'King safety',
+      definition: 'A castled king, protected by his pawns, far from any open line.',
+    },
+    development: {
+      name: 'Lagging development',
+      definition:
+        'Pieces still on their starting squares. Every opening move should bring out a new one.',
+    },
+    centreControl: {
+      name: 'Centre control',
+      definition:
+        'The four central squares: whoever holds them runs the game, because pieces radiate in every direction from there.',
+    },
+    oppositeCastling: {
+      name: 'Opposite castling',
+      definition:
+        'The kings have castled on opposite sides: each can throw their pawns at the other’s king without exposing their own. The games turn very sharp.',
+    },
+    fianchetto: {
+      name: 'Fianchetto',
+      definition:
+        'A bishop developed on b2/g2 (or b7/g7), behind an advanced pawn, sweeping the long diagonal.',
+    },
+    opposition: {
+      name: 'Opposition',
+      definition:
+        'In king and pawn endings, the kings face each other one square apart. Whoever is not on move gains ground — and that often decides the whole game.',
+    },
+    rookBehindPasser: {
+      name: 'Rook behind the passed pawn',
+      definition:
+        'Tarrasch’s rule: rooks belong behind passed pawns — your own to push them, your opponent’s to hold them back.',
+    },
+    wrongBishop: {
+      name: 'Wrong-coloured bishop',
+      definition:
+        'With an a- or h-file pawn and a bishop that does not control the promotion square, the endgame is drawn even a pawn up.',
+    },
+    kingActivity: {
+      name: 'Active king',
+      definition:
+        'In the endgame, the king becomes an attacking piece. Centralising him is often worth more than a pawn.',
+    },
+    zugzwang: {
+      name: 'Zugzwang',
+      definition:
+        'Being obliged to move when every move makes your position worse. Passing would save you — but that is not allowed.',
+    },
+    blockade: {
+      name: 'Blockade',
+      definition:
+        'Placing a piece right in front of an enemy passed pawn to immobilise it. The knight is the best blockader.',
+    },
+    spaceAdvantage: {
+      name: 'Space advantage',
+      definition:
+        'Controlling more squares than your opponent: their pieces tread on each other, yours can manoeuvre.',
+    },
+    xRayAttack: {
+      name: 'X-ray attack',
+      definition:
+        'A long-range piece acts through another: the threat exists already, before the line has even been cleared.',
+    },
+  },
+  qualites: {
+    brilliant: {
+      label: 'Brilliant',
+      description:
+        'A sound sacrifice: material given up, and the position pays it back a hundredfold.',
+    },
+    great: {
+      label: 'Great move',
+      description: 'The only move that held — every other option gave up part of the advantage.',
+    },
+    best: {
+      label: 'Best move',
+      description: 'The engine’s first choice.',
+    },
+    excellent: {
+      label: 'Excellent',
+      description: 'As good as the best, by an imperceptible margin.',
+    },
+    good: {
+      label: 'Good move',
+      description: 'A sound move, costing next to nothing.',
+    },
+    book: {
+      label: 'Book move',
+      description: 'A move of opening theory, played and replayed for a very long time.',
+    },
+    forced: {
+      label: 'Forced move',
+      description: 'The only legal move: there was no choice to make.',
+    },
+    inaccuracy: {
+      label: 'Inaccuracy',
+      description: 'Playable, but inferior: part of the advantage goes.',
+    },
+    mistake: {
+      label: 'Mistake',
+      description: 'A clear error: the evaluation shifts noticeably.',
+    },
+    blunder: {
+      label: 'Blunder',
+      description: 'A blunder: material lost, or the position ruined in one move.',
+    },
+    miss: {
+      label: 'Missed win',
+      description: 'A missed opportunity: a win or a mate was within reach.',
+    },
+  },
+  bots: {
+    novice: {
+      devise: 'Can I take that?',
+      contre:
+        'Leave him material where you take it back next move: he bites almost every time. And develop your pieces while he collects — that is the one thing he forgets to do.',
+      lore1:
+        'The first carving of the series, and the only one never reworked. The lime wood still shows the gouge marks, the ears are too big for the neck, and the whole thing leans forward. The sculptor corrected nothing: it is from that imbalance that the look of wanting to press on comes.',
+      lore2:
+        'On the board, that gives you somebody who sees a piece to take and takes it. Not out of greed — out of trust. He has not yet learned that a piece can be put there on purpose. He is the opponent of your first games, and he will learn at the same time as you.',
+      name: 'Pip',
+      blurb: 'Learning alongside you. Loves grabbing pieces, even when it should not.',
+    },
+    prudent: {
+      devise: 'After you.',
+      contre:
+        'Do not give him the exchanges he is waiting for: keep your pieces, take space, and open a second front. His solidity holds as long as he has only one place to defend.',
+      lore1:
+        'Cut from a block of blue-grey granite that had spent the winter outdoors; the moss caught in the hollows was not removed. The iron plates riveted to the neck have never served any purpose — nothing has ever got that far.',
+      lore2:
+        'He castles early, trades whenever it is offered, and refuses anything that looks like a risk. You do not lose to Rampart to a combination: you lose from exhaustion, after spending forty moves looking for an opening that was not there.',
+      name: 'Rampart',
+      blurb: 'Solid and patient. Castles early, trades willingly and takes no risks.',
+    },
+    fonceur: {
+      devise: 'We’ll see afterwards.',
+      contre:
+        'Do not back away from the advancing pawns: every pawn pushed is a pawn that will not come back to defend. Trade off his attackers, hold the centre, and his assault becomes a row of weaknesses.',
+      lore1:
+        'Cast too hot, cooled too fast. The bronze cracked as it set and the light still comes out through the fissures. The sculptor kept the failed piece: none of the later ones had that movement — ears back, nostrils flared, already away.',
+      lore2:
+        'He pushes his pawns at your king without asking what he leaves behind. It often works, because an attack that arrives fast rarely meets a defence that is ready. When it does not work, he has no position left at all.',
+      name: 'Blaze',
+      blurb: 'Attacks first, thinks afterwards. Pushes pawns at your king without looking back.',
+    },
+    tacticien: {
+      devise: 'Did you see what you just left?',
+      contre:
+        'One discipline is enough: after each of his moves, look at what is hanging and what is aimed at what. He does not create the cracks, he picks them up.',
+      lore1:
+        'Frosted crystal, cut in clean facets. A single crack runs right through the neck: it happened at the mould, it was not planned, and it is the first thing you look at.',
+      lore2:
+        'He does not try to place his pieces better — he waits. An undefended piece, two pieces on the same diagonal, a king that has moved one time too many: he finds it, and he finds it before you do. Against a healthy position he has nothing in particular to say; it is disorder he feeds on.',
+      name: 'Flash',
+      blurb: 'Sees combinations everywhere. Leave a piece hanging and you will regret it.',
+    },
+    positionnel: {
+      devise: 'No hurry.',
+      contre:
+        'Do not let him tidy up in peace. Take space early, create an imbalance while he is finishing his development: he plays badly in positions that cannot be put in order.',
+      lore1:
+        'Patinated brass and dark rosewood, mounted true to a plumb line. A compass rose is engraved on the side of the neck; it points in a direction nothing in the sculpture follows. It is an instrument, not a traveller.',
+      lore2:
+        'He will not attack you. He will improve one piece, then another, then take a square you did not see the point of. Thirty moves later you will be looking for a move to play and there will not be one.',
+      name: 'Compass',
+      blurb:
+        'Plays slowly, improves its pieces one by one, and smothers you without your noticing.',
+    },
+    gambiteur: {
+      devise: 'Go on, take it.',
+      contre:
+        'You may accept, on one condition: give the material back as soon as it starts costing you tempi. An extra pawn is worth nothing against three developed pieces and an open file at your king.',
+      lore1:
+        'Smoked resin, poured twice: the outline doubles, the colour shifts by a hair, and the back of the neck dissolves into the air. Nobody has ever been able to say exactly where the object stops — nor could the automatic cut-out.',
+      lore2:
+        'He offers a pawn in the opening, sometimes a piece. It is not generosity: what he is buying is open lines and two tempi, and he knows what to do with them. Declining is often the right choice. It is rarely the one people make.',
+      name: 'Mirage',
+      blurb: 'Offers material in the opening to open lines. Accept at your own risk.',
+    },
+    machine: {
+      devise: 'Nothing to add.',
+      contre:
+        'There is no stylistic flaw to exploit, and that is the whole point: lower the level if you want to win, keep it at the top if you want to know where you stand. Losing to Oracle says nothing about you.',
+      lore1:
+        'Polished obsidian, no grain, not a tool mark. It is the only one of the series that looks straight ahead, and the only one strictly symmetrical: there is no angle from which it is more flattering than another.',
+      lore2:
+        'No bias, no preference, no bad days. It plays the best move the engine finds, no more and no less, and it plays it as well against you as against anybody. The other six were held back to resemble you a little. This one was not.',
+      name: 'Oracle',
+      blurb: 'No style, no mercy. The best move, every time. Good luck.',
+    },
+  },
+  axes: {
+    capture: {
+      attire: 'taking material',
+      repousse: 'letting a capture go',
+    },
+    check: {
+      attire: 'giving check',
+      repousse: 'avoiding checks',
+    },
+    pawnPush: {
+      attire: 'pushing its pawns',
+      repousse: 'keeping its pawns in place',
+    },
+    development: {
+      attire: 'bringing its pieces out',
+      repousse: 'neglecting its development',
+    },
+    sacrifice: {
+      attire: 'sacrificing material',
+      repousse: 'refusing every sacrifice',
+    },
+    quiet: {
+      attire: 'playing quiet moves',
+      repousse: 'never staying quiet',
+    },
   },
   arbitrage: {
     title: 'Arbitration checklist',

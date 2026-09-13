@@ -1,4 +1,14 @@
 /**
+ * Un chemin dans le dictionnaire de l'application.
+ *
+ * Le cœur ne peut pas importer `TranslationKey` : c'est l'application web qui
+ * dépend de lui, et non l'inverse. Ses textes affichables sont donc des chemins
+ * pointés, que l'appelant résout. Le typage ne les garde pas ; `check-langues`
+ * refuse une clé inventée, ce qui couvre le cas qui compte.
+ */
+export type CleDeTexte = string
+
+/**
  * Types partagés du domaine échiquéen.
  *
  * Tout le reste du monorepo (web, serveur temps réel, scripts d'import) parle
@@ -336,10 +346,15 @@ export interface BotLevel {
   elo: number
   /** Identifiant de la personnalité associée. */
   personality: BotPersonalityId
-  /** Nom affiché. */
-  name: { fr: string; en: string }
-  /** Courte description du style. */
-  blurb: { fr: string; en: string }
+  /**
+   * Le nom de l'adversaire, par clé de dictionnaire.
+   *
+   * Le niveau n'y figure pas : « Pion · niveau 3 » se compose à l'affichage,
+   * parce que l'ordre des morceaux n'est pas le même dans toutes les langues.
+   */
+  nomKey: CleDeTexte
+  /** Courte description du style, par clé. */
+  blurb: CleDeTexte
   /** Paramètres transmis au moteur. */
   engine: BotEngineConfig
 }

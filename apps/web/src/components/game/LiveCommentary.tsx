@@ -67,6 +67,8 @@ import { useSan } from '@/lib/notation.ts'
 import type { PlayedMove } from '@/lib/game/useChessGame.ts'
 import type { Arrow } from '@/components/board/boardKit.ts'
 import { ArrowLegend, LEGEND, legendFor, type LegendItem } from '@/components/board/ArrowLegend.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
+import type { Traducteur } from '@/lib/i18n/resoudre.ts'
 
 /** Une option qu'on avait, avec ce qu'elle valait. */
 export interface Alternative {
@@ -175,6 +177,7 @@ export function useLiveCommentary({
   book,
 }: UseLiveCommentaryOptions) {
   const prefs = usePreferences()
+  const t = useT()
   // Le commentaire est rédigé par le cœur : français ou anglais, jamais l'une
   // des trente-quatre autres langues de l'interface.
   const locale = localeDuContenu(prefs.locale)
@@ -286,6 +289,7 @@ export function useLiveCommentary({
             before.lines,
             alternatives,
             locale,
+            t,
           ),
           highlights: explanation.highlights,
           scoreBefore,
@@ -315,6 +319,7 @@ export function useLiveCommentary({
     prefs.clientDepth,
     locale,
     prefs.notation,
+    t,
   ])
 
   return { commentary, loading, history }
@@ -334,6 +339,7 @@ function buildAlternatives(
   lines: EngineLine[],
   limit: number,
   locale: 'fr' | 'en',
+  t: Traducteur,
 ): Alternative[] {
   const out: Alternative[] = []
 
@@ -355,7 +361,7 @@ function buildAlternatives(
       })
 
       if (probe.isCheckmate()) {
-        reason = locale === 'fr' ? 'Mat' : 'Mate'
+        reason = t('commentary.mate')
       } else {
         /*
           La phrase avant le mot.
@@ -377,10 +383,10 @@ function buildAlternatives(
           const mine = motifs.find((motif) => motif.side === mover && motif.weight >= 0.4)
           if (mine) {
             const copy = motifCopy(mine.id as MotifId, locale)
-            reason = copy ? copy.name : null
+            reason = copy ? tCoeur(t, copy.name) : null
           }
         }
-        if (!reason && probe.inCheck()) reason = locale === 'fr' ? 'Échec' : 'Check'
+        if (!reason && probe.inCheck()) reason = t('commentary.check')
       }
     } catch {
       // Ligne moteur incohérente : on l'affiche sans justification plutôt que
@@ -710,7 +716,9 @@ export function CommentaryPanel({
               color: style ? `var(--q-${style.token})` : 'var(--text-muted)',
             }}
             aria-hidden
-            title={style ? `${style.label.fr} — ${style.description.fr}` : undefined}
+            title={
+              style ? `${tCoeur(t, style.label)} — ${tCoeur(t, style.description)}` : undefined
+            }
           >
             {loading && !commentary ? (
               <Loader2 size={14} className="animate-spin" />

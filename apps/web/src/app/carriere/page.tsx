@@ -41,8 +41,8 @@ import { Button, ButtonLink, Card, Skeleton } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { Celebration, type Gains } from '@/components/carriere/Celebration.tsx'
 import { recommencerCarriere, useCarriere } from '@/lib/carriere/useCarriere.ts'
-import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
-import { usePreferences } from '@/lib/store/preferences.ts'
+import { useT } from '@/lib/i18n/index.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 export default function CarrierePage() {
   const t = useT()
@@ -393,7 +393,6 @@ function LigneRepliee({
   verrouille?: boolean
 }) {
   const t = useT()
-  const contenu = usePreferences((state) => localeDuContenu(state.locale))
   const personnalite = BOT_PERSONALITIES[chapitre.adversaire]
   const elo = BOT_LEVELS[chapitre.niveau - 1]?.elo ?? 0
 
@@ -420,7 +419,7 @@ function LigneRepliee({
           {chapitre.numero}. {chapitre.titre}
         </p>
         <p className="truncate text-[12px] text-faint">
-          {personnalite.name[contenu]} · {elo} Elo
+          {tCoeur(t, personnalite.name)} · {elo} Elo
         </p>
       </div>
 
@@ -451,7 +450,6 @@ function CarteCourante({
   progression: Progression
 }) {
   const t = useT()
-  const contenu = usePreferences((state) => localeDuContenu(state.locale))
   const personnalite = BOT_PERSONALITIES[chapitre.adversaire]
   const niveau = niveauEffectif(chapitre, progression)
   const elo = BOT_LEVELS[niveau - 1]?.elo ?? 0
@@ -527,10 +525,10 @@ function CarteCourante({
           </span>
           <span className="min-w-0 flex-1">
             <span className="block truncate text-[14px] font-medium">
-              {personnalite.name[contenu]} · {elo} Elo
+              {tCoeur(t, personnalite.name)} · {elo} Elo
             </span>
             <span className="block truncate text-[12px] text-faint">
-              {personnalite.blurb[contenu]}
+              {tCoeur(t, personnalite.blurb)}
             </span>
           </span>
         </div>

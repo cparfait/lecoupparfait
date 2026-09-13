@@ -159,7 +159,7 @@ export function BoiteTerme({
         </div>
 
         <p className="mt-3 text-[14px] leading-relaxed">
-          {position.legende}
+          {t(position.legende)}
           {joues.length > 0 && (
             <span className="ml-1 font-semibold text-accent">
               {joues.map((san) => format(san)).join(' ')}

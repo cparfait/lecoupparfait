@@ -22,14 +22,13 @@ import { ArrowRight } from 'lucide-react'
 import { BOT_PERSONALITIES } from '@coupparfait/core'
 import { Card } from '@/components/ui/index.tsx'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
-import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
-import { usePreferences } from '@/lib/store/preferences.ts'
+import { useT } from '@/lib/i18n/index.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 export default function GalerieAdversaires() {
   const t = useT()
   /* Noms et phrases des sept adversaires : du contenu rédigé, que le cœur
      n'écrit qu'en français et en anglais. Voir `localeDuContenu`. */
-  const contenu = usePreferences((state) => localeDuContenu(state.locale))
 
   return (
     <div className="page">
@@ -47,16 +46,18 @@ export default function GalerieAdversaires() {
               <PortraitAdversaire personality={personnalite} size={56} />
               <div className="min-w-0 flex-1">
                 <p className="flex items-center gap-1.5 text-[15px] font-semibold">
-                  {personnalite.name[contenu]}
+                  {tCoeur(t, personnalite.name)}
                   <ArrowRight
                     size={14}
                     aria-hidden
                     className="text-faint transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-accent"
                   />
                 </p>
-                <p className="mt-0.5 text-[12px] italic text-accent">« {personnalite.devise} »</p>
+                <p className="mt-0.5 text-[12px] italic text-accent">
+                  « {tCoeur(t, personnalite.devise)} »
+                </p>
                 <p className="mt-1.5 text-xs leading-relaxed text-muted">
-                  {personnalite.blurb[contenu]}
+                  {tCoeur(t, personnalite.blurb)}
                 </p>
               </div>
             </Card>

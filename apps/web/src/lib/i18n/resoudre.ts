@@ -40,6 +40,24 @@ export function interpoler(modele: string, vars: Record<string, string | number>
 export type Traducteur = (cle: TranslationKey, vars?: Record<string, string | number>) => string
 
 /**
+ * Traduit une clé venue du cœur.
+ *
+ * `packages/core` ne peut pas importer `TranslationKey` : c'est l'application
+ * web qui dépend de lui, et non l'inverse. Ses textes affichables sont donc des
+ * `string`, et il faut bien les faire entrer quelque part.
+ *
+ * Ce passage est explicite, et c'est délibéré. Élargir `t` pour qu'il accepte
+ * n'importe quelle chaîne aurait été plus court d'une quarantaine d'appels, et
+ * aurait coûté la garantie qui compte : le typage a refusé plusieurs clés
+ * inventées pendant ce chantier, et il ne le ferait plus. Une fonction à part
+ * dit où l'on quitte le domaine du typage, et `check-cles-coeur` vérifie ce que
+ * le compilateur ne peut plus voir.
+ */
+export function tCoeur(t: Traducteur, cle: string, vars?: Record<string, string | number>): string {
+  return t(cle as TranslationKey, vars)
+}
+
+/**
  * Le `t()` d'une langue.
  *
  * Une clé absente des trois dictionnaires rend son propre chemin : le typage
