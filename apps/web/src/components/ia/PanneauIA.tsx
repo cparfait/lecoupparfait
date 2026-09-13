@@ -24,6 +24,7 @@ import {
   Toggle,
 } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { allProviders, getProvider, PROVIDERS } from '@/lib/ia/providers/index.ts'
 import {
@@ -37,6 +38,7 @@ import { testerConnexion } from '@/lib/ia/coach.ts'
 import type { ModelInfo } from '@/lib/ia/types.ts'
 
 export function PanneauIA() {
+  const t = useT()
   const enabled = usePreferences((state) => state.iaEnabled)
   const providerId = usePreferences((state) => state.iaProvider)
   const model = usePreferences((state) => state.iaModel)
@@ -93,11 +95,11 @@ export function PanneauIA() {
     })
     setTest(resultat.ok ? 'ok' : 'ko')
     if (resultat.ok) {
-      toast.success('L’assistant répond.', `${provider.name} · ${model}`)
+      toast.success(t('ia.answers'), `${provider.name} · ${model}`)
     } else {
-      toast.error('L’assistant ne répond pas.', resultat.erreur)
+      toast.error(t('ia.noAnswer'), resultat.erreur)
     }
-  }, [provider, model])
+  }, [provider, model, t])
 
   const choisirFournisseur = useCallback(
     (id: string) => {
@@ -117,32 +119,30 @@ export function PanneauIA() {
 
   return (
     <Card className="p-5">
-      <SectionTitle hint="Facultatif. Tout le reste de l’application fonctionne sans.">
+      <SectionTitle hint={t('ia.optional')}>
         <span className="flex items-center gap-2">
           <BrainCircuit size={16} className="text-accent" aria-hidden />
-          Assistant IA
+          {t('ia.title')}
         </span>
       </SectionTitle>
 
       <p className="mb-3 text-sm text-muted">
-        Les explications de chaque coup sont écrites par l’application, hors ligne et sans clé. En
-        branchant ton propre compte, tu ajoutes une chose de plus :{' '}
-        <strong className="text-ink">pouvoir poser une question de suivi</strong> — « et si j’avais
-        joué autre chose ? », « pourquoi cette case est faible ? ».
+        {t('ia.blurbBefore')} <strong className="text-ink">{t('ia.blurbStrong')}</strong>{' '}
+        {t('ia.blurbAfter')}
       </p>
 
       <Toggle
         checked={enabled}
         onChange={(value) => set('iaEnabled', value)}
-        label="Activer l’assistant"
-        description="Tu utilises ton propre compte chez le fournisseur de ton choix."
+        label={t('ia.enable')}
+        description={t('ia.enableHint')}
       />
 
       {enabled && (
         <div className="mt-4 space-y-4 border-t border-line pt-4">
           {/* ── Fournisseur ─────────────────────────────────────────── */}
           <div>
-            <span className="mb-2 block text-sm font-medium">Fournisseur</span>
+            <span className="mb-2 block text-sm font-medium">{t('ia.provider')}</span>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {allProviders().map((entry) => (
                 <button
@@ -158,11 +158,13 @@ export function PanneauIA() {
                 >
                   <span className="block truncate font-medium">{entry.name}</span>
                   <span className="mt-0.5 block text-[12px] text-faint">
-                    {entry.local
-                      ? 'sur ta machine'
-                      : entry.needsKey
-                        ? 'clé requise'
-                        : 'clé facultative'}
+                    {t(
+                      entry.local
+                        ? 'ia.onYourMachine'
+                        : entry.needsKey
+                          ? 'ia.keyRequired'
+                          : 'ia.keyOptional',
+                    )}
                   </span>
                 </button>
               ))}
@@ -176,13 +178,11 @@ export function PanneauIA() {
                 <Input
                   type="password"
                   name="ia-cle"
-                  label="Clé d’API"
+                  label={t('ia.apiKey')}
                   autoComplete="off"
                   spellCheck={false}
                   placeholder={
-                    provider.needsKey
-                      ? 'Colle ta clé ici'
-                      : 'Laisse vide si le service n’en demande pas'
+                    provider.needsKey ? t('ia.pasteKey') : t('ia.keyOptionalPlaceholder')
                   }
                   value={cle}
                   onChange={(event) => {
@@ -190,7 +190,7 @@ export function PanneauIA() {
                     setCle(provider.id, event.target.value)
                     setTest('idle')
                   }}
-                  hint="Enregistrée dans ce navigateur uniquement — jamais sur nos serveurs, jamais liée à ton compte."
+                  hint={t('ia.keyStorage')}
                 />
               )}
 
@@ -198,7 +198,7 @@ export function PanneauIA() {
               <div>
                 <div className="mb-1.5 flex items-baseline justify-between gap-3">
                   <label htmlFor="ia-modele" className="text-sm font-medium">
-                    Modèle
+                    {t('ia.model')}
                   </label>
                   <button
                     type="button"
@@ -206,7 +206,7 @@ export function PanneauIA() {
                     className="inline-flex items-center gap-1 text-xs text-muted transition-colors hover:text-ink"
                   >
                     {chargeModeles ? <Spinner size={12} /> : <RefreshCw size={12} aria-hidden />}
-                    Actualiser la liste
+                    {t('ia.refreshList')}
                   </button>
                 </div>
                 <select
@@ -218,7 +218,7 @@ export function PanneauIA() {
                   }}
                   className="h-11 w-full rounded-[var(--radius-sm)] border border-line bg-surface px-3 text-sm focus:border-accent focus:outline-none"
                 >
-                  <option value="">— choisis un modèle —</option>
+                  <option value="">{t('ia.pickModel')}</option>
                   {modeles.map((entry) => (
                     <option key={entry.id} value={entry.id}>
                       {entry.label}
@@ -228,23 +228,20 @@ export function PanneauIA() {
                       sélectionnable : sinon le réglage se viderait tout seul
                       quand la liste n'a pas pu être chargée. */}
                   {model && !modeles.some((entry) => entry.id === model) && (
-                    <option value={model}>{model} (enregistré)</option>
+                    <option value={model}>{t('ia.savedModel', { modele: model })}</option>
                   )}
                 </select>
 
                 {modeles.length === 0 && !chargeModeles && (
                   <p className="mt-1.5 text-xs text-faint">
-                    {provider.local
-                      ? 'Aucun modèle détecté. Lance le service et télécharge un modèle, puis actualise.'
-                      : 'Saisis ta clé pour voir la liste, ou tape l’identifiant du modèle chez ton fournisseur.'}
+                    {t(provider.local ? 'ia.noModelLocal' : 'ia.noModelRemote')}
                   </p>
                 )}
 
                 {retire && (
                   <p className="mt-1.5 flex items-start gap-1.5 text-xs text-[var(--q-inaccuracy)]">
                     <TriangleAlert size={13} className="mt-px shrink-0" aria-hidden />
-                    Ce modèle appartient à une génération retirée. Il échouera au premier appel —
-                    choisis-en un plus récent.
+                    {t('ia.retiredModel')}
                   </p>
                 )}
 
@@ -255,21 +252,27 @@ export function PanneauIA() {
                     rel="noreferrer noopener"
                     className="mt-1.5 inline-block text-xs text-accent hover:underline"
                   >
-                    Voir les modèles proposés par {provider.name} ↗
+                    {t('ia.seeModels', { fournisseur: provider.name })}
                   </a>
                 )}
               </div>
 
               {/* ── Longueur des réponses ────────────────────────────── */}
               <Slider
-                label="Longueur des réponses"
+                label={t('ia.answerLength')}
                 value={maxTokens}
                 onChange={(value) => set('iaMaxTokens', value)}
                 min={200}
                 max={2000}
                 step={100}
                 format={(value) =>
-                  value <= 400 ? 'très bref' : value <= 900 ? 'mesuré' : 'développé'
+                  t(
+                    value <= 400
+                      ? 'ia.lengthShort'
+                      : value <= 900
+                        ? 'ia.lengthMedium'
+                        : 'ia.lengthLong',
+                  )
                 }
               />
 
@@ -288,30 +291,26 @@ export function PanneauIA() {
                     ) : undefined
                   }
                 >
-                  Tester la connexion
+                  {t('ia.testConnection')}
                 </Button>
-                {test === 'ok' && <Chip tone="success">ça répond</Chip>}
-                {test === 'ko' && <Chip tone="danger">échec</Chip>}
+                {test === 'ok' && <Chip tone="success">{t('ia.testOk')}</Chip>}
+                {test === 'ko' && <Chip tone="danger">{t('ia.testKo')}</Chip>}
               </div>
 
               {/* ── Ce qu'on fait de la clé ──────────────────────────── */}
               <p className="rounded-[var(--radius-sm)] border border-line bg-surface px-3 py-2 text-xs leading-relaxed text-muted">
                 {distant ? (
                   <>
-                    Ta clé est enregistrée dans ce navigateur, et elle n’est envoyée qu’à{' '}
-                    {provider.name}. Comme les navigateurs interdisent d’appeler ces services
-                    directement, la requête{' '}
-                    <strong className="text-ink">transite par ce serveur</strong>, qui la recopie
-                    sans rien en conserver. Sur une instance que tu n’héberges pas toi-même, cela
-                    suppose de faire confiance à l’hébergeur — un service local n’a pas cet
-                    inconvénient.
+                    {t('ia.remoteKeyBefore')} {provider.name}
+                    {t('ia.remoteKeyMiddle')}{' '}
+                    <strong className="text-ink">{t('ia.remoteKeyStrong')}</strong>
+                    {t('ia.remoteKeyAfter')}
                   </>
                 ) : (
                   <>
-                    Ce service tourne sur ta machine : ton navigateur lui parle directement, et{' '}
-                    <strong className="text-ink">rien ne passe par nos serveurs</strong>. Si l’appel
-                    échoue, c’est en général qu’il faut l’autoriser à répondre aux pages web
-                    (variable <code>OLLAMA_ORIGINS</code> pour Ollama).
+                    {t('ia.localKeyBefore')}{' '}
+                    <strong className="text-ink">{t('ia.localKeyStrong')}</strong>
+                    {t('ia.localKeyAfter')} <code>OLLAMA_ORIGINS</code> {t('ia.localKeyEnd')}
                   </>
                 )}
               </p>
@@ -340,11 +339,11 @@ export function PanneauIA() {
               effacerToutesLesCles()
               setCleLocale('')
               setTest('idle')
-              toast.success('Clés effacées de ce navigateur.')
+              toast.success(t('ia.keysCleared'))
             }}
             className="text-xs text-muted underline-offset-2 transition-colors hover:text-[var(--q-blunder)] hover:underline"
           >
-            Effacer toutes mes clés de ce navigateur
+            {t('ia.clearKeys')}
           </button>
         </div>
       )}
@@ -367,6 +366,7 @@ function FournisseursPersonnalises({
   defs: CustomProviderDef[]
   onChange: (defs: CustomProviderDef[]) => void
 }) {
+  const t = useT()
   const [ouvert, setOuvert] = useState(false)
   const [nom, setNom] = useState('')
   const [url, setUrl] = useState('')
@@ -377,14 +377,14 @@ function FournisseursPersonnalises({
     try {
       new URL(adresse)
     } catch {
-      toast.error('Adresse invalide.', 'Exemple : https://api.groq.com/openai/v1')
+      toast.error(t('ia.badAddress'), t('ia.badAddressHint'))
       return
     }
     onChange([
       ...defs,
       {
         id: newCustomProviderId(),
-        name: nom.trim() || 'Service compatible OpenAI',
+        name: nom.trim() || t('ia.defaultCustomName'),
         baseUrl: adresse,
       },
     ])
@@ -395,7 +395,7 @@ function FournisseursPersonnalises({
 
   return (
     <div className="border-t border-line pt-4">
-      <span className="mb-2 block text-sm font-medium">Autre service</span>
+      <span className="mb-2 block text-sm font-medium">{t('ia.otherService')}</span>
 
       {defs.length > 0 && (
         <ul className="mb-2 space-y-1.5">
@@ -410,7 +410,7 @@ function FournisseursPersonnalises({
               </span>
               <button
                 type="button"
-                aria-label={`Retirer ${def.name}`}
+                aria-label={t('ia.removeProvider', { nom: def.name })}
                 onClick={() => onChange(defs.filter((entry) => entry.id !== def.id))}
                 className="shrink-0 text-muted transition-colors hover:text-[var(--q-blunder)]"
               >
@@ -425,26 +425,26 @@ function FournisseursPersonnalises({
         <div className="space-y-2 rounded-[var(--radius-sm)] border border-line p-3">
           <Input
             name="ia-custom-nom"
-            label="Nom"
+            label={t('ia.customName')}
             placeholder="Groq"
             value={nom}
             onChange={(event) => setNom(event.target.value)}
           />
           <Input
             name="ia-custom-url"
-            label="Adresse de l’API"
+            label={t('ia.customUrl')}
             placeholder="https://api.groq.com/openai/v1"
             spellCheck={false}
             value={url}
             onChange={(event) => setUrl(event.target.value)}
-            hint="La racine compatible OpenAI, sans « /chat/completions »."
+            hint={t('ia.customUrlHint')}
           />
           <div className="flex gap-2">
             <Button size="sm" variant="primary" onClick={ajouter}>
-              Ajouter
+              {t('ia.customAdd')}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setOuvert(false)}>
-              Annuler
+              {t('common.cancel')}
             </Button>
           </div>
         </div>
@@ -455,7 +455,7 @@ function FournisseursPersonnalises({
           icon={<Plus size={14} aria-hidden />}
           onClick={() => setOuvert(true)}
         >
-          Ajouter un service compatible OpenAI
+          {t('ia.addOpenAiService')}
         </Button>
       )}
     </div>

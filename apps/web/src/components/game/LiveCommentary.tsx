@@ -61,6 +61,7 @@ import { toast } from '@/components/ui/Toast.tsx'
 import { analyserAvecLeNavigateur } from '@/lib/analysis/runner.ts'
 import { speak, stopSpeaking } from '@/lib/speech.ts'
 import { localeDuContenu } from '@/lib/i18n/dictionary.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { useSan } from '@/lib/notation.ts'
 import type { PlayedMove } from '@/lib/game/useChessGame.ts'
@@ -521,6 +522,7 @@ export function CommentaryPanel({
   onToggleBestMove?: () => void
   className?: string
 }) {
+  const t = useT()
   const locale = usePreferences((state) => localeDuContenu(state.locale))
   const voixPreferee = usePreferences((state) => state.voiceEnabled)
   const voiceEnabled = voixPreferee && voix
@@ -561,10 +563,7 @@ export function CommentaryPanel({
       // Le coup du moteur ne se rejoue pas sur cette position : on le dit
       // plutôt que de rester muet sur un bouton qu'on vient de presser.
       if (!explication) {
-        toast.warning(
-          'Ce coup ne se rejoue pas sur cette position.',
-          'Impossible de l’expliquer sans risquer d’inventer.',
-        )
+        toast.warning(t('commentary.notReplayable'), t('commentary.notReplayableHint'))
         return
       }
       /*
@@ -582,10 +581,10 @@ export function CommentaryPanel({
         cas-là reste un bouton cassé.
       */
       stopSpeaking()
-      toast.info(`${san(alternative.san)} — à jouer à la place`, explication.speech)
+      toast.info(t('commentary.playInstead', { coup: san(alternative.san) }), explication.speech)
       speak(explication.speech)
     },
-    [commentary, locale, san],
+    [commentary, locale, san, t],
   )
 
   /**
@@ -659,10 +658,7 @@ export function CommentaryPanel({
       <Card className={clsx('p-4', className)}>
         <div className="flex items-start gap-2.5 text-sm text-faint">
           <MessageSquareText size={16} className="mt-0.5 shrink-0" aria-hidden />
-          <p className="min-w-0 flex-1 leading-relaxed">
-            Mode commenté actif. Après chaque coup, tu verras ce que tu aurais pu jouer, avec les
-            trois meilleures options et la raison de chacune.
-          </p>
+          <p className="min-w-0 flex-1 leading-relaxed">{t('commentary.placeholder')}</p>
           {onDesactiver && <BoutonDesactiver onClick={onDesactiver} />}
         </div>
       </Card>
@@ -681,9 +677,9 @@ export function CommentaryPanel({
         <div className="flex items-center gap-2 border-b border-line bg-surface-strong px-3 py-1.5 text-[12px] text-faint">
           <History size={12} className="shrink-0" aria-hidden />
           <span className="min-w-0 flex-1 leading-snug">
-            Porte sur ton coup{' '}
-            <strong className="font-semibold text-muted">{san(commentary.san)}</strong> — la
-            position a changé depuis.
+            {t('commentary.staleBefore')}{' '}
+            <strong className="font-semibold text-muted">{san(commentary.san)}</strong>{' '}
+            {t('commentary.staleAfter')}
           </span>
           {onReview && (
             <button
@@ -691,7 +687,7 @@ export function CommentaryPanel({
               onClick={onReview}
               className="shrink-0 rounded-[var(--radius-sm)] px-1.5 py-0.5 font-semibold text-accent transition-colors hover:bg-surface-hover"
             >
-              Revoir
+              {t('commentary.review')}
             </button>
           )}
         </div>
@@ -725,7 +721,7 @@ export function CommentaryPanel({
 
           <div className="min-w-0 flex-1">
             {loading && !commentary ? (
-              <p className="text-sm text-muted">Analyse du coup…</p>
+              <p className="text-sm text-muted">{t('commentary.analysing')}</p>
             ) : (
               commentary && (
                 <>
@@ -774,8 +770,8 @@ export function CommentaryPanel({
                   if (voixPreferee) stopSpeaking()
                   setPreference('voiceEnabled', !voixPreferee)
                 }}
-                title={voixPreferee ? 'Couper la voix' : 'Activer la voix'}
-                aria-label={voixPreferee ? 'Couper la voix' : 'Activer la voix'}
+                title={t(voixPreferee ? 'commentary.muteVoice' : 'commentary.unmuteVoice')}
+                aria-label={t(voixPreferee ? 'commentary.muteVoice' : 'commentary.unmuteVoice')}
                 className={clsx(
                   'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors',
                   voixPreferee
@@ -795,8 +791,8 @@ export function CommentaryPanel({
               <button
                 type="button"
                 onClick={replay}
-                title="Réécouter l’explication complète"
-                aria-label="Réécouter l’explication"
+                title={t('commentary.replayFull')}
+                aria-label={t('commentary.replay')}
                 className={clsx(
                   'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
                   speaking ? 'text-accent' : 'text-faint hover:text-ink',
@@ -813,12 +809,8 @@ export function CommentaryPanel({
                 type="button"
                 onClick={onToggleBestMove}
                 aria-pressed={showBestMove}
-                title={
-                  showBestMove
-                    ? 'Masquer le coup proposé sur l’échiquier'
-                    : 'Montrer le coup proposé sur l’échiquier'
-                }
-                aria-label="Afficher le coup proposé"
+                title={showBestMove ? t('commentary.hideBestMove') : t('commentary.showBestMove')}
+                aria-label={t('commentary.bestMoveAria')}
                 className={clsx(
                   'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
                   showBestMove ? 'text-accent' : 'text-faint hover:text-ink',
@@ -832,8 +824,8 @@ export function CommentaryPanel({
               <button
                 type="button"
                 onClick={onTogglePause}
-                title={paused ? 'Reprendre la partie' : 'Mettre en pause pour lire'}
-                aria-label={paused ? 'Reprendre' : 'Pause'}
+                title={t(paused ? 'commentary.resume' : 'commentary.pauseToRead')}
+                aria-label={t(paused ? 'commentary.resumeShort' : 'commentary.pauseShort')}
                 className={clsx(
                   'grid h-7 w-7 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
                   paused ? 'text-accent' : 'text-faint hover:text-ink',
@@ -863,7 +855,9 @@ export function CommentaryPanel({
       {/* ── Les options qu'on avait ─────────────────────────────────────── */}
       {commentary && commentary.alternatives.length > 0 && (
         <div className="border-t border-line/60">
-          <p className="px-4 py-2 text-[12px] font-semibold text-faint">Ce que tu pouvais jouer</p>
+          <p className="px-4 py-2 text-[12px] font-semibold text-faint">
+            {t('commentary.whatYouCouldPlay')}
+          </p>
           <ul onMouseLeave={() => onHoverAlternative?.(null)}>
             {commentary.alternatives.map((alternative) => (
               /* La ligne et l'écoute sont **deux** boutons côte à côte, et non
@@ -919,7 +913,7 @@ export function CommentaryPanel({
                       flèche sur l'échiquier ne fassent qu'une seule couleur. */}
                   {alternative.played && (
                     <Chip className="shrink-0 border-transparent" style={teinteDeRang(alternative)}>
-                      joué
+                      {t('commentary.played')}
                     </Chip>
                   )}
                   {!alternative.played && alternative.rank === 1 && (
@@ -1071,10 +1065,15 @@ export function commentaryLegend(
   if (hovered) {
     return [
       hovered.played
-        ? { ...LEGEND.played, label: `${hovered.san} — ton coup` }
+        ? {
+            ...LEGEND.played,
+            labelKey: 'legend.yourMoveNamed' as const,
+            vars: { coup: hovered.san },
+          }
         : {
             ...LEGEND.best,
-            label: `${hovered.san} — à la place de ton coup`,
+            labelKey: 'legend.insteadNamed' as const,
+            vars: { coup: hovered.san },
             weight: 'bold' as const,
           },
     ]
@@ -1098,8 +1097,8 @@ export function commentaryLegend(
   const joue = irreprochable
     ? {
         ...LEGEND.played,
-        label: 'Ton coup — le meilleur',
-        title: 'Le moteur n’avait rien de mieux.',
+        labelKey: 'commentary.yourMoveBest' as const,
+        titleKey: 'commentary.nothingBetter' as const,
       }
     : LEGEND.played
 
@@ -1155,12 +1154,14 @@ function teinteDeRang(alternative: Alternative): { background: string; color: st
  * indices », ce qui n'est pas la même chose que couper le mode.
  */
 function BoutonDesactiver({ onClick }: { onClick: () => void }) {
+  const t = useT()
+
   return (
     <button
       type="button"
       onClick={onClick}
-      title="Désactiver le mode commenté"
-      aria-label="Désactiver le mode commenté"
+      title={t('commentary.disable')}
+      aria-label={t('commentary.disable')}
       className="grid h-7 w-7 shrink-0 place-items-center rounded-[var(--radius-sm)] text-faint transition-colors hover:bg-surface-hover hover:text-ink"
     >
       <LightbulbOff size={14} aria-hidden />
@@ -1178,12 +1179,14 @@ export function CommentaryToggle({
   onChange: (value: boolean) => void
   className?: string
 }) {
+  const t = useT()
+
   return (
     <button
       type="button"
       onClick={() => onChange(!active)}
       aria-pressed={active}
-      title="Commenter chaque coup en direct"
+      title={t('commentary.toggleTitle')}
       className={clsx(
         'inline-flex items-center gap-1.5 rounded-[var(--radius-sm)] px-2.5 py-1.5 text-[14px] font-medium transition-colors',
         active
@@ -1193,7 +1196,7 @@ export function CommentaryToggle({
       )}
     >
       <Lightbulb size={14} aria-hidden />
-      Mode commenté
+      {t('commentary.mode')}
     </button>
   )
 }

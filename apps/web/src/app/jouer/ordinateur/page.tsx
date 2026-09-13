@@ -2177,8 +2177,16 @@ function GameScreen({
   const arrowLegend = useMemo<LegendItem[]>(() => {
     if (reviewedMove) {
       return legendFor(arrows, [
-        { ...LEGEND.played, label: `${reviewedMove.san} — le coup joué` },
-        { ...LEGEND.playedBad, label: `${reviewedMove.san} — erreur` },
+        {
+          ...LEGEND.played,
+          labelKey: 'legend.playedNamed' as const,
+          vars: { coup: reviewedMove.san },
+        },
+        {
+          ...LEGEND.playedBad,
+          labelKey: 'legend.mistakeNamed' as const,
+          vars: { coup: reviewedMove.san },
+        },
         LEGEND.best,
       ])
     }

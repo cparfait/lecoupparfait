@@ -12,13 +12,24 @@
 
 import clsx from 'clsx'
 import { ANNOTATION_COLORS, type AnnotationColor, type Arrow } from './boardKit.ts'
+import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 
 export interface LegendItem {
   color: AnnotationColor
-  /** Libellé court, lisible d'un coup d'œil. */
-  label: string
+  /*
+    Le libellé, par clé de dictionnaire.
+
+    Les entrées prêtes à l'emploi — voir `LEGEND` plus bas — sont des
+    constantes de module : elles ne peuvent pas appeler `t()` elles-mêmes, et
+    portaient donc leur texte français en dur. C'est la légende qui le résout
+    au rendu, avec ses variables éventuelles : « Cf3 — ton coup » se compose
+    d'une clé et du coup, pas d'une phrase entière.
+  */
+  labelKey: TranslationKey
+  /** Valeurs à interpoler dans le libellé et le titre. */
+  vars?: Record<string, string | number>
   /** Précision facultative, affichée en survol. */
-  title?: string
+  titleKey?: TranslationKey
   weight?: 'thin' | 'normal' | 'bold'
   /**
    * Forme du repère.
@@ -55,6 +66,8 @@ export function ArrowLegend({
    */
   reserve?: boolean
 }) {
+  const t = useT()
+
   if (items.length === 0) {
     if (!reserve) return null
     return (
@@ -78,20 +91,20 @@ export function ArrowLegend({
         'bg-surface px-3 py-2 text-[12px] leading-none text-muted',
         className,
       )}
-      aria-label="Signification des flèches"
+      aria-label={t('legend.aria')}
     >
       {items.map((item) => (
         <li
-          key={`${item.color}-${item.label}`}
+          key={`${item.color}-${item.labelKey}`}
           className="flex items-center gap-1.5"
-          title={item.title}
+          title={item.titleKey ? t(item.titleKey, item.vars) : undefined}
         >
           {item.shape === 'dot' ? (
             <MiniDot colour={item.swatch ?? ANNOTATION_COLORS[item.color]} />
           ) : (
             <MiniArrow color={item.color} weight={item.weight ?? 'bold'} />
           )}
-          <span className="whitespace-nowrap">{item.label}</span>
+          <span className="whitespace-nowrap">{t(item.labelKey, item.vars)}</span>
         </li>
       ))}
     </ul>
@@ -159,39 +172,39 @@ export const SAFETY_LEGEND: LegendItem[] = [
     color: 'green',
     swatch: 'var(--q-brilliant)',
     shape: 'dot',
-    label: 'Tu gagnes du matériel',
-    title: 'Ce coup remporte plus qu’il ne risque.',
+    labelKey: 'legend.safeWins',
+    titleKey: 'legend.safeWinsTitle',
   },
   {
     color: 'green',
     swatch: 'var(--q-best)',
     shape: 'dot',
-    label: 'Case sûre',
-    title: 'La pièce n’y est pas attaquée, ou elle y est défendue.',
+    labelKey: 'legend.safeSquare',
+    titleKey: 'legend.safeSquareTitle',
   },
   {
     color: 'orange',
     swatch: 'var(--q-forced)',
     shape: 'dot',
-    label: 'Échange équilibré',
-    title: 'Tu perds autant que tu prends.',
+    labelKey: 'legend.evenTrade',
+    titleKey: 'legend.evenTradeTitle',
   },
   {
     color: 'red',
     swatch: 'var(--q-blunder)',
     shape: 'dot',
-    label: 'Tu perds la pièce',
-    title: 'La pièce y serait prise sans compensation suffisante.',
+    labelKey: 'legend.losesPiece',
+    titleKey: 'legend.losesPieceTitle',
   },
 ]
 
 /** Vocabulaire commun à toutes les vues, pour ne pas dire deux fois la même chose autrement. */
 export const LEGEND = {
-  played: { color: 'green', label: 'Ton coup', title: 'Le coup que tu viens de jouer.' },
+  played: { color: 'green', labelKey: 'legend.played', titleKey: 'legend.playedTitle' },
   playedBad: {
     color: 'red',
-    label: 'Ton coup (erreur)',
-    title: 'Le coup joué : le moteur le juge nettement inférieur.',
+    labelKey: 'legend.playedBad',
+    titleKey: 'legend.playedBadTitle',
   },
   /*
     « À la place », et non « conseillé ».
@@ -208,14 +221,14 @@ export const LEGEND = {
   */
   best: {
     color: 'blue',
-    label: 'À jouer à la place',
+    labelKey: 'legend.best',
     weight: 'normal',
-    title: 'Ce qu’il fallait jouer au lieu de ton coup, dans la position d’avant.',
+    titleKey: 'legend.bestTitle',
   },
-  hint: { color: 'orange', label: 'Indice', title: 'Le coup suggéré par l’indice.' },
-  look: { color: 'green', label: 'À observer', title: 'Ce que le coach te montre.' },
-  danger: { color: 'red', label: 'Menace', title: 'Un coup adverse dont il faut se méfier.' },
-  solution: { color: 'blue', label: 'La solution', title: 'Le coup attendu.' },
+  hint: { color: 'orange', labelKey: 'legend.hint', titleKey: 'legend.hintTitle' },
+  look: { color: 'green', labelKey: 'legend.look', titleKey: 'legend.lookTitle' },
+  danger: { color: 'red', labelKey: 'legend.danger', titleKey: 'legend.dangerTitle' },
+  solution: { color: 'blue', labelKey: 'legend.solution', titleKey: 'legend.solutionTitle' },
 } satisfies Record<string, LegendItem>
 
 /**
