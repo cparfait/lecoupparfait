@@ -55,8 +55,10 @@ import { playMoveSound, playResultSound } from '@/lib/sound.ts'
 import { localeDuContenu } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { useGrandEcran } from '@/lib/useMediaQuery.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export default function LocalGamePage() {
+  const t = useT()
   const autoFlip = usePreferences((state) => state.autoFlip)
   const setPreference = usePreferences((state) => state.set)
   /*
@@ -236,8 +238,8 @@ export default function LocalGamePage() {
           annulerRotation()
           setOrientation((value) => (value === 'w' ? 'b' : 'w'))
         }}
-        title="Retourner l’échiquier"
-        aria-label="Retourner l’échiquier"
+        title={t('local.flipBoard')}
+        aria-label={t('local.flipBoard')}
       >
         <span className="max-sm:hidden">Retourner</span>
       </Button>
@@ -247,8 +249,8 @@ export default function LocalGamePage() {
         icon={<Undo2 size={14} />}
         onClick={annulerCoup}
         disabled={state.moves.length === 0}
-        title="Annuler le dernier coup"
-        aria-label="Annuler le dernier coup"
+        title={t('local.undoLast')}
+        aria-label={t('local.undoLast')}
       >
         <span className="max-sm:hidden">Annuler</span>
       </Button>
@@ -270,10 +272,12 @@ export default function LocalGamePage() {
   )
 
   const etatDuTrait = state.isGameOver
-    ? 'Partie terminée'
+    ? t('local.gameOver')
     : rotationEnAttente
-      ? 'Coup joué — l’échiquier pivote…'
-      : `Trait aux ${state.turn === 'w' ? 'Blancs' : 'Noirs'}`
+      ? t('local.boardTurning')
+      : t('local.turnTo', {
+          couleur: t(state.turn === 'w' ? 'settings.white' : 'settings.black'),
+        })
 
   return (
     <div className="mx-auto w-full max-w-[1300px] px-2 py-3 sm:px-4 lg:py-6">
@@ -296,7 +300,7 @@ export default function LocalGamePage() {
           active={state.turn !== orientation && !state.isGameOver}
           status={
             state.turn !== orientation && !state.isGameOver && !rotationEnAttente
-              ? 'Au trait'
+              ? t('local.toMove')
               : undefined
           }
           captured={state.material[orientation === 'w' ? 'b' : 'w']}
@@ -342,7 +346,7 @@ export default function LocalGamePage() {
           active={state.turn === orientation && !state.isGameOver}
           status={
             state.turn === orientation && !state.isGameOver && !rotationEnAttente
-              ? 'Au trait'
+              ? t('local.toMove')
               : undefined
           }
           captured={state.material[orientation]}
@@ -403,8 +407,8 @@ export default function LocalGamePage() {
 
           <Card className="p-4">
             <Toggle
-              label="Rotation automatique"
-              description="L’échiquier se retourne après chaque coup, pour que chaque joueur voie de son côté. Il marque une seconde d’arrêt avant de pivoter, le temps de voir le coup qui vient d’être joué. Pratique sur un téléphone posé entre vous."
+              label={t('local.autoFlip')}
+              description={t('local.autoFlipHint')}
               checked={autoFlip}
               onChange={(value) => setPreference('autoFlip', value)}
             />

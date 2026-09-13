@@ -26,6 +26,7 @@ import { QUALITY_STYLES, type MoveQuality } from '@coupparfait/core'
 import { localeDuContenu } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import type { BilanDesCoups as Bilan } from '@/lib/game/useQualitesDesCoups.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /**
  * Le barème, dans l'ordre du meilleur au pire.
@@ -73,6 +74,7 @@ export function BilanDesCoups({
   noms: Record<Color, string>
   className?: string
 }) {
+  const t = useT()
   /*
     La langue du **contenu**, et non celle de l'interface.
 
@@ -109,7 +111,7 @@ export function BilanDesCoups({
       aria-busy={enCours}
     >
       <div className="flex items-baseline justify-between gap-2">
-        <h3 className="text-[12px] font-semibold text-faint">Pertinence des coups</h3>
+        <h3 className="text-[12px] font-semibold text-faint">{t('moveReport.title')}</h3>
         {enCours && (
           <span className="shrink-0 text-[11px] tabular-nums text-faint">
             analyse {bilan.juges}/{bilan.total}
@@ -163,7 +165,7 @@ export function BilanDesCoups({
               {côté.centipions !== null && (
                 <p
                   className="text-[11px] tabular-nums text-faint"
-                  title="Perte moyenne par coup, en centipions : un pion en vaut cent."
+                  title={t('moveReport.acplTitle')}
                 >
                   {côté.centipions} centipions perdus
                 </p>
@@ -181,7 +183,7 @@ export function BilanDesCoups({
             aria-expanded={deplie}
             className="mt-2 flex w-full items-center justify-center gap-1 rounded-[var(--radius-sm)] py-1 text-[12px] font-medium text-muted transition-colors hover:text-ink"
           >
-            {deplie ? 'Masquer le détail' : 'Voir le détail des coups'}
+            {t(deplie ? 'moveReport.hideDetail' : 'moveReport.showDetail')}
             <ChevronDown
               size={13}
               aria-hidden

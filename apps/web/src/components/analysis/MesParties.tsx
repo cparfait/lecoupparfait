@@ -19,6 +19,7 @@ import type { Color } from 'chess.js'
 import { Bot, ChevronDown, ChevronUp, Loader2, Swords, Users } from 'lucide-react'
 import { SectionTitle } from '@/components/ui/index.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 
 export interface PartieJouee {
   slug: string
@@ -36,12 +37,12 @@ export interface PartieJouee {
 
 /** De quoi lire la provenance d'un coup d'œil, sans phrase. */
 const ORIGINE: Record<string, { Icone: typeof Bot; nom: string }> = {
-  computer: { Icone: Bot, nom: 'Contre l’ordinateur' },
-  local: { Icone: Users, nom: 'À deux sur le même écran' },
+  computer: { Icone: Bot, nom: 'myGames.vsComputer' as const },
+  local: { Icone: Users, nom: 'myGames.local' as const },
 }
 
 /** Les parties du serveur temps réel n'ont pas de mode reconnu ici. */
-const ORIGINE_PAR_DEFAUT = { Icone: Swords, nom: 'Contre quelqu’un' }
+const ORIGINE_PAR_DEFAUT = { Icone: Swords, nom: 'myGames.vsSomeone' as const }
 
 const TEINTE: Record<PartieJouee['issue'], string> = {
   gagnee: 'var(--q-best)',
@@ -49,10 +50,10 @@ const TEINTE: Record<PartieJouee['issue'], string> = {
   nulle: 'var(--q-forced)',
 }
 
-const ISSUE: Record<PartieJouee['issue'], string> = {
-  gagnee: 'Gagnée',
-  perdue: 'Perdue',
-  nulle: 'Nulle',
+const ISSUE: Record<PartieJouee['issue'], TranslationKey> = {
+  gagnee: 'myGames.won',
+  perdue: 'myGames.lost',
+  nulle: 'game.draw',
 }
 
 /**
@@ -72,6 +73,7 @@ export function MesParties({
   /** Le PGN de la partie choisie, et le camp du joueur dans celle-ci. */
   onChoisir: (pgn: string, camp: Color) => void
 }) {
+  const t = useT()
   const identite = useIdentite()
   const [parties, setParties] = useState<PartieJouee[] | null>(null)
   const [choisie, setChoisie] = useState<string | null>(null)
@@ -101,10 +103,8 @@ export function MesParties({
 
   return (
     <div className="space-y-2">
-      <SectionTitle>Tes parties</SectionTitle>
-      <p className="text-xs text-muted">
-        Celles que tu as jouées ici. Un clic la charge&nbsp;; il ne reste qu’à lancer l’analyse.
-      </p>
+      <SectionTitle>{t('myGames.title')}</SectionTitle>
+      <p className="text-xs text-muted">{t('myGames.hint')}</p>
 
       {/* Plus de cadre à défilement : la liste tient en trois lignes, et se
           déplie sur place quand on cherche une partie plus ancienne. Un
@@ -171,7 +171,7 @@ export function MesParties({
           {toutes ? (
             <>
               <ChevronUp size={13} aria-hidden />
-              Réduire la liste
+              {t('myGames.collapse')}
             </>
           ) : (
             <>

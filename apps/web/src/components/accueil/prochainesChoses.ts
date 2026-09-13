@@ -42,6 +42,7 @@
  */
 
 import { quetePar } from '@/lib/daily/quetes.ts'
+import type { useT } from '@/lib/i18n/index.tsx'
 
 export type ProchaineChoseId =
   | 'tonTour'
@@ -109,7 +110,14 @@ function lienPartie(partie: EtatAccueil['enDirect'][number]): string {
   return `/jouer/partie/${partie.slug}?tc=${tc}${partie.rated ? '&classee=1' : ''}`
 }
 
-export function prochainesChoses(etat: EtatAccueil): ProchaineChose[] {
+/*
+  Le traducteur passe en argument.
+
+  La fonction est pure et vit hors de tout composant : elle compose les cartes
+  de l'accueil à partir d'un état, et ne peut pas appeler `useT()` elle-même.
+  C'est la même règle que `libelleDeLaCible` de la page du palier.
+*/
+export function prochainesChoses(etat: EtatAccueil, t: ReturnType<typeof useT>): ProchaineChose[] {
   const liste: ProchaineChose[] = []
 
   // ── 1. Quelqu'un attend ────────────────────────────────────────────────
@@ -117,12 +125,10 @@ export function prochainesChoses(etat: EtatAccueil): ProchaineChose[] {
     if (!partie.yourTurn || !partie.opponent) continue
     liste.push({
       id: 'tonTour',
-      categorie: 'Quelqu’un t’attend',
-      titre: `C’est à toi de jouer contre ${partie.opponent}`,
-      detail: partie.opponentConnected
-        ? 'Il est en ligne, devant l’échiquier.'
-        : 'Il s’est déconnecté, mais la partie tient toujours.',
-      action: 'Jouer mon coup',
+      categorie: t('next.someoneWaits'),
+      titre: t('next.yourTurnAgainst', { adversaire: partie.opponent }),
+      detail: t(partie.opponentConnected ? 'next.opponentOnline' : 'next.opponentOffline'),
+      action: t('next.playMyMove'),
       lien: lienPartie(partie),
       urgent: true,
     })
@@ -134,10 +140,10 @@ export function prochainesChoses(etat: EtatAccueil): ProchaineChose[] {
       categorie: 'Correspondance',
       titre:
         etat.correspondances > 1
-          ? `${etat.correspondances} parties attendent ton coup`
-          : 'Une partie attend ton coup',
-      detail: 'En correspondance, on joue quand on veut — mais on joue.',
-      action: 'Y aller',
+          ? t('next.gamesWaiting', { n: etat.correspondances })
+          : t('next.oneGameWaiting'),
+      detail: t('next.correspondenceDetail'),
+      action: t('next.goThere'),
       lien: '/correspondance',
       urgent: true,
     })
@@ -148,14 +154,12 @@ export function prochainesChoses(etat: EtatAccueil): ProchaineChose[] {
     if (partie.yourTurn && partie.opponent) continue
     liste.push({
       id: 'partieOuverte',
-      categorie: 'Partie en cours',
+      categorie: t('next.gameInProgress'),
       titre: partie.opponent
-        ? `Ta partie contre ${partie.opponent} continue`
-        : 'Ta partie attend un adversaire',
-      detail: partie.opponent
-        ? 'Il réfléchit. Ta place reste gardée.'
-        : 'Personne n’a encore ouvert ton lien.',
-      action: 'Revenir à l’échiquier',
+        ? t('next.gameContinues', { adversaire: partie.opponent })
+        : t('next.gameWaitsOpponent'),
+      detail: t(partie.opponent ? 'next.thinking' : 'next.nobodyOpened'),
+      action: t('next.backToBoard'),
       lien: lienPartie(partie),
     })
   }
@@ -164,10 +168,10 @@ export function prochainesChoses(etat: EtatAccueil): ProchaineChose[] {
     const n = etat.reprise.moves
     liste.push({
       id: 'repriseOrdinateur',
-      categorie: 'Partie en plan',
-      titre: 'Ta partie contre l’ordinateur est restée ouverte',
-      detail: `${n} demi-coup${n > 1 ? 's joués' : ' joué'}. Elle t’attend telle quelle.`,
-      action: 'Reprendre',
+      categorie: t('next.gameLeftOpen'),
+      titre: t('next.computerLeftOpen'),
+      detail: t(n > 1 ? 'next.halfMovesPlayed' : 'next.oneHalfMovePlayed', { n }),
+      action: t('next.resume'),
       lien: '/jouer/ordinateur',
     })
   }
@@ -187,16 +191,15 @@ export function prochainesChoses(etat: EtatAccueil): ProchaineChose[] {
     const restantes = etat.quetes.restantes.length
     liste.push({
       id: 'defi',
-      categorie: 'Le défi du jour',
-      titre: 'Une position, et une seule, jusqu’à minuit',
+      categorie: t('next.dailyChallenge'),
+      titre: t('next.onePositionOnly'),
       detail:
         `La même pour tout le monde de ton niveau, et elle vaut ${quetePar('defi')?.xp ?? 0} des ` +
         `${etat.quetes.total} points du jour. ` +
         (restantes > 0
-          ? `${restantes} autre${restantes > 1 ? 's' : ''} quête${restantes > 1 ? 's' : ''} ` +
-            `${restantes > 1 ? 'attendent' : 'attend'} en dessous.`
-          : 'C’est ta dernière quête de la journée.'),
-      action: 'Chercher le coup',
+          ? t(restantes > 1 ? 'next.otherQuestsWait' : 'next.oneOtherQuestWaits', { n: restantes })
+          : t('next.lastQuest')),
+      action: t('next.findTheMove'),
       // L'adresse du catalogue, et non `/puzzles?defi=1` : elle porte
       // `&quete=defi`, que l'écran de puzzles lit pour annoncer la quête
       // remplie et proposer la suite. C'était la ligne « Résoudre le défi du
@@ -214,11 +217,11 @@ export function prochainesChoses(etat: EtatAccueil): ProchaineChose[] {
       // « Une quête du jour », et non « Aujourd'hui » : la rubrique dit d'où
       // sort cette ligne — de la liste d'à côté, dont on montre ici la
       // première qui reste.
-      categorie: 'Une quête du jour',
+      categorie: t('next.aDailyQuest'),
       titre: prochaine.label,
-      detail: `${etat.quetes.xp} / ${etat.quetes.total} points du jour. ${
-        n > 1 ? `Encore ${n} quêtes` : 'Dernière quête'
-      } avant minuit.`,
+      detail:
+        t('next.pointsOfDay', { xp: etat.quetes.xp, total: etat.quetes.total }) +
+        (n > 1 ? t('next.questsLeft', { n }) : t('next.lastQuestBefore')),
       action: prochaine.action,
       lien: prochaine.lien,
     })
@@ -230,7 +233,7 @@ export function prochainesChoses(etat: EtatAccueil): ProchaineChose[] {
       id: 'carriere',
       categorie: `Carrière · chapitre ${etat.carriere.numero}`,
       titre: etat.carriere.chapitre,
-      detail: 'Ton parcours reprend là où tu l’as laissé.',
+      detail: t('next.careerResumes'),
       action: etat.carriere.libelle,
       lien: etat.carriere.lien,
     })
@@ -243,10 +246,10 @@ export function prochainesChoses(etat: EtatAccueil): ProchaineChose[] {
   if (liste.length === 0) {
     liste.push({
       id: 'jouer',
-      categorie: 'Rien ne presse',
-      titre: 'Tout est à jour',
-      detail: 'Le défi est résolu, aucune partie n’attend. Reste le plaisir de jouer.',
-      action: 'Jouer une partie',
+      categorie: t('next.nothingUrgent'),
+      titre: t('next.allUpToDate'),
+      detail: t('next.allUpToDateDetail'),
+      action: t('next.playAGame'),
       lien: '/jouer/ordinateur',
     })
   }

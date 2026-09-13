@@ -483,6 +483,52 @@ export const fr = {
     playAGame: 'Jouer une partie',
   },
 
+  local: {
+    flipBoard: 'Retourner l’échiquier',
+    undoLast: 'Annuler le dernier coup',
+    gameOver: 'Partie terminée',
+    boardTurning: 'Coup joué — l’échiquier pivote…',
+    turnTo: 'Trait aux {couleur}',
+    toMove: 'Au trait',
+    autoFlip: 'Rotation automatique',
+    autoFlipHint:
+      'L’échiquier se retourne après chaque coup, pour que chaque joueur voie de son côté. Il marque une seconde d’arrêt avant de pivoter, le temps de voir le coup qui vient d’être joué. Pratique sur un téléphone posé entre vous.',
+  },
+
+  today: {
+    done: 'Journée faite',
+    yourQuests: 'Tes quêtes du jour',
+    pointsAria: 'Points du jour',
+  },
+
+  myGames: {
+    vsComputer: 'Contre l’ordinateur',
+    local: 'À deux sur le même écran',
+    vsSomeone: 'Contre quelqu’un',
+    won: 'Gagnée',
+    lost: 'Perdue',
+    title: 'Tes parties',
+    hint: 'Celles que tu as jouées ici. Un clic la charge ; il ne reste qu’à lancer l’analyse.',
+    collapse: 'Réduire la liste',
+  },
+
+  moveReport: {
+    title: 'Pertinence des coups',
+    acplTitle: 'Perte moyenne par coup, en centipions : un pion en vaut cent.',
+    hideDetail: 'Masquer le détail',
+    showDetail: 'Voir le détail des coups',
+  },
+
+  guided2: {
+    foundIt: 'Trouvé — c’était bien ce coup-là.',
+    startPosition: 'La position de départ. Appuie sur « Suivant » pour commencer.',
+    otherSide: 'Voir l’échiquier de l’autre côté',
+    seeAnswer: 'Voir la réponse',
+    endOfGame: 'Fin de la partie',
+    skip: 'Passer',
+    next: 'Suivant',
+  },
+
   next2: {
     title: 'Et maintenant ?',
     andMistakes: ' et {n} fautes sérieuses.',

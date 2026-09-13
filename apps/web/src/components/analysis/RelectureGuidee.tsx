@@ -173,7 +173,7 @@ export function RelectureGuidee({
               */}
               {enigme === 'trouvee' && (
                 <p className="mt-1.5 text-[14px] font-semibold leading-relaxed text-[var(--q-best)]">
-                  Trouvé — c’était bien ce coup-là.
+                  {t('guided2.foundIt')}
                 </p>
               )}
               {explanation.body.slice(0, 2).map((phrase, index) => (
@@ -185,9 +185,7 @@ export function RelectureGuidee({
               ))}
             </>
           ) : (
-            <p className="text-[15px] font-medium leading-snug">
-              La position de départ. Appuie sur « Suivant » pour commencer.
-            </p>
+            <p className="text-[15px] font-medium leading-snug">{t('guided2.startPosition')}</p>
           )}
         </div>
       </div>
@@ -227,7 +225,7 @@ export function RelectureGuidee({
           size="sm"
           icon={<RefreshCw size={14} />}
           onClick={onRetourner}
-          title="Voir l’échiquier de l’autre côté"
+          title={t('guided2.otherSide')}
         >
           Retourner
         </Button>
@@ -236,7 +234,7 @@ export function RelectureGuidee({
             trouvée. */}
         {enigme === 'ouverte' ? (
           <Button variant="ghost" size="sm" icon={<Eye size={14} />} onClick={onReveler}>
-            Voir la réponse
+            {t('guided2.seeAnswer')}
           </Button>
         ) : (
           move?.bestLine &&
@@ -260,7 +258,11 @@ export function RelectureGuidee({
           onClick={() => onCursor(Math.min(report.moves.length - 1, cursor + 1))}
           disabled={dernier}
         >
-          {dernier ? 'Fin de la partie' : enigme === 'ouverte' ? 'Passer' : 'Suivant'}
+          {dernier
+            ? t('guided2.endOfGame')
+            : enigme === 'ouverte'
+              ? t('guided2.skip')
+              : t('guided2.next')}
         </Button>
       </div>
     </div>
@@ -296,6 +298,7 @@ function RubanDesCoups({
    */
   masque?: boolean
 }) {
+  const t = useT()
   /*
     Trois coups sur téléphone, cinq à partir d'une tablette.
     Cinq partout était le premier choix, et il tronquait les coups jusqu'à
@@ -321,7 +324,7 @@ function RubanDesCoups({
         type="button"
         onClick={() => onCursor(Math.max(0, cursor - 1))}
         disabled={cursor === 0}
-        aria-label="Coup précédent"
+        aria-label={t('moves.previous')}
         className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover disabled:opacity-30"
       >
         <ChevronLeft size={18} aria-hidden />

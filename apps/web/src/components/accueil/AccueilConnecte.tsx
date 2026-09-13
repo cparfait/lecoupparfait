@@ -237,7 +237,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
             }
           : null,
     }
-    return prochainesChoses(etat)
+    return prochainesChoses(etat, t)
   }, [enDirect, correspondances, reprise, defiFait, journee, carriereEnCours, chapitre, suite, t])
 
   return (

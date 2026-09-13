@@ -39,6 +39,7 @@ import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { ListeDesQuetes } from '@/components/daily/ListeDesQuetes.tsx'
 import { XP_TOTAL } from '@/lib/daily/quetes.ts'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /** L'ancre de la carte, visée depuis le panneau de la série. */
 const ANCRE = 'aujourdhui'
@@ -61,6 +62,7 @@ export function Aujourdhui({
   /** Cote du puzzle du jour, s'il est connu. */
   niveauDefi: number | null
 }) {
+  const t = useT()
   const { etat, xp } = useQuotidien()
   const superieures = tranche ? tranchesAuDessus(tranche) : []
 
@@ -110,7 +112,7 @@ export function Aujourdhui({
     La question « ai-je fait le défi ? » se répond au liseré vert, qui n'a pas
     bougé, et à la ligne verte sous la barre.
   */
-  const titre = toutFait ? 'Journée faite' : 'Tes quêtes du jour'
+  const titre = t(toutFait ? 'today.done' : 'today.yourQuests')
   const Icone = toutFait ? Check : Sun
 
   /*
@@ -195,7 +197,7 @@ export function Aujourdhui({
           aria-valuenow={xp}
           aria-valuemin={0}
           aria-valuemax={XP_TOTAL}
-          aria-label="Points du jour"
+          aria-label={t('today.pointsAria')}
         >
           <div
             className="h-full rounded-full bg-[var(--teinte)] transition-[width] duration-500"
@@ -224,7 +226,9 @@ export function Aujourdhui({
               aria-hidden
             />
             <span>
-              <strong className="font-semibold text-[var(--q-best)]">Défi du jour relevé</strong>
+              <strong className="font-semibold text-[var(--q-best)]">
+                {t('streak.dailyAlreadyDone')}
+              </strong>
               {niveauDefi ? ` — la position valait ${niveauDefi}.` : '.'} La prochaine arrive à
               minuit.
             </span>
@@ -242,7 +246,7 @@ export function Aujourdhui({
         {superieures.length > 0 && (
           <p className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-line/40 pt-2.5 text-[12px] text-faint">
             <Swords size={11} aria-hidden />
-            <span>Plus dur&nbsp;:</span>
+            <span>{t('daily.harder')}</span>
             {superieures.map((autre) => (
               <Link
                 key={autre.id}

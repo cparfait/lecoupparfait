@@ -478,6 +478,52 @@ export const en: Dictionary = {
     playAGame: 'Play a game',
   },
 
+  local: {
+    flipBoard: 'Flip the board',
+    undoLast: 'Undo the last move',
+    gameOver: 'Game over',
+    boardTurning: 'Move played — the board is turning…',
+    turnTo: '{couleur} to move',
+    toMove: 'To move',
+    autoFlip: 'Automatic rotation',
+    autoFlipHint:
+      'The board turns after every move, so each player sees it from their own side. It pauses for a second before turning, long enough to see the move just played. Handy on a phone lying between you.',
+  },
+
+  today: {
+    done: 'Day done',
+    yourQuests: 'Your quests for today',
+    pointsAria: 'Points for today',
+  },
+
+  myGames: {
+    vsComputer: 'Against the computer',
+    local: 'Two of you on one screen',
+    vsSomeone: 'Against someone',
+    won: 'Won',
+    lost: 'Lost',
+    title: 'Your games',
+    hint: 'The ones you played here. One click loads it; all that is left is to start the analysis.',
+    collapse: 'Collapse the list',
+  },
+
+  moveReport: {
+    title: 'Move quality',
+    acplTitle: 'Average loss per move, in centipawns: a pawn is worth a hundred.',
+    hideDetail: 'Hide the detail',
+    showDetail: 'Show the move-by-move detail',
+  },
+
+  guided2: {
+    foundIt: 'Found it — that was the move.',
+    startPosition: 'The starting position. Press “Next” to begin.',
+    otherSide: 'See the board from the other side',
+    seeAnswer: 'See the answer',
+    endOfGame: 'End of the game',
+    skip: 'Skip',
+    next: 'Next',
+  },
+
   next2: {
     title: 'What now?',
     andMistakes: ' and {n} serious mistakes.',
