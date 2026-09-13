@@ -2543,6 +2543,81 @@ export const en: Dictionary = {
     purgedEvaluations: 'evaluations under 14 plies, too shallow to be reused',
     purgedEmptyAccounts: 'accounts with no game and no analysis, inactive for six months',
   },
+  arbitrage: {
+    title: 'Arbitration checklist',
+    intro:
+      'The situations that come up in tournaments, and what the FIDE Laws of Chess, 2023 edition, say about them. The tournament regulations may refine certain points: they take precedence. When in doubt, stop the clocks and call the arbiter.',
+    sections: 'Sections',
+    disclaimer:
+      'A summary, not the official text: the FIDE Laws of Chess in their current version are authoritative, and each competition’s regulations may add provisions of their own.',
+    paceSlow: 'Slow',
+    paceRapid: 'Rapid',
+    paceBlitz: 'Blitz',
+    'touche-joue': {
+      titre: 'Touch-move',
+      p1: 'A piece touched deliberately must be moved if it is your own, captured if it is your opponent’s — provided a legal move allows it.',
+      p2: 'To recentre a piece, you say “j’adoube” before touching it, and only when it is your turn.',
+      p3: 'A move is played when the piece is released on its square; it is completed when the clock has been pressed. Between the two, there is no going back.',
+      p4: 'To castle, you touch the king first, or the king and the rook together. Rook touched first: you can no longer castle with it this move, you have to move it.',
+      p5: 'A move is made with one hand, and it is that hand which presses the clock.',
+    },
+    'coup-illegal': {
+      titre: 'Illegal move',
+      p1: 'King left in check, a piece off its line, castling when not allowed, promotion forgotten: you go back to the position before the move, and the touch-move rule applies to what was touched.',
+      p2: 'First completed illegal move: two extra minutes to the opponent. Second illegal move by the same player: game lost — drawn if the opponent cannot mate.',
+      p3: 'As soon as it is noticed, even several moves later: you go back to the position before it.',
+      p4: 'Only if the opponent has not yet played their next move. After that, the illegal move stands and the game goes on.',
+      p5: 'The king is never captured: taking the king is an illegal move, not a win.',
+      p6: 'Playing with two hands, or pressing the clock without having moved, is penalised as an illegal move.',
+    },
+    pendule: {
+      titre: 'Clock and flag',
+      p1: 'Flag fallen, game lost — unless the opponent cannot mate by any sequence of legal moves: drawn.',
+      p2: 'The arbiter observes the fall of the flag and announces it.',
+      p3: 'Without an arbiter at every board, it is up to the player to claim the fall; the arbiter does not point it out.',
+      p4: 'Both flags fallen without knowing which fell first: drawn in the last time period, and always in rapid or blitz.',
+      p5: 'You do not press the clock before moving, you do not keep your finger on it, you do not lift it, you do not strike it.',
+      p6: 'To call the arbiter, you stop both clocks. No other reason allows them to be stopped.',
+    },
+    nulle: {
+      titre: 'The draw: offering, claiming, observing',
+      p1: 'You offer a draw after playing your move and before pressing the clock. The opponent accepts by saying so, declines by moving. Offering repeatedly is a nuisance, and is penalised.',
+      p2: 'Threefold repetition: the same position, same side to move, same castling and en passant rights, occurring three times — not necessarily in a row.',
+      p3: 'Fifty moves: fifty moves by each side with no capture and no pawn move.',
+      p4: 'To claim either one: the player to move writes down the move that produces the position, does not play it, stops the clocks and calls the arbiter. Correct claim: draw. False claim: two minutes to the opponent, and the written move must be played.',
+      p5: 'Without a claim, the arbiter declares the draw at the fifth repetition or at the seventy-fifth move with no capture and no pawn move.',
+      p6: 'Dead position: no mate is possible any more, for anybody (king alone, king and bishop, king and knight). The game is drawn there and then, even if a flag falls afterwards.',
+      p7: 'Here, online: threefold repetition and the fifty-move rule are observed automatically, without a claim, as soon as the position reaches them. A fallen flag does apply the proviso of article 6.9: drawn if the opponent could no longer mate.',
+    },
+    'coups-speciaux': {
+      titre: 'Castling, promotion, en passant',
+      p1: 'No castling if the king or the rook has already moved, if the king is in check, or if he crosses or lands on an attacked square. The rook, on the other hand, may be attacked or pass over an attacked square.',
+      p2: 'Promotion is compulsory and the piece is your choice — not necessarily a queen. The choice is made as soon as the new piece touches the square.',
+      p3: 'An upside-down rook is a rook. If the piece you want is missing, you stop the clocks and ask the arbiter for it.',
+      p4: 'En passant is only possible on the move immediately following the pawn’s double advance.',
+    },
+    notation: {
+      titre: 'Recording the game',
+      p1: 'You write down move after move, legibly, in algebraic notation, your own move and your opponent’s. Writing your move down before playing it is forbidden — except to claim a draw.',
+      p2: 'Under five minutes on the clock and no increment of at least thirty seconds: you may stop recording. You complete your scoresheet once the time control has passed.',
+      p3: 'No obligation to record.',
+      p4: 'The scoresheet belongs to the organiser. At the end, both players write the result on it and sign it.',
+    },
+    telephone: {
+      titre: 'Phones, leaving, conduct',
+      p1: 'Phones and any device that communicates: forbidden in the playing area. The tournament regulations may allow a switched-off device, stowed in a bag, out of reach.',
+      p2: 'A phone that rings or is handled: game lost, unless the regulations provide a lesser penalty. The opponent wins — drawn if they cannot mate.',
+      p3: 'The player to move does not leave the playing area. Nobody leaves it without the arbiter’s agreement.',
+      p4: 'No notes, no analysis in the hall, no advice from a third party, nothing that disturbs the opponent. Refusing to follow the arbiter is an offence in itself.',
+    },
+    resultat: {
+      titre: 'Lateness, resignation, result',
+      p1: 'Lateness: the tolerance is the one in the tournament regulations — zero by default at FIDE, often thirty minutes or an hour in French regulations. Beyond that, forfeit, unless the arbiter decides otherwise.',
+      p2: 'Mate ends the game at the instant it is played, if the move is legal: a flag falling afterwards changes nothing.',
+      p3: 'You resign by saying so. Laying your king down or holding out your hand is not a result: you announce it, then you write it down.',
+      p4: 'The penalties available to the arbiter, from lightest to heaviest: warning, time added to the opponent, time deducted, game lost, exclusion from the tournament.',
+    },
+  },
   glossaire: {
     cadence: {
       name: 'Time control',
@@ -5313,6 +5388,9 @@ export const en: Dictionary = {
     elo: 'Elo calculator',
     eloDesc:
       'What a tournament earns or costs you, game by game, and your performance — on the FIDE scale.',
+    arbitration: 'Arbitration checklist',
+    arbitrationDesc:
+      'Touch-move, illegal move, flag, claimed draw, phones: what the FIDE Laws of Chess say, on one page.',
     tools: 'Tools',
     toolsDesc:
       'The clock, the Elo calculator, the random draw and the arbitration checklist: what is useful around a real board.',

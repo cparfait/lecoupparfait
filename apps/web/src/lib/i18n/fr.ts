@@ -2564,6 +2564,81 @@ export const fr = {
     purgedEvaluations: 'évaluations sous 14 demi-coups, trop peu profondes pour resservir',
     purgedEmptyAccounts: 'comptes sans aucune partie ni analyse, inactifs depuis six mois',
   },
+  arbitrage: {
+    title: 'Aide-mémoire d’arbitrage',
+    intro:
+      'Les situations qui reviennent en tournoi, et ce qu’en disent les Règles du jeu de la FIDE, édition 2023. Le règlement du tournoi peut préciser certains points : il prime. Dans le doute, on arrête les pendules et on appelle l’arbitre.',
+    sections: 'Sections',
+    disclaimer:
+      'Résumé, pas texte officiel : les Règles du jeu d’échecs de la FIDE font foi, dans leur version en vigueur, et le règlement de chaque compétition peut y ajouter ses propres dispositions.',
+    paceSlow: 'Lente',
+    paceRapid: 'Rapide',
+    paceBlitz: 'Blitz',
+    'touche-joue': {
+      titre: 'Pièce touchée, pièce jouée',
+      p1: 'Une pièce touchée volontairement doit être jouée si c’est la sienne, prise si c’est celle de l’adversaire — dès lors qu’un coup légal le permet.',
+      p2: 'Pour recentrer une pièce, on dit « j’adoube » avant de la toucher, et seulement quand c’est à soi de jouer.',
+      p3: 'Un coup est joué quand la pièce est lâchée sur sa case ; il est achevé quand on a appuyé sur la pendule. Entre les deux, on ne revient pas en arrière.',
+      p4: 'Pour roquer, on touche le roi d’abord, ou le roi et la tour ensemble. Tour touchée en premier : on ne peut plus roquer avec elle ce coup-ci, on doit la jouer.',
+      p5: 'Un coup se joue d’une seule main, et c’est cette main qui appuie sur la pendule.',
+    },
+    'coup-illegal': {
+      titre: 'Coup illégal',
+      p1: 'Roi laissé en échec, pièce hors de sa marche, roque interdit, promotion oubliée : on revient à la position d’avant le coup, et la règle de la pièce touchée s’applique à ce qu’on a touché.',
+      p2: 'Premier coup illégal achevé : deux minutes de plus à l’adversaire. Second coup illégal du même joueur : partie perdue — nulle si l’adversaire ne peut pas mater.',
+      p3: 'Dès qu’on s’en aperçoit, même plusieurs coups plus tard : on remonte à la position d’avant.',
+      p4: 'Seulement si l’adversaire n’a pas encore joué son coup suivant. Après, le coup illégal reste et la partie continue.',
+      p5: 'Le roi ne se prend jamais : prendre le roi est un coup illégal, pas une victoire.',
+      p6: 'Jouer à deux mains, ou appuyer sur la pendule sans avoir joué, se sanctionne comme un coup illégal.',
+    },
+    pendule: {
+      titre: 'Pendule et drapeau',
+      p1: 'Drapeau tombé, partie perdue — sauf si l’adversaire ne peut mater par aucune suite de coups légaux : nulle.',
+      p2: 'L’arbitre constate la chute du drapeau et l’annonce.',
+      p3: 'Sans arbitre à chaque échiquier, c’est au joueur de réclamer la chute ; l’arbitre ne la signale pas.',
+      p4: 'Deux drapeaux tombés sans savoir lequel le premier : nulle dans la dernière période de jeu, et toujours en rapide ou blitz.',
+      p5: 'On n’appuie pas sur la pendule avant d’avoir joué, on ne garde pas le doigt dessus, on ne la soulève pas, on ne la frappe pas.',
+      p6: 'Pour appeler l’arbitre, on arrête les deux pendules. Aucune autre raison ne permet de les arrêter.',
+    },
+    nulle: {
+      titre: 'La nulle : proposer, réclamer, constater',
+      p1: 'On propose la nulle après avoir joué son coup et avant d’appuyer sur la pendule. L’adversaire accepte en le disant, refuse en jouant. Proposer sans arrêt est une gêne, et se sanctionne.',
+      p2: 'Triple répétition : la même position, même trait, mêmes droits de roque et de prise en passant, apparue trois fois — pas forcément de suite.',
+      p3: 'Cinquante coups : cinquante coups de chaque camp sans prise ni coup de pion.',
+      p4: 'Pour réclamer l’une ou l’autre : le joueur au trait écrit le coup qui produit la position, ne le joue pas, arrête les pendules et appelle l’arbitre. Réclamation juste : nulle. Réclamation fausse : deux minutes à l’adversaire, et le coup écrit doit être joué.',
+      p5: 'Sans réclamation, l’arbitre constate la nulle à la cinquième répétition ou au soixante-quinzième coup sans prise ni coup de pion.',
+      p6: 'Position morte : plus aucun mat possible, pour personne (roi seul, roi et fou, roi et cavalier). La partie est nulle à l’instant, même si un drapeau tombe ensuite.',
+      p7: 'Ici, en ligne : la triple répétition et les cinquante coups sont constatés automatiquement, sans réclamation, dès que la position les atteint. La chute du drapeau applique bien la réserve de l’article 6.9 : nulle si l’adversaire ne pouvait plus mater.',
+    },
+    'coups-speciaux': {
+      titre: 'Roque, promotion, prise en passant',
+      p1: 'Pas de roque si le roi ou la tour a déjà bougé, si le roi est en échec, ou s’il traverse ou arrive sur une case attaquée. La tour, elle, peut être attaquée ou passer sur une case attaquée.',
+      p2: 'La promotion est obligatoire et la pièce est au choix — pas forcément une dame. Le choix est fait dès que la nouvelle pièce touche la case.',
+      p3: 'Une tour retournée est une tour. S’il manque la pièce voulue, on arrête les pendules et on la demande à l’arbitre.',
+      p4: 'La prise en passant n’est possible qu’au coup qui suit immédiatement la double avancée du pion.',
+    },
+    notation: {
+      titre: 'Noter la partie',
+      p1: 'On note coup après coup, lisiblement, en notation algébrique, son coup et celui de l’adversaire. Interdit d’écrire son coup avant de le jouer — sauf pour réclamer une nulle.',
+      p2: 'Moins de cinq minutes au cadran et pas d’incrément d’au moins trente secondes : on peut cesser de noter. On complète sa feuille dès que le contrôle est passé.',
+      p3: 'Pas d’obligation de noter.',
+      p4: 'La feuille appartient à l’organisateur. À la fin, les deux joueurs y inscrivent le résultat et la signent.',
+    },
+    telephone: {
+      titre: 'Téléphone, sorties, conduite',
+      p1: 'Téléphone et tout appareil qui communique : interdits dans l’aire de jeu. Le règlement du tournoi peut autoriser un appareil éteint, rangé dans un sac, hors de portée.',
+      p2: 'Un téléphone qui sonne ou qu’on manipule : partie perdue, sauf sanction moindre prévue par le règlement. L’adversaire gagne — nulle s’il ne peut pas mater.',
+      p3: 'Le joueur au trait ne quitte pas l’aire de jeu. Personne ne la quitte sans l’accord de l’arbitre.',
+      p4: 'Pas de notes, pas d’analyse dans la salle, pas de conseil d’un tiers, rien qui gêne l’adversaire. Refuser de suivre l’arbitre est une faute en soi.',
+    },
+    resultat: {
+      titre: 'Retard, abandon, résultat',
+      p1: 'Retard : la tolérance est celle du règlement du tournoi — zéro par défaut à la FIDE, souvent trente minutes ou une heure dans les règlements français. Au-delà, forfait, sauf décision de l’arbitre.',
+      p2: 'Le mat termine la partie à l’instant où il est joué, si le coup est légal : un drapeau qui tombe ensuite ne change rien.',
+      p3: 'On abandonne en le disant. Coucher son roi ou tendre la main n’est pas un résultat : on l’annonce, puis on l’écrit.',
+      p4: 'Les sanctions dont dispose l’arbitre, de la plus légère à la plus lourde : avertissement, temps ajouté à l’adversaire, temps retiré, partie perdue, exclusion du tournoi.',
+    },
+  },
   glossaire: {
     cadence: {
       name: 'Cadence',
@@ -5330,6 +5405,9 @@ export const fr = {
     elo: 'Calculateur Elo',
     eloDesc:
       'Ce qu’un tournoi te rapporte ou te coûte, partie par partie, et ta performance — au barème de la FIDE.',
+    arbitration: 'Aide-mémoire d’arbitrage',
+    arbitrationDesc:
+      'Pièce touchée, coup illégal, drapeau, nulle réclamée, téléphone : ce que disent les Règles du jeu de la FIDE, en une page.',
     tools: 'Outils',
     toolsDesc:
       'La pendule, le calculateur Elo, le tirage au sort et l’aide-mémoire d’arbitrage : ce qui sert autour d’un vrai échiquier.',
