@@ -35,6 +35,13 @@ export const en: Dictionary = {
     analysis: 'Analysis',
     vision: 'Vision',
     glossary: 'Glossary',
+    glossaryIntro:
+      '{n} terms defined in plain language — the rules, the material, the phases of the game, and the patterns the coach can recognise and name in your games. {illustres} of them show themselves on a board: their name carries a dot. The loudspeaker, to the right of each word, reads the definition aloud.',
+    famRegles: 'Rules',
+    famPieces: 'Pieces and material',
+    famPhases: 'Phases of the game',
+    famEvaluation: 'Evaluation and play',
+    famMotifs: 'Tactical patterns',
     leaderboard: 'Leaderboard',
     friends: 'Friends',
     editor: 'Editor',
@@ -2535,6 +2542,719 @@ export const en: Dictionary = {
     purgedSessions: 'expired sessions',
     purgedEvaluations: 'evaluations under 14 plies, too shallow to be reused',
     purgedEmptyAccounts: 'accounts with no game and no analysis, inactive for six months',
+  },
+  glossaire: {
+    cadence: {
+      name: 'Time control',
+      definition:
+        'The time each player has. It is written with two numbers: **“3 | 2” means 3 minutes to start with, plus 2 seconds added to your clock for every move played**. A single number — “5 min” — means there is nothing to get back: when the flag falls, the game is lost, even a whole queen up. The time control also decides the category of the game, and each one keeps its own rating: bullet under 3 minutes, blitz up to 10, rapid up to 60, classical beyond. You improve far faster by playing slowly.',
+    },
+    increment: {
+      name: 'Increment',
+      definition:
+        'The seconds given back on every move, the second number of a time control. They serve one precise purpose: not losing on time in a winning position for want of the few seconds it takes to play the obvious moves at the end. With a 2-second increment, a thirty-move game gives you a minute back along the way.',
+    },
+    roque: {
+      name: 'Castling',
+      definition:
+        'The only move that shifts two pieces at once: the king takes two steps towards a rook, which jumps over him. Neither may have moved, the squares between them must be empty, and the king must not be in check nor cross an attacked square. Kingside castling on the king’s side, queenside castling on the queen’s.',
+    },
+    'prise-en-passant': {
+      name: 'En passant',
+      definition:
+        'When a pawn advances two squares and lands beside an enemy pawn, that pawn may take it as if it had advanced only one. The capture has to be made **immediately**, on the very next move, or the right is lost. It is the rule beginners overlook most often.',
+    },
+    promotion: {
+      name: 'Promotion',
+      definition:
+        'A pawn reaching the last rank turns, compulsorily, into a queen, rook, bishop or knight — your choice, and with no regard to the pieces already captured. Almost everybody takes the queen; the knight is the only other sometimes useful choice, because it alone makes moves a queen cannot.',
+    },
+    'echec-et-mat': {
+      name: 'Checkmate',
+      definition:
+        'The king is attacked and no legal move can remedy it: he can neither flee, nor capture the attacker, nor interpose. The game stops at once. It is the only aim of the game — everything else is a means.',
+    },
+    pat: {
+      name: 'Stalemate',
+      definition:
+        'The side to move has **no legal move at all**, but their king is not in check. The game is drawn, whatever the material difference. It is the classic disappointment of the beginner a queen up: stalemate is the lifeline of whoever is losing.',
+    },
+    'nulle-par-repetition': {
+      name: 'Draw by repetition',
+      definition:
+        'The same position, with the same player to move and the same castling rights, appears three times: the game is drawn. Often reached by perpetual check, when one side gives check endlessly because they would otherwise lose.',
+    },
+    'regle-des-cinquante': {
+      name: 'Fifty-move rule',
+      definition:
+        'Fifty moves by each side without a capture or a pawn move: the game is drawn. It stops an endgame nobody knows how to win from going on for ever.',
+    },
+    'valeur-des-pieces': {
+      name: 'Piece values',
+      definition:
+        'The universal yardstick: pawn 1, knight and bishop 3, rook 5, queen 9. The king has no value — he cannot be exchanged. These numbers are a useful approximation, not a truth: a well-placed knight is often worth more than a shut-in rook.',
+    },
+    'paire-de-fous': {
+      name: 'Bishop pair',
+      definition:
+        'Having both bishops when your opponent has only one. Each bishop sees a single colour of square; together they cover the whole board. The advantage is reckoned at about half a pawn, more in an open position.',
+    },
+    'mauvais-fou': {
+      name: 'Bad bishop',
+      definition:
+        'A bishop whose own pawns sit on its colour of square. It can neither defend them nor get past them: a piece paid for at three points that is now worth one. In the endgame, a wrong-coloured bishop draws positions that were a pawn up.',
+    },
+    qualite: {
+      name: 'The exchange',
+      definition:
+        'The gap between a rook and a minor piece, about two pawns. “Winning the exchange” means taking a rook for a bishop or a knight. “Sacrificing the exchange” is done deliberately, in return for a better position.',
+    },
+    'pion-passe': {
+      name: 'Passed pawn',
+      definition:
+        'A pawn no enemy pawn can stop any more: not on its file, nor on the two beside it. It threatens to queen, which forces your opponent to watch it. In the endgame it is often the one factor that decides.',
+    },
+    'pions-doubles': {
+      name: 'Doubled pawns',
+      definition:
+        'Two pawns of the same side on the same file, the result of a capture. They cannot defend each other and they advance badly. The flaw is real but rarely decisive — the open file that comes with them often makes up for it.',
+    },
+    'pion-isole': {
+      name: 'Isolated pawn',
+      definition:
+        'A pawn with no neighbour on the adjacent files: no pawn will ever be able to defend it. A weakness in the endgame, but the space and squares it gives in the middlegame make it a weapon for whoever knows how to attack.',
+    },
+    ouverture: {
+      name: 'Opening',
+      definition:
+        'The first ten to fifteen moves, where you apply three principles rather than calculate: occupy the centre, bring out your pieces, put your king in safety. Openings have names because they have been studied for centuries.',
+    },
+    developpement: {
+      name: 'Development',
+      definition:
+        'Bringing your pieces off their starting squares to squares where they do something. A piece left at the back does not count, even though it is on the board. Losing time in the opening means playing three pieces against five.',
+    },
+    'milieu-de-partie': {
+      name: 'Middlegame',
+      definition:
+        'The phase where theory stops and you have to find plans for yourself. It is where almost every tactic happens, and where a beginner gains most from working on puzzles.',
+    },
+    finale: {
+      name: 'Endgame',
+      definition:
+        'Few pieces remain, and the king stops being a target and becomes a strong piece you walk towards the centre. The rules of the middlegame invert: precision replaces initiative.',
+    },
+    transposition: {
+      name: 'Transposition',
+      definition:
+        'Reaching a known position by a different move order from the usual one. That is why an opening is recognised by the position reached, never by the sequence of moves played.',
+    },
+    evaluation: {
+      name: 'Evaluation',
+      definition:
+        'The mark the engine gives, counted in pawns: +1.0 means “White has the equivalent of an extra pawn”. Positive favours White, negative Black. “M3” announces mate in three. Below half a pawn, the gap means nothing.',
+    },
+    centipion: {
+      name: 'Centipawn',
+      definition:
+        'A hundredth of a pawn, the internal unit of engines. An “average loss of 40 centipawns” means each move cost on average four tenths of a pawn compared with the best one.',
+    },
+    precision: {
+      name: 'Accuracy',
+      definition:
+        'A percentage that sums up a game: how close the moves played were to the best ones. It is worked out on winning chances, not on the raw evaluation — losing a pawn in a won position does not count the same as losing one in a level position.',
+    },
+    elo: {
+      name: 'Elo',
+      definition:
+        'The players’ rating. Beating somebody stronger earns a lot, losing to somebody weaker costs as much. A beginner is around 400 to 800, a club player around 1600, a grandmaster beyond 2500.',
+    },
+    'glicko-2': {
+      name: 'Glicko-2',
+      definition:
+        'A finer version of Elo, which also tracks the **uncertainty** about your level. After a long absence the rating moves faster: the system knows it knows you less well. It is the one used here.',
+    },
+    zugzwang: {
+      name: 'Zugzwang',
+      definition:
+        'A situation where you are obliged to move when every move makes your position worse: you would lose less by passing your turn, which the rules forbid. Common in the endgame, it is often the very mechanism of the win.',
+    },
+    initiative: {
+      name: 'Initiative',
+      definition:
+        'Leading the game: forcing your opponent to answer your threats instead of developing their own. It is not counted in material, but it often turns into material.',
+    },
+    tempo: {
+      name: 'Tempo',
+      definition:
+        'A move, seen as a unit of time. “Gaining a tempo” means advancing your own game while obliging your opponent to make a move that does not advance theirs — by attacking a piece while developing one of yours, for instance.',
+    },
+  },
+  paliers: {
+    regles: {
+      nom: 'Getting through a whole game',
+      promesse:
+        'You know how the pieces move. What loses you games is not strategy yet: it is a forgotten rule, or a won game you do not know how to finish.',
+      leviers: {
+        'les-trois-regles': {
+          titre: 'The three rules everybody forgets',
+          pourquoi:
+            'Castling, en passant and promotion decide more games at this level than everything else put together. An en passant capture you believe is illegal means a pawn lost and the conviction that your opponent cheated.',
+        },
+        'mater-avec-roi': {
+          titre: 'Mating with king and rook',
+          pourquoi:
+            'It is the endgame you reach most often without knowing how to win it. A whole queen up and a draw by the fifty-move rule: it happens, and ten minutes prevents it.',
+        },
+        'mater-avec-la': {
+          titre: 'Mating with the queen without stalemating',
+          pourquoi:
+            'Stalemate is the classic disappointment of somebody a queen up. There is one method that avoids it, always the same one.',
+        },
+        'combien-vaut-chaque': {
+          titre: 'What each piece is worth',
+          pourquoi:
+            'Trading a rook for a knight because “it is an exchange” costs two pawns. The scale cannot be guessed, it is learned once.',
+        },
+        'reconnaitre-un-mat': {
+          titre: 'Recognising mate in one',
+          pourquoi:
+            'Before looking for a plan, you have to see the mate when it is there. It is also the quickest thing to train: fifty positions and the eye does it on its own.',
+        },
+      },
+    },
+    'pieces-en-prise': {
+      nom: 'Not giving pieces away any more',
+      promesse:
+        'You can get through a game and you can mate. What costs you the most points now is nothing subtle: a piece left on an attacked square, and the game changes hands.',
+      leviers: {
+        'voir-ce-qui': {
+          titre: 'Seeing what is hanging',
+          pourquoi:
+            'At this tier, most games are decided by a piece left undefended — not by a combination. It is the one reflex worth several hundred rating points.',
+        },
+        'la-fourchette-de': {
+          titre: 'The knight fork',
+          pourquoi:
+            'The knight is the piece whose moves beginners see least, and the one that punishes most. A fork decides one game in three at this level.',
+        },
+        'les-quatre-mats': {
+          titre: 'The four mates you walk into',
+          pourquoi:
+            'Scholar’s, Fool’s, Légal’s, the Shilling: you get all of them in your first ten games, and you do not know what happened. Knowing them means parrying them without thinking.',
+        },
+        'le-mat-du': {
+          titre: 'The back-rank mate',
+          pourquoi:
+            'Three pawns in front of the castled king, and a rook arriving on the last rank. It is the most frequent mating pattern at every level.',
+        },
+        'les-trois-principes': {
+          titre: 'The three opening principles',
+          pourquoi:
+            'No theory to memorise: a pawn in the centre, the pieces out, the king in safety. Three ideas are enough never to be lost on move ten again.',
+        },
+      },
+    },
+    'voir-ladversaire': {
+      nom: 'Seeing what your opponent is preparing',
+      promesse:
+        'You no longer give pieces away for nothing. What holds you back now is that you look at your own moves and not theirs: the tactics that cost you dearly are the ones you did not see coming.',
+      leviers: {
+        'le-clouage': {
+          titre: 'The pin',
+          pourquoi:
+            'A piece in front of the king cannot move any more, and everybody can attack it. It is the pattern 1,000-rated players suffer most often without naming it.',
+        },
+        'l-attaque-a': {
+          titre: 'The discovered attack',
+          pourquoi:
+            'A move that opens another piece’s line: two threats for one move. Impossible to parry if you have never seen it.',
+        },
+        'le-memo-avant': {
+          titre: 'The checklist before every move',
+          pourquoi:
+            'Four questions, ten seconds: what did they just change, what are they attacking, what am I leaving hanging, does my move hold. It is the measurable difference between 1,000 and 1,300.',
+        },
+        'le-mat-en': {
+          titre: 'Mate in two',
+          pourquoi:
+            'Two moves to see ahead, by force. It is the exercise that teaches you to calculate, and it transfers straight to positions where there is no mate.',
+        },
+        'les-quatre-erreurs': {
+          titre: 'The four classic opening mistakes',
+          pourquoi:
+            'Bringing the queen out too early, moving the same piece twice, pushing the wing pawns, forgetting to castle. Four habits, and each one costs a tempo a game.',
+        },
+      },
+    },
+    'un-plan': {
+      nom: 'Playing with a plan',
+      promesse:
+        'You see the tactics on both sides. The problem is elsewhere: when there is nothing to take, you do not know what to do, and you wait for the other player to go wrong.',
+      leviers: {
+        'les-colonnes-ouvertes': {
+          titre: 'Open files',
+          pourquoi:
+            'The first question of a quiet middlegame: where do my rooks go? The answer is nearly always the same, and it can be read off the pawn structure.',
+        },
+        'l-avant-poste': {
+          titre: 'The outpost',
+          pourquoi:
+            'A knight on a square no pawn can attack is worth more than a badly placed rook. It is the first positional idea that really changes games.',
+        },
+        'les-enjeux-de': {
+          titre: 'What your opening is after',
+          pourquoi:
+            'At this tier, knowing ten moves of theory is no use if you do not know what you are looking for on move eleven. The plan fits in three sentences per opening.',
+        },
+        'eliminer-le-defenseur': {
+          titre: 'Removing the defender',
+          pourquoi:
+            'The tactic that serves a plan rather than falling out of the sky: you take away the piece holding everything together, and the position collapses on its own.',
+        },
+        'la-securite-du': {
+          titre: 'King safety on both sides',
+          pourquoi:
+            'Knowing when to attack the enemy king — and when it is your own that is in danger. Premature attacks cost more than missed ones.',
+        },
+      },
+    },
+    technique: {
+      nom: 'Converting and holding',
+      promesse:
+        'You play with plans and you do not get caught out any more. What you are missing is technique: the winning positions that end in draws, and the endgames played on instinct.',
+      leviers: {
+        'l-opposition': {
+          titre: 'The opposition',
+          pourquoi:
+            'The idea without which no pawn endgame is won or held. It is learned in one lesson and serves for a lifetime.',
+        },
+        'la-regle-du': {
+          titre: 'The rule of the square',
+          pourquoi:
+            'Knowing at a glance whether the king catches the pawn. It replaces a six-move calculation with one look, and it is never wrong.',
+        },
+        'les-finales-objectif': {
+          titre: 'Endgames, with the aim stated',
+          pourquoi:
+            'Three thousand five hundred and sixty-eight classified positions, with the aim given — win or hold the draw — and a computer defending as well as it can. It is the most profitable training at this tier.',
+        },
+        'le-sacrifice-qui': {
+          titre: 'The sacrifice you can calculate',
+          pourquoi:
+            'At 1,600, people miss fewer sacrifices than they play bad ones. The exercise teaches you to check before you give.',
+        },
+        'le-roi-devient': {
+          titre: 'The king becomes a piece',
+          pourquoi:
+            'In the endgame, the king attacks. Players who stall at this tier keep him tucked away out of reflex, and lose a piece’s worth of tempo every move.',
+        },
+      },
+    },
+    prophylaxie: {
+      nom: 'Preventing before proceeding',
+      promesse:
+        'You have the technique and the plans. What still separates you from 2,200 is playing against the other player’s ideas rather than only for your own — and never losing a won game again.',
+      leviers: {
+        'les-enfilades-et': {
+          titre: 'Skewers and X-ray attacks',
+          pourquoi:
+            'The patterns that stay expensive at a high level, because they act through pieces and are badly checked under clock pressure.',
+        },
+        'le-zugzwang': {
+          titre: 'Zugzwang',
+          pourquoi:
+            'The only winning mechanism in many endgames: your opponent is obliged to move, and every move makes things worse. It is prepared, not found.',
+        },
+        'relire-ses-propres': {
+          titre: 'Rereading your own games',
+          pourquoi:
+            'At this tier, generic lessons bring little: what is left to correct is personal, and there is only one place to read it — your own games.',
+        },
+        'les-positions-ou': {
+          titre: 'Positions where everything is defended',
+          pourquoi:
+            'The positional sacrifice and the long-term attack: what is left when there is no tactic at all. That is where the points above 1,900 are won.',
+        },
+      },
+    },
+  },
+  seances: {
+    'rien-en-prise': {
+      nom: 'Leaving nothing hanging',
+      consigne:
+        'Before every move, go round your pieces: which are attacked, and by what. You do not play until you have answered.',
+      aRegarder:
+        'Every time the commentary mentions a hanging piece — yours or theirs — the theme is showing itself.',
+    },
+    fourchettes: {
+      nom: 'Forks',
+      consigne:
+        'Look for the squares from which a knight would reach two pieces at once — yours as well as theirs. Queens and pawns fork too.',
+      aRegarder: 'Spot pairs of pieces on squares of the same colour, a knight’s move apart.',
+    },
+    clouages: {
+      nom: 'Pins and skewers',
+      consigne:
+        'Line your heavy pieces up against theirs, and avoid lining yours up in front of your king or queen.',
+      aRegarder:
+        'The diagonals and files their king and queen stand on: that is where pins are born.',
+    },
+    couloir: {
+      nom: 'The back rank',
+      consigne:
+        'Watch both back ranks: theirs to get in, yours so as not to be shut in. An escape square for your king, early.',
+      aRegarder: 'After every exchange of heavy pieces, ask yourself who controls the eighth rank.',
+    },
+    developpement: {
+      nom: 'Getting every piece out',
+      consigne:
+        'A pawn in the centre, then a new piece every move until everything is out and the king is safe. No piece played twice.',
+      aRegarder:
+        'Count your developed pieces on move ten. Eight is a win; four means this is the theme of the next session too.',
+    },
+    colonnes: {
+      nom: 'Open files',
+      consigne:
+        'Find the file with no pawn on it and put a rook there. Then the second rook behind the first, and get in on the seventh rank.',
+      aRegarder:
+        'The pawn structure: the open file is already drawn on it, there is nothing to calculate.',
+    },
+    'avant-poste': {
+      nom: 'The outpost',
+      consigne:
+        'Look for an advanced square none of their pawns can attack, and install a knight there. It will stay until the end.',
+      aRegarder:
+        'The squares in front of their backward pawns, and the ones their structure has given up for good.',
+    },
+    'roi-expose': {
+      nom: 'Attacking the king',
+      consigne:
+        'Before launching the attack, count the attackers and the defenders. Three against two is enough; two against three never works.',
+      aRegarder:
+        'Their pawn shelter: as soon as a square opens in front of their king, the theme is there.',
+    },
+    'pion-passe': {
+      nom: 'The passed pawn',
+      consigne:
+        'Create a passed pawn on the side where you have the majority, push it, and put your rook behind it. Blockade theirs with a knight.',
+      aRegarder:
+        'As soon as the queens come off, count the pawns on each wing: the majority says which side to play on.',
+    },
+    'deux-faiblesses': {
+      nom: 'The principle of two weaknesses',
+      consigne:
+        'Fix a first weakness, then open a second front at the other end. Their defence cannot cover both.',
+      aRegarder:
+        'The isolated, doubled and backward pawns on both sides: those are the weaknesses you fix.',
+    },
+  },
+  positions: {
+    roque: {
+      legende:
+        'White castling kingside: the king goes from e1 to g1, and the rook on h1 jumps over him to land on f1. One move, two pieces.',
+    },
+    'prise-en-passant': {
+      legende:
+        'The black pawn has just advanced two squares to slip past the white pawn. The white pawn takes it anyway — landing on the square it skipped, as if it had only advanced one.',
+    },
+    promotion: {
+      legende:
+        'The pawn reaches the last rank and changes. Almost always into a queen — but the choice is free, and the knight is sometimes the only move that wins.',
+    },
+    'echec-et-mat': {
+      legende:
+        'The back-rank mate: the black king is shut in by his own pawns, the rook arrives on the eighth rank, and there is no flight, no block and no capture.',
+    },
+    pat: {
+      legende:
+        'Black has to move and has no legal move at all — and yet their king is not in check. The game is drawn: it is the white queen who has robbed herself of the win.',
+    },
+    'pion-passe': {
+      legende:
+        'No black pawn can stop it any more: not in front of it, not on the neighbouring files. Its road to promotion is clear, and that is what makes it valuable in the endgame.',
+    },
+    'pions-doubles': {
+      legende:
+        'Two pawns on the same file: the back one will never protect the front one, and they advance one behind the other. The ordinary price of a capture towards the centre.',
+    },
+    'pion-isole': {
+      legende:
+        'No friendly pawn on the neighbouring files: nobody will ever be able to defend it. A piece will have to, and a piece busy defending does nothing else.',
+    },
+    'mauvais-fou': {
+      legende:
+        'The bishop plays on the light squares, and its own pawns occupy the light squares in front of it. It looks out through its own bars: half the board is closed to it by its own side.',
+    },
+    zugzwang: {
+      legende:
+        'Black is not lost because of the position but because of the obligation to move: any king move lets the white pawn through. Being able to pass would save them.',
+    },
+    'paire-de-fous': {
+      legende:
+        'One bishop on the light squares, one on the dark: between them, no square escapes. That is what is worth more than a bishop and a knight in an open position.',
+    },
+    fork: {
+      legende:
+        'One piece, two targets at once: the knight gives check to the king and attacks the rook. The king has to answer, and the rook falls next move.',
+    },
+    pin: {
+      legende:
+        'The knight cannot move any more: it would expose its own king. It stays put, undefended, and you can take your time attacking it.',
+    },
+    skewer: {
+      legende:
+        'The pin in reverse: the valuable piece is in front, it has to step out of check, and what it was shielding behind it gets taken.',
+    },
+    discoveredAttack: {
+      legende:
+        'The knight steps aside and unmasks the rook, which gives check. It takes the chance to attack the queen: the check has to be answered, and the queen has nobody to save her.',
+    },
+    doubleCheck: {
+      legende:
+        'Two pieces give check at the same time. No capture and no interposition can answer both: the king has to move, whatever it costs.',
+    },
+    smotheredMate: {
+      legende:
+        'The king is shut in by his own pieces, and the knight — the only one that jumps — comes to mate him in his corner. Nothing can take the knight.',
+    },
+    backRankMate: {
+      legende:
+        'The three pawns have never moved, and the king has no window: the rook arrives on the rank and the game stops. It is the commonest mate between beginners.',
+    },
+    mateIn1: {
+      legende:
+        'One move, and it is over. Looking for mates in one is the exercise that teaches you fastest to see the squares the enemy king does not have.',
+    },
+    removingTheDefender: {
+      legende:
+        'The black rook was holding the back rank: you trade it off, the knight recaptures away from the square that mattered, and the second rook comes in. You do not go after the target, but after what guards it.',
+    },
+    hangingPiece: {
+      legende:
+        'The knight is attacked by the bishop and nobody defends it: it is taken for free. It is the first pattern to look for, every move, on both sides.',
+    },
+    xRayAttack: {
+      legende:
+        'The two rooks look at each other down the file: whatever comes between them will be attacked from both sides, and the attack “passes through” the piece.',
+    },
+    underPromotion: {
+      legende:
+        'Promoting to a knight rather than a queen: here, only the knight gives check. Rare, but these are exactly the cases the rule leaves the choice for.',
+    },
+    opposition: {
+      legende:
+        'The kings face each other, one square apart, and it is Black to move: they have to step aside, and the white king will advance. The opposition belongs to whoever is not on move.',
+    },
+    fianchetto: {
+      legende:
+        'The bishop settles on the long diagonal, behind its pawn advanced one square. There it holds the longest line on the board, and keeps the castled king beside it.',
+    },
+    outpost: {
+      legende:
+        'A knight placed in the enemy camp, protected by a pawn, and which no pawn can drive away. There it is worth far more than a badly placed rook.',
+    },
+    openFile: {
+      legende:
+        'No pawn left on the file: the rook sees from one end to the other. That is where rooks belong, and it is often the way into the enemy camp.',
+    },
+    seventhRank: {
+      legende:
+        'The rook settles on the rank of the enemy pawns: it attacks them all at once and shuts the king in on his back rank. A rook on the seventh is often worth a pawn.',
+    },
+    protectedPassedPawn: {
+      legende:
+        'A passed pawn defended by another pawn: the enemy king can neither take it nor leave it. It is the most decisive advantage in pawn endgames.',
+    },
+    rookBehindPasser: {
+      legende:
+        'The rook pushes its pawn from behind: it gains range as the pawn advances, while the enemy rook loses it. Tarrasch’s rule, and it holds.',
+    },
+    backwardPawn: {
+      legende:
+        'The c3 pawn has been left behind its neighbours and cannot advance without being lost: no friendly pawn will ever defend it. The square in front of it is an outpost handed over.',
+    },
+  },
+  explications: {
+    checkmate: {
+      titre: 'Checkmate',
+      texte:
+        'The king is attacked and no legal move can remedy it: he can neither flee, nor capture the attacker, nor interpose. The game stops at once.',
+      terme: 'Checkmate',
+    },
+    stalemate: {
+      titre: 'Stalemate',
+      texte:
+        'The side to move has **no legal move at all**, but their king is not in check: the game is drawn, whatever the material difference. In your statistics it is the line to watch — a stalemate is almost always a win let slip at the end of the game, for want of leaving the enemy king a square.',
+      terme: 'Stalemate',
+    },
+    resigned: {
+      titre: 'Resignation',
+      texte:
+        'A player accepted they were lost and stopped the game before mate. It is the commonest ending between experienced players: once the position is hopeless, playing out the remaining twenty moves teaches nobody anything. **Resigning too early, on the other hand, is an expensive habit** — plenty of “lost” positions are still saved against an opponent of your own level.',
+    },
+    timeout: {
+      titre: 'Time out',
+      texte:
+        'The flag has fallen. The game is lost even a whole queen up — unless your opponent no longer has enough to mate, in which case it is drawn. **A lot of losses on time in the same column means a time control too short for the way you play**, not a lack of speed: you do not gain time by playing faster, you gain it by hesitating less.',
+      terme: 'Time control',
+    },
+    draw: {
+      titre: 'Draw',
+      texte:
+        'Nobody wins: agreement between the players, the same position repeated three times, fifty moves with no capture and no pawn push, or not enough material to mate. Each side leaves with half a point.',
+      terme: 'Draw by repetition',
+    },
+    abandoned: {
+      titre: 'Opponent left',
+      texte:
+        'A player left the game without finishing it, and the waiting time ran out. The result follows the position and the rules of the game: **so it is not always a win**, which is why this line counts its games and its wins separately.',
+    },
+    aborted: {
+      titre: 'Aborted',
+      texte:
+        'The game stopped before it had really started — too few moves played for it to count. It touches neither the rating nor the score, and is here only for the record.',
+    },
+    ultraBullet: {
+      titre: 'Ultrabullet',
+      texte:
+        'Under 30 seconds for the whole game. It is a game of dexterity more than a game of chess: you play by recognised pattern and by hand, never by calculation.',
+      terme: 'Time control',
+    },
+    bullet: {
+      titre: 'Bullet',
+      texte:
+        'Under 3 minutes per player. You no longer calculate, you recognise: it is the time control that rewards puzzle training best, and the worst one for learning an opening.',
+      terme: 'Time control',
+    },
+    blitz: {
+      titre: 'Blitz',
+      texte:
+        'From 3 to 10 minutes per player. Enough for a plan, too little to check it. It is the most played time control online, and the one where the gap between what you know and what you play is widest.',
+      terme: 'Time control',
+    },
+    rapid: {
+      titre: 'Rapid',
+      texte:
+        'From 10 to 60 minutes per player. The first time control where you have time to calculate a line to the end. **It is the one where you improve fastest**: one game contains more considered decisions than ten bullet games.',
+      terme: 'Time control',
+    },
+    classical: {
+      titre: 'Classical',
+      texte:
+        'More than an hour per player. The time control of over-the-board tournaments: you play few games, but each one is analysed afterwards line by line.',
+      terme: 'Time control',
+    },
+    correspondence: {
+      titre: 'Correspondence',
+      texte:
+        'From one to fourteen days per move. You play your game between other things, and you are allowed to move the pieces around to look — it is the format that teaches endgames best.',
+      terme: 'Time control',
+    },
+  },
+  creditsNotes: {
+    stockfish: {
+      note: 'The strongest chess engine in the world. It runs natively on the server, and in the browser through WebAssembly.',
+    },
+    'stockfish-js': {
+      note: 'The WebAssembly build of Stockfish, which lets you analyse without sending anything to a server.',
+    },
+    'chess-js': {
+      note: 'The rules of the game: legal move generation, mate detection, PGN parsing.',
+    },
+    maia: {
+      note: 'Nine networks trained on human games: at 1100, the opponent makes the mistakes an 1100 player really makes.',
+    },
+    'leela-chess-zero': {
+      note: 'The engine that runs Maia’s networks — weights on their own do not play.',
+    },
+    piper: {
+      note: 'The coach’s voice, synthesised on the server and offline: nothing that is said leaves the machine.',
+    },
+    'base-d-ouvertures': {
+      note: '3,810 named and classified openings, translated into French for this project.',
+    },
+    'base-de-puzzles': {
+      note: '6,057,356 tactical positions, rated and tagged by theme, taken from real games.',
+    },
+    'base-de-positions': {
+      note: '3,568 endgame positions classified by material, from “mate with a queen” to “hold the draw a rook down”, translated and re-rated for difficulty for this project.',
+    },
+    'tables-de-finales': {
+      note: 'Perfect play in every endgame of seven pieces or fewer. A certainty, not an evaluation.',
+    },
+    'voix-piper': {
+      note: 'The French and English voice models of the coach.',
+    },
+    'pieces-staunton-cburnett': {
+      note: 'The most widely used vector piece set in the free software world.',
+    },
+    'pieces-merida': {
+      note: 'Crisp outlines, excellent legibility at small sizes.',
+    },
+    'pieces-fantasy-spatial': {
+      note: 'Three sets with character, with sculpted volumes.',
+    },
+    'pieces-chessnut': {
+      note: 'Spare and contemporary.',
+    },
+    'pieces-rhos': {
+      note: 'Flat colours, public domain.',
+    },
+    'pieces-alpha-pixel': {
+      note: 'Three minimalist approaches, including a set in letters for maximum legibility.',
+    },
+    bruitages: {
+      note: 'Move, capture, check, end of game.',
+    },
+    'next-js': {
+      note: 'The framework of the web application: routing, server rendering, bundling.',
+    },
+    react: {
+      note: 'The interface library.',
+    },
+    'react-dom': {
+      note: 'React’s rendering in the browser.',
+    },
+    'server-only': {
+      note: 'A guard rail: it fails the build if a server module heads for the browser.',
+    },
+    'three-js': {
+      note: 'The three-dimensional rendering of the board.',
+    },
+    'react-three-fiber': {
+      note: 'The bridge between React and three.js.',
+    },
+    drei: {
+      note: 'The helpers of the 3D scene: camera, lights, model loading.',
+    },
+    zustand: {
+      note: 'The preferences store, shared by the whole interface.',
+    },
+    lucide: {
+      note: 'The icons throughout the interface.',
+    },
+    clsx: {
+      note: 'The assembly of conditional CSS classes.',
+    },
+    'socket-io': {
+      note: 'The real time of live games, on the server side.',
+    },
+    'socket-io-client': {
+      note: 'The same, on the browser side.',
+    },
+    'drizzle-orm': {
+      note: 'The schema and the SQL queries, typed.',
+    },
+    postgres: {
+      note: 'The PostgreSQL driver.',
+    },
+    nodemailer: {
+      note: 'Sending mail — password recovery, and nothing else.',
+    },
+    'web-push': {
+      note: 'Push notifications: a challenge, a friend request, a move played against you.',
+    },
   },
   memo: {
     'qu-est-ce-que': {

@@ -14,17 +14,18 @@
  */
 
 import type { MotifId } from '@coupparfait/core'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 
 export interface ThemeSeance {
   id: string
   /** Le thème, nommé comme on le dirait à voix haute. */
-  nom: string
+  nom: TranslationKey
   /** L'emoji qui l'identifie dans la liste. */
   icone: string
   /** Ce qu'on cherche à faire pendant la partie. Une phrase, à l'impératif. */
-  consigne: string
+  consigne: TranslationKey
   /** Ce qu'on regarde pour savoir si ça marche. */
-  aRegarder: string
+  aRegarder: TranslationKey
   /**
    * Les motifs comptés dans le bilan.
    *
@@ -47,88 +48,73 @@ export interface ThemeSeance {
 export const THEMES_SEANCE: ThemeSeance[] = [
   {
     id: 'rien-en-prise',
-    nom: 'Ne rien laisser en prise',
+    nom: 'seances.rien-en-prise.nom',
     icone: '🎯',
-    consigne:
-      'Avant chaque coup, fais le tour de tes pièces : lesquelles sont attaquées, et par quoi. Tu ne joues pas tant que tu n’as pas répondu.',
-    aRegarder:
-      'Chaque fois que le commentaire parle d’une pièce en prise — à toi ou à lui — c’est le thème qui se présente.',
+    consigne: 'seances.rien-en-prise.consigne',
+    aRegarder: 'seances.rien-en-prise.aRegarder',
     motifs: ['hangingPiece'],
     paliers: ['regles', 'pieces-en-prise', 'voir-ladversaire'],
   },
   {
     id: 'fourchettes',
-    nom: 'Les fourchettes',
+    nom: 'seances.fourchettes.nom',
     icone: '🍴',
-    consigne:
-      'Cherche les cases d’où un cavalier atteindrait deux pièces à la fois — les tiennes comme les siennes. Les dames et les pions en font aussi.',
-    aRegarder:
-      'Repère les paires de pièces sur des cases de même couleur, à distance de cavalier l’une de l’autre.',
+    consigne: 'seances.fourchettes.consigne',
+    aRegarder: 'seances.fourchettes.aRegarder',
     motifs: ['fork'],
     paliers: ['pieces-en-prise', 'voir-ladversaire', 'un-plan'],
   },
   {
     id: 'clouages',
-    nom: 'Clouages et enfilades',
+    nom: 'seances.clouages.nom',
     icone: '📌',
-    consigne:
-      'Aligne tes pièces lourdes sur ses pièces, et évite d’aligner les tiennes devant ton roi ou ta dame.',
-    aRegarder:
-      'Les diagonales et les colonnes où se trouvent son roi et sa dame : c’est là que les clouages naissent.',
+    consigne: 'seances.clouages.consigne',
+    aRegarder: 'seances.clouages.aRegarder',
     motifs: ['pin', 'skewer'],
     paliers: ['voir-ladversaire', 'un-plan', 'technique'],
   },
   {
     id: 'couloir',
-    nom: 'La dernière rangée',
+    nom: 'seances.couloir.nom',
     icone: '🚪',
-    consigne:
-      'Surveille les deux dernières rangées : la sienne pour y entrer, la tienne pour ne pas s’y faire enfermer. Une case d’air pour ton roi, tôt.',
-    aRegarder:
-      'Après chaque échange de pièces lourdes, demande-toi qui contrôle la huitième rangée.',
+    consigne: 'seances.couloir.consigne',
+    aRegarder: 'seances.couloir.aRegarder',
     motifs: ['backRankMate', 'seventhRank'],
     paliers: ['pieces-en-prise', 'voir-ladversaire', 'un-plan'],
   },
   {
     id: 'developpement',
-    nom: 'Sortir toutes ses pièces',
+    nom: 'seances.developpement.nom',
     icone: '🚀',
-    consigne:
-      'Un pion au centre, puis une pièce nouvelle à chaque coup jusqu’à ce que tout soit dehors et le roi à l’abri. Aucune pièce jouée deux fois.',
-    aRegarder:
-      'Compte tes pièces développées au coup dix. Huit, c’est gagné ; quatre, c’est le thème de la prochaine séance aussi.',
+    consigne: 'seances.developpement.consigne',
+    aRegarder: 'seances.developpement.aRegarder',
     motifs: ['development', 'centreControl'],
     paliers: ['regles', 'pieces-en-prise', 'voir-ladversaire'],
   },
   {
     id: 'colonnes',
-    nom: 'Les colonnes ouvertes',
+    nom: 'seances.colonnes.nom',
     icone: '🏛️',
-    consigne:
-      'Trouve la colonne sans pion et mets-y une tour. Puis la seconde derrière la première, et entre sur la septième rangée.',
-    aRegarder:
-      'La structure de pions : la colonne ouverte est déjà dessinée dessus, il n’y a rien à calculer.',
+    consigne: 'seances.colonnes.consigne',
+    aRegarder: 'seances.colonnes.aRegarder',
     motifs: ['openFile', 'semiOpenFile', 'seventhRank'],
     paliers: ['voir-ladversaire', 'un-plan', 'technique'],
   },
   {
     id: 'avant-poste',
-    nom: 'L’avant-poste',
+    nom: 'seances.avant-poste.nom',
     icone: '🏰',
-    consigne:
-      'Cherche une case avancée qu’aucun de ses pions ne peut attaquer, et installes-y un cavalier. Il y restera jusqu’à la fin.',
-    aRegarder:
-      'Les cases devant ses pions arriérés, et celles que sa structure a définitivement abandonnées.',
+    consigne: 'seances.avant-poste.consigne',
+    aRegarder: 'seances.avant-poste.aRegarder',
     motifs: ['outpost'],
     paliers: ['un-plan', 'technique', 'prophylaxie'],
   },
   {
     id: 'roi-expose',
-    nom: 'Attaquer le roi',
+    nom: 'seances.roi-expose.nom',
     icone: '⚔️',
-    consigne:
-      'Avant de lancer l’attaque, compte les attaquants et les défenseurs. Trois contre deux suffit ; deux contre trois ne marche jamais.',
-    aRegarder: 'Son abri de pions : dès qu’une case s’ouvre devant son roi, le thème est là.',
+    consigne: 'seances.roi-expose.consigne',
+    aRegarder: 'seances.roi-expose.aRegarder',
     // `exposedKing` seul, et c'est un arbitrage. `kingSafety` compterait « ton
     // roi est à l'abri » comme une réussite du thème, ce qui n'est pas
     // attaquer ; et `oppositeCastling` est toujours attribué aux Blancs par le
@@ -139,23 +125,19 @@ export const THEMES_SEANCE: ThemeSeance[] = [
   },
   {
     id: 'pion-passe',
-    nom: 'Le pion passé',
+    nom: 'seances.pion-passe.nom',
     icone: '♟️',
-    consigne:
-      'Crée un pion passé du côté où tu as la majorité, pousse-le, et mets ta tour derrière. Bloque le sien avec un cavalier.',
-    aRegarder:
-      'Dès que les dames partent, compte les pions de chaque aile : la majorité dit de quel côté jouer.',
+    consigne: 'seances.pion-passe.consigne',
+    aRegarder: 'seances.pion-passe.aRegarder',
     motifs: ['passedPawn', 'protectedPassedPawn', 'rookBehindPasser'],
     paliers: ['un-plan', 'technique', 'prophylaxie'],
   },
   {
     id: 'deux-faiblesses',
-    nom: 'Le principe des deux faiblesses',
+    nom: 'seances.deux-faiblesses.nom',
     icone: '🪤',
-    consigne:
-      'Fixe une première faiblesse, puis ouvre un second front à l’autre bout. Sa défense ne peut pas couvrir les deux.',
-    aRegarder:
-      'Les pions isolés, doublés et arriérés des deux camps : ce sont les faiblesses qu’on fixe.',
+    consigne: 'seances.deux-faiblesses.consigne',
+    aRegarder: 'seances.deux-faiblesses.aRegarder',
     motifs: ['isolatedPawn', 'doubledPawns', 'backwardPawn'],
     paliers: ['technique', 'prophylaxie'],
   },

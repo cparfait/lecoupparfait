@@ -18,19 +18,14 @@
  * d'ouvertures — voir `BoiteExplication`.
  */
 
-import { TERMS } from './glossaire.ts'
-
-/** Définition du glossaire portant ce nom, ou `null`. */
-export function definitionDuGlossaire(nom: string): string | null {
-  return TERMS.find((terme) => terme.name === nom)?.definition ?? null
-}
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 
 export interface TexteExplication {
-  titre: string
+  titre: TranslationKey
   /** Le corps, en un ou deux paragraphes. Le gras `**mot**` y est admis. */
-  texte: string
+  texte: TranslationKey
   /** Renvoi vers le glossaire, quand le mot y a sa propre entrée. */
-  terme?: string
+  terme?: TranslationKey
 }
 
 /**
@@ -44,45 +39,36 @@ export interface TexteExplication {
  */
 export const FINS: Record<string, TexteExplication> = {
   checkmate: {
-    titre: 'Échec et mat',
-    texte:
-      definitionDuGlossaire('Échec et mat') ??
-      'Le roi est attaqué et aucun coup légal n’y remédie.',
-    terme: 'Échec et mat',
+    titre: 'explications.checkmate.titre',
+    texte: 'explications.checkmate.texte',
+    terme: 'explications.checkmate.terme',
   },
   stalemate: {
-    titre: 'Pat',
-    texte:
-      (definitionDuGlossaire('Pat') ?? '') +
-      ' Dans tes statistiques, c’est la ligne à surveiller : un pat est presque toujours une victoire qu’on a laissée filer en fin de partie, faute d’avoir laissé une case au roi adverse.',
-    terme: 'Pat',
+    titre: 'explications.stalemate.titre',
+    texte: 'explications.stalemate.texte',
+    terme: 'explications.stalemate.terme',
   },
   resigned: {
-    titre: 'Abandon',
-    texte:
-      'Un joueur s’est reconnu perdu et a arrêté la partie avant le mat. C’est la fin la plus courante entre joueurs expérimentés : une fois la position sans espoir, jouer les vingt coups qui restent n’apprend plus rien à personne. **Abandonner trop tôt, en revanche, est une habitude coûteuse** — beaucoup de positions « perdues » se sauvent encore contre un adversaire de son propre niveau.',
+    titre: 'explications.resigned.titre',
+    texte: 'explications.resigned.texte',
   },
   timeout: {
-    titre: 'Temps écoulé',
-    texte:
-      'La pendule est tombée. La partie est perdue même avec une dame de plus — sauf si l’adversaire n’a plus de quoi mater, auquel cas elle est nulle. **Beaucoup de défaites au temps dans une même colonne veulent dire une cadence trop courte pour ta façon de jouer**, pas un manque de rapidité : on ne gagne pas de temps en jouant plus vite, on en gagne en hésitant moins.',
-    terme: 'Cadence',
+    titre: 'explications.timeout.titre',
+    texte: 'explications.timeout.texte',
+    terme: 'explications.timeout.terme',
   },
   draw: {
-    titre: 'Nulle',
-    texte:
-      'Personne ne gagne : accord entre les joueurs, répétition de la même position trois fois, cinquante coups sans prise ni poussée de pion, ou matériel insuffisant pour mater. Chacun repart avec un demi-point.',
-    terme: 'Nulle par répétition',
+    titre: 'explications.draw.titre',
+    texte: 'explications.draw.texte',
+    terme: 'explications.draw.terme',
   },
   abandoned: {
-    titre: 'Adversaire parti',
-    texte:
-      'Un joueur a quitté la partie sans la terminer, et le temps d’attente s’est écoulé. Le résultat suit la position et le règlement de la partie : **ce n’est donc pas toujours une victoire**, c’est pourquoi cette ligne compte ses parties et ses gains séparément.',
+    titre: 'explications.abandoned.titre',
+    texte: 'explications.abandoned.texte',
   },
   aborted: {
-    titre: 'Annulée',
-    texte:
-      'La partie s’est arrêtée avant d’avoir vraiment commencé — trop peu de coups joués pour qu’elle compte. Elle ne touche ni au classement ni au score, et n’est là que pour l’inventaire.',
+    titre: 'explications.aborted.titre',
+    texte: 'explications.aborted.texte',
   },
 }
 
@@ -96,39 +82,33 @@ export const FINS: Record<string, TexteExplication> = {
  */
 export const CADENCES: Record<string, TexteExplication> = {
   ultraBullet: {
-    titre: 'Ultra-bullet',
-    texte:
-      'Moins de 30 secondes pour toute la partie. C’est un jeu d’adresse plus qu’un jeu d’échecs : on y joue au motif reconnu et à la main, jamais au calcul.',
-    terme: 'Cadence',
+    titre: 'explications.ultraBullet.titre',
+    texte: 'explications.ultraBullet.texte',
+    terme: 'explications.ultraBullet.terme',
   },
   bullet: {
-    titre: 'Bullet',
-    texte:
-      'Moins de 3 minutes par joueur. On n’y calcule plus, on reconnaît : c’est la cadence qui récompense le mieux l’entraînement aux puzzles, et la plus mauvaise pour apprendre une ouverture.',
-    terme: 'Cadence',
+    titre: 'explications.bullet.titre',
+    texte: 'explications.bullet.texte',
+    terme: 'explications.bullet.terme',
   },
   blitz: {
-    titre: 'Blitz',
-    texte:
-      'De 3 à 10 minutes par joueur. Assez pour un plan, trop peu pour le vérifier. C’est la cadence la plus jouée en ligne, et celle où l’écart entre ce qu’on sait et ce qu’on joue est le plus grand.',
-    terme: 'Cadence',
+    titre: 'explications.blitz.titre',
+    texte: 'explications.blitz.texte',
+    terme: 'explications.blitz.terme',
   },
   rapid: {
-    titre: 'Rapide',
-    texte:
-      'De 10 à 60 minutes par joueur. La première cadence où l’on a le temps de calculer une variante jusqu’au bout. **C’est celle où l’on progresse le plus vite** : une partie y contient plus de décisions réfléchies que dix parties de bullet.',
-    terme: 'Cadence',
+    titre: 'explications.rapid.titre',
+    texte: 'explications.rapid.texte',
+    terme: 'explications.rapid.terme',
   },
   classical: {
-    titre: 'Classique',
-    texte:
-      'Plus d’une heure par joueur. La cadence des tournois sur échiquier : on y joue peu de parties, mais chacune s’analyse ensuite ligne par ligne.',
-    terme: 'Cadence',
+    titre: 'explications.classical.titre',
+    texte: 'explications.classical.texte',
+    terme: 'explications.classical.terme',
   },
   correspondence: {
-    titre: 'Correspondance',
-    texte:
-      'De un à quatorze jours par coup. On joue sa partie entre deux occupations, et l’on a le droit de bouger les pièces pour chercher — c’est le format qui apprend le mieux les finales.',
-    terme: 'Cadence',
+    titre: 'explications.correspondence.titre',
+    texte: 'explications.correspondence.texte',
+    terme: 'explications.correspondence.terme',
   },
 }

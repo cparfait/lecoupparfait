@@ -30,7 +30,8 @@ import { BoutonEcouter } from '@/components/ui/BoutonEcouter.tsx'
 import { renderBold } from '@/lib/gras.tsx'
 import { localeDuContenu } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
-import { useT } from '@/lib/i18n/index.tsx'
+import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 
 /** Ignore accents et casse : on cherche « echec » et on trouve « échec ». */
 function normalise(value: string): string {
@@ -112,6 +113,22 @@ function couperEnDeux(texte: string): { chapeau: string; suite: string | null } 
   return { chapeau, suite: texte.slice(chapeau.length).trim() }
 }
 
+/**
+ * Les cinq familles du glossaire, par clé de dictionnaire.
+ *
+ * `Term.family` est un type littéral français : c'est l'identifiant du
+ * regroupement, et il n'a pas à changer. Mais la page l'affichait tel quel, si
+ * bien qu'on lisait « Règles » et « Motifs tactiques » au-dessus de définitions
+ * anglaises.
+ */
+const CLE_FAMILLE: Record<string, TranslationKey> = {
+  Règles: 'nav.famRegles',
+  'Pièces et matériel': 'nav.famPieces',
+  'Phases de la partie': 'nav.famPhases',
+  'Évaluation et jeu': 'nav.famEvaluation',
+  'Motifs tactiques': 'nav.famMotifs',
+}
+
 export default function GlossaryPage() {
   const t = useT()
   /*
@@ -125,6 +142,7 @@ export default function GlossaryPage() {
     qui n'existent pas.
   */
   const locale = usePreferences((state) => localeDuContenu(state.locale))
+  const bcp47 = langue(useI18n().locale).bcp47
   const [query, setQuery] = useState('')
   /**
    * Le terme qu'on veut voir sur l'échiquier.
@@ -132,7 +150,9 @@ export default function GlossaryPage() {
    * L'état vit ici et non dans chaque carte : une seule boîte à la fois, et
    * elle se referme d'elle-même quand la recherche change la liste.
    */
-  const [montre, setMontre] = useState<{ name: string; definition: string } | null>(null)
+  const [montre, setMontre] = useState<{ cle: string; name: string; definition: string } | null>(
+    null,
+  )
 
   /**
    * Toutes les entrées, motifs compris — et dédoublonnées.
@@ -153,16 +173,33 @@ export default function GlossaryPage() {
    * puzzles.
    */
   const entries = useMemo(() => {
-    const connus = new Set(TERMS.map((terme) => terme.name))
+    /*
+      Les deux moitiés du vocabulaire, ramenées à la même forme.
+
+      Le glossaire porte des clés de dictionnaire depuis qu'il existe en
+      plusieurs langues ; les motifs viennent du cœur, qui les rend déjà écrits
+      dans la langue du contenu. On résout les premiers ici, et chaque entrée
+      garde en plus sa **clé stable** — c'est elle qui retrouve la position
+      illustrée, là où l'on cherchait auparavant par le nom affiché, qui change
+      avec la langue.
+    */
+    const termes = TERMS.map((terme) => ({
+      cle: terme.id,
+      name: t(terme.name),
+      definition: t(terme.definition),
+      family: terme.family,
+    }))
+    const connus = new Set(termes.map((terme) => terme.name))
     const motifs = motifGlossary(locale)
       .filter((motif) => !connus.has(motif.name))
       .map((motif) => ({
+        cle: motif.id as string,
         name: motif.name,
         definition: motif.definition,
         family: 'Motifs tactiques' as const,
       }))
-    return [...TERMS, ...motifs]
-  }, [locale])
+    return [...termes, ...motifs]
+  }, [locale, t])
 
   /**
    * Les termes que le lexique ajoute à la recherche.
@@ -211,7 +248,7 @@ export default function GlossaryPage() {
    * mais la page n'a pas à faire confiance à un contrôle qu'elle ne lance pas.
    */
   const illustres = useMemo(
-    () => entries.filter((entree) => POSITIONS_DU_GLOSSAIRE[entree.name]).length,
+    () => entries.filter((entree) => POSITIONS_DU_GLOSSAIRE[entree.cle]).length,
     [entries],
   )
 
@@ -220,12 +257,15 @@ export default function GlossaryPage() {
     return order
       .map((family) => ({
         family,
+        // Le tri suit la langue affichée et non le français : « Castling »
+        // avant « Checkmate » en anglais, « Cadence » avant « Clouage » en
+        // français, et l'ordre des accents change d'une langue à l'autre.
         items: filtered
           .filter((entry) => entry.family === family)
-          .sort((a, b) => a.name.localeCompare(b.name, 'fr')),
+          .sort((a, b) => a.name.localeCompare(b.name, bcp47)),
       }))
       .filter((group) => group.items.length > 0)
-  }, [filtered])
+  }, [filtered, bcp47])
 
   return (
     <div className="page">
@@ -233,10 +273,7 @@ export default function GlossaryPage() {
         {t('nav.glossary')}
       </h1>
       <p className="mt-2 max-w-2xl text-muted max-lg:text-[14px] max-lg:leading-relaxed">
-        {entries.length} termes définis en français clair — les règles, le matériel, les phases de
-        la partie, et les motifs que le coach sait reconnaître et nommer dans tes parties.{' '}
-        {illustres} d’entre eux se montrent sur un échiquier : leur nom porte une pastille. Le
-        haut-parleur, à droite de chaque mot, lit la définition à voix haute.
+        {t('nav.glossaryIntro', { n: entries.length, illustres })}
       </p>
 
       {/* ── Recherche ────────────────────────────────────────────────── */}
@@ -283,7 +320,9 @@ export default function GlossaryPage() {
         {groups.map(({ family, items }) => (
           <section key={family}>
             <div className="mb-3 flex items-baseline gap-2.5">
-              <h2 className="font-display text-xl font-bold tracking-tight">{family}</h2>
+              <h2 className="font-display text-xl font-bold tracking-tight">
+                {t(CLE_FAMILLE[family] ?? 'nav.famMotifs')}
+              </h2>
               <Chip>{items.length}</Chip>
             </div>
 
@@ -293,10 +332,10 @@ export default function GlossaryPage() {
                 // ne devient cliquable que s'il y a quelque chose à voir :
                 // un bouton qui n'ouvre rien coûte plus cher qu'une carte
                 // inerte.
-                const position = POSITIONS_DU_GLOSSAIRE[entry.name]
+                const position = POSITIONS_DU_GLOSSAIRE[entry.cle]
                 return (
                   <Card
-                    key={`${family}-${entry.name}`}
+                    key={`${family}-${entry.cle}`}
                     className={clsx('p-4', 'transition-colors hover:bg-surface-hover')}
                   >
                     {/* Le nom à gauche, le haut-parleur à droite : la
@@ -308,7 +347,11 @@ export default function GlossaryPage() {
                           <button
                             type="button"
                             onClick={() =>
-                              setMontre({ name: entry.name, definition: entry.definition })
+                              setMontre({
+                                cle: entry.cle,
+                                name: entry.name,
+                                definition: entry.definition,
+                              })
                             }
                             className="group inline-flex items-center gap-1.5 text-left transition-colors hover:text-accent"
                             aria-label={`Voir « ${entry.name} » sur l’échiquier`}
@@ -342,11 +385,11 @@ export default function GlossaryPage() {
       {/* Ce qui se montre, montré. Les motifs tactiques n'ont pas encore leur
           position : leurs définitions viennent du cœur, et l'illustration se
           fait aujourd'hui sur les mots du vocabulaire général. */}
-      {montre && POSITIONS_DU_GLOSSAIRE[montre.name] && (
+      {montre && POSITIONS_DU_GLOSSAIRE[montre.cle] && (
         <BoiteTerme
           nom={montre.name}
           definition={montre.definition}
-          position={POSITIONS_DU_GLOSSAIRE[montre.name]!}
+          position={POSITIONS_DU_GLOSSAIRE[montre.cle]!}
           onFermer={() => setMontre(null)}
         />
       )}

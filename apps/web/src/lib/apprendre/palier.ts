@@ -29,6 +29,7 @@
  */
 
 import type { MotifId } from '@coupparfait/core'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Leviers
@@ -44,8 +45,16 @@ export type CibleLevier =
   | { type: 'page'; href: string; label: string }
 
 export interface Levier {
+  /**
+   * Identifiant stable, qui nomme la clé de dictionnaire.
+   *
+   * Dérivé du texte et non du rang : sans lui, insérer une entrée au milieu de
+   * la liste renommerait en silence toutes les suivantes, et chaque traduction
+   * se retrouverait sur la mauvaise phrase.
+   */
+  id: string
   /** Ce qu'il y a à savoir faire, formulé comme une compétence. */
-  titre: string
+  titre: TranslationKey
   /**
    * Pourquoi ça coûte des points **à ce palier-là**.
    *
@@ -53,7 +62,7 @@ export interface Levier {
    * décide si l'on clique : « travaille les fourchettes » ne convainc personne,
    * « à 900, une fourchette de cavalier décide une partie sur trois » si.
    */
-  pourquoi: string
+  pourquoi: TranslationKey
   cible: CibleLevier
 }
 
@@ -64,9 +73,9 @@ export interface Palier {
   /** Borne haute, incluse. `Infinity` pour le dernier. */
   max: number
   /** Le nom du palier, court, qui dit l'objectif et non le niveau. */
-  nom: string
+  nom: TranslationKey
   /** Une phrase : ce qu'on sait déjà faire, et ce qui bloque maintenant. */
-  promesse: string
+  promesse: TranslationKey
   /** Niveau d'ordinateur à peu près équivalent, pour les séances. */
   niveauBot: number
   leviers: Levier[]
@@ -88,39 +97,38 @@ export const PALIERS: Palier[] = [
     id: 'regles',
     min: 0,
     max: 649,
-    nom: 'Tenir une partie de bout en bout',
-    promesse:
-      'Tu connais les déplacements. Ce qui te fait perdre n’est pas encore la stratégie : c’est une règle oubliée, ou une partie gagnée qu’on ne sait pas finir.',
+    nom: 'paliers.regles.nom',
+    promesse: 'paliers.regles.promesse',
     niveauBot: 2,
     leviers: [
       {
-        titre: 'Les trois règles qu’on oublie',
-        pourquoi:
-          'Le roque, la prise en passant et la promotion décident plus de parties à ce niveau que tout le reste. Une prise en passant qu’on croit illégale, c’est un pion perdu et la conviction que l’adversaire a triché.',
+        id: 'les-trois-regles',
+        titre: 'paliers.regles.leviers.les-trois-regles.titre',
+        pourquoi: 'paliers.regles.leviers.les-trois-regles.pourquoi',
         cible: { type: 'lecon', id: 'regles-speciales' },
       },
       {
-        titre: 'Mater avec roi et tour',
-        pourquoi:
-          'C’est la finale qu’on atteint le plus souvent sans savoir la gagner. Une dame de plus et une nulle par cinquante coups : ça arrive, et c’est évitable en dix minutes.',
+        id: 'mater-avec-roi',
+        titre: 'paliers.regles.leviers.mater-avec-roi.titre',
+        pourquoi: 'paliers.regles.leviers.mater-avec-roi.pourquoi',
         cible: { type: 'lecon', id: 'mat-tour-roi' },
       },
       {
-        titre: 'Mater avec la dame sans faire pat',
-        pourquoi:
-          'Le pat est la déception classique de celui qui a une dame de plus. On l’évite avec une seule méthode, toujours la même.',
+        id: 'mater-avec-la',
+        titre: 'paliers.regles.leviers.mater-avec-la.titre',
+        pourquoi: 'paliers.regles.leviers.mater-avec-la.pourquoi',
         cible: { type: 'lecon', id: 'mat-dame-roi' },
       },
       {
-        titre: 'Combien vaut chaque pièce',
-        pourquoi:
-          'Échanger une tour contre un cavalier parce que « ça fait un échange » coûte deux pions. Le barème ne se devine pas, il s’apprend une fois.',
+        id: 'combien-vaut-chaque',
+        titre: 'paliers.regles.leviers.combien-vaut-chaque.titre',
+        pourquoi: 'paliers.regles.leviers.combien-vaut-chaque.pourquoi',
         cible: { type: 'lecon', id: 'valeurs' },
       },
       {
-        titre: 'Reconnaître un mat en un',
-        pourquoi:
-          'Avant de chercher un plan, il faut voir le mat quand il est là. C’est aussi le plus rapide à muscler : cinquante positions et l’œil le fait tout seul.',
+        id: 'reconnaitre-un-mat',
+        titre: 'paliers.regles.leviers.reconnaitre-un-mat.titre',
+        pourquoi: 'paliers.regles.leviers.reconnaitre-un-mat.pourquoi',
         cible: { type: 'puzzle', theme: 'mateIn1' },
       },
     ],
@@ -129,27 +137,26 @@ export const PALIERS: Palier[] = [
     id: 'pieces-en-prise',
     min: 650,
     max: 999,
-    nom: 'Ne plus donner de pièces',
-    promesse:
-      'Tu tiens une partie et tu sais mater. Ce qui te coûte le plus de points maintenant n’a rien de subtil : une pièce laissée sur une case attaquée, et la partie change de camp.',
+    nom: 'paliers.pieces-en-prise.nom',
+    promesse: 'paliers.pieces-en-prise.promesse',
     niveauBot: 5,
     leviers: [
       {
-        titre: 'Voir ce qui est en prise',
-        pourquoi:
-          'À ce palier, la majorité des parties se décide sur une pièce laissée sans défense — pas sur une combinaison. C’est le seul réflexe qui rapporte plusieurs centaines de points.',
+        id: 'voir-ce-qui',
+        titre: 'paliers.pieces-en-prise.leviers.voir-ce-qui.titre',
+        pourquoi: 'paliers.pieces-en-prise.leviers.voir-ce-qui.pourquoi',
         cible: { type: 'puzzle', theme: 'hangingPiece' },
       },
       {
-        titre: 'La fourchette de cavalier',
-        pourquoi:
-          'Le cavalier est la pièce dont les débutants voient le moins les coups, et celle qui punit le plus. Une fourchette décide une partie sur trois à ce niveau.',
+        id: 'la-fourchette-de',
+        titre: 'paliers.pieces-en-prise.leviers.la-fourchette-de.titre',
+        pourquoi: 'paliers.pieces-en-prise.leviers.la-fourchette-de.pourquoi',
         cible: { type: 'lecon', id: 'fourchette' },
       },
       {
-        titre: 'Les quatre mats qu’on subit',
-        pourquoi:
-          'Le berger, l’imbécile, Légal, le Shilling : on les prend tous dans ses dix premières parties, et on ne sait pas ce qui s’est passé. Les connaître, c’est les parer sans y penser.',
+        id: 'les-quatre-mats',
+        titre: 'paliers.pieces-en-prise.leviers.les-quatre-mats.titre',
+        pourquoi: 'paliers.pieces-en-prise.leviers.les-quatre-mats.pourquoi',
         cible: {
           type: 'page',
           href: '/apprendre#mats-ouverture',
@@ -157,15 +164,15 @@ export const PALIERS: Palier[] = [
         },
       },
       {
-        titre: 'Le mat du couloir',
-        pourquoi:
-          'Trois pions devant le roi qui a roqué, et une tour qui arrive sur la dernière rangée. C’est le motif de mat le plus fréquent de toutes les échelles de niveau.',
+        id: 'le-mat-du',
+        titre: 'paliers.pieces-en-prise.leviers.le-mat-du.titre',
+        pourquoi: 'paliers.pieces-en-prise.leviers.le-mat-du.pourquoi',
         cible: { type: 'lecon', id: 'mat-couloir' },
       },
       {
-        titre: 'Les trois principes de l’ouverture',
-        pourquoi:
-          'Pas de théorie à mémoriser : un pion au centre, les pièces dehors, le roi à l’abri. Trois idées suffisent à ne plus jamais être perdu au coup dix.',
+        id: 'les-trois-principes',
+        titre: 'paliers.pieces-en-prise.leviers.les-trois-principes.titre',
+        pourquoi: 'paliers.pieces-en-prise.leviers.les-trois-principes.pourquoi',
         cible: { type: 'lecon', id: 'principes-ouverture' },
       },
     ],
@@ -174,39 +181,38 @@ export const PALIERS: Palier[] = [
     id: 'voir-ladversaire',
     min: 1000,
     max: 1299,
-    nom: 'Voir ce que l’adversaire prépare',
-    promesse:
-      'Tu ne donnes plus de pièces sans raison. Ce qui bloque maintenant, c’est que tu regardes tes coups et pas les siens : les tactiques qui te coûtent cher sont celles que tu n’as pas vu venir.',
+    nom: 'paliers.voir-ladversaire.nom',
+    promesse: 'paliers.voir-ladversaire.promesse',
     niveauBot: 7,
     leviers: [
       {
-        titre: 'Le clouage',
-        pourquoi:
-          'Une pièce devant le roi ne peut plus bouger, et tout le monde peut l’attaquer. C’est le motif que les joueurs à 1 000 subissent le plus souvent sans le nommer.',
+        id: 'le-clouage',
+        titre: 'paliers.voir-ladversaire.leviers.le-clouage.titre',
+        pourquoi: 'paliers.voir-ladversaire.leviers.le-clouage.pourquoi',
         cible: { type: 'lecon', id: 'clouage' },
       },
       {
-        titre: 'L’attaque à la découverte',
-        pourquoi:
-          'Un coup qui ouvre la ligne d’une autre pièce : deux menaces pour un coup. Impossible à parer si on ne l’a jamais vue.',
+        id: 'l-attaque-a',
+        titre: 'paliers.voir-ladversaire.leviers.l-attaque-a.titre',
+        pourquoi: 'paliers.voir-ladversaire.leviers.l-attaque-a.pourquoi',
         cible: { type: 'lecon', id: 'decouverte' },
       },
       {
-        titre: 'Le mémo avant chaque coup',
-        pourquoi:
-          'Quatre questions, dix secondes : qu’est-ce qu’il vient de changer, qu’attaque-t-il, qu’est-ce que je laisse en prise, mon coup tient-il. C’est la différence mesurable entre un 1 000 et un 1 300.',
+        id: 'le-memo-avant',
+        titre: 'paliers.voir-ladversaire.leviers.le-memo-avant.titre',
+        pourquoi: 'paliers.voir-ladversaire.leviers.le-memo-avant.pourquoi',
         cible: { type: 'page', href: '/apprendre/principes', label: 'Les principes et le mémo' },
       },
       {
-        titre: 'Le mat en deux',
-        pourquoi:
-          'Deux coups à voir d’avance, en forçant. C’est l’exercice qui apprend à calculer, et il se transfère directement aux positions où il n’y a pas de mat.',
+        id: 'le-mat-en',
+        titre: 'paliers.voir-ladversaire.leviers.le-mat-en.titre',
+        pourquoi: 'paliers.voir-ladversaire.leviers.le-mat-en.pourquoi',
         cible: { type: 'puzzle', theme: 'mateIn2' },
       },
       {
-        titre: 'Les quatre erreurs classiques de l’ouverture',
-        pourquoi:
-          'Sortir la dame trop tôt, bouger deux fois la même pièce, pousser les pions de l’aile, oublier de roquer. Quatre habitudes, et chacune coûte un tempo par partie.',
+        id: 'les-quatre-erreurs',
+        titre: 'paliers.voir-ladversaire.leviers.les-quatre-erreurs.titre',
+        pourquoi: 'paliers.voir-ladversaire.leviers.les-quatre-erreurs.pourquoi',
         cible: { type: 'lecon', id: 'erreurs-ouverture' },
       },
     ],
@@ -215,39 +221,38 @@ export const PALIERS: Palier[] = [
     id: 'un-plan',
     min: 1300,
     max: 1599,
-    nom: 'Jouer avec un plan',
-    promesse:
-      'Tu vois les tactiques des deux côtés. Le problème est ailleurs : quand il n’y a rien à prendre, tu ne sais pas quoi faire, et tu attends que l’autre se trompe.',
+    nom: 'paliers.un-plan.nom',
+    promesse: 'paliers.un-plan.promesse',
     niveauBot: 9,
     leviers: [
       {
-        titre: 'Les colonnes ouvertes',
-        pourquoi:
-          'La première question d’un milieu de partie calme : où mettre mes tours ? La réponse est presque toujours la même, et elle se voit sur la structure de pions.',
+        id: 'les-colonnes-ouvertes',
+        titre: 'paliers.un-plan.leviers.les-colonnes-ouvertes.titre',
+        pourquoi: 'paliers.un-plan.leviers.les-colonnes-ouvertes.pourquoi',
         cible: { type: 'lecon', id: 'colonnes-ouvertes' },
       },
       {
-        titre: 'L’avant-poste',
-        pourquoi:
-          'Un cavalier sur une case qu’aucun pion ne peut attaquer vaut plus qu’une tour mal placée. C’est le premier concept positionnel qui change vraiment les parties.',
+        id: 'l-avant-poste',
+        titre: 'paliers.un-plan.leviers.l-avant-poste.titre',
+        pourquoi: 'paliers.un-plan.leviers.l-avant-poste.pourquoi',
         cible: { type: 'lecon', id: 'avant-poste' },
       },
       {
-        titre: 'Les enjeux de ton ouverture',
-        pourquoi:
-          'À ce palier, connaître dix coups de théorie ne sert à rien si on ne sait pas ce qu’on cherche au coup onze. Le plan tient en trois phrases par ouverture.',
+        id: 'les-enjeux-de',
+        titre: 'paliers.un-plan.leviers.les-enjeux-de.titre',
+        pourquoi: 'paliers.un-plan.leviers.les-enjeux-de.pourquoi',
         cible: { type: 'page', href: '/ouvertures/enjeux', label: 'Les enjeux des ouvertures' },
       },
       {
-        titre: 'Éliminer le défenseur',
-        pourquoi:
-          'La tactique qui sert un plan plutôt que de tomber du ciel : on retire la pièce qui tient tout, et la position s’effondre d’elle-même.',
+        id: 'eliminer-le-defenseur',
+        titre: 'paliers.un-plan.leviers.eliminer-le-defenseur.titre',
+        pourquoi: 'paliers.un-plan.leviers.eliminer-le-defenseur.pourquoi',
         cible: { type: 'lecon', id: 'elimination-defenseur' },
       },
       {
-        titre: 'La sécurité du roi des deux côtés',
-        pourquoi:
-          'Savoir quand attaquer le roi adverse — et quand c’est le sien qui est en danger. Les attaques prématurées coûtent plus cher que les attaques manquées.',
+        id: 'la-securite-du',
+        titre: 'paliers.un-plan.leviers.la-securite-du.titre',
+        pourquoi: 'paliers.un-plan.leviers.la-securite-du.pourquoi',
         cible: { type: 'lecon', id: 'securite-roi' },
       },
     ],
@@ -256,39 +261,38 @@ export const PALIERS: Palier[] = [
     id: 'technique',
     min: 1600,
     max: 1899,
-    nom: 'Convertir et tenir',
-    promesse:
-      'Tu joues avec des plans et tu ne te fais plus surprendre. Ce qui te manque est de la technique : les positions gagnantes qui finissent nulles, et les finales qu’on joue à l’instinct.',
+    nom: 'paliers.technique.nom',
+    promesse: 'paliers.technique.promesse',
     niveauBot: 12,
     leviers: [
       {
-        titre: 'L’opposition',
-        pourquoi:
-          'La notion sans laquelle aucune finale de pions ne se gagne ni ne se tient. Elle s’apprend en une leçon et sert toute une vie.',
+        id: 'l-opposition',
+        titre: 'paliers.technique.leviers.l-opposition.titre',
+        pourquoi: 'paliers.technique.leviers.l-opposition.pourquoi',
         cible: { type: 'lecon', id: 'opposition' },
       },
       {
-        titre: 'La règle du carré',
-        pourquoi:
-          'Savoir d’un regard si le roi rattrape le pion. Elle remplace un calcul de six coups par un coup d’œil, et elle ne se trompe jamais.',
+        id: 'la-regle-du',
+        titre: 'paliers.technique.leviers.la-regle-du.titre',
+        pourquoi: 'paliers.technique.leviers.la-regle-du.pourquoi',
         cible: { type: 'lecon', id: 'regle-du-carre' },
       },
       {
-        titre: 'Les finales, objectif annoncé',
-        pourquoi:
-          'Trois mille cinq cent soixante-huit positions classées, avec l’objectif donné — gagner ou tenir la nulle — et un ordinateur qui défend au mieux. C’est l’entraînement le plus rentable de ce palier.',
+        id: 'les-finales-objectif',
+        titre: 'paliers.technique.leviers.les-finales-objectif.titre',
+        pourquoi: 'paliers.technique.leviers.les-finales-objectif.pourquoi',
         cible: { type: 'page', href: '/finales', label: 'Les finales' },
       },
       {
-        titre: 'Le sacrifice qui se calcule',
-        pourquoi:
-          'À 1 600, on rate moins les sacrifices qu’on n’en joue de mauvais. L’exercice apprend à vérifier avant de donner.',
+        id: 'le-sacrifice-qui',
+        titre: 'paliers.technique.leviers.le-sacrifice-qui.titre',
+        pourquoi: 'paliers.technique.leviers.le-sacrifice-qui.pourquoi',
         cible: { type: 'lecon', id: 'sacrifice' },
       },
       {
-        titre: 'Le roi devient une pièce',
-        pourquoi:
-          'En finale, le roi attaque. Les joueurs qui stagnent à ce palier le gardent au chaud par réflexe, et perdent une pièce de tempo à chaque coup.',
+        id: 'le-roi-devient',
+        titre: 'paliers.technique.leviers.le-roi-devient.titre',
+        pourquoi: 'paliers.technique.leviers.le-roi-devient.pourquoi',
         cible: { type: 'lecon', id: 'roi-actif' },
       },
     ],
@@ -297,33 +301,32 @@ export const PALIERS: Palier[] = [
     id: 'prophylaxie',
     min: 1900,
     max: Number.POSITIVE_INFINITY,
-    nom: 'Empêcher avant de faire',
-    promesse:
-      'Tu as la technique et les plans. Ce qui sépare encore de 2 200, c’est de jouer contre les idées de l’autre plutôt que pour les siennes — et de ne plus perdre une seule partie gagnée.',
+    nom: 'paliers.prophylaxie.nom',
+    promesse: 'paliers.prophylaxie.promesse',
     niveauBot: 14,
     leviers: [
       {
-        titre: 'Les enfilades et les rayons X',
-        pourquoi:
-          'Les motifs qui restent coûteux à haut niveau, parce qu’ils agissent à travers les pièces et qu’on les vérifie mal sous pression de pendule.',
+        id: 'les-enfilades-et',
+        titre: 'paliers.prophylaxie.leviers.les-enfilades-et.titre',
+        pourquoi: 'paliers.prophylaxie.leviers.les-enfilades-et.pourquoi',
         cible: { type: 'lecon', id: 'enfilade' },
       },
       {
-        titre: 'Le zugzwang',
-        pourquoi:
-          'Le seul mécanisme de gain de beaucoup de finales : l’adversaire est obligé de jouer, et tout coup le dégrade. Il se prépare, il ne se trouve pas.',
+        id: 'le-zugzwang',
+        titre: 'paliers.prophylaxie.leviers.le-zugzwang.titre',
+        pourquoi: 'paliers.prophylaxie.leviers.le-zugzwang.pourquoi',
         cible: { type: 'puzzle', theme: 'zugzwang' },
       },
       {
-        titre: 'Relire ses propres parties',
-        pourquoi:
-          'À ce palier, les leçons génériques n’apportent plus grand-chose : ce qui reste à corriger est personnel, et il n’y a qu’un endroit où le lire — ses parties.',
+        id: 'relire-ses-propres',
+        titre: 'paliers.prophylaxie.leviers.relire-ses-propres.titre',
+        pourquoi: 'paliers.prophylaxie.leviers.relire-ses-propres.pourquoi',
         cible: { type: 'page', href: '/analyse', label: 'Analyser une partie' },
       },
       {
-        titre: 'Les positions où tout est défendu',
-        pourquoi:
-          'Le sacrifice positionnel et l’attaque à long terme : ce qui reste quand il n’y a aucune tactique. C’est là que se gagnent les points au-dessus de 1 900.',
+        id: 'les-positions-ou',
+        titre: 'paliers.prophylaxie.leviers.les-positions-ou.titre',
+        pourquoi: 'paliers.prophylaxie.leviers.les-positions-ou.pourquoi',
         cible: { type: 'lecon', id: 'sacrifice' },
       },
     ],

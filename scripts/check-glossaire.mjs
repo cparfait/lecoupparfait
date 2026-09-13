@@ -27,18 +27,24 @@ const echec = (nom, message) => {
   erreurs++
 }
 
-// Les deux moitiés du vocabulaire : les mots généraux et les motifs du cœur,
-// que la page du glossaire réunit dans une seule liste.
-const noms = new Set([
-  ...TERMS.map((terme) => terme.name),
-  ...motifGlossary('fr').map((motif) => motif.name),
+/*
+  Les deux moitiés du vocabulaire, par **identifiant** et non par nom.
+
+  Les positions étaient rangées sous le nom français affiché, ce qui allait tant
+  que ce nom était écrit dans le code. Il est traduit depuis que le glossaire
+  existe en plusieurs langues : chercher par le nom ne trouvait plus rien dès
+  qu'on changeait de langue, et le contrôle doit suivre la même clé que la page.
+*/
+const identifiants = new Set([
+  ...TERMS.map((terme) => terme.id),
+  ...motifGlossary('fr').map((motif) => motif.id),
 ])
 
 for (const [nom, position] of Object.entries(POSITIONS_DU_GLOSSAIRE)) {
-  // Un nom qui ne correspond à aucun terme n'atteindrait jamais l'écran : c'est
-  // une illustration écrite pour rien, et le plus souvent une faute de frappe.
-  if (!noms.has(nom)) {
-    echec(nom, 'aucun terme ni motif du glossaire ne porte ce nom')
+  // Un identifiant qui ne correspond à rien n'atteindrait jamais l'écran :
+  // c'est une illustration écrite pour rien, et le plus souvent une coquille.
+  if (!identifiants.has(nom)) {
+    echec(nom, 'aucun terme ni motif du glossaire ne porte cet identifiant')
     continue
   }
 
@@ -79,4 +85,4 @@ if (erreurs > 0) {
   console.error(`\n${erreurs} problème(s) sur ${total} positions du glossaire.`)
   process.exit(1)
 }
-console.log(`✔ ${total} positions du glossaire sur ${noms.size} entrées, toutes jouables.`)
+console.log(`✔ ${total} positions du glossaire sur ${identifiants.size} entrées, toutes jouables.`)

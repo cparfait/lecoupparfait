@@ -10,9 +10,19 @@
  * couleur » a besoin des deux moitiés du vocabulaire, pas d'une seule.
  */
 
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
+
 export interface Term {
-  name: string
-  definition: string
+  /**
+   * Identifiant stable, qui nomme la clé de dictionnaire.
+   *
+   * Dérivé du texte et non du rang : sans lui, insérer une entrée au milieu de
+   * la liste renommerait en silence toutes les suivantes, et chaque traduction
+   * se retrouverait sur la mauvaise phrase.
+   */
+  id: string
+  name: TranslationKey
+  definition: TranslationKey
   /** Regroupement pour la navigation. */
   family: 'Règles' | 'Pièces et matériel' | 'Phases de la partie' | 'Évaluation et jeu'
 }
@@ -20,184 +30,184 @@ export interface Term {
 export const TERMS: Term[] = [
   // ── Règles ────────────────────────────────────────────────────────────────
   {
-    name: 'Cadence',
+    id: 'cadence',
+    name: 'glossaire.cadence.name',
     family: 'Règles',
-    definition:
-      "Le temps dont chaque joueur dispose. Elle s'écrit avec deux nombres : **« 3 | 2 » veut dire 3 minutes au départ, plus 2 secondes ajoutées à ta pendule à chaque coup joué**. Un seul nombre — « 5 min » — signifie qu'il n'y a rien à récupérer : quand la pendule tombe, la partie est perdue, même avec une dame de plus. La cadence détermine aussi la catégorie de la partie, et chacune tient son propre classement : bullet sous 3 minutes, blitz jusqu'à 10, rapide jusqu'à 60, classique au-delà. On progresse beaucoup plus vite en jouant lentement.",
+    definition: 'glossaire.cadence.definition',
   },
   {
-    name: 'Incrément',
+    id: 'increment',
+    name: 'glossaire.increment.name',
     family: 'Règles',
-    definition:
-      "Les secondes rendues à chaque coup, le second nombre d'une cadence. Elles servent à une chose précise : éviter de perdre au temps dans une position gagnante, faute des quelques secondes qu'il faut pour jouer les coups évidents de la fin. Avec 2 secondes d'incrément, une partie de trente coups te rend une minute en route.",
+    definition: 'glossaire.increment.definition',
   },
   {
-    name: 'Roque',
+    id: 'roque',
+    name: 'glossaire.roque.name',
     family: 'Règles',
-    definition:
-      "Le seul coup qui déplace deux pièces à la fois : le roi fait deux pas vers une tour, qui saute par-dessus lui. Il faut que ni l'un ni l'autre n'ait bougé, que les cases entre eux soient libres, et que le roi ne soit ni en échec, ni ne traverse une case attaquée. Petit roque du côté du roi, grand roque du côté de la dame.",
+    definition: 'glossaire.roque.definition',
   },
   {
-    name: 'Prise en passant',
+    id: 'prise-en-passant',
+    name: 'glossaire.prise-en-passant.name',
     family: 'Règles',
-    definition:
-      "Quand un pion avance de deux cases et arrive à côté d'un pion adverse, celui-ci peut le prendre comme s'il n'avait avancé que d'une. La prise doit se faire **immédiatement**, au coup suivant, sinon le droit est perdu. C'est la règle la plus souvent ignorée des débutants.",
+    definition: 'glossaire.prise-en-passant.definition',
   },
   {
-    name: 'Promotion',
+    id: 'promotion',
+    name: 'glossaire.promotion.name',
     family: 'Règles',
-    definition:
-      "Un pion qui atteint la dernière rangée se transforme, obligatoirement, en dame, tour, fou ou cavalier — au choix, et sans rapport avec les pièces déjà capturées. On prend presque toujours la dame ; le cavalier est le seul autre choix parfois utile, car lui seul fait des coups qu'une dame ne peut pas faire.",
+    definition: 'glossaire.promotion.definition',
   },
   {
-    name: 'Échec et mat',
+    id: 'echec-et-mat',
+    name: 'glossaire.echec-et-mat.name',
     family: 'Règles',
-    definition:
-      "Le roi est attaqué et aucun coup légal ne peut y remédier : ni fuir, ni capturer l'attaquant, ni s'interposer. La partie s'arrête immédiatement. C'est le seul but du jeu — tout le reste n'est qu'un moyen.",
+    definition: 'glossaire.echec-et-mat.definition',
   },
   {
-    name: 'Pat',
+    id: 'pat',
+    name: 'glossaire.pat.name',
     family: 'Règles',
-    definition:
-      "Le camp au trait n'a **aucun coup légal**, mais son roi n'est pas en échec. La partie est nulle, quelle que soit la différence de matériel. C'est la déception classique du débutant qui a une dame de plus : le pat est la planche de salut de celui qui perd.",
+    definition: 'glossaire.pat.definition',
   },
   {
-    name: 'Nulle par répétition',
+    id: 'nulle-par-repetition',
+    name: 'glossaire.nulle-par-repetition.name',
     family: 'Règles',
-    definition:
-      "La même position, avec le même joueur au trait et les mêmes droits de roque, apparaît trois fois : la partie est nulle. Souvent obtenue par échec perpétuel, quand un camp donne échec sans fin parce qu'il perdrait autrement.",
+    definition: 'glossaire.nulle-par-repetition.definition',
   },
   {
-    name: 'Règle des cinquante coups',
+    id: 'regle-des-cinquante',
+    name: 'glossaire.regle-des-cinquante.name',
     family: 'Règles',
-    definition:
-      'Cinquante coups de chaque camp sans prise ni mouvement de pion : la partie est nulle. Elle évite de faire durer indéfiniment une finale que personne ne sait gagner.',
+    definition: 'glossaire.regle-des-cinquante.definition',
   },
 
   // ── Pièces et matériel ────────────────────────────────────────────────────
   {
-    name: 'Valeur des pièces',
+    id: 'valeur-des-pieces',
+    name: 'glossaire.valeur-des-pieces.name',
     family: 'Pièces et matériel',
-    definition:
-      "Le repère universel : pion 1, cavalier et fou 3, tour 5, dame 9. Le roi n'a pas de valeur — on ne peut pas l'échanger. Ces nombres sont une approximation utile, pas une vérité : un cavalier bien placé vaut souvent plus qu'une tour enfermée.",
+    definition: 'glossaire.valeur-des-pieces.definition',
   },
   {
-    name: 'Paire de fous',
+    id: 'paire-de-fous',
+    name: 'glossaire.paire-de-fous.name',
     family: 'Pièces et matériel',
-    definition:
-      "Posséder les deux fous quand l'adversaire n'en a qu'un. Chaque fou ne voit qu'une couleur de cases ; à deux, ils couvrent tout l'échiquier. On estime l'avantage à environ un demi-pion, davantage en position ouverte.",
+    definition: 'glossaire.paire-de-fous.definition',
   },
   {
-    name: 'Mauvais fou',
+    id: 'mauvais-fou',
+    name: 'glossaire.mauvais-fou.name',
     family: 'Pièces et matériel',
-    definition:
-      "Un fou dont les propres pions occupent la couleur de cases. Il ne peut ni les défendre ni passer devant : c'est une pièce payée trois points qui n'en vaut plus qu'un. En finale, un fou de mauvaise couleur annule des positions pourtant gagnées d'un pion.",
+    definition: 'glossaire.mauvais-fou.definition',
   },
   {
-    name: 'Qualité',
+    id: 'qualite',
+    name: 'glossaire.qualite.name',
     family: 'Pièces et matériel',
-    definition:
-      "L'écart entre une tour et une pièce légère, soit environ deux pions. « Gagner la qualité », c'est prendre une tour contre un fou ou un cavalier. « Sacrifier la qualité » se fait volontairement, en échange d'une position supérieure.",
+    definition: 'glossaire.qualite.definition',
   },
   {
-    name: 'Pion passé',
+    id: 'pion-passe',
+    name: 'glossaire.pion-passe.name',
     family: 'Pièces et matériel',
-    definition:
-      "Un pion qu'aucun pion adverse ne peut plus arrêter : ni sur sa colonne, ni sur les deux voisines. Il menace d'aller à dame, ce qui oblige l'adversaire à le surveiller. En finale, c'est souvent l'unique facteur qui décide.",
+    definition: 'glossaire.pion-passe.definition',
   },
   {
-    name: 'Pions doublés',
+    id: 'pions-doubles',
+    name: 'glossaire.pions-doubles.name',
     family: 'Pièces et matériel',
-    definition:
-      "Deux pions du même camp sur la même colonne, conséquence d'une prise. Ils ne peuvent pas se défendre l'un l'autre et avancent mal. Le défaut est réel mais rarement décisif — la colonne ouverte qu'ils accompagnent compense souvent.",
+    definition: 'glossaire.pions-doubles.definition',
   },
   {
-    name: 'Pion isolé',
+    id: 'pion-isole',
+    name: 'glossaire.pion-isole.name',
     family: 'Pièces et matériel',
-    definition:
-      "Un pion sans voisin sur les colonnes adjacentes : aucun pion ne pourra jamais le défendre. Faiblesse en finale, mais l'espace et les cases qu'il donne au milieu de partie en font une arme pour qui sait attaquer.",
+    definition: 'glossaire.pion-isole.definition',
   },
 
   // ── Phases de la partie ───────────────────────────────────────────────────
   {
-    name: 'Ouverture',
+    id: 'ouverture',
+    name: 'glossaire.ouverture.name',
     family: 'Phases de la partie',
-    definition:
-      "Les dix à quinze premiers coups, où l'on applique trois principes plutôt que de calculer : occuper le centre, sortir ses pièces, mettre son roi à l'abri. Les ouvertures portent des noms parce qu'elles ont été étudiées pendant des siècles.",
+    definition: 'glossaire.ouverture.definition',
   },
   {
-    name: 'Développement',
+    id: 'developpement',
+    name: 'glossaire.developpement.name',
     family: 'Phases de la partie',
-    definition:
-      "Sortir ses pièces de leur case de départ vers des cases où elles agissent. Une pièce restée au fond ne compte pas, même si elle est sur l'échiquier. Perdre du temps en ouverture, c'est jouer à trois pièces contre cinq.",
+    definition: 'glossaire.developpement.definition',
   },
   {
-    name: 'Milieu de partie',
+    id: 'milieu-de-partie',
+    name: 'glossaire.milieu-de-partie.name',
     family: 'Phases de la partie',
-    definition:
-      "La phase où la théorie s'arrête et où l'on doit trouver des plans par soi-même. C'est là que se produisent presque toutes les tactiques, et là qu'un débutant gagne le plus à travailler ses puzzles.",
+    definition: 'glossaire.milieu-de-partie.definition',
   },
   {
-    name: 'Finale',
+    id: 'finale',
+    name: 'glossaire.finale.name',
     family: 'Phases de la partie',
-    definition:
-      "Peu de pièces restent, et le roi cesse d'être une cible pour devenir une pièce forte qu'on avance vers le centre. Les règles du milieu de partie s'inversent : la précision remplace l'initiative.",
+    definition: 'glossaire.finale.definition',
   },
   {
-    name: 'Transposition',
+    id: 'transposition',
+    name: 'glossaire.transposition.name',
     family: 'Phases de la partie',
-    definition:
-      "Arriver à une position connue par un ordre de coups différent de l'habituel. C'est pourquoi une ouverture se reconnaît à la position atteinte, jamais à la suite de coups jouée.",
+    definition: 'glossaire.transposition.definition',
   },
 
   // ── Évaluation et jeu ─────────────────────────────────────────────────────
   {
-    name: 'Évaluation',
+    id: 'evaluation',
+    name: 'glossaire.evaluation.name',
     family: 'Évaluation et jeu',
-    definition:
-      "La note que donne le moteur, comptée en pions : +1,0 signifie « les Blancs ont l'équivalent d'un pion d'avance ». Positif favorise les Blancs, négatif les Noirs. « M3 » annonce un mat en trois coups. En dessous d'un demi-pion, l'écart ne veut rien dire.",
+    definition: 'glossaire.evaluation.definition',
   },
   {
-    name: 'Centipion',
+    id: 'centipion',
+    name: 'glossaire.centipion.name',
     family: 'Évaluation et jeu',
-    definition:
-      "Un centième de pion, l'unité interne des moteurs. Une « perte moyenne de 40 centipions » veut dire que chaque coup a coûté en moyenne quatre dixièmes de pion par rapport au meilleur.",
+    definition: 'glossaire.centipion.definition',
   },
   {
-    name: 'Précision',
+    id: 'precision',
+    name: 'glossaire.precision.name',
     family: 'Évaluation et jeu',
-    definition:
-      "Un pourcentage qui résume une partie : à quel point les coups joués se rapprochent des meilleurs. Elle se calcule sur les chances de victoire, pas sur l'évaluation brute — perdre un pion dans une position gagnée ne compte pas comme perdre un pion dans une position égale.",
+    definition: 'glossaire.precision.definition',
   },
   {
-    name: 'Elo',
+    id: 'elo',
+    name: 'glossaire.elo.name',
     family: 'Évaluation et jeu',
-    definition:
-      'Le classement des joueurs. Battre plus fort que soi en rapporte beaucoup, perdre contre plus faible en coûte autant. Un débutant tourne autour de 400 à 800, un joueur de club vers 1600, un grand maître au-delà de 2500.',
+    definition: 'glossaire.elo.definition',
   },
   {
-    name: 'Glicko-2',
+    id: 'glicko-2',
+    name: 'glossaire.glicko-2.name',
     family: 'Évaluation et jeu',
-    definition:
-      "Une version plus fine de l'Elo, qui suit aussi l'**incertitude** sur ton niveau. Après une longue absence, le classement bouge plus vite : le système sait qu'il te connaît moins bien. C'est celui utilisé ici.",
+    definition: 'glossaire.glicko-2.definition',
   },
   {
-    name: 'Zugzwang',
+    id: 'zugzwang',
+    name: 'glossaire.zugzwang.name',
     family: 'Évaluation et jeu',
-    definition:
-      "Une situation où l'on est obligé de jouer alors que tout coup dégrade sa position : on perdrait moins en passant son tour, ce que les règles interdisent. Fréquent en finale, c'est souvent le mécanisme même du gain.",
+    definition: 'glossaire.zugzwang.definition',
   },
   {
-    name: 'Initiative',
+    id: 'initiative',
+    name: 'glossaire.initiative.name',
     family: 'Évaluation et jeu',
-    definition:
-      "Mener le jeu : forcer l'adversaire à répondre à tes menaces au lieu de développer les siennes. Elle ne se compte pas en matériel mais se transforme souvent en matériel.",
+    definition: 'glossaire.initiative.definition',
   },
   {
-    name: 'Tempo',
+    id: 'tempo',
+    name: 'glossaire.tempo.name',
     family: 'Évaluation et jeu',
-    definition:
-      "Un coup, vu comme une unité de temps. « Gagner un tempo », c'est faire avancer son jeu tout en obligeant l'adversaire à un coup qui ne l'avance pas — par exemple en attaquant une pièce en développant la sienne.",
+    definition: 'glossaire.tempo.definition',
   },
 ]
 

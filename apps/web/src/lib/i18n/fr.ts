@@ -30,6 +30,13 @@ export const fr = {
     analysis: 'Analyse',
     vision: 'Vision',
     glossary: 'Glossaire',
+    glossaryIntro:
+      '{n} termes définis en langage clair — les règles, le matériel, les phases de la partie, et les motifs que le coach sait reconnaître et nommer dans tes parties. {illustres} d’entre eux se montrent sur un échiquier : leur nom porte une pastille. Le haut-parleur, à droite de chaque mot, lit la définition à voix haute.',
+    famRegles: 'Règles',
+    famPieces: 'Pièces et matériel',
+    famPhases: 'Phases de la partie',
+    famEvaluation: 'Évaluation et jeu',
+    famMotifs: 'Motifs tactiques',
     leaderboard: 'Classement',
     friends: 'Amis',
     editor: 'Éditeur',
@@ -2556,6 +2563,720 @@ export const fr = {
     purgedSessions: 'sessions expirées',
     purgedEvaluations: 'évaluations sous 14 demi-coups, trop peu profondes pour resservir',
     purgedEmptyAccounts: 'comptes sans aucune partie ni analyse, inactifs depuis six mois',
+  },
+  glossaire: {
+    cadence: {
+      name: 'Cadence',
+      definition:
+        "Le temps dont chaque joueur dispose. Elle s'écrit avec deux nombres : **« 3 | 2 » veut dire 3 minutes au départ, plus 2 secondes ajoutées à ta pendule à chaque coup joué**. Un seul nombre — « 5 min » — signifie qu'il n'y a rien à récupérer : quand la pendule tombe, la partie est perdue, même avec une dame de plus. La cadence détermine aussi la catégorie de la partie, et chacune tient son propre classement : bullet sous 3 minutes, blitz jusqu'à 10, rapide jusqu'à 60, classique au-delà. On progresse beaucoup plus vite en jouant lentement.",
+    },
+    increment: {
+      name: 'Incrément',
+      definition:
+        "Les secondes rendues à chaque coup, le second nombre d'une cadence. Elles servent à une chose précise : éviter de perdre au temps dans une position gagnante, faute des quelques secondes qu'il faut pour jouer les coups évidents de la fin. Avec 2 secondes d'incrément, une partie de trente coups te rend une minute en route.",
+    },
+    roque: {
+      name: 'Roque',
+      definition:
+        "Le seul coup qui déplace deux pièces à la fois : le roi fait deux pas vers une tour, qui saute par-dessus lui. Il faut que ni l'un ni l'autre n'ait bougé, que les cases entre eux soient libres, et que le roi ne soit ni en échec, ni ne traverse une case attaquée. Petit roque du côté du roi, grand roque du côté de la dame.",
+    },
+    'prise-en-passant': {
+      name: 'Prise en passant',
+      definition:
+        "Quand un pion avance de deux cases et arrive à côté d'un pion adverse, celui-ci peut le prendre comme s'il n'avait avancé que d'une. La prise doit se faire **immédiatement**, au coup suivant, sinon le droit est perdu. C'est la règle la plus souvent ignorée des débutants.",
+    },
+    promotion: {
+      name: 'Promotion',
+      definition:
+        "Un pion qui atteint la dernière rangée se transforme, obligatoirement, en dame, tour, fou ou cavalier — au choix, et sans rapport avec les pièces déjà capturées. On prend presque toujours la dame ; le cavalier est le seul autre choix parfois utile, car lui seul fait des coups qu'une dame ne peut pas faire.",
+    },
+    'echec-et-mat': {
+      name: 'Échec et mat',
+      definition:
+        "Le roi est attaqué et aucun coup légal ne peut y remédier : ni fuir, ni capturer l'attaquant, ni s'interposer. La partie s'arrête immédiatement. C'est le seul but du jeu — tout le reste n'est qu'un moyen.",
+    },
+    pat: {
+      name: 'Pat',
+      definition:
+        "Le camp au trait n'a **aucun coup légal**, mais son roi n'est pas en échec. La partie est nulle, quelle que soit la différence de matériel. C'est la déception classique du débutant qui a une dame de plus : le pat est la planche de salut de celui qui perd.",
+    },
+    'nulle-par-repetition': {
+      name: 'Nulle par répétition',
+      definition:
+        "La même position, avec le même joueur au trait et les mêmes droits de roque, apparaît trois fois : la partie est nulle. Souvent obtenue par échec perpétuel, quand un camp donne échec sans fin parce qu'il perdrait autrement.",
+    },
+    'regle-des-cinquante': {
+      name: 'Règle des cinquante coups',
+      definition:
+        'Cinquante coups de chaque camp sans prise ni mouvement de pion : la partie est nulle. Elle évite de faire durer indéfiniment une finale que personne ne sait gagner.',
+    },
+    'valeur-des-pieces': {
+      name: 'Valeur des pièces',
+      definition:
+        "Le repère universel : pion 1, cavalier et fou 3, tour 5, dame 9. Le roi n'a pas de valeur — on ne peut pas l'échanger. Ces nombres sont une approximation utile, pas une vérité : un cavalier bien placé vaut souvent plus qu'une tour enfermée.",
+    },
+    'paire-de-fous': {
+      name: 'Paire de fous',
+      definition:
+        "Posséder les deux fous quand l'adversaire n'en a qu'un. Chaque fou ne voit qu'une couleur de cases ; à deux, ils couvrent tout l'échiquier. On estime l'avantage à environ un demi-pion, davantage en position ouverte.",
+    },
+    'mauvais-fou': {
+      name: 'Mauvais fou',
+      definition:
+        "Un fou dont les propres pions occupent la couleur de cases. Il ne peut ni les défendre ni passer devant : c'est une pièce payée trois points qui n'en vaut plus qu'un. En finale, un fou de mauvaise couleur annule des positions pourtant gagnées d'un pion.",
+    },
+    qualite: {
+      name: 'Qualité',
+      definition:
+        "L'écart entre une tour et une pièce légère, soit environ deux pions. « Gagner la qualité », c'est prendre une tour contre un fou ou un cavalier. « Sacrifier la qualité » se fait volontairement, en échange d'une position supérieure.",
+    },
+    'pion-passe': {
+      name: 'Pion passé',
+      definition:
+        "Un pion qu'aucun pion adverse ne peut plus arrêter : ni sur sa colonne, ni sur les deux voisines. Il menace d'aller à dame, ce qui oblige l'adversaire à le surveiller. En finale, c'est souvent l'unique facteur qui décide.",
+    },
+    'pions-doubles': {
+      name: 'Pions doublés',
+      definition:
+        "Deux pions du même camp sur la même colonne, conséquence d'une prise. Ils ne peuvent pas se défendre l'un l'autre et avancent mal. Le défaut est réel mais rarement décisif — la colonne ouverte qu'ils accompagnent compense souvent.",
+    },
+    'pion-isole': {
+      name: 'Pion isolé',
+      definition:
+        "Un pion sans voisin sur les colonnes adjacentes : aucun pion ne pourra jamais le défendre. Faiblesse en finale, mais l'espace et les cases qu'il donne au milieu de partie en font une arme pour qui sait attaquer.",
+    },
+    ouverture: {
+      name: 'Ouverture',
+      definition:
+        "Les dix à quinze premiers coups, où l'on applique trois principes plutôt que de calculer : occuper le centre, sortir ses pièces, mettre son roi à l'abri. Les ouvertures portent des noms parce qu'elles ont été étudiées pendant des siècles.",
+    },
+    developpement: {
+      name: 'Développement',
+      definition:
+        "Sortir ses pièces de leur case de départ vers des cases où elles agissent. Une pièce restée au fond ne compte pas, même si elle est sur l'échiquier. Perdre du temps en ouverture, c'est jouer à trois pièces contre cinq.",
+    },
+    'milieu-de-partie': {
+      name: 'Milieu de partie',
+      definition:
+        "La phase où la théorie s'arrête et où l'on doit trouver des plans par soi-même. C'est là que se produisent presque toutes les tactiques, et là qu'un débutant gagne le plus à travailler ses puzzles.",
+    },
+    finale: {
+      name: 'Finale',
+      definition:
+        "Peu de pièces restent, et le roi cesse d'être une cible pour devenir une pièce forte qu'on avance vers le centre. Les règles du milieu de partie s'inversent : la précision remplace l'initiative.",
+    },
+    transposition: {
+      name: 'Transposition',
+      definition:
+        "Arriver à une position connue par un ordre de coups différent de l'habituel. C'est pourquoi une ouverture se reconnaît à la position atteinte, jamais à la suite de coups jouée.",
+    },
+    evaluation: {
+      name: 'Évaluation',
+      definition:
+        "La note que donne le moteur, comptée en pions : +1,0 signifie « les Blancs ont l'équivalent d'un pion d'avance ». Positif favorise les Blancs, négatif les Noirs. « M3 » annonce un mat en trois coups. En dessous d'un demi-pion, l'écart ne veut rien dire.",
+    },
+    centipion: {
+      name: 'Centipion',
+      definition:
+        "Un centième de pion, l'unité interne des moteurs. Une « perte moyenne de 40 centipions » veut dire que chaque coup a coûté en moyenne quatre dixièmes de pion par rapport au meilleur.",
+    },
+    precision: {
+      name: 'Précision',
+      definition:
+        "Un pourcentage qui résume une partie : à quel point les coups joués se rapprochent des meilleurs. Elle se calcule sur les chances de victoire, pas sur l'évaluation brute — perdre un pion dans une position gagnée ne compte pas comme perdre un pion dans une position égale.",
+    },
+    elo: {
+      name: 'Elo',
+      definition:
+        'Le classement des joueurs. Battre plus fort que soi en rapporte beaucoup, perdre contre plus faible en coûte autant. Un débutant tourne autour de 400 à 800, un joueur de club vers 1600, un grand maître au-delà de 2500.',
+    },
+    'glicko-2': {
+      name: 'Glicko-2',
+      definition:
+        "Une version plus fine de l'Elo, qui suit aussi l'**incertitude** sur ton niveau. Après une longue absence, le classement bouge plus vite : le système sait qu'il te connaît moins bien. C'est celui utilisé ici.",
+    },
+    zugzwang: {
+      name: 'Zugzwang',
+      definition:
+        "Une situation où l'on est obligé de jouer alors que tout coup dégrade sa position : on perdrait moins en passant son tour, ce que les règles interdisent. Fréquent en finale, c'est souvent le mécanisme même du gain.",
+    },
+    initiative: {
+      name: 'Initiative',
+      definition:
+        "Mener le jeu : forcer l'adversaire à répondre à tes menaces au lieu de développer les siennes. Elle ne se compte pas en matériel mais se transforme souvent en matériel.",
+    },
+    tempo: {
+      name: 'Tempo',
+      definition:
+        "Un coup, vu comme une unité de temps. « Gagner un tempo », c'est faire avancer son jeu tout en obligeant l'adversaire à un coup qui ne l'avance pas — par exemple en attaquant une pièce en développant la sienne.",
+    },
+  },
+  paliers: {
+    regles: {
+      nom: 'Tenir une partie de bout en bout',
+      promesse:
+        'Tu connais les déplacements. Ce qui te fait perdre n’est pas encore la stratégie : c’est une règle oubliée, ou une partie gagnée qu’on ne sait pas finir.',
+      leviers: {
+        'les-trois-regles': {
+          titre: 'Les trois règles qu’on oublie',
+          pourquoi:
+            'Le roque, la prise en passant et la promotion décident plus de parties à ce niveau que tout le reste. Une prise en passant qu’on croit illégale, c’est un pion perdu et la conviction que l’adversaire a triché.',
+        },
+        'mater-avec-roi': {
+          titre: 'Mater avec roi et tour',
+          pourquoi:
+            'C’est la finale qu’on atteint le plus souvent sans savoir la gagner. Une dame de plus et une nulle par cinquante coups : ça arrive, et c’est évitable en dix minutes.',
+        },
+        'mater-avec-la': {
+          titre: 'Mater avec la dame sans faire pat',
+          pourquoi:
+            'Le pat est la déception classique de celui qui a une dame de plus. On l’évite avec une seule méthode, toujours la même.',
+        },
+        'combien-vaut-chaque': {
+          titre: 'Combien vaut chaque pièce',
+          pourquoi:
+            'Échanger une tour contre un cavalier parce que « ça fait un échange » coûte deux pions. Le barème ne se devine pas, il s’apprend une fois.',
+        },
+        'reconnaitre-un-mat': {
+          titre: 'Reconnaître un mat en un',
+          pourquoi:
+            'Avant de chercher un plan, il faut voir le mat quand il est là. C’est aussi le plus rapide à muscler : cinquante positions et l’œil le fait tout seul.',
+        },
+      },
+    },
+    'pieces-en-prise': {
+      nom: 'Ne plus donner de pièces',
+      promesse:
+        'Tu tiens une partie et tu sais mater. Ce qui te coûte le plus de points maintenant n’a rien de subtil : une pièce laissée sur une case attaquée, et la partie change de camp.',
+      leviers: {
+        'voir-ce-qui': {
+          titre: 'Voir ce qui est en prise',
+          pourquoi:
+            'À ce palier, la majorité des parties se décide sur une pièce laissée sans défense — pas sur une combinaison. C’est le seul réflexe qui rapporte plusieurs centaines de points.',
+        },
+        'la-fourchette-de': {
+          titre: 'La fourchette de cavalier',
+          pourquoi:
+            'Le cavalier est la pièce dont les débutants voient le moins les coups, et celle qui punit le plus. Une fourchette décide une partie sur trois à ce niveau.',
+        },
+        'les-quatre-mats': {
+          titre: 'Les quatre mats qu’on subit',
+          pourquoi:
+            'Le berger, l’imbécile, Légal, le Shilling : on les prend tous dans ses dix premières parties, et on ne sait pas ce qui s’est passé. Les connaître, c’est les parer sans y penser.',
+        },
+        'le-mat-du': {
+          titre: 'Le mat du couloir',
+          pourquoi:
+            'Trois pions devant le roi qui a roqué, et une tour qui arrive sur la dernière rangée. C’est le motif de mat le plus fréquent de toutes les échelles de niveau.',
+        },
+        'les-trois-principes': {
+          titre: 'Les trois principes de l’ouverture',
+          pourquoi:
+            'Pas de théorie à mémoriser : un pion au centre, les pièces dehors, le roi à l’abri. Trois idées suffisent à ne plus jamais être perdu au coup dix.',
+        },
+      },
+    },
+    'voir-ladversaire': {
+      nom: 'Voir ce que l’adversaire prépare',
+      promesse:
+        'Tu ne donnes plus de pièces sans raison. Ce qui bloque maintenant, c’est que tu regardes tes coups et pas les siens : les tactiques qui te coûtent cher sont celles que tu n’as pas vu venir.',
+      leviers: {
+        'le-clouage': {
+          titre: 'Le clouage',
+          pourquoi:
+            'Une pièce devant le roi ne peut plus bouger, et tout le monde peut l’attaquer. C’est le motif que les joueurs à 1 000 subissent le plus souvent sans le nommer.',
+        },
+        'l-attaque-a': {
+          titre: 'L’attaque à la découverte',
+          pourquoi:
+            'Un coup qui ouvre la ligne d’une autre pièce : deux menaces pour un coup. Impossible à parer si on ne l’a jamais vue.',
+        },
+        'le-memo-avant': {
+          titre: 'Le mémo avant chaque coup',
+          pourquoi:
+            'Quatre questions, dix secondes : qu’est-ce qu’il vient de changer, qu’attaque-t-il, qu’est-ce que je laisse en prise, mon coup tient-il. C’est la différence mesurable entre un 1 000 et un 1 300.',
+        },
+        'le-mat-en': {
+          titre: 'Le mat en deux',
+          pourquoi:
+            'Deux coups à voir d’avance, en forçant. C’est l’exercice qui apprend à calculer, et il se transfère directement aux positions où il n’y a pas de mat.',
+        },
+        'les-quatre-erreurs': {
+          titre: 'Les quatre erreurs classiques de l’ouverture',
+          pourquoi:
+            'Sortir la dame trop tôt, bouger deux fois la même pièce, pousser les pions de l’aile, oublier de roquer. Quatre habitudes, et chacune coûte un tempo par partie.',
+        },
+      },
+    },
+    'un-plan': {
+      nom: 'Jouer avec un plan',
+      promesse:
+        'Tu vois les tactiques des deux côtés. Le problème est ailleurs : quand il n’y a rien à prendre, tu ne sais pas quoi faire, et tu attends que l’autre se trompe.',
+      leviers: {
+        'les-colonnes-ouvertes': {
+          titre: 'Les colonnes ouvertes',
+          pourquoi:
+            'La première question d’un milieu de partie calme : où mettre mes tours ? La réponse est presque toujours la même, et elle se voit sur la structure de pions.',
+        },
+        'l-avant-poste': {
+          titre: 'L’avant-poste',
+          pourquoi:
+            'Un cavalier sur une case qu’aucun pion ne peut attaquer vaut plus qu’une tour mal placée. C’est le premier concept positionnel qui change vraiment les parties.',
+        },
+        'les-enjeux-de': {
+          titre: 'Les enjeux de ton ouverture',
+          pourquoi:
+            'À ce palier, connaître dix coups de théorie ne sert à rien si on ne sait pas ce qu’on cherche au coup onze. Le plan tient en trois phrases par ouverture.',
+        },
+        'eliminer-le-defenseur': {
+          titre: 'Éliminer le défenseur',
+          pourquoi:
+            'La tactique qui sert un plan plutôt que de tomber du ciel : on retire la pièce qui tient tout, et la position s’effondre d’elle-même.',
+        },
+        'la-securite-du': {
+          titre: 'La sécurité du roi des deux côtés',
+          pourquoi:
+            'Savoir quand attaquer le roi adverse — et quand c’est le sien qui est en danger. Les attaques prématurées coûtent plus cher que les attaques manquées.',
+        },
+      },
+    },
+    technique: {
+      nom: 'Convertir et tenir',
+      promesse:
+        'Tu joues avec des plans et tu ne te fais plus surprendre. Ce qui te manque est de la technique : les positions gagnantes qui finissent nulles, et les finales qu’on joue à l’instinct.',
+      leviers: {
+        'l-opposition': {
+          titre: 'L’opposition',
+          pourquoi:
+            'La notion sans laquelle aucune finale de pions ne se gagne ni ne se tient. Elle s’apprend en une leçon et sert toute une vie.',
+        },
+        'la-regle-du': {
+          titre: 'La règle du carré',
+          pourquoi:
+            'Savoir d’un regard si le roi rattrape le pion. Elle remplace un calcul de six coups par un coup d’œil, et elle ne se trompe jamais.',
+        },
+        'les-finales-objectif': {
+          titre: 'Les finales, objectif annoncé',
+          pourquoi:
+            'Trois mille cinq cent soixante-huit positions classées, avec l’objectif donné — gagner ou tenir la nulle — et un ordinateur qui défend au mieux. C’est l’entraînement le plus rentable de ce palier.',
+        },
+        'le-sacrifice-qui': {
+          titre: 'Le sacrifice qui se calcule',
+          pourquoi:
+            'À 1 600, on rate moins les sacrifices qu’on n’en joue de mauvais. L’exercice apprend à vérifier avant de donner.',
+        },
+        'le-roi-devient': {
+          titre: 'Le roi devient une pièce',
+          pourquoi:
+            'En finale, le roi attaque. Les joueurs qui stagnent à ce palier le gardent au chaud par réflexe, et perdent une pièce de tempo à chaque coup.',
+        },
+      },
+    },
+    prophylaxie: {
+      nom: 'Empêcher avant de faire',
+      promesse:
+        'Tu as la technique et les plans. Ce qui sépare encore de 2 200, c’est de jouer contre les idées de l’autre plutôt que pour les siennes — et de ne plus perdre une seule partie gagnée.',
+      leviers: {
+        'les-enfilades-et': {
+          titre: 'Les enfilades et les rayons X',
+          pourquoi:
+            'Les motifs qui restent coûteux à haut niveau, parce qu’ils agissent à travers les pièces et qu’on les vérifie mal sous pression de pendule.',
+        },
+        'le-zugzwang': {
+          titre: 'Le zugzwang',
+          pourquoi:
+            'Le seul mécanisme de gain de beaucoup de finales : l’adversaire est obligé de jouer, et tout coup le dégrade. Il se prépare, il ne se trouve pas.',
+        },
+        'relire-ses-propres': {
+          titre: 'Relire ses propres parties',
+          pourquoi:
+            'À ce palier, les leçons génériques n’apportent plus grand-chose : ce qui reste à corriger est personnel, et il n’y a qu’un endroit où le lire — ses parties.',
+        },
+        'les-positions-ou': {
+          titre: 'Les positions où tout est défendu',
+          pourquoi:
+            'Le sacrifice positionnel et l’attaque à long terme : ce qui reste quand il n’y a aucune tactique. C’est là que se gagnent les points au-dessus de 1 900.',
+        },
+      },
+    },
+  },
+  seances: {
+    'rien-en-prise': {
+      nom: 'Ne rien laisser en prise',
+      consigne:
+        'Avant chaque coup, fais le tour de tes pièces : lesquelles sont attaquées, et par quoi. Tu ne joues pas tant que tu n’as pas répondu.',
+      aRegarder:
+        'Chaque fois que le commentaire parle d’une pièce en prise — à toi ou à lui — c’est le thème qui se présente.',
+    },
+    fourchettes: {
+      nom: 'Les fourchettes',
+      consigne:
+        'Cherche les cases d’où un cavalier atteindrait deux pièces à la fois — les tiennes comme les siennes. Les dames et les pions en font aussi.',
+      aRegarder:
+        'Repère les paires de pièces sur des cases de même couleur, à distance de cavalier l’une de l’autre.',
+    },
+    clouages: {
+      nom: 'Clouages et enfilades',
+      consigne:
+        'Aligne tes pièces lourdes sur ses pièces, et évite d’aligner les tiennes devant ton roi ou ta dame.',
+      aRegarder:
+        'Les diagonales et les colonnes où se trouvent son roi et sa dame : c’est là que les clouages naissent.',
+    },
+    couloir: {
+      nom: 'La dernière rangée',
+      consigne:
+        'Surveille les deux dernières rangées : la sienne pour y entrer, la tienne pour ne pas s’y faire enfermer. Une case d’air pour ton roi, tôt.',
+      aRegarder:
+        'Après chaque échange de pièces lourdes, demande-toi qui contrôle la huitième rangée.',
+    },
+    developpement: {
+      nom: 'Sortir toutes ses pièces',
+      consigne:
+        'Un pion au centre, puis une pièce nouvelle à chaque coup jusqu’à ce que tout soit dehors et le roi à l’abri. Aucune pièce jouée deux fois.',
+      aRegarder:
+        'Compte tes pièces développées au coup dix. Huit, c’est gagné ; quatre, c’est le thème de la prochaine séance aussi.',
+    },
+    colonnes: {
+      nom: 'Les colonnes ouvertes',
+      consigne:
+        'Trouve la colonne sans pion et mets-y une tour. Puis la seconde derrière la première, et entre sur la septième rangée.',
+      aRegarder:
+        'La structure de pions : la colonne ouverte est déjà dessinée dessus, il n’y a rien à calculer.',
+    },
+    'avant-poste': {
+      nom: 'L’avant-poste',
+      consigne:
+        'Cherche une case avancée qu’aucun de ses pions ne peut attaquer, et installes-y un cavalier. Il y restera jusqu’à la fin.',
+      aRegarder:
+        'Les cases devant ses pions arriérés, et celles que sa structure a définitivement abandonnées.',
+    },
+    'roi-expose': {
+      nom: 'Attaquer le roi',
+      consigne:
+        'Avant de lancer l’attaque, compte les attaquants et les défenseurs. Trois contre deux suffit ; deux contre trois ne marche jamais.',
+      aRegarder: 'Son abri de pions : dès qu’une case s’ouvre devant son roi, le thème est là.',
+    },
+    'pion-passe': {
+      nom: 'Le pion passé',
+      consigne:
+        'Crée un pion passé du côté où tu as la majorité, pousse-le, et mets ta tour derrière. Bloque le sien avec un cavalier.',
+      aRegarder:
+        'Dès que les dames partent, compte les pions de chaque aile : la majorité dit de quel côté jouer.',
+    },
+    'deux-faiblesses': {
+      nom: 'Le principe des deux faiblesses',
+      consigne:
+        'Fixe une première faiblesse, puis ouvre un second front à l’autre bout. Sa défense ne peut pas couvrir les deux.',
+      aRegarder:
+        'Les pions isolés, doublés et arriérés des deux camps : ce sont les faiblesses qu’on fixe.',
+    },
+  },
+  positions: {
+    roque: {
+      legende:
+        'Le petit roque des Blancs : le roi va de e1 à g1, et la tour de h1 saute par-dessus lui pour se poser en f1. Un seul coup, deux pièces.',
+    },
+    'prise-en-passant': {
+      legende:
+        'Le pion noir vient d’avancer de deux cases pour éviter le pion blanc. Celui-ci le prend quand même — en se posant sur la case qu’il a sautée, comme s’il n’avait avancé que d’une.',
+    },
+    promotion: {
+      legende:
+        'Le pion atteint la dernière rangée et se transforme. Presque toujours en dame — mais le choix est libre, et le cavalier est parfois le seul coup qui gagne.',
+    },
+    'echec-et-mat': {
+      legende:
+        'Le mat du couloir : le roi noir est enfermé par ses propres pions, la tour arrive sur la huitième rangée, et il n’y a ni fuite, ni parade, ni capture.',
+    },
+    pat: {
+      legende:
+        'Les Noirs doivent jouer et n’ont aucun coup légal — leur roi n’est pourtant pas en échec. La partie est nulle : c’est la dame blanche qui s’est privée de sa victoire.',
+    },
+    'pion-passe': {
+      legende:
+        'Plus aucun pion noir ne peut l’arrêter : ni devant lui, ni sur les colonnes voisines. Son chemin jusqu’à la promotion est libre, et c’est ce qui fait sa valeur en finale.',
+    },
+    'pions-doubles': {
+      legende:
+        'Deux pions sur la même colonne : celui de derrière ne protégera jamais celui de devant, et ils avancent l’un derrière l’autre. Le prix ordinaire d’une capture vers le centre.',
+    },
+    'pion-isole': {
+      legende:
+        'Aucun pion ami sur les colonnes voisines : personne ne pourra jamais le défendre. Il faudra une pièce pour cela, et une pièce occupée à défendre ne fait rien d’autre.',
+    },
+    'mauvais-fou': {
+      legende:
+        'Le fou joue sur les cases claires, et ses propres pions occupent les cases claires devant lui. Il regarde par-dessus ses barreaux : la moitié de l’échiquier lui est fermée par son camp.',
+    },
+    zugzwang: {
+      legende:
+        'Les Noirs ne sont pas perdus par la position, mais par l’obligation de jouer : tout coup de leur roi laisse passer le pion blanc. Pouvoir passer son tour les sauverait.',
+    },
+    'paire-de-fous': {
+      legende:
+        'Un fou sur les cases claires, un sur les sombres : à eux deux, plus aucune case ne leur échappe. C’est ce qui vaut mieux qu’un fou et un cavalier en position ouverte.',
+    },
+    fork: {
+      legende:
+        'Une pièce, deux cibles à la fois : le cavalier donne échec au roi et attaque la tour. Le roi doit parer, et la tour tombe au coup suivant.',
+    },
+    pin: {
+      legende:
+        'Le cavalier ne peut plus bouger : il découvrirait son propre roi. Il reste sur place, sans défense, et l’on peut prendre son temps pour l’attaquer.',
+    },
+    skewer: {
+      legende:
+        'Le clouage à l’envers : la pièce de valeur est devant, elle doit s’écarter de l’échec, et ce qu’elle protégeait derrière elle se prend.',
+    },
+    discoveredAttack: {
+      legende:
+        'Le cavalier s’écarte et démasque la tour, qui donne échec. Il en profite pour attaquer la dame : on doit parer l’échec, et la dame n’a personne pour la sauver.',
+    },
+    doubleCheck: {
+      legende:
+        'Deux pièces donnent échec en même temps. Aucune capture, aucune interposition ne peut parer les deux : le roi doit bouger, quoi qu’il en coûte.',
+    },
+    smotheredMate: {
+      legende:
+        'Le roi est enfermé par ses propres pièces, et le cavalier — la seule qui saute — vient le mater dans son coin. Rien ne peut prendre le cavalier.',
+    },
+    backRankMate: {
+      legende:
+        'Les trois pions n’ont jamais bougé, et le roi n’a pas de fenêtre : la tour arrive sur la rangée et la partie s’arrête. C’est le mat le plus fréquent entre débutants.',
+    },
+    mateIn1: {
+      legende:
+        'Un seul coup, et c’est fini. Chercher les mats en un est l’exercice qui apprend le plus vite à voir les cases que le roi adverse n’a pas.',
+    },
+    removingTheDefender: {
+      legende:
+        'La tour noire tenait la dernière rangée : on l’échange, le cavalier reprend loin de la case qui comptait, et la seconde tour entre. On ne s’attaque pas à la cible, mais à ce qui la garde.',
+    },
+    hangingPiece: {
+      legende:
+        'Le cavalier est attaqué par le fou et personne ne le défend : il se prend gratuitement. C’est le premier motif à chercher, à chaque coup, dans les deux camps.',
+    },
+    xRayAttack: {
+      legende:
+        'Les deux tours se regardent à travers la colonne : ce qui viendra s’intercaler entre elles sera attaqué des deux côtés, et l’attaque « traverse » la pièce.',
+    },
+    underPromotion: {
+      legende:
+        'Promouvoir en cavalier plutôt qu’en dame : ici, lui seul donne échec. Rare, mais c’est exactement pour ces cas-là que la règle laisse le choix.',
+    },
+    opposition: {
+      legende:
+        'Les rois se font face, une case entre eux, et c’est aux Noirs de jouer : ils doivent s’écarter, et le roi blanc avancera. L’opposition appartient à celui qui n’a pas le trait.',
+    },
+    fianchetto: {
+      legende:
+        'Le fou s’installe sur la grande diagonale, derrière son pion avancé d’une case. Il y tient la plus longue ligne de l’échiquier, et garde le roi roqué à côté de lui.',
+    },
+    outpost: {
+      legende:
+        'Un cavalier posé dans le camp adverse, protégé par un pion, et qu’aucun pion ne peut chasser. Il vaut là bien plus qu’une tour mal placée.',
+    },
+    openFile: {
+      legende:
+        'Plus aucun pion sur la colonne : la tour y voit d’un bout à l’autre. C’est là qu’on met ses tours, et c’est souvent par là qu’on entre chez l’adversaire.',
+    },
+    seventhRank: {
+      legende:
+        'La tour s’installe sur la rangée des pions adverses : elle les attaque tous à la fois et enferme le roi sur sa dernière rangée. Une tour à la septième vaut souvent un pion.',
+    },
+    protectedPassedPawn: {
+      legende:
+        'Un pion passé que défend un autre pion : le roi adverse ne peut ni le prendre ni le laisser. C’est l’avantage le plus décisif des finales de pions.',
+    },
+    rookBehindPasser: {
+      legende:
+        'La tour pousse son pion par-derrière : elle gagne en portée à mesure qu’il avance, quand la tour adverse, elle, en perd. Règle de Tarrasch, et elle tient.',
+    },
+    backwardPawn: {
+      legende:
+        'Le pion c3 est resté derrière ses voisins et ne peut plus avancer sans se perdre : aucun pion ami ne le défendra jamais. La case devant lui est un avant-poste offert.',
+    },
+  },
+  explications: {
+    checkmate: {
+      titre: 'Échec et mat',
+      texte:
+        'Le roi est attaqué et aucun coup légal ne peut y remédier : ni fuir, ni capturer l’attaquant, ni s’interposer. La partie s’arrête immédiatement.',
+      terme: 'Échec et mat',
+    },
+    stalemate: {
+      titre: 'Pat',
+      texte:
+        'Le camp au trait n’a **aucun coup légal**, mais son roi n’est pas en échec : la partie est nulle, quelle que soit la différence de matériel. Dans tes statistiques, c’est la ligne à surveiller — un pat est presque toujours une victoire qu’on a laissée filer en fin de partie, faute d’avoir laissé une case au roi adverse.',
+      terme: 'Pat',
+    },
+    resigned: {
+      titre: 'Abandon',
+      texte:
+        'Un joueur s’est reconnu perdu et a arrêté la partie avant le mat. C’est la fin la plus courante entre joueurs expérimentés : une fois la position sans espoir, jouer les vingt coups qui restent n’apprend plus rien à personne. **Abandonner trop tôt, en revanche, est une habitude coûteuse** — beaucoup de positions « perdues » se sauvent encore contre un adversaire de son propre niveau.',
+    },
+    timeout: {
+      titre: 'Temps écoulé',
+      texte:
+        'La pendule est tombée. La partie est perdue même avec une dame de plus — sauf si l’adversaire n’a plus de quoi mater, auquel cas elle est nulle. **Beaucoup de défaites au temps dans une même colonne veulent dire une cadence trop courte pour ta façon de jouer**, pas un manque de rapidité : on ne gagne pas de temps en jouant plus vite, on en gagne en hésitant moins.',
+      terme: 'Cadence',
+    },
+    draw: {
+      titre: 'Nulle',
+      texte:
+        'Personne ne gagne : accord entre les joueurs, répétition de la même position trois fois, cinquante coups sans prise ni poussée de pion, ou matériel insuffisant pour mater. Chacun repart avec un demi-point.',
+      terme: 'Nulle par répétition',
+    },
+    abandoned: {
+      titre: 'Adversaire parti',
+      texte:
+        'Un joueur a quitté la partie sans la terminer, et le temps d’attente s’est écoulé. Le résultat suit la position et le règlement de la partie : **ce n’est donc pas toujours une victoire**, c’est pourquoi cette ligne compte ses parties et ses gains séparément.',
+    },
+    aborted: {
+      titre: 'Annulée',
+      texte:
+        'La partie s’est arrêtée avant d’avoir vraiment commencé — trop peu de coups joués pour qu’elle compte. Elle ne touche ni au classement ni au score, et n’est là que pour l’inventaire.',
+    },
+    ultraBullet: {
+      titre: 'Ultra-bullet',
+      texte:
+        'Moins de 30 secondes pour toute la partie. C’est un jeu d’adresse plus qu’un jeu d’échecs : on y joue au motif reconnu et à la main, jamais au calcul.',
+      terme: 'Cadence',
+    },
+    bullet: {
+      titre: 'Bullet',
+      texte:
+        'Moins de 3 minutes par joueur. On n’y calcule plus, on reconnaît : c’est la cadence qui récompense le mieux l’entraînement aux puzzles, et la plus mauvaise pour apprendre une ouverture.',
+      terme: 'Cadence',
+    },
+    blitz: {
+      titre: 'Blitz',
+      texte:
+        'De 3 à 10 minutes par joueur. Assez pour un plan, trop peu pour le vérifier. C’est la cadence la plus jouée en ligne, et celle où l’écart entre ce qu’on sait et ce qu’on joue est le plus grand.',
+      terme: 'Cadence',
+    },
+    rapid: {
+      titre: 'Rapide',
+      texte:
+        'De 10 à 60 minutes par joueur. La première cadence où l’on a le temps de calculer une variante jusqu’au bout. **C’est celle où l’on progresse le plus vite** : une partie y contient plus de décisions réfléchies que dix parties de bullet.',
+      terme: 'Cadence',
+    },
+    classical: {
+      titre: 'Classique',
+      texte:
+        'Plus d’une heure par joueur. La cadence des tournois sur échiquier : on y joue peu de parties, mais chacune s’analyse ensuite ligne par ligne.',
+      terme: 'Cadence',
+    },
+    correspondence: {
+      titre: 'Correspondance',
+      texte:
+        'De un à quatorze jours par coup. On joue sa partie entre deux occupations, et l’on a le droit de bouger les pièces pour chercher — c’est le format qui apprend le mieux les finales.',
+      terme: 'Cadence',
+    },
+  },
+  creditsNotes: {
+    stockfish: {
+      note: 'Le moteur d’échecs le plus fort au monde. Il tourne côté serveur en version native, et dans le navigateur en WebAssembly.',
+    },
+    'stockfish-js': {
+      note: 'La compilation WebAssembly de Stockfish, qui permet d’analyser sans rien envoyer à un serveur.',
+    },
+    'chess-js': {
+      note: 'Les règles du jeu : génération des coups légaux, détection du mat, lecture du PGN.',
+    },
+    maia: {
+      note: 'Neuf réseaux entraînés sur des parties humaines : à 1100, l’adversaire fait les erreurs qu’un joueur de 1100 fait vraiment.',
+    },
+    'leela-chess-zero': {
+      note: 'Le moteur qui fait tourner les réseaux de Maia — les poids seuls ne jouent pas.',
+    },
+    piper: {
+      note: 'La voix du coach, synthétisée sur le serveur et hors ligne : rien de ce qui est dit ne sort de la machine.',
+    },
+    'base-d-ouvertures': {
+      note: '3 810 ouvertures nommées et classées, traduites en français pour ce projet.',
+    },
+    'base-de-puzzles': {
+      note: '6 057 356 positions tactiques, notées et étiquetées par thème, extraites de vraies parties.',
+    },
+    'base-de-positions': {
+      note: '3 568 positions de finales classées par matériel, de « mater avec une dame » à « tenir la nulle avec une tour de moins », traduites et re-cotées en difficulté pour ce projet.',
+    },
+    'tables-de-finales': {
+      note: 'Le jeu parfait dans toutes les finales à sept pièces ou moins. Une certitude, pas une évaluation.',
+    },
+    'voix-piper': {
+      note: 'Les modèles de voix française et anglaise du coach.',
+    },
+    'pieces-staunton-cburnett': {
+      note: 'Le jeu de pièces vectoriel le plus utilisé du monde libre.',
+    },
+    'pieces-merida': {
+      note: 'Contours nets, excellente lisibilité en petite taille.',
+    },
+    'pieces-fantasy-spatial': {
+      note: 'Trois jeux de caractère, aux volumes sculptés.',
+    },
+    'pieces-chessnut': {
+      note: 'Épuré et contemporain.',
+    },
+    'pieces-rhos': {
+      note: 'Aplats colorés, domaine public.',
+    },
+    'pieces-alpha-pixel': {
+      note: 'Trois approches minimalistes, dont un jeu en lettres pour la lisibilité maximale.',
+    },
+    bruitages: {
+      note: 'Déplacement, capture, échec, fin de partie.',
+    },
+    'next-js': {
+      note: 'Le cadre de l’application web : routage, rendu serveur, empaquetage.',
+    },
+    react: {
+      note: 'La bibliothèque d’interface.',
+    },
+    'react-dom': {
+      note: 'Le rendu de React dans le navigateur.',
+    },
+    'server-only': {
+      note: 'Un garde-fou : il fait échouer la construction si un module serveur part vers le navigateur.',
+    },
+    'three-js': {
+      note: 'Le rendu en trois dimensions de l’échiquier.',
+    },
+    'react-three-fiber': {
+      note: 'Le pont entre React et three.js.',
+    },
+    drei: {
+      note: 'Les aides de la scène 3D : caméra, lumières, chargement des modèles.',
+    },
+    zustand: {
+      note: 'Le magasin des préférences, partagé par toute l’interface.',
+    },
+    lucide: {
+      note: 'Les icônes de toute l’interface.',
+    },
+    clsx: {
+      note: 'L’assemblage des classes CSS conditionnelles.',
+    },
+    'socket-io': {
+      note: 'Le temps réel des parties en direct, côté serveur.',
+    },
+    'socket-io-client': {
+      note: 'Le même, côté navigateur.',
+    },
+    'drizzle-orm': {
+      note: 'Le schéma et les requêtes SQL, typés.',
+    },
+    postgres: {
+      note: 'Le pilote PostgreSQL.',
+    },
+    nodemailer: {
+      note: 'L’envoi des courriels — la récupération de mot de passe, et rien d’autre.',
+    },
+    'web-push': {
+      note: 'Les notifications poussées : un défi, une demande d’ami, un coup joué contre toi.',
+    },
   },
   memo: {
     'qu-est-ce-que': {
