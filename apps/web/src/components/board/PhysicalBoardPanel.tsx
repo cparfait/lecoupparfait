@@ -102,8 +102,8 @@ export function PhysicalBoardPanel({
               onClick={() => void state.connect(driver)}
             >
               <span className="flex min-w-0 flex-col items-start">
-                <span className="text-sm">{driver.label}</span>
-                <span className="truncate text-[12px] text-muted">{driver.models}</span>
+                <span className="text-sm">{t(driver.labelKey)}</span>
+                <span className="truncate text-[12px] text-muted">{t(driver.modelsKey)}</span>
               </span>
             </Button>
           ))}

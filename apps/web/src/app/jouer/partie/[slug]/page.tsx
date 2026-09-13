@@ -199,11 +199,7 @@ export default function LiveGamePage() {
    */
   const demanderIndice = useCallback(async () => {
     if (!snapshot || color === null || snapshot.turn !== color) return
-    if (
-      !confirm(
-        'Demander le meilleur coup au moteur ?\n\nTon adversaire en sera informé dans le tchat de la partie.',
-      )
-    ) {
+    if (!confirm(t('rest.askEngineConfirm'))) {
       return
     }
 

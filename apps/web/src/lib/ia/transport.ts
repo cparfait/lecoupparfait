@@ -20,6 +20,19 @@
  */
 
 import type { AIProvider } from './types.ts'
+
+/**
+ * Les deux pannes que ce module sait nommer.
+ *
+ * Un code et non une phrase : le transport est un module pur, appelé hors de tout
+ * composant, et ses deux messages restaient donc en français dans les quarante
+ * autres langues. C'est `messageErreur`, dans `coach.ts`, qui les traduit — comme
+ * il traduit déjà les neuf réponses du fournisseur.
+ */
+export const PANNES_IA = {
+  illisible: 'ia:illisible',
+  sansFlux: 'ia:sans-flux',
+} as const
 import { urlEstLocale } from './hote.ts'
 
 /** Au-delà, on considère que le fournisseur ne répondra plus. */
@@ -84,7 +97,7 @@ async function lireJson(reponse: Response): Promise<unknown> {
   try {
     return JSON.parse(texte) as unknown
   } catch {
-    throw new Error('Réponse illisible du fournisseur.')
+    throw new Error(PANNES_IA.illisible)
   }
 }
 
@@ -133,7 +146,7 @@ export async function appelChatFlux(
     : await appelRelaye('chat', provider.id, url, headers, body)
 
   if (!reponse.ok) throw erreurHttp(reponse.status, await reponse.text())
-  if (!reponse.body) throw new Error('Le fournisseur n’a renvoyé aucun flux.')
+  if (!reponse.body) throw new Error(PANNES_IA.sansFlux)
 
   const lecteur = reponse.body.getReader()
   const decodeur = new TextDecoder()

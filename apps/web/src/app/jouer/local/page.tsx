@@ -454,7 +454,7 @@ export default function LocalGamePage() {
           status={state.status}
           result={state.result}
           playerColor={null}
-          opponentName="l’adversaire"
+          opponentName={t('rest.theOpponent')}
           moves={state.moves}
           bilan={bilan}
           onNewGame={newGame}

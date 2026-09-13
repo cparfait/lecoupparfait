@@ -18,7 +18,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Chess, PieceSymbol, Square } from 'chess.js'
 import { detectFlip, matchSnapshot, occupancyFromFen, type BoardMatch } from './matcher.ts'
 import { rotateOccupancy, type BoardDriver, type Occupancy, type PhysicalBoard } from './types.ts'
+import { PANNES_CARTE } from './types.ts'
 import { isUserCancellation } from './webapis.ts'
+import { useT } from '@/lib/i18n/index.tsx'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 
 export type BoardStatus =
   | 'idle'
@@ -62,7 +65,31 @@ export interface PhysicalBoardState {
   choosePromotion: (piece: PieceSymbol) => void
 }
 
+/**
+ * Les pannes des pilotes, dites en toutes lettres.
+ *
+ * Les sept pilotes sont des objets de module : ils lèvent un code — voir
+ * `PANNES_CARTE` — et c'est ici, dans un crochet, qu'on peut le traduire. Un
+ * message inconnu passe tel quel : une erreur du navigateur vaut mieux qu'un
+ * « connexion impossible » qui n'apprend rien.
+ */
+const PHRASES_DE_PANNE: Record<string, TranslationKey> = {
+  [PANNES_CARTE.bluetooth]: 'rest.noBluetooth',
+  [PANNES_CARTE.hid]: 'rest.noHid',
+  [PANNES_CARTE.serie]: 'rest.noSerial',
+  [PANNES_CARTE.gatt]: 'rest.gattFailed',
+  [PANNES_CARTE.aucune]: 'rest.noCardChosen',
+  [PANNES_CARTE.flux]: 'rest.noStreams',
+}
+
+function messageDePanne(erreur: unknown, t: ReturnType<typeof useT>): string {
+  if (!(erreur instanceof Error)) return t('rest.connectFailed')
+  const cle = PHRASES_DE_PANNE[erreur.message]
+  return cle ? t(cle) : erreur.message
+}
+
 export function usePhysicalBoard(options: UsePhysicalBoardOptions): PhysicalBoardState {
+  const t = useT()
   const { chess, fen, isLive, play, lastMove, enabled = true, debounceMs = 250 } = options
 
   const [board, setBoard] = useState<PhysicalBoard | null>(null)
@@ -145,7 +172,7 @@ export function usePhysicalBoard(options: UsePhysicalBoardOptions): PhysicalBoar
         setWrongSquares(match.squares)
         setMessage(
           match.squares.length > 6
-            ? 'Le plateau ne correspond pas à la partie. Remettez les pièces en place.'
+            ? t('rest.boardMismatch')
             : `À corriger sur le plateau : ${match.squares.join(', ')}.`,
         )
         showLights(match.squares)
@@ -167,7 +194,7 @@ export function usePhysicalBoard(options: UsePhysicalBoardOptions): PhysicalBoar
         return
       }
     }
-  }, [chess, showLights])
+  }, [chess, showLights, t])
 
   const evaluateRef = useRef(evaluate)
   evaluateRef.current = evaluate
@@ -204,14 +231,16 @@ export function usePhysicalBoard(options: UsePhysicalBoardOptions): PhysicalBoar
         setBoard(null)
         setStatus('idle')
         setWrongSquares([])
-        setMessage(reason ? `Carte déconnectée — ${reason}` : 'Carte déconnectée.')
+        setMessage(
+          reason ? t('rest.cardDisconnectedWhy', { raison: reason }) : t('rest.cardDisconnected'),
+        )
       })
 
       setBoard(connected)
       setStatus('ready')
       setMessage(null)
     },
-    [debounceMs],
+    [debounceMs, t],
   )
 
   const connect = useCallback(
@@ -228,10 +257,10 @@ export function usePhysicalBoard(options: UsePhysicalBoardOptions): PhysicalBoar
           return
         }
         setStatus('error')
-        setMessage(error instanceof Error ? error.message : 'Connexion impossible.')
+        setMessage(messageDePanne(error, t))
       }
     },
-    [attach],
+    [attach, t],
   )
 
   const disconnect = useCallback(async () => {

@@ -38,9 +38,26 @@ import {
   type FamillePrincipe,
 } from '@/lib/apprendre/principes.ts'
 import { useT } from '@/lib/i18n/index.tsx'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
 const TEINTE = 'var(--rub-apprendre)'
+
+/**
+ * Les quatre familles de principes, par clé de dictionnaire.
+ *
+ * `FamillePrincipe` est un type littéral français — c'est l'identifiant qui lie
+ * un principe à sa phase, et il n'a pas à changer. Mais le sélecteur affichait
+ * cet identifiant tel quel : « Ouverture », « Finale » et « Jeu positionnel »
+ * restaient en français partout, et seul « Milieu de partie » était traduit,
+ * parce que la page le raccourcissait par une comparaison de chaîne.
+ */
+const CLE_FAMILLE: Record<FamillePrincipe, TranslationKey> = {
+  Ouverture: 'principles.opening',
+  'Milieu de partie': 'principles.middlegameShort',
+  Finale: 'principles.endgame',
+  'Jeu positionnel': 'principles.positional',
+}
 
 export default function PrincipesPage() {
   const t = useT()
@@ -147,7 +164,7 @@ export default function PrincipesPage() {
               { value: 'toutes' as const, label: t('principles.allPhases') },
               ...FAMILLES_PRINCIPES.map((entree) => ({
                 value: entree,
-                label: entree === 'Milieu de partie' ? t('principles.middlegameShort') : entree,
+                label: t(CLE_FAMILLE[entree]),
               })),
             ]}
           />

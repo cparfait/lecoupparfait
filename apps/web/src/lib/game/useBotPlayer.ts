@@ -17,7 +17,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { botLevel, botThinkDelayMs, pickBotMove, uciOptionsFor } from '@coupparfait/core'
 import type { BotLevel, BotPersonalityId } from '@coupparfait/core'
-import { getEngine } from '@/lib/engine/client.ts'
+import { getEngine, messageMoteur } from '@/lib/engine/client.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export interface UseBotPlayerOptions {
   /** Position courante. */
@@ -77,6 +78,7 @@ export interface BotPlayerState {
 }
 
 export function useBotPlayer(options: UseBotPlayerOptions): BotPlayerState {
+  const t = useT()
   const { fen, botColor, level, active, onMove, turn, instant, human, ply } = options
 
   /**
@@ -135,7 +137,7 @@ export function useBotPlayer(options: UseBotPlayerOptions): BotPlayerState {
           if (cancelled) return
 
           if (!response.ok || !data.uci) {
-            setError(data.error ?? 'Maia est injoignable.')
+            setError(data.error ?? t('rest.maiaDown'))
             setThinking(false)
             return
           }
@@ -204,11 +206,7 @@ export function useBotPlayer(options: UseBotPlayerOptions): BotPlayerState {
         setThinking(false)
         // Une annulation n'est pas une erreur : elle vient d'un changement de page.
         if (caught instanceof DOMException && caught.name === 'AbortError') return
-        setError(
-          caught instanceof Error
-            ? caught.message
-            : 'Le moteur n’a pas pu jouer. Réessaie ou recharge la page.',
-        )
+        setError(messageMoteur(caught, t) ?? t('rest.engineCouldntPlay'))
       }
     })()
 

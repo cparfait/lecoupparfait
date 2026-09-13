@@ -17,6 +17,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Mail, RefreshCw, Trash2 } from 'lucide-react'
 import { Button, Card, EmptyState, SectionTitle, Spinner } from '@/components/ui/index.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 interface CapturedMail {
   id: string
@@ -30,6 +31,7 @@ interface CapturedMail {
 const POLL_MS = 3000
 
 export default function MailboxPage() {
+  const t = useT()
   const [mails, setMails] = useState<CapturedMail[] | null>(null)
   const [available, setAvailable] = useState(true)
 
@@ -67,8 +69,8 @@ export default function MailboxPage() {
       <div className="page-etroite">
         <EmptyState
           icon={<Mail size={28} />}
-          title="Réservé au développement"
-          description="Cette boîte n’existe pas en production : la liste des courriels envoyés révélerait les adresses des inscrits."
+          title={t('rest.devOnly')}
+          description={t('rest.devOnlyHint')}
         />
       </div>
     )
@@ -77,7 +79,7 @@ export default function MailboxPage() {
   return (
     <div className="page-etroite">
       <SectionTitle
-        hint="Les messages ne partent pas : ils sont écrits sur le disque, dans data/courriels."
+        hint={t('rest.mailboxHint')}
         action={
           <div className="flex gap-1.5">
             <Button
@@ -102,17 +104,17 @@ export default function MailboxPage() {
           </div>
         }
       >
-        Boîte aux lettres
+        {t('rest.mailbox')}
       </SectionTitle>
 
       {mails.length === 0 ? (
         <EmptyState
           icon={<Mail size={28} />}
           title="Aucun message"
-          description="Crée un compte en renseignant une adresse : le courriel de bienvenue apparaîtra ici."
+          description={t('rest.mailboxEmptyHint')}
           action={
             <Link href="/connexion">
-              <Button variant="primary">Créer un compte</Button>
+              <Button variant="primary">{t('rest.createAccount')}</Button>
             </Link>
           }
         />

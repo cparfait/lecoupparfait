@@ -16,6 +16,7 @@ import { memo } from 'react'
 import clsx from 'clsx'
 import type { Color, Score } from '@coupparfait/core'
 import { formatScore, winPercent } from '@coupparfait/core'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export const EvalBar = memo(function EvalBar({
   score,
@@ -133,6 +134,7 @@ export function EvalGraph({
   onSeek?: (ply: number) => void
   className?: string
 }) {
+  const t = useT()
   if (values.length < 2) return null
 
   const width = 100
@@ -161,7 +163,7 @@ export function EvalGraph({
           onSeek(Math.round(ratio * (values.length - 1)) - 1)
         }}
         role="img"
-        aria-label="Évolution de l’évaluation au fil de la partie"
+        aria-label={t('rest.evalOverTime')}
       >
         <rect width={width} height={height} fill="var(--eval-black)" opacity="0.5" />
         <path d={area} fill="var(--eval-white)" opacity="0.9" />

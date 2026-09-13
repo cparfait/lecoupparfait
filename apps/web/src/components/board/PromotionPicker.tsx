@@ -13,6 +13,7 @@ import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { useDialogue } from '@/lib/useDialogue.ts'
 import { pieceUrl, squarePosition } from './boardKit.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /*
   Le voile flouté disparaît en mode « performance » : le flou d'arrière-plan
@@ -85,6 +86,7 @@ export function PromotionPicker({
   onSelect: (type: PieceSymbol) => void
   onCancel: () => void
 }) {
+  const t = useT()
   /*
     Le dialogue au clavier.
 
@@ -161,7 +163,7 @@ export function PromotionPicker({
         }}
         role="dialog"
         aria-modal="true"
-        aria-label="Choix de la pièce de promotion"
+        aria-label={t('rest.promotionChoice')}
       >
         <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] [[data-effects=low]_&]:backdrop-blur-none" />
 
@@ -210,7 +212,7 @@ export function PromotionPicker({
       }}
       role="dialog"
       aria-modal="true"
-      aria-label="Choix de la pièce de promotion"
+      aria-label={t('rest.promotionChoice')}
     >
       <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] [[data-effects=low]_&]:backdrop-blur-none" />
 

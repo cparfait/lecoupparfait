@@ -19,6 +19,7 @@
  */
 
 import type { Color } from 'chess.js'
+import type { useT } from '@/lib/i18n/index.tsx'
 
 /** Ce qu'il faut pour reconstituer la partie à l'identique. */
 export interface EtatPartieEnCours {
@@ -74,16 +75,25 @@ export function oublierPartieEnCours(): void {
   void fetch('/api/partie-en-cours', { method: 'DELETE' }).catch(() => {})
 }
 
-/** « il y a 3 heures », pour situer la partie qu'on propose de reprendre. */
-export function depuis(iso: string): string {
+/**
+ * « il y a 3 heures », pour situer la partie qu'on propose de reprendre.
+ *
+ * Les quatre formulations étaient écrites en français, avec le « s » du pluriel
+ * ajouté à la main — une règle qui n'est celle d'aucune autre langue. C'est
+ * `Intl.RelativeTimeFormat` qui les dit maintenant, dans la langue de
+ * l'interface ; seul « à l'instant » reste une phrase à nous, parce qu'il ne
+ * correspond à aucune unité de temps.
+ */
+export function depuis(iso: string, bcp47: string, t: ReturnType<typeof useT>): string {
   const ecart = Date.now() - new Date(iso).getTime()
   const minutes = Math.round(ecart / 60_000)
-  if (minutes < 2) return 'à l’instant'
-  if (minutes < 60) return `il y a ${minutes} minutes`
+  if (minutes < 2) return t('rest.justNow')
+
+  const relatif = new Intl.RelativeTimeFormat(bcp47, { numeric: 'auto' })
+  if (minutes < 60) return relatif.format(-minutes, 'minute')
   const heures = Math.round(minutes / 60)
-  if (heures < 24) return `il y a ${heures} heure${heures > 1 ? 's' : ''}`
-  const jours = Math.round(heures / 24)
-  return `il y a ${jours} jour${jours > 1 ? 's' : ''}`
+  if (heures < 24) return relatif.format(-heures, 'hour')
+  return relatif.format(-Math.round(heures / 24), 'day')
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

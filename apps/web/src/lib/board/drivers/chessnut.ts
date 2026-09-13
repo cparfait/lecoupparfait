@@ -15,7 +15,13 @@ import {
   decodeChessnutFrame,
   encodeChessnutLights,
 } from '../codecs/chessnut.ts'
-import { createEmitter, type BoardDriver, type Occupancy, type PhysicalBoard } from '../types.ts'
+import {
+  PANNES_CARTE,
+  createEmitter,
+  type BoardDriver,
+  type Occupancy,
+  type PhysicalBoard,
+} from '../types.ts'
 import {
   getBluetooth,
   getHid,
@@ -40,14 +46,14 @@ async function write(characteristic: BleCharacteristic, bytes: Uint8Array): Prom
 
 export const chessnutBluetooth: BoardDriver = {
   id: 'chessnut',
-  label: 'Chessnut',
-  models: 'Air, Air+, Pro, Go, Evo',
+  labelKey: 'rest.driverChessnut',
+  modelsKey: 'rest.driverChessnutModels',
   transport: 'bluetooth',
   available: () => getBluetooth() !== null,
 
   async connect(): Promise<PhysicalBoard> {
     const bluetooth = getBluetooth()
-    if (!bluetooth) throw new Error("Ce navigateur n'expose pas le Bluetooth.")
+    if (!bluetooth) throw new Error(PANNES_CARTE.bluetooth)
 
     const device = await bluetooth.requestDevice({
       filters: [
@@ -59,7 +65,7 @@ export const chessnutBluetooth: BoardDriver = {
     })
 
     const server = await device.gatt?.connect()
-    if (!server) throw new Error('Connexion GATT impossible.')
+    if (!server) throw new Error(PANNES_CARTE.gatt)
 
     const board = await server.getPrimaryService(CHESSNUT_BLE.boardService)
     const boardData = await board.getCharacteristic(CHESSNUT_BLE.boardData)
@@ -111,20 +117,20 @@ export const chessnutBluetooth: BoardDriver = {
  */
 export const chessnutUsb: BoardDriver = {
   id: 'chessnut-usb',
-  label: 'Chessnut par câble',
-  models: 'Air, Air+, Pro (expérimental)',
+  labelKey: 'rest.driverChessnutUsb',
+  modelsKey: 'rest.driverChessnutUsbModels',
   transport: 'hid',
   available: () => getHid() !== null,
 
   async connect(): Promise<PhysicalBoard> {
     const hid = getHid()
-    if (!hid) throw new Error("Ce navigateur n'expose pas WebHID.")
+    if (!hid) throw new Error(PANNES_CARTE.hid)
 
     // Sans identifiant constructeur public, on laisse l'utilisateur désigner
     // sa carte dans le sélecteur du navigateur.
     const devices = await hid.requestDevice({ filters: [] })
     const device = devices[0]
-    if (!device) throw new Error('Aucune carte choisie.')
+    if (!device) throw new Error(PANNES_CARTE.aucune)
     if (!device.opened) await device.open()
 
     const snapshots = createEmitter<Occupancy>()

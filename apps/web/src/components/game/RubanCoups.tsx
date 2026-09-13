@@ -130,7 +130,7 @@ export function RubanCoups({
         type="button"
         onClick={() => onSeek(Math.max(0, cursor - 1))}
         disabled={cursor <= 0}
-        aria-label="Coup précédent"
+        aria-label={t('rest.previousMove')}
         className="grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius-sm)] bg-surface-strong text-ink ring-1 ring-inset ring-line-strong transition-colors hover:bg-surface-hover disabled:opacity-30 disabled:ring-line pointer-coarse:h-12 pointer-coarse:w-12"
       >
         <ChevronLeft size={18} aria-hidden />

@@ -22,6 +22,7 @@ import {
   millenniumCommand,
 } from '../codecs/millennium.ts'
 import {
+  PANNES_CARTE,
   createEmitter,
   type BoardDriver,
   type BoardDriverId,
@@ -92,21 +93,21 @@ async function openMillenniumBoard(
 
 export const millenniumBluetooth: BoardDriver = {
   id: 'millennium',
-  label: 'Millennium ChessLink',
-  models: 'Exclusive, Supreme Tournament 55, King Performance, eONE',
+  labelKey: 'rest.driverMillennium',
+  modelsKey: 'rest.driverMillenniumModels',
   transport: 'bluetooth',
   available: () => getBluetooth() !== null,
 
   async connect(): Promise<PhysicalBoard> {
     const bluetooth = getBluetooth()
-    if (!bluetooth) throw new Error("Ce navigateur n'expose pas le Bluetooth.")
+    if (!bluetooth) throw new Error(PANNES_CARTE.bluetooth)
 
     const device = await bluetooth.requestDevice({
       filters: [{ namePrefix: MILLENNIUM_NAME_PREFIX }, { services: [MILLENNIUM_BLE.service] }],
       optionalServices: [MILLENNIUM_BLE.service],
     })
     const server = await device.gatt?.connect()
-    if (!server) throw new Error('Connexion GATT impossible.')
+    if (!server) throw new Error(PANNES_CARTE.gatt)
 
     const service = await server.getPrimaryService(MILLENNIUM_BLE.service)
     const notify = await service.getCharacteristic(MILLENNIUM_BLE.notify)
@@ -145,14 +146,14 @@ export const millenniumBluetooth: BoardDriver = {
 
 export const millenniumUsb: BoardDriver = {
   id: 'millennium-usb',
-  label: 'Millennium par câble',
-  models: 'ChessLink en USB',
+  labelKey: 'rest.driverMillenniumUsb',
+  modelsKey: 'rest.driverMillenniumUsbModels',
   transport: 'serial',
   available: () => getSerial() !== null,
 
   async connect(): Promise<PhysicalBoard> {
     const serial = getSerial()
-    if (!serial) throw new Error("Ce navigateur n'expose pas Web Serial.")
+    if (!serial) throw new Error(PANNES_CARTE.serie)
 
     const port = await serial.requestPort()
     let onData: (bytes: Uint8Array) => void = () => {}

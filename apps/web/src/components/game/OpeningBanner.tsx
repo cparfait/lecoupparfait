@@ -24,6 +24,7 @@ import { ECO_VOLUMES } from '@coupparfait/core'
 import { Chip } from '@/components/ui/index.tsx'
 import { speak } from '@/lib/speech.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export interface OpeningBannerProps {
   opening: { eco: string; name: string; ply: number } | null
@@ -41,6 +42,7 @@ export interface OpeningBannerProps {
 const STALE_AFTER_PLIES = 6
 
 export function OpeningBanner({ opening, moveCount, onDismiss, className }: OpeningBannerProps) {
+  const t = useT()
   const showOpeningName = usePreferences((state) => state.showOpeningName)
   const voiceEnabled = usePreferences((state) => state.voiceEnabled)
   const announceOpenings = usePreferences((state) => state.announceOpenings)
@@ -85,8 +87,8 @@ export function OpeningBanner({ opening, moveCount, onDismiss, className }: Open
           type="button"
           onClick={onDismiss}
           className="shrink-0 rounded p-1 text-faint transition-colors hover:text-ink"
-          aria-label="Masquer le nom de l’ouverture"
-          title="Masquer — réactivable dans les préférences"
+          aria-label={t('rest.hideOpening')}
+          title={t('rest.hideOpeningTitle')}
         >
           <X size={13} aria-hidden />
         </button>

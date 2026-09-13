@@ -25,6 +25,41 @@
 
 import type { EngineLine, PositionAnalysis, Score, UciMove } from '@coupparfait/core'
 import { MultiPvCollector, goCommand, parseBestMove, positionCommand } from '@coupparfait/core'
+import type { TranslationKey, useT } from '@/lib/i18n/index.tsx'
+
+/**
+ * Les quatre pannes que le moteur sait nommer.
+ *
+ * Des codes et non des phrases : cette classe vit hors de tout composant et ne
+ * peut pas lire le dictionnaire, si bien que ses quatre messages remontaient en
+ * français jusqu'aux deux écrans qui les affichent — l'analyse et la partie
+ * contre l'ordinateur. `messageMoteur` les traduit là où `t()` existe.
+ */
+export const PANNES_MOTEUR = {
+  lent: 'moteur:lent',
+  arrete: 'moteur:arrete',
+  nonDemarre: 'moteur:non-demarre',
+  annulee: 'moteur:annulee',
+} as const
+
+const PHRASES_MOTEUR: Record<string, TranslationKey> = {
+  [PANNES_MOTEUR.lent]: 'parts.engineSlow',
+  [PANNES_MOTEUR.arrete]: 'parts.engineStopped',
+  [PANNES_MOTEUR.nonDemarre]: 'parts.engineNotStarted',
+  [PANNES_MOTEUR.annulee]: 'parts.analysisCancelled',
+}
+
+/**
+ * La phrase d'une panne du moteur, ou son message brut, ou rien.
+ *
+ * `null` quand on ne sait pas quoi dire : l'appelant a alors sa propre phrase de
+ * repli, qui est plus juste que la nôtre puisqu'elle dit ce qu'il tentait.
+ */
+export function messageMoteur(erreur: unknown, t: ReturnType<typeof useT>): string | null {
+  if (!(erreur instanceof Error)) return null
+  const cle = PHRASES_MOTEUR[erreur.message]
+  return cle ? t(cle) : erreur.message || null
+}
 
 export type EngineStatus = 'idle' | 'loading' | 'ready' | 'searching' | 'error'
 
@@ -170,7 +205,7 @@ export class EngineClient {
         setTimeout(() => {
           if (this.status === 'loading') {
             this.setStatus('error')
-            reject(new Error('Le moteur met trop de temps à démarrer.'))
+            reject(new Error(PANNES_MOTEUR.lent))
           }
         }, 90_000)
       } catch (error) {
@@ -186,7 +221,7 @@ export class EngineClient {
 
   /** Arrête le moteur et libère la mémoire. */
   terminate(): void {
-    this.pending?.reject(new Error('Moteur arrêté'))
+    this.pending?.reject(new Error(PANNES_MOTEUR.arrete))
     this.pending = null
     try {
       this.worker?.postMessage('quit')
@@ -264,11 +299,11 @@ export class EngineClient {
   private runSearch(options: SearchOptions): Promise<PositionAnalysis> {
     return new Promise<PositionAnalysis>((resolve, reject) => {
       if (!this.worker) {
-        reject(new Error('Moteur non démarré'))
+        reject(new Error(PANNES_MOTEUR.nonDemarre))
         return
       }
       if (options.signal?.aborted) {
-        reject(new DOMException('Analyse annulée', 'AbortError'))
+        reject(new DOMException(PANNES_MOTEUR.annulee, 'AbortError'))
         return
       }
 

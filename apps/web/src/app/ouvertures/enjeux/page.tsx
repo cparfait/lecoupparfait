@@ -139,7 +139,7 @@ export default function EnjeuxPage() {
           {t('stakesList.explorerNote')}
         </p>
         <ButtonLink href="/ouvertures" icon={<BookOpen size={15} />}>
-          L’explorateur
+          {t('rest.explorer')}
         </ButtonLink>
       </Card>
 

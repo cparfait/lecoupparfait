@@ -64,6 +64,8 @@ export function rotateOccupancy(occupancy: Occupancy): Occupancy {
 //  Pilotes
 // ─────────────────────────────────────────────────────────────────────────────
 
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
+
 export type BoardDriverId =
   'chessnut' | 'chessnut-usb' | 'millennium' | 'millennium-usb' | 'pegasus' | 'dgt' | 'certabo'
 
@@ -91,11 +93,30 @@ export interface PhysicalBoard {
   close(): Promise<void>
 }
 
+/**
+ * Les pannes que les sept pilotes savent signaler.
+ *
+ * Un code et non une phrase : les pilotes sont des objets de module, sans accès
+ * au dictionnaire, et leurs messages d'erreur restaient donc en français dans
+ * les quarante autres langues — alors qu'ils disent précisément ce qui manque au
+ * navigateur, c'est-à-dire ce qu'on a besoin de comprendre. `usePhysicalBoard`,
+ * qui est un crochet, les traduit à l'affichage.
+ */
+export const PANNES_CARTE = {
+  bluetooth: 'carte:sans-bluetooth',
+  hid: 'carte:sans-hid',
+  serie: 'carte:sans-serie',
+  gatt: 'carte:gatt',
+  aucune: 'carte:aucune',
+  flux: 'carte:sans-flux',
+} as const
+
 export interface BoardDriver {
   readonly id: BoardDriverId
-  readonly label: string
+  /** Nom du pilote, par clé de dictionnaire. */
+  readonly labelKey: TranslationKey
   /** Modèles couverts, pour l'affichage dans le sélecteur. */
-  readonly models: string
+  readonly modelsKey: TranslationKey
   readonly transport: BoardTransport
   /** Le navigateur expose-t-il l'API nécessaire ? */
   available(): boolean

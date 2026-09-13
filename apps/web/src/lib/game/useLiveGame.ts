@@ -21,6 +21,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import type { ClockState, GameResult, GameStatus, TimeControl } from '@coupparfait/core'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export interface LivePlayer {
   name: string
@@ -96,6 +97,7 @@ export function useLiveGame({
   obtenirJeton,
   enabled = true,
 }: UseLiveGameOptions) {
+  const t = useT()
   const socketRef = useRef<Socket | null>(null)
   const obtenirJetonRef = useRef(obtenirJeton)
   obtenirJetonRef.current = obtenirJeton
@@ -180,9 +182,7 @@ export function useLiveGame({
 
     socket.on('connect_error', () => {
       setConnection('error')
-      setError(
-        'Le serveur de parties est injoignable. Vérifie qu’il est démarré, ou joue contre l’ordinateur en attendant.',
-      )
+      setError(t('rest.liveServerDown'))
     })
 
     socket.on('disconnect', () => setConnection('disconnected'))
@@ -226,7 +226,7 @@ export function useLiveGame({
       socket.disconnect()
       socketRef.current = null
     }
-  }, [slug, guestName, timeControl, rated, token, enabled])
+  }, [slug, guestName, timeControl, rated, token, enabled, t])
 
   // ── Actions ─────────────────────────────────────────────────────────────
   const move = useCallback((from: Square, to: Square, promotion?: PieceSymbol) => {

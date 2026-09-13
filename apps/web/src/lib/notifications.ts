@@ -24,6 +24,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /** Où en est cet appareil. */
 export type EtatNotifications =
@@ -129,6 +130,7 @@ const REGLAGES_PAR_DEFAUT: Reglages = { invitations: true, defiDuJour: true }
  * d'exception qui remonterait dans un gestionnaire de clic.
  */
 export function useNotifications() {
+  const t = useT()
   const [etat, setEtat] = useState<EtatNotifications>('inconnu')
   const [occupe, setOccupe] = useState(false)
   const [erreur, setErreur] = useState<string | null>(null)
@@ -248,7 +250,7 @@ export function useNotifications() {
           // pas où écrire : on défait pour que le bouton dise la vérité.
           await abonnement.unsubscribe().catch(() => undefined)
           const donnees = (await reponse.json().catch(() => ({}))) as { error?: string }
-          setErreur(donnees.error ?? 'L’abonnement n’a pas pu être enregistré.')
+          setErreur(donnees.error ?? t('rest.subscribeFailed'))
           return
         }
 
@@ -256,12 +258,12 @@ export function useNotifications() {
         setChoix(reglages)
         setEtat('actif')
       } catch {
-        setErreur('Le navigateur a refusé l’abonnement.')
+        setErreur(t('rest.browserRefused'))
       } finally {
         setOccupe(false)
       }
     },
-    [clePublique],
+    [clePublique, t],
   )
 
   /**
@@ -297,14 +299,14 @@ export function useNotifications() {
         })
         if (!reponse.ok) {
           setChoix(precedent)
-          setErreur('Le réglage n’a pas été enregistré.')
+          setErreur(t('rest.settingNotSaved'))
         }
       } catch {
         setChoix(precedent)
-        setErreur('Le réglage n’a pas été enregistré.')
+        setErreur(t('rest.settingNotSaved'))
       }
     },
-    [choix],
+    [choix, t],
   )
 
   const desactiver = useCallback(async () => {
@@ -344,12 +346,12 @@ export function useNotifications() {
       })
       if (!reponse.ok) {
         const donnees = (await reponse.json().catch(() => ({}))) as { error?: string }
-        setErreur(donnees.error ?? 'L’envoi a échoué.')
+        setErreur(donnees.error ?? t('rest.sendFailed'))
       }
     } finally {
       setOccupe(false)
     }
-  }, [endpoint])
+  }, [endpoint, t])
 
   return { etat, occupe, erreur, choix, activer, desactiver, changerChoix, essayer }
 }

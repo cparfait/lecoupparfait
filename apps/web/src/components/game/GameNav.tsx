@@ -158,7 +158,7 @@ export function GameNav({
       // c'est très bien ainsi.
       case 'C':
         if (!fen || !event.shiftKey) return false
-        void copierLaPosition(fen)
+        void copierLaPosition(fen, t)
         return true
       default:
         return false
@@ -236,10 +236,7 @@ export function GameNav({
           {/* Un trait : copier n'est pas naviguer, et les deux ne doivent pas
               se confondre sous le doigt. */}
           <span className="mx-0.5 h-4 w-px bg-line" aria-hidden />
-          <SeekButton
-            onClick={() => void copierLaPosition(fen)}
-            label="Copier la position (Ctrl+Maj+C)"
-          >
+          <SeekButton onClick={() => void copierLaPosition(fen, t)} label={t('rest.copyPosition')}>
             <ClipboardCopy size={15} aria-hidden />
           </SeekButton>
         </>
@@ -259,12 +256,12 @@ export function GameNav({
  * `navigator.clipboard` demande un contexte sécurisé et n'existe pas partout ;
  * l'échec se dit, plutôt que de laisser croire que c'est copié.
  */
-async function copierLaPosition(fen: string): Promise<void> {
+async function copierLaPosition(fen: string, t: ReturnType<typeof useT>): Promise<void> {
   try {
     await navigator.clipboard.writeText(fen)
-    toast.success('Position copiée', fen)
+    toast.success(t('rest.positionCopied'), fen)
   } catch {
-    toast.error('Copie impossible', 'Le navigateur n’a pas autorisé l’accès au presse-papiers.')
+    toast.error(t('rest.copyFailed'), t('rest.clipboardRefused'))
   }
 }
 

@@ -292,7 +292,7 @@ export default function OpeningsPage() {
     <div className="etude mx-auto w-full max-w-[1400px] px-3 py-5 sm:px-5 lg:py-8">
       <div className="mb-4">
         <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-          Explorateur d’ouvertures
+          {t('rest.openingExplorer')}
         </h1>
         {/* Il fallait le dire : sans cette phrase, on attend que l'ordinateur
             réponde et on croit l'échiquier cassé. Ce n'est pas une partie,

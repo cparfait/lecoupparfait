@@ -15,49 +15,48 @@ import { BarChart3, Trophy, Users } from 'lucide-react'
 import { CarteDestination } from '@/components/ui/CarteDestination.tsx'
 import { TitreDePage } from '@/components/ui/index.tsx'
 import { SECTIONS } from '@/lib/navigation.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 const TEINTE = SECTIONS.find((s) => s.id === 'communaute')?.teinte
 
+/*
+  Les trois entrées de la rubrique, par clé de dictionnaire.
+
+  Constante de module : elle ne peut pas appeler `t()`, et la page entière —
+  titre, phrase d'introduction, trois intitulés et trois phrases — restait en
+  français dans les quarante autres langues.
+*/
 const ENTREES = [
   {
     href: '/classement',
     icon: Trophy,
-    titre: 'Classement',
-    phrase:
-      'Qui joue ici, et à quel niveau. Chaque cadence a le sien, et les puzzles comptent à part.',
+    titreKey: 'nav.leaderboard',
+    phraseKey: 'rest.leaderboardBlurb',
   },
-  {
-    href: '/amis',
-    icon: Users,
-    titre: 'Amis',
-    phrase:
-      'Ton carnet : qui est en ligne, qui t’a défié, et le lien d’invitation à envoyer à quelqu’un qui n’a pas encore de compte.',
-  },
+  { href: '/amis', icon: Users, titreKey: 'nav.friends', phraseKey: 'rest.friendsBlurb' },
   {
     href: '/statistiques',
     icon: BarChart3,
-    titre: 'Statistiques',
-    phrase:
-      'Ce que tes parties disent de ton jeu : l’ouverture où tu marques le moins, la cadence qui te réussit, l’heure où tu joues mal.',
+    titreKey: 'nav.stats',
+    phraseKey: 'rest.statsBlurb',
   },
 ] as const
 
 export default function CommunautePage() {
+  const t = useT()
   return (
     <div className="page">
-      <TitreDePage intro="Les autres joueurs, et ce que tu fais avec eux : se comparer, se retrouver, et regarder ce que tes parties disent de ton jeu.">
-        Communauté
-      </TitreDePage>
+      <TitreDePage intro={t('rest.communityIntro')}>{t('rest.community')}</TitreDePage>
 
       <div className="grille-cartes">
-        {ENTREES.map(({ href, icon, titre, phrase }, index) => (
+        {ENTREES.map(({ href, icon, titreKey, phraseKey }, index) => (
           <CarteDestination
             key={href}
             href={href}
             icon={icon}
             teinte={TEINTE}
-            titre={titre}
-            phrase={phrase}
+            titre={t(titreKey)}
+            phrase={t(phraseKey)}
             className="animate-slide-up"
             style={{ animationDelay: `${index * 50}ms` }}
           />

@@ -74,7 +74,7 @@ export function ImportEnLigne({
       }
     } catch (echec) {
       if (numero !== demande.current) return
-      setErreur(echec instanceof Error ? echec.message : t('misc.fetchFailed'))
+      setErreur((echec instanceof Error ? echec.message : '') || t('misc.fetchFailed'))
     } finally {
       if (numero === demande.current) setChargement(false)
     }
@@ -214,17 +214,19 @@ function LignePartie({
         <span className="block truncate text-sm font-medium">
           contre {adversaire}
           <span className="ml-1.5 font-normal text-faint">
-            {issue === 'gagne'
-              ? 'gagnée'
-              : issue === 'perdu'
-                ? 'perdue'
-                : issue === 'nulle'
-                  ? 'nulle'
-                  : 'sans résultat'}
+            {t(
+              issue === 'gagne'
+                ? 'rest.won'
+                : issue === 'perdu'
+                  ? 'rest.lost'
+                  : issue === 'nulle'
+                    ? 'rest.drawn'
+                    : 'rest.noResult',
+            )}
           </span>
         </span>
         <span className="block text-[12px] text-faint">
-          {partie.monCamp === 'w' ? 'Blancs' : 'Noirs'} · {partie.cadence}
+          {t(partie.monCamp === 'w' ? 'rest.white' : 'rest.black')} · {partie.cadence}
           {partie.date > 0 && ` · ${new Date(partie.date).toLocaleDateString('fr-FR')}`}
         </span>
       </button>

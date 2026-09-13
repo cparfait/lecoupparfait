@@ -64,7 +64,9 @@ export async function chargerParties(
 
   const donnees = (await reponse.json()) as ReponseImport & { error?: string }
   if (!reponse.ok) {
-    throw new Error(donnees.error ?? 'Impossible de récupérer les parties.')
+    // Sans message du serveur, on laisse la chaîne vide : c'est l'appelant, qui
+    // a le dictionnaire, qui dira « impossible de récupérer les parties ».
+    throw new Error(donnees.error ?? '')
   }
   return donnees.parties ?? []
 }

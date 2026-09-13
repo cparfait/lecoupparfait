@@ -21,6 +21,7 @@ import { usePreferences } from '@/lib/store/preferences.ts'
 import { useAssistant } from '@/lib/ia/useAssistant.ts'
 import { speak } from '@/lib/speech.ts'
 import type { AIMessage } from '@/lib/ia/types.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export function QuestionLibre({
   /** Bloc de faits sur la position — voir `lib/ia/contexte.ts`. */
@@ -34,6 +35,7 @@ export function QuestionLibre({
   questionParDefaut: string
   suggestions?: string[]
 }) {
+  const t = useT()
   const assistant = useAssistant()
   const voiceEnabled = usePreferences((state) => state.voiceEnabled)
 
@@ -79,7 +81,7 @@ export function QuestionLibre({
         historique.current.push({ role: 'assistant', content: complete })
         if (voiceEnabled && complete) speak(complete)
       } catch (echec) {
-        setErreur(echec instanceof Error ? echec.message : 'La demande a échoué.')
+        setErreur(echec instanceof Error ? echec.message : t('rest.requestFailed'))
         // On retire la question restée sans réponse : la laisser fausserait le
         // fil de la conversation au prochain essai.
         historique.current.pop()
@@ -87,7 +89,7 @@ export function QuestionLibre({
         setEncours(false)
       }
     },
-    [assistant, contexte, encours, voiceEnabled],
+    [assistant, contexte, encours, voiceEnabled, t],
   )
 
   if (!assistant.disponible) return null
@@ -116,7 +118,7 @@ export function QuestionLibre({
               <button
                 type="button"
                 onClick={() => speak(reponse)}
-                aria-label="Réécouter la réponse"
+                aria-label={t('rest.replayAnswer')}
                 className="ml-auto text-muted transition-colors hover:text-ink"
               >
                 <Volume2 size={12} aria-hidden />
@@ -154,8 +156,8 @@ export function QuestionLibre({
         <input
           value={question}
           onChange={(event) => setQuestion(event.target.value)}
-          placeholder="Pose ta question…"
-          aria-label="Pose ta question sur cette position"
+          placeholder={t('rest.askPlaceholder')}
+          aria-label={t('rest.askAboutPosition')}
           className="h-9 min-w-0 flex-1 rounded-[var(--radius-sm)] border border-line bg-surface px-3 text-sm placeholder:text-faint focus:border-accent focus:outline-none"
         />
         <Button

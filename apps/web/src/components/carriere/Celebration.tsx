@@ -19,6 +19,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import clsx from 'clsx'
 import { HAUTS_FAITS, rangPour } from '@coupparfait/core'
 import { Button } from '@/components/ui/index.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export interface Gains {
   xp: number
@@ -43,6 +44,7 @@ export function Celebration({
   titre: string
   onFermer: () => void
 }) {
+  const t = useT()
   const fermerRef = useRef(onFermer)
   fermerRef.current = onFermer
 
@@ -131,7 +133,7 @@ export function Celebration({
         onClick={(evenement) => evenement.stopPropagation()}
       >
         <p className="text-[12px] font-semibold text-accent">
-          {gains.chapitreTermine ? 'Chapitre terminé' : 'Bien joué'}
+          {t(gains.chapitreTermine ? 'rest.chapterDone' : 'rest.wellPlayed')}
         </p>
         <h2 className="mt-1 font-display text-2xl font-bold leading-tight">{titre}</h2>
 

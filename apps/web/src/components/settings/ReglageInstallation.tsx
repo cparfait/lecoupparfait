@@ -24,7 +24,7 @@ export function ReglageInstallation() {
       <SectionTitle hint={t('notifications.thisDeviceOnly')}>
         <span className="flex items-center gap-2">
           <Smartphone size={16} className="text-accent" aria-hidden />
-          Installer l’application
+          {t('rest.installApp')}
         </span>
       </SectionTitle>
 

@@ -71,9 +71,9 @@ export function AccountButton() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'signout' }),
     })
-    toast.success('À bientôt !')
+    toast.success(t('rest.seeYouSoon'))
     window.location.assign('/')
-  }, [])
+  }, [t])
 
   if (me === undefined) {
     // Calé sur la largeur de l'issue la plus large, pour que l'en-tête ne saute

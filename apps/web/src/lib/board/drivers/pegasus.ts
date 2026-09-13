@@ -20,19 +20,25 @@ import {
   encodePegasusLights,
   pegasusShortCommand,
 } from '../codecs/pegasus.ts'
-import { createEmitter, type BoardDriver, type Occupancy, type PhysicalBoard } from '../types.ts'
+import {
+  PANNES_CARTE,
+  createEmitter,
+  type BoardDriver,
+  type Occupancy,
+  type PhysicalBoard,
+} from '../types.ts'
 import { getBluetooth, toBytes, type BleCharacteristic } from '../webapis.ts'
 
 export const pegasusBluetooth: BoardDriver = {
   id: 'pegasus',
-  label: 'DGT Pegasus',
-  models: 'détection de présence, avec LEDs',
+  labelKey: 'rest.driverPegasus',
+  modelsKey: 'rest.driverPegasusModels',
   transport: 'bluetooth',
   available: () => getBluetooth() !== null,
 
   async connect(): Promise<PhysicalBoard> {
     const bluetooth = getBluetooth()
-    if (!bluetooth) throw new Error("Ce navigateur n'expose pas le Bluetooth.")
+    if (!bluetooth) throw new Error(PANNES_CARTE.bluetooth)
 
     const device = await bluetooth.requestDevice({
       filters: [
@@ -47,7 +53,7 @@ export const pegasusBluetooth: BoardDriver = {
     })
 
     const server = await device.gatt?.connect()
-    if (!server) throw new Error('Connexion GATT impossible.')
+    if (!server) throw new Error(PANNES_CARTE.gatt)
 
     const service = await server.getPrimaryService(PEGASUS_BLE.service)
     const notify = await service.getCharacteristic(PEGASUS_BLE.notify)

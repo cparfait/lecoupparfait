@@ -336,7 +336,7 @@ export default function PendulePage() {
           {tombe && (
             <Card className="mt-2 p-4 text-center">
               <p className="font-display text-lg font-bold">
-                Temps écoulé — {tombe === 'w' ? 'les Blancs' : 'les Noirs'} tombent.
+                {t(tombe === 'w' ? 'rest.whiteFlagged' : 'rest.blackFlagged')}
               </p>
               <div className="mt-3 flex flex-wrap justify-center gap-2">
                 <Button variant="secondary" icon={<RotateCcw size={15} />} onClick={remettre}>

@@ -8,6 +8,7 @@
  * aux échiquiers ici — d'où ce fichier partagé.
  */
 
+import { PANNES_CARTE } from '../types.ts'
 import type { SerialOptions, SerialPortLike } from '../webapis.ts'
 
 export interface SerialLink {
@@ -27,7 +28,7 @@ export async function openSerialLink(
   const writable = port.writable
   if (!readable || !writable) {
     await port.close()
-    throw new Error('Le port série ne fournit ni lecture ni écriture.')
+    throw new Error(PANNES_CARTE.flux)
   }
 
   const reader = readable.getReader()

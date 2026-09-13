@@ -20,6 +20,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode, Ref } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import clsx from 'clsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export function Defilement({
   children,
@@ -96,6 +97,7 @@ export function Defilement({
  * dessous en s'estompant, ce qui dit mieux qu'un trait qu'il continue.
  */
 function Fleche({ sens, onClick }: { sens: -1 | 1; onClick: () => void }) {
+  const t = useT()
   const Icone = sens < 0 ? ChevronLeft : ChevronRight
   return (
     <div
@@ -109,7 +111,7 @@ function Fleche({ sens, onClick }: { sens: -1 | 1; onClick: () => void }) {
       <button
         type="button"
         onClick={onClick}
-        aria-label={sens < 0 ? 'Voir le début de la rangée' : 'Voir la suite de la rangée'}
+        aria-label={t(sens < 0 ? 'rest.rowStart' : 'rest.rowNext')}
         className="pointer-events-auto grid h-8 w-8 place-items-center rounded-full popover text-ink transition-colors hover:bg-surface-hover"
       >
         <Icone size={16} aria-hidden />

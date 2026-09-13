@@ -117,7 +117,7 @@ export default function TournamentsPage() {
             </span>
             <div className="min-w-0 flex-1">
               <p className="font-display text-lg font-bold leading-tight">
-                Tournoi contre l’ordinateur
+                {t('rest.computerTournament')}
               </p>
               <p className="text-[14px] text-muted">{t('arenas.soloBlurb')}</p>
             </div>

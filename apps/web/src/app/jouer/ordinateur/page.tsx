@@ -125,6 +125,7 @@ import {
 import { useCurrentOpening, useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { playMoveSound, playResultSound, playSound } from '@/lib/sound.ts'
 import { localeDuContenu } from '@/lib/i18n/dictionary.ts'
+import { langue, useI18n } from '@/lib/i18n/index.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
 import { usePreferences, usePreferencesDe } from '@/lib/store/preferences.ts'
 import { speak } from '@/lib/speech.ts'
@@ -585,6 +586,7 @@ function SetupScreen({
   personnaliteVoulue?: BotPersonalityId | null
 }) {
   const t = useT()
+  const bcp47 = langue(useI18n().locale).bcp47
   /* La langue du **contenu** pour les sept adversaires : leurs noms et leurs
      phrases sont écrits dans le cœur, qui ne les produit qu'en français et en
      anglais. Voir `localeDuContenu`. */
@@ -841,7 +843,7 @@ function SetupScreen({
                 niveau: reprise.level,
                 couleur: reprise.playerColor === 'w' ? t('settings.white') : t('settings.black'),
                 coups: reprise.moves.length,
-                depuis: depuis(reprise.enregistreLe),
+                depuis: depuis(reprise.enregistreLe, bcp47, t),
               })}
             </p>
           </div>

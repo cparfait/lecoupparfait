@@ -20,20 +20,26 @@ import {
   applyDgtFieldUpdate,
   decodeDgtBoardDump,
 } from '../codecs/dgt.ts'
-import { createEmitter, type BoardDriver, type Occupancy, type PhysicalBoard } from '../types.ts'
+import {
+  PANNES_CARTE,
+  createEmitter,
+  type BoardDriver,
+  type Occupancy,
+  type PhysicalBoard,
+} from '../types.ts'
 import { getSerial } from '../webapis.ts'
 import { openSerialLink } from './serial.ts'
 
 export const dgtSerial: BoardDriver = {
   id: 'dgt',
-  label: 'DGT',
-  models: 'e-Board, Smart Board, USB-C (sans LEDs)',
+  labelKey: 'rest.driverDgt',
+  modelsKey: 'rest.driverDgtModels',
   transport: 'serial',
   available: () => getSerial() !== null,
 
   async connect(): Promise<PhysicalBoard> {
     const serial = getSerial()
-    if (!serial) throw new Error("Ce navigateur n'expose pas Web Serial.")
+    if (!serial) throw new Error(PANNES_CARTE.serie)
 
     const port = await serial.requestPort()
     const snapshots = createEmitter<Occupancy>()

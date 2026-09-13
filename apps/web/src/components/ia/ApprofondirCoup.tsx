@@ -17,7 +17,7 @@
 import type { Commentary } from '@/components/game/LiveCommentary.tsx'
 import { QuestionLibre } from './QuestionLibre.tsx'
 import { contexteDuCoup, questionApprofondir } from '@/lib/ia/contexte.ts'
-import { localeDuContenu } from '@/lib/i18n/index.tsx'
+import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
 export function ApprofondirCoup({
@@ -27,6 +27,7 @@ export function ApprofondirCoup({
   commentary: Commentary | null
   openingName?: string | null
 }) {
+  const t = useT()
   /*
     La langue du **contenu**, et non celle de l'interface.
 
@@ -59,7 +60,7 @@ export function ApprofondirCoup({
         { locale, notation, ouverture: openingName },
       )}
       questionParDefaut={questionApprofondir(locale)}
-      suggestions={suggestionsPour(commentary.quality, locale)}
+      suggestions={suggestionsPour(commentary.quality, t)}
     />
   )
 }
@@ -72,16 +73,19 @@ export function ApprofondirCoup({
  * marchait. Proposer les deux à chaque fois reviendrait à n'en proposer
  * aucune.
  */
-function suggestionsPour(quality: Commentary['quality'], locale: 'fr' | 'en'): string[] {
+function suggestionsPour(quality: Commentary['quality'], t: ReturnType<typeof useT>): string[] {
   const mauvais = quality === 'blunder' || quality === 'mistake' || quality === 'miss'
 
-  if (locale === 'en') {
-    return mauvais
-      ? ['What should I have seen?', 'What does my opponent threaten now?']
-      : ['What is the plan from here?', 'What should I watch out for?']
-  }
+  /*
+    Ces quatre questions passent par le dictionnaire et non par la locale du
+    contenu.
 
+    Elles sont à la fois l'étiquette d'une pastille qu'on lit et la question
+    qu'on envoie au modèle — et le modèle, lui, parle toutes les langues, comme
+    le dit `useAssistant`. Elles étaient écrites en français et en anglais
+    seulement : un hispanophone lisait quatre questions en français.
+  */
   return mauvais
-    ? ['Qu’est-ce que j’aurais dû voir ?', 'Que menace mon adversaire maintenant ?']
-    : ['Quel est le plan à partir d’ici ?', 'À quoi dois-je faire attention ?']
+    ? [t('last.askWhatToSee'), t('last.askWhatThreatens')]
+    : [t('last.askThePlan'), t('last.askWhatToWatch')]
 }

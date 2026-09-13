@@ -94,12 +94,12 @@ export function AvatarPicker({
         onChange?.(avatar)
       } catch {
         setChosen(avant)
-        toast.error('Le serveur est injoignable.')
+        toast.error(t('rest.serverDown'))
       } finally {
         setBusy(false)
       }
     },
-    [busy, chosen, onChange],
+    [busy, chosen, onChange, t],
   )
 
   const active = AVATAR_FAMILIES[family]!
@@ -112,8 +112,8 @@ export function AvatarPicker({
         onClick={() => setOuvert((valeur) => !valeur)}
         aria-haspopup="dialog"
         aria-expanded={ouvert}
-        title="Changer d’avatar"
-        aria-label="Changer d’avatar"
+        title={t('rest.changeAvatar')}
+        aria-label={t('rest.changeAvatar')}
         className={clsx(
           'group relative grid h-16 w-16 place-items-center rounded-[var(--radius)] bg-surface-strong text-3xl transition-colors',
           'hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
@@ -135,7 +135,7 @@ export function AvatarPicker({
       {ouvert && (
         <div
           role="dialog"
-          aria-label="Choisir un avatar"
+          aria-label={t('rest.pickAvatar')}
           className={clsx(
             'animate-slide-up popover absolute left-0 top-[4.75rem] z-50 p-3 shadow-[var(--shadow-lg)]',
             'w-[20rem] max-w-[calc(100vw-2rem)]',
@@ -175,7 +175,7 @@ export function AvatarPicker({
                 key={emoji}
                 type="button"
                 onClick={() => void pick(emoji)}
-                title={emoji === chosen ? 'Ton avatar' : 'Choisir cet avatar'}
+                title={emoji === chosen ? t('auth.avatarYours') : t('auth.avatarPick')}
                 aria-pressed={emoji === chosen}
                 className={clsx(
                   'grid aspect-square place-items-center rounded-[var(--radius-sm)] text-xl transition-colors',

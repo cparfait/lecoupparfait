@@ -61,6 +61,7 @@ import {
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
 import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
+import { messageMoteur } from '@/lib/engine/client.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { positionEnPng, telecharger } from '@/lib/board/imagePosition.ts'
 import { ImportEnLigne } from '@/components/import/ImportEnLigne.tsx'
@@ -297,10 +298,7 @@ function ImportScreen({
         return
       }
       console.error(error)
-      toast.error(
-        t('analysis.failed'),
-        error instanceof Error ? error.message : t('analysis.tryAgainSoon'),
-      )
+      toast.error(t('analysis.failed'), messageMoteur(error, t) ?? t('analysis.tryAgainSoon'))
       onError()
     } finally {
       abandonRef.current = null

@@ -729,7 +729,7 @@ export default function PuzzlesPage() {
           />
           {!puzzleIllisible && (
             <div className="border-t border-line/60 px-5 py-4">
-              <p className="text-xs text-faint">Commande d’import :</p>
+              <p className="text-xs text-faint">{t('rest.importCommand')}</p>
               <code className="mt-1 block rounded bg-surface px-2 py-1.5 font-mono text-[12px]">
                 node scripts/import-puzzles.mjs
               </code>

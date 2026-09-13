@@ -240,7 +240,7 @@ export default function EditorPage() {
                       : 'border-line text-muted hover:bg-surface-hover',
                   )}
                 >
-                  {colour === 'w' ? 'Aux Blancs' : 'Aux Noirs'}
+                  {t(colour === 'w' ? 'rest.whiteToMove' : 'rest.blackToMove')}
                 </button>
               ))}
             </div>

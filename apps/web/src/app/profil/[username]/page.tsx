@@ -688,7 +688,7 @@ function RatingChart({ history }: { history: Profile['history'] }) {
           surinterprète tout aussi vite : le chiffre tranche. */}
       <p className="mb-2 text-[14px] leading-relaxed">
         <strong className="font-display text-lg font-bold tabular-nums">{arrivee}</strong>{' '}
-        <span className="text-muted">aujourd’hui, </span>
+        <span className="text-muted">{t('rest.today')} </span>
         <span
           className={clsx(
             'font-semibold tabular-nums',
@@ -712,7 +712,12 @@ function RatingChart({ history }: { history: Profile['history'] }) {
         viewBox={`0 0 ${L} ${H}`}
         className="h-auto w-full"
         role="img"
-        aria-label={`Classement ${CATEGORY_LABELS[serie.categorie] ?? serie.categorie} : ${depart} au départ, ${arrivee} aujourd’hui, sur ${valeurs.length} parties.`}
+        aria-label={t('rest.ratingCurveAria', {
+          categorie: CATEGORY_LABELS[serie.categorie] ?? serie.categorie,
+          depart,
+          arrivee,
+          parties: valeurs.length,
+        })}
       >
         {/* Le point de départ, en pointillé : c'est la ligne de flottaison, et
             sans elle on ne sait pas si la courbe monte ou revient. */}

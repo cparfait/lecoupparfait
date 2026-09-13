@@ -20,6 +20,7 @@ import { ButtonLink, Card, Chip, Skeleton } from '@/components/ui/index.tsx'
 import { AccueilConnecte } from '@/components/accueil/AccueilConnecte.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { renderEmphasis, useI18n } from '@/lib/i18n/index.tsx'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import type { BoardStyleId, ThemeId } from '@/lib/store/preferences.ts'
 
@@ -93,23 +94,30 @@ const DAMIER_PAR_THEME: Record<ThemeId, BoardStyleId> = {
   clair: 'marbre',
 }
 
-/** Commentaires affichés aux moments charnières de la démonstration. */
-const COMMENTARY: Record<number, string> = {
-  0: 'Le gambit du roi : les Blancs offrent un pion pour ouvrir des lignes vers le roi adverse.',
-  9: 'Les Noirs ramassent du matériel pendant que les Blancs développent. Deux philosophies s’affrontent.',
-  21: 'Un deuxième pion tombe. L’évaluation donne les Noirs largement gagnants — et pourtant.',
-  35: 'Les Noirs viennent de prendre la tour a1. Ils ont une dame et deux tours d’avance.',
-  40: 'Cavalier prend g7, échec. Le roi noir est nu au centre : le matériel ne le protège plus.',
-  42: 'Sacrifice de la dame ! Anderssen abandonne sa dernière pièce lourde.',
-  44: 'Fou e7, mat. Trois pièces mineures suffisent quand le roi n’a plus une seule case.',
+/*
+  Commentaires affichés aux moments charnières de la démonstration.
+
+  Par clé de dictionnaire : c'est une constante de module, donc sans `t()`, et les
+  sept phrases restaient en français sur la page que voit en premier quelqu'un qui
+  arrive — autrement dit la dernière place où l'on voudrait une langue qu'on ne
+  lit pas.
+*/
+const COMMENTARY: Record<number, TranslationKey> = {
+  0: 'rest.immortal0',
+  9: 'rest.immortal1',
+  21: 'rest.immortal2',
+  35: 'rest.immortal3',
+  40: 'rest.immortal4',
+  42: 'rest.immortal5',
+  44: 'rest.immortal6',
 }
 
 /** Les trois destinations que l'accueil doit pouvoir atteindre sans le menu. */
 const PORTES = [
-  { href: '/apprendre', label: 'Apprendre les échecs de zéro' },
-  { href: '/analyse', label: 'Analyser une partie' },
-  { href: '/jouer/ordinateur', label: 'Jouer contre l’ordinateur' },
-] as const
+  { href: '/apprendre', labelKey: 'rest.doorLearn' },
+  { href: '/analyse', labelKey: 'rest.doorAnalyse' },
+  { href: '/jouer/ordinateur', labelKey: 'rest.doorComputer' },
+] as const satisfies ReadonlyArray<{ href: string; labelKey: TranslationKey }>
 
 /**
  * Deux accueils, selon qu'on a un compte ou non.
@@ -334,7 +342,7 @@ function Hero() {
             </span>
             <div className="min-w-0">
               <p className="text-[12px] font-semibold text-faint">{t('home.demoCaption')}</p>
-              <p className="mt-1 text-sm leading-relaxed">{comment}</p>
+              <p className="mt-1 text-sm leading-relaxed">{t(comment)}</p>
             </div>
           </Card>
         </div>
@@ -419,13 +427,13 @@ function Essentiel() {
         className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line/60 pt-5 text-sm"
       >
         <span className="text-[12px] font-semibold text-faint">{t('home.goFurther')}</span>
-        {PORTES.map(({ href, label }) => (
+        {PORTES.map(({ href, labelKey }) => (
           <Link
             key={href}
             href={href}
             className="group flex items-center gap-1.5 font-medium text-muted transition-colors hover:text-ink"
           >
-            {label}
+            {t(labelKey)}
             <ArrowRight
               size={14}
               aria-hidden

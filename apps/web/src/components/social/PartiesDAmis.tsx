@@ -114,7 +114,7 @@ function PartieDUnAmi({ partie, habillage }: { partie: PartieDAmi; habillage: st
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[14px] font-semibold">{partie.pseudo}</span>
           <span className="mt-0.5 block truncate text-[12px] text-faint">
-            contre {partie.adversaire?.nom ?? 'l’ordinateur'}
+            contre {partie.adversaire?.nom ?? t('rest.theComputer')}
             {partie.adversaire && ` · ${partie.adversaire.elo} Elo`}
           </span>
         </span>

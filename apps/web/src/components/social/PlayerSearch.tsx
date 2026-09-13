@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Loader2, Search, X } from 'lucide-react'
 import clsx from 'clsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 interface Player {
   username: string
@@ -28,6 +29,7 @@ interface Player {
 const DEBOUNCE_MS = 250
 
 export function PlayerSearch({ className }: { className?: string }) {
+  const t = useT()
   const [query, setQuery] = useState('')
   const [players, setPlayers] = useState<Player[]>([])
   const [searching, setSearching] = useState(false)
@@ -76,8 +78,8 @@ export function PlayerSearch({ className }: { className?: string }) {
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         onFocus={() => players.length > 0 && setOpen(true)}
-        placeholder="Chercher un joueur…"
-        aria-label="Chercher un joueur dans l’annuaire"
+        placeholder={t('rest.searchPlayer')}
+        aria-label={t('rest.searchPlayerAria')}
         className="h-9 w-full rounded-[var(--radius-sm)] border border-line bg-surface pl-8 pr-8 text-sm placeholder:text-faint focus:border-accent focus:outline-none"
       />
       {query && (
@@ -104,7 +106,7 @@ export function PlayerSearch({ className }: { className?: string }) {
         <div className="popover absolute left-0 right-0 top-11 z-50 max-h-80 overflow-y-auto p-1 shadow-[var(--shadow-lg)]">
           {players.length === 0 ? (
             <p className="px-2.5 py-3 text-[14px] text-faint">
-              {searching ? 'Recherche…' : 'Personne de ce nom dans l’annuaire.'}
+              {searching ? t('common.loading') : t('rest.nobodyByThatName')}
             </p>
           ) : (
             players.map((player) => (

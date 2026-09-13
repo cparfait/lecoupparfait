@@ -24,6 +24,7 @@ import {
   type PieceId,
 } from '../codecs/certabo.ts'
 import {
+  PANNES_CARTE,
   UNKNOWN_PIECE,
   createEmitter,
   type BoardDriver,
@@ -56,14 +57,14 @@ function saveCalibration(calibration: CertaboCalibration): void {
 
 export const certaboSerial: BoardDriver = {
   id: 'certabo',
-  label: 'Certabo',
-  models: 'Certabo, TabuTronic Cerno et Sentio',
+  labelKey: 'rest.driverCertabo',
+  modelsKey: 'rest.driverCertaboModels',
   transport: 'serial',
   available: () => getSerial() !== null,
 
   async connect(): Promise<PhysicalBoard> {
     const serial = getSerial()
-    if (!serial) throw new Error("Ce navigateur n'expose pas Web Serial.")
+    if (!serial) throw new Error(PANNES_CARTE.serie)
 
     const port = await serial.requestPort()
     const snapshots = createEmitter<Occupancy>()

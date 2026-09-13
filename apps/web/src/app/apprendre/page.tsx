@@ -50,10 +50,10 @@ const TEINTE_APPRENDRE = 'var(--rub-apprendre)'
  * page qui payait. Le niveau se lit sur la pastille, qui est faite pour ça.
  */
 const LEVEL_LABELS = {
-  beginner: { label: 'Débutant', tone: 'success' as const },
-  intermediate: { label: 'Intermédiaire', tone: 'warning' as const },
-  advanced: { label: 'Confirmé', tone: 'danger' as const },
-}
+  beginner: { labelKey: 'rest.levelBeginner', tone: 'success' },
+  intermediate: { labelKey: 'rest.levelIntermediate', tone: 'warning' },
+  advanced: { labelKey: 'rest.levelAdvanced', tone: 'danger' },
+} as const
 
 /** Chapitres repliés, conservés d'une visite à l'autre. */
 const COLLAPSED_KEY = 'coupparfait.chaptersCollapsed'
@@ -403,7 +403,7 @@ export default function LearnPage() {
                   </div>
 
                   <Chip tone={LEVEL_LABELS[chapter.level].tone} className="shrink-0">
-                    {LEVEL_LABELS[chapter.level].label}
+                    {t(LEVEL_LABELS[chapter.level].labelKey)}
                   </Chip>
 
                   <ChevronDown
