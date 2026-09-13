@@ -35,9 +35,10 @@ import { TEMOIN_LANGUE } from './temoin.ts'
  * Le témoin seul, sans repli sur `Accept-Language` : contrairement aux routes
  * d'API, on est ici dans le tout premier chargement possible, où le témoin peut
  * manquer — et l'en-tête du navigateur donnerait alors une langue que
- * l'application n'utilise pas encore, si bien que le titre de l'onglet ne
- * correspondrait pas à l'écran qu'il surmonte. Mieux vaut le français, que
- * `TitreTraduit` corrigera dès l'hydratation.
+ * l'application n'utilise pas encore, puisqu'elle démarre en français et ne lit
+ * pas `navigator.language`. Le titre de l'onglet ne correspondrait pas à l'écran
+ * qu'il surmonte. Le témoin est posé dès le premier rendu du client ; seule la
+ * toute première page d'une visite sans témoin porte donc un titre français.
  */
 export async function tDesMetadonnees(): Promise<Traducteur> {
   const boite = await cookies()

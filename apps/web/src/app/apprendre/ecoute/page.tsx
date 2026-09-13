@@ -192,7 +192,7 @@ export default function EcoutePage() {
     // phrase — « Mieux valait Cf3 » devient « cavalier f 3 » — et applique la
     // table des prononciations. Le refaire ici serait une seconde version de la
     // même règle, qui divergerait.
-    speak(etape.say, { force: true, onEnd: () => passerALaSuite(SILENCE_MS) })
+    speak(t(etape.say), { force: true, onEnd: () => passerALaSuite(SILENCE_MS) })
 
     /*
       Le filet de sécurité, et il n'est pas théorique.
@@ -211,7 +211,7 @@ export default function EcoutePage() {
       pour le calcul d'une voix neuronale. La première des deux qui se
       déclenche gagne, `avance` garantissant qu'on ne saute pas deux étapes.
     */
-    const mots = etape.say.trim().split(/\s+/).length
+    const mots = t(etape.say).trim().split(/\s+/).length
     passerALaSuiteAuPireCas(mots)
 
     function passerALaSuiteAuPireCas(nombreDeMots: number) {
@@ -226,7 +226,7 @@ export default function EcoutePage() {
       secours.current = null
       stopSpeaking()
     }
-  }, [enLecture, position, etape, pistes.length])
+  }, [enLecture, position, etape, pistes.length, t])
 
   // Quitter la page ne doit pas laisser une voix qui continue dans le vide.
   useEffect(() => () => stopSpeaking(), [])
@@ -322,7 +322,7 @@ export default function EcoutePage() {
           <div className="space-y-3">
             <Card className="overflow-hidden">
               <EnTeteDeCarte
-                titre={piste.lesson.title}
+                titre={t(piste.lesson.title)}
                 icone={<Headphones size={14} aria-hidden />}
                 teinte={TEINTE}
                 fin={`étape ${piste.etape + 1} / ${piste.lesson.steps.length}`}
@@ -331,10 +331,10 @@ export default function EcoutePage() {
                 <Chip>{piste.chapitre}</Chip>
                 {/* La phrase en grand : c'est ce qu'on entend, et quelqu'un qui
                     regarde l'écran doit pouvoir suivre sans tendre l'oreille. */}
-                <p className="mt-3 text-[16px] leading-relaxed">{etape.say}</p>
+                <p className="mt-3 text-[16px] leading-relaxed">{t(etape.say)}</p>
                 {etape.instruction && (
                   <p className="mt-2 text-[13px] text-faint">
-                    {t('listen.wouldAskYou', { consigne: etape.instruction })}
+                    {t('listen.wouldAskYou', { consigne: t(etape.instruction) })}
                   </p>
                 )}
               </div>
@@ -416,7 +416,7 @@ export default function EcoutePage() {
               <p className="text-[13px] leading-relaxed text-muted">
                 Cette leçon t’intéresse ? Fais-la pour de vrai —{' '}
                 <Link href={`/apprendre/${piste.lesson.id}`} className="lien">
-                  {piste.lesson.title}
+                  {t(piste.lesson.title)}
                 </Link>
                 {t('listen.playedNotHeard')}
               </p>

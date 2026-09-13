@@ -146,7 +146,7 @@ export default function LessonPage() {
   // était prononcée, aussitôt coupée par le démontage, puis considérée comme
   // « déjà lue » au remontage. Résultat : le message d'introduction restait muet
   // alors que les suivants passaient.
-  const spoken = step?.say ?? ''
+  const spoken = step ? t(step.say) : ''
   useEffect(() => {
     if (!spoken || !voiceEnabled) return
     speak(spoken)
@@ -156,7 +156,8 @@ export default function LessonPage() {
   // La voix neuronale demande une seconde ou deux de calcul. On prépare donc
   // l'étape suivante pendant qu'on écoute celle-ci : au moment de cliquer sur
   // « Continuer », la phrase est déjà prête et part sans attente.
-  const upcomingSay = lesson?.steps[stepIndex + 1]?.say ?? ''
+  const suivante = lesson?.steps[stepIndex + 1]
+  const upcomingSay = suivante ? t(suivante.say) : ''
   useEffect(() => {
     if (!upcomingSay || !voiceEnabled) return
     prefetchSpeech(upcomingSay)
@@ -176,9 +177,9 @@ export default function LessonPage() {
   const spokenSquares = useMemo<Square[]>(() => {
     if (step?.highlight?.length) return step.highlight as Square[]
     if (!step?.say) return []
-    const found = step.say.match(/\b[a-h][1-8]\b/g) ?? []
+    const found = t(step.say).match(/\b[a-h][1-8]\b/g) ?? []
     return [...new Set(found)] as Square[]
-  }, [step])
+  }, [step, t])
 
   /**
    * Roi maté, s'il y en a un.
@@ -385,7 +386,7 @@ export default function LessonPage() {
             /
           </span>
           <span className="text-sm font-medium">
-            {lesson.icon} {lesson.title}
+            {lesson.icon} {t(lesson.title)}
           </span>
           {/* Le haut-parleur n'est plus ici — il est dans le panneau du coach,
               c'est-à-dire à côté du texte qu'il fait lire. Sur téléphone,
@@ -395,7 +396,7 @@ export default function LessonPage() {
               lignes d'en-tête, c'est autant de pris sur l'échiquier et sur le
               texte, qui sont toute la leçon. */}
           <Chip className="ml-auto">
-            Étape {stepIndex + 1} / {lesson.steps.length}
+            {t('lesson.stepOf', { n: stepIndex + 1, total: lesson.steps.length })}
           </Chip>
           {/* La bascule de vue, en tête plutôt que sous le plateau, qui
               récupère sa rangée. Le plateau la dessine lui-même ici. */}
@@ -456,7 +457,7 @@ export default function LessonPage() {
             >
               {solved ? <Check size={15} aria-hidden /> : null}
               <span className="min-w-0 flex-1">
-                {feedback?.text ?? step.instruction ?? t('lesson.yourTurn')}
+                {feedback?.text ?? (step.instruction ? t(step.instruction) : t('lesson.yourTurn'))}
               </span>
               {!solved && attempts >= 1 && (
                 <Button size="sm" variant="ghost" icon={<Eye size={13} />} onClick={reveal}>
@@ -504,7 +505,7 @@ export default function LessonPage() {
               </button>
               <button
                 type="button"
-                onClick={() => speak(step.say)}
+                onClick={() => speak(t(step.say))}
                 className="grid h-8 w-8 place-items-center rounded-[var(--radius-sm)] text-faint transition-colors hover:bg-surface-hover hover:text-ink"
                 aria-label={t('lesson.replay')}
                 title={t('lesson.replay')}
@@ -513,7 +514,7 @@ export default function LessonPage() {
               </button>
             </div>
 
-            <p className="text-[15px] leading-relaxed">{renderBold(step.say)}</p>
+            <p className="text-[15px] leading-relaxed">{renderBold(t(step.say))}</p>
           </Card>
 
           {/* Collées en bas sur téléphone, comme dans les puzzles et la
@@ -559,7 +560,7 @@ export default function LessonPage() {
               >
                 <ArrowLeft size={12} aria-hidden />
                 <span className="truncate">
-                  {previous.icon} {previous.title}
+                  {previous.icon} {t(previous.title)}
                 </span>
               </Link>
             )}
@@ -570,7 +571,7 @@ export default function LessonPage() {
               >
                 <ArrowRight size={12} aria-hidden />
                 <span className="truncate">
-                  {upcoming.icon} {upcoming.title}
+                  {upcoming.icon} {t(upcoming.title)}
                 </span>
               </Link>
             )}

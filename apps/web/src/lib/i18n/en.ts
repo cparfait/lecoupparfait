@@ -2093,6 +2093,7 @@ export const en: Dictionary = {
   },
 
   lesson: {
+    stepOf: 'Step {n} / {total}',
     wrongMove: 'That is not the expected move. Try again.',
     cannotShow: 'The move cannot be shown here.',
     notFound: 'Lesson not found',
@@ -2525,6 +2526,1399 @@ export const en: Dictionary = {
     purgedSessions: 'expired sessions',
     purgedEvaluations: 'evaluations under 14 plies, too shallow to be reused',
     purgedEmptyAccounts: 'accounts with no game and no analysis, inactive for six months',
+  },
+  lecons: {
+    bases: {
+      title: 'The basics',
+      description:
+        'The board, the six pieces, the three special rules. In an hour you will be able to play a whole game without ever wondering whether a move is allowed.',
+      echiquier: {
+        title: 'The board and its squares',
+        summary: 'Sixty-four squares, and a name for each one. This is the language of the game.',
+        e1: {
+          say: 'Here is a chessboard. Sixty-four squares, eight files and eight ranks. One rule before anything else: the square in the bottom right must always be a light one.',
+        },
+        e2: {
+          say: 'The files carry letters, from a to h, starting from the left. The ranks carry numbers, from 1 to 8, starting from the bottom.',
+        },
+        e3: {
+          say: 'So every square has a name: the letter of its file, then the number of its rank. Here is e4, in the heart of the board.',
+        },
+        e4: {
+          say: 'These four central squares — d4, d5, e4, e5 — are the most important on the board. A piece placed in the centre controls far more squares than a piece in a corner. Remember it: this is the first rule of strategy.',
+        },
+        e5: {
+          say: 'Here is the starting position. White at the bottom, Black at the top. A little trick so you never get it wrong: the queen goes on a square of her own colour. White queen on a light square, black queen on a dark one.',
+        },
+      },
+      tour: {
+        title: 'The rook',
+        summary: 'It goes in a straight line, as far as it likes. The simplest, and formidable.',
+        e1: {
+          say: 'The rook moves in a straight line: along its file, or along its rank. As far as it likes, as long as the road is clear.',
+        },
+        e2: {
+          say: 'Your turn. Move the rook to the top of its file, to d8.',
+          instruction: 'Play the rook to d8',
+          hint: 'Take the rook and slide it upwards, all the way to d8.',
+        },
+        e3: {
+          say: 'The rook never jumps over a piece. Here, that black pawn on g4 blocks its road: it can go as far as g4 to capture it, but no further.',
+        },
+        e4: {
+          say: 'Capture that pawn. To take a piece, you simply put yours in its place.',
+          instruction: 'Capture the pawn on g4',
+          hint: 'Slide the rook from d4 to g4, onto the pawn.',
+        },
+        e5: {
+          say: 'There. The rook is worth five pawns: it is a heavy piece, a precious one. It becomes very strong when the files open up, in the endgame.',
+        },
+      },
+      fou: {
+        title: 'The bishop',
+        summary: 'It runs along the diagonals — and stays on squares of one colour all its life.',
+        e1: {
+          say: 'The bishop moves along the diagonals, as far as it likes. It too jumps over nothing.',
+        },
+        e2: {
+          say: 'Look carefully: this bishop is on a dark square, and every square it can reach is dark. A bishop never changes square colour. Not once in the whole game.',
+        },
+        e3: {
+          say: 'That is why we speak of the bishop pair: with both of them you cover every square on the board. With only one, half of them escape it for ever.',
+        },
+        e4: {
+          say: 'Your turn. Capture the black pawn on f6.',
+          instruction: 'Capture the pawn on f6',
+          hint: 'Follow the diagonal up and to the right: d4, e5, f6.',
+        },
+        e5: {
+          say: 'The bishop is worth about three pawns, like the knight. In an open position, with few pawns in the centre, it is often the stronger of the two.',
+        },
+      },
+      dame: {
+        title: 'The queen',
+        summary:
+          'Rook and bishop in one. The most powerful piece — and therefore the most fragile.',
+        e1: {
+          say: 'The queen combines the rook and the bishop: straight lines and diagonals, as far as she likes. From the centre she controls twenty-seven squares.',
+        },
+        e2: {
+          say: 'She is worth nine pawns. That is enormous, and that is exactly the problem: any enemy piece can take her, and the game is lost on the spot. A queen has to be looked after.',
+        },
+        e3: {
+          say: 'That black rook on d8 is defended by nobody, and it is on your queen’s file. Take it.',
+          instruction: 'Capture the rook on d8',
+          hint: 'The queen goes straight up the d-file.',
+        },
+        e4: {
+          say: 'A very common beginner’s mistake: bringing the queen out in the first few moves. She then gets chased around by less valuable enemy pieces, and you lose time saving her. Bring her out late.',
+        },
+      },
+      cavalier: {
+        title: 'The knight',
+        summary: 'The only one that jumps. Baffling at first, formidable once tamed.',
+        e1: {
+          say: 'The knight moves in an L: two squares in one direction, then one square at right angles. From d4 it can reach eight squares.',
+        },
+        e2: {
+          say: 'The trick so you never get it wrong: the knight always changes square colour. From a dark square it goes to a light one, and the other way round. Always.',
+        },
+        e3: {
+          say: 'And above all: it is the only piece that jumps over the others. Here the knight is completely surrounded, and yet it can get out. Watch.',
+        },
+        e4: {
+          say: 'Your turn. Get it out of that wall: play the knight to c6, over the pawns.',
+          instruction: 'Play the knight to c6',
+          hint: 'Two squares up, one to the left. The knight goes over everything.',
+        },
+        e5: {
+          say: 'The knight is worth three pawns. It is excellent in closed positions, cluttered with pawns, where bishops and rooks suffocate.',
+        },
+      },
+      pion: {
+        title: 'The pawn',
+        summary: 'It moves straight ahead but captures on the diagonal. And it never goes back.',
+        e1: {
+          say: 'The pawn is the strangest piece. It moves one square, straight ahead, and never backwards. A pawn that has advanced does not return.',
+        },
+        e2: {
+          say: 'One exception: from its starting square it may advance two squares at once. Only once, on its first move.',
+        },
+        e3: {
+          say: 'Advance the pawn two squares, to d4.',
+          instruction: 'Play the pawn to d4',
+          hint: 'Take the pawn and put it two squares higher.',
+        },
+        e4: {
+          say: 'Here is what baffles everybody at first: the pawn moves straight ahead, but it captures **on the diagonal**. These two black pawns are within its reach.',
+        },
+        e5: {
+          say: 'Look: the white pawn on d2 can capture on c3 or on e3, but it cannot capture a piece standing right in front of it on d3. That piece would simply block it.',
+        },
+        e6: {
+          say: 'Capture one of the two pawns.',
+          instruction: 'Capture a pawn on the diagonal',
+          hint: 'The pawn takes on the diagonal, one square only.',
+        },
+        e7: {
+          say: 'The pawn is worth one. It is the unit of measurement of the whole game. But a pawn that reaches the far end of the board turns into a queen — we come back to that in two lessons.',
+        },
+      },
+      roi: {
+        title: 'The king',
+        summary: 'He moves one square only — but the whole game revolves around him.',
+        e1: {
+          say: 'The king moves one square only, but in every direction. Eight possible squares from the centre.',
+        },
+        e2: {
+          say: 'The king is never captured. When he is attacked we say he is in check, and it has to be dealt with. Three ways to do it: move the king, capture the attacker, or put a piece in the way.',
+        },
+        e3: {
+          say: 'If none of those three answers exists, it is checkmate: the game is over. That is the one and only aim of the game.',
+        },
+        e4: {
+          say: 'One last rule: two kings can never touch. They must always keep at least one square between them, otherwise they would put each other in check.',
+        },
+      },
+      roque: {
+        title: 'Castling',
+        summary: 'Two pieces moving in one move: the only such move in the whole game.',
+        e1: {
+          say: 'Castling puts the king in safety. It is the only move where two pieces move at the same time: the king and a rook.',
+        },
+        e2: {
+          say: 'Kingside castling: the king takes two steps towards the rook, and the rook jumps over him to land right beside him. Watch.',
+        },
+        e3: {
+          say: 'Castle kingside. Take the king and bring him to g1: the rook will follow on its own.',
+          instruction: 'Castle kingside',
+          hint: 'Take the king on e1 and put him on g1.',
+        },
+        e4: {
+          say: 'Perfect. Your king is now behind three untouched pawns, and your rook has come out of its corner. Two problems solved in one move.',
+        },
+        e5: {
+          say: 'Four conditions for castling. The king has never moved. The rook in question has never moved. The squares between them are empty. And the king is not in check, does not cross an attacked square, and does not land on an attacked square.',
+        },
+        e6: {
+          say: 'There is also queenside castling: the king goes to c1, the rook from a1 comes to d1. It leaves the king slightly less sheltered, but activates the rook sooner.',
+        },
+      },
+      'regles-speciales': {
+        title: 'En passant and promotion',
+        summary: 'The two rules nobody works out on their own.',
+        e1: {
+          say: 'Capturing en passant. The black pawn has just advanced two squares at once, passing beside your pawn. The rule says you may capture it as if it had advanced only one.',
+        },
+        e2: {
+          say: 'So your pawn on e5 captures on d6, and the black pawn disappears from d5. Try it.',
+          instruction: 'Capture en passant: play the pawn to d6',
+          hint: 'Put your e5 pawn on d6, just behind the black pawn.',
+        },
+        e3: {
+          say: 'Careful: this capture is only possible **immediately**. If you play anything else, the chance is gone for good.',
+        },
+        e4: {
+          say: 'Promotion, now. A pawn that reaches the last rank turns into something else. You choose what you want: queen, rook, bishop or knight.',
+        },
+        e5: {
+          say: 'Advance the pawn to d8 and take a queen — that is the choice in more than ninety-nine per cent of cases.',
+          instruction: 'Promote the pawn to a queen',
+          hint: 'Advance the pawn one square, then choose the queen from the menu.',
+        },
+        e6: {
+          say: 'A pawn worth one becomes a piece worth nine. That is why every pawn matters enormously in the endgame: it is a queen in waiting.',
+        },
+      },
+      'echec-mat-pat': {
+        title: 'Check, mate and stalemate',
+        summary: 'How you win, and how you miss the win by a hair.',
+        e1: {
+          say: 'A rook on the enemy king’s file: that is a check. The black king is attacked, he has to react.',
+        },
+        e2: {
+          say: 'With two rooks you can force mate. Here is the staircase technique: the one on h7 already cuts off the seventh rank, all that is left is to give check on the last one.',
+        },
+        e3: {
+          say: 'Play the rook to a8: it gives check on the last rank, and the other rook stops the king coming down.',
+          instruction: 'Play the rook to a8',
+          hint: 'The rook on a1 goes to the top of its file.',
+        },
+        e4: {
+          say: 'Checkmate. The black king is attacked, he cannot flee to the seventh rank because the other rook controls it, and he has nothing to capture or interpose with. Game over.',
+        },
+        e5: {
+          say: 'Now the trap that infuriates every beginner: stalemate. Here it is Black to move. Their king is **not** in check. But every square around him is controlled, and he has no other piece.',
+        },
+        e6: {
+          say: 'No legal move, and no check: that is stalemate, and the game is a draw. White was a whole queen up and won nothing. Remember it well: when your opponent has almost nothing left, always leave them a square.',
+        },
+      },
+      valeurs: {
+        title: 'What each piece is worth',
+        summary:
+          'A simple scale that will tell you, at every exchange, whether you come out ahead.',
+        e1: {
+          say: 'The universal scale. The pawn is worth one. The knight and the bishop are worth three. The rook is worth five. The queen is worth nine. The king has no value: he is above all of it, and is never exchanged.',
+        },
+        e2: {
+          say: 'What is it for? For deciding in a second whether an exchange is good. Giving a knight for a rook is three against five: excellent. That is called winning the exchange.',
+        },
+        e3: {
+          say: 'But these numbers are only a starting point. A well-placed knight in the centre is worth more than a rook stuck in a corner. And if you can give mate, material stops counting altogether.',
+        },
+        e4: {
+          say: 'An example: White has just given up a bishop, three points, for a single pawn. At first sight it is absurd. But the black king is dragged out of his shelter, and the attack that follows is worth far more than three points.',
+        },
+        e5: {
+          say: 'That is the whole beauty of the game: material is a compass, not a law. You will learn when to follow it and when to betray it.',
+        },
+      },
+    },
+    mats: {
+      title: 'Knowing how to mate',
+      description:
+        'Winning a queen is no use if you cannot finish. The five techniques that end a game, from the back rank to the two bishops.',
+      'mat-couloir': {
+        title: 'The back-rank mate',
+        summary: 'The most frequent mate of all. And the easiest to walk into.',
+        e1: {
+          say: 'Look at the black king. He has castled, he is nicely tucked away… except that his own pawns block every way out. He is shut in on his back rank.',
+        },
+        e2: {
+          say: 'A rook arriving on that rank is mate at once. Go on.',
+          instruction: 'Find mate in one',
+          hint: 'The rook goes to the top of its file.',
+        },
+        e3: {
+          say: 'Checkmate. The king cannot go up — he is already at the top — and he cannot come down, his pawns occupy the squares. That is called a back-rank mate.',
+        },
+        e4: {
+          say: 'The remedy takes one move: push a pawn to make an escape square. Here Black has played h6, and their king can now slip away to h7.',
+        },
+        e5: {
+          say: 'Make it a habit, as soon as your rooks leave the back rank: give your king some air. It will save you games you had already won.',
+        },
+      },
+      'mat-escalier': {
+        title: 'The staircase mate',
+        summary: 'Two rooks, no calculation: the technique repeats itself until mate.',
+        e1: {
+          say: 'Two rooks are enough to mate a lone king, without even the help of your own. The principle: one rook pushes the king back, the other stops him coming back.',
+        },
+        e2: {
+          say: 'Start by giving check with the rook on a2, on the seventh rank. The black king will have to go up.',
+          instruction: 'Play the rook to a7',
+          hint: 'The rook on a2 goes up to a7.',
+        },
+        e3: {
+          say: 'The black king has no choice but to go up to the eighth rank. The rook on a7 now forbids him from coming back down.',
+        },
+        e4: {
+          say: 'Now the other rook comes to give check on the eighth rank. That is mate.',
+          instruction: 'Play the rook to b8',
+          hint: 'The rook on b1 goes right to the top.',
+        },
+        e5: {
+          say: 'That is the staircase: the rooks climb one step at a time in turn, the king retreats, and he ends up cornered. No calculation, just the method. When the king comes near one rook, you send it to the far end of its rank.',
+        },
+      },
+      'mat-tour-roi': {
+        title: 'Mating with king and rook',
+        summary: 'The most frequent endgame. A rook never mates alone: it is all about the king.',
+        e1: {
+          say: 'King and rook against a lone king. A rook never mates on its own: try as long as you like, you will always be one square short. It is your king who does the work, the rook only delivers the final blow.',
+        },
+        e2: {
+          say: 'The method has three stages. The rook cuts off a rank to stop the black king coming back down. Your king walks up to join it. And when the two kings face each other, the rook mates.',
+        },
+        e3: {
+          say: 'Here is the position to recognise, and it is the only one to remember. The two kings face each other, one square apart. Your king alone forbids the three squares in front of him: d7, e7 and f7. The black king is left with only d8 and f8, on his own rank.',
+        },
+        e4: {
+          say: 'And a rook takes a whole rank in one move. Go on.',
+          instruction: 'Find mate in one',
+          hint: 'The rook goes to the top of its file, as far as possible from the black king.',
+        },
+        e5: {
+          say: 'Checkmate. The rook holds d8, e8 and f8; your king holds d7, e7 and f7. Six squares between the two of them, and not one more is needed.',
+        },
+        e6: {
+          say: 'The first mistake, and by far the most common: giving check too soon. Here the kings are not facing each other, they are offset. The rook on h8 would give check, yes, but the black king would run to c7 and everything would have to be done again.',
+        },
+        e7: {
+          say: 'So do not give that check. Walk your king into place first, then mate. A check that does not mate achieves nothing in this endgame: it only hands the enemy king his freedom back.',
+        },
+        e8: {
+          say: 'The second mistake, and it costs the whole game: putting the rook right next to the king. Look. The black king is not in check, and he has no move. That is stalemate. A draw, a whole rook up.',
+        },
+        e9: {
+          say: 'Hence the rule: the rook mates from the far side of the board, never beside the king. Far away it is untouchable and it holds the whole rank. Close up, it gets eaten or it makes a draw.',
+        },
+      },
+      'mat-dame-roi': {
+        title: 'Mating with the queen',
+        summary: 'The most frequent endgame after a promotion. One to master completely.',
+        e1: {
+          say: 'King and queen against a lone king. The method: you shrink the cage around the enemy king with the queen, then bring your own king up to deliver the final blow.',
+        },
+        e2: {
+          say: 'A trick for finding the square, and its name is misleading: **the knight’s jump**. There is no knight here — it is the **shape of the move** we mean, the L. The eight marked squares are a knight’s jump from the black king. A queen placed on one of them takes away almost everything, without ever shutting him in completely: that is what avoids stalemate.',
+        },
+        e3: {
+          say: 'Of those eight squares, your queen on d1 reaches only four: d3, f3, g4 and d7. Take **d3** — two squares straight ahead of her.',
+          instruction: 'Play the queen to d3',
+          hint: 'The queen goes two squares up her file: from d1 to d3.',
+        },
+        e4: {
+          say: 'Look at the result: the black king had eight squares, he now has only three — e6, f6 and f4. And he is not in check, so no stalemate. You repeat the operation every time he moves, and the cage closes on its own.',
+        },
+        e5: {
+          say: 'Beware the trap: here the queen on f2 is right against the black king, but it is Black to move and they have no move at all. Stalemate. A draw. A whole queen up, and no points.',
+        },
+        e6: {
+          say: 'The golden rule: never put your queen next to the enemy king unless your own king is defending her. Bring him up first, mate afterwards.',
+        },
+      },
+      'mat-deux-fous': {
+        title: 'Mating with the two bishops',
+        summary:
+          'Two bishops side by side make a wall no king gets through. You still have to see it.',
+        e1: {
+          say: 'Two bishops mate a lone king, and they are the only pair of minor pieces that manage it every time. The principle: each one sees a single colour of square, but together they see everything.',
+        },
+        e2: {
+          say: 'The mate only comes in a corner or right along an edge. Here the black king is already on h8, and your king on g6 forbids him g7 and h7. He is left with one square: g8.',
+        },
+        e3: {
+          say: 'And that square is already watched by your bishop on c4, from the far end of its diagonal. So the black king is shut in without being in check. All that is missing is the check.',
+        },
+        e4: {
+          say: 'Your second bishop, the dark-squared one, only has to land on the long diagonal to touch h8.',
+          instruction: 'Play the bishop to c3',
+          hint: 'The bishop on d2 steps back one square on the diagonal, to c3.',
+        },
+        e5: {
+          say: 'Checkmate. There is the wall: one bishop gives the check along a diagonal, the other covers the escape square on the neighbouring diagonal, and your king holds the two squares that remain. All three pieces are indispensable.',
+        },
+        e6: {
+          say: 'The technique in one sentence: bring your two bishops side by side, they form a barrier the king cannot cross, then advance the barrier towards an edge with your king behind it. Never separate the bishops — that is the whole secret.',
+        },
+      },
+      'mat-etouffe': {
+        title: 'The smothered mate',
+        summary:
+          'A knight mates a king his own pieces have shut in. The most beautiful in the game.',
+        e1: {
+          say: 'Look at the black king. He has castled, he is safe, and he is shut in — by his own rook on g8 and his own pawns on g7 and h7. He has not a single free square.',
+        },
+        e2: {
+          say: 'Against a king like that, the knight is the only piece that counts. A rook or a queen can be taken, or blocked by a piece stepping in front. A knight cannot: it jumps, and its check can never be blocked.',
+        },
+        e3: {
+          say: 'The knight jumps to f7. From there it touches h8, and nothing can either take it or step in the way.',
+          instruction: 'Play the knight to f7',
+          hint: 'The knight on g5 makes an L to f7.',
+        },
+        e4: {
+          say: 'Checkmate with a knight and nothing else. That is what we call a smothered mate: the king dies smothered by his own defenders.',
+        },
+        e5: {
+          say: 'Now the famous version, and one thing is missing from it. The pawns still shut the king in, but the rook is on f8: the g8 square is free. The knight on f7 would only be a check.',
+        },
+        e6: {
+          say: 'So g8 has to be blocked, and the only piece that can go there is your queen. We are going to give her up on it.',
+        },
+        e7: {
+          say: 'The queen goes to g8 and lets herself be taken. She is not lost: your knight on h6 watches g8, so the king cannot eat her. Only the rook can.',
+          instruction: 'Play the queen to g8',
+          hint: 'The queen on b3 runs down the diagonal to g8.',
+        },
+        e8: {
+          say: 'The rook had to take — it was its only legal move. And in taking, it has just landed on exactly the square through which its king could have escaped.',
+        },
+        e9: {
+          say: 'The cage has been shut, by Black themselves. Finish it.',
+          instruction: 'Find the mate',
+          hint: 'The knight on h6 jumps to f7.',
+        },
+        e10: {
+          say: 'A queen for a mate. It is called Philidor’s legacy, and it is the oldest recorded combination in the game. The reflex to keep: as soon as an enemy king has castled and has no escape square, look for a knight.',
+        },
+      },
+    },
+    'mats-ouverture': {
+      title: 'The opening mates',
+      description:
+        'The mates that land in the first ten moves. Each with its variations: the line that mates, the answers that refute it, and the price you pay when you have tried it for nothing.',
+      'mat-imbecile': {
+        title: 'Fool’s mate',
+        summary:
+          'Two moves. The fastest mate there is — and the one you need to know how to avoid.',
+        e1: {
+          say: 'The fastest mate in the game takes two moves. You will probably never give it — the opponent has to play along — but it teaches you the most dangerous diagonal on the board.',
+        },
+        e2: {
+          say: 'White has pushed the f-pawn. Look at what it has just opened: a diagonal that starts on h4 and runs straight at their king, through g3 and f2.',
+        },
+        e3: {
+          say: 'You have Black. Answer e5, a perfectly normal move — it occupies the centre, and it frees your queen along that same diagonal.',
+          instruction: 'Play the pawn to e5',
+          hint: 'The e7 pawn advances two squares.',
+        },
+        e4: {
+          say: 'And White pushes the g-pawn. That is the second fatal move: g3 is now defended by nobody, f2 is empty, and the diagonal is wide open from h4 to the white king.',
+        },
+        e5: {
+          say: 'Your turn. Your queen only has to travel down the diagonal.',
+          instruction: 'Find the mate',
+          hint: 'The queen on d8 runs down the diagonal: e7, f6, g5, h4.',
+        },
+        e6: {
+          say: 'Checkmate in two moves. The white king is attacked and can do nothing: f2 is the only free square around him, and your queen covers it. Nothing can step in on g3 or f2, and nothing reaches your queen.',
+        },
+        e7: {
+          say: 'The variations change nothing. f3 then g4, f4 then g4, or g4 then f3: the mate is the same. What matters is not the order of the moves but the result — both f- and g-pawns gone, and nobody left on the king’s diagonal.',
+        },
+        e8: {
+          say: 'Now turn the board round, because that is where the lesson pays. You have White, and Black has just played f6 then g5. They have made exactly the same mistake, one move later.',
+        },
+        e9: {
+          say: 'Punish them.',
+          instruction: 'Find the mate',
+          hint: 'The queen on d1 runs down the diagonal to h5.',
+        },
+        e10: {
+          say: 'That is the real lesson, and it fits in one sentence: never push the f- and g-pawns together before you have castled. They are what guards your king, and they guard him as a pair or not at all.',
+        },
+      },
+      'mat-berger': {
+        title: 'Scholar’s mate',
+        summary:
+          'Four moves and the game is over. Knowing it is mostly about never walking into it.',
+        e1: {
+          say: 'At the very start of the game, one square is weaker than all the others: f7. Look at who defends it. Nobody, except the king himself.',
+        },
+        e2: {
+          say: 'The bishop comes out to c4. From there it looks at f7 along the diagonal, right across the board.',
+          instruction: 'Play the bishop to c4',
+          hint: 'The bishop on f1 comes out along the diagonal: e2, d3, c4.',
+        },
+        e3: {
+          say: 'Black has developed a knight, but it does not defend f7. Now bring your queen to h5: she aims at f7 as well. Two attackers against a single defender.',
+          instruction: 'Play the queen to h5',
+          hint: 'The queen on d1 runs down the diagonal to h5.',
+        },
+        e4: {
+          say: 'Black brings out their second knight. The move looks natural — it develops a piece and it attacks your queen — and it loses the game on the next move.',
+        },
+        e5: {
+          say: 'Your turn. The queen takes on f7, and the bishop defends her.',
+          instruction: 'Find the mate',
+          hint: 'The queen on h5 comes down to eat the f7 pawn.',
+        },
+        e6: {
+          say: 'Checkmate. The king cannot take the queen, the bishop on c4 protects her. Nor can he flee: the queen forbids him e7 and d7, and his own pieces occupy d8 and f8.',
+        },
+        e7: {
+          say: 'The first variation, and it is the main defence. Instead of the knight, Black pushes the g6 pawn. It chases the queen away and blocks her diagonal in a single move. There is no mate any more.',
+        },
+        e8: {
+          say: 'A second defence, just as good: the black queen to e7. She defends f7 a second time, and two attackers against two defenders achieve nothing at all.',
+        },
+        e9: {
+          say: 'A third variation, and this one punishes. If Black has brought their knight out to f6 straight away, whatever you do, do not play the queen to h5: that knight covers h5, and it would simply eat her.',
+        },
+        e10: {
+          say: 'And here is what awaits you once the defence arrives. Your queen has had to retreat to f3, she has lost two moves, Black has developed two knights and pushed g6. You are three tempi down with a queen that gets in your own knight’s way.',
+        },
+        e11: {
+          say: 'So remember both sides. If a queen aims at your f7 square, answer g6 or defend with your queen on e7. And do not count on this mate yourself: as soon as your opponent knows it, all you have done is bring your queen out too early, and you will spend the game running away with her.',
+        },
+      },
+      'mat-shilling': {
+        title: 'The Shilling trap',
+        summary:
+          'Black offers a pawn. Whoever takes it is mated in seven moves, by their own pieces.',
+        e1: {
+          say: 'The Italian Game, the most played of all. You have Black. This trap used to sell for a shilling in the chess cafés of London: you bet that coin on the game, and you won it.',
+        },
+        e2: {
+          say: 'Play your knight to d4. It looks lost in the middle of nowhere, and that is the whole bait: it attacks the knight on f3 and it leaves your e5 pawn undefended.',
+          instruction: 'Play the knight to d4',
+          hint: 'The knight on c6 makes an L to d4.',
+        },
+        e3: {
+          say: 'And White takes the pawn. It is the natural move: the pawn is free, and their knight was attacked anyway. It is also the move that loses.',
+        },
+        e4: {
+          say: 'Your queen comes out to g5. She attacks the knight on e5 and the pawn on g2 at the same time, and White cannot defend both.',
+          instruction: 'Play the queen to g5',
+          hint: 'The queen on d8 runs down the diagonal: e7, f6, g5.',
+        },
+        e5: {
+          say: 'White goes looking for complications: their knight takes on f7 and attacks your queen and your rook in one move. Save neither.',
+        },
+        e6: {
+          say: 'Take the g2 pawn with your queen. She now threatens the rook on h1, and she has moved into the white camp.',
+          instruction: 'Take the pawn on g2',
+          hint: 'The queen on g5 goes all the way down her file to g2.',
+        },
+        e7: {
+          say: 'White puts their rook on f1, where their king defends it. Look carefully at the square they have just blocked: f1. Their king needed it.',
+        },
+        e8: {
+          say: 'Take back the e4 pawn with check. Your queen lands on the white king’s file.',
+          instruction: 'Take the pawn on e4',
+          hint: 'The queen on g2 takes along the diagonal: f3, e4.',
+        },
+        e9: {
+          say: 'White interposes with their bishop on e2. And that bishop is pinned: it stands between your queen and their king, and it cannot move again all game.',
+        },
+        e10: {
+          say: 'Your knight on d4, the one everybody took for a blunder, jumps to f3.',
+          instruction: 'Play the knight to f3',
+          hint: 'The knight on d4 makes an L to f3.',
+        },
+        e11: {
+          say: 'Checkmate. Count the squares around the white king: d1 his queen, d2 his pawn, e2 his bishop, f1 his rook, f2 his pawn. All occupied by his own men. And nobody can take your knight — the bishop on e2 is pinned, the rook on f1 is blocked by its own pawn.',
+        },
+        e12: {
+          say: 'It is the same picture as the smothered mate, seen from the other side: a king killed by his own defenders, with a knight. You will recognise it both ways round from now on.',
+        },
+        e13: {
+          say: 'And the variation that declines the trap, the one to know from the other side: taking the knight instead of the pawn. White exchanges on d4, there is no queen on g5, no mate, and it is White who stands better.',
+        },
+        e14: {
+          say: 'Two rules to take away. When someone offers you a pawn in the opening, ask yourself why before you take it. And when you are already in the trap, give material back at once — the bishop on f7 with check — rather than chasing the enemy queen.',
+        },
+      },
+      'mat-legal': {
+        title: 'Légal’s mate',
+        summary: 'A pinned piece can move. Whoever forgets it loses in seven moves.',
+        e1: {
+          say: 'The black bishop on g4 aims at your knight on f3, and behind that knight sits your queen on d1. So the knight is pinned: if it moves, you lose your queen.',
+        },
+        e2: {
+          say: 'Except that this pin is not absolute. It is not your king behind it, it is your queen — the knight has every right to leave. The only question is whether it is worth nine points.',
+        },
+        e3: {
+          say: 'The pinned knight takes the e5 pawn. At the same time it attacks the knight on c6 and it opens your bishop’s diagonal towards f7.',
+          instruction: 'Take the pawn on e5 with the knight',
+          hint: 'The knight on f3 jumps onto the e5 pawn.',
+        },
+        e4: {
+          say: 'Black has taken the queen. Nine points up, and the game is lost in two moves. That is the whole trap: the greedy move is the losing one.',
+        },
+        e5: {
+          say: 'The bishop gives itself up on f7. The king cannot take it, your knight on e5 defends the square.',
+          instruction: 'Take the pawn on f7 with the bishop',
+          hint: 'The bishop on c4 eats the f7 pawn.',
+        },
+        e6: {
+          say: 'The black king had only one legal move. He goes up to e7, in the middle of his own pieces, and there he is shut in.',
+        },
+        e7: {
+          say: 'Your third attacker arrives. The knight from c3 lands on d5, and nobody can drive it away.',
+          instruction: 'Play the knight to d5',
+          hint: 'The knight on c3 makes an L to d5.',
+        },
+        e8: {
+          say: 'Checkmate, with a bishop and two knights, against a queen. The black king is hemmed in by his own side: his queen occupies d8, his bishop occupies f8, and your three pieces hold everything else.',
+        },
+        e9: {
+          say: 'And the variation that saves everything, the only one: taking back the knight instead of taking the queen. Black gives the piece back, they keep their king, and the game goes on about level. All they had to do was refuse the present.',
+        },
+        e10: {
+          say: 'Two things to keep. When an enemy piece is pinned against something other than the king, it can move — always check what it threatens on the way out. And when someone offers you a queen in the opening, count the pieces looking at your king before you take it.',
+        },
+      },
+    },
+    pieges: {
+      title: 'Setting and dodging traps',
+      description:
+        'Five opening traps that win a piece, learned from both sides: you set it through to the win, then you see it coming and you dodge it. These decide club games long before theory does.',
+      'piege-fegatello': {
+        title: 'The Fegatello',
+        summary:
+          'Two pieces on f7, a knight given up, and the black king out in the open on move seven. Then the single move that refutes it all.',
+        e1: {
+          say: 'The Fegatello, or “fried liver” in Italian. White gives up a knight on f7 to drag the black king out. We start by setting it.',
+        },
+        e2: {
+          say: 'King’s pawn, as usual.',
+          instruction: 'Play e4',
+        },
+        e3: {
+          say: 'Knight f3, attacking e5.',
+          instruction: 'Play the knight to f3',
+        },
+        e4: {
+          say: 'And the bishop to c4. Look carefully at its diagonal: it ends on f7.',
+          instruction: 'Play the bishop to c4',
+        },
+        e5: {
+          say: 'Black develops their knight and ignores f7. It is playable, but it means knowing what comes next.',
+        },
+        e6: {
+          say: 'Knight g5. Now two pieces attack f7, and f7 is defended only by the king.',
+          instruction: 'Play the knight to g5',
+        },
+        e7: {
+          say: 'Black counter-attacks in the centre. Take the pawn.',
+          instruction: 'Take on d5 with the e-pawn',
+        },
+        e8: {
+          say: 'There is the mistake. Taking back on d5 with the knight leaves f7 without enough defence. The whole trap rests on that one move.',
+        },
+        e9: {
+          say: 'Knight takes f7. You give up a piece, and you know why.',
+          instruction: 'Take on f7 with the knight',
+        },
+        e10: {
+          say: 'Queen f3. Check, and at the same time she attacks the pinned knight on d5.',
+          instruction: 'Play the queen to f3',
+        },
+        e11: {
+          say: 'The black king is in the middle of the board on move eight, the knight on d5 is attacked twice, and White still has every piece to develop. That is more than enough for a piece.',
+        },
+        e12: {
+          say: 'Now we swap sides. You play Black, and you have to avoid all of that.',
+        },
+        e13: {
+          say: 'Answer in the centre.',
+          instruction: 'Play e5',
+        },
+        e14: {
+          say: 'Defend your pawn.',
+          instruction: 'Play the knight to c6',
+        },
+        e15: {
+          say: 'Develop your king’s knight.',
+          instruction: 'Play the knight to f6',
+        },
+        e16: {
+          say: 'The knight arrives on g5. The only answer is to strike in the centre.',
+          instruction: 'Play d5',
+          hint: 'The d7 pawn advances two squares: it attacks the bishop on c4 on the way.',
+        },
+        e17: {
+          say: 'And here is the move that refutes the whole trap: knight a5. It attacks the bishop on c4 instead of taking back on d5.',
+          instruction: 'Play the knight from c6 to a5',
+          hint: 'Do not take the pawn back: that is exactly what White is waiting for. Go after the bishop.',
+        },
+        e18: {
+          say: 'The bishop has to flee, f7 is attacked by only one piece now, and Black will at worst give the d5 pawn back. One move, and the Fegatello no longer exists.',
+        },
+      },
+      'piege-elephant': {
+        title: 'The Elephant trap',
+        summary:
+          'A pawn that looks like it is falling off, and a queen given up to win a piece. The most profitable trap in the Queen’s Gambit.',
+        e1: {
+          say: 'This one gets suffered more often than it gets set. You play Black, and you are going to let White take a pawn they cannot take.',
+        },
+        e2: {
+          say: 'Answer symmetrically.',
+          instruction: 'Play d5',
+        },
+        e3: {
+          say: 'The Queen’s Gambit. Support your d5 pawn with the e-pawn.',
+          instruction: 'Play e6',
+        },
+        e4: {
+          say: 'Develop your king’s knight.',
+          instruction: 'Play the knight to f6',
+        },
+        e5: {
+          say: 'The bishop pins your knight on f6 against your queen. It is that pin White is going to believe in.',
+        },
+        e6: {
+          say: 'Knight b8 to d7. It adds a defender to f6 — and it sets the trap.',
+          instruction: 'Play the knight from b8 to d7',
+          hint: 'The knight from b8 goes to d7, nowhere else.',
+        },
+        e7: {
+          say: 'Take back with your e-pawn.',
+          instruction: 'Take on d5 with the e6 pawn',
+        },
+        e8: {
+          say: 'There. White takes on d5 because your knight on f6 is pinned. Except that it is not really pinned: what stands behind it is worth less than what you are about to win.',
+        },
+        e9: {
+          say: 'Take the knight with your knight on f6. Yes, you lose the queen.',
+          instruction: 'Take on d5 with the f6 knight',
+          hint: 'The pinned knight moves anyway. Do it.',
+        },
+        e10: {
+          say: 'And now the move the whole trap is about: bishop b4, check.',
+          instruction: 'Play the bishop from f8 to b4',
+        },
+        e11: {
+          say: 'White has to interpose with their queen. Take her.',
+          instruction: 'Take the queen on d2',
+        },
+        e12: {
+          say: 'And you recover the bishop camped on your d8 square.',
+          instruction: 'Take on d8 with the king',
+        },
+        e13: {
+          say: 'Count it up: you gave a queen and a bishop, you recovered a queen, a knight and a bishop. A piece up, and the game is won. Remember the general lesson: a pin against the queen does not forbid moving, it calls for calculation.',
+        },
+      },
+      'piege-kieninger': {
+        title: 'The Kieninger trap',
+        summary:
+          'A smothered mate on move eight, in the middle of the opening, because a pawn taken on the wing opens a file nobody had looked at.',
+        e1: {
+          say: 'The Budapest Gambit, and the prettiest opening mate there is. You play Black.',
+        },
+        e2: {
+          say: 'Knight f6 first.',
+          instruction: 'Play the knight to f6',
+        },
+        e3: {
+          say: 'And now the gambit: e5. You offer a pawn to activate your pieces.',
+          instruction: 'Play e5',
+        },
+        e4: {
+          say: 'Knight g4. It is going back after the e5 pawn.',
+          instruction: 'Play the knight from f6 to g4',
+        },
+        e5: {
+          say: 'White defends their pawn. Bring up a second attacker.',
+          instruction: 'Play the knight to c6',
+        },
+        e6: {
+          say: 'Bishop b4, check. It is not an idle move: it is going to force White to block with their b1 knight.',
+          instruction: 'Play the bishop to b4',
+        },
+        e7: {
+          say: 'Queen e7. She takes up the e-file — remember that file, the whole mate is there.',
+          instruction: 'Play the queen to e7',
+        },
+        e8: {
+          say: 'White attacks your bishop with a3. A natural move, and it is the mistake: they are busy on the wing while their king is still in the centre.',
+        },
+        e9: {
+          say: 'Ignore the bishop. Take the e5 pawn back with the knight from g4.',
+          instruction: 'Take on e5 with the g4 knight',
+          hint: 'It is the knight from g4 that takes, not the one on c6.',
+        },
+        e10: {
+          say: 'White takes the bishop. Now: knight d3. Checkmate.',
+          instruction: 'Play the knight from e5 to d3',
+          hint: 'The knight on e5 jumps to d3. Look at the e-file before you doubt it.',
+        },
+        e11: {
+          say: 'Smothered mate. The king has no square: his queen, his bishop and his knight surround him. And the e2 pawn cannot take the knight, because leaving e2 would open the file onto your queen on e7.',
+        },
+      },
+      'piege-lasker': {
+        title: 'The Lasker trap',
+        summary:
+          'The only opening trap where promoting to a queen loses and promoting to a knight wins. An underpromotion, on move seven.',
+        e1: {
+          say: 'The Albin Counter-Gambit. You play Black, and you are going to end up promoting a pawn to a knight — not to a queen.',
+        },
+        e2: {
+          say: 'Answer d5.',
+          instruction: 'Play d5',
+        },
+        e3: {
+          say: 'And the Albin: e5.',
+          instruction: 'Play e5',
+        },
+        e4: {
+          say: 'Push your d-pawn to d4. It will be very hard to dislodge there.',
+          instruction: 'Play d4',
+        },
+        e5: {
+          say: 'White plays e3 to get rid of the d4 pawn. That is the trap’s mistake: the move opens a diagonal towards their king.',
+        },
+        e6: {
+          say: 'Bishop b4, check.',
+          instruction: 'Play the bishop to b4',
+        },
+        e7: {
+          say: 'Take on e3 with your d4 pawn.',
+          instruction: 'Take on e3',
+        },
+        e8: {
+          say: 'White takes your bishop and thinks they are doing well. Your e3 pawn, meanwhile, is two squares from promotion, and f2 is held only by the king.',
+        },
+        e9: {
+          say: 'Take on f2, check.',
+          instruction: 'Take on f2 with the e3 pawn',
+        },
+        e10: {
+          say: 'And now the move this lesson is about: take the knight on g1 and promote to a **knight**. With check.',
+          instruction: 'Take on g1 and promote to a knight',
+          hint: 'The g1 square holds the white knight. Choose the knight in the promotion picker, not the queen.',
+        },
+        e11: {
+          say: 'The rook takes back. Bishop g4, check — and the white queen is lost.',
+          instruction: 'Play the bishop to g4',
+        },
+        e12: {
+          say: 'The king is in check along the diagonal, and whatever he does the bishop takes the queen on d1. Promoting to a queen would have given check too — but White would have taken her, and nothing would be left. It is the one opening underpromotion you need to know.',
+        },
+      },
+      'piege-arche-de-noe': {
+        title: 'Noah’s Ark',
+        summary:
+          'Three black pawns advance, and the white bishop finds itself without a single square. The oldest trap in the Ruy Lopez.',
+        e1: {
+          say: 'The Ruy Lopez. You play Black, and you are going to shut the white bishop in with pawns. It is called Noah’s Ark because the trap is as old as the flood.',
+        },
+        e2: {
+          say: 'Answer e5.',
+          instruction: 'Play e5',
+        },
+        e3: {
+          say: 'Defend your pawn.',
+          instruction: 'Play the knight to c6',
+        },
+        e4: {
+          say: 'The bishop on b5 attacks the defender of e5. Chase it away with a6.',
+          instruction: 'Play a6',
+        },
+        e5: {
+          say: 'Support your e5 pawn a second time.',
+          instruction: 'Play d6',
+        },
+        e6: {
+          say: 'White opens the centre. Answer b5: the bishop is already short of squares.',
+          instruction: 'Play b5',
+        },
+        e7: {
+          say: 'The bishop takes shelter on b3. Look at its escape squares: a2 and c2 are occupied by its own pawns, a4 and c4 will be held by yours. It has nothing left.',
+        },
+        e8: {
+          say: 'Exchange in the centre: knight takes d4.',
+          instruction: 'Take on d4 with the knight',
+        },
+        e9: {
+          say: 'Take back with your pawn.',
+          instruction: 'Take on d4 with the e5 pawn',
+        },
+        e10: {
+          say: 'There is the mistake: the queen takes back on d4, instead of seeing to the bishop. Now you chase her, and every chasing move pushes your pawns towards the bishop.',
+        },
+        e11: {
+          say: 'Pawn c5: it attacks the queen.',
+          instruction: 'Play c5',
+        },
+        e12: {
+          say: 'Bishop e6: you chase her again, and develop while doing it.',
+          instruction: 'Play the bishop to e6',
+        },
+        e13: {
+          say: 'Block the check with your bishop.',
+          instruction: 'Play the bishop to d7',
+        },
+        e14: {
+          say: 'And the last pawn: c4. The bishop on b3 is caught in the net.',
+          instruction: 'Play c4',
+        },
+        e15: {
+          say: 'The bishop has no square: its own pawns block a2 and c2, your pawns hold a4 and c4. It falls next move. Remember the mechanism rather than the move order: pawns can trap a piece, and a bishop retreating on a wing is often already lost.',
+        },
+      },
+    },
+    repertoire: {
+      title: 'Understanding the openings',
+      description:
+        'The six openings you meet most often, explained by their ideas and not by their variations. The aim: knowing what to do on move 8, even when your opponent has played something other than the book.',
+      italienne: {
+        title: 'The Italian Game',
+        summary: 'The oldest, the most natural. Every piece towards the centre, no detours.',
+        e1: {
+          say: 'The Italian is the most direct development there is. Pawn in the centre, knight, bishop. Three moves, three principles respected.',
+        },
+        e2: {
+          say: 'Start with the king’s pawn.',
+          instruction: 'Play e4',
+        },
+        e3: {
+          say: 'Knight f3. It attacks the e5 pawn and eyes the centre.',
+          instruction: 'Play the knight to f3',
+        },
+        e4: {
+          say: 'And now the move that gives the opening its name: bishop c4. It points at f7, the weakest square in the black camp as long as the king has not castled.',
+          instruction: 'Play the bishop to c4',
+          hint: 'The bishop on f1 comes out along the diagonal to c4.',
+        },
+        e5: {
+          say: 'There is the typical position. Both sides have a pawn in the centre, a knight and a bishop out. This is the Giuoco Piano — “the quiet game”.',
+        },
+        e6: {
+          say: 'White’s idea from here: castle, play c3 and d4 to build a big pawn centre. Black’s idea: the same thing mirrored, with c6 and d5.',
+        },
+        e7: {
+          say: 'The trap to know: never play the queen to h5 hoping for a quick mate. Black parries and chases the queen while developing. You lose three tempi, they gain three.',
+        },
+      },
+      espagnole: {
+        title: 'The Ruy Lopez',
+        summary: 'The most played opening at the highest level for a hundred and fifty years.',
+        e1: {
+          say: 'The same start as the Italian, but the bishop goes to b5 instead of c4. That small change transforms the whole game.',
+        },
+        e2: {
+          say: 'Play the bishop to b5. It attacks the knight on c6, which defends the e5 pawn.',
+          instruction: 'Play the bishop to b5',
+        },
+        e3: {
+          say: 'Black almost always answers a6 to chase the bishop. That is the Morphy move, and it is a question: does the bishop take, or retreat?',
+        },
+        e4: {
+          say: 'Taking on c6 gives Black doubled pawns but the bishop pair: that is the Exchange Variation, playable and simple. Retreating to a4 keeps the tension: that is the main line, and the one every world champion has played.',
+        },
+        e5: {
+          say: 'The deep idea of the Ruy Lopez: the threat against c6 is not immediate — taking the e5 pawn straight away loses a piece on d4. It is a **long-term** pressure that troubles Black for twenty moves.',
+        },
+        e6: {
+          say: 'Remember this above all: in the Ruy Lopez, White plays slowly. c3, d3, Nbd2, Nf1, Ng3 — the knight travels right round the board to join the attack. It is called the Spanish manoeuvre.',
+        },
+      },
+      sicilienne: {
+        title: 'The Sicilian Defence',
+        summary: 'The most combative answer to 1.e4. Unbalanced from the very first move.',
+        e1: {
+          say: 'Against 1.e4, the Sicilian answers c5. Not e5, which gives a symmetrical game: c5, which creates an immediate imbalance.',
+        },
+        e2: {
+          say: 'Play c5. This single move opens the door to thousands of variations — but the idea behind it is always the same.',
+          instruction: 'Play the pawn to c5',
+        },
+        e3: {
+          say: 'Why c5 rather than e5? Because the c-pawn attacks d4 without blocking the black bishop’s diagonal, and above all because after the exchange on d4, Black ends up with two central pawns against one.',
+        },
+        e4: {
+          say: 'After d4 cxd4, White takes back with the knight. Look at the structure: Black has traded a wing pawn for a central pawn. That is a small permanent gain.',
+        },
+        e5: {
+          say: 'In return, White is ahead in development and has the open d-file. The Sicilian is a wager: structural material against time.',
+        },
+        e6: {
+          say: 'White usually attacks on the kingside, Black on the queenside along the c-file. They are two parallel races, and that is what makes these games so sharp.',
+        },
+        e7: {
+          say: 'If you are starting out, just remember: play c5, d6, Nf6, Nc6, e6, then Be7 and castle. That is the Scheveningen set-up, and it holds up against everything.',
+        },
+      },
+      francaise: {
+        title: 'The French Defence',
+        summary: 'Solid as a rock, with one single flaw — and a plan to fix it.',
+        e1: {
+          say: 'The French answers e6 to 1.e4. A modest move, which prepares d5 to challenge the centre at once.',
+        },
+        e2: {
+          say: 'Play e6. A quiet move, but one that prepares the real answer on the next one.',
+          instruction: 'Play the pawn to e6',
+        },
+        e3: {
+          say: 'And now d5, the real move of the French: Black attacks the white centre head on.',
+          instruction: 'Play the pawn to d5',
+        },
+        e4: {
+          say: 'The structure is very solid: two pawns defending each other. But it has a famous flaw — the light-squared bishop is shut in behind its own pawns on e6 and d5.',
+        },
+        e5: {
+          say: 'It is called the “bad French bishop”. Black’s whole plan is to find it a way out: either through b6 and Ba6, or by pushing f6 to open the diagonal.',
+        },
+        e6: {
+          say: 'Black’s other plan, a systematic one: attack the base of the white pawn chain with c5. In the French, c5 comes sooner or later almost every time.',
+        },
+      },
+      'gambit-dame': {
+        title: 'The Queen’s Gambit',
+        summary: 'A pawn offered that is not really offered. The most solid opening after 1.d4.',
+        e1: {
+          say: 'After 1.d4 d5, White plays c4. We call it a gambit, but that is a loose use of the word: the pawn is not really given away.',
+        },
+        e2: {
+          say: 'Play c4, attacking the d5 pawn from the side. That is the Queen’s Gambit.',
+          instruction: 'Play the pawn to c4',
+        },
+        e3: {
+          say: 'If Black takes on c4, White recovers the pawn effortlessly with e3 and then Bxc4. Meanwhile they will have occupied the centre. So taking is not winning a pawn, it is giving up the centre.',
+        },
+        e4: {
+          say: 'The real question put to Black is: how to defend d5? With e6, that is the Queen’s Gambit Declined, solid but it shuts the bishop in. With c6, that is the Slav, which keeps the bishop free.',
+        },
+        e5: {
+          say: 'White’s plan in all these lines is the same: Nc3, Nf3, Bg5 to pin, e3, Bd3, castle, then push e4 at the right moment to open the centre.',
+        },
+        e6: {
+          say: 'Remember the general principle of 1.d4: these games are slower than 1.e4 games. You manoeuvre, you improve your pieces, and the advantage is built over twenty moves instead of ten.',
+        },
+      },
+      'est-indienne': {
+        title: 'The King’s Indian Defence',
+        summary: 'Letting your opponent have the centre… the better to destroy it afterwards.',
+        e1: {
+          say: 'The King’s Indian turns everything we have learned upside down: Black deliberately lets White take the whole centre.',
+        },
+        e2: {
+          say: 'Knight f6 first.',
+          instruction: 'Play the knight to f6',
+        },
+        e3: {
+          say: 'Then g6, to prepare the bishop’s fianchetto.',
+          instruction: 'Play the pawn to g6',
+        },
+        e4: {
+          say: 'And the bishop to g7. It sweeps the long diagonal, straight at the centre and the white queenside.',
+          instruction: 'Play the bishop to g7',
+        },
+        e5: {
+          say: 'There is the idea: the bishop on g7 and the knight on f6 put pressure on the white centre from a distance. Black does not occupy it, they aim at it.',
+        },
+        e6: {
+          say: 'Black’s classic plan: castle, play d6, then e5 to strike at the centre. If White closes with d5, Black launches f5, f4, g5 and attacks the king. These are among the most violent games in chess.',
+        },
+        e7: {
+          say: 'Careful: this is a demanding opening. It asks you to wait while your opponent builds, without panicking. Only take it up when you are comfortable in closed positions.',
+        },
+      },
+    },
+    ouverture: {
+      title: 'Opening well',
+      description:
+        'Three principles are enough to play the first ten moves of any game properly — without learning a single variation by heart.',
+      'principes-ouverture': {
+        title: 'The three principles',
+        summary: 'Centre, development, king safety. Everything else follows from those.',
+        e1: {
+          say: 'The opening has three aims, and only three. Occupy the centre. Bring out your pieces. Put your king in safety. If your first ten moves serve those three ends, you are playing well.',
+        },
+        e2: {
+          say: 'First principle: the centre. Advance a central pawn two squares. Play e4.',
+          instruction: 'Play the pawn to e4',
+          hint: 'The e2 pawn advances two squares.',
+        },
+        e3: {
+          say: 'Excellent. That pawn controls d5 and f5, and it frees your bishop’s diagonal and your queen’s. One move, three benefits.',
+        },
+        e4: {
+          say: 'Second principle: development. Bring a minor piece out towards the centre. The knight to f3 is the most natural move — it already attacks the e5 pawn.',
+          instruction: 'Play the knight to f3',
+          hint: 'The knight on g1 jumps to f3.',
+        },
+        e5: {
+          say: 'Carry on: bring out your bishop. On c4 it aims at f7, the weakest point in the black camp early in the game.',
+          instruction: 'Play the bishop to c4',
+          hint: 'The bishop on f1 comes out along the diagonal.',
+        },
+        e6: {
+          say: 'Third principle: safety. Both your kingside pieces are out, so you can castle. Do it now.',
+          instruction: 'Castle kingside',
+          hint: 'Take the king and put him on g1.',
+        },
+        e7: {
+          say: 'In four moves you have a pawn in the centre, two pieces developed and a king in safety. That is a perfect opening, and you have learned nothing by heart.',
+        },
+      },
+      'erreurs-ouverture': {
+        title: 'The four classic mistakes',
+        summary: 'What every beginner does — and why it costs so much.',
+        e1: {
+          say: 'Mistake number one: bringing the queen out too early. It is tempting, she is powerful. Let us see what happens.',
+        },
+        e2: {
+          say: 'White plays the queen to h5. She threatens mate on f7 — but Black parries easily, and then chases her while developing their pieces with gain of time.',
+        },
+        e3: {
+          say: 'Black brings out a knight while defending. They develop, White does not. Every move that chases the queen wins Black a tempo.',
+        },
+        e4: {
+          say: 'Mistake number two: moving the same piece twice in the opening. Every move should bring out a **new** piece. There are eight pieces to develop and only about ten moves to do it in.',
+        },
+        e5: {
+          say: 'Mistake number three: pointless pawn moves on the wings. a3 and h3 develop nothing, take no centre, and slightly weaken the position. Two moves wasted.',
+        },
+        e6: {
+          say: 'Mistake number four: moving the king. Not only does he stay in the centre, he permanently loses the right to castle. The game will be very uncomfortable.',
+        },
+        e7: {
+          say: 'Just remember: a new piece every move, towards the centre, and castling before move ten. That alone will spare you eighty per cent of bad openings.',
+        },
+      },
+    },
+    milieu: {
+      title: 'The middlegame',
+      description:
+        'The pieces are out, the king is safe… and now what? Here is how to find a plan instead of playing at random.',
+      'colonnes-ouvertes': {
+        title: 'Open files',
+        summary: 'A file with no pawn on it is a motorway. It belongs to the rooks.',
+        e1: {
+          say: 'An open file is a file with no pawn at all on it, white or black. Here the d-file has just opened: it is the way into the enemy camp.',
+        },
+        e2: {
+          say: 'Put your rook on it. In the middlegame and the endgame, a rook on an open file is worth far more than a rook stuck behind its pawns.',
+          instruction: 'Play a rook to d1',
+          hint: 'Bring one of your rooks to d1, behind your queen.',
+        },
+        e3: {
+          say: 'The principle goes further: two rooks doubled on the same open file are almost irresistible. And a rook that reaches the seventh rank devours pawns there.',
+        },
+        e4: {
+          say: 'When no file is open, look for a **half-open** file: no pawn of yours, but an enemy pawn on it. That pawn becomes a fixed target.',
+        },
+      },
+      'avant-poste': {
+        title: 'The outpost',
+        summary: 'An advanced square where your knight is untouchable. Every piece’s dream.',
+        e1: {
+          say: 'An outpost is an advanced square in the enemy camp, protected by one of your pawns, which no enemy pawn can ever attack.',
+        },
+        e2: {
+          say: 'The knight on e5 is on an outpost here: no black pawn will ever be able to chase it away, because the black d- and f-pawns have already gone past or are missing. It will stay there all game.',
+        },
+        e3: {
+          say: 'A knight on an outpost in the heart of the enemy camp is often worth a rook. Look for these squares systematically: they appear as soon as an opponent advances their pawns.',
+        },
+      },
+      'securite-roi': {
+        title: 'King safety',
+        summary: 'Three untouched pawns in front of him, or the attack arrives.',
+        e1: {
+          say: 'A castled king with his three pawns untouched in front of him is very hard to attack. That is the set-up to preserve.',
+        },
+        e2: {
+          say: 'Every pawn that advances in front of the king creates a permanent weakness. Here g6 has weakened the f6 and h6 squares, and above all the long diagonal.',
+        },
+        e3: {
+          say: 'A simple rule: only advance the pawns in front of your king if you are forced to, or to make an escape square. Every push is a door you open.',
+        },
+        e4: {
+          say: 'And the corollary: when you attack a king, count his defenders. If you have more attacking pieces than he has defenders around him, launch the attack. Otherwise, improve your pieces first.',
+        },
+      },
+    },
+    finale: {
+      title: 'Endgames',
+      description:
+        'Few pieces, a great deal of precision. This is where level games are won — and where most club players have never learned a thing.',
+      'roi-actif': {
+        title: 'The king becomes a piece',
+        summary: 'All game he was hiding. In the endgame, he goes to the front.',
+        e1: {
+          say: 'As long as the queens are on the board, the king hides. As soon as they disappear, everything changes: the king becomes an attacking piece, about as strong as a knight.',
+        },
+        e2: {
+          say: 'In the endgame the first reflex is always the same: centralise your king. A king in the centre reaches both wings; a king in his corner always arrives too late.',
+        },
+        e3: {
+          say: 'Walk your king towards the centre.',
+          instruction: 'Advance the king',
+          hint: 'The king steps one square towards the centre.',
+        },
+        e4: {
+          say: 'A player who forgets to activate their king in the endgame loses perfectly holdable positions. It is probably the costliest mistake from 1200 Elo upwards.',
+        },
+      },
+      opposition: {
+        title: 'The opposition',
+        summary: 'The duel of kings that decides every pawn endgame.',
+        e1: {
+          say: 'Two kings facing each other, one square apart: that is the opposition. And here is the paradox: whoever **has** to move loses it, because they are obliged to give ground.',
+        },
+        e2: {
+          say: 'Here it is White to move, so Black has the opposition. The white king will have to step aside, and the black king will advance.',
+        },
+        e3: {
+          say: 'That is why it is decisive. King and pawn against king: if the defending king keeps the opposition in front of the pawn, the game is drawn. If he loses it, the pawn goes through.',
+        },
+        e4: {
+          say: 'The winning technique: push your **king** before your pawn. The king clears the way, the pawn follows. Pushing the pawn first is the classic mistake that turns a win into a draw.',
+        },
+        e5: {
+          say: 'Remember the formula: in a pawn endgame, the king goes first. Always.',
+        },
+      },
+      'regle-du-carre': {
+        title: 'The rule of the square',
+        summary: 'One glance tells you whether a king catches a pawn.',
+        e1: {
+          say: 'Your pawn on a2 wants to queen. The black king on h4 is far away. Does he catch it? There is a trick for answering in a second, without counting.',
+        },
+        e2: {
+          say: 'Draw a square with one side running from the pawn to its promotion square. Here, from a2 to a8: six squares. So the square is six by six, from a2 to f8.',
+        },
+        e3: {
+          say: 'The rule: if the enemy king is **inside** that square, or can step into it, he catches the pawn. If he is outside and it is your move, the pawn goes through.',
+        },
+        e4: {
+          say: 'Here the black king is on h4, outside the square. If you push the pawn, he will never catch it. A geometric rule, no calculation.',
+        },
+        e5: {
+          say: 'Careful: the square shrinks with every pawn push, but a pawn starting from its second rank can advance two squares — so the square is then counted from the third rank.',
+        },
+      },
+      'pion-passe': {
+        title: 'The passed pawn',
+        summary:
+          'No enemy pawn can stop it any more. In the endgame it is worth its weight in gold.',
+        e1: {
+          say: 'A passed pawn is a pawn no enemy pawn can stop any more: not on its file, not on the neighbouring files. All it has to do is run.',
+        },
+        e2: {
+          say: 'In the endgame, a passed pawn forces your opponent to tie a piece down to watching it. That is an enormous advantage, even if it never queens.',
+        },
+        e3: {
+          say: 'Better still: the **protected** passed pawn, supported by another pawn. Your opponent can neither take it nor blockade it lastingly with their king.',
+        },
+        e4: {
+          say: 'And Tarrasch’s rule, absolutely one to remember: rooks belong **behind** passed pawns. Behind yours to push it, behind your opponent’s to hold it back.',
+        },
+      },
+    },
+    tactique: {
+      title: 'Tactics',
+      description:
+        'The patterns that win material. This is the chapter that improves a player below 1500 the most: most games are lost on one of these six things.',
+      'piece-en-prise': {
+        title: 'The hanging piece',
+        summary: 'The number one cause of lost games. A two-second reflex is enough.',
+        e1: {
+          say: 'A hanging piece is an attacked piece that nobody defends. Here, the black pawn on e5 is attacked by the knight, and no black piece protects it.',
+        },
+        e2: {
+          say: 'Take it. It is free.',
+          instruction: 'Capture the pawn on e5',
+          hint: 'The knight jumps from f3 to e5.',
+        },
+        e3: {
+          say: 'That is the reflex to build. Before **every** move, ask yourself two questions. One: what is my opponent attacking? Two: what are they leaving undefended?',
+        },
+        e4: {
+          say: 'Careful all the same: here Black has defended the pawn with the knight on c6. Taking would now be a plain exchange, not a present. A piece that is attacked **and defended** is not hanging.',
+        },
+      },
+      fourchette: {
+        title: 'The fork',
+        summary: 'One piece, two targets. You cannot save everything.',
+        e1: {
+          say: 'A fork is one piece attacking two at once. The knight is the champion in every category, because it jumps and you see it coming badly.',
+        },
+        e2: {
+          say: 'Look: if the knight reaches c7, it attacks the king on e8 and the rook on a8 at the same time.',
+        },
+        e3: {
+          say: 'Your move. The knight is now on b5, one jump from c7. Put it on the square and watch what happens to Black.',
+          instruction: 'Play the knight to c7',
+          hint: 'From b5 the knight jumps to c7: check to the king, and the rook is hit at the same time.',
+        },
+        e4: {
+          say: 'The black king had to answer the check — he had no choice, and that is the whole strength of the royal fork: while he saves himself, he abandons the rook. Take it.',
+          instruction: 'Take the rook on a8',
+          hint: 'The knight on c7 goes to eat the rook on a8.',
+        },
+        e5: {
+          say: 'Here is the other situation: the fork you **suffer**. That black knight on c6 is one jump from e5 and d4. Every time an enemy knight approaches your pieces, look for the squares from which it could touch two of them.',
+        },
+        e6: {
+          say: 'The most profitable fork is the one that hits the king: your opponent is **obliged** to answer the check, and the other piece falls. That is what we call a royal fork.',
+        },
+      },
+      clouage: {
+        title: 'The pin',
+        summary: 'A piece stuck in front of a more valuable one cannot move any more.',
+        e1: {
+          say: 'The pin. A piece is stuck in front of a more valuable one: if it moves, the other falls.',
+        },
+        e2: {
+          say: 'Play the bishop to g5. It aims at the knight on f6, and right behind that knight sits the black queen on d8.',
+          instruction: 'Play the bishop to g5',
+          hint: 'The bishop on c1 goes up the diagonal: d2, e3, f4, g5.',
+        },
+        e3: {
+          say: 'There is the pin. The knight on f6 can no longer move without handing over the queen. It has become a motionless target: you can attack it as often as you like, it will not escape.',
+        },
+        e4: {
+          say: 'There are two kinds of pin. The **relative** pin, like the knight in front of the queen: the piece may legally move, but it costs dearly.',
+        },
+        e5: {
+          say: 'And the **absolute** pin: when it is the king behind. The piece then cannot move at all, it would be illegal. Here the knight on c3 is pinned by the black queen on b4.',
+        },
+        e6: {
+          say: 'A reflex to acquire: when an enemy piece is pinned, attack it once more. It cannot flee, and it will end up falling.',
+        },
+      },
+      enfilade: {
+        title: 'The skewer',
+        summary: 'The pin in reverse: the valuable piece is in front, and it has to move.',
+        e1: {
+          say: 'The skewer is the pin inverted: the valuable piece is in front, the less valuable one behind. You attack the first, it has to step aside, and you take the second.',
+        },
+        e2: {
+          say: 'Here, black king on e8 and black rook on d8, both on the same rank. A white rook arriving on that rank gives check to the king… and eyes the rook behind him.',
+        },
+        e3: {
+          say: 'The same thing along a line. The white rook on a1 aims at the black rook on d1, but it is the white king who is behind. This is what you must never let happen.',
+        },
+        e4: {
+          say: 'In practice you look for a skewer whenever two enemy pieces are lined up: same rank, same file, same diagonal. Build the reflex of checking those alignments every move.',
+        },
+      },
+      decouverte: {
+        title: 'The discovered attack',
+        summary: 'One piece steps aside and unmasks another. Two threats in one move.',
+        e1: {
+          say: 'Look at this alignment: the white rook on e1, the knight on e5, and the black king on e8. All three on the e-file.',
+        },
+        e2: {
+          say: 'The knight blocks the rook’s line. But if it steps aside, the rook gives check instantly. And the knight goes wherever it likes: it can go and capture something while your opponent deals with the check.',
+        },
+        e3: {
+          say: 'Send the knight to c6: it gives discovered check while attacking from its new square.',
+          instruction: 'Play the knight to c6',
+          hint: 'Any knight move frees the file. Pick one.',
+        },
+        e4: {
+          say: 'It is the most profitable tactic in the game, because your opponent can only answer one threat at a time — and a check always comes first.',
+        },
+        e5: {
+          say: 'The peak of the genre is the double check: the knight gives check **and** unmasks the rook. There, no defence works at all. No capture, no interposition: the king has to move, and that is that.',
+        },
+      },
+      'elimination-defenseur': {
+        title: 'Removing the defender',
+        summary: 'A well-defended piece? Start by getting rid of its guard.',
+        e1: {
+          say: 'The e5 pawn is defended by the knight on c6. So you cannot simply take it. But what happens if that knight disappears?',
+        },
+        e2: {
+          say: 'That is the whole idea: instead of attacking the target, you go after its defender. Once the guard has gone, the target falls on its own.',
+        },
+        e3: {
+          say: 'That is why the Ruy Lopez starts with the bishop to b5: it attacks the knight on c6, which defends the e5 pawn. It is an indirect threat, and it shapes the whole opening.',
+        },
+        e4: {
+          say: 'When an enemy piece blocks you, do not batter away at it. Ask yourself instead: who protects it? And attack that one.',
+        },
+      },
+      sacrifice: {
+        title: 'The sacrifice',
+        summary: 'Giving up material to get something better: time, lines, a bare king.',
+        e1: {
+          say: 'A sacrifice is deliberately giving up material to get something else: opening a line, exposing a king, gaining three tempi of development.',
+        },
+        e2: {
+          say: 'The classic sacrifice on f7: the bishop gives itself up to draw the black king out of his shelter. Three points against a pawn — but the king is going to end up in the middle of the board.',
+        },
+        e3: {
+          say: 'How do you know whether a sacrifice is sound? Count what you get **in moves**, not in points. If your opponent has to spend three moves bringing their king back, you have three moves in hand to bring your pieces up.',
+        },
+        e4: {
+          say: 'A rule of caution for a beginner: only sacrifice if you can see it through to the end. A sacrifice you cannot justify is not a sacrifice, it is a piece down.',
+        },
+      },
+    },
   },
   prompt: {
     system:

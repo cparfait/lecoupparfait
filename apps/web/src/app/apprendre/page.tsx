@@ -224,10 +224,10 @@ export default function LearnPage() {
             </span>
             <div className="min-w-[14rem] flex-1">
               <h2 className="font-display text-lg font-semibold tracking-tight">
-                {prochaine.lecon.title}
+                {t(prochaine.lecon.title)}
               </h2>
               <p className="mt-1 text-[14px] leading-relaxed text-muted">
-                {prochaine.lecon.summary}
+                {t(prochaine.lecon.summary)}
               </p>
               <p className="mt-1.5 flex items-center gap-2 text-[12px] text-faint">
                 <Clock size={11} aria-hidden />
@@ -398,7 +398,7 @@ export default function LearnPage() {
                         au-dessus des titres de leçons : c'est sa place dans la
                         hiérarchie, il l'occupe enfin. */}
                     <h2 className="font-display text-[clamp(1.0625rem,2vw,1.25rem)] font-bold leading-tight tracking-tight text-ink">
-                      {chapter.title}
+                      {t(chapter.title)}
                     </h2>
                   </div>
 
@@ -424,7 +424,7 @@ export default function LearnPage() {
                     !replie && 'pb-3',
                   )}
                 >
-                  {chapter.description}
+                  {t(chapter.description)}
                 </p>
               </header>
 
@@ -454,8 +454,10 @@ export default function LearnPage() {
                         {lesson.icon}
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold leading-snug">{lesson.title}</p>
-                        <p className="mt-1 text-xs leading-relaxed text-muted">{lesson.summary}</p>
+                        <p className="text-sm font-semibold leading-snug">{t(lesson.title)}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-muted">
+                          {t(lesson.summary)}
+                        </p>
                         <p className="mt-2 flex items-center gap-2 text-[12px] text-faint">
                           <Clock size={11} aria-hidden />
                           {lesson.minutes} min

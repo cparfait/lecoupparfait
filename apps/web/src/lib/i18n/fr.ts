@@ -2112,6 +2112,7 @@ export const fr = {
   },
 
   lesson: {
+    stepOf: 'Étape {n} / {total}',
     wrongMove: 'Ce n’est pas le coup attendu. Réessaie.',
     cannotShow: 'Impossible de montrer le coup ici.',
     notFound: 'Leçon introuvable',
@@ -2546,6 +2547,1396 @@ export const fr = {
     purgedSessions: 'sessions expirées',
     purgedEvaluations: 'évaluations sous 14 demi-coups, trop peu profondes pour resservir',
     purgedEmptyAccounts: 'comptes sans aucune partie ni analyse, inactifs depuis six mois',
+  },
+  lecons: {
+    bases: {
+      title: 'Les bases',
+      description:
+        'L’échiquier, les six pièces, les trois règles spéciales. En une heure, tu sauras jouer une partie complète sans jamais te demander si un coup est autorisé.',
+      echiquier: {
+        title: 'L’échiquier et ses cases',
+        summary: 'Soixante-quatre cases, et un nom pour chacune. C’est la langue du jeu.',
+        e1: {
+          say: 'Voici un échiquier. Soixante-quatre cases, huit colonnes et huit rangées. Une règle avant tout : la case en bas à droite doit toujours être claire.',
+        },
+        e2: {
+          say: 'Les colonnes portent des lettres, de a à h, en partant de la gauche. Les rangées portent des chiffres, de 1 à 8, en partant du bas.',
+        },
+        e3: {
+          say: "Chaque case a donc un nom : la lettre de sa colonne, puis le chiffre de sa rangée. Voici e4, au cœur de l'échiquier.",
+        },
+        e4: {
+          say: "Ces quatre cases centrales — d4, d5, e4, e5 — sont les plus importantes de l'échiquier. Une pièce placée au centre contrôle beaucoup plus de cases qu'une pièce dans un coin. Retiens-le, c'est la première règle de stratégie.",
+        },
+        e5: {
+          say: 'Voici la position de départ. Les Blancs en bas, les Noirs en haut. Petit truc pour ne jamais se tromper : la dame se place sur une case de sa couleur. Dame blanche sur case claire, dame noire sur case sombre.',
+        },
+      },
+      tour: {
+        title: 'La tour',
+        summary: 'Elle va tout droit, aussi loin qu’elle veut. La plus simple, et redoutable.',
+        e1: {
+          say: "La tour se déplace en ligne droite : le long de sa colonne, ou le long de sa rangée. Aussi loin qu'elle veut, tant que la route est libre.",
+        },
+        e2: {
+          say: 'À toi. Déplace la tour tout en haut de sa colonne, sur la case d8.',
+          instruction: 'Joue la tour en d8',
+          hint: 'Prends la tour et fais-la glisser vers le haut, jusqu’à la case d8.',
+        },
+        e3: {
+          say: "La tour ne saute jamais par-dessus une pièce. Ici, ce pion noir en g4 lui barre la route : elle peut aller jusqu'en g4 pour le capturer, mais pas au-delà.",
+        },
+        e4: {
+          say: 'Capture ce pion. Pour prendre une pièce, on pose simplement la sienne à sa place.',
+          instruction: 'Capture le pion en g4',
+          hint: 'Glisse la tour de d4 jusqu’en g4, sur le pion.',
+        },
+        e5: {
+          say: "Voilà. La tour vaut cinq pions : c'est une pièce lourde, précieuse. Elle devient très forte quand les colonnes s'ouvrent, en fin de partie.",
+        },
+      },
+      fou: {
+        title: 'Le fou',
+        summary: 'Il file en diagonale — et reste toute sa vie sur des cases de la même couleur.',
+        e1: {
+          say: "Le fou se déplace en diagonale, aussi loin qu'il veut. Lui non plus ne saute par-dessus rien.",
+        },
+        e2: {
+          say: "Regarde bien : ce fou est sur une case sombre, et toutes les cases qu'il peut atteindre sont sombres. Un fou ne change jamais de couleur de case. De toute la partie.",
+        },
+        e3: {
+          say: "C'est pour ça qu'on parle de la paire de fous : avec les deux, on couvre toutes les cases de l'échiquier. Avec un seul, la moitié seulement lui échappe pour toujours.",
+        },
+        e4: {
+          say: 'À toi. Capture le pion noir en f6.',
+          instruction: 'Capture le pion en f6',
+          hint: 'Suis la diagonale vers le haut à droite : d4, e5, f6.',
+        },
+        e5: {
+          say: 'Le fou vaut environ trois pions, comme le cavalier. En position ouverte, avec peu de pions au centre, il est souvent le plus fort des deux.',
+        },
+      },
+      dame: {
+        title: 'La dame',
+        summary: 'Tour et fou réunis. La pièce la plus puissante — et donc la plus fragile.',
+        e1: {
+          say: "La dame combine la tour et le fou : lignes droites et diagonales, aussi loin qu'elle veut. Depuis le centre, elle contrôle vingt-sept cases.",
+        },
+        e2: {
+          say: "Elle vaut neuf pions. C'est énorme, et c'est justement le problème : n'importe quelle pièce adverse peut la prendre, et on perd immédiatement la partie. Une dame se protège.",
+        },
+        e3: {
+          say: "Cette tour noire en d8 n'est défendue par personne, et elle est sur la colonne de ta dame. Prends-la.",
+          instruction: 'Capture la tour en d8',
+          hint: 'La dame monte tout droit le long de la colonne d.',
+        },
+        e4: {
+          say: 'Une erreur très courante chez les débutants : sortir la dame dès les premiers coups. Elle se fait alors chasser par des pièces adverses moins précieuses, et on perd du temps à la sauver. Sors-la tard.',
+        },
+      },
+      cavalier: {
+        title: 'Le cavalier',
+        summary: 'Le seul qui saute. Déroutant au début, redoutable une fois apprivoisé.',
+        e1: {
+          say: 'Le cavalier se déplace en L : deux cases dans une direction, puis une case perpendiculairement. Depuis d4, il peut atteindre huit cases.',
+        },
+        e2: {
+          say: "Le truc pour ne jamais se tromper : le cavalier change toujours de couleur de case. D'une case sombre il va sur une case claire, et inversement. Toujours.",
+        },
+        e3: {
+          say: "Et surtout : c'est la seule pièce qui saute par-dessus les autres. Ici le cavalier est complètement entouré, et pourtant il peut sortir. Regarde.",
+        },
+        e4: {
+          say: 'À toi. Fais-le sortir de ce mur : joue le cavalier en c6, par-dessus les pions.',
+          instruction: 'Joue le cavalier en c6',
+          hint: 'Deux cases vers le haut, une vers la gauche. Le cavalier passe par-dessus tout.',
+        },
+        e5: {
+          say: 'Le cavalier vaut trois pions. Il est excellent dans les positions fermées, encombrées de pions, là où les fous et les tours étouffent.',
+        },
+      },
+      pion: {
+        title: 'Le pion',
+        summary: 'Il avance tout droit mais capture en diagonale. Et il ne recule jamais.',
+        e1: {
+          say: "Le pion est la pièce la plus étrange. Il avance d'une case, tout droit, et jamais en arrière. Un pion qui avance ne revient pas.",
+        },
+        e2: {
+          say: "Exception : depuis sa case de départ, il peut avancer de deux cases d'un coup. Une seule fois, à son premier déplacement.",
+        },
+        e3: {
+          say: "Avance le pion de deux cases, jusqu'en d4.",
+          instruction: 'Joue le pion en d4',
+          hint: 'Attrape le pion et pose-le deux cases plus haut.',
+        },
+        e4: {
+          say: 'Voici ce qui déroute tout le monde au début : le pion avance tout droit, mais il capture **en diagonale**. Ces deux pions noirs sont à sa portée.',
+        },
+        e5: {
+          say: 'Regarde : le pion blanc en d2 peut capturer en c3 ou en e3, mais il ne peut pas capturer une pièce qui serait juste devant lui en d3. Elle le bloquerait, tout simplement.',
+        },
+        e6: {
+          say: "Capture l'un des deux pions.",
+          instruction: 'Capture un pion en diagonale',
+          hint: 'Le pion prend en diagonale, d’une seule case.',
+        },
+        e7: {
+          say: "Le pion vaut un. C'est l'unité de mesure de tout le jeu. Mais un pion qui atteint le bout de l'échiquier se transforme en dame — on y revient dans deux leçons.",
+        },
+      },
+      roi: {
+        title: 'Le roi',
+        summary: 'Il se déplace d’une seule case — mais toute la partie tourne autour de lui.',
+        e1: {
+          say: "Le roi se déplace d'une seule case, mais dans toutes les directions. Huit cases possibles depuis le centre.",
+        },
+        e2: {
+          say: "Le roi ne se capture jamais. Quand il est attaqué, on dit qu'il est en échec, et il faut absolument parer. Trois façons de le faire : bouger le roi, capturer l'attaquant, ou interposer une pièce.",
+        },
+        e3: {
+          say: "Si aucune de ces trois parades n'existe, c'est échec et mat : la partie est finie. C'est le seul but du jeu.",
+        },
+        e4: {
+          say: 'Dernière règle : deux rois ne peuvent jamais se toucher. Ils doivent toujours garder au moins une case entre eux, sans quoi ils se mettraient mutuellement en échec.',
+        },
+      },
+      roque: {
+        title: 'Le roque',
+        summary: 'Deux pièces qui bougent en un coup : le seul de tout le jeu.',
+        e1: {
+          say: "Le roque met le roi à l'abri. C'est le seul coup où deux pièces bougent en même temps : le roi et une tour.",
+        },
+        e2: {
+          say: 'Le petit roque, du côté du roi : le roi fait deux pas vers la tour, et la tour saute par-dessus lui pour se poser juste à côté. Regarde.',
+        },
+        e3: {
+          say: 'Fais le petit roque. Prends le roi et amène-le sur la case g1 : la tour suivra toute seule.',
+          instruction: 'Joue le petit roque',
+          hint: 'Attrape le roi en e1 et pose-le en g1.',
+        },
+        e4: {
+          say: 'Parfait. Ton roi est maintenant derrière trois pions intacts, et ta tour est sortie de son coin. Deux problèmes réglés en un coup.',
+        },
+        e5: {
+          say: "Quatre conditions pour pouvoir roquer. Le roi n'a jamais bougé. La tour concernée n'a jamais bougé. Les cases entre eux sont vides. Et le roi n'est pas en échec, ne traverse pas une case attaquée, et n'arrive pas sur une case attaquée.",
+        },
+        e6: {
+          say: "Il existe aussi le grand roque, du côté de la dame : le roi va en c1, la tour de a1 vient en d1. Il met le roi un peu moins à l'abri, mais active la tour plus vite.",
+        },
+      },
+      'regles-speciales': {
+        title: 'Prise en passant et promotion',
+        summary: 'Les deux règles que personne ne devine tout seul.',
+        e1: {
+          say: "La prise en passant. Le pion noir vient d'avancer de deux cases d'un coup, en passant à côté de ton pion. La règle dit que tu peux le capturer comme s'il n'en avait avancé qu'une.",
+        },
+        e2: {
+          say: 'Ton pion en e5 capture donc en d6, et le pion noir disparaît de d5. Essaie.',
+          instruction: 'Capture en passant : joue le pion en d6',
+          hint: 'Pose ton pion e5 sur la case d6, juste derrière le pion noir.',
+        },
+        e3: {
+          say: "Attention : cette prise n'est possible qu'**immédiatement**. Si tu joues autre chose, l'occasion est perdue pour toujours.",
+        },
+        e4: {
+          say: "La promotion, maintenant. Un pion qui atteint la dernière rangée se transforme. On choisit ce qu'on veut : dame, tour, fou ou cavalier.",
+        },
+        e5: {
+          say: "Avance le pion en d8 et prends une dame — c'est le choix dans plus de quatre-vingt-dix-neuf pour cent des cas.",
+          instruction: 'Promeus le pion en dame',
+          hint: 'Avance le pion d’une case, puis choisis la dame dans le menu.',
+        },
+        e6: {
+          say: "Un pion qui vaut un devient une pièce qui en vaut neuf. C'est pour ça qu'en finale, chaque pion compte énormément : c'est une dame en puissance.",
+        },
+      },
+      'echec-mat-pat': {
+        title: 'Échec, mat et pat',
+        summary: 'Comment on gagne, et comment on rate la victoire d’un cheveu.',
+        e1: {
+          say: "Une tour sur la colonne du roi adverse : c'est un échec. Le roi noir est attaqué, il doit réagir.",
+        },
+        e2: {
+          say: "Avec deux tours, on peut mater. Voici la technique de l'escalier : celle de h7 barre déjà la rangée 7, il ne reste plus qu'à donner échec sur la dernière.",
+        },
+        e3: {
+          say: "Joue la tour en a8 : elle donne échec sur la dernière rangée, et l'autre tour lui interdit de descendre.",
+          instruction: 'Joue la tour en a8',
+          hint: 'La tour de a1 monte tout en haut de sa colonne.',
+        },
+        e4: {
+          say: "Échec et mat. Le roi noir est attaqué, il ne peut pas fuir en rangée 7 parce que l'autre tour la contrôle, et il n'a rien pour capturer ou interposer. Partie terminée.",
+        },
+        e5: {
+          say: "Maintenant le piège qui fait rager tous les débutants : le pat. Ici, c'est aux Noirs de jouer. Leur roi n'est **pas** en échec. Mais toutes ses cases sont contrôlées, et il n'a aucune autre pièce.",
+        },
+        e6: {
+          say: "Aucun coup légal, et pas d'échec : c'est un pat, et la partie est nulle. Les Blancs avaient une dame de plus et n'ont rien gagné. Retiens bien : quand ton adversaire n'a presque plus rien, laisse-lui toujours une case.",
+        },
+      },
+      valeurs: {
+        title: 'Combien vaut chaque pièce',
+        summary: 'Un barème simple qui te dira, à chaque échange, si tu y gagnes.',
+        e1: {
+          say: "Le barème universel. Le pion vaut un. Le cavalier et le fou valent trois. La tour vaut cinq. La dame vaut neuf. Le roi n'a pas de valeur : il est au-dessus de tout, on ne l'échange jamais.",
+        },
+        e2: {
+          say: "À quoi ça sert ? À décider en une seconde si un échange est bon. Donner un cavalier pour une tour, c'est trois contre cinq : excellent. On appelle ça gagner la qualité.",
+        },
+        e3: {
+          say: "Mais ces chiffres ne sont qu'un point de départ. Un cavalier bien placé au centre vaut plus qu'une tour coincée dans un coin. Et si tu peux mater, le matériel ne compte plus du tout.",
+        },
+        e4: {
+          say: "Exemple : les Blancs viennent de donner leur fou, trois points, contre un simple pion. À première vue c'est absurde. Mais le roi noir est attiré hors de son abri, et l'attaque qui suit vaut bien plus que trois points.",
+        },
+        e5: {
+          say: 'Voilà toute la beauté du jeu : le matériel est une boussole, pas une loi. Tu apprendras à savoir quand la suivre et quand la trahir.',
+        },
+      },
+    },
+    mats: {
+      title: 'Savoir mater',
+      description:
+        'Gagner une dame ne sert à rien si l’on ne sait pas conclure. Les cinq techniques qui terminent une partie, du couloir aux deux fous.',
+      'mat-couloir': {
+        title: 'Le mat du couloir',
+        summary: 'Le mat le plus fréquent de tous. Et le plus facile à subir.',
+        e1: {
+          say: "Regarde le roi noir. Il a roqué, il est bien à l'abri… sauf que ses propres pions lui bouchent toute sortie. Il est enfermé sur sa dernière rangée.",
+        },
+        e2: {
+          say: 'Une tour qui arrive sur cette rangée fait mat immédiatement. Vas-y.',
+          instruction: 'Trouve le mat en un coup',
+          hint: 'La tour monte tout en haut de sa colonne.',
+        },
+        e3: {
+          say: "Échec et mat. Le roi ne peut pas monter — il est déjà en haut — et pas descendre, ses pions occupent les cases. Ça s'appelle le mat du couloir.",
+        },
+        e4: {
+          say: "La parade tient en un coup : avancer un pion pour créer une case d'air. Ici les Noirs ont joué h6, et leur roi peut désormais s'échapper en h7.",
+        },
+        e5: {
+          say: "Prends l'habitude, dès que tes tours quittent la dernière rangée : fais une case d'air à ton roi. Ça t'évitera de perdre des parties gagnées.",
+        },
+      },
+      'mat-escalier': {
+        title: 'Le mat de l’escalier',
+        summary: 'Deux tours, aucun calcul : la technique se répète jusqu’au mat.',
+        e1: {
+          say: "Deux tours suffisent à mater un roi nu, sans même l'aide du sien. Le principe : une tour repousse le roi, l'autre l'empêche de revenir.",
+        },
+        e2: {
+          say: 'Commence par donner échec avec la tour de a2, sur la rangée 7. Le roi noir devra monter.',
+          instruction: 'Joue la tour en a7',
+          hint: 'La tour de a2 monte jusqu’en a7.',
+        },
+        e3: {
+          say: "Le roi noir n'a d'autre choix que de monter en rangée 8. La tour de a7 lui interdit désormais de redescendre.",
+        },
+        e4: {
+          say: "Maintenant l'autre tour vient donner échec sur la rangée 8. C'est mat.",
+          instruction: 'Joue la tour en b8',
+          hint: 'La tour de b1 monte tout en haut.',
+        },
+        e5: {
+          say: "Voilà l'escalier : les tours montent une marche à tour de rôle, le roi recule, et il finit acculé. Aucun calcul, juste la méthode. Quand le roi s'approche d'une tour, on l'éloigne à l'autre bout de sa rangée.",
+        },
+      },
+      'mat-tour-roi': {
+        title: 'Mater avec le roi et la tour',
+        summary:
+          'La finale la plus fréquente. Une tour ne mate jamais seule : tout est dans le roi.',
+        e1: {
+          say: 'Roi et tour contre roi seul. Une tour ne mate jamais toute seule : essaie autant que tu veux, il te manquera toujours une case. C’est ton roi qui fait le travail, la tour ne donne que le coup final.',
+        },
+        e2: {
+          say: 'La méthode tient en trois temps. La tour coupe une rangée pour interdire au roi noir de redescendre. Ton roi monte le rejoindre. Et quand les deux rois se font face, la tour mate.',
+        },
+        e3: {
+          say: 'Voici la position à reconnaître, et c’est la seule à retenir. Les deux rois se font face, une case entre eux. Ton roi interdit à lui seul les trois cases devant lui : d7, e7 et f7. Il ne reste au roi noir que d8 et f8, sur sa rangée.',
+        },
+        e4: {
+          say: 'Et une tour prend une rangée entière d’un seul coup. Vas-y.',
+          instruction: 'Trouve le mat en un coup',
+          hint: 'La tour monte tout en haut de sa colonne, le plus loin possible du roi noir.',
+        },
+        e5: {
+          say: 'Échec et mat. La tour tient d8, e8 et f8 ; ton roi tient d7, e7 et f7. Six cases à deux, et il n’en faut pas une de plus.',
+        },
+        e6: {
+          say: 'Première faute, et de loin la plus courante : donner échec trop tôt. Ici les rois ne se font pas face, ils sont décalés. La tour en h8 ferait échec, oui, mais le roi noir filerait en c7 et tout serait à refaire.',
+        },
+        e7: {
+          say: 'Alors ne donne pas cet échec. Avance d’abord ton roi pour le mettre en face, puis mate. Un échec qui ne mate pas ne fait rien avancer dans cette finale : il rend juste sa liberté au roi adverse.',
+        },
+        e8: {
+          say: 'Seconde faute, et elle coûte la partie entière : coller la tour contre le roi. Regarde. Le roi noir n’est pas en échec, et il n’a aucun coup. C’est un pat. Nulle, avec une tour de plus.',
+        },
+        e9: {
+          say: 'D’où la règle : la tour mate depuis l’autre bout de l’échiquier, jamais à côté du roi. Loin, elle est intouchable et elle tient toute la rangée. Près, elle se fait manger ou elle fait nulle.',
+        },
+      },
+      'mat-dame-roi': {
+        title: 'Mater avec la dame',
+        summary: 'La finale la plus fréquente après une promotion. À maîtriser absolument.',
+        e1: {
+          say: 'Roi et dame contre roi seul. La méthode : on rétrécit la cage autour du roi adverse avec la dame, puis on amène son propre roi pour donner le coup final.',
+        },
+        e2: {
+          say: "Une astuce de repérage, et elle porte un nom trompeur : **le saut de cavalier**. Il n'y a aucun cavalier ici — c'est de sa **forme de déplacement** qu'on parle, le L. Les huit cases marquées sont à un saut de cavalier du roi noir. Une dame posée sur l'une d'elles lui retire presque tout, sans jamais l'enfermer complètement : c'est ce qui évite le pat.",
+        },
+        e3: {
+          say: "Parmi ces huit cases, ta dame en d1 n'en atteint que quatre : d3, f3, g4 et d7. Prends **d3** — deux cases droit devant elle.",
+          instruction: 'Joue la dame en d3',
+          hint: 'La dame monte de deux cases sur sa colonne : de d1 à d3.',
+        },
+        e4: {
+          say: "Regarde le résultat : le roi noir avait huit cases, il n'en a plus que trois — e6, f6 et f4. Et il n'est pas en échec, donc pas de pat. Tu répètes l'opération à chaque fois qu'il bouge, et la cage se referme d'elle-même.",
+        },
+        e5: {
+          say: "Attention au piège : ici, la dame en f2 colle le roi noir, mais c'est aux Noirs de jouer et ils n'ont aucun coup. Pat. Nulle. Une dame de plus, et zéro point.",
+        },
+        e6: {
+          say: "La règle d'or : ne colle jamais ta dame au roi adverse sans que ton propre roi la défende. Amène-le d'abord, mate ensuite.",
+        },
+      },
+      'mat-deux-fous': {
+        title: 'Mater avec les deux fous',
+        summary:
+          'Deux fous côte à côte font un mur qu’aucun roi ne franchit. Encore faut-il le voir.',
+        e1: {
+          say: 'Deux fous matent un roi seul, et c’est la seule paire de pièces légères qui y arrive à coup sûr. Le principe : chacun ne voit qu’une couleur de cases, mais à deux ils voient tout.',
+        },
+        e2: {
+          say: 'Le mat ne tombe que dans un coin ou tout au bord. Ici le roi noir est déjà en h8, et ton roi en g6 lui interdit g7 et h7. Il ne lui reste qu’une case : g8.',
+        },
+        e3: {
+          say: 'Et cette case-là, ton fou de c4 la surveille déjà, depuis l’autre bout de sa diagonale. Le roi noir est donc enfermé sans être en échec. Il ne manque plus que l’échec.',
+        },
+        e4: {
+          say: 'Ton second fou, celui des cases noires, n’a qu’à se poser sur la grande diagonale pour toucher h8.',
+          instruction: 'Joue le fou en c3',
+          hint: 'Le fou de d2 recule d’une case en diagonale, vers c3.',
+        },
+        e5: {
+          say: 'Échec et mat. Voilà le mur : un fou donne l’échec sur une diagonale, l’autre couvre la case de fuite sur la diagonale voisine, et ton roi tient les deux cases qui restent. Les trois pièces sont indispensables.',
+        },
+        e6: {
+          say: 'La technique, en une phrase : rapproche tes deux fous côte à côte, ils forment une barrière que le roi ne peut pas traverser, puis avance la barrière vers un bord en amenant ton roi derrière. Ne sépare jamais les fous, c’est tout le secret.',
+        },
+      },
+      'mat-etouffe': {
+        title: 'Le mat étouffé',
+        summary: 'Un cavalier mate un roi que ses propres pièces ont enfermé. Le plus beau du jeu.',
+        e1: {
+          say: 'Regarde le roi noir. Il a roqué, il est à l’abri, et il est enfermé — par sa propre tour en g8 et par ses propres pions en g7 et h7. Il n’a pas une seule case libre.',
+        },
+        e2: {
+          say: 'Contre un roi comme celui-là, le cavalier est la seule pièce qui compte. Une tour ou une dame, on peut les prendre ou s’interposer devant. Un cavalier, non : il saute, et son échec ne se bloque jamais.',
+        },
+        e3: {
+          say: 'Le cavalier saute en f7. De là il touche h8, et rien ne peut ni le prendre ni s’interposer.',
+          instruction: 'Joue le cavalier en f7',
+          hint: 'Le cavalier de g5 fait un L vers f7.',
+        },
+        e4: {
+          say: 'Échec et mat avec un cavalier et rien d’autre. C’est ce qu’on appelle un mat étouffé : le roi meurt étouffé par ses propres défenseurs.',
+        },
+        e5: {
+          say: 'Maintenant la version célèbre, et il y manque une chose. Les pions enferment toujours le roi, mais la tour est en f8 : la case g8 est libre. Le cavalier en f7 ne serait plus qu’un échec.',
+        },
+        e6: {
+          say: 'Il faut donc boucher g8, et la seule pièce qui peut y aller est ta dame. On va l’y donner.',
+        },
+        e7: {
+          say: 'La dame va en g8 et se laisse prendre. Elle n’est pas perdue : ton cavalier de h6 surveille g8, donc le roi ne peut pas la manger. Seule la tour peut.',
+          instruction: 'Joue la dame en g8',
+          hint: 'La dame de b3 file en diagonale jusqu’en g8.',
+        },
+        e8: {
+          say: 'La tour a dû prendre — c’était son unique coup légal. Et en prenant, elle vient de se poser exactement sur la case par laquelle son roi pouvait s’échapper.',
+        },
+        e9: {
+          say: 'La cage est refermée, par les Noirs eux-mêmes. Finis.',
+          instruction: 'Trouve le mat',
+          hint: 'Le cavalier de h6 saute en f7.',
+        },
+        e10: {
+          say: 'Une dame contre un mat. Ça s’appelle le legs de Philidor, et c’est la plus vieille combinaison notée du jeu. Le réflexe à garder : dès qu’un roi adverse a roqué et qu’il n’a aucune case d’air, cherche un cavalier.',
+        },
+      },
+    },
+    'mats-ouverture': {
+      title: 'Les mats de l’ouverture',
+      description:
+        'Les mats qui tombent dans les dix premiers coups. Chacun avec ses variantes : la ligne qui mate, les réponses qui l’annulent, et le prix à payer quand on l’a tenté pour rien.',
+      'mat-imbecile': {
+        title: 'Le mat de l’imbécile',
+        summary: 'Deux coups. Le mat le plus rapide possible — et celui qu’il faut savoir éviter.',
+        e1: {
+          say: 'Le mat le plus rapide du jeu tient en deux coups. Tu ne le donneras probablement jamais — il faut que l’adversaire s’y prête — mais il t’apprend la diagonale la plus dangereuse de l’échiquier.',
+        },
+        e2: {
+          say: 'Les Blancs ont avancé le pion f. Regarde ce qu’il vient d’ouvrir : une diagonale qui part de h4 et qui arrive droit sur leur roi, en passant par g3 et f2.',
+        },
+        e3: {
+          say: 'Tu as les Noirs. Réponds e5, un coup tout à fait normal — il occupe le centre, et il libère ta dame sur cette même diagonale.',
+          instruction: 'Joue le pion en e5',
+          hint: 'Le pion e7 avance de deux cases.',
+        },
+        e4: {
+          say: 'Et les Blancs avancent le pion g. C’est le second coup fatal : g3 n’est plus défendu par personne, f2 est vide, et la diagonale est grande ouverte de h4 jusqu’au roi blanc.',
+        },
+        e5: {
+          say: 'À toi. Ta dame n’a qu’à parcourir la diagonale.',
+          instruction: 'Trouve le mat',
+          hint: 'La dame de d8 file en diagonale : e7, f6, g5, h4.',
+        },
+        e6: {
+          say: 'Échec et mat en deux coups. Le roi blanc est attaqué et il ne peut rien faire : f2 est la seule case libre autour de lui, et ta dame la couvre. Rien ne peut s’interposer en g3 ni en f2, et rien n’atteint ta dame.',
+        },
+        e7: {
+          say: 'Les variantes ne changent rien à l’affaire. f3 puis g4, f4 puis g4, ou g4 puis f3 : le mat est le même. Ce qui compte n’est pas l’ordre des coups mais le résultat — les deux pions f et g partis, et plus personne sur la diagonale du roi.',
+        },
+        e8: {
+          say: 'Maintenant retourne l’échiquier, parce que c’est là que la leçon sert. Tu as les Blancs, et les Noirs viennent de jouer f6 puis g5. Ils ont commis exactement la même faute, un coup plus tard.',
+        },
+        e9: {
+          say: 'Punis-les.',
+          instruction: 'Trouve le mat',
+          hint: 'La dame de d1 file en diagonale jusqu’en h5.',
+        },
+        e10: {
+          say: 'Voilà la vraie leçon, et elle tient en une phrase : n’avance jamais les pions f et g ensemble avant d’avoir roqué. Ce sont eux qui gardent ton roi, et ils le gardent à deux ou pas du tout.',
+        },
+      },
+      'mat-berger': {
+        title: 'Le mat du berger',
+        summary:
+          'Quatre coups, et la partie est finie. Le connaître, c’est surtout ne plus le subir.',
+        e1: {
+          say: 'Au tout début de la partie, une case est plus faible que toutes les autres : f7. Regarde qui la défend. Personne, sauf le roi lui-même.',
+        },
+        e2: {
+          say: 'Le fou sort en c4. De là, il regarde f7 en diagonale, par-dessus tout l’échiquier.',
+          instruction: 'Joue le fou en c4',
+          hint: 'Le fou de f1 sort en diagonale : e2, d3, c4.',
+        },
+        e3: {
+          say: 'Les Noirs ont développé un cavalier, mais il ne défend pas f7. Amène maintenant ta dame en h5 : elle vise f7 elle aussi. Deux attaquants contre un seul défenseur.',
+          instruction: 'Joue la dame en h5',
+          hint: 'La dame de d1 file en diagonale jusqu’en h5.',
+        },
+        e4: {
+          say: 'Les Noirs sortent leur second cavalier. Le coup a l’air naturel — il développe une pièce et il attaque ta dame — et il perd la partie sur le coup suivant.',
+        },
+        e5: {
+          say: 'À toi. La dame prend en f7, et le fou la défend.',
+          instruction: 'Trouve le mat',
+          hint: 'La dame de h5 descend manger le pion f7.',
+        },
+        e6: {
+          say: 'Échec et mat. Le roi ne peut pas prendre la dame, le fou c4 la protège. Il ne peut pas fuir non plus : la dame lui interdit e7 et d7, et ses propres pièces occupent d8 et f8.',
+        },
+        e7: {
+          say: 'Première variante, et c’est la parade principale. Au lieu du cavalier, les Noirs avancent le pion g6. Il chasse la dame et il bouche sa diagonale d’un seul coup. Il n’y a plus de mat.',
+        },
+        e8: {
+          say: 'Seconde parade, tout aussi bonne : la dame noire en e7. Elle défend f7 une seconde fois, et deux attaquants contre deux défenseurs ne font plus rien du tout.',
+        },
+        e9: {
+          say: 'Troisième variante, et celle-là punit. Si les Noirs ont sorti leur cavalier en f6 d’entrée, ne joue surtout pas la dame en h5 : ce cavalier-là couvre h5, et il la mangerait tout simplement.',
+        },
+        e10: {
+          say: 'Et voilà ce qui t’attend quand la parade arrive. Ta dame a dû reculer en f3, elle a perdu deux coups, les Noirs ont développé deux cavaliers et poussé g6. Tu as trois temps de retard et une dame qui gêne ton propre cavalier.',
+        },
+        e11: {
+          say: 'Retiens donc les deux côtés. Si une dame vise ta case f7, réponds g6 ou défends avec ta dame en e7. Et ne compte pas sur ce mat toi-même : dès que ton adversaire le connaît, tu as juste sorti ta dame trop tôt, et tu vas passer la partie à la faire fuir.',
+        },
+      },
+      'mat-shilling': {
+        title: 'Le piège du Shilling',
+        summary:
+          'Les Noirs offrent un pion. Celui qui le prend est maté en sept coups, par ses propres pièces.',
+        e1: {
+          say: 'Partie italienne, la plus jouée de toutes. Tu as les Noirs. Ce piège se vendait un shilling dans les cafés d’échecs de Londres : on pariait cette pièce sur la partie, et on la gagnait.',
+        },
+        e2: {
+          say: 'Joue ton cavalier en d4. Il a l’air perdu au milieu de rien, et c’est tout l’appât : il attaque le cavalier f3 et il laisse ton pion e5 sans défense.',
+          instruction: 'Joue le cavalier en d4',
+          hint: 'Le cavalier de c6 fait un L vers d4.',
+        },
+        e3: {
+          say: 'Et les Blancs prennent le pion. C’est le coup naturel : le pion est gratuit, et leur cavalier était attaqué de toute façon. C’est aussi le coup qui perd.',
+        },
+        e4: {
+          say: 'Ta dame sort en g5. Elle attaque le cavalier e5 et le pion g2 en même temps, et les Blancs ne peuvent pas défendre les deux.',
+          instruction: 'Joue la dame en g5',
+          hint: 'La dame de d8 file en diagonale : e7, f6, g5.',
+        },
+        e5: {
+          say: 'Les Blancs cherchent la complication : leur cavalier prend en f7 et attaque ta dame et ta tour d’un seul coup. Ne sauve ni l’une ni l’autre.',
+        },
+        e6: {
+          say: 'Prends le pion g2 avec ta dame. Elle menace maintenant la tour h1, et elle s’installe dans le camp blanc.',
+          instruction: 'Prends le pion en g2',
+          hint: 'La dame de g5 descend toute sa colonne jusqu’en g2.',
+        },
+        e7: {
+          say: 'Les Blancs mettent leur tour en f1, où leur roi la défend. Regarde bien la case qu’ils viennent de boucher : f1. Leur roi en avait besoin.',
+        },
+        e8: {
+          say: 'Reprends le pion e4 avec échec. Ta dame se met sur la colonne du roi blanc.',
+          instruction: 'Prends le pion en e4',
+          hint: 'La dame de g2 prend en diagonale : f3, e4.',
+        },
+        e9: {
+          say: 'Les Blancs s’interposent avec leur fou en e2. Et ce fou est cloué : il est entre ta dame et leur roi, il ne peut plus bouger de la partie.',
+        },
+        e10: {
+          say: 'Ton cavalier de d4, celui que tout le monde prenait pour une bêtise, saute en f3.',
+          instruction: 'Joue le cavalier en f3',
+          hint: 'Le cavalier de d4 fait un L vers f3.',
+        },
+        e11: {
+          say: 'Échec et mat. Compte les cases autour du roi blanc : d1 sa dame, d2 son pion, e2 son fou, f1 sa tour, f2 son pion. Toutes occupées par les siens. Et personne ne peut prendre ton cavalier — le fou e2 est cloué, la tour f1 est bloquée par son propre pion.',
+        },
+        e12: {
+          say: 'C’est la même figure que le mat étouffé, vue de l’autre côté : un roi tué par ses propres défenseurs, avec un cavalier. Tu la reconnaîtras désormais dans les deux sens.',
+        },
+        e13: {
+          say: 'Et la variante qui refuse le piège, celle qu’il faut connaître dans l’autre sens : prendre le cavalier au lieu du pion. Les Blancs échangent en d4, il n’y a plus de dame en g5, plus de mat, et ce sont eux qui sont mieux.',
+        },
+        e14: {
+          say: 'Deux règles à en tirer. Quand on t’offre un pion en plein début de partie, demande-toi pourquoi avant de le prendre. Et quand tu es déjà dans le piège, rends du matériel tout de suite — le fou en f7 avec échec — plutôt que de courir après la dame adverse.',
+        },
+      },
+      'mat-legal': {
+        title: 'Le mat de Légal',
+        summary: 'Une pièce clouée peut bouger. Celui qui l’oublie perd en sept coups.',
+        e1: {
+          say: 'Le fou noir en g4 vise ton cavalier f3, et derrière ce cavalier il y a ta dame en d1. Le cavalier est donc cloué : s’il bouge, tu perds ta dame.',
+        },
+        e2: {
+          say: 'Sauf que ce clouage-là n’est pas absolu. Ce n’est pas ton roi qui est derrière, c’est ta dame — le cavalier a parfaitement le droit de partir. La seule question est de savoir si ça vaut neuf points.',
+        },
+        e3: {
+          say: 'Le cavalier cloué prend le pion e5. Il attaque en même temps le cavalier c6 et il ouvre la diagonale de ton fou vers f7.',
+          instruction: 'Prends le pion en e5 avec le cavalier',
+          hint: 'Le cavalier de f3 saute sur le pion e5.',
+        },
+        e4: {
+          say: 'Les Noirs ont pris la dame. Neuf points d’avance, et la partie est perdue en deux coups. C’est tout le piège : le coup gourmand est celui qui perd.',
+        },
+        e5: {
+          say: 'Le fou se donne en f7. Le roi ne peut pas le prendre, ton cavalier e5 défend la case.',
+          instruction: 'Prends le pion en f7 avec le fou',
+          hint: 'Le fou de c4 mange le pion f7.',
+        },
+        e6: {
+          say: 'Le roi noir n’avait qu’un seul coup légal. Il monte en e7, au milieu de ses propres pièces, et il y est enfermé.',
+        },
+        e7: {
+          say: 'Ton troisième attaquant arrive. Le cavalier de c3 se pose en d5, et personne ne peut l’en chasser.',
+          instruction: 'Joue le cavalier en d5',
+          hint: 'Le cavalier de c3 fait un L vers d5.',
+        },
+        e8: {
+          say: 'Échec et mat, avec un fou et deux cavaliers, contre une dame. Le roi noir est cerné par son propre camp : sa dame occupe d8, son fou occupe f8, et tes trois pièces tiennent tout le reste.',
+        },
+        e9: {
+          say: 'Et la variante qui sauve tout, la seule : reprendre le cavalier au lieu de prendre la dame. Les Noirs rendent la pièce, ils gardent leur roi, et la partie continue à peu près à égalité. Ils n’avaient qu’à refuser le cadeau.',
+        },
+        e10: {
+          say: 'Deux choses à garder. Quand une pièce adverse est clouée sur autre chose que le roi, elle peut bouger — vérifie toujours ce qu’elle menace en partant. Et quand on t’offre une dame en plein début de partie, compte les pièces qui regardent ton roi avant de la prendre.',
+        },
+      },
+    },
+    pieges: {
+      title: 'Tendre et déjouer les pièges',
+      description:
+        'Cinq pièges d’ouverture qui gagnent une pièce, appris des deux côtés : on le tend jusqu’au gain, puis on le voit venir et on le déjoue. Ce sont eux qui décident les parties en club, bien avant la théorie.',
+      'piege-fegatello': {
+        title: 'Le Fegatello',
+        summary:
+          'Deux pièces sur f7, un cavalier donné, et le roi noir dehors au septième coup. Puis le coup unique qui annule tout.',
+        e1: {
+          say: 'Le Fegatello, ou « foie frit » en italien. Les Blancs donnent un cavalier sur f7 pour sortir le roi noir. On commence par le tendre.',
+        },
+        e2: {
+          say: 'Pion roi, comme d’habitude.',
+          instruction: 'Joue e4',
+        },
+        e3: {
+          say: 'Cavalier f3, qui attaque e5.',
+          instruction: 'Joue le cavalier en f3',
+        },
+        e4: {
+          say: 'Et le fou en c4. Regarde bien sa diagonale : elle finit sur f7.',
+          instruction: 'Joue le fou en c4',
+        },
+        e5: {
+          say: 'Les Noirs développent leur cavalier et ignorent f7. C’est jouable, mais ça demande de connaître la suite.',
+        },
+        e6: {
+          say: 'Cavalier g5. Maintenant deux pièces attaquent f7, et f7 n’est défendu que par le roi.',
+          instruction: 'Joue le cavalier en g5',
+        },
+        e7: {
+          say: 'Les Noirs contre-attaquent au centre. Prends le pion.',
+          instruction: 'Prends en d5 avec le pion e',
+        },
+        e8: {
+          say: 'Voilà la faute. Reprendre en d5 avec le cavalier laisse f7 sans défense suffisante. Tout le piège tient dans ce coup-là.',
+        },
+        e9: {
+          say: 'Cavalier prend f7. Tu donnes une pièce, et tu sais pourquoi.',
+          instruction: 'Prends en f7 avec le cavalier',
+        },
+        e10: {
+          say: 'Dame f3. Échec, et elle attaque en même temps le cavalier cloué en d5.',
+          instruction: 'Joue la dame en f3',
+        },
+        e11: {
+          say: 'Le roi noir est au milieu de l’échiquier au huitième coup, le cavalier d5 est attaqué deux fois, et les Blancs ont encore toutes leurs pièces à sortir. C’est largement suffisant pour une pièce.',
+        },
+        e12: {
+          say: 'Maintenant on change de camp. Tu joues les Noirs, et tu dois éviter tout ça.',
+        },
+        e13: {
+          say: 'Réponds au centre.',
+          instruction: 'Joue e5',
+        },
+        e14: {
+          say: 'Défends ton pion.',
+          instruction: 'Joue le cavalier en c6',
+        },
+        e15: {
+          say: 'Développe ton cavalier roi.',
+          instruction: 'Joue le cavalier en f6',
+        },
+        e16: {
+          say: 'Le cavalier arrive sur g5. La seule réponse est de frapper au centre.',
+          instruction: 'Joue d5',
+          hint: 'Le pion d7 avance de deux cases : il attaque le fou c4 en passant.',
+        },
+        e17: {
+          say: 'Et voici le coup qui déjoue tout le piège : cavalier a5. Il attaque le fou c4 au lieu de reprendre en d5.',
+          instruction: 'Joue le cavalier de c6 en a5',
+          hint: 'Ne reprends pas le pion : c’est exactement ce que les Blancs attendent. Va chercher le fou.',
+        },
+        e18: {
+          say: 'Le fou doit fuir, f7 n’est plus attaqué que par une pièce, et les Noirs rendront le pion d5 au pire. Un seul coup, et le Fegatello n’existe plus.',
+        },
+      },
+      'piege-elephant': {
+        title: 'Le piège de l’éléphant',
+        summary:
+          'Un pion qui a l’air de tomber tout seul, et une dame qui se donne pour gagner une pièce. Le piège le plus rentable du gambit dame.',
+        e1: {
+          say: 'Celui-ci se subit plus souvent qu’il ne se tend. Tu joues les Noirs, et tu vas laisser les Blancs prendre un pion qu’ils ne peuvent pas prendre.',
+        },
+        e2: {
+          say: 'Réponds symétriquement.',
+          instruction: 'Joue d5',
+        },
+        e3: {
+          say: 'Le gambit dame. Soutiens ton pion d5 avec le pion e.',
+          instruction: 'Joue e6',
+        },
+        e4: {
+          say: 'Développe ton cavalier roi.',
+          instruction: 'Joue le cavalier en f6',
+        },
+        e5: {
+          say: 'Le fou cloue ton cavalier f6 contre ta dame. C’est ce clouage que les Blancs vont croire réel.',
+        },
+        e6: {
+          say: 'Cavalier b8 en d7. Il ajoute un défenseur à f6 — et il tend le piège.',
+          instruction: 'Joue le cavalier de b8 en d7',
+          hint: 'Le cavalier de b8 va en d7, pas ailleurs.',
+        },
+        e7: {
+          say: 'Reprends avec ton pion e.',
+          instruction: 'Prends en d5 avec le pion e6',
+        },
+        e8: {
+          say: 'Voilà. Les Blancs prennent en d5 parce que ton cavalier f6 est cloué. Sauf qu’il ne l’est pas vraiment : ce qui est derrière vaut moins que ce qu’on va gagner.',
+        },
+        e9: {
+          say: 'Prends le cavalier avec ton cavalier f6. Oui, tu perds la dame.',
+          instruction: 'Prends en d5 avec le cavalier f6',
+          hint: 'Le cavalier cloué bouge quand même. Fais-le.',
+        },
+        e10: {
+          say: 'Et maintenant le coup de tout le piège : fou b4, échec.',
+          instruction: 'Joue le fou de f8 en b4',
+        },
+        e11: {
+          say: 'Les Blancs doivent s’interposer avec leur dame. Prends-la.',
+          instruction: 'Prends la dame en d2',
+        },
+        e12: {
+          say: 'Et tu récupères le fou qui campe sur ta case d8.',
+          instruction: 'Prends en d8 avec le roi',
+        },
+        e13: {
+          say: 'Compte : tu as donné la dame et un fou, tu as récupéré une dame, un cavalier et un fou. Une pièce de plus, et la partie est gagnée. Retiens la leçon générale : un clouage contre la dame n’interdit pas de bouger, il faut calculer.',
+        },
+      },
+      'piege-kieninger': {
+        title: 'Le piège de Kieninger',
+        summary:
+          'Un mat étouffé au huitième coup, en pleine ouverture, parce qu’un pion pris à l’aile ouvre une colonne qu’on n’avait pas regardée.',
+        e1: {
+          say: 'Le gambit Budapest, et le plus joli mat d’ouverture qui existe. Tu joues les Noirs.',
+        },
+        e2: {
+          say: 'Cavalier f6 d’abord.',
+          instruction: 'Joue le cavalier en f6',
+        },
+        e3: {
+          say: 'Et maintenant le gambit : e5. Tu offres un pion pour activer tes pièces.',
+          instruction: 'Joue e5',
+        },
+        e4: {
+          say: 'Cavalier g4. Il va rechercher le pion e5.',
+          instruction: 'Joue le cavalier de f6 en g4',
+        },
+        e5: {
+          say: 'Les Blancs défendent leur pion. Amène un deuxième attaquant.',
+          instruction: 'Joue le cavalier en c6',
+        },
+        e6: {
+          say: 'Fou b4, échec. Ce n’est pas un coup en l’air : il va forcer les Blancs à boucher avec leur cavalier b1.',
+          instruction: 'Joue le fou en b4',
+        },
+        e7: {
+          say: 'Dame e7. Elle se met sur la colonne e — retiens cette colonne, tout le mat est là.',
+          instruction: 'Joue la dame en e7',
+        },
+        e8: {
+          say: 'Les Blancs attaquent ton fou avec a3. Un coup naturel, et c’est la faute : ils s’occupent de l’aile alors que leur roi est encore au centre.',
+        },
+        e9: {
+          say: 'Ignore le fou. Reprends le pion e5 avec le cavalier de g4.',
+          instruction: 'Prends en e5 avec le cavalier g4',
+          hint: 'C’est le cavalier de g4 qui prend, pas celui de c6.',
+        },
+        e10: {
+          say: 'Les Blancs prennent le fou. Maintenant : cavalier d3. Échec et mat.',
+          instruction: 'Joue le cavalier de e5 en d3',
+          hint: 'Le cavalier de e5 saute en d3. Regarde la colonne e avant de douter.',
+        },
+        e11: {
+          say: 'Mat étouffé. Le roi n’a aucune case : sa dame, son fou et son cavalier l’entourent. Et le pion e2 ne peut pas prendre le cavalier, parce qu’en quittant e2 il ouvrirait la colonne sur ta dame e7.',
+        },
+      },
+      'piege-lasker': {
+        title: 'Le piège de Lasker',
+        summary:
+          'Le seul piège d’ouverture où promouvoir en dame perd et promouvoir en cavalier gagne. Une sous-promotion, au septième coup.',
+        e1: {
+          say: 'Le gambit Albin. Tu joues les Noirs, et tu vas finir par promouvoir un pion en cavalier — pas en dame.',
+        },
+        e2: {
+          say: 'Réponds d5.',
+          instruction: 'Joue d5',
+        },
+        e3: {
+          say: 'Et le gambit Albin : e5.',
+          instruction: 'Joue e5',
+        },
+        e4: {
+          say: 'Pousse ton pion d en d4. Il y sera très difficile à déloger.',
+          instruction: 'Joue d4',
+        },
+        e5: {
+          say: 'Les Blancs jouent e3 pour se débarrasser du pion d4. C’est la faute du piège : ce coup ouvre une diagonale vers leur roi.',
+        },
+        e6: {
+          say: 'Fou b4, échec.',
+          instruction: 'Joue le fou en b4',
+        },
+        e7: {
+          say: 'Prends en e3 avec ton pion d4.',
+          instruction: 'Prends en e3',
+        },
+        e8: {
+          say: 'Les Blancs prennent ton fou et se croient bien. Ton pion e3, lui, est à deux cases de la promotion, et la case f2 n’est tenue que par le roi.',
+        },
+        e9: {
+          say: 'Prends en f2, échec.',
+          instruction: 'Prends en f2 avec le pion e3',
+        },
+        e10: {
+          say: 'Et maintenant le coup de la leçon : prends le cavalier g1 et promeus en **cavalier**. Avec échec.',
+          instruction: 'Prends en g1 et promeus en cavalier',
+          hint: 'La case g1 porte le cavalier blanc. Choisis le cavalier dans le sélecteur de promotion, pas la dame.',
+        },
+        e11: {
+          say: 'La tour reprend. Fou g4, échec — et la dame blanche est perdue.',
+          instruction: 'Joue le fou en g4',
+        },
+        e12: {
+          say: 'Le roi est en échec sur la diagonale, et quoi qu’il fasse le fou prend la dame en d1. Promouvoir en dame aurait donné échec aussi — mais les Blancs l’auraient prise, et il ne resterait rien. C’est la seule sous-promotion d’ouverture qu’il faut connaître.',
+        },
+      },
+      'piege-arche-de-noe': {
+        title: 'L’arche de Noé',
+        summary:
+          'Trois pions noirs qui avancent, et le fou blanc se retrouve sans une seule case. Le piège le plus vieux de l’espagnole.',
+        e1: {
+          say: 'L’espagnole. Tu joues les Noirs, et tu vas enfermer le fou blanc avec des pions. On appelle ça l’arche de Noé parce que le piège est aussi vieux que le déluge.',
+        },
+        e2: {
+          say: 'Réponds e5.',
+          instruction: 'Joue e5',
+        },
+        e3: {
+          say: 'Défends ton pion.',
+          instruction: 'Joue le cavalier en c6',
+        },
+        e4: {
+          say: 'Le fou en b5 attaque le défenseur de e5. Chasse-le avec a6.',
+          instruction: 'Joue a6',
+        },
+        e5: {
+          say: 'Soutiens ton pion e5 une deuxième fois.',
+          instruction: 'Joue d6',
+        },
+        e6: {
+          say: 'Les Blancs ouvrent le centre. Réponds b5 : le fou n’a déjà plus beaucoup de cases.',
+          instruction: 'Joue b5',
+        },
+        e7: {
+          say: 'Le fou se réfugie en b3. Regarde ses cases de fuite : a2 et c2 sont occupées par ses propres pions, a4 et c4 seront tenues par tes pions. Il ne lui reste rien.',
+        },
+        e8: {
+          say: 'Échange au centre : cavalier prend d4.',
+          instruction: 'Prends en d4 avec le cavalier',
+        },
+        e9: {
+          say: 'Reprends avec ton pion.',
+          instruction: 'Prends en d4 avec le pion e5',
+        },
+        e10: {
+          say: 'Voilà la faute : la dame reprend en d4, au lieu de s’occuper du fou. Maintenant tu la chasses, et chaque coup de chasse avance tes pions vers le fou.',
+        },
+        e11: {
+          say: 'Pion c5 : il attaque la dame.',
+          instruction: 'Joue c5',
+        },
+        e12: {
+          say: 'Fou e6 : tu la chasses encore, en développant.',
+          instruction: 'Joue le fou en e6',
+        },
+        e13: {
+          say: 'Bouche l’échec avec ton fou.',
+          instruction: 'Joue le fou en d7',
+        },
+        e14: {
+          say: 'Et le dernier pion : c4. Le fou b3 est pris au filet.',
+          instruction: 'Joue c4',
+        },
+        e15: {
+          say: 'Le fou n’a aucune case : ses propres pions lui bouchent a2 et c2, tes pions tiennent a4 et c4. Il tombera au coup suivant. Retiens le mécanisme plutôt que la suite de coups : des pions peuvent enfermer une pièce, et un fou qui recule sur une aile est souvent déjà perdu.',
+        },
+      },
+    },
+    repertoire: {
+      title: 'Comprendre les ouvertures',
+      description:
+        'Les six ouvertures qu’on rencontre le plus, expliquées par leurs idées et non par leurs variantes. Objectif : savoir quoi faire au coup 8, même quand l’adversaire a joué autre chose que le livre.',
+      italienne: {
+        title: 'La partie italienne',
+        summary:
+          'La plus ancienne, la plus naturelle. Toutes les pièces vers le centre, sans détour.',
+        e1: {
+          say: "L'italienne, c'est le développement le plus direct qui existe. Pion au centre, cavalier, fou. Trois coups, trois principes respectés.",
+        },
+        e2: {
+          say: 'Commence par le pion roi.',
+          instruction: 'Joue e4',
+        },
+        e3: {
+          say: 'Cavalier f3. Il attaque le pion e5 et vise le centre.',
+          instruction: 'Joue le cavalier en f3',
+        },
+        e4: {
+          say: "Et maintenant le coup qui donne son nom à l'ouverture : fou c4. Il pointe vers f7, la case la plus faible du camp noir tant que le roi n'a pas roqué.",
+          instruction: 'Joue le fou en c4',
+          hint: 'Le fou de f1 sort en diagonale jusqu’en c4.',
+        },
+        e5: {
+          say: "Voilà la position type. Les deux camps ont un pion au centre, un cavalier et un fou dehors. C'est le Giuoco Piano — « le jeu tranquille ».",
+        },
+        e6: {
+          say: "L'idée blanche pour la suite : roquer, jouer c3 et d4 pour construire un gros centre de pions. L'idée noire : la même chose en miroir, avec c6 et d5.",
+        },
+        e7: {
+          say: 'Le piège à connaître : ne joue jamais la dame en h5 pour tenter un mat rapide. Les Noirs parent et chassent la dame en développant. Tu perds trois temps, ils en gagnent trois.',
+        },
+      },
+      espagnole: {
+        title: 'La partie espagnole',
+        summary: 'L’ouverture la plus jouée au plus haut niveau depuis cent cinquante ans.',
+        e1: {
+          say: "Même début que l'italienne, mais le fou va en b5 au lieu de c4. Ce petit changement transforme toute la partie.",
+        },
+        e2: {
+          say: 'Joue le fou en b5. Il attaque le cavalier c6, qui défend le pion e5.',
+          instruction: 'Joue le fou en b5',
+        },
+        e3: {
+          say: "Les Noirs répondent presque toujours a6 pour chasser le fou. C'est le coup Morphy, et c'est une question : le fou prend-il, ou recule-t-il ?",
+        },
+        e4: {
+          say: "Prendre en c6 donne aux Noirs des pions doublés mais la paire de fous : c'est la variante d'échange, jouable et simple. Reculer en a4 garde la tension : c'est la ligne principale, et celle de tous les champions du monde.",
+        },
+        e5: {
+          say: "L'idée profonde de l'espagnole : la menace sur c6 n'est pas immédiate — reprendre le pion e5 tout de suite perd une pièce sur d4. C'est une pression **à long terme** qui gêne les Noirs pendant vingt coups.",
+        },
+        e6: {
+          say: "Retiens surtout ceci : dans l'espagnole, les Blancs jouent lentement. c3, d3, Cbd2, Cf1, Cg3 — le cavalier fait tout le tour de l'échiquier pour rejoindre l'attaque. On appelle ça la manœuvre espagnole.",
+        },
+      },
+      sicilienne: {
+        title: 'La défense sicilienne',
+        summary: 'La réponse la plus combative à 1.e4. Déséquilibrée dès le premier coup.',
+        e1: {
+          say: 'Face à 1.e4, la sicilienne répond c5. Pas e5, qui donne une partie symétrique : c5, qui crée un déséquilibre immédiat.',
+        },
+        e2: {
+          say: "Joue c5. Ce coup unique ouvre la porte à des milliers de variantes — mais l'idée derrière est toujours la même.",
+          instruction: 'Joue le pion en c5',
+        },
+        e3: {
+          say: "Pourquoi c5 plutôt que e5 ? Parce que le pion c attaque d4 sans bloquer la diagonale du fou noir, et surtout parce qu'après l'échange en d4, les Noirs se retrouvent avec deux pions centraux contre un.",
+        },
+        e4: {
+          say: "Après d4 cxd4, les Blancs reprennent avec le cavalier. Regarde la structure : les Noirs ont échangé un pion d'aile contre un pion central. C'est un petit gain permanent.",
+        },
+        e5: {
+          say: "En contrepartie, les Blancs ont de l'avance au développement et la colonne d ouverte. La sicilienne est un pari : du matériel structurel contre du temps.",
+        },
+        e6: {
+          say: "Les Blancs attaquent généralement sur l'aile roi, les Noirs sur l'aile dame le long de la colonne c. Ce sont deux courses parallèles, et c'est ce qui rend ces parties si tranchantes.",
+        },
+        e7: {
+          say: "Si tu débutes, retiens simplement : joue c5, d6, Cf6, Cc6, e6, puis Fe7 et roque. C'est le dispositif Scheveningue, et il tient face à tout.",
+        },
+      },
+      francaise: {
+        title: 'La défense française',
+        summary: 'Solide comme un roc, avec un seul défaut — et un plan pour le corriger.',
+        e1: {
+          say: 'La française répond e6 à 1.e4. Un coup modeste, qui prépare d5 pour contester le centre immédiatement.',
+        },
+        e2: {
+          say: 'Joue e6. Un coup discret, mais qui prépare la vraie réponse au coup suivant.',
+          instruction: 'Joue le pion en e6',
+        },
+        e3: {
+          say: 'Et maintenant d5, le vrai coup de la française : les Noirs attaquent le centre blanc de front.',
+          instruction: 'Joue le pion en d5',
+        },
+        e4: {
+          say: "La structure est très solide : deux pions qui se défendent l'un l'autre. Mais elle a un défaut célèbre — le fou de cases claires est enfermé derrière ses propres pions e6 et d5.",
+        },
+        e5: {
+          say: "On l'appelle le « mauvais fou français ». Tout le plan noir consiste à lui trouver une sortie : soit par b6 et Fa6, soit en poussant f6 pour ouvrir la diagonale.",
+        },
+        e6: {
+          say: "L'autre plan noir, systématique : attaquer la base de la chaîne de pions blanche avec c5. En française, on joue presque toujours c5 tôt ou tard.",
+        },
+      },
+      'gambit-dame': {
+        title: 'Le gambit dame',
+        summary: 'Un pion offert qui n’en est pas un. L’ouverture la plus solide après 1.d4.',
+        e1: {
+          say: "Après 1.d4 d5, les Blancs jouent c4. On appelle ça un gambit, mais c'est un abus de langage : le pion n'est pas vraiment donné.",
+        },
+        e2: {
+          say: "Joue c4, en attaquant le pion d5 depuis le côté. C'est le gambit dame.",
+          instruction: 'Joue le pion en c4',
+        },
+        e3: {
+          say: "Si les Noirs prennent en c4, les Blancs récupèrent le pion sans effort avec e3 puis Fxc4. Pendant ce temps ils auront occupé le centre. Prendre n'est donc pas gagner un pion, c'est céder le centre.",
+        },
+        e4: {
+          say: "La vraie question posée aux Noirs est : comment défendre d5 ? Avec e6, c'est le gambit dame refusé, solide mais qui enferme le fou. Avec c6, c'est la slave, qui garde le fou libre.",
+        },
+        e5: {
+          say: 'Le plan blanc dans toutes ces lignes est le même : Cc3, Cf3, Fg5 pour clouer, e3, Fd3, roque, puis pousser e4 au bon moment pour ouvrir le centre.',
+        },
+        e6: {
+          say: "Retiens le principe général de 1.d4 : ces parties sont plus lentes que celles de 1.e4. On manœuvre, on améliore ses pièces, et l'avantage se construit sur vingt coups au lieu de dix.",
+        },
+      },
+      'est-indienne': {
+        title: 'La défense est-indienne',
+        summary: 'Laisser le centre à l’adversaire… pour mieux le détruire ensuite.',
+        e1: {
+          say: "L'est-indienne renverse tout ce qu'on a appris : les Noirs laissent volontairement les Blancs prendre tout le centre.",
+        },
+        e2: {
+          say: "Cavalier f6 d'abord.",
+          instruction: 'Joue le cavalier en f6',
+        },
+        e3: {
+          say: 'Puis g6, pour préparer le fianchetto du fou.',
+          instruction: 'Joue le pion en g6',
+        },
+        e4: {
+          say: "Et le fou en g7. Il balaie la grande diagonale, droit sur le centre et l'aile dame blanche.",
+          instruction: 'Joue le fou en g7',
+        },
+        e5: {
+          say: "Voilà l'idée : le fou g7 et le cavalier f6 exercent une pression à distance sur le centre blanc. Les Noirs ne l'occupent pas, ils le visent.",
+        },
+        e6: {
+          say: 'Le plan noir classique : roquer, jouer d6, puis e5 pour frapper le centre. Si les Blancs ferment avec d5, les Noirs lancent f5, f4, g5 et attaquent le roi. Ce sont parmi les parties les plus violentes du jeu.',
+        },
+        e7: {
+          say: "Attention : c'est une ouverture exigeante. Elle demande de savoir attendre pendant que l'adversaire construit, sans paniquer. Ne l'adopte que quand tu es à l'aise avec les positions fermées.",
+        },
+      },
+    },
+    ouverture: {
+      title: 'Bien ouvrir',
+      description:
+        'Trois principes suffisent à jouer correctement les dix premiers coups de n’importe quelle partie — sans apprendre une seule variante par cœur.',
+      'principes-ouverture': {
+        title: 'Les trois principes',
+        summary: 'Centre, développement, sécurité du roi. Tout le reste en découle.',
+        e1: {
+          say: "L'ouverture a trois objectifs, et trois seulement. Occuper le centre. Sortir ses pièces. Mettre son roi à l'abri. Si tes dix premiers coups servent ces trois buts, tu joues bien.",
+        },
+        e2: {
+          say: 'Premier principe : le centre. Avance un pion central de deux cases. Joue e4.',
+          instruction: 'Joue le pion en e4',
+          hint: 'Le pion e2 avance de deux cases.',
+        },
+        e3: {
+          say: 'Excellent. Ce pion contrôle d5 et f5, et il libère la diagonale de ton fou et celle de ta dame. Un seul coup, trois bénéfices.',
+        },
+        e4: {
+          say: 'Deuxième principe : le développement. Sors une pièce mineure vers le centre. Le cavalier en f3 est le coup le plus naturel — il attaque déjà le pion e5.',
+          instruction: 'Joue le cavalier en f3',
+          hint: 'Le cavalier de g1 saute en f3.',
+        },
+        e5: {
+          say: 'Continue : sors ton fou. En c4 il vise f7, le point le plus faible du camp noir en début de partie.',
+          instruction: 'Joue le fou en c4',
+          hint: 'Le fou de f1 sort en diagonale.',
+        },
+        e6: {
+          say: 'Troisième principe : la sécurité. Tes deux pièces du côté roi sont sorties, tu peux roquer. Fais-le maintenant.',
+          instruction: 'Joue le petit roque',
+          hint: 'Attrape le roi et pose-le en g1.',
+        },
+        e7: {
+          say: "En quatre coups tu as un pion au centre, deux pièces développées et un roi en sécurité. C'est une ouverture parfaite, et tu n'as rien appris par cœur.",
+        },
+      },
+      'erreurs-ouverture': {
+        title: 'Les quatre erreurs classiques',
+        summary: 'Ce que font tous les débutants — et pourquoi ça se paie cher.',
+        e1: {
+          say: "Erreur numéro un : sortir la dame trop tôt. C'est tentant, elle est puissante. Voyons ce qui se passe.",
+        },
+        e2: {
+          say: 'Les Blancs jouent la dame en h5. Elle menace le mat en f7 — mais les Noirs parent facilement, et ensuite ils vont la chasser en développant leurs pièces avec gain de temps.',
+        },
+        e3: {
+          say: 'Les Noirs sortent leur cavalier en défendant. Ils développent, les Blancs non. Chaque coup qui chasse la dame fait gagner un temps aux Noirs.',
+        },
+        e4: {
+          say: 'Erreur numéro deux : bouger deux fois la même pièce en ouverture. Chaque coup devrait sortir une pièce **nouvelle**. Il y a huit pièces à développer et seulement une dizaine de coups pour le faire.',
+        },
+        e5: {
+          say: 'Erreur numéro trois : les coups de pions inutiles sur les ailes. a3 et h3 ne développent rien, ne prennent pas le centre, et affaiblissent légèrement la position. Deux coups perdus.',
+        },
+        e6: {
+          say: 'Erreur numéro quatre : bouger le roi. Non seulement il reste au centre, mais il perd définitivement le droit de roquer. La partie sera très inconfortable.',
+        },
+        e7: {
+          say: 'Retiens simplement : une pièce nouvelle à chaque coup, vers le centre, et le roque avant le dixième coup. Tu éviteras déjà quatre-vingts pour cent des mauvaises ouvertures.',
+        },
+      },
+    },
+    milieu: {
+      title: 'Le milieu de partie',
+      description:
+        'Les pièces sont sorties, le roi est à l’abri… et maintenant ? Voici comment trouver un plan au lieu de jouer au hasard.',
+      'colonnes-ouvertes': {
+        title: 'Les colonnes ouvertes',
+        summary: 'Une colonne sans pion, c’est une autoroute. Elle appartient aux tours.',
+        e1: {
+          say: "Une colonne ouverte est une colonne sans aucun pion, ni blanc ni noir. Ici, la colonne d vient de s'ouvrir : c'est le chemin d'entrée dans le camp adverse.",
+        },
+        e2: {
+          say: "Place ta tour dessus. En finale et en milieu de partie, une tour sur colonne ouverte vaut bien plus qu'une tour coincée derrière ses pions.",
+          instruction: 'Joue une tour en d1',
+          hint: 'Amène une de tes tours sur la case d1, derrière ta dame.',
+        },
+        e3: {
+          say: 'Le principe se prolonge : deux tours doublées sur la même colonne ouverte sont presque irrésistibles. Et une tour qui atteint la septième rangée y dévore les pions.',
+        },
+        e4: {
+          say: "Quand aucune colonne n'est ouverte, cherche une colonne **semi-ouverte** : sans pion à toi, mais avec un pion adverse. Ce pion devient une cible fixe.",
+        },
+      },
+      'avant-poste': {
+        title: 'L’avant-poste',
+        summary: 'Une case avancée où ton cavalier est intouchable. Le rêve de toute pièce.',
+        e1: {
+          say: "Un avant-poste, c'est une case avancée dans le camp adverse, protégée par un de tes pions, et qu'aucun pion adverse ne peut jamais attaquer.",
+        },
+        e2: {
+          say: 'Le cavalier en e5 est ici sur un avant-poste : aucun pion noir ne pourra jamais venir le chasser, parce que les pions d et f noirs sont déjà passés ou absents. Il restera là toute la partie.',
+        },
+        e3: {
+          say: "Un cavalier sur avant-poste au cœur du camp adverse vaut souvent une tour. Cherche systématiquement ces cases : elles apparaissent dès qu'un adversaire avance ses pions.",
+        },
+      },
+      'securite-roi': {
+        title: 'La sécurité du roi',
+        summary: 'Trois pions intacts devant lui, ou l’attaque arrive.',
+        e1: {
+          say: "Un roi roqué avec ses trois pions intacts devant lui est très difficile à attaquer. C'est la configuration à préserver.",
+        },
+        e2: {
+          say: 'Chaque pion qui avance devant le roi crée une faiblesse permanente. Ici g6 a affaibli les cases f6 et h6, et surtout la grande diagonale.',
+        },
+        e3: {
+          say: "Règle simple : n'avance les pions devant ton roi que si tu y es obligé, ou pour faire une case d'air. Chaque poussée est une porte que tu ouvres.",
+        },
+        e4: {
+          say: "Et le corollaire : quand tu attaques un roi, compte ses défenseurs. Si tu as plus de pièces attaquantes qu'il n'a de défenseurs autour de son roi, lance l'attaque. Sinon, améliore d'abord tes pièces.",
+        },
+      },
+    },
+    finale: {
+      title: 'Les finales',
+      description:
+        'Peu de pièces, beaucoup de précision. C’est là que se gagnent les parties égales — et là que la plupart des joueurs de club n’ont jamais rien appris.',
+      'roi-actif': {
+        title: 'Le roi devient une pièce',
+        summary: 'Toute la partie il se cachait. En finale, il monte au front.',
+        e1: {
+          say: "Tant que les dames sont sur l'échiquier, le roi se cache. Dès qu'elles disparaissent, tout change : le roi devient une pièce d'attaque, à peu près aussi forte qu'un cavalier.",
+        },
+        e2: {
+          say: 'En finale, le premier réflexe est toujours le même : centraliser son roi. Un roi au centre atteint les deux ailes ; un roi dans son coin arrive toujours trop tard.',
+        },
+        e3: {
+          say: 'Avance ton roi vers le centre.',
+          instruction: 'Avance le roi',
+          hint: 'Le roi monte d’une case vers le centre.',
+        },
+        e4: {
+          say: "Un joueur qui oublie d'activer son roi en finale perd des positions parfaitement tenables. C'est sans doute l'erreur la plus coûteuse à partir de 1200 Elo.",
+        },
+      },
+      opposition: {
+        title: 'L’opposition',
+        summary: 'Le duel de rois qui décide toutes les finales de pions.',
+        e1: {
+          say: "Deux rois face à face, une case entre eux : c'est l'opposition. Et voici le paradoxe : celui qui **doit** jouer la perd, parce qu'il est obligé de céder du terrain.",
+        },
+        e2: {
+          say: "Ici c'est aux Blancs de jouer, donc les Noirs ont l'opposition. Le roi blanc va devoir s'écarter, et le roi noir avancera.",
+        },
+        e3: {
+          say: "Voilà pourquoi c'est décisif. Roi et pion contre roi : si le roi défenseur garde l'opposition devant le pion, la partie est nulle. S'il la perd, le pion passe.",
+        },
+        e4: {
+          say: "La technique gagnante : pousse ton **roi** avant ton pion. Le roi ouvre la voie, le pion suit. Pousser le pion en premier est l'erreur classique qui transforme un gain en nulle.",
+        },
+        e5: {
+          say: 'Retiens la formule : en finale de pions, le roi passe devant. Toujours.',
+        },
+      },
+      'regle-du-carre': {
+        title: 'La règle du carré',
+        summary: 'Un coup d’œil suffit pour savoir si un roi rattrape un pion.',
+        e1: {
+          say: 'Ton pion en a2 veut aller à dame. Le roi noir en h4 est loin. Le rattrape-t-il ? Il existe une astuce pour répondre en une seconde, sans compter.',
+        },
+        e2: {
+          say: "Trace un carré dont un côté va du pion jusqu'à sa case de promotion. Ici, du pion a2 jusqu'à a8 : six cases. Le carré fait donc six sur six, de a2 à f8.",
+        },
+        e3: {
+          say: "La règle : si le roi adverse est **dans** ce carré, ou peut y entrer en jouant, il rattrape le pion. S'il est dehors et que c'est à toi de jouer, le pion passe.",
+        },
+        e4: {
+          say: "Ici le roi noir est en h4, à l'extérieur du carré. Si tu pousses le pion, il ne le rattrapera jamais. Une règle géométrique, aucun calcul.",
+        },
+        e5: {
+          say: 'Attention : le carré rétrécit à chaque poussée du pion, mais le pion qui part de sa deuxième rangée peut avancer de deux cases — le carré se compte alors depuis la troisième rangée.',
+        },
+      },
+      'pion-passe': {
+        title: 'Le pion passé',
+        summary: 'Aucun pion adverse ne peut plus l’arrêter. En finale, il vaut de l’or.',
+        e1: {
+          say: "Un pion passé est un pion qu'aucun pion adverse ne peut plus arrêter : ni sur sa colonne, ni sur les colonnes voisines. Il n'a plus qu'à courir.",
+        },
+        e2: {
+          say: "En finale, un pion passé oblige l'adversaire à immobiliser une pièce pour le surveiller. C'est un avantage énorme, même s'il ne va jamais à dame.",
+        },
+        e3: {
+          say: "Encore mieux : le pion passé **protégé**, soutenu par un autre pion. L'adversaire ne peut ni le prendre ni le bloquer durablement avec son roi.",
+        },
+        e4: {
+          say: "Et la règle de Tarrasch, à retenir absolument : les tours se placent **derrière** les pions passés. Derrière le tien pour le pousser, derrière celui de l'adversaire pour le retenir.",
+        },
+      },
+    },
+    tactique: {
+      title: 'La tactique',
+      description:
+        'Les figures qui gagnent du matériel. C’est le chapitre qui fait le plus progresser un joueur en dessous de 1500 : la plupart des parties se perdent sur l’une de ces six choses.',
+      'piece-en-prise': {
+        title: 'La pièce en prise',
+        summary: 'La cause numéro un des parties perdues. Un réflexe de deux secondes suffit.',
+        e1: {
+          say: "Une pièce en prise, c'est une pièce attaquée que personne ne défend. Ici, le pion noir en e5 est attaqué par le cavalier, et aucune pièce noire ne le protège.",
+        },
+        e2: {
+          say: "Prends-le. C'est gratuit.",
+          instruction: 'Capture le pion en e5',
+          hint: 'Le cavalier saute de f3 en e5.',
+        },
+        e3: {
+          say: "Voilà le réflexe à prendre. Avant **chaque** coup, pose-toi deux questions. Un : qu'est-ce que mon adversaire attaque ? Deux : qu'est-ce qu'il laisse sans défense ?",
+        },
+        e4: {
+          say: "Attention quand même : ici les Noirs ont défendu leur pion avec le cavalier c6. Reprendre serait maintenant un simple échange, plus un cadeau. Une pièce attaquée **et défendue** n'est pas en prise.",
+        },
+      },
+      fourchette: {
+        title: 'La fourchette',
+        summary: 'Une pièce, deux cibles. On ne peut pas tout sauver.',
+        e1: {
+          say: "Une fourchette, c'est une pièce qui en attaque deux d'un coup. Le cavalier est le champion toutes catégories, parce qu'il saute et qu'on le voit mal venir.",
+        },
+        e2: {
+          say: 'Regarde : si le cavalier atteint la case c7, il attaque en même temps le roi en e8 et la tour en a8.',
+        },
+        e3: {
+          say: 'À toi de jouer. Le cavalier est maintenant en b5, à un saut de c7. Pose-le sur la case et regarde ce qui arrive aux Noirs.',
+          instruction: 'Joue le cavalier en c7',
+          hint: 'Depuis b5, le cavalier saute en c7 : échec au roi, et la tour est visée en même temps.',
+        },
+        e4: {
+          say: "Le roi noir a dû parer l'échec — il n'avait pas le choix, et c'est là toute la force de la fourchette royale : pendant qu'il se sauve, il abandonne la tour. Prends-la.",
+          instruction: 'Prends la tour en a8',
+          hint: 'Le cavalier de c7 va manger la tour en a8.',
+        },
+        e5: {
+          say: "Voici l'autre situation : la fourchette qu'on **subit**. Ce cavalier noir en c6 est à un saut de e5 et d4. Chaque fois qu'un cavalier adverse approche de tes pièces, cherche les cases d'où il pourrait en toucher deux.",
+        },
+        e6: {
+          say: "La fourchette la plus rentable est celle qui touche le roi : l'adversaire est **obligé** de parer l'échec, et l'autre pièce tombe. C'est ce qu'on appelle une fourchette royale.",
+        },
+      },
+      clouage: {
+        title: 'Le clouage',
+        summary: 'Une pièce coincée devant une plus précieuse ne peut plus bouger.',
+        e1: {
+          say: "Le clouage. Une pièce est coincée devant une pièce plus précieuse : si elle bouge, l'autre tombe.",
+        },
+        e2: {
+          say: 'Joue le fou en g5. Il vise le cavalier f6, et juste derrière ce cavalier se trouve la dame noire en d8.',
+          instruction: 'Joue le fou en g5',
+          hint: 'Le fou de c1 monte en diagonale : d2, e3, f4, g5.',
+        },
+        e3: {
+          say: "Voilà le clouage. Le cavalier f6 ne peut plus bouger sans livrer la dame. Il est devenu une cible immobile : tu peux l'attaquer autant que tu veux, il ne s'échappera pas.",
+        },
+        e4: {
+          say: 'Il existe deux sortes de clouages. Le clouage **relatif**, comme celui du cavalier devant la dame : la pièce peut légalement bouger, mais ça coûte cher.',
+        },
+        e5: {
+          say: "Et le clouage **absolu** : quand c'est le roi qui est derrière. La pièce ne peut alors pas bouger du tout, ce serait illégal. Ici le cavalier c3 est cloué par la dame noire en b4.",
+        },
+        e6: {
+          say: 'Réflexe à acquérir : quand une pièce adverse est clouée, attaque-la une fois de plus. Elle ne peut pas fuir, elle finira par tomber.',
+        },
+      },
+      enfilade: {
+        title: 'L’enfilade',
+        summary: 'Le clouage à l’envers : la pièce de valeur est devant, et elle doit fuir.',
+        e1: {
+          say: "L'enfilade, c'est le clouage inversé : la pièce précieuse est devant, la moins précieuse derrière. On attaque la première, elle doit s'écarter, et on prend la seconde.",
+        },
+        e2: {
+          say: 'Ici, roi noir en e8 et tour noire en d8, tous deux sur la même rangée. Une tour blanche qui arrive sur cette rangée donne échec au roi… et vise la tour derrière.',
+        },
+        e3: {
+          say: "Variante en ligne. La tour blanche en a1 vise la tour noire en d1, mais c'est le roi blanc qui est derrière. Voilà ce qu'il ne faut jamais laisser arriver.",
+        },
+        e4: {
+          say: "En pratique, l'enfilade se cherche quand deux pièces adverses sont alignées : même rangée, même colonne, même diagonale. Prends le réflexe de regarder ces alignements à chaque coup.",
+        },
+      },
+      decouverte: {
+        title: 'L’attaque à la découverte',
+        summary: 'Une pièce s’écarte et démasque une autre. Deux menaces d’un seul coup.',
+        e1: {
+          say: 'Regarde cet alignement : la tour blanche en e1, le cavalier en e5, et le roi noir en e8. Tous les trois sur la colonne e.',
+        },
+        e2: {
+          say: "Le cavalier bloque la ligne de la tour. Mais s'il s'écarte, la tour donne échec instantanément. Et le cavalier, lui, part où il veut : il peut aller capturer quelque chose pendant que l'adversaire pare l'échec.",
+        },
+        e3: {
+          say: 'Fais partir le cavalier en c6 : il donne échec par découverte tout en attaquant depuis sa nouvelle case.',
+          instruction: 'Joue le cavalier en c6',
+          hint: 'N’importe quel déplacement du cavalier libère la colonne. Choisis-en un.',
+        },
+        e4: {
+          say: "C'est la tactique la plus rentable du jeu, parce que l'adversaire ne peut parer qu'une menace à la fois — et l'échec est toujours prioritaire.",
+        },
+        e5: {
+          say: "Le sommet du genre est l'échec double : le cavalier donne échec **et** démasque la tour. Là, plus aucune parade ne fonctionne. Ni capture, ni interposition : le roi doit bouger, un point c'est tout.",
+        },
+      },
+      'elimination-defenseur': {
+        title: 'Éliminer le défenseur',
+        summary: 'Une pièce bien défendue ? Commence par supprimer son gardien.',
+        e1: {
+          say: 'Le pion e5 est défendu par le cavalier c6. On ne peut donc pas simplement le prendre. Mais que se passe-t-il si ce cavalier disparaît ?',
+        },
+        e2: {
+          say: "C'est toute l'idée : au lieu d'attaquer la cible, on s'en prend à son défenseur. Une fois le gardien parti, la cible tombe d'elle-même.",
+        },
+        e3: {
+          say: "Voilà pourquoi la partie espagnole commence par le fou en b5 : il attaque le cavalier c6, qui défend le pion e5. C'est une menace indirecte, et elle structure toute l'ouverture.",
+        },
+        e4: {
+          say: "Quand une pièce adverse te bloque, ne t'acharne pas dessus. Demande-toi plutôt : qui la protège ? Et attaque celui-là.",
+        },
+      },
+      sacrifice: {
+        title: 'Le sacrifice',
+        summary: 'Donner du matériel pour obtenir mieux : du temps, des lignes, un roi à nu.',
+        e1: {
+          say: "Un sacrifice, c'est donner volontairement du matériel pour obtenir autre chose : ouvrir une ligne, exposer un roi, gagner trois temps de développement.",
+        },
+        e2: {
+          say: "Le sacrifice classique en f7 : le fou se donne pour attirer le roi noir hors de son abri. Trois points contre un pion — mais le roi va se retrouver au milieu de l'échiquier.",
+        },
+        e3: {
+          say: "Comment savoir si un sacrifice est correct ? Compte ce que tu obtiens **en coups**, pas en points. Si l'adversaire doit passer trois coups à ramener son roi, tu as trois coups d'avance pour amener tes pièces.",
+        },
+        e4: {
+          say: "Règle de prudence pour un débutant : ne sacrifie que si tu vois la suite jusqu'au bout. Un sacrifice qu'on ne sait pas justifier n'est pas un sacrifice, c'est une pièce en moins.",
+        },
+      },
+    },
   },
   prompt: {
     system:

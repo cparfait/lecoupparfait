@@ -10,9 +10,21 @@
  * Le texte de chaque étape est lu à voix haute par la synthèse vocale. Il est
  * donc écrit pour être **entendu** : phrases courtes, pas de parenthèses, pas
  * de symboles imprononçables. La notation est convertie automatiquement.
+ *
+ * ── Le texte n'est pas ici ──────────────────────────────────────────────────
+ *
+ * Les champs de prose portent une clé de dictionnaire et non la phrase. Le
+ * programme était écrit en français dans le code, et il n'en existait même pas
+ * de version anglaise : les trente-six leçons, seule raison d'être de la moitié
+ * de l'application, n'étaient lisibles que par des francophones.
+ *
+ * Les clés disent où elles vivent — `lecons.bases.echiquier.e3.say` —, ce qui
+ * permet de retrouver l'écran depuis le dictionnaire, et surtout ne bouge pas
+ * quand on insère une leçon au milieu d'un chapitre.
  */
 
 import type { Square } from 'chess.js'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 
 export type LessonLevel = 'beginner' | 'intermediate' | 'advanced'
 
@@ -31,10 +43,10 @@ export interface LessonStep {
   fen?: string
 
   /** Ce que dit le coach. Affiché et prononcé. */
-  say: string
+  say: TranslationKey
 
   /** Consigne courte affichée sous l'échiquier pendant l'action. */
-  instruction?: string
+  instruction?: TranslationKey
 
   /** Coups acceptés, en notation algébrique. Le premier est le coup montré. */
   answers?: string[]
@@ -58,7 +70,7 @@ export interface LessonStep {
   spotlight?: Square[]
 
   /** Message affiché si le joueur se trompe. */
-  hint?: string
+  hint?: TranslationKey
 
   /** Orientation de l'échiquier pendant l'étape. */
   orientation?: 'w' | 'b'
@@ -72,9 +84,9 @@ export interface LessonStep {
 
 export interface Lesson {
   id: string
-  title: string
+  title: TranslationKey
   /** Une phrase qui donne envie et annonce ce qu'on va savoir faire. */
-  summary: string
+  summary: TranslationKey
   level: LessonLevel
   /** Durée estimée, en minutes. */
   minutes: number
@@ -85,8 +97,8 @@ export interface Lesson {
 
 export interface Chapter {
   id: string
-  title: string
-  description: string
+  title: TranslationKey
+  description: TranslationKey
   level: LessonLevel
   icon: string
   lessons: Lesson[]
