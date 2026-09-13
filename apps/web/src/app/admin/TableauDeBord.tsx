@@ -23,6 +23,8 @@ import {
   SegmentedControl,
   Skeleton,
 } from '@/components/ui/index.tsx'
+import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 import { Barres, Courbe, Histogramme, Mesure, nombre, part } from './graphiques.tsx'
 
 interface Statistiques {
@@ -52,34 +54,45 @@ interface Statistiques {
   apprentissage: { suivies: number; terminees: number; joueurs: number }
 }
 
-/** Les modes de jeu, dits en français. Un `cle` inconnu s'affiche tel quel. */
-const MODES: Record<string, string> = {
-  computer: 'Contre l’ordinateur',
-  friend: 'Entre joueurs',
-  local: 'À deux sur le même écran',
-  puzzle: 'Puzzle',
-  lesson: 'Leçon',
-  tournament: 'Tournoi',
-  correspondence: 'Correspondance',
+/*
+  Les modes, les cadences et les fenêtres de temps, par clé de dictionnaire.
+
+  Ces trois tables sont des constantes de module : elles ne peuvent pas appeler
+  `t()`, et leurs intitulés restaient donc en français dans les quarante autres
+  langues. Un `cle` absent de la table s'affiche tel quel, comme avant — c'est ce
+  qui permet à un mode ajouté côté serveur d'apparaître avant d'être traduit.
+*/
+const MODES: Record<string, TranslationKey> = {
+  computer: 'admin.modeComputer',
+  friend: 'admin.modeFriend',
+  local: 'admin.modeLocal',
+  puzzle: 'admin.modePuzzle',
+  lesson: 'admin.modeLesson',
+  tournament: 'admin.modeTournament',
+  correspondence: 'admin.modeCorrespondence',
 }
 
-const CADENCES: Record<string, string> = {
+// Bullet, blitz et Elo ne se traduisent pas : ce sont les mots du jeu, repris
+// tels quels dans toutes les langues. Seuls « rapide » et « classique » sont des
+// adjectifs ordinaires, et seuls ceux-là ont une clé.
+const CADENCES: Record<string, TranslationKey | string> = {
   bullet: 'Bullet',
   blitz: 'Blitz',
-  rapid: 'Rapide',
-  classical: 'Classique',
-  correspondence: 'Correspondance',
-  puzzle: 'Puzzle',
+  rapid: 'admin.paceRapid',
+  classical: 'admin.paceClassical',
+  correspondence: 'admin.modeCorrespondence',
+  puzzle: 'admin.modePuzzle',
 }
 
 const FENETRES = [
-  { value: '7', label: '7 j' },
-  { value: '30', label: '30 j' },
-  { value: '90', label: '90 j' },
-  { value: '365', label: '1 an' },
-]
+  { value: '7', labelKey: 'admin.days7' },
+  { value: '30', labelKey: 'admin.days30' },
+  { value: '90', labelKey: 'admin.days90' },
+  { value: '365', labelKey: 'admin.days365' },
+] as const satisfies ReadonlyArray<{ value: string; labelKey: TranslationKey }>
 
 export function TableauDeBord() {
+  const t = useT()
   const [jours, setJours] = useState('30')
   const [stats, setStats] = useState<Statistiques | null>(null)
   const [echec, setEchec] = useState(false)
@@ -101,17 +114,16 @@ export function TableauDeBord() {
   }, [jours, charger])
 
   if (echec) {
-    return (
-      <EmptyState
-        title="Calcul impossible"
-        description="La base n’a pas répondu. Les autres onglets restent utilisables."
-      />
-    )
+    return <EmptyState title={t('admin.statsFailed')} description={t('admin.statsFailedHint')} />
   }
 
   return (
     <div className="space-y-5">
-      <SegmentedControl value={jours} onChange={setJours} options={FENETRES} />
+      <SegmentedControl
+        value={jours}
+        onChange={setJours}
+        options={FENETRES.map((f) => ({ value: f.value, label: t(f.labelKey) }))}
+      />
 
       {stats === null ? (
         <Skeleton className="h-96 w-full" />
@@ -131,48 +143,57 @@ export function TableauDeBord() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Activite({ stats }: { stats: Statistiques }) {
+  const t = useT()
   const total = (valeurs: number[]) => valeurs.reduce((somme, valeur) => somme + valeur, 0)
   const parties = total(stats.courbes.parties)
 
   return (
     <Card className="p-4">
-      <SectionTitle hint="Chaque point est une journée, à l’heure de Paris. Un jour sans rien vaut zéro, pas un trou.">
-        Activité
-      </SectionTitle>
+      <SectionTitle hint={t('admin.activityHint')}>{t('admin.activity')}</SectionTitle>
 
       <Courbe
         jours={stats.courbes.jours}
         series={[
-          { nom: 'Parties', valeurs: stats.courbes.parties, couleur: 'var(--accent)' },
-          { nom: 'Puzzles', valeurs: stats.courbes.puzzles, couleur: 'var(--q-inaccuracy)' },
-          { nom: 'Inscriptions', valeurs: stats.courbes.inscriptions, couleur: 'var(--q-best)' },
+          { nom: t('admin.games'), valeurs: stats.courbes.parties, couleur: 'var(--accent)' },
+          {
+            nom: t('admin.puzzles'),
+            valeurs: stats.courbes.puzzles,
+            couleur: 'var(--q-inaccuracy)',
+          },
+          {
+            nom: t('admin.signups'),
+            valeurs: stats.courbes.inscriptions,
+            couleur: 'var(--q-best)',
+          },
         ]}
       />
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <Mesure
-          titre="Parties"
+          titre={t('admin.games')}
           valeur={parties}
-          note={`${(parties / stats.jours).toFixed(1)} par jour en moyenne`}
+          note={t('admin.perDayAverage', { n: (parties / stats.jours).toFixed(1) })}
         />
         <Mesure
-          titre="Puzzles tentés"
+          titre={t('admin.puzzlesTried')}
           valeur={stats.puzzles.tentatives}
-          note={`${part(stats.puzzles.reussies, stats.puzzles.tentatives)} résolus du premier coup`}
+          note={t('admin.solvedFirstTry', {
+            part: part(stats.puzzles.reussies, stats.puzzles.tentatives),
+          })}
         />
         <Mesure
-          titre="Inscriptions"
+          titre={t('admin.signups')}
           valeur={total(stats.courbes.inscriptions)}
-          note={`${stats.retention.inscrits} comptes créés sur la période`}
+          note={t('admin.accountsCreated', { n: stats.retention.inscrits })}
         />
         <Mesure
-          titre="Temps médian par puzzle"
+          titre={t('admin.medianPerPuzzle')}
           valeur={
             stats.puzzles.tempsMedian == null
               ? '—'
               : `${(stats.puzzles.tempsMedian / 1000).toFixed(1)} s`
           }
-          note={`${nombre(stats.puzzles.joueurs)} joueurs distincts`}
+          note={t('admin.distinctPlayers', { n: nombre(stats.puzzles.joueurs) })}
         />
       </div>
     </Card>
@@ -184,6 +205,7 @@ function Activite({ stats }: { stats: Statistiques }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Usage({ stats }: { stats: Statistiques }) {
+  const t = useT()
   const partiesTotales = stats.modes.reduce((somme, mode) => somme + mode.n, 0)
 
   // Les issues sont regroupées par ce qui a mis fin à la partie plutôt que par
@@ -198,41 +220,41 @@ function Usage({ stats }: { stats: Statistiques }) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card className="p-4">
-        <SectionTitle hint="Sur la période choisie.">Modes de jeu</SectionTitle>
+        <SectionTitle hint={t('admin.overPeriod')}>{t('admin.gameModes')}</SectionTitle>
         <Barres
           total={partiesTotales}
-          parts={stats.modes.map((mode) => ({ cle: MODES[mode.cle] ?? mode.cle, n: mode.n }))}
-        />
-      </Card>
-
-      <Card className="p-4">
-        <SectionTitle hint="Une cadence classée compte pour le classement Glicko ; une amicale non.">
-          Cadences
-        </SectionTitle>
-        <Barres
-          parts={stats.cadences.map((cadence) => ({
-            cle: CADENCES[cadence.cle] ?? cadence.cle,
-            n: cadence.n,
-            note: cadence.classee ? 'classée' : 'amicale',
+          parts={stats.modes.map((mode) => ({
+            cle: MODES[mode.cle] ? t(MODES[mode.cle]!) : mode.cle,
+            n: mode.n,
           }))}
         />
       </Card>
 
       <Card className="p-4">
-        <SectionTitle hint="« En cours » compte aussi les parties abandonnées en plan, jamais reprises.">
-          Fins de partie
-        </SectionTitle>
+        <SectionTitle hint={t('admin.pacesHint')}>{t('admin.paces')}</SectionTitle>
         <Barres
-          parts={[...finales.entries()]
-            .sort((premier, second) => second[1] - premier[1])
-            .map(([statut, n]) => ({ cle: STATUTS[statut] ?? statut, n }))}
+          parts={stats.cadences.map((cadence) => ({
+            cle: libelleCadence(cadence.cle, t),
+            n: cadence.n,
+            note: t(cadence.classee ? 'admin.rated' : 'admin.casual'),
+          }))}
         />
       </Card>
 
       <Card className="p-4">
-        <SectionTitle hint="Sur toute l’histoire du site : un répertoire d’ouvertures ne se juge pas sur un mois.">
-          Ouvertures les plus jouées
-        </SectionTitle>
+        <SectionTitle hint={t('admin.endingsHint')}>{t('admin.endings')}</SectionTitle>
+        <Barres
+          parts={[...finales.entries()]
+            .sort((premier, second) => second[1] - premier[1])
+            .map(([statut, n]) => ({
+              cle: STATUTS[statut] ? t(STATUTS[statut]!) : statut,
+              n,
+            }))}
+        />
+      </Card>
+
+      <Card className="p-4">
+        <SectionTitle hint={t('admin.openingsHint')}>{t('admin.openings')}</SectionTitle>
         <Barres
           parts={stats.ouvertures.map((ouverture) => ({
             cle: ouverture.nom,
@@ -243,9 +265,7 @@ function Usage({ stats }: { stats: Statistiques }) {
       </Card>
 
       <Card className="p-4 lg:col-span-2">
-        <SectionTitle hint="Les parties commencées, par heure locale. C’est l’heure où il faut éviter de redémarrer le serveur.">
-          Heures de jeu
-        </SectionTitle>
+        <SectionTitle hint={t('admin.hoursHint')}>{t('admin.hours')}</SectionTitle>
         <Histogramme
           valeurs={stats.heures}
           etiquette={(heure) => `${String(heure).padStart(2, '0')} h`}
@@ -255,18 +275,31 @@ function Usage({ stats }: { stats: Statistiques }) {
   )
 }
 
-/** Les fins de partie, dites en français. */
-const STATUTS: Record<string, string> = {
-  playing: 'En cours',
-  checkmate: 'Échec et mat',
-  resign: 'Abandon',
-  timeout: 'Temps écoulé',
-  draw: 'Nulle convenue',
-  stalemate: 'Pat',
-  repetition: 'Répétition',
-  fiftyMoves: 'Règle des cinquante coups',
-  insufficient: 'Matériel insuffisant',
-  aborted: 'Interrompue',
+/** Les fins de partie, par clé de dictionnaire. */
+const STATUTS: Record<string, TranslationKey> = {
+  playing: 'admin.statusPlaying',
+  checkmate: 'admin.statusCheckmate',
+  resign: 'admin.statusResign',
+  timeout: 'admin.statusTimeout',
+  draw: 'admin.statusDraw',
+  stalemate: 'admin.statusStalemate',
+  repetition: 'admin.statusRepetition',
+  fiftyMoves: 'admin.statusFiftyMoves',
+  insufficient: 'admin.statusInsufficient',
+  aborted: 'admin.statusAborted',
+}
+
+/**
+ * Le nom d'une cadence, traduit quand il le mérite.
+ *
+ * « Bullet » et « blitz » sont des mots du jeu : on les écrit pareil partout, et
+ * leur donner une clé aurait invité à les traduire. Le reste passe par le
+ * dictionnaire ; un identifiant inconnu s'affiche tel quel.
+ */
+function libelleCadence(cle: string, t: ReturnType<typeof useT>): string {
+  const valeur = CADENCES[cle]
+  if (!valeur) return cle
+  return valeur.includes('.') ? t(valeur as TranslationKey) : valeur
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -274,6 +307,8 @@ const STATUTS: Record<string, string> = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Public({ stats }: { stats: Statistiques }) {
+  const t = useT()
+  const bcp47 = langue(useI18n().locale).bcp47
   const { retention } = stats
 
   // Les niveaux, toutes cadences confondues : la question posée est « le
@@ -287,14 +322,15 @@ function Public({ stats }: { stats: Statistiques }) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card className="p-4">
-        <SectionTitle hint="Calculé sur les seuls comptes créés pendant la période : un taux mesuré sur tout l’historique ne bougerait plus jamais.">
-          Ce que deviennent les nouveaux comptes
-        </SectionTitle>
+        <SectionTitle hint={t('admin.retentionHint')}>{t('admin.retention')}</SectionTitle>
         <div className="grid gap-2 sm:grid-cols-2">
           <Mesure
-            titre="Ont joué au moins une partie"
+            titre={t('admin.playedOnce')}
             valeur={part(retention.ontJoue, retention.inscrits)}
-            note={`${nombre(retention.ontJoue)} sur ${nombre(retention.inscrits)} inscrits`}
+            note={t('admin.outOfSignups', {
+              n: nombre(retention.ontJoue),
+              total: nombre(retention.inscrits),
+            })}
             ton={
               retention.inscrits >= 10 && retention.ontJoue / retention.inscrits < 0.5
                 ? 'attention'
@@ -302,29 +338,30 @@ function Public({ stats }: { stats: Statistiques }) {
             }
           />
           <Mesure
-            titre="Revenus au moins un jour après"
+            titre={t('admin.cameBack')}
             valeur={part(retention.revenus, retention.inscrits)}
-            note={`${nombre(retention.revenus)} comptes revus le lendemain ou plus tard`}
+            note={t('admin.cameBackNote', { n: nombre(retention.revenus) })}
           />
           <Mesure
-            titre="Ont laissé une adresse"
+            titre={t('admin.leftAddress')}
             valeur={part(retention.avecAdresse, retention.inscrits)}
-            note={`${nombre(retention.adresseConfirmee)} confirmées — les autres ne pourront pas récupérer leur mot de passe`}
+            note={t('admin.leftAddressNote', { n: nombre(retention.adresseConfirmee) })}
           />
           <Mesure
-            titre="Leçons terminées"
+            titre={t('admin.lessonsDone')}
             valeur={stats.apprentissage.terminees}
-            note={`${nombre(stats.apprentissage.suivies)} entamées par ${nombre(stats.apprentissage.joueurs)} joueurs`}
+            note={t('admin.lessonsDoneNote', {
+              n: nombre(stats.apprentissage.suivies),
+              joueurs: nombre(stats.apprentissage.joueurs),
+            })}
           />
         </div>
       </Card>
 
       <Card className="p-4">
-        <SectionTitle hint="Par tranches de cent points, toutes cadences confondues, comptes ayant au moins une partie classée.">
-          Répartition des niveaux
-        </SectionTitle>
+        <SectionTitle hint={t('admin.levelsHint')}>{t('admin.levels')}</SectionTitle>
         {ordonnees.length === 0 ? (
-          <p className="py-3 text-[12px] text-faint">Aucune partie classée pour l’instant.</p>
+          <p className="py-3 text-[12px] text-faint">{t('admin.noRatedGame')}</p>
         ) : (
           <Histogramme
             valeurs={ordonnees.map(([, n]) => n)}
@@ -335,17 +372,17 @@ function Public({ stats }: { stats: Statistiques }) {
       </Card>
 
       <Card className="p-4 lg:col-span-2">
-        <SectionTitle hint="Les comptes qui ont le plus joué sur la période. Une partie compte pour ses deux joueurs.">
-          Joueurs les plus actifs
-        </SectionTitle>
+        <SectionTitle hint={t('admin.topPlayersHint')}>{t('admin.topPlayers')}</SectionTitle>
         {stats.meilleursJoueurs.length === 0 ? (
-          <p className="py-3 text-[12px] text-faint">Aucune partie sur la période.</p>
+          <p className="py-3 text-[12px] text-faint">{t('admin.noGameInPeriod')}</p>
         ) : (
           <Barres
             parts={stats.meilleursJoueurs.map((joueur) => ({
               cle: joueur.pseudo,
               n: joueur.parties,
-              note: `vu le ${new Date(joueur.derniere).toLocaleDateString('fr-FR')}`,
+              note: t('admin.seenOn', {
+                date: new Date(joueur.derniere).toLocaleDateString(bcp47),
+              }),
             }))}
           />
         )}

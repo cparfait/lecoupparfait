@@ -13,6 +13,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { Database, Eraser, Gauge, Mail, RefreshCw } from 'lucide-react'
 import { Button, Card, Chip, SectionTitle, Skeleton } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 import { Mesure, nombre } from './graphiques.tsx'
 
 interface Sante {
@@ -36,28 +38,37 @@ interface Sante {
   administration: { parEnvironnement: boolean; pseudosPrivilegies: string[] }
 }
 
-/** Les purges d'entretien, avec ce qu'elles retirent dit en toutes lettres. */
+/*
+  Les purges d'entretien, avec ce qu'elles retirent dit en toutes lettres.
+
+  Constante de module, donc sans `t()` : les trois intitulés et les trois phrases
+  restaient en français dans les quarante autres langues. Ils portent des clés,
+  résolues au rendu de chaque ligne.
+*/
 const PURGES = [
   {
     action: 'sessions',
-    titre: 'Sessions expirées',
-    detail: 'Des lignes que plus personne ne relit. Sans effet visible.',
+    titreKey: 'admin.purgeSessions',
+    detailKey: 'admin.purgeSessionsHint',
   },
   {
     action: 'evaluations',
-    titre: 'Évaluations trop peu profondes',
-    detail:
-      'Sous 14 demi-coups : l’analyse en demande 18, ces entrées occupent de la place sans jamais éviter un calcul. Le moteur refera le travail si besoin.',
+    titreKey: 'admin.purgeEvaluations',
+    detailKey: 'admin.purgeEvaluationsHint',
   },
   {
     action: 'vide',
-    titre: 'Comptes vides et inactifs',
-    detail:
-      'Aucune partie, aucune analyse, pas revus depuis six mois. Les administrateurs sont épargnés.',
+    titreKey: 'admin.purgeEmpty',
+    detailKey: 'admin.purgeEmptyHint',
   },
-] as const
+] as const satisfies ReadonlyArray<{
+  action: string
+  titreKey: TranslationKey
+  detailKey: TranslationKey
+}>
 
 export function Systeme() {
+  const t = useT()
   const [sante, setSante] = useState<Sante | null>(null)
   const [occupe, setOccupe] = useState<string | null>(null)
 
@@ -66,9 +77,9 @@ export function Systeme() {
       const reponse = await fetch('/api/admin/sante', { cache: 'no-store' })
       if (reponse.ok) setSante(await reponse.json())
     } catch {
-      toast.error('Lecture impossible.')
+      toast.error(t('admin.readFailed'))
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     void charger()
@@ -85,18 +96,18 @@ export function Systeme() {
         })
         const donnees = await reponse.json().catch(() => ({}))
         if (!reponse.ok) {
-          toast.error(donnees.error ?? 'Purge impossible.')
+          toast.error(donnees.error ?? t('admin.purgeImpossible'))
           return
         }
-        toast.success(`${donnees.retirees} ligne(s) retirée(s)`, donnees.quoi)
+        toast.success(t('admin.linesRemoved', { n: donnees.retirees }), donnees.quoi)
         await charger()
       } catch {
-        toast.error('Le serveur est injoignable.')
+        toast.error(t('admin.serverDown'))
       } finally {
         setOccupe(null)
       }
     },
-    [charger],
+    [charger, t],
   )
 
   if (!sante) return <Skeleton className="h-64 w-full" />
@@ -105,14 +116,14 @@ export function Systeme() {
     <div className="space-y-5">
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <Mesure
-          titre="Comptes"
+          titre={t('admin.accounts')}
           valeur={sante.base.comptes}
-          note={`+${sante.base.inscritsCetteSemaine ?? 0} cette semaine`}
+          note={t('admin.thisWeek', { n: sante.base.inscritsCetteSemaine ?? 0 })}
         />
         <Mesure
-          titre="Parties"
+          titre={t('admin.games')}
           valeur={sante.base.parties}
-          note={`+${sante.base.parties24h ?? 0} depuis hier`}
+          note={t('admin.sinceYesterday', { n: sante.base.parties24h ?? 0 })}
         />
         {/* Trois échelles de la même question, de la plus vraie à la plus
             large : qui est là maintenant, qui est passé aujourd'hui, et
@@ -120,53 +131,50 @@ export function Systeme() {
             fréquentation — une session dure trente jours — mais dit combien
             d'accès une désactivation refermerait. */}
         <Mesure
-          titre="En ligne"
+          titre={t('admin.onlineMeasure')}
           valeur={sante.base.enLigne}
-          note={`${sante.base.vus24h ?? 0} vus depuis 24 h · ${sante.base.sessionsActives ?? 0} sessions ouvertes`}
+          note={t('admin.onlineNote', {
+            vus: sante.base.vus24h ?? 0,
+            sessions: sante.base.sessionsActives ?? 0,
+          })}
         />
         <Mesure
-          titre="Analyses conservées"
+          titre={t('admin.analysesKept')}
           valeur={sante.base.analysesConservees}
-          note={`${nombre(sante.base.puzzles ?? 0)} puzzles en réserve`}
+          note={t('admin.puzzlesInStock', { n: nombre(sante.base.puzzles ?? 0) })}
         />
       </div>
 
       <Card className="p-4">
-        <SectionTitle>Services</SectionTitle>
+        <SectionTitle>{t('admin.services')}</SectionTitle>
         <div className="space-y-2">
           <Etat
             icone={<Database size={15} />}
-            titre="Base de données"
+            titre={t('admin.database')}
             ok={sante.base.joignable}
-            detail={detailBase(sante)}
+            detail={detailBase(sante, t)}
           />
           <Etat
             icone={<Gauge size={15} />}
-            titre="Moteur d’analyse"
+            titre={t('admin.analysisEngine')}
             ok={sante.moteur.joignable}
-            detail={
-              sante.moteur.joignable
-                ? 'répond au diagnostic'
-                : 'injoignable — les analyses repassent par le navigateur'
-            }
+            detail={t(sante.moteur.joignable ? 'admin.engineAnswers' : 'admin.engineDown')}
           />
           <Etat
             icone={<Mail size={15} />}
-            titre="Messagerie sortante"
+            titre={t('admin.outgoingMail')}
             ok={sante.courriel.configure}
             detail={
               sante.courriel.configure
-                ? (sante.courriel.expediteur ?? 'expéditeur non précisé')
-                : 'SMTP_URL absente — la récupération de mot de passe est masquée'
+                ? (sante.courriel.expediteur ?? t('admin.senderUnset'))
+                : t('admin.mailUnset')
             }
           />
         </div>
       </Card>
 
       <Card className="p-4">
-        <SectionTitle hint="Aucune ne touche à une partie, un compte actif ou une analyse conservée.">
-          Ménage
-        </SectionTitle>
+        <SectionTitle hint={t('admin.housekeepingHint')}>{t('admin.housekeeping')}</SectionTitle>
         <div className="space-y-2">
           {PURGES.map((purge) => (
             <div
@@ -174,8 +182,10 @@ export function Systeme() {
               className="flex flex-wrap items-center gap-2 rounded-[var(--radius-sm)] border border-line px-3 py-2"
             >
               <span className="min-w-0 flex-1">
-                <span className="block text-[14px] font-medium">{purge.titre}</span>
-                <span className="block text-[12px] leading-snug text-faint">{purge.detail}</span>
+                <span className="block text-[14px] font-medium">{t(purge.titreKey)}</span>
+                <span className="block text-[12px] leading-snug text-faint">
+                  {t(purge.detailKey)}
+                </span>
               </span>
               <Button
                 size="sm"
@@ -184,7 +194,7 @@ export function Systeme() {
                 icon={<Eraser size={14} />}
                 onClick={() => void purger(purge.action)}
               >
-                Purger
+                {t('admin.purge')}
               </Button>
             </div>
           ))}
@@ -192,22 +202,17 @@ export function Systeme() {
       </Card>
 
       <Card className="p-4">
-        <SectionTitle>Accès administrateur</SectionTitle>
+        <SectionTitle>{t('admin.adminAccess')}</SectionTitle>
+        {/* Le nom de la variable d'environnement reste en clair dans la phrase :
+            c'est un identifiant, pas un mot, et le traduire enverrait chercher
+            une variable qui n'existe pas. */}
         <p className="text-[14px] leading-relaxed text-muted">
-          {sante.administration.pseudosPrivilegies.length > 0 ? (
-            <>
-              <code className="text-ink">ADMIN_USERNAMES</code> désigne{' '}
-              <strong>{sante.administration.pseudosPrivilegies.join(', ')}</strong>. Ces comptes
-              restent administrateurs quoi qu’il arrive en base — c’est ce qui empêche de s’enfermer
-              dehors après une restauration de sauvegarde.
-            </>
-          ) : (
-            <>
-              <code className="text-ink">ADMIN_USERNAMES</code> n’est pas renseignée : tes droits
-              viennent de la base seule. Si une restauration ramène un dump antérieur à ta
-              promotion, plus personne ne pourra ouvrir cette page.
-            </>
-          )}
+          <code className="text-ink">ADMIN_USERNAMES</code>{' '}
+          {sante.administration.pseudosPrivilegies.length > 0
+            ? t('admin.adminNamesSet', {
+                pseudos: sante.administration.pseudosPrivilegies.join(', '),
+              })
+            : t('admin.adminNamesUnset')}
         </p>
         <Button
           variant="ghost"
@@ -216,7 +221,7 @@ export function Systeme() {
           icon={<RefreshCw size={14} />}
           onClick={() => void charger()}
         >
-          Relire l’état
+          {t('admin.rereadState')}
         </Button>
       </Card>
     </div>
@@ -230,15 +235,19 @@ export function Systeme() {
  * qu'une fraction du total, le reste est de l'espace mort qu'un `VACUUM FULL`
  * rendrait — l'information qui manque le jour où le disque se remplit.
  */
-function detailBase(sante: Sante): string {
+function detailBase(sante: Sante, t: ReturnType<typeof useT>): string {
   const { octets, octetsTables } = sante.base
-  if (octets == null) return 'taille inconnue'
+  if (octets == null) return t('admin.sizeUnknown')
 
   const go = (valeur: number) => `${(valeur / 1024 ** 3).toFixed(2)} Go`
-  if (octetsTables == null) return `${go(octets)} au total`
+  if (octetsTables == null) return t('admin.sizeTotal', { taille: go(octets) })
 
   const partTables = Math.round((octetsTables / octets) * 100)
-  return `${go(octets)} au total, dont ${go(octetsTables)} de tables (${partTables} %)`
+  return t('admin.sizeWithTables', {
+    taille: go(octets),
+    tables: go(octetsTables),
+    part: partTables,
+  })
 }
 
 function Etat({
@@ -252,6 +261,7 @@ function Etat({
   ok: boolean
   detail: string
 }) {
+  const t = useT()
   return (
     <div className="flex items-center gap-2.5">
       <span
@@ -270,7 +280,7 @@ function Etat({
         <span className="block text-[14px] font-medium">{titre}</span>
         <span className="block truncate text-[12px] text-faint">{detail}</span>
       </span>
-      <Chip tone={ok ? 'success' : 'danger'}>{ok ? 'ok' : 'absent'}</Chip>
+      <Chip tone={ok ? 'success' : 'danger'}>{t(ok ? 'admin.ok' : 'admin.missing')}</Chip>
     </div>
   )
 }

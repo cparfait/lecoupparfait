@@ -29,6 +29,8 @@ import {
 import clsx from 'clsx'
 import { Button, Card, Chip, EmptyState, Input, Skeleton } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 import { nombre } from './graphiques.tsx'
 
 interface Compte {
@@ -50,22 +52,30 @@ interface Compte {
   vu: string
 }
 
+/*
+  Les six tamis et les trois tris, par clé de dictionnaire.
+
+  Deux constantes de module, donc sans accès à `t()` : leurs intitulés restaient
+  en français quelle que soit la langue choisie. Ils sont résolus au rendu, là où
+  les boutons et les options du menu sont fabriqués.
+*/
 const FILTRES = [
-  { cle: 'tous', texte: 'Tous' },
-  { cle: 'enLigne', texte: 'En ligne' },
-  { cle: 'admins', texte: 'Administrateurs' },
-  { cle: 'desactives', texte: 'Désactivés' },
-  { cle: 'inactifs', texte: 'Jamais joué' },
-  { cle: 'sansAdresse', texte: 'Sans adresse confirmée' },
-] as const
+  { cle: 'tous', texteKey: 'admin.filterAll' },
+  { cle: 'enLigne', texteKey: 'admin.filterOnline' },
+  { cle: 'admins', texteKey: 'admin.filterAdmins' },
+  { cle: 'desactives', texteKey: 'admin.filterDisabled' },
+  { cle: 'inactifs', texteKey: 'admin.filterNeverPlayed' },
+  { cle: 'sansAdresse', texteKey: 'admin.filterNoAddress' },
+] as const satisfies ReadonlyArray<{ cle: string; texteKey: TranslationKey }>
 
 const TRIS = [
-  { cle: 'vu', texte: 'dernière visite' },
-  { cle: 'inscrit', texte: 'inscription' },
-  { cle: 'pseudo', texte: 'pseudo' },
-] as const
+  { cle: 'vu', texteKey: 'admin.sortLastSeen' },
+  { cle: 'inscrit', texteKey: 'admin.sortSignup' },
+  { cle: 'pseudo', texteKey: 'admin.sortUsername' },
+] as const satisfies ReadonlyArray<{ cle: string; texteKey: TranslationKey }>
 
 export function Comptes() {
+  const t = useT()
   const [recherche, setRecherche] = useState('')
   const [filtre, setFiltre] = useState<string>('tous')
   const [tri, setTri] = useState<string>('vu')
@@ -92,10 +102,10 @@ export function Comptes() {
       setParPage(donnees.parPage)
       setMoi(donnees.moi)
     } catch {
-      toast.error('Lecture impossible.', 'Réessaie dans un instant.')
+      toast.error(t('admin.readFailed'), t('admin.tryAgain'))
       setComptes([])
     }
-  }, [recherche, filtre, tri, sens, page])
+  }, [recherche, filtre, tri, sens, page, t])
 
   useEffect(() => {
     // Recherche différée : taper « cparfait » lancerait sinon huit requêtes.
@@ -121,18 +131,18 @@ export function Comptes() {
         })
         const donnees = await reponse.json().catch(() => ({}))
         if (!reponse.ok) {
-          toast.error(donnees.error ?? 'Action impossible.')
+          toast.error(donnees.error ?? t('admin.actionImpossible'))
           return
         }
-        toast.success('C’est fait.', 'L’acte est consigné dans le journal.')
+        toast.success(t('admin.done'), t('admin.loggedInJournal'))
         await charger()
       } catch {
-        toast.error('Le serveur est injoignable.')
+        toast.error(t('admin.serverDown'))
       } finally {
         setOccupe(null)
       }
     },
-    [charger],
+    [charger, t],
   )
 
   const dernierePage = Math.max(0, Math.ceil(total / parPage) - 1)
@@ -142,14 +152,14 @@ export function Comptes() {
       <div className="flex items-end gap-2">
         <div className="min-w-0 flex-1">
           <Input
-            label="Chercher"
+            label={t('admin.search')}
             value={recherche}
             onChange={(event) => changerTamis(() => setRecherche(event.target.value))}
-            placeholder="pseudo ou adresse"
+            placeholder={t('admin.searchPlaceholder')}
           />
         </div>
         <Button variant="secondary" icon={<Search size={15} />} onClick={() => void charger()}>
-          Relire
+          {t('admin.reload')}
         </Button>
       </div>
 
@@ -167,12 +177,12 @@ export function Comptes() {
                 : 'border border-line text-muted hover:bg-[var(--surface-hover)]',
             )}
           >
-            {element.texte}
+            {t(element.texteKey)}
           </button>
         ))}
 
         <span className="ml-auto flex items-center gap-1 text-[12px] text-faint">
-          trier par
+          {t('admin.sortBy')}
           <select
             value={tri}
             onChange={(event) => changerTamis(() => setTri(event.target.value))}
@@ -180,7 +190,7 @@ export function Comptes() {
           >
             {TRIS.map((element) => (
               <option key={element.cle} value={element.cle}>
-                {element.texte}
+                {t(element.texteKey)}
               </option>
             ))}
           </select>
@@ -188,7 +198,7 @@ export function Comptes() {
             size="sm"
             variant="ghost"
             icon={<ArrowDownUp size={13} />}
-            title={sens === 'desc' ? 'Décroissant' : 'Croissant'}
+            title={t(sens === 'desc' ? 'admin.descending' : 'admin.ascending')}
             onClick={() => changerTamis(() => setSens(sens === 'desc' ? 'asc' : 'desc'))}
           >
             {sens === 'desc' ? '↓' : '↑'}
@@ -199,12 +209,12 @@ export function Comptes() {
       {comptes === null ? (
         <Skeleton className="h-64 w-full" />
       ) : comptes.length === 0 ? (
-        <EmptyState title="Aucun compte" description="Aucun résultat pour ce filtre." />
+        <EmptyState title={t('admin.noAccount')} description={t('admin.noResultForFilter')} />
       ) : (
         <>
           <p className="text-[12px] text-faint">
-            {nombre(total)} compte{total > 1 ? 's' : ''} retenu{total > 1 ? 's' : ''}
-            {total !== totalGeneral && ` sur ${nombre(totalGeneral)}`}
+            {t(total > 1 ? 'admin.accountsKept' : 'admin.accountKept', { n: nombre(total) })}
+            {total !== totalGeneral && ` ${t('admin.outOfTotal', { n: nombre(totalGeneral) })}`}
           </p>
 
           <div className="space-y-2">
@@ -228,10 +238,10 @@ export function Comptes() {
                 icon={<ChevronLeft size={14} />}
                 onClick={() => setPage(page - 1)}
               >
-                Précédents
+                {t('admin.previous')}
               </Button>
               <span className="text-[12px] tabular-nums text-faint">
-                page {page + 1} sur {dernierePage + 1}
+                {t('admin.pageOf', { page: page + 1, total: dernierePage + 1 })}
               </span>
               <Button
                 size="sm"
@@ -240,7 +250,7 @@ export function Comptes() {
                 icon={<ChevronRight size={14} />}
                 onClick={() => setPage(page + 1)}
               >
-                Suivants
+                {t('admin.nextOnes')}
               </Button>
             </div>
           )}
@@ -258,14 +268,16 @@ export function Comptes() {
  * vivante : l'heure devient lisible pour la journée en cours, qui est celle
  * qu'on regarde quand on se demande si quelqu'un vient de partir.
  */
-function derniereVisite(compte: Compte): string {
-  if (compte.enLigne) return 'en ligne à l’instant'
+function derniereVisite(compte: Compte, t: ReturnType<typeof useT>, bcp47: string): string {
+  if (compte.enLigne) return t('admin.onlineNow')
 
   const vu = new Date(compte.vu)
   const memeJour = vu.toDateString() === new Date().toDateString()
   return memeJour
-    ? `vu à ${vu.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`
-    : `vu le ${vu.toLocaleDateString('fr-FR')}`
+    ? t('admin.seenAt', {
+        heure: vu.toLocaleTimeString(bcp47, { hour: '2-digit', minute: '2-digit' }),
+      })
+    : t('admin.seenOn', { date: vu.toLocaleDateString(bcp47) })
 }
 
 function LigneCompte({
@@ -279,6 +291,8 @@ function LigneCompte({
   occupe: boolean
   onAgir: (compte: Compte, action: string, extra?: Record<string, unknown>) => void
 }) {
+  const t = useT()
+  const bcp47 = langue(useI18n().locale).bcp47
   const [confirmation, setConfirmation] = useState('')
   const [ouvert, setOuvert] = useState<'anonymiser' | 'motDePasse' | null>(null)
   const [motDePasse, setMotDePasse] = useState('')
@@ -293,9 +307,9 @@ function LigneCompte({
         <div className="min-w-0 flex-1">
           <p className="flex flex-wrap items-center gap-1.5 text-sm font-semibold">
             {compte.username}
-            {compte.role === 'admin' && <Chip tone="accent">admin</Chip>}
-            {compte.disabled && <Chip tone="danger">désactivé</Chip>}
-            {estMoi && <Chip>toi</Chip>}
+            {compte.role === 'admin' && <Chip tone="accent">{t('admin.admin')}</Chip>}
+            {compte.disabled && <Chip tone="danger">{t('admin.disabled')}</Chip>}
+            {estMoi && <Chip>{t('admin.you')}</Chip>}
             {/*
               « En ligne » se lit sur le dernier battement du navigateur, pas
               sur l'existence d'une session : celle-ci dure trente jours, et
@@ -303,22 +317,28 @@ function LigneCompte({
               jamais — la pastille était allumée pour tout le monde, tout le
               temps, et ne voulait plus rien dire.
             */}
-            {compte.enLigne && !compte.disabled && <Chip tone="success">en ligne</Chip>}
+            {compte.enLigne && !compte.disabled && <Chip tone="success">{t('admin.online')}</Chip>}
           </p>
           <p className="mt-0.5 truncate text-[12px] text-faint">
             {[
               compte.email
-                ? `${compte.email}${compte.emailVerifie ? ' (confirmée)' : ' (non confirmée)'}`
-                : 'aucune adresse',
-              `${compte.parties} partie${compte.parties > 1 ? 's' : ''}`,
-              compte.classement == null ? null : `meilleur classement ${compte.classement}`,
-              `inscrit le ${new Date(compte.inscrit).toLocaleDateString('fr-FR')}`,
-              derniereVisite(compte),
+                ? `${compte.email} (${t(
+                    compte.emailVerifie ? 'admin.confirmed' : 'admin.unconfirmed',
+                  )})`
+                : t('admin.noAddress'),
+              t(compte.parties > 1 ? 'admin.gamesCount' : 'admin.gameCount', {
+                n: compte.parties,
+              }),
+              compte.classement == null ? null : t('admin.bestRating', { n: compte.classement }),
+              t('admin.signedUpOn', { date: new Date(compte.inscrit).toLocaleDateString(bcp47) }),
+              derniereVisite(compte, t, bcp47),
               // Le nombre d'appareils encore ouverts : c'est ce qu'une
               // désactivation va fermer, et la seule question à laquelle le
               // compte des sessions sache vraiment répondre.
               compte.sessions > 0
-                ? `${compte.sessions} appareil${compte.sessions > 1 ? 's' : ''} ouvert${compte.sessions > 1 ? 's' : ''}`
+                ? t(compte.sessions > 1 ? 'admin.devicesOpen' : 'admin.deviceOpen', {
+                    n: compte.sessions,
+                  })
                 : null,
             ]
               .filter(Boolean)
@@ -336,7 +356,7 @@ function LigneCompte({
                 icon={compte.disabled ? <ShieldCheck size={14} /> : <ShieldOff size={14} />}
                 onClick={() => onAgir(compte, compte.disabled ? 'reactiver' : 'desactiver')}
               >
-                {compte.disabled ? 'Réactiver' : 'Désactiver'}
+                {t(compte.disabled ? 'admin.reactivate' : 'admin.deactivate')}
               </Button>
               <Button
                 size="sm"
@@ -346,7 +366,7 @@ function LigneCompte({
                   onAgir(compte, compte.role === 'admin' ? 'retrograder' : 'promouvoir')
                 }
               >
-                {compte.role === 'admin' ? 'Rétrograder' : 'Promouvoir'}
+                {t(compte.role === 'admin' ? 'admin.demote' : 'admin.promote')}
               </Button>
             </>
           )}
@@ -357,7 +377,7 @@ function LigneCompte({
             icon={<KeyRound size={14} />}
             onClick={() => setOuvert(ouvert === 'motDePasse' ? null : 'motDePasse')}
           >
-            Mot de passe
+            {t('admin.password')}
           </Button>
           {!estMoi && (
             <Button
@@ -367,7 +387,7 @@ function LigneCompte({
               icon={<UserX size={14} />}
               onClick={() => setOuvert(ouvert === 'anonymiser' ? null : 'anonymiser')}
             >
-              Anonymiser
+              {t('admin.anonymise')}
             </Button>
           )}
         </div>
@@ -376,16 +396,13 @@ function LigneCompte({
       {/* ── Redonner l'accès ─────────────────────────────────────── */}
       {ouvert === 'motDePasse' && (
         <div className="mt-3 border-t border-line/60 pt-3">
-          <p className="text-[12px] leading-relaxed text-muted">
-            Choisis un mot de passe provisoire et transmets-le à la personne. Toutes ses sessions se
-            ferment. C’est la porte de secours quand la messagerie n’est pas configurée.
-          </p>
+          <p className="text-[12px] leading-relaxed text-muted">{t('admin.passwordBlurb')}</p>
           <div className="mt-2 flex items-end gap-2">
             <div className="min-w-0 flex-1">
               <Input
                 value={motDePasse}
                 onChange={(event) => setMotDePasse(event.target.value)}
-                placeholder="8 caractères minimum"
+                placeholder={t('admin.passwordPlaceholder')}
                 autoComplete="off"
               />
             </div>
@@ -399,7 +416,7 @@ function LigneCompte({
                 setOuvert(null)
               }}
             >
-              Appliquer
+              {t('admin.apply')}
             </Button>
           </div>
         </div>
@@ -410,18 +427,14 @@ function LigneCompte({
         <div className="mt-3 border-t border-line/60 pt-3">
           <p className="flex items-start gap-2 text-[12px] leading-relaxed text-[var(--q-blunder)]">
             <AlertTriangle size={14} className="mt-0.5 shrink-0" aria-hidden />
-            <span>
-              Le pseudo, l’adresse et le mot de passe sont effacés sans retour possible. Les parties
-              restent — elles appartiennent aussi aux adversaires, et les retirer creuserait des
-              trous dans leur historique.
-            </span>
+            <span>{t('admin.anonymiseWarning')}</span>
           </p>
           <div className="mt-2 flex items-end gap-2">
             <div className="min-w-0 flex-1">
               <Input
                 value={confirmation}
                 onChange={(event) => setConfirmation(event.target.value)}
-                placeholder={`écris « ${compte.username} » pour confirmer`}
+                placeholder={t('admin.anonymisePlaceholder', { pseudo: compte.username })}
                 autoComplete="off"
               />
             </div>
@@ -435,7 +448,7 @@ function LigneCompte({
                 setOuvert(null)
               }}
             >
-              Anonymiser
+              {t('admin.anonymise')}
             </Button>
           </div>
         </div>

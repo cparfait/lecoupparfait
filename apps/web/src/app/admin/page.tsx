@@ -24,6 +24,8 @@
 
 import { useEffect, useState } from 'react'
 import { Skeleton, EmptyState, SegmentedControl } from '@/components/ui/index.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 import { Comptes } from './Comptes.tsx'
 import { Contenus } from './Contenus.tsx'
 import { Journal } from './Journal.tsx'
@@ -31,14 +33,21 @@ import { Outils } from './Outils.tsx'
 import { Systeme } from './Systeme.tsx'
 import { TableauDeBord } from './TableauDeBord.tsx'
 
+/*
+  Les six onglets, par clé de dictionnaire.
+
+  Constante de module : elle ne peut pas appeler `t()`, et portait donc six
+  intitulés français que les quarante autres langues recevaient tels quels. Ils
+  sont résolus au rendu, juste avant d'être passés au sélecteur.
+*/
 const ONGLETS = [
-  { value: 'bord', label: 'Tableau de bord' },
-  { value: 'comptes', label: 'Comptes' },
-  { value: 'contenus', label: 'Contenus' },
-  { value: 'journal', label: 'Journal' },
-  { value: 'systeme', label: 'Système' },
-  { value: 'outils', label: 'Outils' },
-] as const
+  { value: 'bord', labelKey: 'admin.tabDashboard' },
+  { value: 'comptes', labelKey: 'admin.tabAccounts' },
+  { value: 'contenus', labelKey: 'admin.tabContent' },
+  { value: 'journal', labelKey: 'admin.tabLog' },
+  { value: 'systeme', labelKey: 'admin.tabSystem' },
+  { value: 'outils', labelKey: 'admin.tabTools' },
+] as const satisfies ReadonlyArray<{ value: string; labelKey: TranslationKey }>
 
 type Onglet = (typeof ONGLETS)[number]['value']
 
@@ -47,6 +56,7 @@ function ongletValide(valeur: string): valeur is Onglet {
 }
 
 export default function AdminPage() {
+  const t = useT()
   const [onglet, setOnglet] = useState<Onglet>('bord')
   /** `undefined` tant qu'on ne sait pas, `false` = pas administrateur. */
   const [autorise, setAutorise] = useState<boolean | undefined>(undefined)
@@ -82,21 +92,17 @@ export default function AdminPage() {
   if (!autorise) {
     return (
       <div className="mx-auto w-full max-w-md px-4 py-20">
-        <EmptyState
-          title="Cette page n’existe pas"
-          description="Vérifie l’adresse, ou reviens à l’accueil."
-        />
+        <EmptyState title={t('admin.notFound')} description={t('admin.notFoundHint')} />
       </div>
     )
   }
 
   return (
     <div className="page">
-      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Administration</h1>
-      <p className="mt-1.5 text-sm text-muted">
-        Ce que tu fais ici s’applique à de vraies personnes. Les actes irréversibles demandent
-        d’écrire le pseudo, et tous sont consignés dans le journal.
-      </p>
+      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+        {t('admin.title')}
+      </h1>
+      <p className="mt-1.5 text-sm text-muted">{t('admin.blurb')}</p>
 
       {/* Six onglets ne tiennent pas dans 375 pixels : les libellés se
           coupaient, et « Système » sortait du cadre. On leur donne leur largeur
@@ -113,7 +119,7 @@ export default function AdminPage() {
               // cliquer six fois sur « précédent » pour quitter la page.
               window.history.replaceState(null, '', `#${valeur}`)
             }}
-            options={[...ONGLETS]}
+            options={ONGLETS.map((o) => ({ value: o.value, label: t(o.labelKey) }))}
           />
         </div>
       </div>

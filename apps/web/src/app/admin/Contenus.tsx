@@ -11,6 +11,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { ExternalLink, Trash2 } from 'lucide-react'
 import { Button, Card, EmptyState, SectionTitle, Skeleton } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
 
 interface Contenus {
   parties: Array<{
@@ -36,6 +37,8 @@ interface Contenus {
 }
 
 export function Contenus() {
+  const t = useT()
+  const bcp47 = langue(useI18n().locale).bcp47
   const [contenus, setContenus] = useState<Contenus | null>(null)
 
   const charger = useCallback(async () => {
@@ -45,10 +48,10 @@ export function Contenus() {
       if (!reponse.ok) throw new Error()
       setContenus(await reponse.json())
     } catch {
-      toast.error('Lecture impossible.')
+      toast.error(t('admin.readFailed'))
       setContenus({ parties: [], analyses: [] })
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     void charger()
@@ -60,16 +63,16 @@ export function Contenus() {
         const reponse = await fetch(`/api/admin/contenus?${parametre}`, { method: 'DELETE' })
         const donnees = await reponse.json().catch(() => ({}))
         if (!reponse.ok) {
-          toast.error(donnees.error ?? 'Suppression impossible.')
+          toast.error(donnees.error ?? t('admin.deleteImpossible'))
           return
         }
-        toast.success('Supprimé.', 'L’acte est consigné dans le journal.')
+        toast.success(t('admin.deleted'), t('admin.loggedInJournal'))
         await charger()
       } catch {
-        toast.error('Le serveur est injoignable.')
+        toast.error(t('admin.serverDown'))
       }
     },
-    [charger],
+    [charger, t],
   )
 
   if (contenus === null) return <Skeleton className="h-64 w-full" />
@@ -77,27 +80,25 @@ export function Contenus() {
   return (
     <div className="space-y-5">
       <div>
-        <SectionTitle hint="Une partie classée ne peut pas être effacée : elle a bougé le classement de son adversaire.">
-          Dernières parties
-        </SectionTitle>
+        <SectionTitle hint={t('admin.recentGamesHint')}>{t('admin.recentGames')}</SectionTitle>
         {contenus.parties.length === 0 ? (
-          <EmptyState title="Aucune partie" />
+          <EmptyState title={t('admin.noGame')} />
         ) : (
           <div className="space-y-1.5">
             {contenus.parties.map((partie) => (
               <Card key={partie.slug} className="flex items-center gap-2 p-2.5">
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[14px]">
-                    {partie.blancs ?? 'Blancs'} — {partie.noirs ?? 'Noirs'}{' '}
+                    {partie.blancs ?? t('admin.white')} — {partie.noirs ?? t('admin.black')}{' '}
                     <span className="text-faint">{partie.result ?? '*'}</span>
                   </span>
                   <span className="block truncate text-[12px] text-faint">
                     {[
                       partie.mode,
-                      partie.rated ? 'classée' : 'amicale',
+                      t(partie.rated ? 'admin.rated' : 'admin.casual'),
                       partie.opening,
-                      `${partie.coups} demi-coups`,
-                      new Date(partie.jouee).toLocaleDateString('fr-FR'),
+                      t('admin.halfMoves', { n: partie.coups }),
+                      new Date(partie.jouee).toLocaleDateString(bcp47),
                     ]
                       .filter(Boolean)
                       .join(' · ')}
@@ -109,7 +110,7 @@ export function Contenus() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  title="Ouvrir la partie dans un autre onglet"
+                  title={t('admin.openGameInNewTab')}
                   icon={<ExternalLink size={13} />}
                   onClick={() => window.open(`/jouer/partie/${partie.slug}`, '_blank', 'noopener')}
                 >
@@ -119,9 +120,7 @@ export function Contenus() {
                   size="sm"
                   variant="ghost"
                   disabled={partie.rated}
-                  title={
-                    partie.rated ? 'Partie classée : non supprimable' : 'Supprimer cette partie'
-                  }
+                  title={t(partie.rated ? 'admin.ratedNotDeletable' : 'admin.deleteGame')}
                   icon={<Trash2 size={13} />}
                   onClick={() => void supprimer(`partie=${encodeURIComponent(partie.slug)}`)}
                 >
@@ -134,24 +133,26 @@ export function Contenus() {
       </div>
 
       <div>
-        <SectionTitle hint="Les analyses conservées par les joueurs. Supprimer n’efface pas la partie d’origine.">
-          Dernières analyses
+        <SectionTitle hint={t('admin.recentAnalysesHint')}>
+          {t('admin.recentAnalyses')}
         </SectionTitle>
         {contenus.analyses.length === 0 ? (
-          <EmptyState title="Aucune analyse conservée" />
+          <EmptyState title={t('admin.noAnalysisKept')} />
         ) : (
           <div className="space-y-1.5">
             {contenus.analyses.map((analyse) => (
               <Card key={analyse.id} className="flex items-center gap-2 p-2.5">
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[14px]">
-                    {analyse.blancs ?? 'Blancs'} — {analyse.noirs ?? 'Noirs'}
+                    {analyse.blancs ?? t('admin.white')} — {analyse.noirs ?? t('admin.black')}
                   </span>
                   <span className="block truncate text-[12px] text-faint">
                     {[
-                      analyse.proprietaire ? `à ${analyse.proprietaire}` : 'sans propriétaire',
+                      analyse.proprietaire
+                        ? t('admin.belongsTo', { pseudo: analyse.proprietaire })
+                        : t('admin.noOwner'),
                       analyse.opening,
-                      new Date(analyse.creee).toLocaleDateString('fr-FR'),
+                      new Date(analyse.creee).toLocaleDateString(bcp47),
                     ]
                       .filter(Boolean)
                       .join(' · ')}
@@ -160,7 +161,7 @@ export function Contenus() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  title="Supprimer cette analyse"
+                  title={t('admin.deleteAnalysis')}
                   icon={<Trash2 size={13} />}
                   onClick={() => void supprimer(`analyse=${encodeURIComponent(analyse.id)}`)}
                 >

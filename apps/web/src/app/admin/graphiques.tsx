@@ -19,6 +19,7 @@
  */
 
 import { useState } from 'react'
+import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
 
 /** Les teintes utilisées pour distinguer des séries, dans l'ordre. */
 export const TEINTES = [
@@ -36,9 +37,17 @@ export function teinte(index: number): string {
   return TEINTES[index % TEINTES.length]!
 }
 
-/** `12 345` plutôt que `12345` : un nombre long ne se lit pas d'un coup d'œil. */
+/**
+ * `12 345` plutôt que `12345` : un nombre long ne se lit pas d'un coup d'œil.
+ *
+ * La langue du groupement est celle du navigateur et non plus le français en
+ * dur : un anglophone lit `12,345`, un germanophone `12.345`. Impossible de
+ * passer par le dictionnaire ici — la fonction est appelée depuis des constantes
+ * et des fonctions pures —, mais `undefined` laisse `Intl` choisir, ce qui est
+ * la bonne réponse partout.
+ */
 export function nombre(valeur: number | null | undefined): string {
-  return valeur == null ? '—' : valeur.toLocaleString('fr-FR')
+  return valeur == null ? '—' : valeur.toLocaleString(undefined)
 }
 
 /** Un pourcentage, ou `—` quand le dénominateur est nul — jamais `NaN %`. */
@@ -74,6 +83,8 @@ export function Courbe({
   jours: string[]
   hauteur?: number
 }) {
+  const t = useT()
+  const bcp47 = langue(useI18n().locale).bcp47
   const [survol, setSurvol] = useState<number | null>(null)
 
   const points = jours.length
@@ -104,7 +115,10 @@ export function Courbe({
           style={{ height: hauteur }}
           className="w-full touch-none"
           role="img"
-          aria-label={`Évolution sur ${points} jours de : ${series.map((serie) => serie.nom).join(', ')}`}
+          aria-label={t('admin.curveLabel', {
+            n: points,
+            series: series.map((serie) => serie.nom).join(', '),
+          })}
           onPointerLeave={() => setSurvol(null)}
           onPointerMove={(evenement) => {
             const cadre = evenement.currentTarget.getBoundingClientRect()
@@ -176,7 +190,7 @@ export function Courbe({
             </span>
             {index === series.length - 1 && (
               <span className="text-faint">
-                {survol == null ? 'sur la période' : formaterJour(jourSurvole)}
+                {survol == null ? t('admin.overThePeriod') : formaterJour(jourSurvole, bcp47)}
               </span>
             )}
           </span>
@@ -186,13 +200,13 @@ export function Courbe({
   )
 }
 
-function formaterJour(jour: string | null | undefined): string {
+function formaterJour(jour: string | null | undefined, bcp47: string): string {
   if (!jour) return ''
   // Le jour arrive en `AAAA-MM-JJ` sans heure : `new Date` le lirait en UTC et
   // l'afficherait décalé d'un jour à l'ouest de Greenwich. On le découpe.
   const [annee, mois, numero] = jour.split('-').map(Number)
   if (!annee || !mois || !numero) return jour
-  return new Date(annee, mois - 1, numero).toLocaleDateString('fr-FR', {
+  return new Date(annee, mois - 1, numero).toLocaleDateString(bcp47, {
     day: 'numeric',
     month: 'short',
   })
@@ -217,11 +231,12 @@ export interface Part {
  * c'est le rapport entre les catégories qu'on regarde.
  */
 export function Barres({ parts, total }: { parts: Part[]; total?: number }) {
+  const t = useT()
   const maximum = Math.max(1, ...parts.map((element) => element.n))
   const somme = total ?? parts.reduce((accumulateur, element) => accumulateur + element.n, 0)
 
   if (parts.length === 0) {
-    return <p className="py-3 text-[12px] text-faint">Rien à montrer sur cette période.</p>
+    return <p className="py-3 text-[12px] text-faint">{t('admin.nothingThisPeriod')}</p>
   }
 
   return (

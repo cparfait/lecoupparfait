@@ -26,6 +26,7 @@ import clsx from 'clsx'
 import { Button, Card, Chip, SectionTitle, Skeleton } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { TITRES_CATEGORIE, type CategorieCredit } from '@/lib/credits/catalogue.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 import { Mesure } from './graphiques.tsx'
 
 interface Outil {
@@ -85,26 +86,30 @@ function comparer(actuelle: string | null, derniere: string | null): Etat {
 }
 
 export function Outils() {
+  const t = useT()
   const [donnees, setDonnees] = useState<Reponse | null>(null)
   const [cherche, setCherche] = useState(false)
 
-  const charger = useCallback(async (avecMaj: boolean) => {
-    if (avecMaj) setCherche(true)
-    try {
-      const reponse = await fetch(`/api/admin/outils${avecMaj ? '?maj=1' : ''}`, {
-        cache: 'no-store',
-      })
-      if (!reponse.ok) {
-        toast.error('Lecture impossible.')
-        return
+  const charger = useCallback(
+    async (avecMaj: boolean) => {
+      if (avecMaj) setCherche(true)
+      try {
+        const reponse = await fetch(`/api/admin/outils${avecMaj ? '?maj=1' : ''}`, {
+          cache: 'no-store',
+        })
+        if (!reponse.ok) {
+          toast.error(t('admin.readFailed'))
+          return
+        }
+        setDonnees(await reponse.json())
+      } catch {
+        toast.error(t('admin.serverDown'))
+      } finally {
+        setCherche(false)
       }
-      setDonnees(await reponse.json())
-    } catch {
-      toast.error('Le serveur est injoignable.')
-    } finally {
-      setCherche(false)
-    }
-  }, [])
+    },
+    [t],
+  )
 
   useEffect(() => {
     void charger(false)
@@ -122,24 +127,24 @@ export function Outils() {
     <div className="space-y-5">
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <Mesure
-          titre="Outils suivis"
+          titre={t('admin.toolsTracked')}
           valeur={donnees.outils.length}
-          note="moteurs, données, ressources, bibliothèques"
+          note={t('admin.toolsTrackedNote')}
         />
         <Mesure
-          titre="Bibliothèques"
+          titre={t('admin.libraries')}
           valeur={donnees.outils.filter((outil) => outil.paquet).length}
-          note="dépendances d’exécution"
+          note={t('admin.librariesNote')}
         />
         <Mesure
-          titre="À corriger"
+          titre={t('admin.toFix')}
           valeur={alertes}
-          note={alertes === 0 ? 'catalogue et dépôt d’accord' : 'détail ci-dessous'}
+          note={t(alertes === 0 ? 'admin.toFixNone' : 'admin.toFixSome')}
         />
         <Mesure
-          titre="Mises à jour"
+          titre={t('admin.updates')}
           valeur={donnees.majCherchees ? aMettreAJour.length : null}
-          note={donnees.majCherchees ? 'versions plus récentes publiées' : 'pas encore cherchées'}
+          note={t(donnees.majCherchees ? 'admin.updatesFound' : 'admin.updatesNotSought')}
         />
       </div>
 
@@ -148,14 +153,12 @@ export function Outils() {
           permanent qui dit « rien à signaler » finit par ne plus se lire. */}
       {alertes > 0 && (
         <Card className="border border-[color-mix(in_oklab,var(--q-inaccuracy)_40%,transparent)] p-4">
-          <SectionTitle hint="Le même contrôle tourne dans `npm test` : ces écarts font échouer la construction.">
-            À corriger
-          </SectionTitle>
+          <SectionTitle hint={t('admin.toFixHint')}>{t('admin.toFix')}</SectionTitle>
           <div className="space-y-3">
             {donnees.nonCredites.length > 0 && (
               <Anomalie
-                titre={`${donnees.nonCredites.length} paquet(s) non crédité(s)`}
-                detail="Déclarés dans un package.json, absents du catalogue. Leur licence exige peut-être l’attribution."
+                titre={t('admin.uncredited', { n: donnees.nonCredites.length })}
+                detail={t('admin.uncreditedHint')}
               >
                 {donnees.nonCredites.map((entree) => (
                   <li key={entree.paquet} className="flex flex-wrap items-baseline gap-2">
@@ -174,8 +177,8 @@ export function Outils() {
 
             {donnees.orphelins.length > 0 && (
               <Anomalie
-                titre={`${donnees.orphelins.length} crédit(s) orphelin(s)`}
-                detail="Le catalogue cite un paquet que plus aucun espace de travail ne déclare."
+                titre={t('admin.orphans', { n: donnees.orphelins.length })}
+                detail={t('admin.orphansHint')}
               >
                 {donnees.orphelins.map((entree) => (
                   <li key={entree.nom}>
@@ -187,15 +190,15 @@ export function Outils() {
 
             {donnees.versionsDivergentes.length > 0 && (
               <Anomalie
-                titre={`${donnees.versionsDivergentes.length} version(s) qui a dérivé`}
-                detail="La version affichée ne se trouve plus dans le fichier qui fait autorité."
+                titre={t('admin.drifted', { n: donnees.versionsDivergentes.length })}
+                detail={t('admin.driftedHint')}
               >
                 {donnees.versionsDivergentes.map((entree) => (
                   <li key={entree.nom}>
                     {entree.nom} <strong className="text-ink">{entree.version}</strong> —{' '}
-                    {entree.introuvable
-                      ? `introuvable dans ${entree.fichier}`
-                      : `${entree.fichier} illisible ici`}
+                    {t(entree.introuvable ? 'admin.notFoundIn' : 'admin.unreadableHere', {
+                      fichier: entree.fichier,
+                    })}
                   </li>
                 ))}
               </Anomalie>
@@ -206,11 +209,12 @@ export function Outils() {
 
       {donnees.depot.espacesIllisibles.length > 0 && (
         <p className="text-[12px] leading-relaxed text-faint">
-          {donnees.depot.espacesIllisibles.join(', ')} n’
-          {donnees.depot.espacesIllisibles.length > 1 ? 'ont' : 'a'} pas pu être lu
-          {donnees.depot.espacesIllisibles.length > 1 ? 's' : ''} depuis ce serveur — l’image de
-          production n’embarque pas tous les manifestes. Le contrôle des tests, lui, voit le dépôt
-          entier.
+          {t(
+            donnees.depot.espacesIllisibles.length > 1
+              ? 'admin.workspacesUnreadablePlural'
+              : 'admin.workspacesUnreadable',
+            { espaces: donnees.depot.espacesIllisibles.join(', ') },
+          )}
         </p>
       )}
 
@@ -222,7 +226,7 @@ export function Outils() {
           icon={<Search size={14} />}
           onClick={() => void charger(true)}
         >
-          Chercher les mises à jour
+          {t('admin.seekUpdates')}
         </Button>
         <Button
           variant="ghost"
@@ -230,12 +234,9 @@ export function Outils() {
           icon={<RefreshCw size={14} />}
           onClick={() => void charger(false)}
         >
-          Relire
+          {t('admin.reload')}
         </Button>
-        <span className="text-[12px] leading-snug text-faint">
-          Interroge le registre npm et GitHub depuis le serveur. Rien d’autre que des noms de
-          paquets publics ne sort d’ici.
-        </span>
+        <span className="text-[12px] leading-snug text-faint">{t('admin.outboundNote')}</span>
       </div>
 
       {ORDRE.map((categorie) => {
@@ -281,6 +282,7 @@ function Anomalie({
 }
 
 function Ligne({ outil }: { outil: Outil }) {
+  const t = useT()
   const actuelle = outil.installee ?? outil.versionCatalogue
   const etat = comparer(actuelle, outil.derniere)
   /* Le catalogue peut se tromper de licence : le paquet la déclare lui-même. */
@@ -307,16 +309,17 @@ function Ligne({ outil }: { outil: Outil }) {
       {actuelle && <span className="text-[12px] tabular-nums text-muted">{actuelle}</span>}
 
       {etat === 'plusrecent' && (
-        <Chip tone="warning" title="Version publiée par l’auteur">
+        <Chip tone="warning" title={t('admin.publishedByAuthor')}>
           {outil.derniere}
         </Chip>
       )}
       {etat === 'ajour' && (
         <span
           className="flex items-center gap-0.5 text-[12px] text-[var(--q-best)]"
-          title="Dernière version publiée"
+          title={t('admin.latestPublished')}
         >
-          <Check size={11} aria-hidden />à jour
+          <Check size={11} aria-hidden />
+          {t('admin.upToDate')}
         </span>
       )}
 
@@ -327,7 +330,7 @@ function Ligne({ outil }: { outil: Outil }) {
         )}
         title={
           licenceDiverge
-            ? `Le paquet déclare « ${outil.licenceReelle} » — le catalogue dit autre chose.`
+            ? t('admin.licenceDiverges', { licence: outil.licenceReelle ?? '' })
             : undefined
         }
       >
