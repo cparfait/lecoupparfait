@@ -11,6 +11,7 @@
  */
 
 import { NextResponse } from 'next/server'
+import { RD_ETABLI } from '@coupparfait/core'
 import { desc, eq, getDb, ratings, sql, users } from '@coupparfait/db'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
@@ -74,7 +75,7 @@ export async function GET(request: Request) {
         countryCode: row.countryCode,
         rating: row.rating,
         deviation: row.deviation,
-        provisional: row.deviation > 110,
+        provisional: row.deviation > RD_ETABLI,
         elo: row.elo,
         games: row.games,
         wins: row.wins,

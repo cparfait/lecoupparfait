@@ -32,6 +32,7 @@ import { AccountButton } from '@/components/layout/AccountButton.tsx'
 import { ChallengeWatcher } from '@/components/social/ChallengeWatcher.tsx'
 import { PastilleSerie } from '@/components/daily/PastilleSerie.tsx'
 import { MiseEnRoute } from '@/components/layout/MiseEnRoute.tsx'
+import { MesureEnAttente } from '@/components/layout/MesureEnAttente.tsx'
 import { MotDeLEquipe } from '@/components/layout/MotDeLEquipe.tsx'
 import { Presence } from '@/components/layout/Presence.tsx'
 import { RepriseEnLigne } from '@/components/social/RepriseEnLigne.tsx'
@@ -282,6 +283,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Notifications et installation, proposées une fois — mais proposées.
           Jamais sur un écran de partie : voir `MiseEnRoute`. */}
       {!immersive && <MiseEnRoute />}
+
+      {/* Le test de niveau passé sans compte, repris dès qu'il y en a un. Ne
+          rend rien ; vaut sur tous les écrans, y compris pendant une partie,
+          puisqu'il n'affiche qu'un toast et seulement s'il a repris quelque
+          chose. */}
+      <MesureEnAttente />
 
       {/* Le mot de l'équipe — annonce générale ou message adressé à une
           personne. Hors écran de partie, pour la même raison que ci-dessus :

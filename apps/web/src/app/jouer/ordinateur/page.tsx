@@ -813,7 +813,12 @@ function SetupScreen({
       <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
         {t('nav.vsComputer')}
       </h1>
-      <p className="mt-1.5 text-muted">{t('computer.intro')}</p>
+      <p className="mt-1.5 text-muted">
+        {t('computer.intro', {
+          n: BOT_LEVELS.length,
+          p: Object.keys(BOT_PERSONALITIES).length,
+        })}
+      </p>
 
       {/* ── Reprendre ──────────────────────────────────────────────────
           En tête, avant les réglages : quelqu'un qui a une partie en cours

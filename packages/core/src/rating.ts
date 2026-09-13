@@ -212,6 +212,40 @@ export function trancheDefi(id: string | null | undefined): TrancheDefi | null {
 /** Écart-type initial : un nouveau joueur est très incertain. */
 export const GLICKO_DEFAULT_RD = 350
 
+/**
+ * En deçà de quoi un classement cesse d'être provisoire.
+ *
+ * La valeur était recopiée dans trois routes — le tableau des classements, la
+ * page « Ton palier », le profil public — et l'interface promettait de son côté
+ * « moins d'une trentaine de parties », ce qui ne correspondait à rien : ni au
+ * seuil, ni à ce qu'il faut réellement jouer pour le franchir.
+ */
+export const RD_ETABLI = 110
+
+/**
+ * Combien de parties avant que le classement cesse d'être provisoire.
+ *
+ * Pas une règle de trois : on fait tourner le vrai Glicko sur des parties
+ * moyennes — une nulle contre un adversaire de son propre niveau, bien établi —
+ * et l'on compte. C'est l'hypothèse la plus favorable, puisque chaque partie y
+ * informe au maximum : le nombre rendu est donc un **plancher**, et l'écran doit
+ * le dire ainsi. Une partie contre trop fort ou trop faible apprend moins, et il
+ * en faudra davantage.
+ *
+ * Rend 0 quand le classement est déjà établi, et se borne à `maximum` pour ne
+ * pas annoncer un nombre décourageant à quelqu'un qui revient après deux ans
+ * d'absence.
+ */
+export function partiesAvantEtabli(rd: number, volatility = 0.06, maximum = 30): number {
+  if (rd <= RD_ETABLI) return 0
+  let etat: GlickoRating = { rating: 1500, rd, volatility }
+  for (let parties = 1; parties <= maximum; parties++) {
+    etat = updateGlicko(etat, [{ rating: 1500, rd: 60, score: 0.5 }])
+    if (etat.rd <= RD_ETABLI) return parties
+  }
+  return maximum
+}
+
 /** Volatilité initiale, valeur recommandée par Glickman. */
 export const GLICKO_DEFAULT_VOLATILITY = 0.09
 

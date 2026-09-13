@@ -70,7 +70,13 @@ interface Faiblesse {
 
 interface Diagnostic {
   connecte: boolean
-  partie: { categorie: SpeedCategory; cote: number; parties: number; provisoire: boolean } | null
+  partie: {
+    categorie: SpeedCategory
+    cote: number
+    parties: number
+    provisoire: boolean
+    restantes: number
+  } | null
   puzzle: { cote: number; tentatives: number } | null
   faiblesses: Faiblesse[]
 }
@@ -187,7 +193,8 @@ export default function PalierPage() {
                       cadence: SPEED_LABELS[diagnostic.partie.categorie][locale].toLowerCase(),
                       parties: diagnostic.partie.parties,
                     })}
-                    {diagnostic.partie.provisoire && ` ${t('tier.provisional')}`}
+                    {diagnostic.partie.provisoire &&
+                      ` ${t('tier.provisionalLeft', { n: diagnostic.partie.restantes })}`}
                   </>
                 )}
                 {niveau.source === 'test' &&

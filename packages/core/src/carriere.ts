@@ -49,7 +49,7 @@ export interface Chapitre {
   puzzles: number
   /** Personnalité de l'adversaire. */
   adversaire: BotPersonalityId
-  /** Niveau du barème des bots, 1 à 25. */
+  /** Niveau du barème des bots, 1 à `BOT_LEVELS.length`. */
   niveau: number
   /**
    * Difficulté des puzzles du chapitre, en Elo, la même pour tout le monde.
@@ -191,7 +191,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'discoveredAttack',
     puzzles: 5,
     adversaire: 'positionnel',
-    niveau: 8,
+    niveau: 10,
     cotePuzzles: 1250,
     victoires: 2,
     teinte: '#20c997',
@@ -205,7 +205,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'sacrifice',
     puzzles: 5,
     adversaire: 'gambiteur',
-    niveau: 9,
+    niveau: 11,
     cotePuzzles: 1400,
     victoires: 2,
     teinte: '#e64980',
@@ -219,7 +219,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'promotion',
     puzzles: 5,
     adversaire: 'positionnel',
-    niveau: 10,
+    niveau: 12,
     cotePuzzles: 1550,
     victoires: 2,
     teinte: '#4dabf7',
@@ -233,7 +233,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'zugzwang',
     puzzles: 5,
     adversaire: 'positionnel',
-    niveau: 11,
+    niveau: 13,
     cotePuzzles: 1700,
     victoires: 2,
     teinte: '#00b894',
@@ -247,7 +247,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'mateIn2',
     puzzles: 5,
     adversaire: 'machine',
-    niveau: 13,
+    niveau: 15,
     cotePuzzles: 1850,
     victoires: 1,
     teinte: '#f03e3e',

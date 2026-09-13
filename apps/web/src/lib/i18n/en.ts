@@ -203,7 +203,7 @@ export const en: Dictionary = {
     seanceBlurb:
       'A theme announced before you start, an opponent at your level, and a report saying where that theme showed up.',
     vsComputer: 'Against the computer',
-    vsComputerBlurb: 'Twenty-five levels, from first move to grandmaster.',
+    vsComputerBlurb: 'Calibrated opponents, from the very first move to grandmaster.',
     vsFriend: 'Against someone',
     vsFriendBlurb: 'Create a link, send it, the game begins.',
     localGame: 'Same screen',
@@ -248,7 +248,7 @@ export const en: Dictionary = {
 
   computer: {
     back: 'Back to the mode picker',
-    intro: 'Twenty-five levels, seven personalities. Pick an opponent a little above you.',
+    intro: '{n} levels, {p} personalities. Pick an opponent a little above you.',
     badFen: 'That position cannot be played.',
     badFenHint: 'A king may be missing, or one side is already in check. The game starts normally.',
     resume: 'You have a game in progress',
@@ -621,7 +621,7 @@ export const en: Dictionary = {
     conservativeAfter:
       ' rating: two standard deviations are subtracted. In practice, a player who has just won three games has enormous uncertainty about their true level, and so does not take first place for it. You have to play regularly for the uncertainty to come down — and therefore to climb.',
     provisionalNote:
-      'The question mark next to a rating means it is still provisional: under thirty or so games, the estimate moves a lot.',
+      'The question mark next to a rating means it is still provisional: the uncertainty is still wide, and the estimate moves a lot. It takes about ten games to narrow it — more when opponents are far from your level, since a foregone result teaches nothing.',
   },
 
   verify: {
@@ -1080,6 +1080,9 @@ export const en: Dictionary = {
     foundOf: '{reussies} / {total} found',
     inGame: 'in games, roughly — the scale of the app’s rating',
     range: 'between {bas} and {haut}',
+    pickedUp: 'Your level test has been picked up',
+    pickedUpHint:
+      'Your starting rating is {elo} instead of starting from scratch. Your first games will adjust it.',
     unknownPosition: 'One of the positions in the run cannot be found.',
     incoherentRun: 'This run does not look like a test played through.',
     onPuzzleScale: 'on the puzzle scale',
@@ -1133,6 +1136,7 @@ export const en: Dictionary = {
     inGameSpeed: 'in {cadence}, over {parties} games',
     inGameSpeedOne: 'in {cadence}, over {parties} game',
     provisional: '— still provisional',
+    provisionalLeft: '— still provisional: at least {n} games to settle it',
     testedOn: ' of {date}',
   },
 
@@ -5784,7 +5788,7 @@ export const en: Dictionary = {
     playDesc: 'Against the computer, against a friend, or on the same screen.',
     local: 'Game on the same screen',
     computer: 'Against the computer',
-    computerDesc: 'Twenty-five levels, seven personalities.',
+    computerDesc: 'Calibrated opponents, from the very first move to grandmaster.',
     liveGame: 'Live game',
     lesson: 'Teaching session',
     lessonDesc:

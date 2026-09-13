@@ -202,7 +202,7 @@ export const fr = {
     seanceBlurb:
       'Un thème annoncé avant de commencer, un adversaire à ton niveau, et un bilan qui dit où ce thème est apparu.',
     vsComputer: 'Contre l’ordinateur',
-    vsComputerBlurb: 'Vingt-cinq niveaux, du tout premier coup au grand maître.',
+    vsComputerBlurb: 'Des adversaires calibrés, du tout premier coup au grand maître.',
     vsFriend: 'Contre quelqu’un',
     vsFriendBlurb: 'De quinze secondes à quatorze jours par coup. Un lien, ou un ami.',
     localGame: 'Sur le même écran',
@@ -249,7 +249,7 @@ export const fr = {
 
   computer: {
     back: 'Retour au choix du mode',
-    intro: 'Vingt-cinq niveaux, sept personnalités. Choisis un adversaire un peu au-dessus de toi.',
+    intro: '{n} niveaux, {p} personnalités. Choisis un adversaire un peu au-dessus de toi.',
     badFen: 'Cette position n’est pas jouable.',
     badFenHint:
       'Il manque peut-être un roi, ou un camp est déjà en échec. La partie commence normalement.',
@@ -629,7 +629,7 @@ export const fr = {
     conservativeAfter:
       ' : on retranche deux écarts-types. Concrètement, un joueur qui vient de gagner trois parties a une incertitude énorme sur son vrai niveau, et n’occupe donc pas la première place pour autant. Il faut jouer régulièrement pour que l’incertitude descende — et donc pour monter.',
     provisionalNote:
-      'Le point d’interrogation à côté d’un classement signifie qu’il est encore provisoire : moins d’une trentaine de parties, l’estimation bouge beaucoup.',
+      'Le point d’interrogation à côté d’un classement signifie qu’il est encore provisoire : l’incertitude reste large, et l’estimation bouge beaucoup. Il faut une dizaine de parties pour la resserrer — davantage si les adversaires sont loin de son niveau, puisqu’un résultat couru d’avance n’apprend rien.',
   },
 
   verify: {
@@ -1093,6 +1093,9 @@ export const fr = {
     foundOf: '{reussies} / {total} trouvés',
     inGame: 'en partie, environ — l’échelle du classement de l’application',
     range: 'entre {bas} et {haut}',
+    pickedUp: 'Ton test de niveau a été repris',
+    pickedUpHint:
+      'Ton classement de départ est {elo} au lieu de repartir de zéro. Tes premières parties l’ajusteront.',
     unknownPosition: 'Une des positions du relevé est introuvable.',
     incoherentRun: 'Ce relevé ne ressemble pas à un test passé jusqu’au bout.',
     onPuzzleScale: 'sur l’échelle des puzzles',
@@ -1146,6 +1149,7 @@ export const fr = {
     inGameSpeed: 'en {cadence}, sur {parties} parties',
     inGameSpeedOne: 'en {cadence}, sur {parties} partie',
     provisional: '— encore provisoire',
+    provisionalLeft: '— encore provisoire : au moins {n} parties pour le stabiliser',
     testedOn: ' du {date}',
   },
 
@@ -5805,7 +5809,7 @@ export const fr = {
     playDesc: 'Contre l’ordinateur, contre un ami, ou sur le même écran.',
     local: 'Partie sur le même écran',
     computer: 'Contre l’ordinateur',
-    computerDesc: 'Vingt-cinq niveaux, sept personnalités.',
+    computerDesc: 'Des adversaires calibrés, du tout premier coup au grand maître.',
     liveGame: 'Partie en direct',
     lesson: 'Séance pédagogique',
     lessonDesc:

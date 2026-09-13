@@ -22,6 +22,7 @@
  */
 
 import { NextResponse } from 'next/server'
+import { partiesAvantEtabli, RD_ETABLI } from '@coupparfait/core'
 import { getDb, ratings, eq, sql } from '@coupparfait/db'
 import { getCurrentUser } from '@/lib/server/session.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
@@ -141,7 +142,10 @@ export async function GET(request: Request) {
             categorie: representatif.category,
             cote: representatif.rating,
             parties: representatif.games,
-            provisoire: representatif.deviation > 110,
+            provisoire: representatif.deviation > RD_ETABLI,
+            // Combien il en reste, plutôt qu'un point d'interrogation muet :
+            // c'est la seule information qui dise quoi faire.
+            restantes: partiesAvantEtabli(representatif.deviation),
           }
         : null,
       puzzle: cotePuzzle ? { cote: cotePuzzle.rating, tentatives: cotePuzzle.games } : null,

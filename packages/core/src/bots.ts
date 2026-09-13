@@ -370,6 +370,47 @@ const LEVEL_TABLE: LevelSpec[] = [
     multiPv: 6,
     nodes: 28000,
   },
+  /*
+    Les deux marches qui manquaient, entre 1 000 et 1 320.
+
+    L'échelle sautait 320 points là où les autres écarts en font 130 à 150, et
+    ce n'était pas une négligence : 1 320 est le minimum de `UCI_LimitStrength`,
+    donc la frontière entre les deux régimes de ce fichier — le bridage à la
+    main en dessous, Stockfish qui se limite lui-même au-dessus. Le trou tombait
+    simplement au mauvais endroit : c'est la bande la plus peuplée, celle où
+    arrive la majorité de ceux qui se mesurent, et personne n'y avait
+    d'adversaire à sa taille. Un joueur mesuré à 1 150 affrontait 1 000 ou
+    1 320, soit 150 points d'écart dans un sens ou dans l'autre.
+
+    Ces deux-là prolongent donc le régime bridé, avec la même mécanique que les
+    sept premiers : moins de tolérance, plus de nœuds, une liste de coups qui se
+    resserre.
+
+    **Leur cote est interpolée, pas mesurée.** Elle vaut ce que vaut une
+    interpolation entre deux points calibrés — à vérifier sur de vrais
+    résultats, ce que `games` permet désormais puisque la cote de l'adversaire
+    y est écrite.
+  */
+  {
+    elo: 1110,
+    personality: 'fonceur',
+    skill: 4,
+    depth: 5,
+    movetimeMs: 360,
+    temperature: 0.44,
+    multiPv: 6,
+    nodes: 40000,
+  },
+  {
+    elo: 1215,
+    personality: 'prudent',
+    skill: 5,
+    depth: 5,
+    movetimeMs: 380,
+    temperature: 0.41,
+    multiPv: 5,
+    nodes: 60000,
+  },
   {
     elo: 1320,
     personality: 'prudent',

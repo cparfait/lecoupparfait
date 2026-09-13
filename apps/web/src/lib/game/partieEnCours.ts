@@ -23,7 +23,7 @@ import type { useT } from '@/lib/i18n/index.tsx'
 
 /** Ce qu'il faut pour reconstituer la partie à l'identique. */
 export interface EtatPartieEnCours {
-  /** Niveau du bot, 1 à 25. */
+  /** Niveau du bot, 1 à `BOT_LEVELS.length`. */
   level: number
   /** Camp du joueur. */
   playerColor: Color

@@ -10,6 +10,7 @@
  */
 
 import { NextResponse } from 'next/server'
+import { RD_ETABLI } from '@coupparfait/core'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 import {
   desc,
@@ -117,7 +118,7 @@ export async function GET(request: Request, context: { params: Promise<{ usernam
           category: rating.category,
           rating: rating.rating,
           deviation: rating.deviation,
-          provisional: rating.deviation > 110,
+          provisional: rating.deviation > RD_ETABLI,
           elo: rating.elo,
           games: rating.games,
           wins: rating.wins,

@@ -1012,7 +1012,7 @@ export const ratedIntents = pgTable('rated_intents', {
   userId: uuid('user_id')
     .primaryKey()
     .references(() => users.id, { onDelete: 'cascade' }),
-  /** Niveau du bot annoncé, déjà ramené dans le barème des 25. */
+  /** Niveau du bot annoncé, déjà ramené dans le barème. */
   botLevel: smallint('bot_level').notNull(),
   /** Cadence, en secondes : elle décide de la catégorie de classement. */
   initialTime: integer('initial_time').notNull().default(0),

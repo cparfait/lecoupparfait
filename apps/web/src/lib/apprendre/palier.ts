@@ -223,7 +223,7 @@ export const PALIERS: Palier[] = [
     max: 1599,
     nom: 'paliers.un-plan.nom',
     promesse: 'paliers.un-plan.promesse',
-    niveauBot: 9,
+    niveauBot: 11,
     leviers: [
       {
         id: 'les-colonnes-ouvertes',
@@ -263,7 +263,7 @@ export const PALIERS: Palier[] = [
     max: 1899,
     nom: 'paliers.technique.nom',
     promesse: 'paliers.technique.promesse',
-    niveauBot: 12,
+    niveauBot: 14,
     leviers: [
       {
         id: 'l-opposition',
@@ -303,7 +303,7 @@ export const PALIERS: Palier[] = [
     max: Number.POSITIVE_INFINITY,
     nom: 'paliers.prophylaxie.nom',
     promesse: 'paliers.prophylaxie.promesse',
-    niveauBot: 14,
+    niveauBot: 16,
     leviers: [
       {
         id: 'les-enfilades-et',

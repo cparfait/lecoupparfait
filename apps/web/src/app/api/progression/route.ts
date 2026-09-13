@@ -11,6 +11,7 @@
  */
 
 import { NextResponse } from 'next/server'
+import { BOT_LEVELS } from '@coupparfait/core'
 import { botProgress, eq, getDb, sql } from '@coupparfait/db'
 import { getCurrentUser } from '@/lib/server/session.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
@@ -33,7 +34,7 @@ export async function GET() {
   const me = await getCurrentUser()
   // Sans compte, on ne bloque rien : la progression est un confort, pas un
   // péage. Tous les niveaux restent jouables.
-  if (!me) return NextResponse.json({ defeated: 0, unlocked: 25, tracked: false })
+  if (!me) return NextResponse.json({ defeated: 0, unlocked: BOT_LEVELS.length, tracked: false })
 
   const [row] = await getDb()
     .select()
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
     classement, précisément parce qu'elle n'est vérifiée par personne.
   */
   if (body.action === 'declarer') {
-    const declare = Math.min(25, Math.max(1, Math.round(Number(body.level ?? 0))))
+    const declare = Math.min(BOT_LEVELS.length, Math.max(1, Math.round(Number(body.level ?? 0))))
     if (!declare) return NextResponse.json({ error: t('api.levelMissing') }, { status: 400 })
 
     const [ligne] = await getDb()
@@ -103,7 +104,7 @@ export async function POST(request: Request) {
     })
   }
 
-  const level = Math.min(25, Math.max(1, Math.round(Number(body.level ?? 0))))
+  const level = Math.min(BOT_LEVELS.length, Math.max(1, Math.round(Number(body.level ?? 0))))
   const won = body.won === true
   if (!level) return NextResponse.json({ error: t('api.levelMissing') }, { status: 400 })
 

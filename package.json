@@ -25,6 +25,7 @@
     "db:push": "npm run db:push -w @coupparfait/db",
     "install:maia": "node scripts/install-maia.mjs",
     "seed:demo": "node --experimental-strip-types scripts/seed-demo.mjs",
+    "etalonner:conversion": "node --experimental-strip-types --env-file=.env scripts/etalonner-conversion.mjs",
     "seed:demo:purge": "node --experimental-strip-types scripts/seed-demo.mjs --purge",
     "db:generate": "npm run db:generate -w @coupparfait/db",
     "db:migrate": "npm run db:migrate -w @coupparfait/db",
