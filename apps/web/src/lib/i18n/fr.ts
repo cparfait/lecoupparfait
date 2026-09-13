@@ -1121,6 +1121,128 @@ export const fr = {
     pickAGame: 'Choisis une partie à gauche, ou lance-en une avec quelqu’un de ton carnet.',
   },
 
+  endgames: {
+    missingBase: 'Base de finales absente',
+    missingBaseHint:
+      'Le fichier des positions n’a pas été trouvé. Lance la compilation depuis le dépôt.',
+    title: 'Entraînement aux finales',
+    intro:
+      '{n} positions classées. On te donne un objectif — gagner ou tenir la nulle — et l’ordinateur défend au mieux. Il faut jouer jusqu’au bout : aucune solution à réciter.',
+    yourObjective: 'Ton objectif',
+    piecesCount: '{n} pièces',
+    solved: 'finale résolue',
+    difficultyOf: 'difficulté {n}/5',
+    spokenDraw: 'Tu joues {couleur}. Tiens la nulle.',
+    spokenMate: ' Il y a mat en {n} coups au mieux.',
+    playAndWin: 'Tu joues {couleur}. Gagne cette position.{mat}',
+    allFamilies: 'Toutes les familles',
+    win: 'Gagner',
+    holdDraw: 'Tenir la nulle',
+    mateIn: ' · mat en {n}',
+    winWithMate: 'Gagner — mat en {n} coups au mieux',
+    wonMessage: 'Gagné. La technique est acquise.',
+    drawnMessage: 'Nulle tenue. Exactement ce qu’il fallait.',
+    thisExercise: 'cet exercice',
+    listenInstruction: 'Écouter la consigne',
+    youPlay:
+      'Tu joues les {couleur}. L’ordinateur défend au maximum de ses moyens — il ne te fera aucun cadeau.',
+    won: 'Gagné !',
+    drawn: 'Nulle tenue',
+    missed: 'Objectif manqué',
+    lost: 'Position perdue',
+    retryWin:
+      'La position était gagnante. Reprends-la : en finale, une seule imprécision suffit à tout annuler.',
+    retryDraw: 'Il fallait tenir. Retente en cherchant la case exacte où ton roi doit se placer.',
+    acquired: 'Technique acquise. Passe à la position suivante, un cran plus difficile.',
+    fiftyMoves:
+      'La règle des cinquante coups s’applique : si tu n’avances pas, la partie sera déclarée nulle — ce qui est une défaite quand l’objectif est de gagner.',
+  },
+
+  clock: {
+    noMove: 'Aucun coup noté.',
+    noMoveHint: 'Branche un échiquier électronique pour que la partie s’écrive.',
+    intro:
+      'Pose l’appareil entre les deux joueurs. Chacun tape son propre côté après avoir joué — comme sur une pendule mécanique. Avec un échiquier électronique branché, tu n’as rien à toucher : la carte voit le coup, la pendule bascule, et la partie s’écrit toute seule.',
+    start: 'Démarrer — les Blancs jouent',
+    startHint: 'Le premier appui lance la pendule des Blancs sans rien leur décompter.',
+    analyse: 'Analyser la partie',
+    asSeenByBoard: 'La partie, telle que la carte l’a vue',
+  },
+
+  savedAnalyses: {
+    title: 'Tes analyses',
+    unshare: 'Retirer le partage : le lien cessera de fonctionner',
+    share: 'Partager par un lien, sans compte requis',
+    forget: 'Oublier cette analyse',
+    forgetNamed: 'Oublier l’analyse {blancs} – {noirs}',
+    removeFailed: 'Retrait impossible.',
+    linkRemoved: 'Lien retiré',
+    linkRemovedHint: 'L’analyse n’est plus accessible par ce lien.',
+    shareFailed: 'Partage impossible.',
+    linkCopied: 'Lien copié',
+    shareLink: 'Lien de partage',
+    deleteFailed: 'Suppression impossible.',
+    hint: 'Déjà calculées : les rouvrir est immédiat, le moteur ne retravaille pas.',
+  },
+
+  streak: {
+    goToDaily: 'jours consécutifs — aller au défi du jour',
+    seeStreak: 'jours consécutifs — voir ta série',
+    streakOf: 'Série de {n}',
+    lastSevenDays: 'les sept derniers jours · aujourd’hui à droite',
+    resetsToZero: 'Un jour sans rien, et la flamme repart de zéro.',
+    todayBefore: 'Aujourd’hui :',
+    questsOf: 'quêtes sur {total}.',
+    questOf: 'quête sur {total}.',
+    atStake: ' Ta série est en jeu.',
+    dailyAlreadyDone: 'Défi du jour déjà relevé',
+    takeDaily: 'Relever le défi du jour',
+  },
+
+  stakes: {
+    whitePlan: 'Le plan des Blancs',
+    blackPlan: 'Le plan des Noirs',
+    structure: 'La structure',
+    trap: 'Le piège',
+    guidedLesson: 'La leçon guidée',
+    seeOnBoard: 'Voir sur l’échiquier',
+  },
+
+  errors: {
+    somethingWrong: 'Quelque chose s’est mal passé',
+    somethingWrongHint:
+      'L’écran n’a pas pu s’afficher. Ce n’est pas de ta faute, et ce n’est probablement pas définitif : réessayer suffit le plus souvent.',
+    notFound: 'Cette page n’existe pas',
+    notFoundHint:
+      'L’adresse est peut-être ancienne, ou la partie, le profil ou l’étude que tu cherches a été supprimé.',
+    incidentRef: 'Référence de l’incident :',
+    backHome: 'Retour à l’accueil',
+    playAGame: 'Jouer une partie',
+  },
+
+  arenas: {
+    running: 'En cours',
+    scheduled: 'À venir',
+    finished: 'Terminé',
+    createFailed: 'Création impossible.',
+    created: 'Arène créée.',
+    createdHint: 'Elle commence dans cinq minutes.',
+    soloBlurb:
+      'Tu es le seul humain. Trois à sept adversaires, de force choisie ou variée, et un classement aux points.',
+    title: 'Arènes',
+    hint: 'On arrive quand on veut, on part quand on veut. Dès qu’une partie finit, on est réapparié.',
+    namePlaceholder: 'Nom de l’arène — « Blitz du jeudi »',
+    nameAria: 'Nom de la nouvelle arène',
+    create: 'Créer',
+    createHint: '3 minutes par partie, 45 minutes d’arène, départ dans 5 minutes.',
+    none: 'Aucune arène',
+    noneSignedIn:
+      'Crée-en une : elle commencera dans cinq minutes, le temps que les autres arrivent.',
+    noneSignedOut: 'Connecte-toi pour en créer une.',
+    footer:
+      'Une arène n’a d’intérêt qu’à plusieurs : à trois joueurs, c’est un salon d’attente déguisé. Préviens tes amis avant d’en lancer une.',
+  },
+
   openings: {
     title: 'Ouvertures',
     subtitle: '3 810 ouvertures répertoriées, expliquées et jouables.',

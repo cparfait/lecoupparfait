@@ -16,6 +16,7 @@ import clsx from 'clsx'
 import { Button, Card, EmptyState, Input, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 
 interface Tournament {
   slug: string
@@ -28,13 +29,14 @@ interface Tournament {
   players: number
 }
 
-const STATUS: Record<string, { label: string; tone: string }> = {
-  running: { label: 'En cours', tone: 'text-[var(--q-best)]' },
-  scheduled: { label: 'À venir', tone: 'text-accent' },
-  finished: { label: 'Terminé', tone: 'text-faint' },
+const STATUS: Record<string, { label: TranslationKey; tone: string }> = {
+  running: { label: 'arenas.running', tone: 'text-[var(--q-best)]' },
+  scheduled: { label: 'arenas.scheduled', tone: 'text-accent' },
+  finished: { label: 'arenas.finished', tone: 'text-faint' },
 }
 
 export default function TournamentsPage() {
+  const t = useT()
   const [list, setList] = useState<Tournament[] | null>(null)
   const [signedIn, setSignedIn] = useState(false)
   const [name, setName] = useState('')
@@ -75,16 +77,16 @@ export default function TournamentsPage() {
       })
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
-        toast.error(data.error ?? 'Création impossible.')
+        toast.error(data.error ?? t('arenas.createFailed'))
         return
       }
       setName('')
       await refresh()
-      toast.success('Arène créée.', 'Elle commence dans cinq minutes.')
+      toast.success(t('arenas.created'), t('arenas.createdHint'))
     } finally {
       setBusy(false)
     }
-  }, [name, refresh])
+  }, [name, refresh, t])
 
   if (list === null) {
     return (
@@ -117,10 +119,7 @@ export default function TournamentsPage() {
               <p className="font-display text-lg font-bold leading-tight">
                 Tournoi contre l’ordinateur
               </p>
-              <p className="text-[14px] text-muted">
-                Tu es le seul humain. Trois à sept adversaires, de force choisie ou variée, et un
-                classement aux points.
-              </p>
+              <p className="text-[14px] text-muted">{t('arenas.soloBlurb')}</p>
             </div>
             <span className="shrink-0 text-muted" aria-hidden>
               →
@@ -129,9 +128,7 @@ export default function TournamentsPage() {
         </Card>
       </Link>
 
-      <SectionTitle hint="On arrive quand on veut, on part quand on veut. Dès qu’une partie finit, on est réapparié.">
-        Arènes
-      </SectionTitle>
+      <SectionTitle hint={t('arenas.hint')}>{t('arenas.title')}</SectionTitle>
 
       {signedIn && (
         <Card className="mt-4 p-3">
@@ -146,30 +143,24 @@ export default function TournamentsPage() {
               <Input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                placeholder="Nom de l’arène — « Blitz du jeudi »"
-                aria-label="Nom de la nouvelle arène"
+                placeholder={t('arenas.namePlaceholder')}
+                aria-label={t('arenas.nameAria')}
                 maxLength={80}
               />
             </div>
             <Button type="submit" variant="primary" disabled={busy}>
-              Créer
+              {t('arenas.create')}
             </Button>
           </form>
-          <p className="mt-1.5 text-[12px] text-faint">
-            3 minutes par partie, 45 minutes d’arène, départ dans 5 minutes.
-          </p>
+          <p className="mt-1.5 text-[12px] text-faint">{t('arenas.createHint')}</p>
         </Card>
       )}
 
       {list.length === 0 ? (
         <EmptyState
           icon={<Swords size={28} />}
-          title="Aucune arène"
-          description={
-            signedIn
-              ? 'Crée-en une : elle commencera dans cinq minutes, le temps que les autres arrivent.'
-              : 'Connecte-toi pour en créer une.'
-          }
+          title={t('arenas.none')}
+          description={t(signedIn ? 'arenas.noneSignedIn' : 'arenas.noneSignedOut')}
         />
       ) : (
         <div className="mt-3 space-y-2">
@@ -209,8 +200,7 @@ export default function TournamentsPage() {
 
       <p className="mt-5 flex items-start gap-1.5 text-xs leading-relaxed text-faint">
         <Timer size={13} className="mt-0.5 shrink-0" aria-hidden />
-        Une arène n’a d’intérêt qu’à plusieurs : à trois joueurs, c’est un salon d’attente déguisé.
-        Préviens tes amis avant d’en lancer une.
+        {t('arenas.footer')}
       </p>
     </div>
   )

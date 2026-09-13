@@ -22,6 +22,7 @@ import { Card, Chip } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { BoutonEcouter } from '@/components/ui/BoutonEcouter.tsx'
 import type { FicheEnjeux } from '@/lib/ouvertures/enjeux.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 const TEINTE = 'var(--rub-apprendre)'
 
@@ -38,6 +39,7 @@ export function CarteEnjeux({
   ecrire?: (san: string) => string
   className?: string
 }) {
+  const t = useT()
   const suite = fiche.coups
     .map((coup, index) =>
       index % 2 === 0
@@ -86,7 +88,7 @@ export function CarteEnjeux({
         <p className="mt-3 text-[15px] leading-relaxed">{fiche.idee}</p>
 
         <div className="mt-4">
-          <p className="text-[12px] font-semibold text-faint">La structure</p>
+          <p className="text-[12px] font-semibold text-faint">{t('stakes.structure')}</p>
           <p className="mt-1 text-[14px] leading-relaxed text-muted">{fiche.structure}</p>
         </div>
 
@@ -97,7 +99,7 @@ export function CarteEnjeux({
           <div className="rounded-[var(--radius-sm)] border border-line bg-bg-elev p-3">
             <p className="flex items-center gap-1.5 text-[12px] font-semibold text-faint">
               <span className="h-2.5 w-2.5 rounded-full bg-[var(--eval-white)]" aria-hidden />
-              Le plan des Blancs
+              {t('stakes.whitePlan')}
             </p>
             <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{fiche.planBlancs}</p>
           </div>
@@ -107,7 +109,7 @@ export function CarteEnjeux({
                 className="h-2.5 w-2.5 rounded-full bg-[var(--eval-black)] ring-1 ring-line"
                 aria-hidden
               />
-              Le plan des Noirs
+              {t('stakes.blackPlan')}
             </p>
             <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{fiche.planNoirs}</p>
           </div>
@@ -124,7 +126,7 @@ export function CarteEnjeux({
         >
           <p className="flex items-center gap-1.5 text-[12px] font-semibold text-[var(--q-inaccuracy-text)]">
             <AlertTriangle size={12} aria-hidden />
-            Le piège
+            {t('stakes.trap')}
           </p>
           <p className="mt-1.5 text-[14px] leading-relaxed">{fiche.piege}</p>
         </div>
@@ -136,7 +138,7 @@ export function CarteEnjeux({
               className="lien inline-flex items-center gap-1.5"
             >
               <GraduationCap size={13} aria-hidden />
-              La leçon guidée
+              {t('stakes.guidedLesson')}
             </Link>
           )}
           {versEchiquier && (
@@ -145,7 +147,7 @@ export function CarteEnjeux({
               className="lien inline-flex items-center gap-1.5"
             >
               <Grid3x3 size={13} aria-hidden />
-              Voir sur l’échiquier
+              {t('stakes.seeOnBoard')}
             </Link>
           )}
         </div>

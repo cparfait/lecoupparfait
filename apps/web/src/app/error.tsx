@@ -22,6 +22,7 @@
 import { useEffect } from 'react'
 import { RotateCcw, TriangleAlert } from 'lucide-react'
 import { Button, ButtonLink } from '@/components/ui/index.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export default function Erreur({
   error,
@@ -30,6 +31,7 @@ export default function Erreur({
   error: Error & { digest?: string }
   retry: () => void
 }) {
+  const t = useT()
   useEffect(() => {
     // La console du navigateur, faute de service de rapport : l'application
     // n'en a pas, et n'en veut pas — voir le README, rubrique vie privée.
@@ -41,11 +43,8 @@ export default function Erreur({
       <TriangleAlert size={40} strokeWidth={1.6} className="text-faint" aria-hidden />
 
       <div>
-        <h1 className="text-xl font-semibold">Quelque chose s’est mal passé</h1>
-        <p className="mt-2 text-sm text-muted">
-          L’écran n’a pas pu s’afficher. Ce n’est pas de ta faute, et ce n’est probablement pas
-          définitif : réessayer suffit le plus souvent.
-        </p>
+        <h1 className="text-xl font-semibold">{t('errors.somethingWrong')}</h1>
+        <p className="mt-2 text-sm text-muted">{t('errors.somethingWrongHint')}</p>
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-2">
@@ -54,16 +53,16 @@ export default function Erreur({
           icon={<RotateCcw size={15} aria-hidden />}
           onClick={() => retry()}
         >
-          Réessayer
+          {t('common.retry')}
         </Button>
-        <ButtonLink href="/">Retour à l’accueil</ButtonLink>
+        <ButtonLink href="/">{t('errors.backHome')}</ButtonLink>
       </div>
 
       {error.digest && (
         // Sans traduction ni mise en forme : c'est un identifiant, il se
         // recopie tel quel dans un signalement.
         <p className="text-xs text-faint">
-          Référence de l’incident : <code className="font-mono">{error.digest}</code>
+          {t('errors.incidentRef')} <code className="font-mono">{error.digest}</code>
         </p>
       )}
     </main>

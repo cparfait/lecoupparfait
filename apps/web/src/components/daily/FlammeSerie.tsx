@@ -47,6 +47,7 @@ import { QUETES, queteFaite } from '@/lib/daily/quotidien.ts'
 import type { EtatQuotidien } from '@/lib/daily/quotidien.ts'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /**
  * Deux habillages pour le même objet.
@@ -77,6 +78,7 @@ export function FlammeSerie({
   habillage?: Habillage
   className?: string
 }) {
+  const t = useT()
   const { etat } = useQuotidien()
   const identite = useIdentite()
   const serie = etat?.serie ?? 0
@@ -111,9 +113,13 @@ export function FlammeSerie({
   */
   if (habillage === 'carte') {
     return (
-      <Link href="/puzzles?defi=1" title={`Série de ${jours}${record}`} className={classe}>
+      <Link
+        href="/puzzles?defi=1"
+        title={`${t('streak.streakOf', { n: jours })}${record}`}
+        className={classe}
+      >
         {contenu}
-        <span className="sr-only">jours consécutifs — aller au défi du jour</span>
+        <span className="sr-only">{t('streak.goToDaily')}</span>
       </Link>
     )
   }
@@ -122,7 +128,7 @@ export function FlammeSerie({
     <Menu
       align="right"
       largeur="w-[19rem]"
-      label={`Série de ${jours}`}
+      label={t('streak.streakOf', { n: jours })}
       className="shrink-0"
       // Le déclencheur *est* la pastille : sans cela, le bouton de `Menu`
       // rapporterait son propre cadre, celui-là même qu'on vient de retirer aux
@@ -131,7 +137,7 @@ export function FlammeSerie({
       declencheur={() => (
         <>
           {contenu}
-          <span className="sr-only">jours consécutifs — voir ta série</span>
+          <span className="sr-only">{t('streak.seeStreak')}</span>
         </>
       )}
     >
@@ -147,6 +153,7 @@ export function FlammeSerie({
  * chiffre*, *où j'en suis aujourd'hui*, *qu'est-ce que je fais maintenant*.
  */
 function PanneauSerie({ etat, serie }: { etat: EtatQuotidien | null; serie: number }) {
+  const t = useT()
   // « Aujourd'hui compte-t-il déjà ? » — c'est ce qui décale la frise d'un cran
   // et change entièrement le message : tant qu'aucune quête n'est finie, la
   // flamme d'aujourd'hui n'est pas allumée, et elle est en jeu.
@@ -192,9 +199,7 @@ function PanneauSerie({ etat, serie }: { etat: EtatQuotidien | null; serie: numb
           )
         })}
       </div>
-      <p className="mt-1 px-1 text-[12px] text-faint">
-        les sept derniers jours · aujourd’hui à droite
-      </p>
+      <p className="mt-1 px-1 text-[12px] text-faint">{t('streak.lastSevenDays')}</p>
 
       {/* « Le défi du jour en est une » n'est pas un détail de formulation.
           Le site nomme deux choses à part — le défi du jour, les quêtes du
@@ -204,15 +209,13 @@ function PanneauSerie({ etat, serie }: { etat: EtatQuotidien | null; serie: numb
           ailleurs disparu du catalogue il y a longtemps. */}
       <p className="mt-3 px-1 text-[12px] leading-relaxed text-muted">
         Un jour compte dès qu’une seule des {QUETES.length} quêtes est terminée — et le défi du jour
-        en est une.{' '}
-        <strong className="font-semibold text-ink">
-          Un jour sans rien, et la flamme repart de zéro.
-        </strong>
+        en est une. <strong className="font-semibold text-ink">{t('streak.resetsToZero')}</strong>
       </p>
 
       <p className="mt-2 px-1 text-[12px] text-muted">
-        Aujourd’hui : <strong className="font-semibold text-ink">{finies}</strong> quête
-        {finies > 1 ? 's' : ''} sur {QUETES.length}.{!faitAujourdhui && ' Ta série est en jeu.'}
+        {t('streak.todayBefore')} <strong className="font-semibold text-ink">{finies}</strong>{' '}
+        {t(finies > 1 ? 'streak.questsOf' : 'streak.questOf', { total: QUETES.length })}
+        {!faitAujourdhui && t('streak.atStake')}
       </p>
 
       {/* ── Ce qu'on peut faire maintenant ────────────────────────────
@@ -224,7 +227,7 @@ function PanneauSerie({ etat, serie }: { etat: EtatQuotidien | null; serie: numb
           <>
             <p className="flex items-center gap-1.5 px-1 text-[12px] font-medium text-[var(--q-best)]">
               <Check size={13} aria-hidden />
-              Défi du jour déjà relevé
+              {t('streak.dailyAlreadyDone')}
             </p>
             {/* `#aujourdhui`, et non `/` : le lien menait à la page où l'on
                 était déjà, sur une carte repliée. L'ancre l'ouvre et l'amène
@@ -252,7 +255,7 @@ function PanneauSerie({ etat, serie }: { etat: EtatQuotidien | null; serie: numb
             href="/puzzles?defi=1"
             className="flex items-center justify-between rounded-[var(--radius-sm)] bg-accent/15 px-2.5 py-2 text-[14px] font-semibold text-accent transition-colors hover:bg-accent/25"
           >
-            Relever le défi du jour
+            {t('streak.takeDaily')}
             <ArrowRight size={14} aria-hidden />
           </Link>
         )}

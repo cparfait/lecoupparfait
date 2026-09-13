@@ -55,6 +55,7 @@ import { useChessGame } from '@/lib/game/useChessGame.ts'
 import { useEcranAllume } from '@/lib/ecranAllume.ts'
 import { playSound } from '@/lib/sound.ts'
 import { toast } from '@/components/ui/Toast.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /**
  * Les cadences proposées.
@@ -69,6 +70,7 @@ const CADENCES = TIME_CONTROLS.filter(
 )
 
 export default function PendulePage() {
+  const t = useT()
   const router = useRouter()
   const [control, setControl] = useState<TimeControl>(
     () => CADENCES.find((cadence) => cadence.id === '600+5') ?? CADENCES[0]!,
@@ -218,10 +220,7 @@ export default function PendulePage() {
   const analyser = useCallback(() => {
     const pgn = chess.pgn()
     if (state.moves.length === 0) {
-      toast.info(
-        'Aucun coup noté.',
-        'Branche un échiquier électronique pour que la partie s’écrive.',
-      )
+      toast.info(t('clock.noMove'), t('clock.noMoveHint'))
       return
     }
     try {
@@ -230,7 +229,7 @@ export default function PendulePage() {
       // Stockage refusé : l'écran d'analyse s'ouvrira vide, et il sait le dire.
     }
     router.push('/analyse')
-  }, [chess, state.moves.length, router])
+  }, [chess, state.moves.length, router, t])
 
   return (
     <div className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-6 sm:py-6">
@@ -246,11 +245,7 @@ export default function PendulePage() {
           <h1 className="mt-3 font-display text-2xl font-bold tracking-tight sm:text-3xl">
             Pendule
           </h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
-            Pose l’appareil entre les deux joueurs. Chacun tape son propre côté après avoir joué —
-            comme sur une pendule mécanique. Avec un échiquier électronique branché, tu n’as rien à
-            toucher : la carte voit le coup, la pendule bascule, et la partie s’écrit toute seule.
-          </p>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">{t('clock.intro')}</p>
 
           <Card className="mt-5 p-4">
             <p className="text-[12px] font-semibold text-faint">Cadence</p>
@@ -285,10 +280,10 @@ export default function PendulePage() {
             icon={<Timer size={17} />}
             onClick={demarrer}
           >
-            Démarrer — les Blancs jouent
+            {t('clock.start')}
           </Button>
           <p className="mt-2 text-center text-[12px] leading-relaxed text-faint">
-            Le premier appui lance la pendule des Blancs sans rien leur décompter.
+            {t('clock.startHint')}
           </p>
         </>
       )}
@@ -349,7 +344,7 @@ export default function PendulePage() {
                 </Button>
                 {state.moves.length > 0 && (
                   <Button variant="primary" icon={<Gauge size={15} />} onClick={analyser}>
-                    Analyser la partie
+                    {t('clock.analyse')}
                   </Button>
                 )}
               </div>
@@ -363,9 +358,7 @@ export default function PendulePage() {
 
           {state.moves.length > 0 && (
             <Card className="mt-2 p-3">
-              <p className="text-[12px] font-semibold text-faint">
-                La partie, telle que la carte l’a vue
-              </p>
+              <p className="text-[12px] font-semibold text-faint">{t('clock.asSeenByBoard')}</p>
               <p className="mt-1.5 font-mono text-[12px] leading-relaxed text-muted">
                 {state.moves.map((coup) => coup.san).join(' ')}
               </p>

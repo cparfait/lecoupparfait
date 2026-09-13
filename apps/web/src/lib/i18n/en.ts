@@ -1111,6 +1111,127 @@ export const en: Dictionary = {
     pickAGame: 'Pick a game on the left, or start one with someone from your book.',
   },
 
+  endgames: {
+    missingBase: 'Endgame database missing',
+    missingBaseHint: 'The position file was not found. Run the build from the repository.',
+    title: 'Endgame training',
+    intro:
+      '{n} classified positions. You are given an objective — win or hold the draw — and the computer defends as well as it can. You have to play it out: there is no solution to recite.',
+    yourObjective: 'Your objective',
+    piecesCount: '{n} pieces',
+    solved: 'solved endgame',
+    difficultyOf: 'difficulty {n}/5',
+    spokenDraw: 'You play {couleur}. Hold the draw.',
+    spokenMate: ' There is mate in {n} moves at best.',
+    playAndWin: 'You play {couleur}. Win this position.{mat}',
+    allFamilies: 'All the families',
+    win: 'Win',
+    holdDraw: 'Hold the draw',
+    mateIn: ' · mate in {n}',
+    winWithMate: 'Win — mate in {n} moves at best',
+    wonMessage: 'Won. The technique is yours.',
+    drawnMessage: 'Draw held. Exactly what was needed.',
+    thisExercise: 'this exercise',
+    listenInstruction: 'Listen to the instruction',
+    youPlay:
+      'You play {couleur}. The computer defends to the best of its ability — it will give you nothing.',
+    won: 'Won!',
+    drawn: 'Draw held',
+    missed: 'Objective missed',
+    lost: 'Position lost',
+    retryWin:
+      'The position was winning. Take it again: in an endgame, a single inaccuracy is enough to throw it away.',
+    retryDraw: 'You had to hold. Try again, looking for the exact square your king belongs on.',
+    acquired: 'Technique acquired. Move on to the next position, a notch harder.',
+    fiftyMoves:
+      'The fifty-move rule applies: if you make no progress, the game is declared drawn — which is a loss when the objective is to win.',
+  },
+
+  clock: {
+    noMove: 'No move recorded.',
+    noMoveHint: 'Connect an electronic board so the game writes itself.',
+    intro:
+      'Put the device between the two players. Each taps their own side after playing — as on a mechanical clock. With an electronic board connected you have nothing to touch: the board sees the move, the clock switches, and the game writes itself.',
+    start: 'Start — White to play',
+    startHint: 'The first tap starts White’s clock without taking anything off it.',
+    analyse: 'Analyse the game',
+    asSeenByBoard: 'The game, as the board saw it',
+  },
+
+  savedAnalyses: {
+    title: 'Your analyses',
+    unshare: 'Withdraw sharing: the link will stop working',
+    share: 'Share by a link, no account required',
+    forget: 'Forget this analysis',
+    forgetNamed: 'Forget the analysis {blancs} – {noirs}',
+    removeFailed: 'Could not withdraw it.',
+    linkRemoved: 'Link withdrawn',
+    linkRemovedHint: 'The analysis is no longer reachable through that link.',
+    shareFailed: 'Could not share it.',
+    linkCopied: 'Link copied',
+    shareLink: 'Share link',
+    deleteFailed: 'Could not delete it.',
+    hint: 'Already computed: reopening them is instant, the engine does not work again.',
+  },
+
+  streak: {
+    goToDaily: 'days in a row — go to the daily challenge',
+    seeStreak: 'days in a row — see your streak',
+    streakOf: 'Streak of {n}',
+    lastSevenDays: 'the last seven days · today on the right',
+    resetsToZero: 'One day with nothing, and the flame starts again from zero.',
+    todayBefore: 'Today:',
+    questsOf: 'quests of {total}.',
+    questOf: 'quest of {total}.',
+    atStake: ' Your streak is at stake.',
+    dailyAlreadyDone: 'Daily challenge already done',
+    takeDaily: 'Take the daily challenge',
+  },
+
+  stakes: {
+    whitePlan: 'White’s plan',
+    blackPlan: 'Black’s plan',
+    structure: 'The structure',
+    trap: 'The trap',
+    guidedLesson: 'The guided lesson',
+    seeOnBoard: 'See it on the board',
+  },
+
+  errors: {
+    somethingWrong: 'Something went wrong',
+    somethingWrongHint:
+      'The screen could not be displayed. It is not your fault, and it is probably not permanent: trying again is usually enough.',
+    notFound: 'This page does not exist',
+    notFoundHint:
+      'The address may be old, or the game, profile or study you are looking for has been deleted.',
+    incidentRef: 'Incident reference:',
+    backHome: 'Back to the home page',
+    playAGame: 'Play a game',
+  },
+
+  arenas: {
+    running: 'Running',
+    scheduled: 'Upcoming',
+    finished: 'Finished',
+    createFailed: 'Could not create it.',
+    created: 'Arena created.',
+    createdHint: 'It starts in five minutes.',
+    soloBlurb:
+      'You are the only human. Three to seven opponents, of chosen or varied strength, and standings by points.',
+    title: 'Arenas',
+    hint: 'Arrive when you like, leave when you like. As soon as a game ends, you are paired again.',
+    namePlaceholder: 'Name of the arena — “Thursday blitz”',
+    nameAria: 'Name of the new arena',
+    create: 'Create',
+    createHint: '3 minutes per game, 45 minutes of arena, starting in 5 minutes.',
+    none: 'No arena',
+    noneSignedIn:
+      'Create one: it will start in five minutes, time enough for the others to arrive.',
+    noneSignedOut: 'Sign in to create one.',
+    footer:
+      'An arena is only worth it with a crowd: with three players it is a waiting room in disguise. Tell your friends before starting one.',
+  },
+
   openings: {
     title: 'Openings',
     subtitle: '3,810 openings catalogued, explained and playable.',

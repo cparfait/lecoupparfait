@@ -46,6 +46,7 @@ import { playResultSound, playSound } from '@/lib/sound.ts'
 import { speak } from '@/lib/speech.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { VoiceQuickToggle } from '@/components/layout/VoiceQuickToggle.tsx'
+import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
 
 type Screen =
   | { kind: 'families' }
@@ -53,6 +54,7 @@ type Screen =
   | { kind: 'play'; family: EndgameFamily; group: EndgameGroup; index: number }
 
 export default function EndgamesPage() {
+  const t = useT()
   const { families, ready } = useEndgames()
   const [screen, setScreen] = useState<Screen>({ kind: 'families' })
   const [progress, setProgress] = useState<EndgameProgress>({})
@@ -73,8 +75,8 @@ export default function EndgamesPage() {
         <Card>
           <EmptyState
             icon={<Target size={28} />}
-            title="Base de finales absente"
-            description="Le fichier des positions n’a pas été trouvé. Lance la compilation depuis le dépôt."
+            title={t('endgames.missingBase')}
+            description={t('endgames.missingBaseHint')}
           />
           <div className="border-t border-line/60 px-5 py-4">
             <code className="block rounded bg-surface px-2 py-1.5 font-mono text-[12px]">
@@ -142,6 +144,8 @@ function FamilyList({
   progress: EndgameProgress
   onPick: (family: EndgameFamily) => void
 }) {
+  const t = useT()
+  const bcp47 = langue(useI18n().locale).bcp47
   const total = families.reduce(
     (sum, family) => sum + family.groups.reduce((n, g) => n + g.positions.length, 0),
     0,
@@ -150,12 +154,10 @@ function FamilyList({
   return (
     <div className="page">
       <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-        Entraînement aux finales
+        {t('endgames.title')}
       </h1>
       <p className="mt-2 max-w-2xl text-muted max-lg:text-[14px] max-lg:leading-relaxed">
-        {total.toLocaleString('fr-FR')} positions classées. On te donne un objectif — gagner ou
-        tenir la nulle — et l’ordinateur défend au mieux. Il faut jouer jusqu’au bout : aucune
-        solution à réciter.
+        {t('endgames.intro', { n: total.toLocaleString(bcp47) })}
       </p>
 
       {/* Deux colonnes, et des cartes plus basses.
@@ -248,6 +250,7 @@ function GroupList({
   onBack: () => void
   onPick: (group: EndgameGroup, index: number) => void
 }) {
+  const t = useT()
   return (
     <div className="page">
       <button
@@ -256,7 +259,7 @@ function GroupList({
         className="mb-5 inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
       >
         <ArrowLeft size={15} aria-hidden />
-        Toutes les familles
+        {t('endgames.allFamilies')}
       </button>
 
       <h1 className="flex items-center gap-2.5 font-display text-2xl font-bold tracking-tight">
@@ -288,7 +291,7 @@ function GroupList({
                     key={index}
                     type="button"
                     onClick={() => onPick(group, index)}
-                    title={describePosition(position)}
+                    title={describePosition(position, t)}
                     className={clsx(
                       'grid h-8 w-8 place-items-center rounded-[var(--radius-sm)] text-[12px] font-semibold transition-colors',
                       solved.has(index)
@@ -316,17 +319,21 @@ function GroupList({
  * qu'on cherche un mat en cinq n'est pas un indice, c'est la différence entre
  * chercher et tâtonner.
  */
-function consigneParlee(position: EndgamePosition, camp: Color): string {
-  const couleur = camp === 'w' ? 'les Blancs' : 'les Noirs'
-  if (position.target === 'draw') return `Tu joues ${couleur}. Tiens la nulle.`
-  const mat = position.mateIn ? ` Il y a mat en ${position.mateIn} coups au mieux.` : ''
-  return `Tu joues ${couleur}. Gagne cette position.${mat}`
+function consigneParlee(
+  position: EndgamePosition,
+  camp: Color,
+  t: ReturnType<typeof useT>,
+): string {
+  const couleur = t(camp === 'w' ? 'settings.white' : 'settings.black')
+  if (position.target === 'draw') return t('endgames.spokenDraw', { couleur })
+  const mat = position.mateIn ? t('endgames.spokenMate', { n: position.mateIn }) : ''
+  return t('endgames.playAndWin', { couleur, mat })
 }
 
-function describePosition(position: EndgamePosition): string {
-  const objective = position.target === 'checkmate' ? 'Gagner' : 'Tenir la nulle'
-  const mate = position.mateIn ? ` · mat en ${position.mateIn}` : ''
-  return `${objective}${mate} · difficulté ${position.difficulty}/5`
+function describePosition(position: EndgamePosition, t: ReturnType<typeof useT>): string {
+  const objectif = t(position.target === 'checkmate' ? 'endgames.win' : 'endgames.holdDraw')
+  const mat = position.mateIn ? t('endgames.mateIn', { n: position.mateIn }) : ''
+  return `${objectif}${mat} · ${t('endgames.difficultyOf', { n: position.difficulty })}`
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -350,6 +357,7 @@ function EndgameTrainer({
   onSolved: () => void
   onNext: () => void
 }) {
+  const t = useT()
   const position = group.positions[index]!
   const voiceEnabled = usePreferences((state) => state.voiceEnabled)
 
@@ -381,9 +389,7 @@ function EndgameTrainer({
         playResultSound('win')
         if (voiceEnabled) {
           speak(
-            position.target === 'checkmate'
-              ? 'Gagné. La technique est acquise.'
-              : 'Nulle tenue. Exactement ce qu’il fallait.',
+            t(position.target === 'checkmate' ? 'endgames.wonMessage' : 'endgames.drawnMessage'),
           )
         }
       } else {
@@ -417,8 +423,8 @@ function EndgameTrainer({
    * position qu'on vient d'entendre.
    */
   useEffect(() => {
-    speak(consigneParlee(position, playerColor))
-  }, [position, playerColor])
+    speak(consigneParlee(position, playerColor, t))
+  }, [position, playerColor, t])
 
   // L'adversaire défend au maximum de ses moyens : une finale ne s'apprend pas
   // contre un adversaire complaisant.
@@ -433,10 +439,12 @@ function EndgameTrainer({
 
   const objective =
     position.target === 'checkmate'
-      ? `Gagner${position.mateIn ? ` — mat en ${position.mateIn} coups au mieux` : ''}`
-      : 'Tenir la nulle'
+      ? position.mateIn
+        ? t('endgames.winWithMate', { n: position.mateIn })
+        : t('endgames.win')
+      : t('endgames.holdDraw')
 
-  const voix = consigneParlee(position, playerColor)
+  const voix = consigneParlee(position, playerColor, t)
 
   return (
     <div className="etude mx-auto w-full max-w-[1200px] px-3 py-4 sm:px-5 lg:py-8">
@@ -482,12 +490,14 @@ function EndgameTrainer({
           {/* ── Objectif ─────────────────────────────────────────── */}
           <Card glow className="p-4">
             <div className="flex items-start gap-2">
-              <p className="min-w-0 flex-1 text-[12px] font-semibold text-faint">Ton objectif</p>
+              <p className="min-w-0 flex-1 text-[12px] font-semibold text-faint">
+                {t('endgames.yourObjective')}
+              </p>
               {/* Réentendre la consigne : elle est dite une fois, à l'arrivée,
                   et on arrive parfois avant d'écouter. */}
               <BoutonEcouter
-                quoi="cet exercice"
-                annonce="Écouter la consigne"
+                quoi={t('endgames.thisExercise')}
+                annonce={t('endgames.listenInstruction')}
                 texte={voix}
                 className="-mr-1 -mt-1.5"
               />
@@ -501,8 +511,9 @@ function EndgameTrainer({
               {objective}
             </p>
             <p className="mt-2 text-[14px] leading-relaxed text-muted">
-              Tu joues les {playerColor === 'w' ? 'Blancs' : 'Noirs'}. L’ordinateur défend au
-              maximum de ses moyens — il ne te fera aucun cadeau.
+              {t('endgames.youPlay', {
+                couleur: t(playerColor === 'w' ? 'settings.white' : 'settings.black'),
+              })}
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">
               <Chip
@@ -517,8 +528,8 @@ function EndgameTrainer({
                 {'★'.repeat(position.difficulty)}
                 {'☆'.repeat(5 - position.difficulty)}
               </Chip>
-              <Chip>{position.pieces} pièces</Chip>
-              {position.tablebase && <Chip tone="accent">finale résolue</Chip>}
+              <Chip>{t('endgames.piecesCount', { n: position.pieces })}</Chip>
+              {position.tablebase && <Chip tone="accent">{t('endgames.solved')}</Chip>}
             </div>
           </Card>
 
@@ -550,19 +561,19 @@ function EndgameTrainer({
                     }}
                   >
                     {outcome === 'won'
-                      ? 'Gagné !'
+                      ? t('endgames.won')
                       : outcome === 'drawn'
                         ? 'Nulle tenue !'
-                        : position.target === 'checkmate'
-                          ? 'Objectif manqué'
-                          : 'Position perdue'}
+                        : t(position.target === 'checkmate' ? 'endgames.missed' : 'endgames.lost')}
                   </p>
                   <p className="mt-1 text-[14px] leading-relaxed text-muted">
                     {outcome === 'lost'
-                      ? position.target === 'checkmate'
-                        ? 'La position était gagnante. Reprends-la : en finale, une seule imprécision suffit à tout annuler.'
-                        : 'Il fallait tenir. Retente en cherchant la case exacte où ton roi doit se placer.'
-                      : 'Technique acquise. Passe à la position suivante, un cran plus difficile.'}
+                      ? t(
+                          position.target === 'checkmate'
+                            ? 'endgames.retryWin'
+                            : 'endgames.retryDraw',
+                        )
+                      : t('endgames.acquired')}
                   </p>
                 </div>
               </div>
@@ -600,10 +611,7 @@ function EndgameTrainer({
             )}
           </div>
 
-          <p className="text-[12px] leading-relaxed text-faint">
-            La règle des cinquante coups s’applique : si tu n’avances pas, la partie sera déclarée
-            nulle — ce qui est une défaite quand l’objectif est de gagner.
-          </p>
+          <p className="text-[12px] leading-relaxed text-faint">{t('endgames.fiftyMoves')}</p>
         </div>
       </div>
     </div>

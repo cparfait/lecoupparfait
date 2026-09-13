@@ -26,6 +26,7 @@ import {
 } from '@/lib/analysis/enregistrees.ts'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { MarqueService } from '@/components/brand/MarqueService.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /** Ce qu'on affiche à gauche de chaque ligne, selon la provenance. */
 const PROVENANCE: Record<AnalyseEnregistree['source'], { glyphe: string; nom: string }> = {
@@ -41,6 +42,7 @@ export function MesAnalyses({
   /** Appelé au clic sur une ligne : à l'appelant de rejouer le rapport. */
   onOuvrir: (id: string) => void
 }) {
+  const t = useT()
   const identite = useIdentite()
   const [analyses, setAnalyses] = useState<AnalyseEnregistree[] | null>(null)
   const [ouverture, setOuverture] = useState<string | null>(null)
@@ -72,57 +74,61 @@ export function MesAnalyses({
    * repartager en engendre un nouveau. C'est la mécanique des études, reprise
    * telle quelle.
    */
-  const basculerLePartage = useCallback(async (id: string, partageActuel: string | null) => {
-    const partage = await partagerAnalyse(id, partageActuel === null)
+  const basculerLePartage = useCallback(
+    async (id: string, partageActuel: string | null) => {
+      const partage = await partagerAnalyse(id, partageActuel === null)
 
-    if (partageActuel !== null) {
-      if (partage !== null) {
-        toast.error('Retrait impossible.', 'Réessaie dans un instant.')
+      if (partageActuel !== null) {
+        if (partage !== null) {
+          toast.error(t('savedAnalyses.removeFailed'), t('analysis.tryAgainSoon'))
+          return
+        }
+        setAnalyses(
+          (liste) => liste?.map((a) => (a.id === id ? { ...a, partage: null } : a)) ?? liste,
+        )
+        toast.info(t('savedAnalyses.linkRemoved'), t('savedAnalyses.linkRemovedHint'))
         return
       }
-      setAnalyses(
-        (liste) => liste?.map((a) => (a.id === id ? { ...a, partage: null } : a)) ?? liste,
-      )
-      toast.info('Lien retiré', 'L’analyse n’est plus accessible par ce lien.')
-      return
-    }
 
-    if (!partage) {
-      toast.error('Partage impossible.', 'Réessaie dans un instant.')
-      return
-    }
-    setAnalyses((liste) => liste?.map((a) => (a.id === id ? { ...a, partage } : a)) ?? liste)
+      if (!partage) {
+        toast.error(t('savedAnalyses.shareFailed'), t('analysis.tryAgainSoon'))
+        return
+      }
+      setAnalyses((liste) => liste?.map((a) => (a.id === id ? { ...a, partage } : a)) ?? liste)
 
-    const lien = `${window.location.origin}/analyse/p/${partage}`
-    try {
-      await navigator.clipboard.writeText(lien)
-      toast.success('Lien copié', lien)
-    } catch {
-      // Le presse-papiers peut être refusé — contexte non sécurisé, permission
-      // absente. Le lien s'affiche alors, il reste sélectionnable à la main.
-      toast.info('Lien de partage', lien)
-    }
-  }, [])
+      const lien = `${window.location.origin}/analyse/p/${partage}`
+      try {
+        await navigator.clipboard.writeText(lien)
+        toast.success(t('savedAnalyses.linkCopied'), lien)
+      } catch {
+        // Le presse-papiers peut être refusé — contexte non sécurisé, permission
+        // absente. Le lien s'affiche alors, il reste sélectionnable à la main.
+        toast.info(t('savedAnalyses.shareLink'), lien)
+      }
+    },
+    [t],
+  )
 
-  const oublier = useCallback(async (id: string) => {
-    // Retrait immédiat de la liste : attendre le serveur pour faire disparaître
-    // une ligne qu'on vient de supprimer donne l'impression que le clic a raté.
-    setAnalyses((liste) => liste?.filter((a) => a.id !== id) ?? liste)
-    if (!(await oublierAnalyse(id))) {
-      toast.error('Suppression impossible.', 'Réessaie dans un instant.')
-      setAnalyses(await listerAnalyses())
-    }
-  }, [])
+  const oublier = useCallback(
+    async (id: string) => {
+      // Retrait immédiat de la liste : attendre le serveur pour faire disparaître
+      // une ligne qu'on vient de supprimer donne l'impression que le clic a raté.
+      setAnalyses((liste) => liste?.filter((a) => a.id !== id) ?? liste)
+      if (!(await oublierAnalyse(id))) {
+        toast.error(t('savedAnalyses.deleteFailed'), t('analysis.tryAgainSoon'))
+        setAnalyses(await listerAnalyses())
+      }
+    },
+    [t],
+  )
 
   if (!identite || analyses === null) return null
   if (analyses.length === 0) return null
 
   return (
     <div className="space-y-2">
-      <SectionTitle>Tes analyses</SectionTitle>
-      <p className="text-xs text-muted">
-        Déjà calculées : les rouvrir est immédiat, le moteur ne retravaille pas.
-      </p>
+      <SectionTitle>{t('savedAnalyses.title')}</SectionTitle>
+      <p className="text-xs text-muted">{t('savedAnalyses.hint')}</p>
 
       <ul className="max-h-[22rem] space-y-1.5 overflow-y-auto pr-1">
         {analyses.map((analyse) => {
@@ -188,9 +194,7 @@ export function MesAnalyses({
                       type="button"
                       onClick={() => void basculerLePartage(analyse.id, analyse.partage)}
                       title={
-                        analyse.partage
-                          ? 'Retirer le partage : le lien cessera de fonctionner'
-                          : 'Partager par un lien, sans compte requis'
+                        analyse.partage ? t('savedAnalyses.unshare') : t('savedAnalyses.share')
                       }
                       aria-label={
                         analyse.partage
@@ -212,8 +216,11 @@ export function MesAnalyses({
                     <button
                       type="button"
                       onClick={() => void oublier(analyse.id)}
-                      title="Oublier cette analyse"
-                      aria-label={`Oublier l'analyse ${analyse.whiteName ?? 'Blancs'} – ${analyse.blackName ?? 'Noirs'}`}
+                      title={t('savedAnalyses.forget')}
+                      aria-label={t('savedAnalyses.forgetNamed', {
+                        blancs: analyse.whiteName ?? t('settings.white'),
+                        noirs: analyse.blackName ?? t('settings.black'),
+                      })}
                       className="shrink-0 rounded-[var(--radius-sm)] p-1 text-faint transition-colors hover:bg-surface-strong hover:text-[var(--q-blunder)]"
                     >
                       <Trash2 size={13} aria-hidden />
