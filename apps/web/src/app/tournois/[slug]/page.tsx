@@ -19,6 +19,7 @@ import clsx from 'clsx'
 import { Button, Card, EmptyState, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
 
 interface Standing {
   userId: string
@@ -47,6 +48,8 @@ interface Tournament {
 const POLL_MS = 3000
 
 export default function ArenaPage() {
+  const t = useT()
+  const bcp47 = langue(useI18n().locale).bcp47
   const slug = String(useParams().slug ?? '')
   const router = useRouter()
 
@@ -127,11 +130,11 @@ export default function ArenaPage() {
       <div className="page-etroite">
         <EmptyState
           icon={<Trophy size={28} />}
-          title="Arène introuvable"
-          description="Elle n’existe pas, ou son adresse est incomplète."
+          title={t('tournament.notFound')}
+          description={t('tournament.notFoundHint')}
           action={
             <Link href="/tournois">
-              <Button variant="secondary">Toutes les arènes</Button>
+              <Button variant="secondary">{t('tournament.allArenas')}</Button>
             </Link>
           }
         />
@@ -159,22 +162,25 @@ export default function ArenaPage() {
       {/* ── Ce qu'il y a à faire ─────────────────────────────────────── */}
       <Card className="p-3">
         {finished ? (
-          <p className="text-[14px] text-muted">
-            Arène terminée. Le classement ci-dessous est définitif.
-          </p>
+          <p className="text-[14px] text-muted">{t('tournament.over')}</p>
         ) : !me ? (
           <p className="text-[14px] text-muted">
             <Link href="/connexion" className="font-semibold text-accent hover:underline">
-              Connecte-toi
+              {t('tournament.signIn')}
             </Link>{' '}
-            pour participer. Tu peux suivre le classement sans compte.
+            {t('tournament.signInAfter')}
           </p>
         ) : !joined ? (
           <div className="flex flex-wrap items-center gap-2">
             <p className="min-w-0 flex-1 text-[14px] text-muted">
               {running
-                ? 'L’arène a commencé : tu peux rejoindre en cours, tu seras apparié au prochain tour.'
-                : `Départ ${new Date(tournament.startsAt).toLocaleString('fr-FR', { hour: '2-digit', minute: '2-digit' })}.`}
+                ? t('tournament.started')
+                : t('tournament.startsAt', {
+                    heure: new Date(tournament.startsAt).toLocaleString(bcp47, {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    }),
+                  })}
             </p>
             <Button variant="primary" icon={<Play size={15} />} onClick={() => void act('join')}>
               Rejoindre
@@ -183,14 +189,12 @@ export default function ArenaPage() {
         ) : mine?.playing ? (
           <p className="flex items-center gap-2 text-[14px] font-medium text-[var(--q-best)]">
             <Swords size={15} aria-hidden />
-            Ta partie est en cours — tu y es conduit automatiquement.
+            {t('tournament.gameRunning')}
           </p>
         ) : mine?.active ? (
           <div className="flex flex-wrap items-center gap-2">
             <p className="min-w-0 flex-1 text-[14px] text-muted">
-              {running
-                ? 'En file d’attente. Dès qu’un adversaire est libre, tu es apparié.'
-                : 'Inscrit. L’arène démarrera à l’heure prévue.'}
+              {t(running ? 'tournament.inQueue' : 'tournament.registered')}
             </p>
             <Button
               size="sm"
@@ -198,14 +202,12 @@ export default function ArenaPage() {
               icon={<Pause size={14} />}
               onClick={() => void act('leave')}
             >
-              Faire une pause
+              {t('tournament.takeABreak')}
             </Button>
           </div>
         ) : (
           <div className="flex flex-wrap items-center gap-2">
-            <p className="min-w-0 flex-1 text-[14px] text-muted">
-              En pause. Tes points sont conservés — reviens quand tu veux.
-            </p>
+            <p className="min-w-0 flex-1 text-[14px] text-muted">{t('tournament.paused')}</p>
             <Button
               size="sm"
               variant="primary"
@@ -222,7 +224,7 @@ export default function ArenaPage() {
       <Card className="mt-3 p-3">
         <p className="mb-2 text-[12px] font-semibold text-faint">Classement</p>
         {standings.length === 0 ? (
-          <p className="text-[14px] text-faint">Personne d’inscrit pour l’instant.</p>
+          <p className="text-[14px] text-faint">{t('tournament.nobodyRegistered')}</p>
         ) : (
           <div className="space-y-0.5">
             {standings.map((player, index) => (
@@ -269,8 +271,7 @@ export default function ArenaPage() {
         )}
 
         <p className="mt-2.5 border-t border-line/60 pt-2.5 text-[12px] leading-relaxed text-faint">
-          Deux points par victoire, un par nulle. À partir de la deuxième victoire d’affilée, les
-          points doublent — c’est ce qui rend l’arène rattrapable jusqu’au bout.
+          {t('tournament.scoring')}
         </p>
       </Card>
     </div>

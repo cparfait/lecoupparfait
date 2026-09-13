@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation'
 import { BookMarked, Link2, Lock, Plus } from 'lucide-react'
 import { Button, Card, EmptyState, Input, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
 
 interface StudySummary {
   id: string
@@ -26,6 +27,8 @@ interface StudySummary {
 }
 
 export default function StudiesPage() {
+  const t = useT()
+  const bcp47 = langue(useI18n().locale).bcp47
   const router = useRouter()
   const [studies, setStudies] = useState<StudySummary[] | null>(null)
   const [signedIn, setSignedIn] = useState<boolean | null>(null)
@@ -58,14 +61,14 @@ export default function StudiesPage() {
       })
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
-        toast.error(data.error ?? 'Création impossible.')
+        toast.error(data.error ?? t('studies.createFailed'))
         return
       }
       router.push(`/etudes/${data.slug}`)
     } finally {
       setBusy(false)
     }
-  }, [title, router])
+  }, [title, router, t])
 
   if (studies === null) {
     return (
@@ -80,11 +83,11 @@ export default function StudiesPage() {
       <div className="page-etroite">
         <EmptyState
           icon={<BookMarked size={28} />}
-          title="Les études demandent un compte"
-          description="Une étude t’appartient et se retrouve d’une session à l’autre : il faut donc savoir à qui elle est."
+          title={t('studies.needsAccount')}
+          description={t('studies.needsAccountHint')}
           action={
             <Link href="/connexion">
-              <Button variant="primary">Créer un compte</Button>
+              <Button variant="primary">{t('auth.signUp')}</Button>
             </Link>
           }
         />
@@ -94,9 +97,7 @@ export default function StudiesPage() {
 
   return (
     <div className="page-etroite">
-      <SectionTitle hint="Range des positions commentées : tes ouvertures, une partie à comprendre, un thème de finale.">
-        Mes études
-      </SectionTitle>
+      <SectionTitle hint={t('studies.hint')}>{t('studies.title')}</SectionTitle>
 
       <Card className="mt-4 p-3">
         <form
@@ -110,22 +111,20 @@ export default function StudiesPage() {
             <Input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="Titre de l’étude — « Ma défense contre 1.e4 »"
-              aria-label="Titre de la nouvelle étude"
+              placeholder={t('studies.newTitlePlaceholder')}
+              aria-label={t('studies.newTitleAria')}
               maxLength={120}
             />
           </div>
           <Button type="submit" variant="primary" icon={<Plus size={15} />} disabled={busy}>
-            Créer
+            {t('studies.create')}
           </Button>
         </form>
       </Card>
 
       {studies.length === 0 ? (
         <p className="mt-6 text-center text-[14px] leading-relaxed text-faint">
-          Aucune étude pour l’instant. Commence par celle qui te servira le plus :
-          <br />
-          l’ouverture que tu joues et que tu ne comprends pas encore.
+          {t('studies.empty')}
         </p>
       ) : (
         <div className="mt-3 space-y-2">
@@ -144,15 +143,23 @@ export default function StudiesPage() {
                     <span className="block text-[12px] text-faint">
                       {study.chapters === 0
                         ? 'Aucun chapitre'
-                        : `${study.chapters} chapitre${study.chapters > 1 ? 's' : ''}`}
-                      {' · modifiée le '}
-                      {new Date(study.updatedAt).toLocaleDateString('fr-FR')}
+                        : t(study.chapters > 1 ? 'studies.chapters' : 'studies.oneChapter', {
+                            n: study.chapters,
+                          })}
+                      {t('studies.updatedOn')}
+                      {new Date(study.updatedAt).toLocaleDateString(bcp47)}
                     </span>
                   </span>
                   <span
                     className="shrink-0 text-faint"
-                    title={study.visibility === 'unlisted' ? 'Partageable par lien' : 'Privée'}
-                    aria-label={study.visibility === 'unlisted' ? 'Partageable' : 'Privée'}
+                    title={t(
+                      study.visibility === 'unlisted' ? 'studies.shareable' : 'studies.private',
+                    )}
+                    aria-label={t(
+                      study.visibility === 'unlisted'
+                        ? 'studies.shareableShort'
+                        : 'studies.private',
+                    )}
                   >
                     {study.visibility === 'unlisted' ? <Link2 size={14} /> : <Lock size={14} />}
                   </span>

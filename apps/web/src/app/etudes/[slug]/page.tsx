@@ -28,6 +28,7 @@ import { Button, Card, EmptyState, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useSan } from '@/lib/notation.ts'
 import { useTitreDeLOnglet } from '@/lib/titreOnglet.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 interface Chapter {
   id: string
@@ -50,6 +51,7 @@ interface Study {
 const SAVE_MS = 900
 
 export default function StudyPage() {
+  const t = useT()
   const slug = String(useParams().slug ?? '')
   const format = useSan()
 
@@ -200,11 +202,11 @@ export default function StudyPage() {
       await navigator.clipboard.writeText(window.location.href)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-      toast.success('Lien copié.', 'L’étude est désormais accessible à qui l’ouvre.')
+      toast.success(t('studies.linkCopied'), t('studies.linkCopiedHint'))
     } catch {
-      toast.warning('Copie refusée.', 'Sélectionne l’adresse à la main.')
+      toast.warning(t('studies.copyRefused'), t('studies.copyRefusedHint'))
     }
-  }, [study])
+  }, [study, t])
 
   // ── Rendu ───────────────────────────────────────────────────────────────
   if (study === undefined) {
@@ -220,11 +222,11 @@ export default function StudyPage() {
       <div className="page-etroite">
         <EmptyState
           icon={<BookMarked size={28} />}
-          title="Étude introuvable"
-          description="Elle n’existe pas, ou son auteur ne l’a pas partagée."
+          title={t('studies.notFound')}
+          description={t('studies.notFoundHint')}
           action={
             <Link href="/etudes">
-              <Button variant="secondary">Mes études</Button>
+              <Button variant="secondary">{t('studies.title')}</Button>
             </Link>
           }
         />
@@ -256,7 +258,7 @@ export default function StudyPage() {
             }
             onClick={() => void share()}
           >
-            {copied ? 'Lien copié' : 'Partager'}
+            {t(copied ? 'studies.copiedShort' : 'studies.share')}
           </Button>
         )}
       </div>
@@ -323,18 +325,14 @@ export default function StudyPage() {
                   fen={board.fen()}
                 />
                 <p className="text-[12px] text-muted">
-                  {own
-                    ? 'Joue les coups sur l’échiquier : ils s’ajoutent au chapitre.'
-                    : 'Navigue dans les coups du chapitre.'}
+                  {t(own ? 'studies.playMoves' : 'studies.browseMoves')}
                 </p>
               </div>
             </>
           ) : (
             <Card className="p-6 text-center">
               <p className="text-sm text-muted">
-                {own
-                  ? 'Ajoute un chapitre pour commencer : chaque chapitre est une position et sa suite.'
-                  : 'Cette étude ne contient encore aucun chapitre.'}
+                {t(own ? 'studies.addChapter' : 'studies.noChapter')}
               </p>
             </Card>
           )}
@@ -351,7 +349,7 @@ export default function StudyPage() {
                     key={index}
                     type="button"
                     onClick={() => setCursor(index)}
-                    title={chapter.comments[String(index)] ? 'Ce coup est commenté' : undefined}
+                    title={chapter.comments[String(index)] ? t('studies.commentedMove') : undefined}
                     className={clsx(
                       'rounded px-1.5 py-0.5 text-[14px] transition-colors',
                       index === cursor
@@ -369,26 +367,26 @@ export default function StudyPage() {
                 ))}
               </div>
             ) : (
-              <p className="px-1 py-2 text-[14px] text-faint">Aucun coup pour l’instant.</p>
+              <p className="px-1 py-2 text-[14px] text-faint">{t('studies.noMoveYet')}</p>
             )}
           </Card>
 
           <Card className="flex min-h-[180px] flex-1 flex-col p-2">
             <p className="mb-1 px-1 text-[12px] font-semibold text-faint">
-              {cursor < 0 ? 'Note sur la position de départ' : 'Note sur ce coup'}
+              {t(cursor < 0 ? 'studies.noteOnStart' : 'studies.noteOnMove')}
             </p>
             {own ? (
               <textarea
                 value={comment}
                 onChange={(event) => writeComment(event.target.value)}
-                placeholder="Pourquoi ce coup ? Qu’est-ce qu’il prépare ?"
+                placeholder={t('studies.notePlaceholder')}
                 maxLength={2000}
-                aria-label="Commentaire du coup"
+                aria-label={t('studies.noteAria')}
                 className="min-h-0 flex-1 resize-none rounded-[var(--radius-sm)] bg-transparent px-1.5 py-1 text-[14px] leading-relaxed placeholder:text-faint focus:outline-none"
               />
             ) : (
               <p className="min-h-0 flex-1 whitespace-pre-wrap px-1.5 py-1 text-[14px] leading-relaxed text-muted">
-                {comment || <span className="text-faint">Pas de note sur ce coup.</span>}
+                {comment || <span className="text-faint">{t('studies.noNoteOnMove')}</span>}
               </p>
             )}
           </Card>
@@ -413,7 +411,7 @@ export default function StudyPage() {
                 setCursor(-1)
               }}
             >
-              Supprimer ce chapitre
+              {t('studies.deleteChapter')}
             </Button>
           )}
         </div>

@@ -18,6 +18,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { KeyRound, ShieldCheck } from 'lucide-react'
 import { Button, Card, Input } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /** Voir la note de `/amis` : lire les paramètres d'adresse impose la frontière. */
 export default function ResetPage() {
@@ -29,6 +30,7 @@ export default function ResetPage() {
 }
 
 function ResetForm() {
+  const t = useT()
   const router = useRouter()
   const token = useSearchParams().get('jeton') ?? ''
   const [password, setPassword] = useState('')
@@ -42,7 +44,7 @@ function ResetForm() {
       // Vérifié ici plutôt qu'au serveur : c'est une faute de frappe, pas une
       // règle de sécurité, et l'aller-retour n'apprendrait rien de plus.
       if (password !== confirm) {
-        setError('Les deux mots de passe ne sont pas identiques.')
+        setError(t('reset.mismatch'))
         return
       }
 
@@ -56,31 +58,29 @@ function ResetForm() {
         })
         const data = await response.json().catch(() => ({}))
         if (!response.ok) {
-          setError(data.error ?? 'Réinitialisation impossible.')
+          setError(data.error ?? t('reset.failed'))
           return
         }
-        toast.success('Mot de passe changé.', 'Connecte-toi avec le nouveau.')
+        toast.success(t('reset.changed'), t('reset.changedHint'))
         router.push('/connexion')
       } catch {
-        setError('Le serveur est injoignable.')
+        setError(t('reset.serverUnreachable'))
       } finally {
         setBusy(false)
       }
     },
-    [token, password, confirm, router],
+    [token, password, confirm, router, t],
   )
 
   if (!token) {
     return (
       <div className="mx-auto grid min-h-[calc(100dvh-8rem)] w-full max-w-md place-items-center px-4 py-10">
         <Card className="w-full p-6 text-center">
-          <h1 className="font-display text-xl font-bold">Lien incomplet</h1>
-          <p className="mt-1.5 text-sm text-muted">
-            Ouvre le lien tel qu’il apparaît dans le courriel, sans le retaper.
-          </p>
+          <h1 className="font-display text-xl font-bold">{t('reset.incompleteLink')}</h1>
+          <p className="mt-1.5 text-sm text-muted">{t('reset.incompleteLinkHint')}</p>
           <Link href="/mot-de-passe-oublie" className="mt-4 block">
             <Button variant="secondary" fullWidth>
-              Demander un nouveau lien
+              {t('reset.askNewLink')}
             </Button>
           </Link>
         </Card>
@@ -99,17 +99,15 @@ function ResetForm() {
             <KeyRound size={22} />
           </span>
           <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-            Nouveau mot de passe
+            {t('reset.title')}
           </h1>
-          <p className="mt-1.5 text-sm text-muted">
-            Huit caractères au minimum. C’est la seule règle.
-          </p>
+          <p className="mt-1.5 text-sm text-muted">{t('reset.rule')}</p>
         </div>
 
         <Card glow className="p-6">
           <form onSubmit={submit} className="space-y-4">
             <Input
-              label="Nouveau mot de passe"
+              label={t('reset.newPassword')}
               name="password"
               type="password"
               value={password}
@@ -119,7 +117,7 @@ function ResetForm() {
               minLength={8}
             />
             <Input
-              label="Répète-le"
+              label={t('reset.repeat')}
               name="confirm"
               type="password"
               value={confirm}
@@ -140,12 +138,11 @@ function ResetForm() {
 
             <p className="flex items-start gap-1.5 text-xs leading-relaxed text-faint">
               <ShieldCheck size={13} className="mt-0.5 shrink-0" aria-hidden />
-              Toutes les sessions ouvertes seront fermées, y compris sur les autres appareils. Tu
-              devras te reconnecter partout.
+              {t('reset.sessionsClosed')}
             </p>
 
             <Button type="submit" variant="primary" fullWidth disabled={busy}>
-              {busy ? 'Enregistrement…' : 'Changer mon mot de passe'}
+              {t(busy ? 'reset.saving' : 'reset.submit')}
             </Button>
           </form>
         </Card>
