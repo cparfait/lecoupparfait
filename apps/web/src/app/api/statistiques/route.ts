@@ -14,6 +14,7 @@
 import { NextResponse } from 'next/server'
 import { and, desc, eq, getDb, games, gte, or, sql } from '@coupparfait/db'
 import { getCurrentUser } from '@/lib/server/session.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -22,8 +23,9 @@ export const dynamic = 'force-dynamic'
 const MIN_GAMES_PER_OPENING = 3
 
 export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   const me = await getCurrentUser()
-  if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+  if (!me) return NextResponse.json({ error: t('api.signInRequired') }, { status: 401 })
 
   const days = Math.min(
     3650,
@@ -157,6 +159,6 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('[statistiques] calcul impossible :', error)
-    return NextResponse.json({ error: 'Statistiques indisponibles.' }, { status: 503 })
+    return NextResponse.json({ error: t('api.statsUnavailable') }, { status: 503 })
   }
 }

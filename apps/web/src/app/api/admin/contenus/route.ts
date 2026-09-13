@@ -33,15 +33,17 @@ import {
 import { pruneSessions } from '@coupparfait/db/auth'
 import { getAdmin } from '@/lib/server/admin.ts'
 import { journaliser } from '@/lib/server/audit.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const PAR_PAGE = 40
 
-export async function GET() {
+export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   const admin = await getAdmin()
-  if (!admin) return NextResponse.json({ error: 'Introuvable.' }, { status: 404 })
+  if (!admin) return NextResponse.json({ error: t('api.notFound') }, { status: 404 })
 
   try {
     const base = getDb()
@@ -102,13 +104,14 @@ export async function GET() {
     })
   } catch (error) {
     console.error('[admin/contenus]', error)
-    return NextResponse.json({ error: 'Lecture impossible.' }, { status: 503 })
+    return NextResponse.json({ error: t('api.readFailed') }, { status: 503 })
   }
 }
 
 export async function DELETE(request: Request) {
+  const t = tDeLaRequete(request)
   const admin = await getAdmin()
-  if (!admin) return NextResponse.json({ error: 'Introuvable.' }, { status: 404 })
+  if (!admin) return NextResponse.json({ error: t('api.notFound') }, { status: 404 })
 
   const parametres = new URL(request.url).searchParams
   const partie = parametres.get('partie')
@@ -122,10 +125,7 @@ export async function DELETE(request: Request) {
         .where(and(eq(games.slug, partie), eq(games.rated, false)))
         .returning({ slug: games.slug })
       if (effacees.length === 0) {
-        return NextResponse.json(
-          { error: 'Partie introuvable, ou classée — une partie classée ne s’efface pas.' },
-          { status: 400 },
-        )
+        return NextResponse.json({ error: t('api.gameNotFoundOrRated') }, { status: 400 })
       }
       await journaliser(admin, {
         action: 'supprimerPartie',
@@ -147,10 +147,10 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ ok: true })
     }
 
-    return NextResponse.json({ error: 'Rien à supprimer.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.nothingToDelete') }, { status: 400 })
   } catch (error) {
     console.error('[admin/contenus]', error)
-    return NextResponse.json({ error: 'Suppression impossible.' }, { status: 500 })
+    return NextResponse.json({ error: t('api.deleteFailed') }, { status: 500 })
   }
 }
 
@@ -163,14 +163,15 @@ export async function DELETE(request: Request) {
  * commande de ménage n'a pas à pouvoir les atteindre.
  */
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   const admin = await getAdmin()
-  if (!admin) return NextResponse.json({ error: 'Introuvable.' }, { status: 404 })
+  if (!admin) return NextResponse.json({ error: t('api.notFound') }, { status: 404 })
 
   let corps: { action?: string }
   try {
     corps = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   try {
@@ -183,7 +184,7 @@ export async function POST(request: Request) {
         cibleNom: 'sessions expirées',
         detail: { retirees },
       })
-      return NextResponse.json({ ok: true, retirees, quoi: 'sessions expirées' })
+      return NextResponse.json({ ok: true, retirees, quoi: t('api.purgedSessions') })
     }
 
     if (corps.action === 'evaluations') {
@@ -209,7 +210,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         ok: true,
         retirees: retirees.length,
-        quoi: 'évaluations sous 14 demi-coups, trop peu profondes pour resservir',
+        quoi: t('api.purgedEvaluations'),
       })
     }
 
@@ -245,13 +246,13 @@ export async function POST(request: Request) {
       return NextResponse.json({
         ok: true,
         retirees: retires.length,
-        quoi: 'comptes sans aucune partie ni analyse, inactifs depuis six mois',
+        quoi: t('api.purgedEmptyAccounts'),
       })
     }
 
-    return NextResponse.json({ error: 'Purge inconnue.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unknownPurge') }, { status: 400 })
   } catch (error) {
     console.error('[admin/contenus]', error)
-    return NextResponse.json({ error: 'Purge impossible.' }, { status: 500 })
+    return NextResponse.json({ error: t('api.purgeFailed') }, { status: 500 })
   }
 }

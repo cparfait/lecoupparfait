@@ -45,6 +45,7 @@ import {
 } from '@coupparfait/db/auth'
 import { getAdmin } from '@/lib/server/admin.ts'
 import { journaliser } from '@/lib/server/audit.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -83,8 +84,9 @@ const TRIS = {
 type Tri = keyof typeof TRIS
 
 export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   const admin = await getAdmin()
-  if (!admin) return NextResponse.json({ error: 'Introuvable.' }, { status: 404 })
+  if (!admin) return NextResponse.json({ error: t('api.notFound') }, { status: 404 })
 
   const parametres = new URL(request.url).searchParams
   const recherche = (parametres.get('q') ?? '').trim()
@@ -203,7 +205,7 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('[admin/comptes]', error)
-    return NextResponse.json({ error: 'Lecture impossible.' }, { status: 503 })
+    return NextResponse.json({ error: t('api.readFailed') }, { status: 503 })
   }
 }
 
@@ -217,20 +219,21 @@ const ACTIONS = new Set([
 ])
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   const admin = await getAdmin()
-  if (!admin) return NextResponse.json({ error: 'Introuvable.' }, { status: 404 })
+  if (!admin) return NextResponse.json({ error: t('api.notFound') }, { status: 404 })
 
   let corps: { action?: string; id?: string; motDePasse?: string }
   try {
     corps = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   const action = String(corps.action ?? '')
   const cible = String(corps.id ?? '')
   if (!ACTIONS.has(action) || !cible) {
-    return NextResponse.json({ error: 'Action inconnue.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unknownAction') }, { status: 400 })
   }
 
   const base = getDb()
@@ -240,7 +243,7 @@ export async function POST(request: Request) {
     .where(eq(users.id, cible))
     .limit(1)
   const compte = lignes[0]
-  if (!compte) return NextResponse.json({ error: 'Compte introuvable.' }, { status: 404 })
+  if (!compte) return NextResponse.json({ error: t('api.accountNotFound') }, { status: 404 })
 
   // On ne se retire pas soi-même les droits, et l'on ne se désactive pas soi-
   // même : c'est le moyen le plus simple de fermer la porte en étant dedans.
@@ -249,10 +252,7 @@ export async function POST(request: Request) {
   // demander à un collègue, et beaucoup de raisons de l'avoir fait par erreur.
   const surSoiMeme = compte.id === admin.userId
   if (surSoiMeme && action !== 'motDePasse') {
-    return NextResponse.json(
-      { error: 'Cette action ne s’applique pas à ton propre compte.' },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: t('api.notYourOwnAccount') }, { status: 400 })
   }
 
   // Ce que le journal retiendra en plus du verbe. On note l'état *avant*, seule
@@ -290,10 +290,7 @@ export async function POST(request: Request) {
         // seul, et le traduire ici évite d'importer la table complète des
         // messages pour une valeur unique.
         if (validatePassword(nouveau)) {
-          return NextResponse.json(
-            { error: 'Mot de passe trop court (8 caractères minimum).' },
-            { status: 400 },
-          )
+          return NextResponse.json({ error: t('api.passwordTooShort') }, { status: 400 })
         }
         await base
           .update(users)
@@ -328,7 +325,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true })
   } catch (error) {
     console.error('[admin/comptes]', error)
-    return NextResponse.json({ error: 'Action impossible.' }, { status: 500 })
+    return NextResponse.json({ error: t('api.actionFailed') }, { status: 500 })
   }
 }
 

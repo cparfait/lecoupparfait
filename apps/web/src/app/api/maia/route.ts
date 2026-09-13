@@ -20,6 +20,7 @@ import { entetesDeRelais } from '@/lib/server/passerelle.ts'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { Chess } from 'chess.js'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -130,15 +131,16 @@ async function bookMove(fen: string, elo: number): Promise<string | null> {
 }
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   let body: { fen?: string; elo?: number; ply?: number }
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   const fen = String(body.fen ?? '')
-  if (!fen) return NextResponse.json({ error: 'Position manquante.' }, { status: 400 })
+  if (!fen) return NextResponse.json({ error: t('api.positionMissing') }, { status: 400 })
 
   if (Number(body.ply ?? 99) < BOOK_PLIES) {
     try {
@@ -164,6 +166,6 @@ export async function POST(request: Request) {
     }
     return NextResponse.json({ ...data, source: 'maia' })
   } catch {
-    return NextResponse.json({ error: 'Le serveur de jeu est injoignable.' }, { status: 503 })
+    return NextResponse.json({ error: t('api.gameServerDown') }, { status: 503 })
   }
 }

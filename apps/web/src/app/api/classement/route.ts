@@ -12,6 +12,7 @@
 
 import { NextResponse } from 'next/server'
 import { desc, eq, getDb, ratings, sql, users } from '@coupparfait/db'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const revalidate = 60
@@ -22,6 +23,7 @@ const CATEGORIES = ['bullet', 'blitz', 'rapid', 'classical', 'correspondence', '
 const MIN_GAMES = 5
 
 export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   const url = new URL(request.url)
   const category = url.searchParams.get('categorie') ?? 'rapid'
   const limit = Math.min(200, Math.max(5, Number(url.searchParams.get('limite') ?? 50)))
@@ -84,9 +86,6 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('[classement]', error)
-    return NextResponse.json(
-      { error: 'Le classement est momentanément indisponible.', players: [] },
-      { status: 503 },
-    )
+    return NextResponse.json({ error: t('api.leaderboardDown'), players: [] }, { status: 503 })
   }
 }

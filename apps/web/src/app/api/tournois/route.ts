@@ -21,11 +21,13 @@ import {
 } from '@coupparfait/db/tournaments'
 import { getRating } from '@coupparfait/db/ratings'
 import { getCurrentUser } from '@/lib/server/session.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   const slug = new URL(request.url).searchParams.get('slug')
   const me = await getCurrentUser()
 
@@ -36,7 +38,7 @@ export async function GET(request: Request) {
   }
 
   const found = await getTournament(slug)
-  if (!found) return NextResponse.json({ error: 'Tournoi introuvable.' }, { status: 404 })
+  if (!found) return NextResponse.json({ error: t('api.tournamentNotFound') }, { status: 404 })
 
   // La partie en cours de celui qui regarde : c'est elle qui l'emmènera sur
   // l'échiquier sans qu'il ait à surveiller quoi que ce soit.
@@ -47,8 +49,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   const me = await getCurrentUser()
-  if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+  if (!me) return NextResponse.json({ error: t('api.signInRequired') }, { status: 401 })
 
   let body: {
     action?: string
@@ -62,7 +65,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   switch (body.action) {
@@ -79,7 +82,7 @@ export async function POST(request: Request) {
         durationMinutes: Number(body.durationMinutes ?? 45),
         startsAt: new Date(Date.now() + delay * 60_000),
       })
-      if (!slug) return NextResponse.json({ error: 'Création impossible.' }, { status: 500 })
+      if (!slug) return NextResponse.json({ error: t('api.createFailed') }, { status: 500 })
       return NextResponse.json({ ok: true, slug })
     }
 
@@ -91,18 +94,18 @@ export async function POST(request: Request) {
         rating: rating.rating,
       })
       if (!done) {
-        return NextResponse.json({ error: 'Tournoi introuvable ou terminé.' }, { status: 404 })
+        return NextResponse.json({ error: t('api.tournamentGoneOrOver') }, { status: 404 })
       }
       return NextResponse.json({ ok: true })
     }
 
     case 'leave': {
       const done = await leaveTournament(String(body.slug ?? ''), me.userId)
-      if (!done) return NextResponse.json({ error: 'Tournoi introuvable.' }, { status: 404 })
+      if (!done) return NextResponse.json({ error: t('api.tournamentNotFound') }, { status: 404 })
       return NextResponse.json({ ok: true })
     }
 
     default:
-      return NextResponse.json({ error: 'Action inconnue.' }, { status: 400 })
+      return NextResponse.json({ error: t('api.unknownAction') }, { status: 400 })
   }
 }

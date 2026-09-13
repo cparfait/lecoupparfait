@@ -28,6 +28,7 @@ import {
 } from '@coupparfait/db'
 import { PRESENCE_MS } from '@coupparfait/db/auth'
 import { getAdmin } from '@/lib/server/admin.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -37,9 +38,10 @@ const SERVER_URL =
   process.env.NEXT_PUBLIC_SERVER_URL ??
   'http://localhost:3001'
 
-export async function GET() {
+export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   const admin = await getAdmin()
-  if (!admin) return NextResponse.json({ error: 'Introuvable.' }, { status: 404 })
+  if (!admin) return NextResponse.json({ error: t('api.notFound') }, { status: 404 })
 
   const base = getDb()
   const maintenant = new Date()

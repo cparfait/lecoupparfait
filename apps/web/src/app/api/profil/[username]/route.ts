@@ -10,6 +10,7 @@
  */
 
 import { NextResponse } from 'next/server'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 import {
   desc,
   eq,
@@ -25,7 +26,8 @@ import {
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function GET(_request: Request, context: { params: Promise<{ username: string }> }) {
+export async function GET(request: Request, context: { params: Promise<{ username: string }> }) {
+  const t = tDeLaRequete(request)
   const { username } = await context.params
 
   try {
@@ -47,7 +49,7 @@ export async function GET(_request: Request, context: { params: Promise<{ userna
 
     const user = rows[0]
     if (!user || user.disabled) {
-      return NextResponse.json({ error: 'Joueur introuvable.' }, { status: 404 })
+      return NextResponse.json({ error: t('api.playerNotFound') }, { status: 404 })
     }
 
     const [allRatings, recentGames, history] = await Promise.all([
@@ -171,6 +173,6 @@ export async function GET(_request: Request, context: { params: Promise<{ userna
     })
   } catch (error) {
     console.error('[profil]', error)
-    return NextResponse.json({ error: 'Le service de profils est indisponible.' }, { status: 503 })
+    return NextResponse.json({ error: t('api.profilesDown') }, { status: 503 })
   }
 }

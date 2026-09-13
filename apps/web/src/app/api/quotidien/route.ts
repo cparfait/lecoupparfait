@@ -21,6 +21,7 @@ import { NextResponse } from 'next/server'
 import { and, dailyProgress, desc, eq, getDb } from '@coupparfait/db'
 import { getCurrentUser } from '@/lib/server/session.ts'
 import { xpPour } from '@/lib/daily/quetes.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -64,6 +65,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ ok: false })
 
@@ -76,12 +78,12 @@ export async function POST(request: Request) {
   try {
     corps = (await request.json()) as typeof corps
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   const jour = String(corps.jour ?? '')
   if (!JOUR_VALIDE.test(jour)) {
-    return NextResponse.json({ error: 'Jour invalide.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.invalidDay') }, { status: 400 })
   }
 
   const avancement = nettoyerAvancement(corps.avancement)

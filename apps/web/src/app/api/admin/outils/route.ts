@@ -20,6 +20,7 @@ import { NextResponse } from 'next/server'
 import { CREDITS } from '@/lib/credits/catalogue.ts'
 import { inventorier } from '@/lib/credits/inventaire.ts'
 import { getAdmin } from '@/lib/server/admin.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -59,8 +60,9 @@ async function derniereEtiquette(depot: string): Promise<string | null> {
 }
 
 export async function GET(requete: Request) {
+  const t = tDeLaRequete(requete)
   const admin = await getAdmin()
-  if (!admin) return NextResponse.json({ error: 'Introuvable.' }, { status: 404 })
+  if (!admin) return NextResponse.json({ error: t('api.notFound') }, { status: 404 })
 
   const inventaire = inventorier()
   const chercherMaj = new URL(requete.url).searchParams.get('maj') === '1'

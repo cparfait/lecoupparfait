@@ -17,6 +17,7 @@
 import { NextResponse } from 'next/server'
 import { adminAudit, and, desc, eq, getDb, lt, sql } from '@coupparfait/db'
 import { getAdmin } from '@/lib/server/admin.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -24,8 +25,9 @@ export const dynamic = 'force-dynamic'
 const PAR_PAGE = 40
 
 export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   const admin = await getAdmin()
-  if (!admin) return NextResponse.json({ error: 'Introuvable.' }, { status: 404 })
+  if (!admin) return NextResponse.json({ error: t('api.notFound') }, { status: 404 })
 
   const parametres = new URL(request.url).searchParams
   const action = parametres.get('action')?.trim()
@@ -85,6 +87,6 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('[admin/journal]', error)
-    return NextResponse.json({ error: 'Lecture impossible.' }, { status: 503 })
+    return NextResponse.json({ error: t('api.readFailed') }, { status: 503 })
   }
 }

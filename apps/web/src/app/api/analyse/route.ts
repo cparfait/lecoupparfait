@@ -14,6 +14,7 @@
 import { NextResponse } from 'next/server'
 import { entetesDeRelais } from '@/lib/server/passerelle.ts'
 import { getSessionToken } from '@/lib/server/session.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -32,6 +33,7 @@ const SERVER_URL =
   'http://localhost:3001'
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   let body: {
     fen?: string
     moves?: string[]
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   // Plafonds appliqués côté serveur : le client ne peut pas les contourner.
@@ -53,16 +55,13 @@ export async function POST(request: Request) {
   const isGame = body.mode === 'game' || Array.isArray(body.moves)
 
   if (isGame && (!Array.isArray(body.moves) || body.moves.length === 0)) {
-    return NextResponse.json({ error: 'Aucun coup à analyser.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.noMoveToAnalyse') }, { status: 400 })
   }
   if (isGame && body.moves!.length > 300) {
-    return NextResponse.json(
-      { error: 'Partie trop longue (300 demi-coups maximum).' },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: t('api.gameTooLongAnalysis') }, { status: 400 })
   }
   if (!isGame && !body.fen) {
-    return NextResponse.json({ error: 'Le champ « fen » est requis.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.fenRequired') }, { status: 400 })
   }
 
   try {

@@ -23,11 +23,13 @@ import {
   updateStudy,
 } from '@coupparfait/db/studies'
 import { getCurrentUser } from '@/lib/server/session.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   const slug = new URL(request.url).searchParams.get('slug')
   const me = await getCurrentUser()
 
@@ -35,17 +37,18 @@ export async function GET(request: Request) {
     const study = await getStudy(slug, me?.userId ?? null)
     // Introuvable et sans droit d'accès donnent la même réponse : distinguer
     // apprendrait qu'une étude privée existe sous cette adresse.
-    if (!study) return NextResponse.json({ error: 'Étude introuvable.' }, { status: 404 })
+    if (!study) return NextResponse.json({ error: t('api.studyNotFound') }, { status: 404 })
     return NextResponse.json({ study, own: me?.userId === study.owner.id })
   }
 
-  if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+  if (!me) return NextResponse.json({ error: t('api.signInRequired') }, { status: 401 })
   return NextResponse.json({ studies: await listStudies(me.userId) })
 }
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   const me = await getCurrentUser()
-  if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+  if (!me) return NextResponse.json({ error: t('api.signInRequired') }, { status: 401 })
 
   let body: {
     action?: string
@@ -62,13 +65,13 @@ export async function POST(request: Request) {
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   switch (body.action) {
     case 'create': {
       const created = await createStudy(me.userId, String(body.title ?? ''))
-      if (!created) return NextResponse.json({ error: 'Création impossible.' }, { status: 500 })
+      if (!created) return NextResponse.json({ error: t('api.createFailed') }, { status: 500 })
       return NextResponse.json({ ok: true, slug: created.slug })
     }
 
@@ -78,13 +81,13 @@ export async function POST(request: Request) {
         description: body.description,
         visibility: body.visibility,
       })
-      if (!done) return NextResponse.json({ error: 'Étude introuvable.' }, { status: 404 })
+      if (!done) return NextResponse.json({ error: t('api.studyNotFound') }, { status: 404 })
       return NextResponse.json({ ok: true })
     }
 
     case 'delete': {
       const done = await deleteStudy(me.userId, String(body.id ?? ''))
-      if (!done) return NextResponse.json({ error: 'Étude introuvable.' }, { status: 404 })
+      if (!done) return NextResponse.json({ error: t('api.studyNotFound') }, { status: 404 })
       return NextResponse.json({ ok: true })
     }
 
@@ -94,7 +97,7 @@ export async function POST(request: Request) {
         startFen: body.startFen ?? null,
         moves: body.moves ?? [],
       })
-      if (!chapter) return NextResponse.json({ error: 'Étude introuvable.' }, { status: 404 })
+      if (!chapter) return NextResponse.json({ error: t('api.studyNotFound') }, { status: 404 })
       return NextResponse.json({ ok: true, chapter })
     }
 
@@ -104,17 +107,17 @@ export async function POST(request: Request) {
         moves: body.moves,
         comments: body.comments,
       })
-      if (!done) return NextResponse.json({ error: 'Chapitre introuvable.' }, { status: 404 })
+      if (!done) return NextResponse.json({ error: t('api.chapterNotFound') }, { status: 404 })
       return NextResponse.json({ ok: true })
     }
 
     case 'deleteChapter': {
       const done = await deleteChapter(me.userId, String(body.chapterId ?? ''))
-      if (!done) return NextResponse.json({ error: 'Chapitre introuvable.' }, { status: 404 })
+      if (!done) return NextResponse.json({ error: t('api.chapterNotFound') }, { status: 404 })
       return NextResponse.json({ ok: true })
     }
 
     default:
-      return NextResponse.json({ error: 'Action inconnue.' }, { status: 400 })
+      return NextResponse.json({ error: t('api.unknownAction') }, { status: 400 })
   }
 }

@@ -27,6 +27,7 @@ import { courrielDisponible, resetMail, sendMail, verificationMail } from '@/lib
 import { estAdministrateur } from '@/lib/server/admin.ts'
 import { creerLimiteur } from '@/lib/server/limiteur.ts'
 import { endSession, getCurrentUser, startSession } from '@/lib/server/session.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -81,6 +82,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   let body: {
     action?: string
     username?: string
@@ -93,7 +95,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   if (body.action === 'signout') {
@@ -132,17 +134,14 @@ export async function POST(request: Request) {
       request.headers.get('x-real-ip') ??
       'inconnu'
     if (tentatives.depasse(`oubli:${ip}`)) {
-      return NextResponse.json(
-        { error: 'Trop de demandes. Réessaie dans quelques minutes.' },
-        { status: 429 },
-      )
+      return NextResponse.json({ error: t('api.tooManyRequests') }, { status: 429 })
     }
 
     const demande = await startPasswordReset(String(body.email ?? ''))
     if (demande) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin
       await sendMail({
-        ...resetMail(demande.username, appUrl, demande.token),
+        ...resetMail(demande.username, appUrl, demande.token, t),
         to: demande.email,
       })
     }
@@ -167,11 +166,11 @@ export async function POST(request: Request) {
 
   if (body.action === 'resendVerification') {
     const me = await getCurrentUser()
-    if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+    if (!me) return NextResponse.json({ error: t('api.signInRequired') }, { status: 401 })
 
     const status = await emailStatus(me.userId)
     if (!status.email) {
-      return NextResponse.json({ error: 'Aucune adresse enregistrée.' }, { status: 400 })
+      return NextResponse.json({ error: t('api.noAddressOnFile') }, { status: 400 })
     }
     if (status.verified) return NextResponse.json({ ok: true, alreadyDone: true })
 
@@ -179,10 +178,7 @@ export async function POST(request: Request) {
     // « Envoyé ». On refuse plutôt que de mentir — même règle que pour la
     // récupération de mot de passe.
     if (!courrielDisponible()) {
-      return NextResponse.json(
-        { error: 'Ce serveur n’envoie pas encore de courriel.' },
-        { status: 503 },
-      )
+      return NextResponse.json({ error: t('api.noMailYet') }, { status: 503 })
     }
 
     // Même limitation que les tentatives de connexion : un bouton « renvoyer »
@@ -192,10 +188,7 @@ export async function POST(request: Request) {
       request.headers.get('x-real-ip') ??
       'inconnu'
     if (tentatives.depasse(`renvoi:${address}:${me.username.toLowerCase()}`)) {
-      return NextResponse.json(
-        { error: 'Trop de renvois. Réessaie dans quelques minutes.' },
-        { status: 429 },
-      )
+      return NextResponse.json({ error: t('api.tooManyResends') }, { status: 429 })
     }
 
     await sendVerification(me.userId, me.username, status.email, request)
@@ -208,9 +201,9 @@ export async function POST(request: Request) {
   // caractères, ce qui laisserait passer bien autre chose qu'un émoji.
   if (body.action === 'avatar') {
     const me = await getCurrentUser()
-    if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+    if (!me) return NextResponse.json({ error: t('api.signInRequired') }, { status: 401 })
     if (!isKnownAvatar(body.avatar)) {
-      return NextResponse.json({ error: 'Avatar inconnu.' }, { status: 400 })
+      return NextResponse.json({ error: t('api.unknownAvatar') }, { status: 400 })
     }
     await getDb().update(users).set({ avatar: body.avatar }).where(eq(users.id, me.userId))
     return NextResponse.json({ ok: true, avatar: body.avatar })
@@ -220,7 +213,7 @@ export async function POST(request: Request) {
   const password = String(body.password ?? '')
 
   if (!username || !password) {
-    return NextResponse.json({ error: 'Pseudo et mot de passe sont requis.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.nameAndPasswordRequired') }, { status: 400 })
   }
 
   // La clé de limitation mêle l'adresse et le pseudo : bloquer sur la seule
@@ -231,10 +224,7 @@ export async function POST(request: Request) {
     'inconnu'
 
   if (tentatives.depasse(`${ip}:${username.toLowerCase()}`)) {
-    return NextResponse.json(
-      { error: 'Trop de tentatives. Réessaie dans quelques minutes.' },
-      { status: 429 },
-    )
+    return NextResponse.json({ error: t('api.tooManyAttempts') }, { status: 429 })
   }
 
   try {
@@ -306,12 +296,12 @@ export async function POST(request: Request) {
       })
     }
 
-    return NextResponse.json({ error: 'Action inconnue.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unknownAction') }, { status: 400 })
   } catch (error) {
     console.error('[auth]', error)
     return NextResponse.json(
       {
-        error: 'Le service de comptes est indisponible. Tu peux continuer à jouer sans compte.',
+        error: t('api.accountsDown'),
       },
       { status: 503 },
     )
@@ -333,5 +323,8 @@ async function sendVerification(
 ): Promise<void> {
   const token = await startEmailVerification(userId)
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin
-  await sendMail({ ...verificationMail(username, appUrl, token), to: address })
+  await sendMail({
+    ...verificationMail(username, appUrl, token, tDeLaRequete(request)),
+    to: address,
+  })
 }

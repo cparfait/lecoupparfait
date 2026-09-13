@@ -13,6 +13,7 @@
 
 import { NextResponse } from 'next/server'
 import { entetesDeRelais } from '@/lib/server/passerelle.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -57,6 +58,7 @@ export async function GET(request: Request) {
       },
       request.headers.get('range'),
       entetesDeRelais(request),
+      tDeLaRequete(request),
     )
   }
 
@@ -73,17 +75,18 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   let body: { text?: string; voice?: string; language?: 'fr' | 'en'; rate?: number }
 
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   const text = (body.text ?? '').trim().slice(0, MAX_CHARS)
   if (!text) {
-    return NextResponse.json({ error: 'Le champ « text » est requis.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.textRequired') }, { status: 400 })
   }
 
   return synthesise(
@@ -95,6 +98,7 @@ export async function POST(request: Request) {
     },
     null,
     entetesDeRelais(request),
+    t,
   )
 }
 
@@ -121,6 +125,7 @@ async function synthesise(
   },
   range: string | null,
   entetes: Record<string, string>,
+  t: ReturnType<typeof tDeLaRequete>,
 ): Promise<Response> {
   const rate = Number.isFinite(options.rate) ? Math.max(0.5, Math.min(2, options.rate!)) : 1
 
@@ -141,11 +146,11 @@ async function synthesise(
     })
 
     if (!upstream.ok) {
-      return NextResponse.json({ error: 'Voix neuronale indisponible.' }, { status: 503 })
+      return NextResponse.json({ error: t('api.neuralVoiceUnavailable') }, { status: 503 })
     }
     audio = await upstream.arrayBuffer()
   } catch {
-    return NextResponse.json({ error: 'Voix neuronale injoignable.' }, { status: 503 })
+    return NextResponse.json({ error: t('api.neuralVoiceDown') }, { status: 503 })
   }
 
   const total = audio.byteLength

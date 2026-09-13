@@ -13,6 +13,7 @@
 import { NextResponse } from 'next/server'
 import { botProgress, eq, getDb, sql } from '@coupparfait/db'
 import { getCurrentUser } from '@/lib/server/session.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -51,6 +52,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   const me = await getCurrentUser()
   if (!me) return NextResponse.json({ ok: true, tracked: false })
 
@@ -58,7 +60,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   /*
@@ -78,7 +80,7 @@ export async function POST(request: Request) {
   */
   if (body.action === 'declarer') {
     const declare = Math.min(25, Math.max(1, Math.round(Number(body.level ?? 0))))
-    if (!declare) return NextResponse.json({ error: 'Niveau manquant.' }, { status: 400 })
+    if (!declare) return NextResponse.json({ error: t('api.levelMissing') }, { status: 400 })
 
     const [ligne] = await getDb()
       .insert(botProgress)
@@ -103,7 +105,7 @@ export async function POST(request: Request) {
 
   const level = Math.min(25, Math.max(1, Math.round(Number(body.level ?? 0))))
   const won = body.won === true
-  if (!level) return NextResponse.json({ error: 'Niveau manquant.' }, { status: 400 })
+  if (!level) return NextResponse.json({ error: t('api.levelMissing') }, { status: 400 })
 
   const db = getDb()
   const [row] = await db

@@ -10,6 +10,7 @@
  */
 
 import { NextResponse } from 'next/server'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 /**
  * Adresse du serveur temps réel.
  *
@@ -27,7 +28,8 @@ export const dynamic = 'force-dynamic'
 /** Au-delà, c'est que le serveur temps réel a un problème : mieux vaut le dire. */
 const TIMEOUT_MS = 2500
 
-export async function GET() {
+export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   try {
     const response = await fetch(`${SERVER_URL}/parties`, {
       signal: AbortSignal.timeout(TIMEOUT_MS),
@@ -38,9 +40,6 @@ export async function GET() {
   } catch {
     // Une liste vide et un serveur injoignable ne se ressemblent pas : sans
     // cette distinction, on croirait que personne ne joue.
-    return NextResponse.json(
-      { error: 'Le serveur de parties est injoignable.', games: [] },
-      { status: 503 },
-    )
+    return NextResponse.json({ error: t('api.gamesServerDown'), games: [] }, { status: 503 })
   }
 }

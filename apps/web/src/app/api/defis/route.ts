@@ -26,6 +26,7 @@ import {
 import { creerLimiteur } from '@/lib/server/limiteur.ts'
 import { getCurrentUser } from '@/lib/server/session.ts'
 import { prevenir } from '@/lib/server/push.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -77,9 +78,10 @@ function makeSlug(): string {
   return [...bytes].map((byte) => ALPHABET[byte % ALPHABET.length]).join('')
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   const me = await getCurrentUser()
-  if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+  if (!me) return NextResponse.json({ error: t('api.signInRequired') }, { status: 401 })
 
   const [incoming, outgoing] = await Promise.all([
     listIncomingChallenges(me.userId),
@@ -106,6 +108,7 @@ export async function GET() {
 const invitesVisiteurs = creerLimiteur(15 * 60 * 1000, 10)
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   let body: {
     action?: string
     to?: string
@@ -121,7 +124,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   // Seule action ouverte aux visiteurs : c'est le bout du lien d'invitation.
@@ -132,17 +135,14 @@ export async function POST(request: Request) {
       'inconnu'
 
     if (invitesVisiteurs.depasse(ip)) {
-      return NextResponse.json(
-        { error: 'Trop d’invitations envoyées. Réessaie dans quelques minutes.' },
-        { status: 429 },
-      )
+      return NextResponse.json({ error: t('api.tooManyInvites') }, { status: 429 })
     }
 
     const name = String(body.name ?? '')
       .trim()
       .slice(0, 20)
     if (name.length < 2) {
-      return NextResponse.json({ error: 'Choisis un pseudo.' }, { status: 400 })
+      return NextResponse.json({ error: t('api.pickAName') }, { status: 400 })
     }
 
     const challenge = await createGuestChallenge({
@@ -154,10 +154,7 @@ export async function POST(request: Request) {
     })
 
     if (!challenge) {
-      return NextResponse.json(
-        { error: 'Ce lien d’invitation ne correspond à personne.' },
-        { status: 404 },
-      )
+      return NextResponse.json({ error: t('api.inviteMatchesNobody') }, { status: 404 })
     }
 
     prevenirDuDefi(challenge.to, name, challenge.initialTime, challenge.increment)
@@ -166,7 +163,7 @@ export async function POST(request: Request) {
   }
 
   const me = await getCurrentUser()
-  if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+  if (!me) return NextResponse.json({ error: t('api.signInRequired') }, { status: 401 })
 
   switch (body.action) {
     case 'create': {
@@ -174,10 +171,7 @@ export async function POST(request: Request) {
       // On ne défie que des gens de son carnet : sans cette vérification,
       // n'importe qui pourrait faire sonner n'importe qui.
       if (!to || !(await areFriends(me.userId, to))) {
-        return NextResponse.json(
-          { error: 'Cette personne n’est pas dans ton carnet.' },
-          { status: 403 },
-        )
+        return NextResponse.json({ error: t('api.notInYourList') }, { status: 403 })
       }
 
       const initialTime = Math.min(
@@ -215,7 +209,7 @@ export async function POST(request: Request) {
         rated: body.rated === true,
       })
       if (!challenge) {
-        return NextResponse.json({ error: 'Partie non enregistrée.' }, { status: 500 })
+        return NextResponse.json({ error: t('api.gameNotSaved') }, { status: 500 })
       }
       return NextResponse.json({ ok: true, challenge })
     }
@@ -227,18 +221,18 @@ export async function POST(request: Request) {
         body.accept === true,
       )
       if (!result.ok) {
-        return NextResponse.json({ error: 'Défi introuvable ou expiré.' }, { status: 404 })
+        return NextResponse.json({ error: t('api.challengeGoneOrExpired') }, { status: 404 })
       }
       return NextResponse.json(result)
     }
 
     case 'cancel': {
       const done = await cancelChallenge(me.userId, String(body.id ?? ''))
-      if (!done) return NextResponse.json({ error: 'Défi introuvable.' }, { status: 404 })
+      if (!done) return NextResponse.json({ error: t('api.challengeNotFound') }, { status: 404 })
       return NextResponse.json({ ok: true })
     }
 
     default:
-      return NextResponse.json({ error: 'Action inconnue.' }, { status: 400 })
+      return NextResponse.json({ error: t('api.unknownAction') }, { status: 400 })
   }
 }

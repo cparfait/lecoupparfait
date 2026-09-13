@@ -14,6 +14,7 @@
 
 import { NextResponse } from 'next/server'
 import type { PartieImportee } from '@/lib/import/enligne.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -41,24 +42,22 @@ const MAX_ARCHIVES = 6
 const PSEUDO_VALIDE = /^[A-Za-z0-9_-]{1,30}$/
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   let corps: { source?: unknown; pseudo?: unknown; max?: unknown }
   try {
     corps = (await request.json()) as typeof corps
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   const source = corps.source
   if (source !== 'chesscom' && source !== 'lichess') {
-    return NextResponse.json({ error: 'Source inconnue.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unknownSource') }, { status: 400 })
   }
 
   const pseudo = String(corps.pseudo ?? '').trim()
   if (!PSEUDO_VALIDE.test(pseudo)) {
-    return NextResponse.json(
-      { error: 'Pseudo invalide : lettres, chiffres, tirets et soulignés seulement.' },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: t('api.invalidName') }, { status: 400 })
   }
 
   const max = Math.max(1, Math.min(MAX_PARTIES, Number(corps.max) || 30))

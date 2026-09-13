@@ -17,6 +17,7 @@
 
 import { NextResponse } from 'next/server'
 import { and, asc, eq, getDb, ilike, ratings, sql, users } from '@coupparfait/db'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -26,6 +27,7 @@ const MIN_QUERY = 2
 const LIMIT = 20
 
 export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   const query = (new URL(request.url).searchParams.get('q') ?? '').trim()
   if (query.length < MIN_QUERY) return NextResponse.json({ players: [] })
 
@@ -59,6 +61,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ players: rows })
   } catch (error) {
     console.error('[annuaire] recherche impossible :', error)
-    return NextResponse.json({ error: 'Annuaire indisponible.' }, { status: 503 })
+    return NextResponse.json({ error: t('api.directoryDown') }, { status: 503 })
   }
 }

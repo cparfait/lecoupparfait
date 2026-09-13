@@ -24,6 +24,7 @@ import { TRANCHES_DEFI, trancheDefi, trancheDefiPour } from '@coupparfait/core'
 import { and, getDb, gte, lte, puzzles, sql } from '@coupparfait/db'
 import { getRating } from '@coupparfait/db/ratings'
 import { getCurrentUser } from '@/lib/server/session.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -34,6 +35,7 @@ const POPULARITE_MIN = 85
 const JOUR_VALIDE = /^\d{4}-\d{2}-\d{2}$/
 
 export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   const demande = new URL(request.url).searchParams.get('jour') ?? ''
   // Le jour vient du client parce qu'il dépend de son fuseau : la journée d'un
   // joueur commence quand il se lève, pas à minuit à Greenwich. On valide
@@ -77,10 +79,7 @@ export async function GET(request: Request) {
 
     const puzzle = rangees[0]
     if (!puzzle) {
-      return NextResponse.json(
-        { error: 'Aucun puzzle en base. Lance l’import :  npm run data:puzzles' },
-        { status: 404 },
-      )
+      return NextResponse.json({ error: t('api.noPuzzleNpm') }, { status: 404 })
     }
 
     return NextResponse.json({
@@ -100,6 +99,6 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('[defi-du-jour]', error)
-    return NextResponse.json({ error: 'Le défi du jour est indisponible.' }, { status: 503 })
+    return NextResponse.json({ error: t('api.dailyUnavailable') }, { status: 503 })
   }
 }

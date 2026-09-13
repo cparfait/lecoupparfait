@@ -16,6 +16,7 @@
 
 import { NextResponse } from 'next/server'
 import { getSessionToken } from '@/lib/server/session.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 const SERVER_URL =
   (process.env.NODE_ENV === 'production' ? process.env.INTERNAL_SERVER_URL : undefined) ??
@@ -53,20 +54,21 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   const token = await getSessionToken()
   if (!token) {
-    return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+    return NextResponse.json({ error: t('api.signInRequired') }, { status: 401 })
   }
 
   let body: { slug?: string }
   try {
     body = (await request.json()) as typeof body
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   const slug = String(body.slug ?? '').slice(0, 12)
-  if (!slug) return NextResponse.json({ error: 'Partie manquante.' }, { status: 400 })
+  if (!slug) return NextResponse.json({ error: t('api.gameMissing') }, { status: 400 })
 
   try {
     const response = await fetch(`${SERVER_URL}/parties/quitter`, {
@@ -78,6 +80,6 @@ export async function POST(request: Request) {
     })
     return NextResponse.json(await response.json(), { status: response.status })
   } catch {
-    return NextResponse.json({ error: 'Le serveur de parties est injoignable.' }, { status: 503 })
+    return NextResponse.json({ error: t('api.gamesServerDown') }, { status: 503 })
   }
 }

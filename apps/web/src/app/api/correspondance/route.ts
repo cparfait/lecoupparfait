@@ -22,6 +22,7 @@ import { areFriends } from '@coupparfait/db/friends'
 import { eq, getDb, users } from '@coupparfait/db'
 import { getCurrentUser } from '@/lib/server/session.ts'
 import { prevenir } from '@/lib/server/push.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -35,13 +36,14 @@ const REASONS: Record<string, string> = {
 }
 
 export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   const me = await getCurrentUser()
-  if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+  if (!me) return NextResponse.json({ error: t('api.signInRequired') }, { status: 401 })
 
   const slug = new URL(request.url).searchParams.get('partie')
   if (slug) {
     const game = await getCorrespondence(me.userId, slug)
-    if (!game) return NextResponse.json({ error: 'Partie introuvable.' }, { status: 404 })
+    if (!game) return NextResponse.json({ error: t('api.gameNotFound') }, { status: 404 })
     return NextResponse.json({ game })
   }
 
@@ -49,8 +51,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   const me = await getCurrentUser()
-  if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+  if (!me) return NextResponse.json({ error: t('api.signInRequired') }, { status: 401 })
 
   let body: {
     action?: string
@@ -64,7 +67,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   switch (body.action) {
@@ -74,10 +77,7 @@ export async function POST(request: Request) {
       // quelqu'un de son carnet. Une correspondance dure des semaines, on ne
       // l'impose pas à un inconnu.
       if (!to || !(await areFriends(me.userId, to))) {
-        return NextResponse.json(
-          { error: 'Cette personne n’est pas dans ton carnet.' },
-          { status: 403 },
-        )
+        return NextResponse.json({ error: t('api.notInYourList') }, { status: 403 })
       }
 
       const [target] = await getDb()
@@ -85,7 +85,7 @@ export async function POST(request: Request) {
         .from(users)
         .where(eq(users.id, to))
         .limit(1)
-      if (!target) return NextResponse.json({ error: 'Joueur introuvable.' }, { status: 404 })
+      if (!target) return NextResponse.json({ error: t('api.playerNotFound') }, { status: 404 })
 
       const slug = await startCorrespondence({
         fromId: me.userId,
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
         toName: target.username,
         daysPerMove: Number(body.days ?? 2),
       })
-      if (!slug) return NextResponse.json({ error: 'Création impossible.' }, { status: 500 })
+      if (!slug) return NextResponse.json({ error: t('api.createFailed') }, { status: 500 })
       return NextResponse.json({ ok: true, slug })
     }
 
@@ -135,11 +135,11 @@ export async function POST(request: Request) {
 
     case 'resign': {
       const done = await resignCorrespondence(me.userId, String(body.slug ?? ''))
-      if (!done) return NextResponse.json({ error: 'Partie introuvable.' }, { status: 404 })
+      if (!done) return NextResponse.json({ error: t('api.gameNotFound') }, { status: 404 })
       return NextResponse.json({ ok: true })
     }
 
     default:
-      return NextResponse.json({ error: 'Action inconnue.' }, { status: 400 })
+      return NextResponse.json({ error: t('api.unknownAction') }, { status: 400 })
   }
 }

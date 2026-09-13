@@ -31,6 +31,7 @@ import 'server-only'
 import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createTransport, type Transporter } from 'nodemailer'
+import type { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export interface Mail {
   to: string
@@ -218,29 +219,43 @@ export async function clearMailbox(): Promise<void> {
  * Le texte dit à quoi sert l'adresse — retrouver un mot de passe perdu, rien
  * d'autre — et ce qui arrive si l'on ignore le lien : le compte fonctionne,
  * mais l'adresse ne servira à rien.
+ *
+ * **Dans la langue de celui qui s'inscrit.** Les deux messages étaient écrits en
+ * français et partaient tels quels à quelqu'un qui venait de choisir le japonais
+ * deux écrans plus tôt — alors que l'un des deux est le seul moyen de récupérer
+ * un compte perdu. `t` vient du témoin de langue porté par la requête : voir
+ * `lib/i18n/serveur.ts`.
+ *
+ * Les retours à la ligne du corps ne sont plus posés à la main. Une phrase
+ * coupée en trois à la soixante-dixième colonne n'est pas traduisible — aucune
+ * autre langue ne se coupe aux mêmes endroits —, et les clients de messagerie
+ * replient très bien tout seuls.
  */
-export function verificationMail(username: string, appUrl: string, token: string): Mail {
+export function verificationMail(
+  username: string,
+  appUrl: string,
+  token: string,
+  t: ReturnType<typeof tDeLaRequete>,
+): Mail {
   const lien = `${appUrl.replace(/\/$/, '')}/verifier?jeton=${encodeURIComponent(token)}`
   return {
     to: '',
-    subject: `Confirme ton adresse, ${username}`,
+    subject: t('mail.verifySubject', { pseudo: username }),
     body: [
-      `Bonjour ${username},`,
+      t('mail.hello', { pseudo: username }),
       '',
-      'Ton compte est créé : tu peux jouer et apprendre dès maintenant.',
+      t('mail.verifyCreated'),
       '',
-      'Il reste à confirmer ton adresse, en ouvrant ce lien :',
+      t('mail.verifyOpenLink'),
       lien,
       '',
-      'Le lien est valable vingt-quatre heures. Sans lui ton compte marche',
-      'très bien, mais ton adresse ne pourra pas servir à retrouver ton mot de',
-      'passe si tu le perds.',
+      t('mail.verifyValidity'),
       '',
-      'Aucune lettre d’information, aucun traqueur, aucune donnée revendue.',
+      t('mail.verifyNoTracking'),
       '',
-      'Si tu n’es pas à l’origine de cette inscription, ignore ce message.',
+      t('mail.verifyNotYou'),
       '',
-      'Le Coup Parfait — logiciel libre sous licence AGPL-3.0.',
+      t('mail.signature'),
     ].join('\n'),
   }
 }
@@ -253,24 +268,27 @@ export function verificationMail(username: string, appUrl: string, token: string
  * lien n'est pas ouvert, rien n'a changé — et le dire évite l'inquiétude que
  * provoque un courriel de ce genre reçu sans raison.
  */
-export function resetMail(username: string, appUrl: string, token: string): Mail {
+export function resetMail(
+  username: string,
+  appUrl: string,
+  token: string,
+  t: ReturnType<typeof tDeLaRequete>,
+): Mail {
   const lien = `${appUrl.replace(/\/$/, '')}/reinitialiser?jeton=${encodeURIComponent(token)}`
   return {
     to: '',
-    subject: 'Réinitialiser ton mot de passe',
+    subject: t('mail.resetSubject'),
     body: [
-      `Bonjour ${username},`,
+      t('mail.hello', { pseudo: username }),
       '',
-      'Quelqu’un a demandé à réinitialiser le mot de passe de ce compte.',
-      'Si c’est toi, ouvre ce lien pour en choisir un nouveau :',
+      t('mail.resetAsked'),
       lien,
       '',
-      'Le lien est valable une heure, et ne sert qu’une fois.',
+      t('mail.resetValidity'),
       '',
-      'Si tu n’as rien demandé, ignore ce message : tant que le lien n’est pas',
-      'ouvert, ton mot de passe reste inchangé.',
+      t('mail.resetNotYou'),
       '',
-      'Le Coup Parfait — logiciel libre sous licence AGPL-3.0.',
+      t('mail.signature'),
     ].join('\n'),
   }
 }

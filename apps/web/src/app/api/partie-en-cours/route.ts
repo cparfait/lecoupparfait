@@ -18,6 +18,7 @@
 import { NextResponse } from 'next/server'
 import { activeGames, eq, getDb } from '@coupparfait/db'
 import { getCurrentUser } from '@/lib/server/session.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -56,6 +57,7 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
+  const t = tDeLaRequete(request)
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ ok: false })
 
@@ -63,17 +65,17 @@ export async function PUT(request: Request) {
   try {
     corps = (await request.json()) as typeof corps
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   if (!Array.isArray(corps.moves) || corps.moves.length === 0) {
-    return NextResponse.json({ error: 'Aucun coup à enregistrer.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.noMoveToSave') }, { status: 400 })
   }
   if (corps.moves.length > MAX_COUPS) {
-    return NextResponse.json({ error: 'Partie trop longue.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.gameTooLong') }, { status: 400 })
   }
   if (!corps.state || typeof corps.state !== 'object' || Array.isArray(corps.state)) {
-    return NextResponse.json({ error: 'État manquant.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.stateMissing') }, { status: 400 })
   }
 
   const moves = corps.moves.filter((coup): coup is string => typeof coup === 'string').join(' ')

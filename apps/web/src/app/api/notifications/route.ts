@@ -23,6 +23,7 @@ import {
 } from '@coupparfait/db/push'
 import { getCurrentUser } from '@/lib/server/session.ts'
 import { clePubliqueVapid, envoyerAux, notificationsActives } from '@/lib/server/push.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -50,15 +51,13 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   if (!notificationsActives()) {
-    return NextResponse.json(
-      { error: 'Les notifications ne sont pas configurées sur ce serveur.' },
-      { status: 503 },
-    )
+    return NextResponse.json({ error: t('api.notificationsUnconfigured') }, { status: 503 })
   }
 
   const me = await getCurrentUser()
-  if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+  if (!me) return NextResponse.json({ error: t('api.signInRequired') }, { status: 401 })
 
   let body: {
     action?: string
@@ -71,7 +70,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   /*
@@ -86,7 +85,7 @@ export async function POST(request: Request) {
   if (body.action === 'essai') {
     const abonnement = body.endpoint ? await lireAbonnement(body.endpoint) : null
     if (!abonnement || abonnement.userId !== me.userId) {
-      return NextResponse.json({ error: 'Cet appareil n’est pas abonné.' }, { status: 404 })
+      return NextResponse.json({ error: t('api.deviceNotSubscribed') }, { status: 404 })
     }
 
     const { envoyes, morts } = await envoyerAux([abonnement], {
@@ -98,10 +97,7 @@ export async function POST(request: Request) {
     await retirerAbonnements(morts)
 
     if (envoyes.length === 0) {
-      return NextResponse.json(
-        { error: 'L’envoi a échoué. Vérifie les notifications dans les réglages du téléphone.' },
-        { status: 502 },
-      )
+      return NextResponse.json({ error: t('api.pushFailed') }, { status: 502 })
     }
     return NextResponse.json({ ok: true })
   }
@@ -110,7 +106,7 @@ export async function POST(request: Request) {
   const p256dh = body.abonnement?.keys?.p256dh
   const auth = body.abonnement?.keys?.auth
   if (!endpoint || !p256dh || !auth) {
-    return NextResponse.json({ error: 'Abonnement incomplet.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.subscriptionIncomplete') }, { status: 400 })
   }
 
   await enregistrerAbonnement({
@@ -129,18 +125,19 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const t = tDeLaRequete(request)
   const me = await getCurrentUser()
-  if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+  if (!me) return NextResponse.json({ error: t('api.signInRequired') }, { status: 401 })
 
   let body: { endpoint?: string }
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   if (!body.endpoint) {
-    return NextResponse.json({ error: 'Adresse d’abonnement manquante.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.subscriptionAddressMissing') }, { status: 400 })
   }
 
   /*

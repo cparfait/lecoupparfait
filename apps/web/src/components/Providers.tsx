@@ -13,6 +13,7 @@
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { I18nProvider, langue } from '@/lib/i18n/index.tsx'
+import { TEMOIN_LANGUE } from '@/lib/i18n/temoin.ts'
 import { detectEffectsCapability, usePreferences } from '@/lib/store/preferences.ts'
 import { unlockAudio } from '@/lib/sound.ts'
 import { loadNeuralVoices, loadVoices } from '@/lib/speech.ts'
@@ -46,6 +47,24 @@ export function Providers({ children }: { children: ReactNode }) {
     document.documentElement.lang = choisie.bcp47
     document.documentElement.dir = choisie.rtl ? 'rtl' : 'ltr'
   }, [theme, locale])
+
+  /*
+    La langue choisie, déposée dans un témoin.
+
+    C'est le seul moyen pour les routes d'`app/api` de savoir à qui elles
+    répondent : la préférence vit dans le navigateur, et le serveur ne la voyait
+    jamais. Leurs quatre-vingt-quinze messages d'erreur arrivaient donc en
+    français au milieu d'un écran en japonais — voir `lib/i18n/serveur.ts`.
+
+    Un témoin plutôt qu'un en-tête : il part tout seul avec chaque requête, là où
+    un en-tête aurait demandé de modifier la centaine d'appels `fetch` du projet
+    et d'en oublier au moins un. Il ne porte qu'un code de langue, ne sert qu'à
+    cela, et `SameSite=Lax` suffit puisqu'il n'autorise rien.
+  */
+  useEffect(() => {
+    const an = 60 * 60 * 24 * 365
+    document.cookie = `${TEMOIN_LANGUE}=${encodeURIComponent(locale)}; path=/; max-age=${an}; SameSite=Lax`
+  }, [locale])
 
   useEffect(() => {
     document.documentElement.dataset.effects = effects

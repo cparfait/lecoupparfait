@@ -25,6 +25,7 @@
 import { NextResponse } from 'next/server'
 import { getDb, sql } from '@coupparfait/db'
 import { getAdmin } from '@/lib/server/admin.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -48,8 +49,9 @@ interface LigneJour {
 }
 
 export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   const admin = await getAdmin()
-  if (!admin) return NextResponse.json({ error: 'Introuvable.' }, { status: 404 })
+  if (!admin) return NextResponse.json({ error: t('api.notFound') }, { status: 404 })
 
   const demandes = Number(new URL(request.url).searchParams.get('jours') ?? 30)
   const jours = FENETRES.has(demandes) ? demandes : 30
@@ -234,7 +236,7 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('[admin/statistiques]', error)
-    return NextResponse.json({ error: 'Calcul impossible.' }, { status: 503 })
+    return NextResponse.json({ error: t('api.computeFailed') }, { status: 503 })
   }
 }
 

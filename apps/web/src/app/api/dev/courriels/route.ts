@@ -11,6 +11,7 @@
 
 import { NextResponse } from 'next/server'
 import { clearMailbox, readMailbox } from '@/lib/server/mailer.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -22,21 +23,21 @@ export const dynamic = 'force-dynamic'
  * construction faite avec `NODE_ENV` mal posé ne doit pas figer une route
  * ouverte dans l'image livrée.
  */
-function forbidden(): NextResponse | null {
+function forbidden(t: ReturnType<typeof tDeLaRequete>): NextResponse | null {
   if (process.env.NODE_ENV === 'production') {
-    return NextResponse.json({ error: 'Indisponible.' }, { status: 404 })
+    return NextResponse.json({ error: t('api.unavailable') }, { status: 404 })
   }
   return null
 }
 
-export async function GET() {
-  const refus = forbidden()
+export async function GET(request: Request) {
+  const refus = forbidden(tDeLaRequete(request))
   if (refus) return refus
   return NextResponse.json({ mails: await readMailbox() })
 }
 
-export async function DELETE() {
-  const refus = forbidden()
+export async function DELETE(request: Request) {
+  const refus = forbidden(tDeLaRequete(request))
   if (refus) return refus
   await clearMailbox()
   return NextResponse.json({ ok: true })

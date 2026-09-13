@@ -22,6 +22,7 @@ import {
 } from '@coupparfait/db/friends'
 import { getCurrentUser } from '@/lib/server/session.ts'
 import { prevenir } from '@/lib/server/push.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -33,8 +34,9 @@ const ADD_ERRORS: Record<string, string> = {
 }
 
 export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   const me = await getCurrentUser()
-  if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+  if (!me) return NextResponse.json({ error: t('api.signInRequired') }, { status: 401 })
 
   const query = new URL(request.url).searchParams.get('q')
   if (query != null) {
@@ -51,14 +53,15 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   const me = await getCurrentUser()
-  if (!me) return NextResponse.json({ error: 'Connexion requise.' }, { status: 401 })
+  if (!me) return NextResponse.json({ error: t('api.signInRequired') }, { status: 401 })
 
   let body: { action?: string; username?: string; id?: string; accept?: boolean }
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   switch (body.action) {
@@ -100,18 +103,18 @@ export async function POST(request: Request) {
     case 'respond': {
       const done = await respondToRequest(me.userId, String(body.id ?? ''), body.accept === true)
       if (!done) {
-        return NextResponse.json({ error: 'Demande introuvable.' }, { status: 404 })
+        return NextResponse.json({ error: t('api.requestNotFound') }, { status: 404 })
       }
       return NextResponse.json({ ok: true })
     }
 
     case 'remove': {
       const done = await removeFriend(me.userId, String(body.id ?? ''))
-      if (!done) return NextResponse.json({ error: 'Relation introuvable.' }, { status: 404 })
+      if (!done) return NextResponse.json({ error: t('api.relationNotFound') }, { status: 404 })
       return NextResponse.json({ ok: true })
     }
 
     default:
-      return NextResponse.json({ error: 'Action inconnue.' }, { status: 400 })
+      return NextResponse.json({ error: t('api.unknownAction') }, { status: 400 })
   }
 }

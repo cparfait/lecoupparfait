@@ -24,6 +24,7 @@
 import { NextResponse } from 'next/server'
 import { getDb, ratings, eq, sql } from '@coupparfait/db'
 import { getCurrentUser } from '@/lib/server/session.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -73,7 +74,8 @@ const NON_MOTIFS = new Set([
   'playerGames',
 ])
 
-export async function GET() {
+export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   const me = await getCurrentUser()
   if (!me) {
     return NextResponse.json({ connecte: false, partie: null, puzzle: null, faiblesses: [] })
@@ -147,6 +149,6 @@ export async function GET() {
     })
   } catch (error) {
     console.error('[palier]', error)
-    return NextResponse.json({ error: 'Diagnostic indisponible.' }, { status: 503 })
+    return NextResponse.json({ error: t('api.diagnosticUnavailable') }, { status: 503 })
   }
 }

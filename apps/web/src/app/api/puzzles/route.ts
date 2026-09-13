@@ -25,6 +25,7 @@ import {
 } from '@coupparfait/db'
 import { applyPuzzleResult, getRating } from '@coupparfait/db/ratings'
 import { getCurrentUser } from '@/lib/server/session.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -33,6 +34,7 @@ export const dynamic = 'force-dynamic'
 const WINDOW = 120
 
 export async function GET(request: Request) {
+  const t = tDeLaRequete(request)
   const url = new URL(request.url)
   const theme = url.searchParams.get('theme')
   const requestedRating = url.searchParams.get('rating')
@@ -40,7 +42,7 @@ export async function GET(request: Request) {
 
   // Une manche chronométrée ne peut pas attendre le réseau entre deux
   // puzzles : on la sert d'un bloc, par difficulté croissante.
-  if (rush > 0) return rushSeries(Math.min(60, Math.max(5, rush)))
+  if (rush > 0) return rushSeries(Math.min(60, Math.max(5, rush)), t)
 
   try {
     const database = getDb()
@@ -162,7 +164,7 @@ export async function GET(request: Request) {
     if (!puzzle) {
       return NextResponse.json(
         {
-          error: 'Aucun puzzle en base. Lance l’import :  node scripts/import-puzzles.mjs',
+          error: t('api.noPuzzleNode'),
         },
         { status: 404 },
       )
@@ -182,20 +184,21 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('[puzzles]', error)
-    return NextResponse.json({ error: 'Le service de puzzles est indisponible.' }, { status: 503 })
+    return NextResponse.json({ error: t('api.puzzlesDown') }, { status: 503 })
   }
 }
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   let body: { puzzleId?: string; solved?: boolean; correctMoves?: number; timeMs?: number }
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   if (!body.puzzleId || typeof body.solved !== 'boolean') {
-    return NextResponse.json({ error: 'Champs manquants.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.fieldsMissing') }, { status: 400 })
   }
 
   const user = await getCurrentUser()
@@ -212,7 +215,7 @@ export async function POST(request: Request) {
       .limit(1)
 
     const puzzle = rows[0]
-    if (!puzzle) return NextResponse.json({ error: 'Puzzle inconnu.' }, { status: 404 })
+    if (!puzzle) return NextResponse.json({ error: t('api.unknownPuzzle') }, { status: 404 })
 
     /*
       Une position ne compte qu'une fois, et c'est le serveur qui le garantit.
@@ -273,7 +276,7 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('[puzzles:post]', error)
-    return NextResponse.json({ error: 'Enregistrement impossible.' }, { status: 503 })
+    return NextResponse.json({ error: t('api.saveFailed') }, { status: 503 })
   }
 }
 
@@ -293,7 +296,7 @@ export async function POST(request: Request) {
  * difficulté ne compte que quelques milliers de lignes, là où un `random()`
  * sur cinq millions serait catastrophique.
  */
-async function rushSeries(count: number): Promise<Response> {
+async function rushSeries(count: number, t: ReturnType<typeof tDeLaRequete>): Promise<Response> {
   const database = getDb()
   const START = 600
   const END = 2200
@@ -314,10 +317,7 @@ async function rushSeries(count: number): Promise<Response> {
 
   const found = series.filter((puzzle) => puzzle !== null)
   if (found.length === 0) {
-    return NextResponse.json(
-      { error: 'Aucun puzzle en base. Lance l’import :  node scripts/import-puzzles.mjs' },
-      { status: 404 },
-    )
+    return NextResponse.json({ error: t('api.noPuzzleNode') }, { status: 404 })
   }
 
   return NextResponse.json({

@@ -18,6 +18,7 @@
 
 import { NextResponse } from 'next/server'
 import { nettoyerEntetes, verifierCible } from '@/lib/ia/relais.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -29,16 +30,17 @@ const TAILLE_MAX = 256 * 1024
 const DELAI_MS = 120_000
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   const brut = await request.text()
   if (brut.length > TAILLE_MAX) {
-    return NextResponse.json({ error: 'Requête trop volumineuse.' }, { status: 413 })
+    return NextResponse.json({ error: t('api.requestTooLarge') }, { status: 413 })
   }
 
   let charge: { providerId?: unknown; url?: unknown; headers?: unknown; body?: unknown }
   try {
     charge = JSON.parse(brut) as typeof charge
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   const refus = await verifierCible(charge.providerId, charge.url)

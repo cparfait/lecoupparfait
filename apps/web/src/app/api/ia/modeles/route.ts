@@ -9,6 +9,7 @@
 
 import { NextResponse } from 'next/server'
 import { nettoyerEntetes, verifierCible } from '@/lib/ia/relais.ts'
+import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -17,11 +18,12 @@ export const dynamic = 'force-dynamic'
 const DELAI_MS = 20_000
 
 export async function POST(request: Request) {
+  const t = tDeLaRequete(request)
   let charge: { providerId?: unknown; url?: unknown; headers?: unknown }
   try {
     charge = (await request.json()) as typeof charge
   } catch {
-    return NextResponse.json({ error: 'Requête illisible.' }, { status: 400 })
+    return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
   const refus = await verifierCible(charge.providerId, charge.url)
