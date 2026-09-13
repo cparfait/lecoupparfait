@@ -14,9 +14,9 @@
  * **Y compris pendant une partie**, donc, contrairement à `MiseEnRoute` qui
  * propose et peut attendre. Ce que ça coûte est réel : la boîte s'ouvre sur
  * une position en cours et la pendule continue de tourner derrière. C'est la
- * raison pour laquelle elle se ferme de trois façons — le bouton, Échap,
- * l'arrière-plan — et pour laquelle on n'en montre **jamais deux** : la route
- * n'en rend qu'une à la fois, la plus récente.
+ * raison pour laquelle elle se ferme de deux façons — le bouton et Échap — et
+ * pour laquelle on n'en montre **jamais deux** : la route n'en rend qu'une à la
+ * fois, la plus récente.
  *
  * **Refermer vaut lecture**, et c'est consigné pour les comptes : le message ne
  * revient pas à la page suivante, et l'administration voit qu'il est arrivé.
@@ -31,6 +31,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Megaphone, UserRound } from 'lucide-react'
 import clsx from 'clsx'
 import { Button } from '@/components/ui/index.tsx'
@@ -69,29 +70,96 @@ function retenirLue(id: string): void {
   }
 }
 
+/**
+ * Rythme d'interrogation.
+ *
+ * Le composant ne demandait qu'une fois, au montage. La coque restant montée
+ * d'une page à l'autre, cela voulait dire **une fois par chargement complet** :
+ * un message écrit pendant qu'une page est ouverte n'arrivait jamais, et il
+ * fallait recharger pour le voir. C'est exactement le cas qu'un message
+ * d'administration doit couvrir — prévenir quelqu'un qui est là, en train de
+ * jouer.
+ *
+ * Trente secondes : un message de l'équipe n'est pas un défi qui expire en
+ * cinq minutes — le guetteur de défis, lui, interroge toutes les quatre
+ * secondes. Une requête par demi-minute et par onglet reste négligeable, et la
+ * boucle s'arrête dès qu'un message est affiché : il n'y en a jamais deux.
+ */
+const RYTHME_MS = 30_000
+
+/**
+ * Le nœud du portail, replacé à chaque appel.
+ *
+ * Même raison que pour la pile d'alertes, et la même correction — voir
+ * `components/ui/Alerte.tsx` : le bouton « plein écran » de l'échiquier appelle
+ * `requestFullscreen` sur le conteneur du plateau, et le navigateur ne rend
+ * alors plus que cet élément et ses descendants. Une boîte accrochée au corps
+ * du document serait littéralement hors du rendu, sur l'écran où l'on passe le
+ * plus de temps.
+ */
+function hoteDuDialogue(): HTMLElement {
+  const parent = (document.fullscreenElement as HTMLElement | null) ?? document.body
+  const existant = document.getElementById('mot-equipe-hote')
+  if (existant) {
+    if (existant.parentElement !== parent) parent.appendChild(existant)
+    return existant
+  }
+  const noeud = document.createElement('div')
+  noeud.id = 'mot-equipe-hote'
+  parent.appendChild(noeud)
+  return noeud
+}
+
 export function MotDeLEquipe() {
   const t = useT()
   const [annonce, setAnnonce] = useState<Annonce | null>(null)
   const boite = useRef<HTMLDivElement>(null)
+  /** Lu par la boucle sans la relancer : une dépendance la redémarrerait. */
+  const affiche = useRef(false)
+  affiche.current = annonce !== null
 
   useEffect(() => {
     let vivant = true
-    void fetch('/api/annonces', { cache: 'no-store' })
-      .then((reponse) => (reponse.ok ? reponse.json() : { annonce: null }))
-      .then((donnees: { annonce: Annonce | null }) => {
-        if (!vivant || !donnees.annonce) return
-        // La liste locale ne sert qu'aux visiteurs sans compte : pour les
-        // autres, la route a déjà écarté ce qui est lu. La consulter dans les
-        // deux cas ne coûte rien et évite une condition de plus.
-        if (lues().includes(donnees.annonce.id)) return
-        setAnnonce(donnees.annonce)
-      })
-      .catch(() => {
-        // Silence : l'absence d'un message ne s'annonce pas.
-      })
+
+    const demander = () => {
+      // Rien à demander si une boîte est déjà ouverte — on n'en montre jamais
+      // deux — ni si l'onglet est en arrière-plan : le retour au premier plan
+      // déclenche une demande immédiate, ci-dessous.
+      if (affiche.current || document.hidden) return
+      void fetch('/api/annonces', { cache: 'no-store' })
+        .then((reponse) => (reponse.ok ? reponse.json() : { annonce: null }))
+        .then((donnees: { annonce: Annonce | null }) => {
+          if (!vivant || !donnees.annonce || affiche.current) return
+          // La liste locale ne sert qu'aux visiteurs sans compte : pour les
+          // autres, la route a déjà écarté ce qui est lu. La consulter dans les
+          // deux cas ne coûte rien et évite une condition de plus.
+          if (lues().includes(donnees.annonce.id)) return
+          setAnnonce(donnees.annonce)
+        })
+        .catch(() => {
+          // Silence : l'absence d'un message ne s'annonce pas, et le tour
+          // suivant réessaiera.
+        })
+    }
+
+    demander()
+    const minuteur = setInterval(demander, RYTHME_MS)
+    document.addEventListener('visibilitychange', demander)
     return () => {
       vivant = false
+      clearInterval(minuteur)
+      document.removeEventListener('visibilitychange', demander)
     }
+  }, [])
+
+  // Le portail ne peut viser le document qu'une fois monté, et il suit le plein
+  // écran dans les deux sens.
+  const [hote, setHote] = useState<HTMLElement | null>(null)
+  useEffect(() => {
+    const suivre = () => setHote(hoteDuDialogue())
+    suivre()
+    document.addEventListener('fullscreenchange', suivre)
+    return () => document.removeEventListener('fullscreenchange', suivre)
   }, [])
 
   const fermer = useCallback(() => {
@@ -112,21 +180,31 @@ export function MotDeLEquipe() {
   // conteneur qui n'existe pas.
   useDialogue(boite, { onFermer: fermer, actif: annonce !== null })
 
-  if (!annonce) return null
+  if (!annonce || !hote) return null
 
   const important = annonce.tone === 'important'
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[93] grid place-items-center p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="mot-equipe-titre"
     >
-      {/* L'arrière-plan ferme, comme partout ailleurs dans l'application. Il
-          est assombri sans être flouté : derrière, il y a peut-être une
-          position qu'on est en train de calculer. */}
-      <div className="absolute inset-0 bg-black/40" onClick={fermer} aria-hidden />
+      {/*
+        L'arrière-plan **ne ferme pas**, contrairement aux autres dialogues.
+
+        Ailleurs, fermer d'un clic à côté est une commodité : on rouvre le menu
+        qu'on a refermé par mégarde. Ici, ce qui se referme est perdu — la
+        lecture est consignée, et le message ne revient pas. Un clic qui tombe
+        n'importe où sur l'écran pendant une partie l'effacerait sans qu'il ait
+        été lu, ce qui est précisément ce que cette boîte existe pour empêcher.
+
+        Restent deux sorties, toutes deux délibérées : le bouton, et Échap.
+        L'arrière-plan est assombri sans être flouté — derrière, il y a
+        peut-être une position qu'on est en train de calculer.
+      */}
+      <div className="absolute inset-0 bg-black/40" aria-hidden />
 
       <div
         ref={boite}
@@ -165,6 +243,7 @@ export function MotDeLEquipe() {
           {t('announce.dismiss')}
         </Button>
       </div>
-    </div>
+    </div>,
+    hote,
   )
 }
