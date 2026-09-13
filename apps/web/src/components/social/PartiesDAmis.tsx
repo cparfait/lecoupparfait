@@ -34,6 +34,7 @@ import { Board2D } from '@/components/board/Board2D.tsx'
 import { Card, Chip } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export interface PartieDAmi {
   pseudo: string
@@ -55,6 +56,7 @@ export interface PartieDAmi {
  * ne peut compter que ce qu'elle tient.
  */
 export function PartiesDAmis({ parties }: { parties: PartieDAmi[] }) {
+  const t = useT()
   const habillage = usePreferences((state) => state.boardStyle)
 
   if (parties.length === 0) return null
@@ -62,7 +64,7 @@ export function PartiesDAmis({ parties }: { parties: PartieDAmi[] }) {
   return (
     <Card className="mb-4 overflow-hidden">
       <EnTeteDeCarte
-        titre="Tes amis, contre l’ordinateur"
+        titre={t('last.friendsVsComputer')}
         icone={<Cpu size={14} aria-hidden />}
         teinte="var(--rub-jouer)"
         fin={`${parties.length} en cours`}
@@ -77,6 +79,7 @@ export function PartiesDAmis({ parties }: { parties: PartieDAmi[] }) {
 }
 
 function PartieDUnAmi({ partie, habillage }: { partie: PartieDAmi; habillage: string }) {
+  const t = useT()
   /**
    * La position, rejouée depuis le départ.
    *
@@ -143,7 +146,7 @@ function PartieDUnAmi({ partie, habillage }: { partie: PartieDAmi; habillage: st
             très bien être en pause devant un café, et l'annoncer comme un
             direct serait mentir sur ce qu'on regarde. */}
         dernier coup {ilYA(partie.dernierCoupLe)}
-        <span className="ml-auto text-accent">suivre la partie →</span>
+        <span className="ml-auto text-accent">{t('last.followGame')}</span>
       </p>
     </Link>
   )

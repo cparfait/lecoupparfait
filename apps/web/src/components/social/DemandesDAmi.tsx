@@ -26,6 +26,7 @@ import clsx from 'clsx'
 import { Button, Card } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 interface Demandeur {
   id: string
@@ -49,6 +50,7 @@ interface Demande {
 const POLL_MS = 60_000
 
 export function DemandesDAmi({ className }: { className?: string }) {
+  const t = useT()
   const [demandes, setDemandes] = useState<Demande[]>([])
   const [enCours, setEnCours] = useState<string | null>(null)
 
@@ -88,13 +90,16 @@ export function DemandesDAmi({ className }: { className?: string }) {
         // laisserait la ligne sous le doigt qui vient de répondre.
         setDemandes((liste) => liste.filter((entree) => entree.id !== demande.id))
         if (accepter) {
-          toast.success(`${demande.user.username} est maintenant ton ami.`, 'Tu peux le défier.')
+          toast.success(
+            t('last.nowYourFriend', { pseudo: demande.user.username }),
+            t('last.youCanChallenge'),
+          )
         }
       } finally {
         setEnCours(null)
       }
     },
-    [enCours],
+    [enCours, t],
   )
 
   if (demandes.length === 0) return null
@@ -103,7 +108,11 @@ export function DemandesDAmi({ className }: { className?: string }) {
     <Card className={clsx('overflow-hidden', className)}>
       <div className="h-1 bg-accent" aria-hidden />
       <EnTeteDeCarte
-        titre={demandes.length === 1 ? 'Une demande d’ami' : `${demandes.length} demandes d’ami`}
+        titre={
+          demandes.length === 1
+            ? t('last.oneFriendRequest')
+            : t('last.friendRequests', { n: demandes.length })
+        }
         icone={<UserPlus size={14} aria-hidden />}
         fin={
           <Link href="/amis" className="text-accent hover:underline">
@@ -127,7 +136,7 @@ export function DemandesDAmi({ className }: { className?: string }) {
                   'absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-[var(--bg-elev)]',
                   demande.user.online ? 'bg-[var(--q-best)]' : 'bg-line',
                 )}
-                aria-label={demande.user.online ? 'En ligne' : 'Hors ligne'}
+                aria-label={t(demande.user.online ? 'last.online' : 'friendGame.offline')}
               />
             </span>
             <span className="min-w-0 flex-1 truncate text-sm font-medium">

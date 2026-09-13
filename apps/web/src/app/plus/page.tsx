@@ -44,7 +44,7 @@ export default function PlusPage() {
             action={
               section.sommaire && (
                 <Link href={section.sommaire} className="lien">
-                  Voir la page
+                  {t('last.seeThePage')}
                 </Link>
               )
             }

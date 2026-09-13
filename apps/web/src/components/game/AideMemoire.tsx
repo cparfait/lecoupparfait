@@ -30,6 +30,7 @@ import Link from 'next/link'
 import { Card } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { MEMO_AVANT_COUP } from '@/lib/apprendre/principes.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export function AideMemoire({
   /** `false` pendant que l'adversaire réfléchit : il n'y a rien à décider. */
@@ -39,12 +40,13 @@ export function AideMemoire({
   actif?: boolean
   className?: string
 }) {
+  const t = useT()
   const [ouvert, setOuvert] = useState(true)
 
   return (
     <Card className={className}>
       <EnTeteDeCarte
-        titre="Avant de jouer"
+        titre={t('last.beforeYouPlay')}
         icone={<ListChecks size={14} aria-hidden />}
         teinte="var(--rub-apprendre)"
         filet={ouvert}
@@ -80,11 +82,9 @@ export function AideMemoire({
           </ol>
 
           <p className="mt-3 border-t border-line/60 pt-2.5 text-[12px] leading-relaxed text-faint">
-            {actif
-              ? 'Dix secondes, dans cet ordre. '
-              : 'C’est à lui de jouer — profites-en pour faire le tour. '}
+            {actif ? t('last.tenSeconds') : t('last.theirTurn')}{' '}
             <Link href="/apprendre/principes" className="lien">
-              Ce que chaque question regarde
+              {t('last.whatEachLooksAt')}
             </Link>
           </p>
         </div>

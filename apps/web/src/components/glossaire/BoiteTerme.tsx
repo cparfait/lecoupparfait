@@ -29,6 +29,7 @@ import { renderBold } from '@/lib/gras.tsx'
 import { playMoveFor } from '@/lib/sound.ts'
 import { useSan } from '@/lib/notation.ts'
 import type { PositionIllustree } from '@/lib/glossaire-positions.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /** Le temps qu'on laisse à la position de départ avant de jouer. */
 const AVANT_LE_COUP = 1000
@@ -46,6 +47,7 @@ export function BoiteTerme({
   position: PositionIllustree
   onFermer: () => void
 }) {
+  const t = useT()
   const boite = useRef<HTMLDivElement>(null)
   useDialogue(boite, { onFermer })
   const format = useSan()
@@ -173,7 +175,7 @@ export function BoiteTerme({
             icon={<RotateCcw size={14} />}
             onClick={jouer}
           >
-            Rejouer le coup
+            {t('last.replayMove')}
           </Button>
         )}
       </div>

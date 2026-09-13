@@ -26,6 +26,7 @@ import clsx from 'clsx'
 import type { Color } from 'chess.js'
 import { QUALITY_STYLES, isNotableQuality, type MoveQuality } from '@coupparfait/core'
 import { useSan } from '@/lib/notation.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /** Ce que le ruban a besoin de savoir d'un coup. */
 export interface CoupDuRuban {
@@ -79,6 +80,7 @@ export function RubanCoups({
   masque?: boolean
   className?: string
 }) {
+  const t = useT()
   /*
     Trois coups sur téléphone, cinq à partir d'une tablette.
 
@@ -103,7 +105,7 @@ export function RubanCoups({
   if (coups.length === 0) {
     return (
       <p className={clsx('py-2 text-center text-[14px] text-faint', className)}>
-        Les coups joués apparaîtront ici.
+        {t('moves.empty')}
       </p>
     )
   }

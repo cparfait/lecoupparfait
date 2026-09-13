@@ -184,7 +184,7 @@ export default function LeaderboardPage() {
       </Card>
 
       <Card className="mt-4 p-4">
-        <p className="text-[12px] font-semibold text-faint">Comment ce classement est calculé</p>
+        <p className="text-[12px] font-semibold text-faint">{t('last.howRatingWorks')}</p>
         <p className="mt-2 text-[14px] leading-relaxed text-muted">
           {t('leaderboard.conservativeBefore')}{' '}
           <strong className="text-ink">{t('leaderboard.conservativeStrong')}</strong>

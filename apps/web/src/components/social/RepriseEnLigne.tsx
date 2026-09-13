@@ -23,8 +23,10 @@ import { Swords, X } from 'lucide-react'
 import { Alerte } from '@/components/ui/Alerte.tsx'
 import { Button } from '@/components/ui/index.tsx'
 import { oublierPartieEnLigne, usePartieEnLigne } from '@/lib/game/partieEnLigne.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export function RepriseEnLigne() {
+  const t = useT()
   const pathname = usePathname()
   const partie = usePartieEnLigne()
 
@@ -38,7 +40,7 @@ export function RepriseEnLigne() {
     // vivait dans le coin bas-droit, où l'on ne regarde pas — et c'est
     // précisément l'alerte qu'il ne faut pas manquer, puisqu'une partie
     // continue sans nous pendant qu'on ne la voit pas.
-    <Alerte label="Partie en cours" className="popover p-3.5 shadow-[var(--shadow-lg)]">
+    <Alerte label={t('last.gameInProgress')} className="popover p-3.5 shadow-[var(--shadow-lg)]">
       <div className="flex items-start gap-3">
         <span
           className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[color-mix(in_oklab,var(--accent)_16%,transparent)] text-accent"
@@ -49,8 +51,8 @@ export function RepriseEnLigne() {
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold leading-snug">
             {partie.adversaire
-              ? `Ta partie contre ${partie.adversaire} continue`
-              : 'Ta partie en direct continue'}
+              ? t('next.gameContinues', { adversaire: partie.adversaire })
+              : t('last.liveGameContinues')}
           </p>
           {/* Le texte suivait l'ancienne règle — une minute, quoi qu'il
               arrive. Il annonçait donc une perte qui n'a plus lieu, ce qui

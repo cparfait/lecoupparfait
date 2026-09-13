@@ -26,6 +26,7 @@ import clsx from 'clsx'
 import { Button, Card, Skeleton } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import type { ProchaineChose, ProchaineChoseId } from './prochainesChoses.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 const SECONDAIRES_MAX = 2
 
@@ -55,6 +56,7 @@ export function Maintenant({
   /** Vrai tant qu'on ignore ce qui attend : on ne propose rien au hasard. */
   chargement: boolean
 }) {
+  const t = useT()
   if (chargement) return <Skeleton className="h-36 w-full" />
 
   const [principale, ...suite] = choses
@@ -102,7 +104,7 @@ export function Maintenant({
 
       {suite.length > 0 && (
         <div className="border-t border-line/60">
-          <p className="px-5 pt-3 text-[12px] font-semibold text-faint">Et aussi</p>
+          <p className="px-5 pt-3 text-[12px] font-semibold text-faint">{t('last.andAlso')}</p>
           <ul className="space-y-1 px-2 pb-2">
             {suite.slice(0, SECONDAIRES_MAX).map((chose) => (
               <li key={`${chose.id}-${chose.lien}`}>

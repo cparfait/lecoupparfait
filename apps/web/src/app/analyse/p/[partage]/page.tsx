@@ -22,6 +22,7 @@ import { usePreferencesDe } from '@/lib/store/preferences.ts'
 import { Card, EmptyState, Skeleton } from '@/components/ui/index.tsx'
 import { ButtonLink } from '@/components/ui/index.tsx'
 import { ReviewScreen } from '@/app/analyse/page.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 interface AnalysePartagee {
   moves: string[]
@@ -32,6 +33,7 @@ interface AnalysePartagee {
 }
 
 export default function AnalysePartageePage({ params }: { params: Promise<{ partage: string }> }) {
+  const t = useT()
   const { partage } = use(params)
   const { locale: langue, notation } = usePreferencesDe('locale', 'notation')
   // Le rapport est rédigé par le cœur : français ou anglais.
@@ -79,9 +81,9 @@ export default function AnalysePartageePage({ params }: { params: Promise<{ part
       <div className="mx-auto max-w-md px-4 py-20">
         <Card>
           <EmptyState
-            title="Ce lien ne mène à rien"
-            description="L’analyse a peut-être cessé d’être partagée, ou le lien est incomplet."
-            action={<ButtonLink href="/analyse">Analyser une partie</ButtonLink>}
+            title={t('last.deadLink')}
+            description={t('last.deadLinkHint')}
+            action={<ButtonLink href="/analyse">{t('analysis.analyseAGame')}</ButtonLink>}
           />
         </Card>
       </div>

@@ -42,6 +42,7 @@ import type { PlayedMove } from '@/lib/game/useChessGame.ts'
 import { Button } from '@/components/ui/index.tsx'
 import { CommentaryPanel, useLiveCommentary } from './LiveCommentary.tsx'
 import { ApprofondirCoup } from '@/components/ia/ApprofondirCoup.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export function PourquoiPanel({
   move,
@@ -63,6 +64,7 @@ export function PourquoiPanel({
   openingName?: string | null
   className?: string
 }) {
+  const t = useT()
   const [ouvert, setOuvert] = useState(false)
 
   /**
@@ -101,7 +103,7 @@ export function PourquoiPanel({
             setOuvert(true)
           }}
         >
-          Pourquoi ce coup ?
+          {t('last.whyThisMove')}
         </Button>
       </div>
     )

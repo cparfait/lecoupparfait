@@ -75,7 +75,7 @@ function VerifyResult() {
         {state.phase === 'checking' && (
           <>
             <Spinner size={24} className="mx-auto text-accent" />
-            <p className="mt-3 text-sm text-muted">Confirmation en cours…</p>
+            <p className="mt-3 text-sm text-muted">{t('last.confirming')}</p>
           </>
         )}
 
