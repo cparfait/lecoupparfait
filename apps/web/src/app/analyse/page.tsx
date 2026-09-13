@@ -1871,7 +1871,7 @@ export function ReviewScreen({
                       notation,
                       ouverture: report.opening?.name ?? null,
                     })}
-                    questionParDefaut={questionApprofondir(locale)}
+                    questionParDefaut={questionApprofondir(t)}
                   />
                 </div>
               </Card>

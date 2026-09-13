@@ -2526,6 +2526,19 @@ export const en: Dictionary = {
     purgedEvaluations: 'evaluations under 14 plies, too shallow to be reused',
     purgedEmptyAccounts: 'accounts with no game and no analysis, inactive for six months',
   },
+  prompt: {
+    system:
+      'You are a chess coach: warm and direct.\n\nWhat you are given is reliable: the evaluation comes from the Stockfish engine and the written explanation comes from the application. Your job is to build on it to help the person understand — never to recompute it.\n\nRules:\n- Never invent a line, a move or an evaluation. If something was not given to you, say plainly that you do not have it.\n- Start from what the person already knows: their question shows where they are stuck.\n- Three sentences is enough. This is read between moves, not in a textbook.\n- Name patterns the way players do: fork, pin, skewer, back-rank mate, weak square.\n- Do not open with a greeting.',
+    answerIn: 'Answer in {langue}, whatever the language of these instructions.',
+    spoken: '(Answer in two sentences at most — this will be read aloud.)',
+    goDeeper:
+      'Go further than the explanation above: what is the idea behind the engine’s move, and what should I look at next time to spot it myself?',
+    relayIncomplete: 'Incomplete request.',
+    relaySchemeOnly: 'Only http and https are relayed.',
+    relayWrongProvider: 'This address does not match this provider.',
+    relayUnknownHost: 'Host name not found.',
+    relayPrivateNetwork: 'This address points to a private network.',
+  },
   meta: {
     rootTitle: 'Le Coup Parfait — learn, play, improve at chess',
     rootDesc:

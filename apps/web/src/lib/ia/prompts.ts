@@ -10,44 +10,44 @@
  * Sans ce cadrage, un modèle de langue invente des variantes plausibles et
  * fausses. C'est le travers connu des assistants d'échecs, et le seul remède
  * fiable est de ne jamais lui demander de calculer.
+ *
+ * ── La langue de la réponse ─────────────────────────────────────────────────
+ *
+ * La consigne disait « Tu es un entraîneur d'échecs qui parle français », et il
+ * n'en existait que deux versions. Le coach répondait donc en français à
+ * quelqu'un dont toute l'application était en japonais — le seul endroit du
+ * projet où le texte lu n'était pas seulement mal traduit, mais produit dans la
+ * mauvaise langue à chaque appel.
+ *
+ * Deux choses distinctes, qu'on sépare ici :
+ *
+ *  - **la langue de la consigne**, qui n'est lue que par le modèle. Elle vient du
+ *    dictionnaire, donc de la langue choisie quand elle est traduite, et de
+ *    l'anglais sinon. Aucune importance pour l'utilisateur ;
+ *  - **la langue de la réponse**, qui est la sienne. Elle est nommée
+ *    explicitement, par son nom dans sa propre langue — « 日本語 », « العربية » —
+ *    ce que les modèles suivent mieux qu'un code ISO.
+ *
+ * La seconde ligne n'est posée que si les deux diffèrent : redire « réponds en
+ * français » à une consigne déjà en français, c'est une phrase de plus à peser
+ * pour rien.
  */
 
-import type { Locale } from '@coupparfait/core'
+import type { Traducteur } from '@/lib/i18n/resoudre.ts'
+import { langue } from '@/lib/i18n/langues.ts'
+import type { Locale } from '@/lib/i18n/dictionary.ts'
+import { localeDuContenu } from '@/lib/i18n/dictionary.ts'
 
-const FR = `Tu es un entraîneur d'échecs qui parle français, chaleureux et direct.
+/** Consigne système, et la langue dans laquelle il faut répondre. */
+export function systemPrompt(locale: Locale, t: Traducteur): string {
+  const corps = t('prompt.system')
 
-Ce que tu reçois est fiable : l'évaluation vient du moteur Stockfish et
-l'explication écrite vient de l'application. Ton rôle est de t'appuyer dessus
-pour aider la personne à comprendre — jamais de la recalculer.
+  // La consigne existe en français et en anglais ; au-delà, elle est servie en
+  // anglais par la chaîne de repli. C'est donc à ces deux langues-là qu'on
+  // compare, et non à la langue choisie.
+  if (locale === localeDuContenu(locale)) return corps
 
-Règles :
-- N'invente aucune variante, aucun coup et aucune évaluation. Si une
-  information ne t'a pas été fournie, dis simplement que tu ne l'as pas.
-- Pars de ce que la personne sait déjà : sa question dit où elle bloque.
-- Trois phrases suffisent. On lit ça entre deux coups, pas dans un manuel.
-- Nomme les motifs avec les mots des joueurs : fourchette, clouage, enfilade,
-  mat du couloir, case faible.
-- Tutoie, et n'ouvre pas par une formule de politesse.`
-
-const EN = `You are a chess coach: warm, direct, speaking English.
-
-What you are given is reliable: the evaluation comes from the Stockfish engine
-and the written explanation comes from the application. Your job is to build on
-it to help the person understand — never to recompute it.
-
-Rules:
-- Never invent a line, a move or an evaluation. If something was not given to
-  you, say plainly that you do not have it.
-- Start from what the person already knows: their question shows where they
-  are stuck.
-- Three sentences is enough. This is read between moves, not in a textbook.
-- Name patterns the way players do: fork, pin, skewer, back-rank mate, weak
-  square.
-- Do not open with a greeting.`
-
-/** Consigne système, dans la langue de l'interface. */
-export function systemPrompt(locale: Locale): string {
-  return locale === 'en' ? EN : FR
+  return `${corps}\n\n${t('prompt.answerIn', { langue: langue(locale).nom })}`
 }
 
 /**
@@ -57,8 +57,6 @@ export function systemPrompt(locale: Locale): string {
  * l'écran : on ne peut pas la parcourir en diagonale, il faut l'écouter en
  * entier.
  */
-export function consigneVocale(locale: Locale): string {
-  return locale === 'en'
-    ? '(Answer in two sentences at most — this will be read aloud.)'
-    : '(Réponds en deux phrases maximum : ta réponse sera lue à voix haute.)'
+export function consigneVocale(t: Traducteur): string {
+  return t('prompt.spoken')
 }

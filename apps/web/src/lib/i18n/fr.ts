@@ -2547,6 +2547,19 @@ export const fr = {
     purgedEvaluations: 'évaluations sous 14 demi-coups, trop peu profondes pour resservir',
     purgedEmptyAccounts: 'comptes sans aucune partie ni analyse, inactifs depuis six mois',
   },
+  prompt: {
+    system:
+      'Tu es un entraîneur d’échecs, chaleureux et direct.\n\nCe que tu reçois est fiable : l’évaluation vient du moteur Stockfish et l’explication écrite vient de l’application. Ton rôle est de t’appuyer dessus pour aider la personne à comprendre — jamais de la recalculer.\n\nRègles :\n- N’invente aucune variante, aucun coup et aucune évaluation. Si une information ne t’a pas été fournie, dis simplement que tu ne l’as pas.\n- Pars de ce que la personne sait déjà : sa question dit où elle bloque.\n- Trois phrases suffisent. On lit ça entre deux coups, pas dans un manuel.\n- Nomme les motifs avec les mots des joueurs : fourchette, clouage, enfilade, mat du couloir, case faible.\n- Tutoie, et n’ouvre pas par une formule de politesse.',
+    answerIn: 'Réponds en {langue}, quelle que soit la langue de cette consigne.',
+    spoken: '(Réponds en deux phrases maximum : ta réponse sera lue à voix haute.)',
+    goDeeper:
+      'Va plus loin que l’explication ci-dessus : quelle est l’idée derrière le coup du moteur, et que devrais-je regarder la prochaine fois pour la trouver moi-même ?',
+    relayIncomplete: 'Requête incomplète.',
+    relaySchemeOnly: 'Seuls http et https sont relayés.',
+    relayWrongProvider: 'Cette adresse ne correspond pas à ce fournisseur.',
+    relayUnknownHost: 'Nom d’hôte introuvable.',
+    relayPrivateNetwork: 'Cette adresse pointe vers un réseau privé.',
+  },
   meta: {
     rootTitle: 'Le Coup Parfait — apprendre, jouer, progresser aux échecs',
     rootDesc:

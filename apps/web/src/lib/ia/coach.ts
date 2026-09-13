@@ -9,10 +9,13 @@
  * dialogue et de la traduction des échecs en messages lisibles.
  */
 
-import type { Locale } from '@coupparfait/core'
+// La langue de l'interface, pas celle du contenu : le modèle parle les
+// quarante et une, et c'est dans celle de son interlocuteur qu'il doit répondre.
+import type { Locale } from '@/lib/i18n/dictionary.ts'
 import type { useT } from '@/lib/i18n/index.tsx'
 import type { AIMessage, AIProvider } from './types.ts'
 import { PANNES_IA, appelChat, appelChatFlux } from './transport.ts'
+import type { Traducteur } from '@/lib/i18n/resoudre.ts'
 import { systemPrompt } from './prompts.ts'
 
 /**
@@ -77,11 +80,12 @@ export async function demander(options: {
   model: string
   apiKey: string
   locale: Locale
+  t: Traducteur
   messages: AIMessage[]
   maxTokens: number
 }): Promise<string> {
-  const { provider, model, apiKey, locale, messages, maxTokens } = options
-  const complet: AIMessage[] = [{ role: 'system', content: systemPrompt(locale) }, ...messages]
+  const { provider, model, apiKey, locale, t, messages, maxTokens } = options
+  const complet: AIMessage[] = [{ role: 'system', content: systemPrompt(locale, t) }, ...messages]
   const brut = await appelChat(
     provider,
     provider.chatUrl(model, apiKey),
@@ -103,12 +107,13 @@ export async function demanderEnFlux(options: {
   model: string
   apiKey: string
   locale: Locale
+  t: Traducteur
   messages: AIMessage[]
   maxTokens: number
   onFragment: (texte: string) => void
 }): Promise<string> {
-  const { provider, model, apiKey, locale, messages, maxTokens, onFragment } = options
-  const complet: AIMessage[] = [{ role: 'system', content: systemPrompt(locale) }, ...messages]
+  const { provider, model, apiKey, locale, t, messages, maxTokens, onFragment } = options
+  const complet: AIMessage[] = [{ role: 'system', content: systemPrompt(locale, t) }, ...messages]
   return appelChatFlux(
     provider,
     provider.streamChatUrl(model, apiKey),

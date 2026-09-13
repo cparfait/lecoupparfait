@@ -22,6 +22,7 @@
 import { lookup } from 'node:dns/promises'
 import { PROVIDERS } from './providers/index.ts'
 import { estAdresseLocale, estHoteLocal } from './hote.ts'
+import type { Traducteur } from '@/lib/i18n/resoudre.ts'
 
 /**
  * Origines autorisées, déduites des fournisseurs eux-mêmes.
@@ -61,9 +62,13 @@ export interface Refus {
  * inacceptable (protocole, hôte local) avant de faire la moindre résolution
  * DNS, qui est la seule étape coûteuse.
  */
-export async function verifierCible(providerId: unknown, url: unknown): Promise<Refus | null> {
+export async function verifierCible(
+  providerId: unknown,
+  url: unknown,
+  t: Traducteur,
+): Promise<Refus | null> {
   if (typeof providerId !== 'string' || typeof url !== 'string' || !providerId || !url) {
-    return { message: 'Requête incomplète.', status: 400 }
+    return { message: t('prompt.relayIncomplete'), status: 400 }
   }
 
   let cible: URL
@@ -74,7 +79,7 @@ export async function verifierCible(providerId: unknown, url: unknown): Promise<
   }
 
   if (cible.protocol !== 'https:' && cible.protocol !== 'http:') {
-    return { message: 'Seuls http et https sont relayés.', status: 400 }
+    return { message: t('prompt.relaySchemeOnly'), status: 400 }
   }
 
   // Un service local se joint depuis le navigateur, jamais depuis le serveur :
@@ -89,7 +94,7 @@ export async function verifierCible(providerId: unknown, url: unknown): Promise<
   const integre = ORIGINES_INTEGREES.get(providerId)
   if (integre) {
     if (!integre.has(cible.origin)) {
-      return { message: 'Cette adresse ne correspond pas à ce fournisseur.', status: 400 }
+      return { message: t('prompt.relayWrongProvider'), status: 400 }
     }
     return null
   }
@@ -104,13 +109,13 @@ export async function verifierCible(providerId: unknown, url: unknown): Promise<
   try {
     const adresses = await lookup(cible.hostname, { all: true })
     if (adresses.length === 0) {
-      return { message: 'Nom d’hôte introuvable.', status: 400 }
+      return { message: t('prompt.relayUnknownHost'), status: 400 }
     }
     if (adresses.some((entree) => estAdresseLocale(entree.address))) {
-      return { message: 'Cette adresse pointe vers un réseau privé.', status: 400 }
+      return { message: t('prompt.relayPrivateNetwork'), status: 400 }
     }
   } catch {
-    return { message: 'Nom d’hôte introuvable.', status: 400 }
+    return { message: t('prompt.relayUnknownHost'), status: 400 }
   }
 
   return null

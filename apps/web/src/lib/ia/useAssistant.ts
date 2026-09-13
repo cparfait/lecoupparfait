@@ -14,7 +14,6 @@
  */
 
 import { useCallback, useEffect, useState } from 'react'
-import { localeDuContenu } from '@/lib/i18n/dictionary.ts'
 import { useT } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { getProvider } from './providers/index.ts'
@@ -94,8 +93,12 @@ export function useAssistant(): Assistant {
           apiKey: getCle(courant.id),
           // L'assistant, lui, parle toutes les langues : on lui donne celle de
           // l'interface et non celle du contenu. C'est la seule frontière du
-          // projet où la distinction ne s'applique pas.
-          locale: localeDuContenu(locale),
+          // projet où la distinction ne s'applique pas — et elle ne s'appliquait
+          // pas non plus ici, où `localeDuContenu` ramenait les quarante et une
+          // langues à deux, si bien que le coach répondait en français à
+          // quelqu'un dont tout l'écran était en japonais.
+          locale,
+          t,
           messages: historique,
           maxTokens,
           onFragment,

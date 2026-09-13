@@ -13,6 +13,7 @@
  */
 
 import { formatScore, localiseSan, QUALITY_STYLES } from '@coupparfait/core'
+import type { Traducteur } from '@/lib/i18n/resoudre.ts'
 import type {
   AnalysedMove,
   Color,
@@ -175,8 +176,6 @@ export function contexteDuCoupAnalyse(
  * sans cette consigne, les modèles la reformulent, et l'utilisateur a payé un
  * appel pour relire ce qu'il venait de lire.
  */
-export function questionApprofondir(locale: Locale): string {
-  return locale === 'en'
-    ? 'Go further than the explanation above: what is the idea behind the engine’s move, and what should I look at next time to spot it myself?'
-    : 'Va plus loin que l’explication ci-dessus : quelle est l’idée derrière le coup du moteur, et que devrais-je regarder la prochaine fois pour la trouver moi-même ?'
+export function questionApprofondir(t: Traducteur): string {
+  return t('prompt.goDeeper')
 }

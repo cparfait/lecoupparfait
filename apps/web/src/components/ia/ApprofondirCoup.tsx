@@ -59,7 +59,7 @@ export function ApprofondirCoup({
         },
         { locale, notation, ouverture: openingName },
       )}
-      questionParDefaut={questionApprofondir(locale)}
+      questionParDefaut={questionApprofondir(t)}
       suggestions={suggestionsPour(commentary.quality, t)}
     />
   )

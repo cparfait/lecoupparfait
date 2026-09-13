@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: t('api.unreadable') }, { status: 400 })
   }
 
-  const refus = await verifierCible(charge.providerId, charge.url)
+  const refus = await verifierCible(charge.providerId, charge.url, t)
   if (refus) {
     return NextResponse.json({ error: refus.message }, { status: refus.status })
   }
