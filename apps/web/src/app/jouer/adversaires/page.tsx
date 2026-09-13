@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * La galerie des sept adversaires.
  *
@@ -10,31 +12,32 @@
  * arriver sur `/jouer/adversaires` après avoir coupé la fin de
  * `/jouer/adversaires/mirage` doit mener à la liste, pas à une page
  * introuvable.
+ *
+ * Composant client depuis qu'elle se traduit : le titre de l'onglet vit dans
+ * `layout.tsx`.
  */
 
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { BOT_PERSONALITIES } from '@coupparfait/core'
 import { Card } from '@/components/ui/index.tsx'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
-
-export const metadata: Metadata = {
-  title: 'Les adversaires artificiels',
-  description:
-    'Sept adversaires, sept styles de jeu réellement différents — leur histoire, leurs penchants chiffrés, et comment battre chacun d’eux.',
-}
+import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
+import { usePreferences } from '@/lib/store/preferences.ts'
 
 export default function GalerieAdversaires() {
+  const t = useT()
+  /* Noms et phrases des sept adversaires : du contenu rédigé, que le cœur
+     n'écrit qu'en français et en anglais. Voir `localeDuContenu`. */
+  const contenu = usePreferences((state) => localeDuContenu(state.locale))
+
   return (
     <div className="page">
       <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-        Tes adversaires artificiels
+        {t('play.opponentsTitle')}
       </h1>
       <p className="mt-3 max-w-2xl leading-relaxed text-muted max-lg:text-[14px]">
-        Sept caractères, répartis sur les vingt-cinq niveaux. Leur style n’est pas un habillage :
-        chacun évalue les coups avec une préférence propre, et sa fiche montre les nombres qui la
-        produisent — avec ce qu’il faut faire pour le battre.
+        {t('opponent.galleryIntro')}
       </p>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -44,7 +47,7 @@ export default function GalerieAdversaires() {
               <PortraitAdversaire personality={personnalite} size={56} />
               <div className="min-w-0 flex-1">
                 <p className="flex items-center gap-1.5 text-[15px] font-semibold">
-                  {personnalite.name.fr}
+                  {personnalite.name[contenu]}
                   <ArrowRight
                     size={14}
                     aria-hidden
@@ -52,7 +55,9 @@ export default function GalerieAdversaires() {
                   />
                 </p>
                 <p className="mt-0.5 text-[12px] italic text-accent">« {personnalite.devise} »</p>
-                <p className="mt-1.5 text-xs leading-relaxed text-muted">{personnalite.blurb.fr}</p>
+                <p className="mt-1.5 text-xs leading-relaxed text-muted">
+                  {personnalite.blurb[contenu]}
+                </p>
               </div>
             </Card>
           </Link>

@@ -148,6 +148,43 @@ export const fr = {
     statsOpenings: 'ouvertures répertoriées',
   },
 
+  opponent: {
+    all: 'Tous les adversaires',
+    galleryIntro:
+      'Sept caractères, répartis sur les vingt-cinq niveaux. Leur style n’est pas un habillage : chacun évalue les coups avec une préférence propre, et sa fiche montre les nombres qui la produisent — avec ce qu’il faut faire pour le battre.',
+    whereYouMeet: 'Où tu le rencontres',
+    atLevel: 'Au niveau',
+    atLevels: 'Aux niveaux',
+    ofTwentyFive: 'des vingt-cinq, soit de',
+    to: 'à',
+    playAgainst: 'Jouer contre {nom}',
+    character: 'Son caractère',
+    characterHint:
+      'Ce que son évaluation ajoute — ou retire — à un coup, en centièmes de pion. Ce n’est pas une étiquette : c’est le nombre qui le fait jouer comme il joue.',
+    noBias:
+      'Aucun biais, sur aucun axe. C’est le seul de la série dans ce cas, et c’est ce qui le rend si désagréable.',
+    howToBeat: 'Comment le battre',
+  },
+
+  credits: {
+    title: 'Crédits & licences',
+    intro:
+      'Le Coup Parfait n’aurait pas pu exister sans le travail libre d’autres personnes. Tout ce qui suit est réutilisé dans le respect de sa licence — et cette page en fait partie : plusieurs de ces licences exigent explicitement l’attribution.',
+    licenceTitle: 'La licence du Coup Parfait',
+    licenceBefore: 'Le Coup Parfait est publié sous licence',
+    licenceStrong: 'GNU Affero General Public License v3 ou ultérieure',
+    licenceAfter:
+      '. Ce choix n’est pas arbitraire : Stockfish est sous GPL, et toute œuvre qui l’intègre doit adopter une licence compatible. L’AGPL ajoute une clause décisive pour un service en ligne — quiconque héberge une version modifiée doit en publier le code source.',
+    licenceConcretely:
+      'Concrètement : tu peux l’utiliser, le modifier, l’héberger pour tes amis, le redistribuer. La seule obligation est de laisser les suivants faire pareil.',
+    nonCommercialBefore: 'Les jeux de pièces publiés sous licence',
+    nonCommercialAfter:
+      '(usage non commercial) ont été délibérément écartés du projet, aussi beaux soient-ils : leur clause rendrait la redistribution libre impossible.',
+    moreAboutProject: 'En savoir plus sur le projet',
+    by: 'par {auteur}',
+    librariesCount: 'Les {n} bibliothèques embarquées dans l’application.',
+  },
+
   play: {
     title: 'Jouer',
     career: 'Le mode carrière',

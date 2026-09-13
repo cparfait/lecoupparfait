@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * Crédits et licences.
  *
@@ -13,27 +15,21 @@
  * tourner l'application, Maia, Lc0 et Piper.
  */
 
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Card } from '@/components/ui/index.tsx'
 import { TITRES_CATEGORIE, creditsDe, type Credit } from '@/lib/credits/catalogue.ts'
-
-export const metadata: Metadata = {
-  title: 'Crédits & licences',
-  description:
-    'Les logiciels, jeux de données et ressources graphiques libres sur lesquels Le Coup Parfait est construit, avec leurs auteurs et leurs licences.',
-}
+import { useT } from '@/lib/i18n/index.tsx'
 
 export default function CreditsPage() {
+  const t = useT()
+
   return (
     <div className="page-etroite">
       <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-        Crédits &amp; licences
+        {t('credits.title')}
       </h1>
       <p className="mt-3 max-w-2xl leading-relaxed text-muted max-lg:text-[14px]">
-        Le Coup Parfait n’aurait pas pu exister sans le travail libre d’autres personnes. Tout ce
-        qui suit est réutilisé dans le respect de sa licence — et cette page en fait partie :
-        plusieurs de ces licences exigent explicitement l’attribution.
+        {t('credits.intro')}
       </p>
 
       <Section titre={TITRES_CATEGORIE.moteur} credits={creditsDe('moteur')} />
@@ -46,28 +42,22 @@ export default function CreditsPage() {
       <Bibliotheques credits={creditsDe('bibliotheque')} />
 
       <Card className="mt-8 p-5">
-        <h2 className="font-display text-lg font-semibold">La licence du Coup Parfait</h2>
+        <h2 className="font-display text-lg font-semibold">{t('credits.licenceTitle')}</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">
-          Le Coup Parfait est publié sous licence{' '}
-          <strong className="text-ink">GNU Affero General Public License v3 ou ultérieure</strong>.
-          Ce choix n’est pas arbitraire : Stockfish est sous GPL, et toute œuvre qui l’intègre doit
-          adopter une licence compatible. L’AGPL ajoute une clause décisive pour un service en ligne
-          — quiconque héberge une version modifiée doit en publier le code source.
+          {t('credits.licenceBefore')}{' '}
+          <strong className="text-ink">{t('credits.licenceStrong')}</strong>
+          {t('credits.licenceAfter')}
         </p>
-        <p className="mt-2 text-sm leading-relaxed text-muted">
-          Concrètement : tu peux l’utiliser, le modifier, l’héberger pour tes amis, le redistribuer.
-          La seule obligation est de laisser les suivants faire pareil.
-        </p>
+        <p className="mt-2 text-sm leading-relaxed text-muted">{t('credits.licenceConcretely')}</p>
         <p className="mt-3 text-xs text-faint">
-          Les jeux de pièces publiés sous licence <span className="font-mono">CC BY-NC-SA</span>{' '}
-          (usage non commercial) ont été délibérément écartés du projet, aussi beaux soient-ils :
-          leur clause rendrait la redistribution libre impossible.
+          {t('credits.nonCommercialBefore')} <span className="font-mono">CC BY-NC-SA</span>{' '}
+          {t('credits.nonCommercialAfter')}
         </p>
       </Card>
 
       <p className="mt-8 text-center text-sm">
         <Link href="/a-propos" className="text-accent hover:underline">
-          En savoir plus sur le projet
+          {t('credits.moreAboutProject')}
         </Link>
       </p>
     </div>
@@ -75,6 +65,8 @@ export default function CreditsPage() {
 }
 
 function Section({ titre, credits }: { titre: string; credits: Credit[] }) {
+  const t = useT()
+
   return (
     <section className="mt-8">
       <h2 className="font-display text-xl font-semibold tracking-tight">{titre}</h2>
@@ -91,7 +83,9 @@ function Section({ titre, credits }: { titre: string; credits: Credit[] }) {
                 {credit.nom}
                 {credit.version ? ` ${credit.version}` : ''}
               </a>
-              <span className="text-xs text-muted">par {credit.auteur}</span>
+              <span className="text-xs text-muted">
+                {t('credits.by', { auteur: credit.auteur })}
+              </span>
               <span className="ml-auto rounded-full border border-line px-2 py-0.5 font-mono text-[12px] text-faint">
                 {credit.licence}
               </span>
@@ -105,13 +99,15 @@ function Section({ titre, credits }: { titre: string; credits: Credit[] }) {
 }
 
 function Bibliotheques({ credits }: { credits: Credit[] }) {
+  const t = useT()
+
   return (
     <section className="mt-8">
       <h2 className="font-display text-xl font-semibold tracking-tight">
         {TITRES_CATEGORIE.bibliotheque}
       </h2>
       <p className="mt-1 text-[14px] text-muted">
-        Les {credits.length} bibliothèques embarquées dans l’application.
+        {t('credits.librariesCount', { n: credits.length })}
       </p>
       <Card className="mt-3 overflow-hidden">
         <ul>
@@ -128,7 +124,9 @@ function Bibliotheques({ credits }: { credits: Credit[] }) {
               >
                 {credit.nom}
               </a>
-              <span className="text-[12px] text-muted">par {credit.auteur}</span>
+              <span className="text-[12px] text-muted">
+                {t('credits.by', { auteur: credit.auteur })}
+              </span>
               <span className="ml-auto shrink-0 font-mono text-[12px] text-faint">
                 {credit.licence}
               </span>

@@ -149,6 +149,43 @@ export const en: Dictionary = {
     statsOpenings: 'openings catalogued',
   },
 
+  opponent: {
+    all: 'All the opponents',
+    galleryIntro:
+      'Seven characters, spread over the twenty-five levels. Their style is not decoration: each evaluates moves with a preference of its own, and its page shows the numbers that produce it — along with what to do to beat it.',
+    whereYouMeet: 'Where you meet them',
+    atLevel: 'At level',
+    atLevels: 'At levels',
+    ofTwentyFive: 'of the twenty-five, that is from',
+    to: 'to',
+    playAgainst: 'Play against {nom}',
+    character: 'Their character',
+    characterHint:
+      'What their evaluation adds to — or takes from — a move, in hundredths of a pawn. This is not a label: it is the number that makes them play the way they do.',
+    noBias:
+      'No bias, on any axis. The only one of the set in that case, and that is what makes them so unpleasant.',
+    howToBeat: 'How to beat them',
+  },
+
+  credits: {
+    title: 'Credits & licences',
+    intro:
+      'Le Coup Parfait could not have existed without other people’s free work. Everything that follows is reused in accordance with its licence — and this page is part of that: several of these licences explicitly require attribution.',
+    licenceTitle: 'The licence of Le Coup Parfait',
+    licenceBefore: 'Le Coup Parfait is published under the',
+    licenceStrong: 'GNU Affero General Public License v3 or later',
+    licenceAfter:
+      '. That choice is not arbitrary: Stockfish is under the GPL, and any work that embeds it must adopt a compatible licence. The AGPL adds a decisive clause for an online service — whoever hosts a modified version must publish its source code.',
+    licenceConcretely:
+      'In practice: you can use it, change it, host it for your friends, redistribute it. The only obligation is to let the next people do the same.',
+    nonCommercialBefore: 'Piece sets published under the',
+    nonCommercialAfter:
+      'licence (non-commercial use) were deliberately left out of the project, however beautiful they are: their clause would make free redistribution impossible.',
+    moreAboutProject: 'More about the project',
+    by: 'by {auteur}',
+    librariesCount: 'The {n} libraries embedded in the app.',
+  },
+
   play: {
     title: 'Play',
     career: 'Career mode',
