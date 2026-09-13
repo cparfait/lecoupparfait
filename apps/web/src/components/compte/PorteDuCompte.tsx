@@ -63,7 +63,7 @@ export function PorteDuCompte({
           type="button"
           onClick={onFermer}
           className="absolute right-3 top-3 rounded p-1 text-faint transition-colors hover:text-ink"
-          aria-label="Fermer"
+          aria-label={t('common.close')}
         >
           <X size={16} aria-hidden />
         </button>
@@ -76,15 +76,15 @@ export function PorteDuCompte({
         </span>
 
         <h2 id="porte-compte-titre" className="font-display text-xl font-bold tracking-tight">
-          {avantage.titre}
+          {t(avantage.titre)}
         </h2>
-        <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{avantage.raison}</p>
+        <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{t(avantage.raison)}</p>
 
         <ul className="mt-4 space-y-1.5">
           {avantage.gains.map((gain) => (
             <li key={gain} className="flex items-start gap-2 text-[14px] leading-snug">
               <Check size={14} className="mt-0.5 shrink-0 text-[var(--q-best)]" aria-hidden />
-              <span>{gain}</span>
+              <span>{t(gain)}</span>
             </li>
           ))}
         </ul>

@@ -14,6 +14,7 @@ import { persist } from 'zustand/middleware'
 import { useShallow } from 'zustand/react/shallow'
 import type { Notation } from '@coupparfait/core'
 import type { Locale } from '../i18n/dictionary.ts'
+import type { TranslationKey } from '../i18n/index.tsx'
 import type { CustomProviderDef } from '../ia/providers/custom.ts'
 
 export type ThemeId = 'aurora' | 'clair'
@@ -465,6 +466,11 @@ export function supportsThreadedEngine(): boolean {
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Catalogues affichés dans les préférences
+//
+//  Les intitulés et les phrases de ces quatre tables sont des clés de
+//  dictionnaire et non du texte : ce sont des constantes de module, donc sans
+//  accès à `t()`, et leurs quarante textes restaient en français dans toutes les
+//  autres langues. La page des préférences résout au rendu.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const THEME_LIST: Array<{ id: ThemeId; swatch: [string, string, string] }> = [
@@ -478,39 +484,43 @@ export const THEME_LIST: Array<{ id: ThemeId; swatch: [string, string, string] }
  * Tous sont sous licence libre sans clause non commerciale — voir
  * `ATTRIBUTION.md` à la racine du dépôt pour les auteurs et les licences.
  */
-export const PIECE_SETS: Array<{ id: PieceSetId; label: string; blurb: string }> = [
-  { id: 'staunton', label: 'Staunton', blurb: 'Le standard des tournois depuis 1849.' },
-  { id: 'merida', label: 'Merida', blurb: 'Contours nets, très lisible en petite taille.' },
-  { id: 'alpha', label: 'Alpha', blurb: 'Silhouettes pleines, sans détail superflu.' },
-  { id: 'chessnut', label: 'Chessnut', blurb: 'Épuré et contemporain.' },
-  { id: 'fantasy', label: 'Fantasy', blurb: 'Volumes sculptés, ombres douces.' },
-  { id: 'celtic', label: 'Celtique', blurb: 'Entrelacs et lignes gravées.' },
-  { id: 'spatial', label: 'Spatial', blurb: 'Formes futuristes en perspective.' },
-  { id: 'rhosgfx', label: 'Rhos', blurb: 'Aplats colorés, domaine public.' },
-  { id: 'pixel', label: 'Pixel', blurb: 'Hommage aux échiquiers 8 bits.' },
-  { id: 'letter', label: 'Lettres', blurb: 'Initiales seules — lisibilité maximale.' },
+export const PIECE_SETS: Array<{
+  id: PieceSetId
+  labelKey: TranslationKey
+  blurbKey: TranslationKey
+}> = [
+  { id: 'staunton', labelKey: 'catalog.setStaunton', blurbKey: 'catalog.setStauntonHint' },
+  { id: 'merida', labelKey: 'catalog.setMerida', blurbKey: 'catalog.setMeridaHint' },
+  { id: 'alpha', labelKey: 'catalog.setAlpha', blurbKey: 'catalog.setAlphaHint' },
+  { id: 'chessnut', labelKey: 'catalog.setChessnut', blurbKey: 'catalog.setChessnutHint' },
+  { id: 'fantasy', labelKey: 'catalog.setFantasy', blurbKey: 'catalog.setFantasyHint' },
+  { id: 'celtic', labelKey: 'catalog.setCeltic', blurbKey: 'catalog.setCelticHint' },
+  { id: 'spatial', labelKey: 'catalog.setSpatial', blurbKey: 'catalog.setSpatialHint' },
+  { id: 'rhosgfx', labelKey: 'catalog.setRhos', blurbKey: 'catalog.setRhosHint' },
+  { id: 'pixel', labelKey: 'catalog.setPixel', blurbKey: 'catalog.setPixelHint' },
+  { id: 'letter', labelKey: 'catalog.setLetter', blurbKey: 'catalog.setLetterHint' },
 ]
 
 export const BOARD_STYLES: Array<{
   id: BoardStyleId
-  label: string
+  labelKey: TranslationKey
   light: string
   dark: string
 }> = [
-  { id: 'aurore', label: 'Aurore', light: '#dfd7ea', dark: '#6b5f8c' },
-  { id: 'noyer', label: 'Noyer', light: '#e8dcc8', dark: '#8a6a45' },
-  { id: 'marbre', label: 'Marbre', light: '#eceff3', dark: '#7f8794' },
-  { id: 'ardoise', label: 'Ardoise', light: '#cdd3d8', dark: '#4c5a63' },
-  { id: 'mousse', label: 'Mousse', light: '#e6ecd8', dark: '#6b8a4f' },
-  { id: 'papier', label: 'Papier', light: '#f4efe4', dark: '#c3b7a2' },
-  { id: 'neon', label: 'Néon', light: '#1d2233', dark: '#0d1020' },
-  { id: 'sepia', label: 'Sépia', light: '#f0e2cc', dark: '#a5825b' },
+  { id: 'aurore', labelKey: 'catalog.boardAurore', light: '#dfd7ea', dark: '#6b5f8c' },
+  { id: 'noyer', labelKey: 'catalog.boardNoyer', light: '#e8dcc8', dark: '#8a6a45' },
+  { id: 'marbre', labelKey: 'catalog.boardMarbre', light: '#eceff3', dark: '#7f8794' },
+  { id: 'ardoise', labelKey: 'catalog.boardArdoise', light: '#cdd3d8', dark: '#4c5a63' },
+  { id: 'mousse', labelKey: 'catalog.boardMousse', light: '#e6ecd8', dark: '#6b8a4f' },
+  { id: 'papier', labelKey: 'catalog.boardPapier', light: '#f4efe4', dark: '#c3b7a2' },
+  { id: 'neon', labelKey: 'catalog.boardNeon', light: '#1d2233', dark: '#0d1020' },
+  { id: 'sepia', labelKey: 'catalog.boardSepia', light: '#f0e2cc', dark: '#a5825b' },
 ]
 
-export const PIECE_MATERIALS: Array<{ id: PieceMaterial; label: string }> = [
-  { id: 'ivoire', label: 'Ivoire' },
-  { id: 'marbre', label: 'Marbre' },
-  { id: 'verre', label: 'Verre' },
+export const PIECE_MATERIALS: Array<{ id: PieceMaterial; labelKey: TranslationKey }> = [
+  { id: 'ivoire', labelKey: 'catalog.matIvory' },
+  { id: 'marbre', labelKey: 'catalog.matMarble' },
+  { id: 'verre', labelKey: 'catalog.matGlass' },
 ]
 
 /**
@@ -522,52 +532,52 @@ export const PIECE_MATERIALS: Array<{ id: PieceMaterial; label: string }> = [
  */
 export const PIECE_COLOURS: Array<{
   id: PieceColourId
-  label: string
+  labelKey: TranslationKey
   white: string
   black: string
-  blurb: string
+  blurbKey: TranslationKey
 }> = [
   {
     id: 'classique',
-    label: 'Ivoire & ébène',
+    labelKey: 'catalog.colClassic',
     white: '#f2ead8',
     black: '#26221e',
-    blurb: 'Les couleurs d’un vrai jeu de tournoi.',
+    blurbKey: 'catalog.colClassicHint',
   },
   {
     id: 'pur',
-    label: 'Blanc & noir',
+    labelKey: 'catalog.colPure',
     white: '#fbfbfd',
     black: '#141418',
-    blurb: 'Contraste maximal, aucune ambiguïté.',
+    blurbKey: 'catalog.colPureHint',
   },
   {
     id: 'bois',
-    label: 'Érable & noyer',
+    labelKey: 'catalog.colWood',
     white: '#e8d5b0',
     black: '#4a3020',
-    blurb: 'Deux essences de bois, chaleureux.',
+    blurbKey: 'catalog.colWoodHint',
   },
   {
     id: 'marbre',
-    label: 'Marbre',
+    labelKey: 'catalog.colMarble',
     white: '#f0f2f5',
     black: '#3a4048',
-    blurb: 'Froid et minéral.',
+    blurbKey: 'catalog.colMarbleHint',
   },
   {
     id: 'theme',
-    label: 'Suivre le thème',
+    labelKey: 'catalog.colTheme',
     white: '',
     black: '',
-    blurb: 'Les pièces prennent les couleurs du damier.',
+    blurbKey: 'catalog.colThemeHint',
   },
   {
     id: 'custom',
-    label: 'Personnalisé',
+    labelKey: 'catalog.colCustom',
     white: '',
     black: '',
-    blurb: 'Choisis toi-même les deux couleurs.',
+    blurbKey: 'catalog.colCustomHint',
   },
 ]
 

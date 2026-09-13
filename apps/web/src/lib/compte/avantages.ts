@@ -19,6 +19,8 @@
  * jamais qu'un compte débloque ce qui est déjà libre.
  */
 
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
+
 export interface AvantageCompte {
   /**
    * Le titre de la boîte, **en entier**.
@@ -27,86 +29,59 @@ export interface AvantageCompte {
    * cassait au pluriel : « Les statistiques demande un compte ». Une phrase
    * française ne se fabrique pas par concaténation ; on l'écrit.
    */
-  titre: string
+  titre: TranslationKey
   /** Pourquoi *celle-ci* demande un compte. Une phrase, jamais deux. */
-  raison: string
+  raison: TranslationKey
   /** Ce qu'on y gagne concrètement, en trois points au plus. */
-  gains: string[]
+  gains: TranslationKey[]
 }
 
 /**
  * Indexé par chemin, sans requête ni ancre : `/puzzles?defi=1` se ramène à
  * `/puzzles`, qui lui est libre — la clé porte donc le href complet quand la
  * distinction compte.
+ *
+ * Les textes sont des clés de dictionnaire et non des phrases : c'est une
+ * constante de module, qui ne peut pas appeler `t()`. Elles restaient donc en
+ * français dans les quarante autres langues, sur un écran dont le seul rôle est
+ * d'expliquer — c'est-à-dire le pire endroit pour ne pas être compris. Le
+ * dialogue `PorteDuCompte` résout au rendu.
  */
 export const AVANTAGES: Record<string, AvantageCompte> = {
   '/carriere': {
-    titre: 'La carrière demande un compte',
-    raison:
-      'Douze chapitres et une progression qui se garde : elle n’aurait aucun sens si elle disparaissait en fermant l’onglet.',
-    gains: [
-      'Tes étoiles, ton rang et tes hauts faits conservés',
-      'La reprise là où tu t’es arrêté, sur n’importe quel appareil',
-      'Un adversaire calibré sur ton niveau réel, chapitre après chapitre',
-    ],
+    titre: 'catalog.careerGate',
+    raison: 'catalog.careerGateWhy',
+    gains: ['catalog.careerGain1', 'catalog.careerGain2', 'catalog.careerGain3'],
   },
   '/tournois': {
-    titre: 'Les tournois demandent un compte',
-    raison:
-      'Une arène apparie des joueurs sur plusieurs rondes : il faut pouvoir te retrouver entre deux parties.',
-    gains: [
-      'Créer une arène et y inscrire d’autres joueurs',
-      'Un classement qui suit d’une ronde à l’autre',
-      'Les tournois solo contre l’ordinateur, avec leur tableau',
-    ],
+    titre: 'catalog.tourneyGate',
+    raison: 'catalog.tourneyGateWhy',
+    gains: ['catalog.tourneyGain1', 'catalog.tourneyGain2', 'catalog.tourneyGain3'],
   },
   '/amis': {
-    titre: 'Le carnet d’amis demande un compte',
-    raison: 'Les amis se retrouvent par leur pseudo : il faut donc en avoir un.',
-    gains: [
-      'Défier quelqu’un d’un clic, sans repasser par un lien',
-      'Voir qui est en ligne et qui attend ton coup',
-      'Un lien d’invitation à ton nom',
-    ],
+    titre: 'catalog.friendsGate',
+    raison: 'catalog.friendsGateWhy',
+    gains: ['catalog.friendsGain1', 'catalog.friendsGain2', 'catalog.friendsGain3'],
   },
   '/correspondance': {
-    titre: 'La correspondance demande un compte',
-    raison:
-      'Une partie qui dure des jours doit te reconnaître à chaque retour, sinon elle est perdue au premier onglet fermé.',
-    gains: [
-      'Plusieurs parties en cours, à ton rythme',
-      'Un compteur qui te dit où c’est à toi de jouer',
-      'Rien à laisser ouvert entre deux coups',
-    ],
+    titre: 'catalog.corrGate',
+    raison: 'catalog.corrGateWhy',
+    gains: ['catalog.corrGain1', 'catalog.corrGain2', 'catalog.corrGain3'],
   },
   '/statistiques': {
-    titre: 'Les statistiques demandent un compte',
-    raison:
-      'Elles se calculent sur tes parties enregistrées : sans compte, aucune partie n’est à personne.',
-    gains: [
-      'Ta précision et ton Elo estimé, partie après partie',
-      'Tes ouvertures les plus jouées et leurs résultats',
-      'La phase de jeu qui te coûte le plus de points',
-    ],
+    titre: 'catalog.statsGate',
+    raison: 'catalog.statsGateWhy',
+    gains: ['catalog.statsGain1', 'catalog.statsGain2', 'catalog.statsGain3'],
   },
   '/etudes': {
-    titre: 'Les études demandent un compte',
-    raison:
-      'Une étude t’appartient et se retrouve d’une session à l’autre : il faut savoir à qui elle est.',
-    gains: [
-      'Des positions annotées, conservées et reprises',
-      'Tes variantes gardées avec leurs commentaires',
-    ],
+    titre: 'catalog.studiesGate',
+    raison: 'catalog.studiesGateWhy',
+    gains: ['catalog.studiesGain1', 'catalog.studiesGain2'],
   },
   '/puzzles?defi=1': {
-    titre: 'Le défi du jour demande un compte',
-    raison:
-      'La même position pour tout le monde, une fois par jour : c’est une série, et une série se compte dans le temps.',
-    gains: [
-      'Ta série de jours consécutifs, et ton record',
-      'Les objectifs du jour et les points qui vont avec',
-      'Les puzzles ordinaires, eux, restent libres et illimités',
-    ],
+    titre: 'catalog.dailyGate',
+    raison: 'catalog.dailyGateWhy',
+    gains: ['catalog.dailyGain1', 'catalog.dailyGain2', 'catalog.dailyGain3'],
   },
 }
 

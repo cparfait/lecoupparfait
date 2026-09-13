@@ -37,6 +37,7 @@ import {
   type PieceSetId,
 } from '@/lib/store/preferences.ts'
 import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 import { LANGUES } from '@/lib/i18n/langues.ts'
 import { Drapeau } from '@/components/ui/Drapeau.tsx'
 import {
@@ -227,8 +228,8 @@ export default function PreferencesPage() {
                     key={style.id}
                     type="button"
                     onClick={() => set('boardStyle', style.id as BoardStyleId)}
-                    title={style.label}
-                    aria-label={style.label}
+                    title={t(style.labelKey)}
+                    aria-label={t(style.labelKey)}
                     className={clsx(
                       'aspect-square overflow-hidden rounded-[var(--radius-sm)] border transition-all',
                       prefs.boardStyle === style.id
@@ -255,7 +256,7 @@ export default function PreferencesPage() {
                     key={entry.id}
                     type="button"
                     onClick={() => set('pieceSet', entry.id as PieceSetId)}
-                    title={entry.blurb}
+                    title={t(entry.blurbKey)}
                     className={clsx(
                       'flex flex-col items-center gap-1 rounded-[var(--radius-sm)] border p-2 transition-all',
                       prefs.pieceSet === entry.id
@@ -275,7 +276,7 @@ export default function PreferencesPage() {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={pieceUrl(entry.id, 'b', 'q')} alt="" className="h-7 w-7" />
                     </span>
-                    <span className="text-[12px] font-medium">{entry.label}</span>
+                    <span className="text-[12px] font-medium">{t(entry.labelKey)}</span>
                   </button>
                 ))}
               </div>
@@ -310,7 +311,7 @@ export default function PreferencesPage() {
                       label={t('settings.material')}
                       options={PIECE_MATERIALS.map((material) => ({
                         value: material.id,
-                        label: material.label,
+                        label: t(material.labelKey),
                       }))}
                     />
                   </div>
@@ -323,7 +324,7 @@ export default function PreferencesPage() {
                           key={entry.id}
                           type="button"
                           onClick={() => set('pieceColours', entry.id as PieceColourId)}
-                          title={entry.blurb}
+                          title={t(entry.blurbKey)}
                           className={clsx(
                             'flex items-center gap-2 rounded-[var(--radius-sm)] border p-2 text-left transition-all',
                             prefs.pieceColours === entry.id
@@ -354,7 +355,7 @@ export default function PreferencesPage() {
                             />
                           </span>
                           <span className="min-w-0 text-[12px] font-medium leading-tight">
-                            {entry.label}
+                            {t(entry.labelKey)}
                           </span>
                         </button>
                       ))}
@@ -812,12 +813,30 @@ export default function PreferencesPage() {
           />
           <p className="mt-2 text-xs leading-relaxed text-faint">
             {t('settings.previewHint', {
-              damier: BOARD_STYLES.find((style) => style.id === prefs.boardStyle)?.label ?? '',
-              pieces: PIECE_SETS.find((entry) => entry.id === prefs.pieceSet)?.label ?? '',
+              damier: libelleOuVide(
+                BOARD_STYLES.find((style) => style.id === prefs.boardStyle)?.labelKey,
+                t,
+              ),
+              pieces: libelleOuVide(
+                PIECE_SETS.find((entry) => entry.id === prefs.pieceSet)?.labelKey,
+                t,
+              ),
             })}
           </p>
         </div>
       </div>
     </div>
   )
+}
+
+/**
+ * Le libellé d'une entrée de catalogue, ou rien.
+ *
+ * Les quatre catalogues portent des clés de dictionnaire et non du texte ; la
+ * recherche par identifiant peut ne rien trouver — un réglage conservé dans le
+ * navigateur peut nommer un jeu de pièces retiré depuis. On rend alors la chaîne
+ * vide, comme avant.
+ */
+function libelleOuVide(cle: TranslationKey | undefined, t: ReturnType<typeof useT>): string {
+  return cle ? t(cle) : ''
 }
