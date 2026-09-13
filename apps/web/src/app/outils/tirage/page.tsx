@@ -24,6 +24,7 @@ import Link from 'next/link'
 import { ArrowLeft, Dices } from 'lucide-react'
 import clsx from 'clsx'
 import { Button, Card, Input, SegmentedControl } from '@/components/ui/index.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 type Mode = 'couleurs' | 'paires' | 'ordre'
 
@@ -58,6 +59,7 @@ interface Paire {
 }
 
 export default function TiragePage() {
+  const t = useT()
   const [mode, setMode] = useState<Mode>('couleurs')
 
   // Couleurs.
@@ -71,8 +73,8 @@ export default function TiragePage() {
   const [ordre, setOrdre] = useState<string[] | null>(null)
 
   const noms = lireNoms(texte)
-  const nom1 = joueur1.trim() || 'Joueur 1'
-  const nom2 = joueur2.trim() || 'Joueur 2'
+  const nom1 = joueur1.trim() || t('draw.player1')
+  const nom2 = joueur2.trim() || t('draw.player2')
 
   const tirerCouleurs = () => setBlancs(entier(2) === 0 ? 1 : 2)
 
@@ -95,25 +97,22 @@ export default function TiragePage() {
         className="inline-flex items-center gap-1.5 text-[14px] text-muted transition-colors hover:text-ink"
       >
         <ArrowLeft size={14} aria-hidden />
-        Outils
+        {t('nav.tools')}
       </Link>
       <h1 className="mt-3 font-display text-2xl font-bold tracking-tight sm:text-3xl">
-        Tirage au sort
+        {t('draw.title')}
       </h1>
-      <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
-        Les couleurs d’une partie, les paires d’une ronde, l’ordre de passage. Un tirage que tout le
-        monde voit, et personne ne conteste.
-      </p>
+      <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">{t('draw.intro')}</p>
 
       <div className="mt-5">
         <SegmentedControl
           value={mode}
           onChange={setMode}
-          label="Quoi tirer"
+          label={t('draw.what')}
           options={[
-            { value: 'couleurs', label: 'Couleurs' },
-            { value: 'paires', label: 'Paires' },
-            { value: 'ordre', label: 'Ordre de passage' },
+            { value: 'couleurs', label: t('draw.colours') },
+            { value: 'paires', label: t('draw.pairs') },
+            { value: 'ordre', label: t('draw.order') },
           ]}
         />
       </div>
@@ -122,9 +121,9 @@ export default function TiragePage() {
         <Card className="mt-3 p-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <Input
-              label="Premier joueur"
+              label={t('draw.firstPlayer')}
               name="joueur1"
-              placeholder="Joueur 1"
+              placeholder={t('draw.player1')}
               value={joueur1}
               onChange={(e) => {
                 setJoueur1(e.target.value)
@@ -132,9 +131,9 @@ export default function TiragePage() {
               }}
             />
             <Input
-              label="Second joueur"
+              label={t('draw.secondPlayer')}
               name="joueur2"
-              placeholder="Joueur 2"
+              placeholder={t('draw.player2')}
               value={joueur2}
               onChange={(e) => {
                 setJoueur2(e.target.value)
@@ -143,7 +142,7 @@ export default function TiragePage() {
             />
           </div>
           <Button icon={<Dices size={16} />} className="mt-4" onClick={tirerCouleurs}>
-            {blancs ? 'Retirer' : 'Tirer les couleurs'}
+            {t(blancs ? 'draw.drawAgain' : 'draw.drawColours')}
           </Button>
 
           {blancs && (
@@ -151,17 +150,17 @@ export default function TiragePage() {
               className="mt-4 grid gap-2 sm:grid-cols-2"
               role="status"
               aria-live="polite"
-              aria-label="Résultat du tirage"
+              aria-label={t('draw.result')}
             >
               {[
-                { nom: blancs === 1 ? nom1 : nom2, couleur: 'Blancs', symbole: '♔' },
-                { nom: blancs === 1 ? nom2 : nom1, couleur: 'Noirs', symbole: '♚' },
+                { nom: blancs === 1 ? nom1 : nom2, couleur: t('draw.white'), symbole: '♔' },
+                { nom: blancs === 1 ? nom2 : nom1, couleur: t('draw.black'), symbole: '♚' },
               ].map((cote) => (
                 <div
                   key={cote.couleur}
                   className={clsx(
                     'flex items-center gap-3 rounded-[var(--radius)] border px-4 py-3',
-                    cote.couleur === 'Blancs'
+                    cote.symbole === '♔'
                       ? 'border-line-strong bg-[#f2eee8] text-[#141418]'
                       : 'border-line bg-[#17171c] text-[#f2eee8]',
                   )}
@@ -173,7 +172,9 @@ export default function TiragePage() {
                     <span className="block truncate font-display text-lg font-bold">
                       {cote.nom}
                     </span>
-                    <span className="block text-xs opacity-70">a les {cote.couleur}</span>
+                    <span className="block text-xs opacity-70">
+                      {t('draw.hasColour', { couleur: cote.couleur })}
+                    </span>
                   </span>
                 </div>
               ))}
@@ -185,7 +186,7 @@ export default function TiragePage() {
       {mode !== 'couleurs' && (
         <Card className="mt-3 p-4">
           <label htmlFor="noms" className="mb-1.5 block text-sm font-medium">
-            Les joueurs, un par ligne
+            {t('draw.playersOnePerLine')}
           </label>
           <textarea
             id="noms"
@@ -201,10 +202,10 @@ export default function TiragePage() {
           />
           <p className="mt-1.5 text-xs text-faint">
             {noms.length === 0
-              ? 'Aucun nom pour l’instant.'
-              : `${noms.length} joueur${noms.length > 1 ? 's' : ''}`}
+              ? t('draw.noName')
+              : t(noms.length > 1 ? 'draw.playersCount' : 'draw.onePlayer', { n: noms.length })}
             {mode === 'paires' && noms.length % 2 === 1 && noms.length > 1
-              ? ' — nombre impair, il y aura un exempt.'
+              ? ` ${t('draw.oddNumber')}`
               : ''}
           </p>
 
@@ -216,17 +217,17 @@ export default function TiragePage() {
                 disabled={noms.length < 2}
                 onClick={formerPaires}
               >
-                {paires ? 'Refaire les paires' : 'Former les paires'}
+                {t(paires ? 'draw.redoPairs' : 'draw.makePairs')}
               </Button>
               {paires && (
-                <ol className="mt-4 space-y-1.5" aria-label="Les tables">
+                <ol className="mt-4 space-y-1.5" aria-label={t('draw.tables')}>
                   {paires.tables.map((table, index) => (
                     <li
                       key={index}
                       className="flex items-center gap-3 rounded-[var(--radius-sm)] bg-surface px-3 py-2 text-sm"
                     >
                       <span className="w-14 shrink-0 text-xs font-semibold text-faint">
-                        Table {index + 1}
+                        {t('draw.table', { n: index + 1 })}
                       </span>
                       <span className="min-w-0 flex-1 truncate">
                         <span aria-hidden>♔ </span>
@@ -243,8 +244,8 @@ export default function TiragePage() {
                   ))}
                   {paires.exempt && (
                     <li className="rounded-[var(--radius-sm)] border border-dashed border-line px-3 py-2 text-sm text-muted">
-                      <span className="font-medium text-ink">{paires.exempt}</span> ne joue pas
-                      cette ronde.
+                      <span className="font-medium text-ink">{paires.exempt}</span>{' '}
+                      {t('draw.sitsOut')}
                     </li>
                   )}
                 </ol>
@@ -260,10 +261,10 @@ export default function TiragePage() {
                 disabled={noms.length < 2}
                 onClick={tirerOrdre}
               >
-                {ordre ? 'Remélanger' : 'Tirer l’ordre'}
+                {t(ordre ? 'draw.reshuffle' : 'draw.drawOrder')}
               </Button>
               {ordre && (
-                <ol className="mt-4 space-y-1.5" aria-label="Ordre de passage">
+                <ol className="mt-4 space-y-1.5" aria-label={t('draw.order')}>
                   {ordre.map((nom, index) => (
                     <li
                       key={`${index}-${nom}`}

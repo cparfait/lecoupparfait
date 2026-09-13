@@ -45,6 +45,7 @@ import { useSan } from '@/lib/notation.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import type { Arrow, CircleMark } from '@/components/board/boardKit.ts'
 import { useLegalMoves } from '@/lib/game/useLegalMoves.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 type Feedback = { kind: 'correct' | 'wrong' | 'revealed'; text: string } | null
 
@@ -64,6 +65,7 @@ const ADVANCE_DELAY_MS = 950
 const ADVANCE_WITH_REPLY_MS = REPLY_DELAY_MS + 1100
 
 export default function LessonPage() {
+  const t = useT()
   const params = useParams<{ lessonId: string }>()
   const router = useRouter()
   const lesson = findLesson(params.lessonId)
@@ -224,7 +226,7 @@ export default function LessonPage() {
         playSound('error')
         setFeedback({
           kind: 'wrong',
-          text: step.hint ?? 'Ce n’est pas le coup attendu. Réessaie.',
+          text: step.hint ?? t('lesson.wrongMove'),
         })
         return
       }
@@ -264,7 +266,7 @@ export default function LessonPage() {
         }, REPLY_DELAY_MS)
       }
     },
-    [step, lesson, solved, fen, stepIndex, isLast],
+    [step, lesson, solved, fen, stepIndex, isLast, t],
   )
 
   // ── Montrer la solution ───────────────────────────────────────────────────
@@ -276,12 +278,12 @@ export default function LessonPage() {
       setRevealArrow({ from: move.from, to: move.to, color: 'blue', weight: 'bold' })
       setFeedback({
         kind: 'revealed',
-        text: `Le coup était ${ecrire(move.san)}. Joue-le pour continuer.`,
+        text: t('lessonExtra.theMoveWas', { coup: ecrire(move.san) }),
       })
     } catch {
-      setFeedback({ kind: 'revealed', text: 'Impossible de montrer le coup ici.' })
+      setFeedback({ kind: 'revealed', text: t('lesson.cannotShow') })
     }
-  }, [step, fen, ecrire])
+  }, [step, fen, ecrire, t])
 
   // ── Navigation ────────────────────────────────────────────────────────────
   const goNext = useCallback(() => {
@@ -334,14 +336,14 @@ export default function LessonPage() {
   if (!lesson) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-20 text-center">
-        <h1 className="font-display text-2xl font-semibold">Leçon introuvable</h1>
-        <p className="mt-2 text-muted">Cette leçon n’existe pas ou a été renommée.</p>
+        <h1 className="font-display text-2xl font-semibold">{t('lesson.notFound')}</h1>
+        <p className="mt-2 text-muted">{t('lesson.notFoundHint')}</p>
         <Link
           href="/apprendre"
           className="mt-6 inline-flex items-center gap-1.5 text-accent hover:underline"
         >
           <ArrowLeft size={15} aria-hidden />
-          Retour au programme
+          {t('lesson.backToCurriculum')}
         </Link>
       </div>
     )
@@ -454,11 +456,11 @@ export default function LessonPage() {
             >
               {solved ? <Check size={15} aria-hidden /> : null}
               <span className="min-w-0 flex-1">
-                {feedback?.text ?? step.instruction ?? 'À toi de jouer.'}
+                {feedback?.text ?? step.instruction ?? t('lesson.yourTurn')}
               </span>
               {!solved && attempts >= 1 && (
                 <Button size="sm" variant="ghost" icon={<Eye size={13} />} onClick={reveal}>
-                  Montre-moi
+                  {t('lessonExtra.showMe')}
                 </Button>
               )}
             </div>
@@ -476,7 +478,7 @@ export default function LessonPage() {
               >
                 <Volume2 size={14} className="text-accent" />
               </span>
-              <span className="text-[12px] font-semibold text-faint">Le coach</span>
+              <span className="text-[12px] font-semibold text-faint">{t('lesson.coach')}</span>
               {/* Couper la voix, à côté de ce qu'elle lit : un haut-parleur
                   posé dans une barre ne dit pas ce qu'il fait taire — les
                   pièces, la fin de partie, une musique ? Ici, il n'y a aucun
@@ -491,8 +493,8 @@ export default function LessonPage() {
                   'ml-auto grid h-8 w-8 place-items-center rounded-[var(--radius-sm)] transition-colors hover:bg-surface-hover',
                   voiceEnabled ? 'text-accent' : 'text-faint',
                 )}
-                aria-label={voiceEnabled ? 'Couper la voix du coach' : 'Activer la voix du coach'}
-                title={voiceEnabled ? 'Couper la voix du coach' : 'Activer la voix du coach'}
+                aria-label={t(voiceEnabled ? 'lesson.muteCoach' : 'lesson.unmuteCoach')}
+                title={t(voiceEnabled ? 'lesson.muteCoach' : 'lesson.unmuteCoach')}
               >
                 {voiceEnabled ? (
                   <Volume2 size={15} aria-hidden />
@@ -504,8 +506,8 @@ export default function LessonPage() {
                 type="button"
                 onClick={() => speak(step.say)}
                 className="grid h-8 w-8 place-items-center rounded-[var(--radius-sm)] text-faint transition-colors hover:bg-surface-hover hover:text-ink"
-                aria-label="Réécouter"
-                title="Réécouter"
+                aria-label={t('lesson.replay')}
+                title={t('lesson.replay')}
               >
                 <RotateCcw size={13} aria-hidden />
               </button>
@@ -526,7 +528,7 @@ export default function LessonPage() {
               disabled={stepIndex === 0}
               icon={<ArrowLeft size={15} />}
             >
-              Précédent
+              {t('lesson.previous')}
             </Button>
             <Button
               variant="primary"
@@ -535,13 +537,17 @@ export default function LessonPage() {
               disabled={needsAction && !solved}
               icon={<ArrowRight size={15} />}
             >
-              {isLast ? (upcoming ? 'Leçon suivante' : 'Terminer') : 'Continuer'}
+              {isLast
+                ? upcoming
+                  ? t('lesson.nextLesson')
+                  : t('lessonExtra.finish')
+                : t('lessonExtra.carryOn')}
             </Button>
           </div>
 
           {needsAction && solved && (
             <Button size="sm" variant="ghost" icon={<RotateCcw size={13} />} onClick={restartStep}>
-              Rejouer cette étape
+              {t('lesson.replayStep')}
             </Button>
           )}
 

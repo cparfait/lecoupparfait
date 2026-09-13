@@ -50,8 +50,11 @@ import {
   oublierTournoi,
   reprendreResultat,
 } from '@/lib/game/tournoiSolo.ts'
+import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
+import { usePreferences } from '@/lib/store/preferences.ts'
 
 export default function TournoiOrdinateurPage() {
+  const t = useT()
   /** `undefined` tant qu'on n'a pas lu le stockage : on n'affiche rien avant. */
   const [tournoi, setTournoi] = useState<TournoiSolo | null | undefined>(undefined)
 
@@ -83,7 +86,7 @@ export default function TournoiOrdinateurPage() {
         href="/tournois"
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
       >
-        ← Retour aux tournois
+        {t('arena.back')}
       </Link>
 
       {tournoi === null ? (
@@ -111,6 +114,8 @@ export default function TournoiOrdinateurPage() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void }) {
+  const t = useT()
+  const contenu = usePreferences((state) => localeDuContenu(state.locale))
   const [adversaires, setAdversaires] = useState(5)
   const [niveau, setNiveau] = useState(6)
   const [aleatoire, setAleatoire] = useState(true)
@@ -133,15 +138,14 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
   return (
     <>
       <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-        Tournoi contre l’ordinateur
+        {t('arena.soloTitle')}
       </h1>
       <p className="mt-2 max-w-prose text-muted max-lg:text-[14px] max-lg:leading-relaxed">
-        Tu es le seul humain. Tu affrontes chaque adversaire une fois, et le classement se fait aux
-        points — comme dans un vrai toutes rondes.
+        {t('arena.onlyHuman')}
       </p>
 
       <Card className="mt-6 p-5">
-        <SectionTitle>Combien d’adversaires</SectionTitle>
+        <SectionTitle>{t('arena.howMany')}</SectionTitle>
         <div className="grid grid-cols-3 gap-1.5">
           {[3, 5, 7].map((n) => (
             <button
@@ -156,9 +160,9 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
                   : 'border-line text-muted hover:bg-surface-hover',
               )}
             >
-              {n} adversaires
+              {t('arena.opponentsCount', { n })}
               <span className="mt-0.5 block text-[12px] font-normal text-faint">
-                {n} parties à jouer
+                {t('arena.gamesToPlay', { n })}
               </span>
             </button>
           ))}
@@ -166,9 +170,7 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
       </Card>
 
       <Card className="mt-4 p-5">
-        <SectionTitle hint="Le niveau sert de repère : en aléatoire, chaque adversaire est tiré autour de lui.">
-          Leur force
-        </SectionTitle>
+        <SectionTitle hint={t('arena.levelHint')}>{t('arena.theirStrength')}</SectionTitle>
 
         {/*
           Le hasard par défaut, et ce n'est pas une facilité.
@@ -190,7 +192,7 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
             )}
           >
             <Dices size={15} aria-hidden />
-            Forces variées
+            {t('arena.variedStrengths')}
           </button>
           <button
             type="button"
@@ -203,13 +205,15 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
                 : 'border-line text-muted hover:bg-surface-hover',
             )}
           >
-            Tous au même niveau
+            {t('arena.sameLevel')}
           </button>
         </div>
 
         <label className="mt-4 block">
           <span className="mb-1.5 flex items-baseline justify-between text-sm">
-            <span className="font-medium">{aleatoire ? 'Autour du niveau' : 'Niveau'}</span>
+            <span className="font-medium">
+              {t(aleatoire ? 'arena.aroundLevel' : 'arena.level')}
+            </span>
             <span className="text-muted">
               {niveau} · {palier.elo} Elo
             </span>
@@ -225,13 +229,16 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
         </label>
         <p className="mt-1 text-xs text-faint">
           {aleatoire
-            ? `Les adversaires seront tirés entre ${botLevel(Math.max(1, niveau - 4)).elo} et ${botLevel(Math.min(BOT_LEVELS.length, niveau + 4)).elo} Elo environ.`
-            : `Tous les adversaires vaudront environ ${palier.elo} Elo.`}
+            ? t('arena.randomRange', {
+                min: botLevel(Math.max(1, niveau - 4)).elo,
+                max: botLevel(Math.min(BOT_LEVELS.length, niveau + 4)).elo,
+              })
+            : t('arena.sameStrength', { elo: palier.elo })}
         </p>
       </Card>
 
       <Card className="mt-4 p-5">
-        <SectionTitle>Cadence</SectionTitle>
+        <SectionTitle>{t('friendGame.timeControl')}</SectionTitle>
         <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5">
           {TIME_CONTROLS.filter((tc) =>
             ['180+2', '300+3', '600+5', '900+10', '1800+20'].includes(tc.id),
@@ -249,7 +256,7 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
               )}
             >
               <span className="block text-[12px] font-normal leading-tight text-faint">
-                {SPEED_LABELS[tc.category].fr}
+                {SPEED_LABELS[tc.category][contenu]}
               </span>
               <span className="mt-0.5 block text-sm">{tc.label}</span>
             </button>
@@ -265,7 +272,7 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
         icon={<Trophy size={17} />}
         onClick={lancer}
       >
-        Composer le plateau
+        {t('arena.composeField')}
       </Button>
     </>
   )
@@ -276,6 +283,7 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Tableau({ tournoi, onAbandonner }: { tournoi: TournoiSolo; onAbandonner: () => void }) {
+  const t = useT()
   const router = useRouter()
   const table = classement(tournoi)
   const duel = prochainDuel(tournoi)
@@ -288,7 +296,7 @@ function Tableau({ tournoi, onAbandonner }: { tournoi: TournoiSolo; onAbandonner
     const adverse = duel.blancs === HUMAIN ? duel.noirs : duel.blancs
     const bot = trouverConcurrent(tournoi, adverse)
     if (!bot?.niveau) {
-      toast.error('Adversaire introuvable.', 'Recompose le plateau.')
+      toast.error(t('arena.opponentMissing'), t('arena.recompose'))
       return
     }
     const couleur = duel.blancs === HUMAIN ? 'w' : 'b'
@@ -298,14 +306,16 @@ function Tableau({ tournoi, onAbandonner }: { tournoi: TournoiSolo; onAbandonner
       `/jouer/ordinateur?tournoi=1&niveau=${bot.niveau}&couleur=${couleur}` +
         `&tc=${tournoi.cadence}&perso=${bot.personnalite ?? ''}`,
     )
-  }, [duel, tournoi, router])
+  }, [duel, tournoi, router, t])
 
   return (
     <>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Ton tournoi</h1>
+        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+          {t('arena.yourTournament')}
+        </h1>
         <Chip tone="accent">
-          Ronde {Math.min(tournoi.ronde, rondes)} sur {rondes}
+          {t('arena.roundOf', { n: Math.min(tournoi.ronde, rondes), total: rondes })}
         </Chip>
       </div>
 
@@ -314,13 +324,15 @@ function Tableau({ tournoi, onAbandonner }: { tournoi: TournoiSolo; onAbandonner
           <p className="text-4xl">{moi?.rang === 1 ? '🏆' : moi?.rang === 2 ? '🥈' : '🎯'}</p>
           <p className="mt-2 font-display text-xl font-bold">
             {moi?.rang === 1
-              ? 'Tu gagnes le tournoi.'
-              : `${moi?.rang}ᵉ sur ${table.length}, avec ${moi?.points} point${(moi?.points ?? 0) > 1 ? 's' : ''}.`}
+              ? t('arena.youWin')
+              : t((moi?.points ?? 0) > 1 ? 'arena.rankOf' : 'arena.rankOfOne', {
+                  rang: moi?.rang ?? 0,
+                  total: table.length,
+                  points: moi?.points ?? 0,
+                })}
           </p>
           <p className="mt-1 text-sm text-muted">
-            {moi?.rang === 1
-              ? 'Reprends avec un plateau plus fort — c’est là qu’on apprend.'
-              : 'Le classement complet est ci-dessous, partie par partie.'}
+            {t(moi?.rang === 1 ? 'arena.tryStronger' : 'arena.fullStandings')}
           </p>
           <Button
             variant="primary"
@@ -329,7 +341,7 @@ function Tableau({ tournoi, onAbandonner }: { tournoi: TournoiSolo; onAbandonner
             icon={<RotateCcw size={14} />}
             onClick={onAbandonner}
           >
-            Nouveau tournoi
+            {t('arena.newTournament')}
           </Button>
         </Card>
       ) : (
@@ -338,7 +350,7 @@ function Tableau({ tournoi, onAbandonner }: { tournoi: TournoiSolo; onAbandonner
 
       <Card className="mt-4 overflow-hidden">
         <p className="border-b border-line/60 px-4 py-2.5 text-[12px] font-semibold text-faint">
-          Classement
+          {t('arena.standings')}
         </p>
         <ul>
           {table.map((ligne) => {
@@ -358,8 +370,10 @@ function Tableau({ tournoi, onAbandonner }: { tournoi: TournoiSolo; onAbandonner
                     {ligne.concurrent.nom}
                   </span>
                   <span className="block text-[12px] text-faint">
-                    {ligne.concurrent.elo} Elo · {ligne.joues} partie
-                    {ligne.joues > 1 ? 's' : ''}
+                    {ligne.concurrent.elo} Elo ·{' '}
+                    {t(ligne.joues > 1 ? 'arena.gamesPlayed' : 'arena.oneGamePlayed', {
+                      n: ligne.joues,
+                    })}
                   </span>
                 </span>
                 <span className="shrink-0 font-display text-lg font-bold tabular-nums">
@@ -379,7 +393,7 @@ function Tableau({ tournoi, onAbandonner }: { tournoi: TournoiSolo; onAbandonner
           onClick={onAbandonner}
           className="mt-4 text-sm text-faint transition-colors hover:text-muted"
         >
-          Abandonner ce tournoi
+          {t('arena.abandon')}
         </button>
       )}
     </>
@@ -395,19 +409,22 @@ function ProchaineRonde({
   duel: { blancs: string; noirs: string; ronde: number }
   onJouer: () => void
 }) {
+  const t = useT()
   const adverse = duel.blancs === HUMAIN ? duel.noirs : duel.blancs
   const bot = trouverConcurrent(tournoi, adverse)
-  const couleur = duel.blancs === HUMAIN ? 'Blancs' : 'Noirs'
+  const couleur = t(duel.blancs === HUMAIN ? 'settings.white' : 'settings.black')
 
   return (
     <Card className="mt-5 p-5">
-      <p className="text-[12px] font-semibold text-faint">Ronde {duel.ronde} · ta partie</p>
+      <p className="text-[12px] font-semibold text-faint">
+        {t('arena.yourRound', { n: duel.ronde })}
+      </p>
       <div className="mt-2 flex items-center gap-3">
         {bot && <VisageDuConcurrent concurrent={bot} taille={56} />}
         <div className="min-w-0 flex-1">
           <p className="font-display text-lg font-bold leading-tight">{bot?.nom}</p>
           <p className="text-[14px] text-muted">
-            {bot?.elo} Elo · tu joues les {couleur}
+            {t('arena.youPlay', { elo: bot?.elo ?? 0, couleur })}
           </p>
         </div>
       </div>
@@ -419,7 +436,7 @@ function ProchaineRonde({
         icon={<Play size={17} />}
         onClick={onJouer}
       >
-        Jouer cette partie
+        {t('arena.playThisGame')}
       </Button>
     </Card>
   )
@@ -491,6 +508,7 @@ function VisageDuConcurrent({
  * réellement affrontés se ferait une fausse idée de la valeur du classement.
  */
 function Resultats({ tournoi }: { tournoi: TournoiSolo }) {
+  const t = useT()
   const rondes = nombreDeRondes(tournoi)
   const jouees = tournoi.duels.filter((d) => d.resultat !== '*')
   if (jouees.length === 0) return null
@@ -498,7 +516,7 @@ function Resultats({ tournoi }: { tournoi: TournoiSolo }) {
   return (
     <Card className="mt-4 overflow-hidden">
       <p className="border-b border-line/60 px-4 py-2.5 text-[12px] font-semibold text-faint">
-        Résultats
+        {t('arena.results')}
       </p>
       <div className="max-h-80 overflow-y-auto">
         {Array.from({ length: rondes }, (_, i) => i + 1).map((ronde) => {
@@ -506,7 +524,9 @@ function Resultats({ tournoi }: { tournoi: TournoiSolo }) {
           if (duels.length === 0) return null
           return (
             <div key={ronde} className="border-b border-line/40 px-4 py-2 last:border-0">
-              <p className="mb-1 text-[12px] font-semibold text-faint">Ronde {ronde}</p>
+              <p className="mb-1 text-[12px] font-semibold text-faint">
+                {t('arena.round', { n: ronde })}
+              </p>
               {duels.map((duel, index) => {
                 const blancs = trouverConcurrent(tournoi, duel.blancs)
                 const noirs = trouverConcurrent(tournoi, duel.noirs)
@@ -528,9 +548,9 @@ function Resultats({ tournoi }: { tournoi: TournoiSolo }) {
                     {duel.simule && (
                       <span
                         className="shrink-0 text-[12px] text-faint"
-                        title="Résultat tiré selon l’écart de classement, la partie n’a pas été jouée."
+                        title={t('arena.simulatedTitle')}
                       >
-                        simulé
+                        {t('arena.simulated')}
                       </span>
                     )}
                   </p>
