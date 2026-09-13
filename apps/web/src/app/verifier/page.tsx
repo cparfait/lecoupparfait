@@ -97,7 +97,7 @@ function VerifyResult() {
             </p>
             <Link href="/jouer" className="mt-4 block">
               <Button variant="primary" fullWidth>
-                Aller jouer
+                {t('bits.goPlay')}
               </Button>
             </Link>
           </>
@@ -111,7 +111,7 @@ function VerifyResult() {
             >
               <XCircle size={24} />
             </span>
-            <h1 className="font-display text-xl font-bold">Lien inutilisable</h1>
+            <h1 className="font-display text-xl font-bold">{t('bits.deadLinkShort')}</h1>
             <p className="mt-1.5 text-sm leading-relaxed text-muted">{state.message}</p>
             <p className="mt-2 flex items-center justify-center gap-1.5 text-xs text-faint">
               <Mail size={12} aria-hidden />

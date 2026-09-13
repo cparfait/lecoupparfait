@@ -81,7 +81,7 @@ export function PhysicalBoardPanel({
               onClick={() => setDeplie(false)}
               className="shrink-0 text-xs text-faint transition-colors hover:text-ink"
             >
-              Masquer
+              {t('bits.hide')}
             </button>
           ) : null
         }
@@ -176,7 +176,7 @@ function StatusChip({ state }: { state: PhysicalBoardState }) {
       </Chip>
     )
   }
-  if (state.status === 'error') return <Chip tone="danger">Erreur</Chip>
+  if (state.status === 'error') return <Chip tone="danger">{t('common.error')}</Chip>
   return (
     <Chip tone="success">
       <Check size={12} className="mr-1 inline" />

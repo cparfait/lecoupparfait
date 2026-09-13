@@ -178,7 +178,7 @@ export default function RegarderUnAmiPage() {
     return (
       <div className="page-etroite">
         <Link href="/jouer/regarder" className="lien mb-4 inline-flex items-center gap-1">
-          <ArrowLeft size={14} aria-hidden /> Regarder
+          <ArrowLeft size={14} aria-hidden /> {t('bits.watch')}
         </Link>
         <EmptyState
           icon={<Eye size={28} />}
@@ -203,7 +203,7 @@ export default function RegarderUnAmiPage() {
           qu'il peut y jouer, essaie, et conclut que la page est cassée. */}
       <div className="mb-3 flex flex-wrap items-center gap-2 rounded-[var(--radius-sm)] border border-line bg-surface px-3 py-2">
         <Link href="/jouer/regarder" className="lien inline-flex items-center gap-1">
-          <ArrowLeft size={14} aria-hidden /> Regarder
+          <ArrowLeft size={14} aria-hidden /> {t('bits.watch')}
         </Link>
         <span className="text-faint" aria-hidden>
           ·

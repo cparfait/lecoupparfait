@@ -2493,6 +2493,11 @@ export const fr = {
     reset: 'Remettre',
     analyse: 'Analyser',
     fineLevel: 'Niveau fin',
+    goPlay: 'Aller jouer',
+    deadLinkShort: 'Lien inutilisable',
+    newRecord: 'Nouveau record !',
+    show: 'Montrer',
+    hide: 'Masquer',
   },
   rest: {
     immortal0:

@@ -43,6 +43,7 @@
     "check:enjeux": "node --experimental-strip-types scripts/check-enjeux.mjs",
     "check:seances": "node --experimental-strip-types scripts/check-seances.mjs",
     "check:langues": "node --experimental-strip-types scripts/check-langues.mjs",
+    "check:textes": "node scripts/check-textes-durs.mjs",
     "check:eboards": "node --experimental-strip-types scripts/check-eboards.mjs",
     "check:puzzles": "node scripts/check-puzzles.mjs",
     "check:cadences": "node --experimental-strip-types scripts/check-cadences.mjs",

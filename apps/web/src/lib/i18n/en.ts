@@ -2472,6 +2472,11 @@ export const en: Dictionary = {
     reset: 'Reset',
     analyse: 'Analyse',
     fineLevel: 'Fine level',
+    goPlay: 'Go and play',
+    deadLinkShort: 'Unusable link',
+    newRecord: 'New record!',
+    show: 'Show',
+    hide: 'Hide',
   },
   rest: {
     immortal0: 'The King’s Gambit: White offers a pawn to open lines towards the enemy king.',

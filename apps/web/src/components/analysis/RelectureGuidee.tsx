@@ -227,7 +227,7 @@ export function RelectureGuidee({
           onClick={onRetourner}
           title={t('guided2.otherSide')}
         >
-          Retourner
+          {t('bits.flip')}
         </Button>
         {/* Pendant la question, « Montrer » révèle la réponse plutôt que de
             dérouler la suite : on ne déroule pas une suite qu'on n'a pas encore
@@ -246,7 +246,7 @@ export function RelectureGuidee({
               onClick={onMontrer}
               disabled={demo}
             >
-              Montrer
+              {t('bits.show')}
             </Button>
           )
         )}
