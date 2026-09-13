@@ -421,6 +421,167 @@ export const fr = {
     serverUnreachable: 'Le serveur est injoignable.',
   },
 
+  board3d: {
+    noWebgl:
+      'Ce navigateur n’offre pas l’accélération graphique dont elle a besoin. La vue 2D joue exactement la même partie.',
+    switchTo2d: 'Passer en 2D',
+    contextLost:
+      'Ton appareil a repris la mémoire graphique. La partie continue : rien n’est perdu.',
+    backTo2d: 'Revenir en 2D',
+  },
+
+  vision: {
+    intro:
+      'Une case est annoncée, tu cliques dessus. Trente secondes. Tant qu’il faut réfléchir pour trouver « f6 », ce temps-là est pris sur le calcul — c’est le réflexe le plus rentable à installer quand on débute.',
+    over: 'Manche terminée.',
+    ready: 'Prêt ? La première case s’affichera ici.',
+    time: 'Temps',
+    found: 'Trouvées',
+    record: 'Record',
+    fromBlack: 'Voir depuis les Noirs',
+    fromBlackHint:
+      'Un exercice différent, et celui qui manque le plus : on connaît son côté par cœur, jamais l’autre.',
+    noPenalty:
+      'Une erreur ne coûte pas de temps : l’objectif est d’installer un réflexe, pas de se mettre la pression. Vise trente cases en trente secondes — à ce rythme, tu ne cherches plus, tu vois.',
+  },
+
+  next: {
+    someoneWaits: 'Quelqu’un t’attend',
+    yourTurnAgainst: 'C’est à toi de jouer contre {adversaire}',
+    opponentOnline: 'Il est en ligne, devant l’échiquier.',
+    opponentOffline: 'Il s’est déconnecté, mais la partie tient toujours.',
+    playMyMove: 'Jouer mon coup',
+    gamesWaiting: '{n} parties attendent ton coup',
+    oneGameWaiting: 'Une partie attend ton coup',
+    correspondenceDetail: 'En correspondance, on joue quand on veut — mais on joue.',
+    goThere: 'Y aller',
+    gameInProgress: 'Partie en cours',
+    gameContinues: 'Ta partie contre {adversaire} continue',
+    gameWaitsOpponent: 'Ta partie attend un adversaire',
+    thinking: 'Il réfléchit. Ta place reste gardée.',
+    nobodyOpened: 'Personne n’a encore ouvert ton lien.',
+    backToBoard: 'Revenir à l’échiquier',
+    gameLeftOpen: 'Partie en plan',
+    computerLeftOpen: 'Ta partie contre l’ordinateur est restée ouverte',
+    halfMovesPlayed: '{n} demi-coups joués. Elle t’attend telle quelle.',
+    oneHalfMovePlayed: '{n} demi-coup joué. Elle t’attend telle quelle.',
+    resume: 'Reprendre',
+    dailyChallenge: 'Le défi du jour',
+    onePositionOnly: 'Une position, et une seule, jusqu’à minuit',
+    otherQuestsWait: '{n} autres quêtes attendent en dessous.',
+    oneOtherQuestWaits: '{n} autre quête attend en dessous.',
+    lastQuest: 'C’est ta dernière quête de la journée.',
+    findTheMove: 'Chercher le coup',
+    aDailyQuest: 'Une quête du jour',
+    pointsOfDay: '{xp} / {total} points du jour.',
+    questsLeft: ' Encore {n} quêtes avant minuit.',
+    lastQuestBefore: ' Dernière quête avant minuit.',
+    careerResumes: 'Ton parcours reprend là où tu l’as laissé.',
+    nothingUrgent: 'Rien ne presse',
+    allUpToDate: 'Tout est à jour',
+    allUpToDateDetail: 'Le défi est résolu, aucune partie n’attend. Reste le plaisir de jouer.',
+    playAGame: 'Jouer une partie',
+  },
+
+  next2: {
+    title: 'Et maintenant ?',
+    andMistakes: ' et {n} fautes sérieuses.',
+    andOneMistake: ' et {n} faute sérieuse.',
+    noSeriousMistake: ' sans faute grave mais sans précision.',
+    costliestPhase: 'C’est la phase qui t’a coûté le plus cher.',
+    whereItRecurs: 'Les positions où ce motif revient',
+    whatProgresses: 'Ce qui te fait progresser à ton niveau',
+  },
+
+  guided: {
+    lostGround: 'Ici, tu as perdu du terrain. À toi de trouver mieux.',
+    tryFirst: 'Joue le coup que tu aurais dû jouer, directement sur l’échiquier.',
+    trySecond: 'Pas celui-là. Regarde ce que l’adversaire menace, et ce qui est en prise.',
+    tryMore: 'Toujours pas — {n} essais. La réponse t’attend si tu préfères la voir.',
+  },
+
+  career2: {
+    pointsSuffix: 'pts de carrière',
+    rankProgress: 'Avancement dans le rang',
+    lastRank: 'Dernier rang : il n’y a plus rien au-dessus.',
+    oldScale:
+      'Points enregistrés sous un barème antérieur, que le détail ci-dessus ne sait pas reconstituer.',
+    dayPointsNote:
+      'Les « points du jour » de la carte Aujourd’hui sont un autre compteur : ils comptent tes quêtes de la journée, sur {total}, et repartent de zéro à minuit.',
+    seeCareerMap: 'Voir la carte de carrière',
+  },
+
+  moves: {
+    start: 'Début',
+    previous: 'Coup précédent',
+    stopPlayback: 'Interrompre la lecture',
+    playThrough: 'Dérouler la partie',
+    playThroughLong: 'Dérouler la partie coup par coup',
+    list: 'Liste des coups',
+    empty: 'Les coups joués apparaîtront ici.',
+    reviewGroup: 'Revoir les coups',
+    firstMove: 'Premier coup (Début)',
+    previousArrow: 'Coup précédent (flèche gauche)',
+    nextArrow: 'Coup suivant (flèche droite)',
+    lastMove: 'Dernier coup (Fin)',
+  },
+
+  gate: {
+    stillFree:
+      'Jouer, apprendre, résoudre des puzzles et analyser tes parties restent entièrement libres, sans rien créer. Le compte est gratuit : un pseudo, un mot de passe, et l’adresse est facultative.',
+    lookAnyway: 'Voir quand même',
+  },
+
+  install: {
+    alreadyDone: 'C’est déjà fait : tu lis ceci depuis l’application installée.',
+    ios: 'Sur iPhone et iPad, l’installation passe par le navigateur : touche le bouton de partage, puis « Sur l’écran d’accueil ». C’est aussi ce qui débloque les notifications.',
+    blurb:
+      'Une icône sur ton écran d’accueil, plein écran, sans barre d’adresse — et rien à télécharger sur un magasin d’applications : c’est le même site.',
+    manual:
+      'Ce navigateur ne propose pas l’installation depuis la page. Cherche « Installer » ou « Ajouter à l’écran d’accueil » dans son menu — ou l’icône d’installation à droite de la barre d’adresse.',
+  },
+
+  leaderboard: {
+    unavailable: 'Classement indisponible',
+    unavailableHint:
+      'La base de données n’est pas joignable. Le reste de la plateforme fonctionne normalement.',
+    empty: 'Personne au classement pour l’instant',
+    emptyHint:
+      'Joue {n} parties classées dans cette cadence pour y apparaître. Il faut être deux comptes inscrits pour qu’une partie compte.',
+    conservativeBefore: 'Le tri ne se fait pas sur le classement brut mais sur un classement',
+    conservativeStrong: 'conservateur',
+    conservativeAfter:
+      ' : on retranche deux écarts-types. Concrètement, un joueur qui vient de gagner trois parties a une incertitude énorme sur son vrai niveau, et n’occupe donc pas la première place pour autant. Il faut jouer régulièrement pour que l’incertitude descende — et donc pour monter.',
+    provisionalNote:
+      'Le point d’interrogation à côté d’un classement signifie qu’il est encore provisoire : moins d’une trentaine de parties, l’estimation bouge beaucoup.',
+  },
+
+  verify: {
+    incompleteLink: 'Ce lien est incomplet.',
+    serverUnreachable: 'Le serveur est injoignable.',
+    alreadyDone: 'C’était déjà fait',
+    confirmed: 'Adresse confirmée',
+    accountWorks: 'Ton compte fonctionne : seule l’adresse reste à confirmer.',
+  },
+
+  stakesList: {
+    afterE4: 'Après 1.e4',
+    afterE4Sub: 'Le centre pris tout de suite, et les six façons d’y répondre.',
+    afterD4: 'Après 1.d4',
+    afterD4Sub: 'Plus lent, plus fermé, et des plans qui durent trente coups.',
+    noCentrePawn: 'Sans pion au centre',
+    noCentrePawnSub: 'L’anglaise et le Réti : on contrôle le centre de loin, avec des pièces.',
+    title: 'Les enjeux des ouvertures',
+    intro:
+      'Aucune variante à mémoriser. Connaître dix coups de théorie ne sert à rien si l’on ne sait pas ce qu’on cherche au onzième — et l’adversaire sort du livre au quatrième, presque toujours. Ce qui reste, c’est le plan : il tient en trois phrases par ouverture, et il vaut pour toute la partie.',
+    searchPlaceholder: 'Chercher une ouverture, un code ECO, un piège…',
+    searchAria: 'Chercher dans les fiches d’ouverture',
+    noMatch:
+      'Aucune fiche ne correspond à « {recherche} ». L’explorateur, lui, connaît les 3 810 ouvertures nommées.',
+    explorerNote:
+      'Ton ouverture n’est pas là ? L’explorateur en connaît 3 810, les reconnaît par transposition, et donne les statistiques par tranche de niveau.',
+  },
+
   game: {
     yourTurn: 'À toi de jouer',
     opponentTurn: 'L’adversaire réfléchit…',

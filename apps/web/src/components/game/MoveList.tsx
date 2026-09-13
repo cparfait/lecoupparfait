@@ -22,6 +22,7 @@ import { useNavigationClavier } from './GameNav.tsx'
 import { useMoveWords, useSan } from '@/lib/notation.ts'
 import { localeDuContenu } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export interface MoveListProps {
   moves: PlayedMove[]
@@ -82,6 +83,7 @@ export function MoveList({
   onToggleAutoplay,
   maxRows,
 }: MoveListProps) {
+  const t = useT()
   /*
     La langue du **contenu**, et non celle de l'interface.
 
@@ -179,13 +181,13 @@ export function MoveList({
           s’allongeait — c’est-à-dire exactement quand on en a besoin. */}
       {controls && (
         <div className="flex items-center justify-center gap-0.5 border-b border-line/60 p-1.5">
-          <NavButton onClick={() => onSeek(-1)} disabled={cursor < 0} label="Début">
+          <NavButton onClick={() => onSeek(-1)} disabled={cursor < 0} label={t('moves.start')}>
             <ChevronFirst size={17} aria-hidden />
           </NavButton>
           <NavButton
             onClick={() => onSeek(cursor - 1)}
             disabled={cursor < 0}
-            label="Coup précédent"
+            label={t('moves.previous')}
           >
             <ChevronLeft size={17} aria-hidden />
           </NavButton>
@@ -197,8 +199,8 @@ export function MoveList({
               type="button"
               onClick={onToggleAutoplay}
               aria-pressed={autoplay}
-              aria-label={autoplay ? 'Interrompre la lecture' : 'Dérouler la partie'}
-              title={autoplay ? 'Interrompre la lecture' : 'Dérouler la partie'}
+              aria-label={t(autoplay ? 'moves.stopPlayback' : 'moves.playThrough')}
+              title={t(autoplay ? 'moves.stopPlayback' : 'moves.playThrough')}
               className={clsx(
                 'mx-1 grid h-8 w-8 shrink-0 place-items-center rounded-full transition-all pointer-coarse:h-11 pointer-coarse:w-11',
                 autoplay
@@ -263,12 +265,10 @@ export function MoveList({
         className="min-h-0 flex-1 overflow-y-auto overscroll-auto [--hauteur-rangee:35px] lg:overscroll-contain pointer-coarse:[--hauteur-rangee:47px]"
         style={maxRows ? { maxHeight: `calc(var(--hauteur-rangee) * ${maxRows})` } : undefined}
         role="list"
-        aria-label="Liste des coups"
+        aria-label={t('moves.list')}
       >
         {rows.length === 0 ? (
-          <p className="px-3 py-6 text-center text-sm text-faint">
-            Les coups joués apparaîtront ici.
-          </p>
+          <p className="px-3 py-6 text-center text-sm text-faint">{t('moves.empty')}</p>
         ) : (
           <ol className="text-[14px]">
             {rows.map((row) => (

@@ -29,6 +29,7 @@ import {
 import { Button, Card, Chip, Toggle } from '@/components/ui/index.tsx'
 import { playSound } from '@/lib/sound.ts'
 import { usePreferencesDe } from '@/lib/store/preferences.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /** Durée d'une manche. Assez court pour se relancer, assez long pour chauffer. */
 const ROUND_SECONDS = 30
@@ -49,6 +50,7 @@ function randomSquare(exclude: Square | null): Square {
 }
 
 export default function VisionPage() {
+  const t = useT()
   const prefs = usePreferencesDe('boardStyle')
   const skin = BOARD_SKINS[prefs.boardStyle] ?? BOARD_SKINS.aurore
 
@@ -150,9 +152,7 @@ export default function VisionPage() {
           phase === 'enCours' && 'max-lg:hidden',
         )}
       >
-        Une case est annoncée, tu cliques dessus. Trente secondes. Tant qu’il faut réfléchir pour
-        trouver « f6 », ce temps-là est pris sur le calcul — c’est le réflexe le plus rentable à
-        installer quand on débute.
+        {t('vision.intro')}
       </p>
 
       {/* ── L'ordre des blocs, et il n'est pas le même sur les deux écrans ──
@@ -261,16 +261,16 @@ export default function VisionPage() {
               </>
             ) : (
               <p className="py-4 text-sm text-muted sm:py-6">
-                {phase === 'fini' ? 'Manche terminée.' : 'Prêt ? La première case s’affichera ici.'}
+                {t(phase === 'fini' ? 'vision.over' : 'vision.ready')}
               </p>
             )}
           </Card>
 
           <div className="order-2 grid grid-cols-3 gap-2 lg:order-none">
             {[
-              { label: 'Temps', value: `${remaining}s`, icon: Timer },
-              { label: 'Trouvées', value: String(found), icon: null },
-              { label: 'Record', value: String(best), icon: Trophy },
+              { label: t('vision.time'), value: `${remaining}s`, icon: Timer },
+              { label: t('vision.found'), value: String(found), icon: null },
+              { label: t('vision.record'), value: String(best), icon: Trophy },
             ].map(({ label, value, icon: Icon }) => (
               <Card key={label} className="p-3 text-center">
                 <p className="flex items-center justify-center gap-1 text-[12px] text-faint">
@@ -290,8 +290,8 @@ export default function VisionPage() {
 
           <Card className="order-5 p-4 lg:order-none">
             <Toggle
-              label="Voir depuis les Noirs"
-              description="Un exercice différent, et celui qui manque le plus : on connaît son côté par cœur, jamais l’autre."
+              label={t('vision.fromBlack')}
+              description={t('vision.fromBlackHint')}
               checked={orientation === 'b'}
               onChange={(value) => setOrientation(value ? 'b' : 'w')}
               disabled={phase === 'enCours'}
@@ -299,9 +299,7 @@ export default function VisionPage() {
           </Card>
 
           <p className="order-6 text-xs leading-relaxed text-faint lg:order-none">
-            Une erreur ne coûte pas de temps : l’objectif est d’installer un réflexe, pas de se
-            mettre la pression. Vise trente cases en trente secondes — à ce rythme, tu ne cherches
-            plus, tu vois.
+            {t('vision.noPenalty')}
           </p>
         </div>
       </div>

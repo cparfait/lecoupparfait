@@ -18,6 +18,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { CheckCircle2, Mail, XCircle } from 'lucide-react'
 import { Button, Card, Spinner } from '@/components/ui/index.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 type State =
   | { phase: 'checking' }
@@ -34,12 +35,13 @@ export default function VerifyPage() {
 }
 
 function VerifyResult() {
+  const t = useT()
   const token = useSearchParams().get('jeton')
   const [state, setState] = useState<State>({ phase: 'checking' })
 
   useEffect(() => {
     if (!token) {
-      setState({ phase: 'failed', message: 'Ce lien est incomplet.' })
+      setState({ phase: 'failed', message: t('verify.incompleteLink') })
       return
     }
 
@@ -59,13 +61,13 @@ function VerifyResult() {
         setState({ phase: 'done', username: data.username, alreadyDone: data.alreadyDone })
       })
       .catch(() => {
-        if (alive) setState({ phase: 'failed', message: 'Le serveur est injoignable.' })
+        if (alive) setState({ phase: 'failed', message: t('verify.serverUnreachable') })
       })
 
     return () => {
       alive = false
     }
-  }, [token])
+  }, [token, t])
 
   return (
     <div className="mx-auto grid min-h-[calc(100dvh-8rem)] w-full max-w-md place-items-center px-4 py-10">
@@ -86,7 +88,7 @@ function VerifyResult() {
               <CheckCircle2 size={24} />
             </span>
             <h1 className="font-display text-xl font-bold">
-              {state.alreadyDone ? 'C’était déjà fait' : 'Adresse confirmée'}
+              {t(state.alreadyDone ? 'verify.alreadyDone' : 'verify.confirmed')}
             </h1>
             <p className="mt-1.5 text-sm leading-relaxed text-muted">
               {state.alreadyDone
@@ -113,11 +115,11 @@ function VerifyResult() {
             <p className="mt-1.5 text-sm leading-relaxed text-muted">{state.message}</p>
             <p className="mt-2 flex items-center justify-center gap-1.5 text-xs text-faint">
               <Mail size={12} aria-hidden />
-              Ton compte fonctionne : seule l’adresse reste à confirmer.
+              {t('verify.accountWorks')}
             </p>
             <Link href="/connexion" className="mt-4 block">
               <Button variant="secondary" fullWidth>
-                Se connecter
+                {t('nav.signIn')}
               </Button>
             </Link>
           </>

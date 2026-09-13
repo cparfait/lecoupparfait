@@ -27,6 +27,7 @@ import Link from 'next/link'
 import { Check, Lock, X } from 'lucide-react'
 import { Button, ButtonLink } from '@/components/ui/index.tsx'
 import type { AvantageCompte } from '@/lib/compte/avantages.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export function PorteDuCompte({
   avantage,
@@ -38,6 +39,7 @@ export function PorteDuCompte({
   href: string
   onFermer: () => void
 }) {
+  const t = useT()
   // Échap, focus initial, piège à Tab et retour du focus à la fermeture :
   // les quatre gestes d'un dialogue modal, dans `useDialogue`. Seul le premier
   // était fait ici.
@@ -88,24 +90,22 @@ export function PorteDuCompte({
         </ul>
 
         <p className="mt-4 rounded-[var(--radius-sm)] bg-surface-strong px-3 py-2 text-[12px] leading-relaxed text-muted">
-          Jouer, apprendre, résoudre des puzzles et analyser tes parties restent entièrement libres,
-          sans rien créer. Le compte est gratuit : un pseudo, un mot de passe, et l’adresse est
-          facultative.
+          {t('gate.stillFree')}
         </p>
 
         <div className="mt-4 space-y-2">
           <ButtonLink href="/connexion" variant="primary" fullWidth>
-            Créer un compte
+            {t('auth.signUp')}
           </ButtonLink>
           <div className="flex gap-2">
             <Link href="/connexion" className="min-w-0 flex-1">
               <Button variant="secondary" fullWidth>
-                Se connecter
+                {t('nav.signIn')}
               </Button>
             </Link>
             <Link href={href} className="min-w-0 flex-1" onClick={onFermer}>
               <Button variant="ghost" fullWidth>
-                Voir quand même
+                {t('gate.lookAnyway')}
               </Button>
             </Link>
           </div>

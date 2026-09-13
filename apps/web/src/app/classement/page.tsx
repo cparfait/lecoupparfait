@@ -17,6 +17,7 @@ import clsx from 'clsx'
 import { PlayerSearch } from '@/components/social/PlayerSearch.tsx'
 import { SPEED_LABELS } from '@coupparfait/core'
 import { Card, EmptyState, Skeleton } from '@/components/ui/index.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 interface LeaderboardPlayer {
   rank: number
@@ -42,6 +43,7 @@ const CATEGORIES = [
 ] as const
 
 export default function LeaderboardPage() {
+  const t = useT()
   const [category, setCategory] = useState<string>('rapid')
   const [players, setPlayers] = useState<LeaderboardPlayer[]>([])
   const [loading, setLoading] = useState(true)
@@ -124,14 +126,14 @@ export default function LeaderboardPage() {
         ) : unavailable ? (
           <EmptyState
             icon={<Trophy size={26} />}
-            title="Classement indisponible"
-            description="La base de données n’est pas joignable. Le reste de la plateforme fonctionne normalement."
+            title={t('leaderboard.unavailable')}
+            description={t('leaderboard.unavailableHint')}
           />
         ) : players.length === 0 ? (
           <EmptyState
             icon={<Medal size={26} />}
-            title="Personne au classement pour l’instant"
-            description={`Joue ${minGames} parties classées dans cette cadence pour y apparaître. Il faut être deux comptes inscrits pour qu’une partie compte.`}
+            title={t('leaderboard.empty')}
+            description={t('leaderboard.emptyHint', { n: minGames })}
           />
         ) : (
           <ul>
@@ -184,15 +186,12 @@ export default function LeaderboardPage() {
       <Card className="mt-4 p-4">
         <p className="text-[12px] font-semibold text-faint">Comment ce classement est calculé</p>
         <p className="mt-2 text-[14px] leading-relaxed text-muted">
-          Le tri ne se fait pas sur le classement brut mais sur un classement{' '}
-          <strong className="text-ink">conservateur</strong> : on retranche deux écarts-types.
-          Concrètement, un joueur qui vient de gagner trois parties a une incertitude énorme sur son
-          vrai niveau, et n’occupe donc pas la première place pour autant. Il faut jouer
-          régulièrement pour que l’incertitude descende — et donc pour monter.
+          {t('leaderboard.conservativeBefore')}{' '}
+          <strong className="text-ink">{t('leaderboard.conservativeStrong')}</strong>
+          {t('leaderboard.conservativeAfter')}
         </p>
         <p className="mt-2 text-[14px] leading-relaxed text-muted">
-          Le point d’interrogation à côté d’un classement signifie qu’il est encore provisoire :
-          moins d’une trentaine de parties, l’estimation bouge beaucoup.
+          {t('leaderboard.provisionalNote')}
         </p>
       </Card>
     </div>

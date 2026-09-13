@@ -31,8 +31,10 @@ import { XP, detailXp, rangPour, type Progression } from '@coupparfait/core'
 import { Menu } from '@/components/ui/Menu.tsx'
 import { classesChip } from '@/components/ui/index.tsx'
 import { XP_TOTAL } from '@/lib/daily/quetes.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export function PointsCarriere({ progression }: { progression: Progression }) {
+  const t = useT()
   const rang = rangPour(progression.xp)
 
   return (
@@ -48,8 +50,8 @@ export function PointsCarriere({ progression }: { progression: Progression }) {
       boutonClassName={classesChip('accent', 'transition-colors hover:brightness-125')}
       declencheur={(ouvert) => (
         <>
-          <span aria-hidden>{rang.rang.emoji}</span> {rang.rang.nom} · {progression.xp} pts de
-          carrière
+          <span aria-hidden>{rang.rang.emoji}</span> {rang.rang.nom} · {progression.xp}{' '}
+          {t('career2.pointsSuffix')}
           <ChevronDown
             size={11}
             aria-hidden
@@ -64,6 +66,7 @@ export function PointsCarriere({ progression }: { progression: Progression }) {
 }
 
 function PanneauPoints({ progression }: { progression: Progression }) {
+  const t = useT()
   const rang = rangPour(progression.xp)
   const { lignes, total } = detailXp(progression)
   /** Ce que le détail n'explique pas. Nul dans la quasi-totalité des cas. */
@@ -98,18 +101,14 @@ function PanneauPoints({ progression }: { progression: Progression }) {
           aria-valuenow={rang.acquis}
           aria-valuemin={0}
           aria-valuemax={rang.requis ?? rang.acquis}
-          aria-label="Avancement dans le rang"
+          aria-label={t('career2.rankProgress')}
         >
           <div
             className="h-full rounded-full bg-accent"
             style={{ width: `${rang.fraction * 100}%` }}
           />
         </div>
-        {!rang.suivant && (
-          <p className="mt-1 text-[12px] text-faint">
-            Dernier rang : il n’y a plus rien au-dessus.
-          </p>
-        )}
+        {!rang.suivant && <p className="mt-1 text-[12px] text-faint">{t('career2.lastRank')}</p>}
       </div>
 
       {/* ── D'où ils viennent ─────────────────────────────────────────── */}
@@ -133,7 +132,7 @@ function PanneauPoints({ progression }: { progression: Progression }) {
           {ecart !== 0 && (
             <li
               className="flex items-baseline gap-2 px-1 text-[12px]"
-              title="Points enregistrés sous un barème antérieur, que le détail ci-dessus ne sait pas reconstituer."
+              title={t('career2.oldScale')}
             >
               <span className="min-w-0 flex-1 truncate text-muted">non détaillés</span>
               <span className="shrink-0 tabular-nums font-semibold text-ink">
@@ -155,8 +154,7 @@ function PanneauPoints({ progression }: { progression: Progression }) {
         <strong className="font-semibold text-ink">sans aide</strong>.
       </p>
       <p className="mt-2 px-1 text-[12px] leading-relaxed text-faint">
-        Les « points du jour » de la carte Aujourd’hui sont un autre compteur : ils comptent tes
-        quêtes de la journée, sur {XP_TOTAL}, et repartent de zéro à minuit.
+        {t('career2.dayPointsNote', { total: XP_TOTAL })}
       </p>
 
       <div className="mt-2 border-t border-line/60 pt-2">
@@ -164,7 +162,7 @@ function PanneauPoints({ progression }: { progression: Progression }) {
           href="/carriere"
           className="flex items-center justify-between rounded-[var(--radius-sm)] px-1 py-1.5 text-[14px] font-medium transition-colors hover:bg-surface-hover"
         >
-          Voir la carte de carrière
+          {t('career2.seeCareerMap')}
           <ArrowRight size={14} aria-hidden />
         </Link>
       </div>

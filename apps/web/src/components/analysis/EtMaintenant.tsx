@@ -41,6 +41,7 @@ import {
 import { Card, Chip } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { themesDePuzzles } from '@/lib/analysis/versLesPuzzles.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /**
  * En dessous de cette note, la phase mérite d'être nommée.
@@ -69,6 +70,7 @@ export function EtMaintenant({
   locale: Locale
   className?: string
 }) {
+  const t = useT()
   const themes = themesDePuzzles(motifs)
   const notes = gradePhases(report, camp)
   const plusFaible = weakestPhase(notes)
@@ -81,7 +83,7 @@ export function EtMaintenant({
   return (
     <Card className={clsx('overflow-hidden', className)}>
       <EnTeteDeCarte
-        titre="Et maintenant ?"
+        titre={t('next2.title')}
         icone={<Compass size={14} aria-hidden />}
         teinte="var(--rub-entrainer)"
       />
@@ -106,9 +108,11 @@ export function EtMaintenant({
               <strong>{PHASE_LABELS[phaseANommer.phase][locale === 'en' ? 'en' : 'fr']}</strong> —{' '}
               {phaseANommer.accuracy.toFixed(0)} % de précision sur {phaseANommer.moves} coups,
               {phaseANommer.mistakes > 0
-                ? ` et ${phaseANommer.mistakes} faute${phaseANommer.mistakes > 1 ? 's' : ''} sérieuse${phaseANommer.mistakes > 1 ? 's' : ''}.`
-                : ' sans faute grave mais sans précision.'}{' '}
-              <span className="text-muted">C’est la phase qui t’a coûté le plus cher.</span>
+                ? t(phaseANommer.mistakes > 1 ? 'next2.andMistakes' : 'next2.andOneMistake', {
+                    n: phaseANommer.mistakes,
+                  })
+                : t('next2.noSeriousMistake')}{' '}
+              <span className="text-muted">{t('next2.costliestPhase')}</span>
             </span>
           </div>
         )}
@@ -116,9 +120,7 @@ export function EtMaintenant({
         {/* ── Les puzzles du motif ───────────────────────────────────── */}
         {themes.length > 0 && (
           <>
-            <p className="mt-4 text-[12px] font-semibold text-faint">
-              Les positions où ce motif revient
-            </p>
+            <p className="mt-4 text-[12px] font-semibold text-faint">{t('next2.whereItRecurs')}</p>
             <ul className="mt-1.5 space-y-1.5">
               {themes.map((theme) => {
                 const copy = motifCopy(theme as MotifId, locale)
@@ -147,7 +149,7 @@ export function EtMaintenant({
             regarder cette partie-là. */}
         <Link href="/apprendre/palier" className="lien mt-4 inline-flex items-center gap-1.5">
           <Target size={13} aria-hidden />
-          Ce qui te fait progresser à ton niveau
+          {t('next2.whatProgresses')}
         </Link>
       </div>
     </Card>

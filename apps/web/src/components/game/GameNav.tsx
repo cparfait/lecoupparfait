@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import clsx from 'clsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Les flèches du clavier, écoutées une seule fois par page
@@ -131,6 +132,7 @@ export function GameNav({
   fen,
   className,
 }: GameNavProps) {
+  const t = useT()
   const last = count - 1
   const atStart = cursor <= min
   const atEnd = cursor >= last
@@ -186,15 +188,15 @@ export function GameNav({
         className,
       )}
       role="group"
-      aria-label="Revoir les coups"
+      aria-label={t('moves.reviewGroup')}
     >
-      <SeekButton onClick={() => onSeek(min)} disabled={atStart} label="Premier coup (Début)">
+      <SeekButton onClick={() => onSeek(min)} disabled={atStart} label={t('moves.firstMove')}>
         <ChevronFirst size={16} aria-hidden />
       </SeekButton>
       <SeekButton
         onClick={() => onSeek(cursor - 1)}
         disabled={atStart}
-        label="Coup précédent (flèche gauche)"
+        label={t('moves.previousArrow')}
       >
         <ChevronLeft size={16} aria-hidden />
       </SeekButton>
@@ -203,8 +205,8 @@ export function GameNav({
           type="button"
           onClick={onToggleAutoplay}
           aria-pressed={autoplay}
-          title={autoplay ? 'Interrompre la lecture' : 'Dérouler la partie coup par coup'}
-          aria-label={autoplay ? 'Interrompre la lecture' : 'Dérouler la partie coup par coup'}
+          title={t(autoplay ? 'moves.stopPlayback' : 'moves.playThroughLong')}
+          aria-label={t(autoplay ? 'moves.stopPlayback' : 'moves.playThroughLong')}
           className={clsx(
             'mx-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full transition-all pointer-coarse:h-11 pointer-coarse:w-11',
             autoplay
@@ -222,14 +224,10 @@ export function GameNav({
           )}
         </button>
       )}
-      <SeekButton
-        onClick={() => onSeek(cursor + 1)}
-        disabled={atEnd}
-        label="Coup suivant (flèche droite)"
-      >
+      <SeekButton onClick={() => onSeek(cursor + 1)} disabled={atEnd} label={t('moves.nextArrow')}>
         <ChevronRight size={16} aria-hidden />
       </SeekButton>
-      <SeekButton onClick={() => onSeek(last)} disabled={atEnd} label="Dernier coup (Fin)">
+      <SeekButton onClick={() => onSeek(last)} disabled={atEnd} label={t('moves.lastMove')}>
         <ChevronLast size={16} aria-hidden />
       </SeekButton>
 

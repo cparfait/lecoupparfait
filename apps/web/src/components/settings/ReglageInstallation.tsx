@@ -13,13 +13,15 @@
 import { Check, Download, Share, Smartphone } from 'lucide-react'
 import { Button, Card, SectionTitle } from '@/components/ui/index.tsx'
 import { useInstallation } from '@/lib/pwa.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export function ReglageInstallation() {
+  const t = useT()
   const { possible, installee, manuelle, installer } = useInstallation()
 
   return (
     <Card className="p-5">
-      <SectionTitle hint="Sur cet appareil uniquement.">
+      <SectionTitle hint={t('notifications.thisDeviceOnly')}>
         <span className="flex items-center gap-2">
           <Smartphone size={16} className="text-accent" aria-hidden />
           Installer l’application
@@ -29,23 +31,16 @@ export function ReglageInstallation() {
       {installee ? (
         <p className="flex items-center gap-2 text-sm text-ink">
           <Check size={15} className="text-[var(--q-best)]" aria-hidden />
-          C’est déjà fait : tu lis ceci depuis l’application installée.
+          {t('install.alreadyDone')}
         </p>
       ) : manuelle ? (
         <p className="flex items-start gap-2 text-sm leading-relaxed text-muted">
           <Share size={15} className="mt-0.5 shrink-0" aria-hidden />
-          <span>
-            Sur iPhone et iPad, l’installation passe par le navigateur : touche le bouton de
-            partage, puis «&nbsp;Sur l’écran d’accueil&nbsp;». C’est aussi ce qui débloque les
-            notifications.
-          </span>
+          <span>{t('install.ios')}</span>
         </p>
       ) : possible ? (
         <>
-          <p className="text-sm leading-relaxed text-muted">
-            Une icône sur ton écran d’accueil, plein écran, sans barre d’adresse — et rien à
-            télécharger sur un magasin d’applications : c’est le même site.
-          </p>
+          <p className="text-sm leading-relaxed text-muted">{t('install.blurb')}</p>
           <Button
             className="mt-3"
             size="sm"
@@ -63,11 +58,7 @@ export function ReglageInstallation() {
           proposé pendant cette visite et attend son heure. On décrit donc le
           chemin manuel, qui existe dans les deux cas.
         */
-        <p className="text-sm leading-relaxed text-muted">
-          Ce navigateur ne propose pas l’installation depuis la page. Cherche
-          «&nbsp;Installer&nbsp;» ou «&nbsp;Ajouter à l’écran d’accueil&nbsp;» dans son menu — ou
-          l’icône d’installation à droite de la barre d’adresse.
-        </p>
+        <p className="text-sm leading-relaxed text-muted">{t('install.manual')}</p>
       )}
     </Card>
   )

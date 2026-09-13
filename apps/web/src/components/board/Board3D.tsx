@@ -35,6 +35,7 @@ import {
 import { PromotionPicker } from './PromotionPicker.tsx'
 import { resolvePieceColours, usePreferencesDe } from '@/lib/store/preferences.ts'
 import type { Board2DProps } from './Board2D.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /**
  * Demi-largeur du plateau, cadre compris.
@@ -85,6 +86,7 @@ function squareToWorld(square: Square, orientation: Color): [number, number] {
   pas ; c'est ce qui rend la mémoïsation efficace.
 */
 export const Board3D = memo(function Board3D(props: Board2DProps) {
+  const t = useT()
   // Trois réglages nommés, et non tout le store — voir `usePreferencesDe`.
   const prefs = usePreferencesDe('effects', 'pieceSet', 'set')
   const {
@@ -386,8 +388,7 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
           <div>
             <p className="text-sm font-semibold">La vue 3D n’est pas disponible ici</p>
             <p className="mx-auto mt-1.5 max-w-xs text-[14px] leading-relaxed text-muted">
-              Ce navigateur n’offre pas l’accélération graphique dont elle a besoin. La vue 2D joue
-              exactement la même partie.
+              {t('board3d.noWebgl')}
             </p>
             <div className="mt-4 flex justify-center">
               <button
@@ -395,7 +396,7 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
                 onClick={() => prefs.set('view', '2d')}
                 className="rounded-[var(--radius-sm)] bg-accent px-3 py-1.5 text-[14px] font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
               >
-                Passer en 2D
+                {t('board3d.switchTo2d')}
               </button>
             </div>
           </div>
@@ -410,7 +411,7 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
           <div>
             <p className="text-sm font-semibold">La vue 3D s’est interrompue</p>
             <p className="mx-auto mt-1.5 max-w-xs text-[14px] leading-relaxed text-muted">
-              Ton appareil a repris la mémoire graphique. La partie continue : rien n’est perdu.
+              {t('board3d.contextLost')}
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               <button
@@ -421,14 +422,14 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
                 }}
                 className="rounded-[var(--radius-sm)] bg-accent px-3 py-1.5 text-[14px] font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110"
               >
-                Réessayer
+                {t('common.retry')}
               </button>
               <button
                 type="button"
                 onClick={() => prefs.set('view', '2d')}
                 className="rounded-[var(--radius-sm)] border border-line px-3 py-1.5 text-[14px] font-medium transition-colors hover:bg-surface-hover"
               >
-                Revenir en 2D
+                {t('board3d.backTo2d')}
               </button>
             </div>
           </div>

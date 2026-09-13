@@ -32,6 +32,8 @@ import {
 import type { MoveExplanation } from '@coupparfait/core'
 import { Button } from '@/components/ui/index.tsx'
 import { TexteAvecTermes } from './TexteAvecTermes.tsx'
+import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
+import { usePreferences } from '@/lib/store/preferences.ts'
 
 export function RelectureGuidee({
   echiquier,
@@ -72,6 +74,8 @@ export function RelectureGuidee({
   essais: number
   onReveler: () => void
 }) {
+  const t = useT()
+  const contenu = usePreferences((state) => localeDuContenu(state.locale))
   const style = move ? QUALITY_STYLES[move.quality] : null
   const dernier = cursor >= report.moves.length - 1
 
@@ -127,15 +131,15 @@ export function RelectureGuidee({
                   ?
                 </span>
                 <p className="min-w-0 flex-1 text-[15px] font-semibold leading-snug">
-                  Ici, tu as perdu du terrain. À toi de trouver mieux.
+                  {t('guided.lostGround')}
                 </p>
               </div>
               <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
                 {essais === 0
-                  ? 'Joue le coup que tu aurais dû jouer, directement sur l’échiquier.'
+                  ? t('guided.tryFirst')
                   : essais === 1
-                    ? 'Pas celui-là. Regarde ce que l’adversaire menace, et ce qui est en prise.'
-                    : `Toujours pas — ${essais} essais. La réponse t’attend si tu préfères la voir.`}
+                    ? t('guided.trySecond')
+                    : t('guided.tryMore', { n: essais })}
               </p>
             </>
           ) : explanation && style && move ? (
@@ -147,7 +151,7 @@ export function RelectureGuidee({
                     background: `color-mix(in oklab, var(--q-${style.token}) 20%, transparent)`,
                     color: `var(--q-${style.token})`,
                   }}
-                  title={`${style.label.fr} — ${style.description.fr}`}
+                  title={`${style.label[contenu]} — ${style.description[contenu]}`}
                 >
                   {style.glyph}
                 </span>

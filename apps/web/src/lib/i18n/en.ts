@@ -416,6 +416,166 @@ export const en: Dictionary = {
     serverUnreachable: 'The server is unreachable.',
   },
 
+  board3d: {
+    noWebgl:
+      'This browser does not offer the graphics acceleration it needs. The 2D view plays exactly the same game.',
+    switchTo2d: 'Switch to 2D',
+    contextLost: 'Your device reclaimed the graphics memory. The game carries on: nothing is lost.',
+    backTo2d: 'Back to 2D',
+  },
+
+  vision: {
+    intro:
+      'A square is announced, you click it. Thirty seconds. As long as you have to think to find “f6”, that time is taken from calculating — it is the most profitable reflex to build when starting out.',
+    over: 'Run finished.',
+    ready: 'Ready? The first square will appear here.',
+    time: 'Time',
+    found: 'Found',
+    record: 'Record',
+    fromBlack: 'See it from Black',
+    fromBlackHint:
+      'A different exercise, and the one most often missing: you know your own side by heart, never the other.',
+    noPenalty:
+      'A mistake costs no time: the aim is to build a reflex, not to put yourself under pressure. Aim for thirty squares in thirty seconds — at that pace you no longer search, you see.',
+  },
+
+  next: {
+    someoneWaits: 'Someone is waiting for you',
+    yourTurnAgainst: 'It is your move against {adversaire}',
+    opponentOnline: 'They are online, at the board.',
+    opponentOffline: 'They have disconnected, but the game still stands.',
+    playMyMove: 'Play my move',
+    gamesWaiting: '{n} games are waiting for your move',
+    oneGameWaiting: 'A game is waiting for your move',
+    correspondenceDetail: 'In correspondence you play when you like — but you do play.',
+    goThere: 'Go there',
+    gameInProgress: 'Game in progress',
+    gameContinues: 'Your game against {adversaire} carries on',
+    gameWaitsOpponent: 'Your game is waiting for an opponent',
+    thinking: 'They are thinking. Your seat is kept.',
+    nobodyOpened: 'Nobody has opened your link yet.',
+    backToBoard: 'Back to the board',
+    gameLeftOpen: 'Game left hanging',
+    computerLeftOpen: 'Your game against the computer was left open',
+    halfMovesPlayed: '{n} half-moves played. It is waiting for you as it was.',
+    oneHalfMovePlayed: '{n} half-move played. It is waiting for you as it was.',
+    resume: 'Resume',
+    dailyChallenge: 'The daily challenge',
+    onePositionOnly: 'One position, and one only, until midnight',
+    otherQuestsWait: '{n} other quests are waiting below.',
+    oneOtherQuestWaits: '{n} other quest is waiting below.',
+    lastQuest: 'It is your last quest of the day.',
+    findTheMove: 'Find the move',
+    aDailyQuest: 'A daily quest',
+    pointsOfDay: '{xp} / {total} points for today.',
+    questsLeft: ' {n} more quests before midnight.',
+    lastQuestBefore: ' Last quest before midnight.',
+    careerResumes: 'Your path picks up where you left it.',
+    nothingUrgent: 'Nothing urgent',
+    allUpToDate: 'Everything is up to date',
+    allUpToDateDetail:
+      'The challenge is solved, no game is waiting. What is left is the pleasure of playing.',
+    playAGame: 'Play a game',
+  },
+
+  next2: {
+    title: 'What now?',
+    andMistakes: ' and {n} serious mistakes.',
+    andOneMistake: ' and {n} serious mistake.',
+    noSeriousMistake: ' with no serious mistake but no accuracy either.',
+    costliestPhase: 'That is the phase that cost you the most.',
+    whereItRecurs: 'The positions where this pattern comes back',
+    whatProgresses: 'What makes you progress at your level',
+  },
+
+  guided: {
+    lostGround: 'Here you lost ground. Your turn to find better.',
+    tryFirst: 'Play the move you should have played, straight on the board.',
+    trySecond: 'Not that one. Look at what your opponent threatens, and what is hanging.',
+    tryMore: 'Still not — {n} tries. The answer is waiting if you would rather see it.',
+  },
+
+  career2: {
+    pointsSuffix: 'career pts',
+    rankProgress: 'Progress within the rank',
+    lastRank: 'Last rank: there is nothing above it.',
+    oldScale:
+      'Points recorded under an earlier scale, which the breakdown above cannot reconstruct.',
+    dayPointsNote:
+      'The “points for today” on the Today card are a different counter: they count your quests for the day, out of {total}, and reset to zero at midnight.',
+    seeCareerMap: 'See the career map',
+  },
+
+  moves: {
+    start: 'Start',
+    previous: 'Previous move',
+    stopPlayback: 'Stop playback',
+    playThrough: 'Play through the game',
+    playThroughLong: 'Play through the game move by move',
+    list: 'Move list',
+    empty: 'The moves played will appear here.',
+    reviewGroup: 'Review the moves',
+    firstMove: 'First move (Home)',
+    previousArrow: 'Previous move (left arrow)',
+    nextArrow: 'Next move (right arrow)',
+    lastMove: 'Last move (End)',
+  },
+
+  gate: {
+    stillFree:
+      'Playing, learning, solving puzzles and analysing your games all stay entirely free, without creating anything. The account is free: a username, a password, and the address is optional.',
+    lookAnyway: 'Look anyway',
+  },
+
+  install: {
+    alreadyDone: 'Already done: you are reading this from the installed app.',
+    ios: 'On iPhone and iPad, installing goes through the browser: touch the share button, then “Add to Home Screen”. That is also what unlocks notifications.',
+    blurb:
+      'An icon on your home screen, full screen, without an address bar — and nothing to download from an app store: it is the same site.',
+    manual:
+      'This browser does not offer installing from the page. Look for “Install” or “Add to Home Screen” in its menu — or the install icon at the right of the address bar.',
+  },
+
+  leaderboard: {
+    unavailable: 'Leaderboard unavailable',
+    unavailableHint: 'The database is unreachable. The rest of the platform works normally.',
+    empty: 'Nobody on the leaderboard yet',
+    emptyHint:
+      'Play {n} rated games in this time control to appear here. It takes two registered accounts for a game to count.',
+    conservativeBefore: 'The order is not by raw rating but by a',
+    conservativeStrong: 'conservative',
+    conservativeAfter:
+      ' rating: two standard deviations are subtracted. In practice, a player who has just won three games has enormous uncertainty about their true level, and so does not take first place for it. You have to play regularly for the uncertainty to come down — and therefore to climb.',
+    provisionalNote:
+      'The question mark next to a rating means it is still provisional: under thirty or so games, the estimate moves a lot.',
+  },
+
+  verify: {
+    incompleteLink: 'This link is incomplete.',
+    serverUnreachable: 'The server is unreachable.',
+    alreadyDone: 'It was already done',
+    confirmed: 'Address confirmed',
+    accountWorks: 'Your account works: only the address remains to be confirmed.',
+  },
+
+  stakesList: {
+    afterE4: 'After 1.e4',
+    afterE4Sub: 'The centre taken at once, and the six ways of answering it.',
+    afterD4: 'After 1.d4',
+    afterD4Sub: 'Slower, more closed, and plans that last thirty moves.',
+    noCentrePawn: 'No pawn in the centre',
+    noCentrePawnSub: 'The English and the Réti: you control the centre from afar, with pieces.',
+    title: 'What is at stake in the openings',
+    intro:
+      'No variation to memorise. Knowing ten moves of theory is no use if you do not know what you are after on the eleventh — and your opponent leaves the book on the fourth, almost every time. What is left is the plan: it fits in three sentences per opening, and it holds for the whole game.',
+    searchPlaceholder: 'Search an opening, an ECO code, a trap…',
+    searchAria: 'Search the opening pages',
+    noMatch:
+      'No page matches “{recherche}”. The explorer, for its part, knows all 3,810 named openings.',
+    explorerNote:
+      'Your opening is not here? The explorer knows 3,810 of them, recognises them by transposition, and gives statistics by rating band.',
+  },
+
   game: {
     yourTurn: 'Your turn',
     opponentTurn: 'Opponent is thinking…',
