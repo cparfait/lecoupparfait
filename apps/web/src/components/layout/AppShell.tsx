@@ -377,10 +377,10 @@ function MenuSection({
                   le bouton qu'on vient d'ouvrir, et l'on croit avoir affaire à
                   un titre. Le verbe dit que c'est une destination. */}
               <span className="block text-sm font-semibold">
-                Voir la page {t(section.labelKey)}
+                {t('last.seeThePage')} {t(section.labelKey)}
               </span>
               <span className="block text-[12px] leading-snug text-faint">
-                toute la rubrique, présentée en grand
+                {t('last.wholeSection')}
               </span>
             </span>
             <ChevronRight size={14} className="shrink-0 text-faint" aria-hidden />

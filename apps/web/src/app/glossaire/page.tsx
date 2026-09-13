@@ -56,6 +56,7 @@ function normalise(value: string): string {
  * définitions courtes — il y en a — s'affichent d'un bloc, sans bouton.
  */
 function Definition({ texte }: { texte: string }) {
+  const t = useT()
   const [ouvert, setOuvert] = useState(false)
   const { chapeau, suite } = couperEnDeux(texte)
 
@@ -78,7 +79,7 @@ function Definition({ texte }: { texte: string }) {
             aria-expanded={ouvert}
             className="mt-1 text-[12px] font-medium text-accent transition-colors hover:underline"
           >
-            {ouvert ? 'Réduire' : 'Lire la suite'}
+            {t(ouvert ? 'last.hide' : 'last.readMore')}
           </button>
         </>
       )}

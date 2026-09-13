@@ -16,12 +16,14 @@ import { Volume2, VolumeX } from 'lucide-react'
 import clsx from 'clsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { stopSpeaking } from '@/lib/speech.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export function VoiceQuickToggle({ className }: { className?: string }) {
+  const t = useT()
   const voiceEnabled = usePreferences((state) => state.voiceEnabled)
   const setPreference = usePreferences((state) => state.set)
 
-  const label = voiceEnabled ? 'Couper la voix du coach' : 'Activer la voix du coach'
+  const label = t(voiceEnabled ? 'last.muteCoach' : 'last.unmuteCoach')
 
   return (
     <button

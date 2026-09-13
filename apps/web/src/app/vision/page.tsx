@@ -254,7 +254,7 @@ export default function VisionPage() {
           <Card glow className="order-1 p-4 text-center sm:p-5 lg:order-none">
             {phase === 'enCours' ? (
               <>
-                <p className="text-[12px] font-semibold text-faint">Clique sur</p>
+                <p className="text-[12px] font-semibold text-faint">{t('last.clickOn')}</p>
                 <p className="mt-1 font-display text-5xl font-bold tabular-nums text-accent sm:text-6xl">
                   {target}
                 </p>

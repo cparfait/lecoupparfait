@@ -135,7 +135,7 @@ export function EtMaintenant({
                       <span className="min-w-0 flex-1 text-[14px] font-medium">
                         {copy?.name ?? theme}
                       </span>
-                      <Chip tone="accent">s’entraîner</Chip>
+                      <Chip tone="accent">{t('last.train')}</Chip>
                       <ArrowRight size={14} className="shrink-0 text-faint" aria-hidden />
                     </Link>
                   </li>

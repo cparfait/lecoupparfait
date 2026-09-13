@@ -47,6 +47,7 @@ import { SAFETY_COLOURS, evaluateMoveSafety, type SafetyVerdict } from './moveSa
 import { playSound } from '@/lib/sound.ts'
 import { usePreferencesDe } from '@/lib/store/preferences.ts'
 import type { BoardStyleId } from '@/lib/store/preferences.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export interface Board2DProps {
   fen: string
@@ -204,6 +205,7 @@ export const Board2D = memo(function Board2D({
   animationMs: animationOverride,
   skinId,
 }: Board2DProps) {
+  const t = useT()
   const boardRef = useRef<HTMLDivElement>(null)
   // Dix réglages nommés, et non tout le store : sans cela, changer le volume
   // du son re-rendait l'échiquier. Voir `usePreferencesDe`.
@@ -836,7 +838,7 @@ export const Board2D = memo(function Board2D({
       <div
         ref={boardRef}
         role="grid"
-        aria-label="Échiquier"
+        aria-label={t('last.board')}
         tabIndex={0}
         // `touch-none` seulement quand on peut jouer : c'est ce qui permet de
         // glisser une pièce sans que la page défile. Sur un plateau en lecture

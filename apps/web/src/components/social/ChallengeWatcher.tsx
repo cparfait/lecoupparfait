@@ -231,7 +231,7 @@ export function ChallengeWatcher() {
           <p className="mt-0.5 text-[12px] text-muted">
             {minutes} min{challenge.increment > 0 ? ` + ${challenge.increment} s` : ''} ·{' '}
             {SPEED_LABELS[speed]?.fr ?? speed}
-            {challenge.rated ? ' · classée' : ''}
+            {challenge.rated ? t('last.ratedShort') : ''}
           </p>
           {/* Accepter quitte l'échiquier en cours — la pendule, elle, continue
                 de tourner. On le dit avant, pas après. */}

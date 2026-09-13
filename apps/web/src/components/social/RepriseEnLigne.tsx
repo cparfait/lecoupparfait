@@ -57,10 +57,7 @@ export function RepriseEnLigne() {
           {/* Le texte suivait l'ancienne règle — une minute, quoi qu'il
               arrive. Il annonçait donc une perte qui n'a plus lieu, ce qui
               revient à presser quelqu'un pour rien. */}
-          <p className="mt-1 text-[12px] leading-relaxed text-muted">
-            Ta place est gardée tant que ton adversaire n’attend pas devant l’échiquier. S’il est
-            là, la partie se perd par abandon au bout de la moitié de la cadence.
-          </p>
+          <p className="mt-1 text-[12px] leading-relaxed text-muted">{t('last.seatKept')}</p>
           <div className="mt-2.5 flex items-center gap-2">
             <Link href={partie.href}>
               <Button size="sm" variant="primary" icon={<Swords size={14} />}>

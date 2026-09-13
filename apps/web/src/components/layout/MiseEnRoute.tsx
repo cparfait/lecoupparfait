@@ -37,6 +37,7 @@ import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { usePartieEnLigne } from '@/lib/game/partieEnLigne.ts'
 import { useNotifications } from '@/lib/notifications.ts'
 import { useInstallation } from '@/lib/pwa.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /** Ce qui a déjà été proposé, pour ne pas le reproposer. */
 const CLES = {
@@ -72,6 +73,7 @@ function marquerPropose(cle: string) {
 const DELAI_MS = 3_000
 
 export function MiseEnRoute() {
+  const t = useT()
   const identite = useIdentite()
   const installation = useInstallation()
   const partieEnCours = usePartieEnLigne()
@@ -124,20 +126,20 @@ export function MiseEnRoute() {
     // Sur iPhone, il n'y a pas de bouton à offrir : seulement le geste à décrire.
     <Bandeau
       icone={<Share size={18} aria-hidden />}
-      titre="Installe Le Coup Parfait"
-      detail="Touche le bouton de partage, puis « Sur l’écran d’accueil ». C’est aussi ce qui débloque les notifications sur iPhone."
+      titre={t('last.installTitle')}
+      detail={t('last.installIos')}
       onFermer={() => ecarter(CLES.installation)}
       action={
         <Button size="sm" variant="ghost" onClick={() => ecarter(CLES.installation)}>
-          Compris
+          {t('common.close')}
         </Button>
       }
     />
   ) : (
     <Bandeau
       icone={<Download size={18} aria-hidden />}
-      titre="Installe Le Coup Parfait"
-      detail="Une icône sur ton écran d’accueil, plein écran, sans barre d’adresse. Rien à télécharger sur un magasin."
+      titre={t('last.installTitle')}
+      detail={t('last.installBlurb')}
       onFermer={() => ecarter(CLES.installation)}
       action={
         <Button
@@ -197,6 +199,7 @@ function ProposerNotifications({
   onFermer: () => void
   secours: React.ReactNode
 }) {
+  const t = useT()
   const { etat, occupe, activer } = useNotifications()
 
   // `inconnu` le temps de la vérification : on ne montre pas le repli pendant
@@ -207,8 +210,8 @@ function ProposerNotifications({
   return (
     <Bandeau
       icone={<Bell size={18} aria-hidden />}
-      titre="Être prévenu quand un ami t’invite"
-      detail="Une invitation expire en cinq minutes. Rien d’autre ne te sera envoyé, et ça se coupe d’un clic."
+      titre={t('last.notifyTitle')}
+      detail={t('last.notifyBlurb')}
       onFermer={onFermer}
       action={
         <Button
@@ -249,6 +252,7 @@ function Bandeau({
   action: React.ReactNode
   onFermer: () => void
 }) {
+  const t = useT()
   return (
     <Alerte label={titre} className="popover p-3.5 shadow-[var(--shadow-lg)]">
       <div className="flex items-start gap-3">
@@ -268,7 +272,7 @@ function Bandeau({
               onClick={onFermer}
               className="rounded-[var(--radius-sm)] px-2 py-1 text-[12px] font-medium text-muted transition-colors hover:bg-surface-hover hover:text-ink"
             >
-              Plus tard
+              {t('last.later')}
             </button>
           </div>
         </div>

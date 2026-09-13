@@ -44,6 +44,7 @@ import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { toPlayedMove, type PlayedMove } from '@/lib/game/useChessGame.ts'
 import { useGrandEcran } from '@/lib/useMediaQuery.ts'
 import { playMoveForSan } from '@/lib/sound.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /**
  * Rythme d'interrogation.
@@ -65,6 +66,7 @@ interface PartieDAmi {
 }
 
 export default function RegarderUnAmiPage() {
+  const t = useT()
   const params = useParams<{ pseudo: string }>()
   const pseudo = decodeURIComponent(params.pseudo ?? '')
   const grandEcran = useGrandEcran()
@@ -180,11 +182,11 @@ export default function RegarderUnAmiPage() {
         </Link>
         <EmptyState
           icon={<Eye size={28} />}
-          title={`${pseudo} ne joue pas en ce moment`}
-          description="La partie est peut-être terminée, ou elle date de plus de vingt minutes. Seules les parties de tes amis, fraîches, sont visibles ici."
+          title={t('watch.notPlaying', { pseudo })}
+          description={t('last.gameGone')}
           action={
             <Link href="/jouer/regarder" className="lien">
-              Voir qui joue
+              {t('last.seeWhoPlays')}
             </Link>
           }
         />
@@ -208,9 +210,9 @@ export default function RegarderUnAmiPage() {
         </span>
         <span className="flex items-center gap-1.5 text-[13px] text-muted">
           <Eye size={13} aria-hidden />
-          Tu regardes la partie de{' '}
-          <strong className="font-semibold text-ink">{partie.pseudo}</strong>. Lecture seule : tu ne
-          peux pas jouer à sa place.
+          {t('watch.youAreWatching')}{' '}
+          <strong className="font-semibold text-ink">{partie.pseudo}</strong>
+          {t('last.readOnly')}
         </span>
       </div>
 

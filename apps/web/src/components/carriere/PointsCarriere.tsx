@@ -76,9 +76,9 @@ function PanneauPoints({ progression }: { progression: Progression }) {
     <div className="p-2">
       <div className="flex items-baseline gap-2 px-1">
         <p className="font-display text-lg font-bold tracking-tight tabular-nums">
-          {progression.xp} points
+          {t('last.pointsCount', { n: progression.xp })}
         </p>
-        <span className="text-[12px] text-faint">de carrière</span>
+        <span className="text-[12px] text-faint">{t('last.careerWord')}</span>
       </div>
 
       {/* ── Où ça place ───────────────────────────────────────────────
