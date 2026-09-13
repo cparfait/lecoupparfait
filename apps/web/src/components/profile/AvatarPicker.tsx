@@ -29,6 +29,7 @@ import clsx from 'clsx'
 import { AVATAR_FAMILIES, DEFAULT_AVATAR } from '@/lib/avatars.ts'
 import { useFermetureExterieure } from '@/components/ui/Menu.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export function AvatarPicker({
   current,
@@ -38,6 +39,7 @@ export function AvatarPicker({
   /** Prévient la page, pour que l'en-tête du profil suive sans rechargement. */
   onChange?: (avatar: string) => void
 }) {
+  const t = useT()
   const [chosen, setChosen] = useState(current ?? DEFAULT_AVATAR)
   // On ouvre sur la famille de l'avatar porté : sinon le sien n'est pas
   // visible, et l'on croit que le choix n'a pas été retenu.
@@ -153,12 +155,12 @@ export function AvatarPicker({
                     : 'text-muted hover:bg-surface-hover',
                 )}
               >
-                {entry.label}
+                {t(entry.label)}
               </button>
             ))}
           </div>
 
-          <p className="mb-2 text-xs text-faint">{active.hint}</p>
+          <p className="mb-2 text-xs text-faint">{t(active.hint)}</p>
 
           {/* Six colonnes sur téléphone, huit au-delà.
 

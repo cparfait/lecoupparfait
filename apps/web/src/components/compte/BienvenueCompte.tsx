@@ -299,7 +299,7 @@ function EtapeAvatar({ depart }: { depart: string | null }) {
                   : 'text-muted hover:bg-surface-hover',
               )}
             >
-              {entree.label}
+              {t(entree.label)}
             </button>
           ))}
         </div>

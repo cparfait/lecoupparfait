@@ -22,6 +22,7 @@
 import { Chess } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { PIECE_VALUES, opposite, staticExchange } from '@coupparfait/core'
+import type { useT } from '@/lib/i18n/index.tsx'
 
 export type MoveSafety = 'safe' | 'winning' | 'losing' | 'even'
 
@@ -116,21 +117,27 @@ export const SAFETY_COLOURS: Record<MoveSafety, string> = {
   losing: 'var(--q-blunder)',
 }
 
-/** Libellé affiché en info-bulle sur la case. */
-export function describeSafety(verdict: SafetyVerdict): string {
-  if (verdict.mate) return 'Échec et mat'
+/**
+ * Libellé affiché en info-bulle sur la case.
+ *
+ * `t` est passé en argument faute de pouvoir l'obtenir ici : la fonction est
+ * pure, et `useT` est un crochet. Sans cela l'info-bulle restait en français
+ * quelle que soit la langue choisie.
+ */
+export function describeSafety(verdict: SafetyVerdict, t: ReturnType<typeof useT>): string {
+  if (verdict.mate) return t('parts.checkmate')
 
   const pawns = Math.abs(verdict.net) / 100
   const rounded = pawns >= 1 ? pawns.toFixed(0) : pawns.toFixed(1)
 
   const base =
     verdict.safety === 'winning'
-      ? `Gagne ${rounded} point${pawns >= 2 ? 's' : ''}`
+      ? t(pawns >= 2 ? 'parts.gains' : 'parts.gainsOne', { n: rounded })
       : verdict.safety === 'losing'
-        ? `Perd ${rounded} point${pawns >= 2 ? 's' : ''}`
+        ? t(pawns >= 2 ? 'parts.loses' : 'parts.losesOne', { n: rounded })
         : verdict.safety === 'even'
-          ? 'Échange équilibré'
-          : 'Case sûre'
+          ? t('parts.evenTrade')
+          : t('parts.safeSquare')
 
-  return verdict.check ? `${base} · échec` : base
+  return verdict.check ? `${base}${t('parts.withCheck')}` : base
 }

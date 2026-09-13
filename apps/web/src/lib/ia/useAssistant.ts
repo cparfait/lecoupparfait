@@ -15,6 +15,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { localeDuContenu } from '@/lib/i18n/dictionary.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { getProvider } from './providers/index.ts'
 import { setCustomProviders } from './providers/custom.ts'
@@ -40,6 +41,7 @@ export interface Assistant {
 }
 
 export function useAssistant(): Assistant {
+  const t = useT()
   const enabled = usePreferences((state) => state.iaEnabled)
   const providerId = usePreferences((state) => state.iaProvider)
   const model = usePreferences((state) => state.iaModel)
@@ -84,7 +86,7 @@ export function useAssistant(): Assistant {
       onFragment: (texte: string) => void
     }) => {
       const courant = getProvider(providerId)
-      if (!courant) throw new Error('Aucun fournisseur configuré.')
+      if (!courant) throw new Error(t('parts.iaNoProvider'))
       try {
         return await demanderEnFlux({
           provider: courant,
@@ -99,10 +101,10 @@ export function useAssistant(): Assistant {
           onFragment,
         })
       } catch (erreur) {
-        throw new Error(messageErreur(erreur))
+        throw new Error(messageErreur(erreur, t))
       }
     },
-    [providerId, model, locale, maxTokens],
+    [providerId, model, locale, maxTokens, t],
   )
 
   return {

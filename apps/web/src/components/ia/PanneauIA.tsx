@@ -88,11 +88,14 @@ export function PanneauIA() {
   const lancerTest = useCallback(async () => {
     if (!provider) return
     setTest('running')
-    const resultat = await testerConnexion({
-      provider,
-      model,
-      apiKey: getCle(provider.id),
-    })
+    const resultat = await testerConnexion(
+      {
+        provider,
+        model,
+        apiKey: getCle(provider.id),
+      },
+      t,
+    )
     setTest(resultat.ok ? 'ok' : 'ko')
     if (resultat.ok) {
       toast.success(t('ia.answers'), `${provider.name} · ${model}`)

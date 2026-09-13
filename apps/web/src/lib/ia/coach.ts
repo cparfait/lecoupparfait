@@ -10,6 +10,7 @@
  */
 
 import type { Locale } from '@coupparfait/core'
+import type { useT } from '@/lib/i18n/index.tsx'
 import type { AIMessage, AIProvider } from './types.ts'
 import { appelChat, appelChatFlux } from './transport.ts'
 import { systemPrompt } from './prompts.ts'
@@ -21,8 +22,12 @@ import { systemPrompt } from './prompts.ts'
  * aucun moyen de savoir si le problème vient de sa clé, de son crédit, du
  * modèle qu'il a choisi ou de sa connexion — quatre causes, quatre gestes
  * différents.
+ *
+ * `t` est passé en argument : le module est une fonction pure appelée depuis
+ * un `catch`, et `useT` est un crochet. Sans lui, les neuf phrases de ce
+ * traducteur restaient en français dans les quarante autres langues.
  */
-export function messageErreur(erreur: unknown): string {
+export function messageErreur(erreur: unknown, t: ReturnType<typeof useT>): string {
   const message = erreur instanceof Error ? erreur.message : String(erreur)
 
   // Modèle inconnu, retiré, ou hors du périmètre de la clé. Les fournisseurs
@@ -31,31 +36,31 @@ export function messageErreur(erreur: unknown): string {
   if (
     /no longer available|not found for API version|model.*(not found|does not exist)/i.test(message)
   ) {
-    return 'Ce modèle n’est pas disponible pour ta clé. Choisis-en un autre dans la liste.'
+    return t('parts.iaModelUnavailable')
   }
 
   const code = /HTTP (\d{3})/.exec(message)?.[1]
   if (code === '401' || code === '403') {
-    return 'Ta clé a été refusée. Vérifie-la dans les préférences.'
+    return t('parts.iaKeyRefused')
   }
   if (code === '402') {
-    return 'Ton crédit est épuisé chez ce fournisseur.'
+    return t('parts.iaOutOfCredit')
   }
   if (code === '404') {
-    return 'Ce modèle n’existe pas chez ce fournisseur. Choisis-en un autre.'
+    return t('parts.iaNoSuchModel')
   }
   if (code === '429') {
-    return 'Trop de demandes d’affilée. Laisse passer quelques secondes.'
+    return t('parts.iaTooMany')
   }
   if (code && code.startsWith('5')) {
-    return `Le fournisseur est en difficulté (erreur ${code}). Réessaie dans un instant.`
+    return t('parts.iaServerError', { code })
   }
 
   if (/failed to fetch|networkerror|load failed/i.test(message)) {
-    return 'Service injoignable. S’il tourne sur ta machine, autorise-le à répondre aux pages web (variable OLLAMA_ORIGINS pour Ollama).'
+    return t('parts.iaUnreachable')
   }
   if (/abort/i.test(message)) {
-    return 'Le fournisseur a mis trop de temps à répondre.'
+    return t('parts.iaTimeout')
   }
 
   return message
@@ -115,14 +120,17 @@ export async function demanderEnFlux(options: {
  * passe parfois alors que la conversation échoue, parce que le modèle choisi
  * n'est pas accessible à cette clé. On envoie donc une vraie question.
  */
-export async function testerConnexion(options: {
-  provider: AIProvider
-  model: string
-  apiKey: string
-}): Promise<{ ok: boolean; erreur?: string }> {
+export async function testerConnexion(
+  options: {
+    provider: AIProvider
+    model: string
+    apiKey: string
+  },
+  t: ReturnType<typeof useT>,
+): Promise<{ ok: boolean; erreur?: string }> {
   const { provider, model, apiKey } = options
-  if (!model) return { ok: false, erreur: 'Choisis d’abord un modèle.' }
-  if (provider.needsKey && !apiKey) return { ok: false, erreur: 'Saisis d’abord ta clé.' }
+  if (!model) return { ok: false, erreur: t('parts.iaPickModel') }
+  if (provider.needsKey && !apiKey) return { ok: false, erreur: t('parts.iaEnterKey') }
 
   try {
     // Un appel qui aboutit suffit à valider la clé, le modèle et le réseau —
@@ -136,6 +144,6 @@ export async function testerConnexion(options: {
     )
     return { ok: true }
   } catch (erreur) {
-    return { ok: false, erreur: messageErreur(erreur) }
+    return { ok: false, erreur: messageErreur(erreur, t) }
   }
 }

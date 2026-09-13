@@ -28,13 +28,26 @@ import { Board2D, type Board2DProps } from './Board2D.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { useT } from '@/lib/i18n/index.tsx'
 
+/**
+ * Le carré d'attente pendant que Three.js arrive.
+ *
+ * Composant nommé, et non fonction anonyme passée à `loading` : son texte
+ * était écrit en français dans la fabrique de module, où `useT` — qui est un
+ * crochet — n'a pas le droit d'être appelé. Nommé et rendu comme un composant,
+ * il lit le dictionnaire comme le reste de l'écran.
+ */
+function Chargement3D() {
+  const t = useT()
+  return (
+    <div className="grid aspect-square w-full place-items-center rounded-[var(--radius)] glass">
+      <span className="text-sm text-muted">{t('parts.loading3d')}</span>
+    </div>
+  )
+}
+
 const Board3D = dynamic(() => import('./Board3D.tsx').then((m) => m.Board3D), {
   ssr: false,
-  loading: () => (
-    <div className="grid aspect-square w-full place-items-center rounded-[var(--radius)] glass">
-      <span className="text-sm text-muted">Chargement de la 3D…</span>
-    </div>
-  ),
+  loading: Chargement3D,
 })
 
 export interface ChessBoardProps extends Board2DProps {

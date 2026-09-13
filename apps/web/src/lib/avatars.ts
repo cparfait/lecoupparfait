@@ -19,23 +19,32 @@
  *     politiques : un avatar sert à se reconnaître, pas à se déclarer.
  */
 
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
+
 export interface AvatarFamily {
-  /** Intitulé de l'onglet. */
-  label: string
-  /** Une phrase qui dit à qui la famille s'adresse. */
-  hint: string
+  /*
+    Intitulé de l'onglet et phrase qui dit à qui la famille s'adresse,
+    donnés par clé de dictionnaire.
+
+    Les deux étaient en français dans le code, et le restaient dans les
+    quarante autres langues : une constante de module ne peut pas appeler
+    `t()`, qui est un crochet. Les deux écrans qui lisent cette table — la
+    mise en route du compte et le choix d'avatar — résolvent au rendu.
+  */
+  label: TranslationKey
+  hint: TranslationKey
   emojis: string[]
 }
 
 export const AVATAR_FAMILIES: AvatarFamily[] = [
   {
-    label: 'Échecs',
-    hint: 'Les pièces du jeu, pour rester dans le ton.',
+    label: 'parts.avatarChess',
+    hint: 'parts.avatarChessHint',
     emojis: ['♟️', '♞', '♝', '♜', '♛', '♚', '♙', '♘', '♗', '♖', '♕', '♔'],
   },
   {
-    label: 'Animaux',
-    hint: 'Les plus reconnaissables en petit.',
+    label: 'parts.avatarAnimals',
+    hint: 'parts.avatarAnimalsHint',
     emojis: [
       '🦉',
       '🦊',
@@ -60,18 +69,18 @@ export const AVATAR_FAMILIES: AvatarFamily[] = [
     ],
   },
   {
-    label: 'Créatures',
-    hint: 'Pour qui préfère l’imaginaire.',
+    label: 'parts.avatarCreatures',
+    hint: 'parts.avatarCreaturesHint',
     emojis: ['🐉', '🦄', '👾', '🤖', '👻', '🎃', '🧙', '🧝', '🦖', '🐲'],
   },
   {
-    label: 'Nature',
-    hint: 'Sobres, lisibles, sans rien affirmer.',
+    label: 'parts.avatarNature',
+    hint: 'parts.avatarNatureHint',
     emojis: ['🌵', '🍀', '🌻', '🍁', '🌊', '🔥', '❄️', '⭐', '🌙', '☀️', '🌈', '🍄'],
   },
   {
-    label: 'Objets',
-    hint: 'Un peu de caractère sans mascotte.',
+    label: 'parts.avatarObjects',
+    hint: 'parts.avatarObjectsHint',
     emojis: ['⚓', '🎩', '🎸', '🚀', '🧭', '🔭', '📚', '🎲', '🏆', '⚙️', '💡', '🗝️'],
   },
 ]

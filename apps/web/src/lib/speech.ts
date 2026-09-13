@@ -684,7 +684,7 @@ function testPhrase(locale: 'fr' | 'en'): string {
  */
 export async function testVoice(
   locale: 'fr' | 'en',
-): Promise<{ engine: 'neural' | 'system'; voice: string; reason?: string }> {
+): Promise<{ engine: 'neural' | 'system'; voice: string | null; neuralDown?: boolean }> {
   const prefs = getPreferences()
   const text = testPhrase(locale)
 
@@ -696,16 +696,24 @@ export async function testVoice(
         neuralVoices.find((voice) => voice.language === locale) ??
         neuralVoices[0]
       speak(text)
-      return { engine: 'neural', voice: chosen?.label ?? 'voix par défaut' }
+      return { engine: 'neural', voice: chosen?.label ?? null }
     }
   }
 
   speak(text)
   const fallback = pickVoice(locale, prefs.voiceName)
+  /*
+    On renvoie des faits, pas des phrases.
+
+    Le nom de la voix vient du système et n'est pas traduisible ; son absence,
+    si, et la panne du serveur neuronal aussi. Les deux étaient écrites en
+    français ici, dans un module qui ne peut pas lire le dictionnaire — ce qui
+    les laissait en français dans les quarante autres langues. C'est la page
+    des préférences, qui a `t()`, qui les formule.
+  */
   return {
     engine: 'system',
-    voice: fallback?.name ?? 'voix par défaut du système',
-    reason:
-      prefs.voiceEngine === 'neural' ? 'Le serveur de voix neuronale ne répond pas.' : undefined,
+    voice: fallback?.name ?? null,
+    neuralDown: prefs.voiceEngine === 'neural',
   }
 }

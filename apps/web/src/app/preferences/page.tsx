@@ -684,11 +684,19 @@ export default function PreferencesPage() {
                       // l'on écoute vraiment la voix qu'on a choisie.
                       void testVoice(localeDuContenu(prefs.locale)).then((result) => {
                         if (result.engine === 'neural') {
-                          toast.success(t('settings.testVoiceNeural'), result.voice)
+                          toast.success(
+                            t('settings.testVoiceNeural'),
+                            result.voice ?? t('parts.defaultVoice'),
+                          )
                         } else {
                           toast.info(
                             t('settings.testVoiceBrowser'),
-                            [result.voice, result.reason].filter(Boolean).join(' — '),
+                            [
+                              result.voice ?? t('parts.systemDefaultVoice'),
+                              result.neuralDown ? t('parts.neuralDown') : null,
+                            ]
+                              .filter(Boolean)
+                              .join(' — '),
                           )
                         }
                       })
