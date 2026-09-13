@@ -42,6 +42,8 @@ import {
 } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
+import { usePreferences } from '@/lib/store/preferences.ts'
 
 interface Friend {
   id: string
@@ -112,6 +114,9 @@ export default function FriendsPage() {
 }
 
 function FriendsBook() {
+  const t = useT()
+  /* Les noms de catégorie de cadence viennent du cœur : voir `localeDuContenu`. */
+  const contenu = usePreferences((state) => localeDuContenu(state.locale))
   const router = useRouter()
   const params = useSearchParams()
 
@@ -260,9 +265,13 @@ function FriendsBook() {
         initialTime: control?.initial ?? 600,
         increment: control?.increment ?? 5,
       })
-      if (data) toast.info(`Défi envoyé à ${friend.username}.`, 'On attend sa réponse.')
+      if (data)
+        toast.info(
+          t('friends.challengeSent', { pseudo: friend.username }),
+          t('friends.challengeSentHint'),
+        )
     },
-    [post, timeControlId],
+    [post, timeControlId, t],
   )
 
   // ── Lien d'invitation ───────────────────────────────────────────────────
@@ -278,9 +287,9 @@ function FriendsBook() {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      toast.error('Copie refusée par le navigateur.', 'Sélectionne le lien à la main.')
+      toast.error(t('friends.copyRefused'), t('friends.copyRefusedHint'))
     }
-  }, [inviteUrl])
+  }, [inviteUrl, t])
 
   // ── Ajout automatique par lien de parrainage ────────────────────────────
   const referrer = params.get('ami')
@@ -305,11 +314,11 @@ function FriendsBook() {
       <div className="page-etroite">
         <EmptyState
           icon={<Users size={28} />}
-          title="Le carnet demande un compte"
-          description="Les amis se retrouvent par leur pseudo : il faut donc en avoir un. La création prend dix secondes et ne demande pas d’adresse électronique."
+          title={t('friends.needsAccount')}
+          description={t('friends.needsAccountHint')}
           action={
             <Link href="/connexion">
-              <Button variant="primary">Créer un compte</Button>
+              <Button variant="primary">{t('auth.signUp')}</Button>
             </Link>
           }
         />
@@ -319,19 +328,16 @@ function FriendsBook() {
 
   return (
     <div className="page-etroite">
-      <SectionTitle hint="Ajoute les gens avec qui tu joues, et lance une partie en un clic.">
-        Mes amis
-      </SectionTitle>
+      <SectionTitle hint={t('friends.hint')}>{t('friends.title')}</SectionTitle>
 
       {/* ── Invitation ─────────────────────────────────────────────── */}
       <Card className="mt-4 p-4">
         <div className="flex items-start gap-2.5">
           <Link2 size={18} className="mt-0.5 shrink-0 text-accent" aria-hidden />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold">Inviter quelqu’un qui n’est pas encore là</p>
+            <p className="text-sm font-semibold">{t('friends.inviteTitle')}</p>
             <p className="mt-0.5 text-[14px] leading-relaxed text-muted">
-              Envoie ce lien. La personne crée son compte et vous êtes amis directement, sans
-              demande à accepter.
+              {t('friends.inviteHint')}
             </p>
             <div className="mt-2.5 flex gap-2">
               <input
@@ -346,7 +352,7 @@ function FriendsBook() {
                 icon={copied ? <Check size={14} /> : <Copy size={14} />}
                 onClick={copyInvite}
               >
-                {copied ? 'Copié' : 'Copier'}
+                {t(copied ? 'common.copied' : 'common.copy')}
               </Button>
             </div>
           </div>
@@ -357,7 +363,9 @@ function FriendsBook() {
       {incoming.length > 0 && (
         <Card className="mt-3 p-4">
           <p className="mb-2 text-[12px] font-semibold text-faint">
-            {incoming.length === 1 ? 'Une demande d’ami' : `${incoming.length} demandes d’ami`}
+            {incoming.length === 1
+              ? t('friends.oneRequest')
+              : t('friends.manyRequests', { n: incoming.length })}
           </p>
           <div className="space-y-1.5">
             {incoming.map((request) => (
@@ -376,7 +384,7 @@ function FriendsBook() {
                     })
                   }
                 >
-                  Accepter
+                  {t('friends.accept')}
                 </Button>
                 <Button
                   size="sm"
@@ -390,7 +398,7 @@ function FriendsBook() {
                     })
                   }
                 >
-                  Refuser
+                  {t('friends.decline')}
                 </Button>
               </div>
             ))}
@@ -400,7 +408,7 @@ function FriendsBook() {
 
       {/* ── Recherche ──────────────────────────────────────────────── */}
       <Card className="mt-3 p-4">
-        <p className="mb-2 text-[12px] font-semibold text-faint">Ajouter quelqu’un déjà inscrit</p>
+        <p className="mb-2 text-[12px] font-semibold text-faint">{t('friends.addExisting')}</p>
         <div className="relative">
           <Search
             size={15}
@@ -410,9 +418,9 @@ function FriendsBook() {
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Pseudo…"
+            placeholder={t('friends.searchPlaceholder')}
             className="pl-8"
-            aria-label="Chercher un joueur"
+            aria-label={t('friends.searchAria')}
           />
           {searching && (
             <Loader2
@@ -426,9 +434,7 @@ function FriendsBook() {
         {query.trim().length >= 2 && (
           <div className="mt-2 space-y-1">
             {results.length === 0 && !searching ? (
-              <p className="px-1 py-2 text-[14px] text-faint">
-                Personne de ce nom. Envoie plutôt le lien d’invitation ci-dessus.
-              </p>
+              <p className="px-1 py-2 text-[14px] text-faint">{t('friends.nobodyNamed')}</p>
             ) : (
               results.map((person) => (
                 <div key={person.id} className="flex items-center gap-2.5">
@@ -445,7 +451,7 @@ function FriendsBook() {
                     icon={<UserPlus size={14} />}
                     onClick={() => void add(person.username)}
                   >
-                    Ajouter
+                    {t('friends.add')}
                   </Button>
                 </div>
               ))
@@ -458,10 +464,10 @@ function FriendsBook() {
       <Card className="mt-3 p-4">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <p className="text-[12px] font-semibold text-faint">
-            Mon carnet {friends.length > 0 && `· ${friends.length}`}
+            {t('friends.myBook')} {friends.length > 0 && `· ${friends.length}`}
           </p>
           <label className="flex items-center gap-1.5 text-[12px] text-muted">
-            Cadence
+            {t('friends.timeControl')}
             <select
               value={timeControlId}
               onChange={(event) => setTimeControlId(event.target.value)}
@@ -469,7 +475,7 @@ function FriendsBook() {
             >
               {TIME_CONTROLS.map((control) => (
                 <option key={control.id} value={control.id}>
-                  {control.label} · {SPEED_LABELS[control.category]?.fr ?? ''}
+                  {control.label} · {SPEED_LABELS[control.category]?.[contenu] ?? ''}
                 </option>
               ))}
             </select>
@@ -482,8 +488,7 @@ function FriendsBook() {
           </div>
         ) : friends.length === 0 ? (
           <p className="px-1 py-3 text-[14px] leading-relaxed text-faint">
-            Personne pour l’instant. Envoie le lien d’invitation à quelqu’un, ou cherche son pseudo
-            s’il est déjà inscrit.
+            {t('friends.emptyBook')}
           </p>
         ) : (
           <div className="space-y-1">
@@ -535,19 +540,23 @@ function FriendsBook() {
                         <Swords size={14} />
                       )
                     }
-                    title={waiting ? 'Retirer ce défi' : `Défier ${friend.username}`}
+                    title={
+                      waiting
+                        ? t('friends.cancelChallenge')
+                        : t('friends.challengeSomeone', { pseudo: friend.username })
+                    }
                     onClick={() =>
                       waiting
                         ? void post('/api/defis', { action: 'cancel', id: waiting.id })
                         : void challenge(friend)
                     }
                   >
-                    {waiting ? 'Annuler' : 'Jouer'}
+                    {t(waiting ? 'common.cancel' : 'friends.play')}
                   </Button>
                   <button
                     type="button"
-                    title={`Retirer ${friend.username} du carnet`}
-                    aria-label={`Retirer ${friend.username}`}
+                    title={t('friends.removeFromBook', { pseudo: friend.username })}
+                    aria-label={t('friends.remove', { pseudo: friend.username })}
                     onClick={() => void post('/api/amis', { action: 'remove', id: friend.id })}
                     className="grid h-7 w-7 shrink-0 place-items-center rounded-[var(--radius-sm)] text-faint transition-colors hover:bg-surface-hover hover:text-ink"
                   >
@@ -561,7 +570,7 @@ function FriendsBook() {
 
         {outgoing.length > 0 && (
           <p className="mt-3 border-t border-line/60 pt-2.5 text-[12px] text-faint">
-            Demandes d’ami en attente :{' '}
+            {t('friends.pendingRequests')}{' '}
             {outgoing.map((request) => request.user.username).join(', ')}.
           </p>
         )}
@@ -574,7 +583,7 @@ function FriendsBook() {
       */}
       {sent.length > 0 && (
         <Card className="mt-3 p-4">
-          <p className="mb-2 text-[12px] font-semibold text-faint">Parties en attente</p>
+          <p className="mb-2 text-[12px] font-semibold text-faint">{t('friends.pendingGames')}</p>
           <div className="space-y-1">
             {sent.map((game) => (
               <div key={game.id} className="flex items-center gap-2.5 py-0.5">
@@ -586,12 +595,13 @@ function FriendsBook() {
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[14px] font-medium">
-                    {game.toName ?? 'Partie par lien'}
+                    {game.toName ?? t('friends.linkGame')}
                   </span>
                   <span className="block text-[12px] text-faint">
                     {Math.round(game.initialTime / 60)} min
                     {game.increment > 0 ? ` + ${game.increment} s` : ''}
-                    {game.rated ? ' · classée' : ''} · <Countdown until={game.expiresAt} />
+                    {game.rated ? t('friends.ratedSuffix') : ''} ·{' '}
+                    <Countdown until={game.expiresAt} />
                   </span>
                 </span>
                 <Button
@@ -603,12 +613,12 @@ function FriendsBook() {
                     )
                   }
                 >
-                  Rejoindre
+                  {t('friends.join')}
                 </Button>
                 <button
                   type="button"
-                  title="Supprimer cette partie"
-                  aria-label="Supprimer cette partie"
+                  title={t('friends.deleteGame')}
+                  aria-label={t('friends.deleteGame')}
                   onClick={() => void post('/api/defis', { action: 'cancel', id: game.id })}
                   className="grid h-7 w-7 shrink-0 place-items-center rounded-[var(--radius-sm)] text-faint transition-colors hover:bg-surface-hover hover:text-ink"
                 >
@@ -630,6 +640,7 @@ function FriendsBook() {
  * indéfiniment. Elle ne tient pas : faute de coup joué, le serveur l'annule.
  */
 function Countdown({ until }: { until: string }) {
+  const t = useT()
   const [left, setLeft] = useState(() => Date.parse(until) - Date.now())
 
   useEffect(() => {
@@ -637,12 +648,14 @@ function Countdown({ until }: { until: string }) {
     return () => clearInterval(timer)
   }, [until])
 
-  if (left <= 0) return <>expirée</>
+  if (left <= 0) return <>{t('friends.expired')}</>
   const minutes = Math.floor(left / 60_000)
   const seconds = Math.floor((left % 60_000) / 1000)
   return (
     <>
-      expire dans {minutes}:{String(seconds).padStart(2, '0')}
+      {t('friends.expiresIn', {
+        temps: `${minutes}:${String(seconds).padStart(2, '0')}`,
+      })}
     </>
   )
 }
@@ -670,6 +683,7 @@ function NomDuJoueur({ pseudo }: { pseudo: string }) {
 }
 
 function Avatar({ friend }: { friend: Friend }) {
+  const t = useT()
   return (
     <span className="relative shrink-0">
       <span className="grid h-8 w-8 place-items-center rounded-full bg-surface-strong text-base">
@@ -680,8 +694,8 @@ function Avatar({ friend }: { friend: Friend }) {
           'absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-[var(--bg-elev)]',
           friend.online ? 'bg-[var(--q-best)]' : 'bg-line',
         )}
-        title={friend.online ? 'En ligne' : 'Hors ligne'}
-        aria-label={friend.online ? 'En ligne' : 'Hors ligne'}
+        title={t(friend.online ? 'friends.online' : 'friends.offline')}
+        aria-label={t(friend.online ? 'friends.online' : 'friends.offline')}
       />
     </span>
   )

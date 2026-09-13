@@ -16,8 +16,10 @@ import Link from 'next/link'
 import { KeyRound, MailCheck, MailX } from 'lucide-react'
 import { Button, Card, Input } from '@/components/ui/index.tsx'
 import { useCourrielDisponible } from '@/lib/auth/useIdentite.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export default function ForgotPasswordPage() {
+  const t = useT()
   const courriel = useCourrielDisponible()
   const [email, setEmail] = useState('')
   const [busy, setBusy] = useState(false)
@@ -37,17 +39,17 @@ export default function ForgotPasswordPage() {
         })
         const data = await response.json().catch(() => ({}))
         if (!response.ok) {
-          setError(data.error ?? 'Demande impossible.')
+          setError(data.error ?? t('password.requestFailed'))
           return
         }
         setSent(true)
       } catch {
-        setError('Le serveur est injoignable.')
+        setError(t('password.serverUnreachable'))
       } finally {
         setBusy(false)
       }
     },
-    [email],
+    [email, t],
   )
 
   return (
@@ -61,15 +63,13 @@ export default function ForgotPasswordPage() {
             <KeyRound size={22} />
           </span>
           <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-            Mot de passe oublié
+            {t('password.title')}
           </h1>
           {/* Le sous-titre suit la même règle que la carte : promettre un lien
               juste au-dessus d'un encart qui explique qu'aucun ne peut partir
               se contredit à deux lignes d'intervalle. */}
           <p className="mt-1.5 text-sm text-muted">
-            {courriel === false
-              ? 'La récupération par courriel n’est pas active sur ce serveur.'
-              : 'Indique l’adresse de ton compte : nous t’enverrons un lien pour en choisir un nouveau.'}
+            {t(courriel === false ? 'password.disabled' : 'password.intro')}
           </p>
         </div>
 
@@ -87,18 +87,14 @@ export default function ForgotPasswordPage() {
               >
                 <MailX size={22} />
               </span>
-              <p className="text-sm font-semibold">Pas encore possible ici</p>
+              <p className="text-sm font-semibold">{t('password.notPossible')}</p>
               <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
-                Ce serveur n’envoie pas de courriel pour le moment : il n’y a donc aucun moyen de
-                t’envoyer un lien de réinitialisation.
+                {t('password.notPossibleHint')}
               </p>
-              <p className="mt-2 text-xs leading-relaxed text-faint">
-                Écris à la personne qui héberge cette instance — elle peut redonner la main à ton
-                compte directement. Ton mot de passe, lui, n’a pas changé.
-              </p>
+              <p className="mt-2 text-xs leading-relaxed text-faint">{t('password.askTheHost')}</p>
               <Link href="/connexion" className="mt-4 block">
                 <Button variant="secondary" fullWidth>
-                  Retour à la connexion
+                  {t('password.backToSignIn')}
                 </Button>
               </Link>
             </div>
@@ -110,32 +106,31 @@ export default function ForgotPasswordPage() {
               >
                 <MailCheck size={22} />
               </span>
-              <p className="text-sm font-semibold">C’est envoyé</p>
+              <p className="text-sm font-semibold">{t('password.sent')}</p>
               <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
-                Si un compte utilise cette adresse <strong>et qu’elle a été confirmée</strong>, un
-                lien vient d’y être envoyé. Il est valable une heure.
+                {t('password.sentBefore')} <strong>{t('password.sentStrong')}</strong>
+                {t('password.sentAfter')}
               </p>
               <p className="mt-2 text-xs leading-relaxed text-faint">
-                Rien reçu ? L’adresse n’est peut-être pas celle du compte, ou n’a jamais été
-                confirmée — auquel cas elle ne peut pas servir à reprendre la main.
+                {t('password.nothingReceived')}
               </p>
               <Link href="/connexion" className="mt-4 block">
                 <Button variant="secondary" fullWidth>
-                  Retour à la connexion
+                  {t('password.backToSignIn')}
                 </Button>
               </Link>
             </div>
           ) : (
             <form onSubmit={submit} className="space-y-4">
               <Input
-                label="Adresse électronique"
+                label={t('password.emailLabel')}
                 name="email"
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"
                 required
-                hint="Celle que tu as renseignée à l’inscription."
+                hint={t('password.emailHint')}
               />
 
               {error && (
@@ -148,16 +143,13 @@ export default function ForgotPasswordPage() {
               )}
 
               <Button type="submit" variant="primary" fullWidth disabled={busy}>
-                {busy ? 'Envoi…' : 'Envoyer le lien'}
+                {t(busy ? 'password.sending' : 'password.sendLink')}
               </Button>
             </form>
           )}
         </Card>
 
-        <p className="mt-4 text-center text-xs text-faint">
-          Pas d’adresse sur ton compte ? Un compte sans adresse confirmée ne peut pas être récupéré
-          — c’est le prix de ne rien demander à l’inscription.
-        </p>
+        <p className="mt-4 text-center text-xs text-faint">{t('password.noEmailNote')}</p>
       </div>
     </div>
   )

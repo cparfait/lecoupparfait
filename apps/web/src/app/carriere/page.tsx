@@ -41,21 +41,21 @@ import { Button, ButtonLink, Card, Skeleton } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { Celebration, type Gains } from '@/components/carriere/Celebration.tsx'
 import { recommencerCarriere, useCarriere } from '@/lib/carriere/useCarriere.ts'
+import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
+import { usePreferences } from '@/lib/store/preferences.ts'
 
 export default function CarrierePage() {
+  const t = useT()
   const progression = useCarriere()
 
   return (
     <div className="page-etroite">
       <header className="mb-5">
-        <p className="text-[12px] font-semibold text-accent">Mode carrière</p>
+        <p className="text-[12px] font-semibold text-accent">{t('career.tag')}</p>
         <h1 className="mt-1 font-display text-2xl font-bold tracking-tight sm:text-3xl">
-          Douze chapitres, un chemin
+          {t('career.title')}
         </h1>
-        <p className="mt-2 max-w-prose text-sm text-muted">
-          De « savoir bouger les pièces » à « une partie entière sans filet ». Chaque chapitre a une
-          leçon, cinq puzzles et un adversaire choisi pour ce qu’il t’oblige à travailler.
-        </p>
+        <p className="mt-2 max-w-prose text-sm text-muted">{t('career.intro')}</p>
       </header>
 
       {progression === undefined ? (
@@ -84,14 +84,13 @@ export default function CarrierePage() {
  * douze chapitres, et l'on explique en une phrase ce qu'un compte ajoute.
  */
 function SansCompte() {
+  const t = useT()
   return (
     <>
       <Card className="mb-4 p-4">
-        <p className="text-sm font-medium">La carrière garde ta place.</p>
+        <p className="text-sm font-medium">{t('career.needsAccount')}</p>
         <p className="mt-1 text-[14px] leading-relaxed text-muted">
-          C’est la seule rubrique qui demande un compte, et pour une raison simple : une progression
-          sur douze chapitres n’a aucun sens si elle disparaît en fermant l’onglet. Le compte est
-          gratuit — un pseudo, un mot de passe, et rien d’autre.
+          {t('career.needsAccountHint')}
         </p>
         {/*
           Un seul bouton, et c'est celui qui mène quelque part.
@@ -102,7 +101,7 @@ function SansCompte() {
           elles n'ont pas besoin d'être reproposées ici.
         */}
         <ButtonLink href="/connexion" variant="primary" size="sm" className="mt-3">
-          Créer un compte
+          {t('auth.signUp')}
         </ButtonLink>
       </Card>
 
@@ -120,6 +119,7 @@ function SansCompte() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Parcours({ progression }: { progression: Progression }) {
+  const t = useT()
   const [gains, setGains] = useState<{ gains: Gains; titre: string } | null>(null)
   const courant = chapitreNumero(progression.chapter)
   const termine = progression.chapter >= CARRIERE_TERMINEE
@@ -148,10 +148,10 @@ function Parcours({ progression }: { progression: Progression }) {
   }, [])
 
   const recommencer = useCallback(async () => {
-    if (!window.confirm('Recommencer la carrière depuis le premier chapitre ?')) return
-    if (await recommencerCarriere()) toast.success('Carrière remise à zéro.')
-    else toast.error('Impossible de recommencer.', 'Réessaie dans un instant.')
-  }, [])
+    if (!window.confirm(t('career.restartConfirm'))) return
+    if (await recommencerCarriere()) toast.success(t('career.restarted'))
+    else toast.error(t('career.restartFailed'), t('analysis.tryAgainSoon'))
+  }, [t])
 
   return (
     <>
@@ -160,17 +160,14 @@ function Parcours({ progression }: { progression: Progression }) {
       {termine ? (
         <Card className="mb-4 border-accent/50 p-5 text-center">
           <p className="text-4xl">👑</p>
-          <p className="mt-2 font-display text-xl font-bold">Carrière terminée.</p>
-          <p className="mt-1 text-sm text-muted">
-            Les douze chapitres sont derrière toi. La suite se joue contre des humains — c’est là
-            que les vraies surprises commencent.
-          </p>
+          <p className="mt-2 font-display text-xl font-bold">{t('career.finished')}</p>
+          <p className="mt-1 text-sm text-muted">{t('career.finishedHint')}</p>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             <ButtonLink href="/jouer/ami" variant="primary" size="sm">
-              Défier quelqu’un
+              {t('career.challengeSomeone')}
             </ButtonLink>
             <Button size="sm" variant="ghost" icon={<RefreshCw size={14} />} onClick={recommencer}>
-              Tout refaire
+              {t('career.doItAllAgain')}
             </Button>
           </div>
         </Card>
@@ -205,6 +202,7 @@ function Bandeau({
   progression: Progression
   onRecommencer: () => void
 }) {
+  const t = useT()
   const rang = rangPour(progression.xp)
   const etoiles = totalEtoiles(progression)
 
@@ -246,10 +244,10 @@ function Bandeau({
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-2 text-[12px] text-faint">
-        <span title="Étoiles décrochées sur l’ensemble des chapitres">
+        <span title={t('career.starsTitle')}>
           ★ {etoiles} / {CHAPITRES.length * 3}
         </span>
-        <span title="Hauts faits débloqués">
+        <span title={t('career.badgesTitle')}>
           🏅 {progression.badges.length} / {HAUTS_FAITS.length}
         </span>
         <button
@@ -257,7 +255,7 @@ function Bandeau({
           onClick={onRecommencer}
           className="ml-auto rounded-[var(--radius-sm)] px-1.5 py-0.5 transition-colors hover:bg-surface-hover hover:text-muted"
         >
-          Recommencer
+          {t('career.restart')}
         </button>
       </div>
     </Card>
@@ -305,6 +303,7 @@ function useCompteur(cible: number): number {
  * rien d'autorité : on propose, on explique, et l'on renvoie vers la leçon.
  */
 function CoupDeMain({ chapitre, progression }: { chapitre: Chapitre; progression: Progression }) {
+  const t = useT()
   if (!coupDeMainPropose(progression)) return null
 
   const allege = niveauEffectif(chapitre, progression)
@@ -314,12 +313,11 @@ function CoupDeMain({ chapitre, progression }: { chapitre: Chapitre; progression
     <Card className="mb-4 border-[var(--q-inaccuracy)]/50 p-4">
       <p className="flex items-center gap-2 text-sm font-semibold">
         <TriangleAlert size={15} className="shrink-0 text-[var(--q-inaccuracy)]" aria-hidden />
-        {progression.losingStreak} défaites d’affilée — ça arrive.
+        {t('career.losingStreak', { n: progression.losingStreak })}
       </p>
       <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
-        L’adversaire passe à <strong className="font-semibold text-ink">{elo} Elo</strong> pour
-        cette tentative, le temps de reprendre pied. Revoir la leçon aide souvent plus qu’une partie
-        de plus : c’est là qu’est expliqué ce qui te coûte des points.
+        {t('career.easedBefore')} <strong className="font-semibold text-ink">{elo} Elo</strong>{' '}
+        {t('career.easedAfter')}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         <ButtonLink
@@ -327,14 +325,14 @@ function CoupDeMain({ chapitre, progression }: { chapitre: Chapitre; progression
           size="sm"
           variant="primary"
         >
-          Revoir la leçon
+          {t('career.reviewLesson')}
         </ButtonLink>
         <ButtonLink
           href={`/jouer/ordinateur?carriere=${chapitre.numero}`}
           size="sm"
           variant="ghost"
         >
-          Rejouer quand même
+          {t('career.playAnyway')}
         </ButtonLink>
       </div>
     </Card>
@@ -394,6 +392,8 @@ function LigneRepliee({
   etoiles: number
   verrouille?: boolean
 }) {
+  const t = useT()
+  const contenu = usePreferences((state) => localeDuContenu(state.locale))
   const personnalite = BOT_PERSONALITIES[chapitre.adversaire]
   const elo = BOT_LEVELS[chapitre.niveau - 1]?.elo ?? 0
 
@@ -420,14 +420,14 @@ function LigneRepliee({
           {chapitre.numero}. {chapitre.titre}
         </p>
         <p className="truncate text-[12px] text-faint">
-          {personnalite.name.fr} · {elo} Elo
+          {personnalite.name[contenu]} · {elo} Elo
         </p>
       </div>
 
       {verrouille ? (
-        <span className="shrink-0 text-[12px] text-faint">à venir</span>
+        <span className="shrink-0 text-[12px] text-faint">{t('career.comingUp')}</span>
       ) : (
-        <span className="shrink-0 text-sm" aria-label={`${etoiles} étoiles sur 3`}>
+        <span className="shrink-0 text-sm" aria-label={t('career.starsOf3', { n: etoiles })}>
           {[1, 2, 3].map((rang) => (
             <span
               key={rang}
@@ -450,6 +450,8 @@ function CarteCourante({
   chapitre: Chapitre
   progression: Progression
 }) {
+  const t = useT()
+  const contenu = usePreferences((state) => localeDuContenu(state.locale))
   const personnalite = BOT_PERSONALITIES[chapitre.adversaire]
   const niveau = niveauEffectif(chapitre, progression)
   const elo = BOT_LEVELS[niveau - 1]?.elo ?? 0
@@ -479,7 +481,7 @@ function CarteCourante({
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-[12px] font-semibold text-faint">
-              Chapitre {chapitre.numero} sur {CHAPITRES.length}
+              {t('career.chapterOf', { n: chapitre.numero, total: CHAPITRES.length })}
             </p>
             <h2 className="font-display text-lg font-bold leading-tight">{chapitre.titre}</h2>
             <p className="mt-1 text-[14px] leading-snug text-muted">{chapitre.objectif}</p>
@@ -525,9 +527,11 @@ function CarteCourante({
           </span>
           <span className="min-w-0 flex-1">
             <span className="block truncate text-[14px] font-medium">
-              {personnalite.name.fr} · {elo} Elo
+              {personnalite.name[contenu]} · {elo} Elo
             </span>
-            <span className="block truncate text-[12px] text-faint">{personnalite.blurb.fr}</span>
+            <span className="block truncate text-[12px] text-faint">
+              {personnalite.blurb[contenu]}
+            </span>
           </span>
         </div>
 
@@ -538,15 +542,14 @@ function CarteCourante({
             </Button>
           </Link>
         ) : (
-          <p className="mt-4 text-center text-sm text-muted">
-            Tout est fait — le chapitre suivant s’ouvre.
-          </p>
+          <p className="mt-4 text-center text-sm text-muted">{t('career.allDone')}</p>
         )}
 
         {progression.losingStreak > 0 && progression.losingStreak < SEUIL_COUP_DE_MAIN && (
           <p className="mt-2 text-center text-[12px] text-faint">
-            {progression.losingStreak} défaite{progression.losingStreak > 1 ? 's' : ''} — ça ne
-            compte pas contre toi, seules les victoires avancent.
+            {t(progression.losingStreak > 1 ? 'career.streakNotePlural' : 'career.streakNote', {
+              n: progression.losingStreak,
+            })}
           </p>
         )}
       </div>
@@ -565,10 +568,11 @@ function CarteCourante({
  * l'obtient sans savoir pourquoi, ou jamais faute d'avoir su qu'il existait.
  */
 function HautsFaits({ obtenus }: { obtenus: string[] }) {
+  const t = useT()
   return (
     <Card className="mt-4 p-4">
       <p className="mb-3 text-[12px] font-semibold text-faint">
-        Hauts faits · {obtenus.length} / {HAUTS_FAITS.length}
+        {t('career.badges', { obtenus: obtenus.length, total: HAUTS_FAITS.length })}
       </p>
       <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
         {HAUTS_FAITS.map((fait) => {
