@@ -984,6 +984,46 @@ export const activeGames = pgTable('active_games', {
 })
 
 /**
+ * La partie classée annoncée **avant** d'être jouée.
+ *
+ * Le classement contre l'ordinateur se décidait entièrement à l'arrivée : le
+ * navigateur envoyait ses coups, son résultat, son niveau d'adversaire et sa
+ * cadence, et le serveur n'avait aucun moyen de savoir si une partie classée
+ * avait seulement commencé. Trois conséquences, toutes réelles :
+ *
+ *  - on choisissait sa **catégorie** après coup — une partie annoncée en 30
+ *    minutes classait en `classical` sans qu'une seconde de plus se soit
+ *    écoulée ;
+ *  - on choisissait son **adversaire** après coup, le niveau 25 comme le 1 ;
+ *  - deux parties classées pouvaient se dérouler de front, ou la même être
+ *    envoyée deux fois.
+ *
+ * Une ligne par joueur, écrite au premier coup et **consommée** à l'arrivée :
+ * la fin de partie ne classe que ce qui correspond à ce qui a été déclaré, et
+ * la suppression par `DELETE ... RETURNING` fait office de jeton — une seconde
+ * arrivée ne trouve plus rien à consommer.
+ *
+ * Ce n'est pas une preuve que la partie a eu lieu : elle se joue chez le
+ * joueur, et rien de ce qu'il envoie n'est vérifiable au sens fort. C'est une
+ * contrainte de cohérence — niveau, cadence, camp et heure de départ sont
+ * arrêtés avant que le résultat ne soit connu.
+ */
+export const ratedIntents = pgTable('rated_intents', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  /** Niveau du bot annoncé, déjà ramené dans le barème des 25. */
+  botLevel: smallint('bot_level').notNull(),
+  /** Cadence, en secondes : elle décide de la catégorie de classement. */
+  initialTime: integer('initial_time').notNull().default(0),
+  increment: integer('increment').notNull().default(0),
+  /** Camp annoncé du joueur, `w` ou `b`. */
+  playerColor: varchar('player_color', { length: 1 }).notNull(),
+  /** L'heure du serveur, seule date de début qui ne se déclare pas. */
+  openedAt: timestamp('opened_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+/**
  * Salons de partie en direct, pour qu'un redémarrage ne les emporte pas.
  *
  * Les salons du serveur temps réel ne vivaient qu'en mémoire, et une partie
@@ -1060,6 +1100,109 @@ export const adminAudit = pgTable(
   ],
 )
 
+/**
+ * La dernière mesure du test de niveau.
+ *
+ * **Pourquoi en base, alors que le test marche sans compte.** Il continue de
+ * marcher sans compte — le résultat vit alors dans le navigateur, et c'est très
+ * bien pour l'écran « Ton palier ». Mais la mesure sert désormais à autre chose :
+ * elle **amorce le classement**. Un compte neuf partait de 100 avec une
+ * incertitude de 350, et il fallait une douzaine de parties pour qu'il rejoigne
+ * son niveau : quelqu'un mesuré à 1 550 six minutes plus tôt était classé 345
+ * après ses deux premières parties classées. La mesure existait, elle n'allait
+ * nulle part.
+ *
+ * Une ligne par compte, remplacée à chaque test : c'est un curseur, pas un
+ * journal. La trajectoire du classement, elle, vit déjà dans `rating_history`.
+ *
+ * Les deux échelles sont conservées. `puzzleRating` est ce que le test mesure
+ * vraiment ; `gameRating` est sa conversion vers l'échelle des parties, qui
+ * repose sur une droite approchée. Garder les deux permet de recalculer si la
+ * droite change, ce qui arrivera.
+ */
+export const levelTests = pgTable('level_tests', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  /** Force estimée sur l'échelle des positions. */
+  puzzleRating: integer('puzzle_rating').notNull(),
+  /** La même, convertie sur l'échelle des parties. C'est elle qui amorce. */
+  gameRating: integer('game_rating').notNull(),
+  /** Écart-type de la mesure, rendu par l'ajustement. */
+  sigma: integer('sigma').notNull(),
+  /** Nombre de positions réellement jouées. */
+  positions: smallint('positions').notNull(),
+  takenAt: timestamp('taken_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+/**
+ * Les messages qu'un administrateur adresse aux joueurs.
+ *
+ * **Deux portées, une seule table.** `targetId` vide désigne tout le monde,
+ * `targetId` rempli une personne. Séparer « annonces » et « messages » aurait
+ * donné deux écrans, deux routes et deux fois la même logique d'expiration et
+ * de lecture, pour une différence qui tient dans une colonne.
+ *
+ * **Le texte n'est pas traduit, et ne peut pas l'être.** Tout le reste de
+ * l'application passe par le dictionnaire ; ceci est écrit à la main, au
+ * moment où on l'écrit. Le message porte donc la langue de son auteur, et
+ * l'écran le présente comme ce qu'il est — un mot de l'équipe — plutôt que de
+ * le faire passer pour de l'interface.
+ *
+ * **Retiré, pas supprimé.** `withdrawnAt` éteint le message sans effacer la
+ * trace de ce qui a été dit ni à qui : un message d'avertissement adressé à
+ * quelqu'un est justement ce qu'on veut pouvoir relire trois semaines plus
+ * tard, y compris quand on l'a retiré.
+ */
+export const announcements = pgTable(
+  'announcements',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    /** Destinataire unique, ou `null` pour l'ensemble des joueurs. */
+    targetId: uuid('target_id').references(() => users.id, { onDelete: 'cascade' }),
+    /** Figé à l'écriture : un pseudo change, le journal ne doit pas changer avec. */
+    targetName: varchar('target_name', { length: 40 }),
+    message: text('message').notNull(),
+    /** `info` ou `important` — le second se voit davantage, rien de plus. */
+    tone: varchar('tone', { length: 12 }).notNull().default('info'),
+    authorId: uuid('author_id').references(() => users.id, { onDelete: 'set null' }),
+    authorName: varchar('author_name', { length: 40 }).notNull(),
+    /** Date au-delà de laquelle le message ne s'affiche plus. `null` = sans fin. */
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
+    withdrawnAt: timestamp('withdrawn_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('announcements_target_idx').on(table.targetId),
+    index('announcements_created_idx').on(table.createdAt),
+  ],
+)
+
+/**
+ * Qui a lu quoi.
+ *
+ * Une ligne écrite quand le joueur ferme le message. Sans elle, un message
+ * général réapparaîtrait à chaque page tournée — et l'on ne saurait pas non
+ * plus si l'avertissement adressé à quelqu'un lui est parvenu, ce qui est la
+ * première question qu'on se pose en le relisant.
+ *
+ * Réservé aux comptes : un visiteur sans compte voit les annonces générales et
+ * les referme dans son navigateur, ce que rien ici n'a à savoir.
+ */
+export const announcementReads = pgTable(
+  'announcement_reads',
+  {
+    announcementId: uuid('announcement_id')
+      .notNull()
+      .references(() => announcements.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    readAt: timestamp('read_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.announcementId, table.userId] })],
+)
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  Relations
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1109,6 +1252,9 @@ export type Challenge = typeof challenges.$inferSelect
 export type Evaluation = typeof evaluations.$inferSelect
 export type DailyProgress = typeof dailyProgress.$inferSelect
 export type ActiveGame = typeof activeGames.$inferSelect
+export type RatedIntent = typeof ratedIntents.$inferSelect
 export type LiveGame = typeof liveGames.$inferSelect
 export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect
 export type AdminAudit = typeof adminAudit.$inferSelect
+export type Announcement = typeof announcements.$inferSelect
+export type LevelTest = typeof levelTests.$inferSelect

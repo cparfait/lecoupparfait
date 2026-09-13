@@ -70,6 +70,34 @@ export function enregistrerPartieEnCours(moves: string[], state: EtatPartieEnCou
   })
 }
 
+/**
+ * Annonce une partie classée au serveur, avant d'y jouer le premier coup.
+ *
+ * Sans cette annonce, tout se décidait à l'arrivée : le niveau de l'adversaire,
+ * la cadence — donc la catégorie de classement — et le camp étaient ceux que le
+ * navigateur déclarait *après* avoir vu le résultat. `POST /api/parties/classee`
+ * les fige pendant qu'ils ne servent encore à rien, et la fin de partie ne
+ * classe que ce qui leur ressemble.
+ *
+ * Silencieux et sans blocage, comme ses voisines : la partie commence, annonce
+ * partie ou non. Une annonce perdue coûte le classement de cette partie-là, pas
+ * la partie.
+ */
+export function annoncerPartieClassee(annonce: {
+  botLevel: number
+  playerColor: Color
+  initialTime: number
+  increment: number
+}): void {
+  void fetch('/api/parties/classee', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(annonce),
+  }).catch(() => {
+    // Silence volontaire : voir l'en-tête du fichier.
+  })
+}
+
 /** Oublie la partie enregistrée — partie finie, abandonnée, ou remplacée. */
 export function oublierPartieEnCours(): void {
   void fetch('/api/partie-en-cours', { method: 'DELETE' }).catch(() => {})

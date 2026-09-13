@@ -26,6 +26,7 @@
 
 const { Chess } = await import('chess.js')
 const { resultatImpose } = await import('../packages/core/src/pgn.ts')
+const { START_FEN } = await import('../packages/core/src/index.ts')
 
 let checks = 0
 let failures = 0
@@ -53,11 +54,19 @@ function apres(coups, fen) {
  * Rend `'refusé'`, `'classée'` ou `'archivée'` — ce troisième cas étant la
  * partie qu'on garde dans l'historique mais qu'on ne compte pas au classement.
  */
-function decision(echiquier, declare, camp) {
+function decision(echiquier, declare, camp, startFen = null) {
   const impose = resultatImpose(echiquier)
   if (impose && impose !== declare) return 'refusé'
   const gagneeParLeJoueur = declare !== '1/2-1/2' && (declare === '1-0') === (camp === 'w')
-  return impose !== null || !gagneeParLeJoueur ? 'classée' : 'archivée'
+  const verifiable = impose !== null || !gagneeParLeJoueur
+  const depuisLeDebut = startFen ? memePosition(startFen, START_FEN) : true
+  return verifiable && depuisLeDebut ? 'classée' : 'archivée'
+}
+
+/** `memePosition` de la route : les quatre premiers champs, pas les compteurs. */
+function memePosition(a, b) {
+  const champs = (fen) => fen.trim().split(/\s+/).slice(0, 4).join(' ')
+  return champs(a) === champs(b)
 }
 
 console.log('\n♟  Ce que la position impose\n')
@@ -111,6 +120,38 @@ check(
 )
 check('position vivante, défaite du joueur → classée', decision(vivante, '0-1', 'w') === 'classée')
 check('position vivante, nulle → classée', decision(vivante, '1/2-1/2', 'w') === 'classée')
+
+console.log('\n♟  D’où part une partie classée\n')
+
+/*
+  Le mat le moins cher du monde : dame et roi contre roi seul, une position
+  qu'on écrit dans l'éditeur en dix secondes. Les coups sont légaux, le mat est
+  réel, la position impose « 1-0 » — tout ce que la route vérifiait était vrai.
+  Seul le point de départ trahit la partie.
+*/
+const depart = '7k/8/8/8/8/8/6Q1/6K1 w - - 0 1'
+const matExpress = apres(
+  ['Kf2', 'Kh7', 'Kf3', 'Kh8', 'Kf4', 'Kh7', 'Kf5', 'Kh8', 'Kf6', 'Kh7', 'Qg7#'],
+  depart,
+)
+
+// Onze demi-coups : la partie passe aussi le minimum, ce qui est bien le
+// problème — aucune des autres bornes ne la retenait.
+check('le mat est bien un mat', resultatImpose(matExpress) === '1-0')
+check(
+  'victoire depuis une position d’éditeur → archivée sans classement',
+  decision(matExpress, '1-0', 'w', depart) === 'archivée',
+)
+check(
+  'la même victoire depuis le début resterait classée',
+  decision(matDesNoirs, '1-0', 'w', START_FEN) === 'classée',
+)
+check(
+  'une FEN initiale aux compteurs différents reste la position initiale',
+  decision(matDesNoirs, '1-0', 'w', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0') ===
+    'classée',
+)
+check('pas de startFen du tout → classée', decision(matDesNoirs, '1-0', 'w', null) === 'classée')
 
 console.log(
   failures === 0

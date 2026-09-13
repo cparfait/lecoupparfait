@@ -50,6 +50,27 @@
       "when": 1788448179337,
       "tag": "0006_new_ronan",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789317956207,
+      "tag": "0007_third_killmonger",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789319117753,
+      "tag": "0008_yielding_mathemanic",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789320094101,
+      "tag": "0009_tiresome_hellcat",
+      "breakpoints": true
     }
   ]
 }

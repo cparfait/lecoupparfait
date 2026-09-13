@@ -31,6 +31,9 @@ export * from './explain.ts'
 // Classements Elo et Glicko-2
 export * from './rating.ts'
 
+// Lecture du test de niveau
+export * from './placement.ts'
+
 // Protocole moteur
 export * from './uci.ts'
 

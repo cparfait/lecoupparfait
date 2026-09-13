@@ -3,9 +3,10 @@
 /**
  * Administration.
  *
- * Six onglets, dans l'ordre où l'on s'en sert : le **tableau de bord** (ce
+ * Sept onglets, dans l'ordre où l'on s'en sert : le **tableau de bord** (ce
  * qu'on regarde en arrivant), les **comptes** (c'est souvent pour eux qu'on
- * vient), les **contenus** (on y va quand quelque chose est signalé), le
+ * vient), les **annonces** (pour prévenir tout le monde, ou une personne), les
+ * **contenus** (on y va quand quelque chose est signalé), le
  * **journal** (on le relit quand on se demande qui a fait quoi), le **système**
  * (une fois par mois, ou quand ça va mal), les **outils** (moins souvent
  * encore, mais il faut bien un endroit où voir qu'une dépendance a trois
@@ -26,6 +27,7 @@ import { useEffect, useState } from 'react'
 import { Skeleton, EmptyState, SegmentedControl } from '@/components/ui/index.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
 import type { TranslationKey } from '@/lib/i18n/index.tsx'
+import { Annonces } from './Annonces.tsx'
 import { Comptes } from './Comptes.tsx'
 import { Contenus } from './Contenus.tsx'
 import { Journal } from './Journal.tsx'
@@ -34,15 +36,16 @@ import { Systeme } from './Systeme.tsx'
 import { TableauDeBord } from './TableauDeBord.tsx'
 
 /*
-  Les six onglets, par clé de dictionnaire.
+  Les sept onglets, par clé de dictionnaire.
 
-  Constante de module : elle ne peut pas appeler `t()`, et portait donc six
+  Constante de module : elle ne peut pas appeler `t()`, et portait donc des
   intitulés français que les quarante autres langues recevaient tels quels. Ils
   sont résolus au rendu, juste avant d'être passés au sélecteur.
 */
 const ONGLETS = [
   { value: 'bord', labelKey: 'admin.tabDashboard' },
   { value: 'comptes', labelKey: 'admin.tabAccounts' },
+  { value: 'annonces', labelKey: 'admin.tabAnnouncements' },
   { value: 'contenus', labelKey: 'admin.tabContent' },
   { value: 'journal', labelKey: 'admin.tabLog' },
   { value: 'systeme', labelKey: 'admin.tabSystem' },
@@ -104,12 +107,12 @@ export default function AdminPage() {
       </h1>
       <p className="mt-1.5 text-sm text-muted">{t('admin.blurb')}</p>
 
-      {/* Six onglets ne tiennent pas dans 375 pixels : les libellés se
+      {/* Sept onglets ne tiennent pas dans 375 pixels : les libellés se
           coupaient, et « Système » sortait du cadre. On leur donne leur largeur
           et l'on fait glisser la bande — plutôt que d'abréger des intitulés,
           qui sont ici la seule indication de ce que chaque onglet contient. */}
       <div className="mt-5 -mx-4 overflow-x-auto px-4 sm:mx-0 sm:overflow-visible sm:px-0">
-        <div className="min-w-[38rem] sm:min-w-0">
+        <div className="min-w-[44rem] sm:min-w-0">
           <SegmentedControl
             value={onglet}
             onChange={(valeur: Onglet) => {
@@ -127,6 +130,7 @@ export default function AdminPage() {
       <div className="mt-5">
         {onglet === 'bord' && <TableauDeBord />}
         {onglet === 'comptes' && <Comptes />}
+        {onglet === 'annonces' && <Annonces />}
         {onglet === 'contenus' && <Contenus />}
         {onglet === 'journal' && <Journal />}
         {onglet === 'systeme' && <Systeme />}

@@ -31,8 +31,8 @@
 
 import { NextResponse } from 'next/server'
 import { Chess } from 'chess.js'
-import { botLevel, resultatImpose } from '@coupparfait/core'
-import { and, desc, eq, games, getDb, sql } from '@coupparfait/db'
+import { botLevel, resultatImpose, START_FEN } from '@coupparfait/core'
+import { and, desc, eq, games, getDb, ratedIntents, sql, type RatedIntent } from '@coupparfait/db'
 import { applyGameResult, type RatingCategory } from '@coupparfait/db/ratings'
 import { creerLimiteur } from '@/lib/server/limiteur.ts'
 import { getCurrentUser } from '@/lib/server/session.ts'
@@ -57,6 +57,8 @@ const MAX_COUPS = 400
  */
 const MIN_COUPS_CLASSEE = 10
 const partiesClassees = creerLimiteur(60 * 1000, 1)
+/** Durée plancher d'un demi-coup dans une partie classée — voir `assezLente`. */
+const MS_MIN_PAR_DEMI_COUP = 100
 const ALPHABET = 'abcdefghijkmnopqrstuvwxyz23456789'
 const MODES = new Set(['computer', 'local'])
 const RESULTATS = new Set(['1-0', '0-1', '1/2-1/2'])
@@ -125,7 +127,10 @@ export async function POST(request: Request) {
 
   const camp = body.playerColor === 'b' ? 'b' : 'w'
   const adversaire = (body.opponentName ?? 'Ordinateur').slice(0, 40)
-  const debut = body.startedAt ? new Date(body.startedAt) : new Date()
+  // Une date illisible vaut « maintenant » : la colonne est `notNull`, et une
+  // partie sans début connu reste une partie.
+  const annonceeLe = body.startedAt ? new Date(body.startedAt) : new Date()
+  const debut = Number.isNaN(annonceeLe.getTime()) ? new Date() : annonceeLe
 
   /*
     Le résultat, recoupé avec la position atteinte.
@@ -160,18 +165,81 @@ export async function POST(request: Request) {
   const verifiable = impose !== null || !gagneeParLeJoueur
 
   /*
+    Une partie classée part de la position initiale.
+
+    `startFen` existe pour l'éditeur de position et les parties thématiques, et
+    il traversait tout ce qui précède sans être regardé une seule fois. Une dame
+    contre un roi nu, dix demi-coups, un mat : la position *imposait* bel et
+    bien le résultat déclaré, `verifiable` était vrai, et la victoire comptait
+    au classement — contre le niveau 25 si on le demandait.
+
+    L'écran de jeu applique déjà cette règle pour les statistiques d'adversaire
+    (`if (!startFen) recordBotGame(...)`) : une partie commencée ailleurs qu'au
+    début ne dit rien de la force de personne. Elle ne valait simplement pas
+    pour le classement, qui est pourtant ce qu'on a le plus de raisons de
+    protéger.
+
+    La comparaison porte sur les quatre premiers champs : le compteur de
+    demi-coups et le numéro de coup ne décrivent pas une position.
+  */
+  const depuisLeDebut = body.startFen ? memePosition(body.startFen, START_FEN) : true
+
+  /*
     Classée ? Seulement contre l'ordinateur, seulement si on l'a demandé, et
     seulement avec un niveau d'adversaire connu — c'est lui qui fournit le
     classement d'en face.
   */
   const niveau = typeof body.botLevel === 'number' ? Math.round(body.botLevel) : null
-  const niveauRetenu = niveau === null ? null : botLevel(niveau).level
+  // Le barème est lu une fois : il donne le niveau ramené dans l'échelle et la
+  // cote annoncée de l'adversaire, qui doivent parler du même palier.
+  const bareme = niveau === null ? null : botLevel(niveau)
+  const niveauRetenu = bareme?.level ?? null
+  const initialTime = Math.max(0, Math.round(body.initialTime ?? 0))
+  const increment = Math.max(0, Math.round(body.increment ?? 0))
+
+  /*
+    L'annonce faite avant la partie, et consommée ici.
+
+    Voir `POST /api/parties/classee` : c'est elle qui arrête le niveau, la
+    cadence et le camp pendant qu'on ignore encore le résultat. La fin de
+    partie ne fait plus que constater si ce qui arrive ressemble à ce qui a été
+    annoncé.
+
+    La lecture est une **suppression** : elle rend la ligne au plus une fois,
+    donc la même partie envoyée deux fois n'est classée qu'une, et deux parties
+    classées ne peuvent pas se chevaucher. On ne la consomme que si le
+    classement est demandé — l'archivage ordinaire n'a pas à brûler l'annonce
+    d'une partie encore en cours dans un autre onglet.
+  */
+  const annonce = body.classee === true ? await consommerAnnonce(user.userId) : null
+  const conforme =
+    annonce !== null &&
+    annonce.botLevel === niveauRetenu &&
+    annonce.playerColor === camp &&
+    annonce.initialTime === initialTime &&
+    annonce.increment === increment
+  /*
+    Le temps réellement écoulé depuis l'annonce.
+
+    Cent millisecondes par demi-coup, c'est-à-dire très en dessous de ce que
+    n'importe qui peut jouer : ce n'est pas un contrôle de cadence, mais un
+    plancher contre la boucle « j'annonce, j'envoie une partie, je recommence »,
+    qui sans cela produirait des parties classées aussi vite que le réseau le
+    permet. Une partie d'une minute en garde toute la marge.
+  */
+  const assezLente =
+    annonce !== null &&
+    Date.now() - annonce.openedAt.getTime() >= moves.length * MS_MIN_PAR_DEMI_COUP
+
   const classee =
     body.classee === true &&
     body.mode === 'computer' &&
     niveau !== null &&
     niveau >= 1 &&
     verifiable &&
+    depuisLeDebut &&
+    conforme &&
+    assezLente &&
     moves.length >= MIN_COUPS_CLASSEE &&
     // Compté en dernier : le limiteur consomme un jeton dès qu'on l'interroge,
     // et une partie recalée pour une autre raison n'a pas à en brûler un.
@@ -192,27 +260,40 @@ export async function POST(request: Request) {
         ? 'adversaire sans classement'
         : !verifiable
           ? 'résultat non vérifiable'
-          : moves.length < MIN_COUPS_CLASSEE
-            ? 'partie trop courte'
-            : 'une partie classée par minute'
+          : !depuisLeDebut
+            ? 'position de départ imposée'
+            : annonce === null
+              ? 'partie non annoncée'
+              : !conforme
+                ? 'annonce et partie ne concordent pas'
+                : !assezLente
+                  ? 'partie trop rapide'
+                  : moves.length < MIN_COUPS_CLASSEE
+                    ? 'partie trop courte'
+                    : 'une partie classée par minute'
 
   try {
-    await getDb()
+    const rangee = await getDb()
       .insert(games)
       .values({
         slug: slug(),
         mode: String(body.mode),
-        speed: cadence(body.initialTime ?? 0),
+        speed: cadence(initialTime),
         rated: classee,
         whiteId: camp === 'w' ? user.userId : null,
         blackId: camp === 'b' ? user.userId : null,
         whiteName: camp === 'w' ? user.username : adversaire,
         blackName: camp === 'b' ? user.username : adversaire,
+        // La cote annoncée de l'adversaire, du côté qu'il tient. C'est une
+        // information de la partie, pas du classement : la fiche disait
+        // « Ordinateur » sans jamais dire quel Ordinateur.
+        whiteRating: camp === 'w' ? null : (bareme?.elo ?? null),
+        blackRating: camp === 'b' ? null : (bareme?.elo ?? null),
         // Le niveau borné, et pas celui reçu : la colonne servait d'écho fidèle
         // à ce que le client avait bien voulu dire, y compris un niveau 900.
         botLevel: niveauRetenu,
-        initialTime: Math.max(0, Math.round(body.initialTime ?? 0)),
-        increment: Math.max(0, Math.round(body.increment ?? 0)),
+        initialTime,
+        increment,
         startFen: body.startFen || null,
         moves: moves.join(' '),
         pgn: typeof body.pgn === 'string' ? body.pgn : null,
@@ -221,9 +302,23 @@ export async function POST(request: Request) {
         winner: result === '1-0' ? 'w' : result === '0-1' ? 'b' : null,
         eco: body.eco?.slice(0, 3) ?? null,
         opening: body.opening?.slice(0, 120) ?? null,
-        startedAt: Number.isNaN(debut.getTime()) ? new Date() : debut,
+        // L'heure de l'annonce prime sur celle du client quand il y en a une :
+        // c'est la seule des deux qu'on ait vue passer.
+        startedAt: classee && annonce ? annonce.openedAt : debut,
         endedAt: new Date(),
       })
+      /*
+        L'identifiant de la ligne, qui manquait.
+
+        Sans lui, `rating_history.game_id` restait `null` pour toutes les
+        parties contre l'ordinateur : une variation de classement n'était
+        rattachée à aucune partie, et défaire les gains de quelqu'un demandait
+        de deviner lesquels. Le chemin des parties entre amis le fait depuis
+        toujours (`apps/server/src/persistence.ts`) ; celui-ci ne le faisait
+        pas.
+      */
+      .returning({ id: games.id })
+    const partieId = rangee[0]?.id
 
     // `niveau` accompagne toujours la réponse : le client saura ainsi qu'un
     // niveau hors barème a été ramené dans le barème, au lieu de croire que
@@ -243,13 +338,56 @@ export async function POST(request: Request) {
       dont on n'est pas tout à fait sûr.
     */
     const score = result === '1/2-1/2' ? 0.5 : (result === '1-0') === (camp === 'w') ? 1 : 0
-    const variation = await applyGameResult({
-      userId: user.userId,
-      category: cadence(body.initialTime ?? 0) as RatingCategory,
-      opponentRating: botLevel(niveau!).elo,
-      opponentDeviation: 100,
-      score,
-    })
+
+    let variation
+    try {
+      variation = await applyGameResult({
+        userId: user.userId,
+        // La catégorie vient de la cadence **annoncée**, qui a été comparée à
+        // celle de la partie juste au-dessus : choisir sa catégorie une fois le
+        // résultat connu n'est plus possible.
+        category: cadence(annonce!.initialTime) as RatingCategory,
+        opponentRating: bareme!.elo,
+        opponentDeviation: 100,
+        score,
+        gameId: partieId,
+      })
+    } catch (error) {
+      /*
+        Le classement a échoué alors que la partie est déjà rangée.
+
+        Les deux écritures ne partagent pas de transaction — la partie
+        s'archive même quand elle n'est pas classée, c'est le cas courant. Il
+        reste donc ce cas-ci, où la ligne porterait `rated: true` sans qu'aucun
+        classement ait bougé : une partie qui se présente comme comptée et qui
+        ne l'est pas. On la remet à ce qu'elle est vraiment plutôt que de
+        laisser l'incohérence en base.
+      */
+      console.error('[parties/terminee] classement non appliqué', error)
+      if (partieId) {
+        await getDb().update(games).set({ rated: false }).where(eq(games.id, partieId))
+      }
+      return NextResponse.json({
+        ok: true,
+        classee: false,
+        niveau: niveauRetenu,
+        raison: 'classement indisponible',
+      })
+    }
+
+    // Le classement d'avant et sa variation, écrits sur la partie elle-même :
+    // c'est ce que `/api/profil/<pseudo>` lit pour afficher « +12 » sous une
+    // partie, et ces colonnes restaient vides hors des parties entre amis.
+    if (partieId) {
+      await getDb()
+        .update(games)
+        .set(
+          camp === 'w'
+            ? { whiteRating: variation.before, whiteRatingDelta: variation.delta }
+            : { blackRating: variation.before, blackRatingDelta: variation.delta },
+        )
+        .where(eq(games.id, partieId))
+    }
 
     return NextResponse.json({
       ok: true,
@@ -429,6 +567,44 @@ function enPgn(
     '',
     corps.join(' '),
   ].join('\n')
+}
+
+/**
+ * Reprend l'annonce de partie classée du joueur, et l'efface du même geste.
+ *
+ * `DELETE ... RETURNING` plutôt qu'un `SELECT` suivi d'un `DELETE` : la ligne
+ * n'est rendue qu'à un seul appelant, même si deux arrivent ensemble. C'est ce
+ * qui rend la route idempotente — renvoyer deux fois la même partie ne la
+ * classe pas deux fois.
+ *
+ * Une panne de base rend `null` : la partie s'archivera sans être classée, ce
+ * qui est le bon sens de l'échec pour tout ce fichier.
+ */
+async function consommerAnnonce(userId: string): Promise<RatedIntent | null> {
+  try {
+    const lignes = await getDb()
+      .delete(ratedIntents)
+      .where(eq(ratedIntents.userId, userId))
+      .returning()
+    return lignes[0] ?? null
+  } catch (error) {
+    console.error('[parties/terminee] annonce illisible', error)
+    return null
+  }
+}
+
+/**
+ * Deux FEN décrivent-elles la même position ?
+ *
+ * Les quatre premiers champs — pièces, trait, roques, prise en passant — et pas
+ * les deux derniers : le compteur des cinquante coups et le numéro du coup
+ * varient d'un moteur à l'autre pour une position identique, et les faire
+ * entrer dans la comparaison reviendrait à refuser une position initiale
+ * légitime parce qu'elle est écrite `0 1` d'un côté et `0 0` de l'autre.
+ */
+function memePosition(a: string, b: string): boolean {
+  const champs = (fen: string) => fen.trim().split(/\s+/).slice(0, 4).join(' ')
+  return champs(a) === champs(b)
 }
 
 /**

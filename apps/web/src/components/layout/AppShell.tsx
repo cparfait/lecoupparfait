@@ -32,6 +32,7 @@ import { AccountButton } from '@/components/layout/AccountButton.tsx'
 import { ChallengeWatcher } from '@/components/social/ChallengeWatcher.tsx'
 import { PastilleSerie } from '@/components/daily/PastilleSerie.tsx'
 import { MiseEnRoute } from '@/components/layout/MiseEnRoute.tsx'
+import { MotDeLEquipe } from '@/components/layout/MotDeLEquipe.tsx'
 import { Presence } from '@/components/layout/Presence.tsx'
 import { RepriseEnLigne } from '@/components/social/RepriseEnLigne.tsx'
 import { Menu } from '@/components/ui/Menu.tsx'
@@ -281,6 +282,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Notifications et installation, proposées une fois — mais proposées.
           Jamais sur un écran de partie : voir `MiseEnRoute`. */}
       {!immersive && <MiseEnRoute />}
+
+      {/* Le mot de l'équipe — annonce générale ou message adressé à une
+          personne. Hors écran de partie, pour la même raison que ci-dessus :
+          ce qu'on a à dire peut attendre la fin de la partie. */}
+      {!immersive && <MotDeLEquipe />}
 
       {/* ── Barre inférieure mobile ──────────────────────────────────── */}
       {!immersive && <BottomBar pathname={pathname} />}

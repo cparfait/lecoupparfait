@@ -1071,6 +1071,9 @@ export const fr = {
     yourLevel: 'Ton niveau estimé',
     foundOf: '{reussies} / {total} trouvés',
     inGame: 'en partie, environ — l’échelle du classement de l’application',
+    range: 'entre {bas} et {haut}',
+    unknownPosition: 'Une des positions du relevé est introuvable.',
+    incoherentRun: 'Ce relevé ne ressemble pas à un test passé jusqu’au bout.',
     onPuzzleScale: 'sur l’échelle des puzzles',
     twoNumbers:
       'Les deux nombres diffèrent et c’est normal : un puzzle annonce qu’il y a quelque chose à trouver, une partie ne l’annonce jamais. Le premier est celui à retenir pour choisir ses adversaires ; le second pour choisir ses exercices.',
@@ -6089,16 +6092,60 @@ export const fr = {
     dailyGain2: 'Les objectifs du jour et les points qui vont avec',
     dailyGain3: 'Les puzzles ordinaires, eux, restent libres et illimités',
   },
+  /*
+    Le bandeau qui porte un message de l'équipe.
+
+    Quatre clés seulement : le message lui-même n'est pas traduisible — il est
+    écrit à la main depuis l'administration, dans la langue de son auteur. Tout
+    ce que le dictionnaire peut faire, c'est dire au lecteur d'où il vient.
+  */
+  announce: {
+    fromTeam: 'Mot de l’équipe',
+    forYou: 'Message pour toi',
+    signed: 'de {auteur}',
+    dismiss: 'Fermer ce message',
+  },
+
   admin: {
     title: 'Administration',
     blurb:
       'Ce que tu fais ici s’applique à de vraies personnes. Les actes irréversibles demandent d’écrire le pseudo, et tous sont consignés dans le journal.',
     tabDashboard: 'Tableau de bord',
     tabAccounts: 'Comptes',
+    tabAnnouncements: 'Annonces',
     tabContent: 'Contenus',
     tabLog: 'Journal',
     tabSystem: 'Système',
     tabTools: 'Outils',
+
+    // ── Annonces ──────────────────────────────────────────────────────────
+    announceNew: 'Écrire aux joueurs',
+    announceHint:
+      'Sans destinataire, le message s’affiche à tout le monde. Avec un pseudo, il n’est vu que par cette personne.',
+    announcePlaceholder: 'Le message, tel qu’il sera lu…',
+    announceTarget: 'Destinataire',
+    announceTargetHint: 'Laisse vide pour t’adresser à tout le monde.',
+    announceEveryone: 'Tout le monde',
+    announceDays: 'Durée d’affichage, en jours',
+    announceDaysHint: '0 pour l’afficher jusqu’à ce que tu le retires.',
+    announceToneInfo: 'Information',
+    announceToneImportant: 'Important',
+    announceSend: 'Envoyer',
+    announceSendAll: 'Annoncer à tous',
+    announceScopeOne: 'Seul {pseudo} verra ce message.',
+    announceScopeAll: 'Tous les joueurs verront ce message, connectés ou non.',
+    announceSent: 'Ce qui a été dit',
+    announceSentHint: 'Les quarante derniers messages, et le nombre de fois qu’ils ont été lus.',
+    announceNone: 'Aucun message envoyé',
+    announceReads: '{n} lecture(s)',
+    announceWithdraw: 'Retirer ce message',
+    announceWithdrawn: 'Message retiré.',
+    announceOff: 'Éteint',
+    announceSentTo: 'Message envoyé à {pseudo}.',
+    announceSentAll: 'Annonce publiée.',
+    announceEmpty: 'Un message vide ne s’envoie pas.',
+    announceTooLong: 'Le message dépasse six cents caractères.',
+    announceNoSuchUser: 'Aucun compte ne porte ce pseudo.',
     notFound: 'Cette page n’existe pas',
     notFoundHint: 'Vérifie l’adresse, ou reviens à l’accueil.',
     readFailed: 'Lecture impossible.',

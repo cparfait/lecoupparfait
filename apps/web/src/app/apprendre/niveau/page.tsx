@@ -15,7 +15,7 @@
  * réelles. Résoudre une position à 1 400 est donc une information calibrée, pas
  * une appréciation. Un escalier adaptatif suffit alors à converger : on monte
  * après une réussite, on descend après un échec, et le pas se resserre à chaque
- * fois (voir `PAS`).
+ * fois (voir `PAS_DU_TEST`, dans le cœur).
  *
  * ── Ce que le test ne fait pas ───────────────────────────────────────────────
  *
@@ -32,13 +32,21 @@
  *
  * ── Ce qu'il règle, en revanche ─────────────────────────────────────────────
  *
- * Le premier adversaire proposé contre l'ordinateur. L'échelle des bots
+ * **Le premier adversaire proposé contre l'ordinateur.** L'échelle des bots
  * démarrait au palier le plus faible pour tout le monde : quelqu'un qui joue
  * en club devait gagner une douzaine de parties sans intérêt avant d'affronter
  * sa mesure. Le test, lui, l'a mesurée — il serait absurde de la mesurer pour
- * ne pas s'en servir. C'est le même dépôt que la déclaration d'inscription
- * (`action: 'declarer'`), qui ne fait jamais reculer personne et ne touche à
- * aucun classement.
+ * ne pas s'en servir. C'est le dépôt de la déclaration d'inscription
+ * (`action: 'declarer'`), qui ne fait jamais reculer personne.
+ *
+ * **Et, depuis, le point de départ du classement.** Le Glicko inscrivait tout
+ * le monde à 100 avec une incertitude de 350 : simulé sur le vrai calcul, un
+ * joueur de force 1 800 était classé 345 après ses deux premières parties
+ * classées, et mettait une douzaine de parties à rejoindre son niveau. La
+ * mesure existait pourtant, six minutes plus tôt, et n'allait nulle part.
+ * `POST /api/niveau` l'enregistre et amorce les catégories où rien n'a encore
+ * été joué — voir `amorcerClassements`. Ce qui a été mesuré en jouant, lui,
+ * n'est jamais écrasé : une seule partie vaut mieux qu'un test.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -46,7 +54,15 @@ import { Chess } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { ArrowRight, Check, Gauge, RotateCcw, Swords, Target, X } from 'lucide-react'
 import clsx from 'clsx'
-import { BOT_LEVELS, botLevel, suggestedLevel } from '@coupparfait/core'
+import {
+  BOT_LEVELS,
+  botLevel,
+  COTE_DE_DEPART,
+  mesurerNiveau,
+  PAS_DU_TEST,
+  suggestedLevel,
+  viseeSuivante,
+} from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, ButtonLink, Card, Chip, Spinner, TitreDePage } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
@@ -63,27 +79,11 @@ import { toast } from '@/components/ui/Toast.tsx'
 import { useSan } from '@/lib/notation.ts'
 import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
 
-/**
- * Le pas de l'escalier, position après position.
- *
- * Douze valeurs décroissantes : on corrige largement au début — il s'agit de
- * trouver la bonne région de l'échelle, pas de la raffiner — puis de moins en
- * moins. À pas constant, le test oscillerait indéfiniment autour de la réponse
- * sans jamais s'en approcher ; à pas trop vite resserré, une seule réussite
- * chanceuse au premier essai plafonnerait l'estimation.
- *
- * La somme des pas (environ 1 000) borne aussi ce que le test peut mesurer :
- * parti de 1 000, il atteint 2 000 en haut et 500 en bas. C'est exactement la
- * plage où se trouvent les gens qui se demandent par où commencer.
- */
-const PAS = [220, 190, 160, 140, 120, 105, 90, 80, 70, 60, 55, 50]
-
-/** Cote de départ : le milieu de la population des puzzles de Lichess. */
-const DEPART = 1000
-
-/** Plancher et plafond du catalogue : en dehors, on ne trouve plus rien. */
-const PLANCHER = 500
-const PLAFOND = 2600
+/*
+  L'escalier lui-même vit dans `@coupparfait/core` : le serveur en a besoin pour
+  rejouer un relevé qu'on lui envoie, et deux copies de ces douze nombres
+  auraient divergé au premier réglage.
+*/
 
 interface Position {
   id: string
@@ -94,11 +94,20 @@ interface Position {
 }
 
 interface Etape {
+  /** L'identifiant de la position, ce que le serveur recoupera. */
+  id: string
   /** Cote demandée pour cette position. */
   visee: number
   /** Cote réelle de la position servie. */
   cote: number
   reussie: boolean
+}
+
+/** Ce que vaut le joueur, sur les deux échelles, avec son incertitude. */
+interface Mesure {
+  cotePuzzle: number
+  partie: number
+  sigma: number
 }
 
 type Phase = 'intro' | 'chargement' | 'jeu' | 'verdict' | 'fini' | 'panne'
@@ -125,10 +134,10 @@ export default function TestDeNiveauPage() {
   const [verdict, setVerdict] = useState<{ juste: boolean; attendu: string } | null>(null)
 
   /** Cote visée pour la position suivante. */
-  const visee = useRef(DEPART)
+  const visee = useRef(COTE_DE_DEPART)
 
   const index = etapes.length
-  const termine = index >= PAS.length
+  const termine = index >= PAS_DU_TEST.length
 
   // ── Chargement d'une position ─────────────────────────────────────────────
   const charger = useCallback(async () => {
@@ -186,7 +195,7 @@ export default function TestDeNiveauPage() {
 
   const commencer = useCallback(() => {
     vus.current = []
-    visee.current = DEPART
+    visee.current = COTE_DE_DEPART
     setEtapes([])
     setVerdict(null)
     void charger()
@@ -227,13 +236,17 @@ export default function TestDeNiveauPage() {
       setVerdict({ juste, attendu: nomDuCoup(fen, attendu) })
       setEtapes((liste) => [
         ...liste,
-        { visee: Math.round(visee.current), cote: position.rating, reussie: juste },
+        {
+          id: position.id,
+          visee: Math.round(visee.current),
+          cote: position.rating,
+          reussie: juste,
+        },
       ])
 
       // L'escalier : on monte si c'est juste, on descend sinon, du pas prévu
       // pour cette marche-ci.
-      const pas = PAS[etapes.length] ?? 50
-      visee.current = Math.max(PLANCHER, Math.min(PLAFOND, visee.current + (juste ? pas : -pas)))
+      visee.current = viseeSuivante(visee.current, etapes.length, juste)
 
       setPhase('verdict')
     },
@@ -241,7 +254,7 @@ export default function TestDeNiveauPage() {
   )
 
   const suivante = useCallback(() => {
-    if (etapes.length >= PAS.length) {
+    if (etapes.length >= PAS_DU_TEST.length) {
       setPhase('fini')
       return
     }
@@ -251,42 +264,86 @@ export default function TestDeNiveauPage() {
   /**
    * L'estimation finale.
    *
-   * La moyenne des cotes **réellement servies** sur la seconde moitié du test,
-   * et non la dernière visée : la dernière marche dépend du tout dernier coup,
-   * si bien que deux tests identiques à une position près rendaient des nombres
-   * écartés de cinquante points. La seconde moitié, elle, est déjà dans la
-   * bonne région — c'est tout l'objet des premières marches — et la moyenne y
-   * lisse le hasard du tirage.
+   * **Les douze réponses, pas les six dernières.** La lecture précédente
+   * moyennait les cotes servies sur la seconde moitié du test : elle jetait la
+   * moitié du relevé, et la douzième réponse n'entrait dans aucun calcul —
+   * elle ne déplaçait qu'une visée qu'on ne lisait plus. `mesurerNiveau`
+   * ajuste la courbe d'Elo sur l'ensemble du relevé ; le détail, les chiffres
+   * de simulation et le pourquoi des deux pseudo-observations sont dans
+   * `packages/core/src/placement.ts`.
    *
-   * On corrige ensuite un biais connu : le test ne demande **qu'un coup**, là
-   * où la cote d'un puzzle récompense la séquence entière. On retient donc la
-   * cote des positions résolues, pas celle des positions vues.
+   * Calculée ici pour l'affichage immédiat, et **recalculée par le serveur**
+   * sur les cotes réelles du catalogue quand c'est lui qui enregistre : voir
+   * `POST /api/niveau`. Les deux devraient donner le même nombre — c'est la
+   * même fonction sur les mêmes données — et c'est celui du serveur qui prime,
+   * puisque c'est lui qui amorce le classement.
    */
-  const estimation = useMemo(() => {
-    if (etapes.length === 0) return null
-    const secondeMoitie = etapes.slice(Math.floor(etapes.length / 2))
-    const reference = secondeMoitie.length > 0 ? secondeMoitie : etapes
-    const somme = reference.reduce((total, etape) => total + etape.cote, 0)
-    const cotePuzzle = Math.round(somme / reference.length)
-    return { cotePuzzle, partie: puzzleVersPartie(cotePuzzle) }
+  const estimation = useMemo<Mesure | null>(() => {
+    const mesure = mesurerNiveau(
+      etapes.map((etape) => ({ cote: etape.cote, reussie: etape.reussie })),
+      COTE_DE_DEPART,
+    )
+    if (!mesure) return null
+    return {
+      cotePuzzle: mesure.cote,
+      partie: puzzleVersPartie(mesure.cote),
+      sigma: mesure.sigma,
+    }
   }, [etapes])
 
-  // Le résultat est conservé dès qu'il existe : quitter la page sans cliquer
-  // « voir mon palier » ne doit pas effacer six minutes de travail.
-  //
-  // Et il est déposé au compte dans le même souffle, s'il y en a un : le test
-  // sert à choisir le premier adversaire, or l'écran « contre l'ordinateur »
-  // ne lit pas le navigateur, il lit la progression. Sans compte, la route
-  // répond poliment `tracked: false` et il ne se passe rien — le test doit
-  // marcher avant l'inscription, c'est même là qu'il est le plus utile.
+  /** La mesure rendue par le serveur, quand il a pu la refaire. */
+  const [mesureServeur, setMesureServeur] = useState<Mesure | null>(null)
+  const mesure = mesureServeur ?? estimation
+
+  /*
+    La fin du test : trois dépôts, et aucun ne doit gâcher l'écran.
+
+    1. Le navigateur, tout de suite : quitter la page sans cliquer « voir mon
+       palier » ne doit pas effacer six minutes de travail, et c'est le seul
+       endroit qui existe quand on n'a pas de compte.
+    2. `POST /api/niveau`, qui recoupe le relevé, l'enregistre et **amorce le
+       classement** — c'est la nouveauté : la mesure servait à conseiller un
+       adversaire, elle fixe désormais le point de départ du Glicko, qui
+       plaçait tout le monde à 100 quel que soit son niveau.
+    3. `POST /api/progression`, inchangé, qui déplace le curseur d'adversaire.
+
+    Le relevé part tel quel — les identifiants des positions et ce qu'on en a
+    fait —, jamais le résultat : c'est au serveur de dire ce qu'il vaut, sans
+    quoi il suffirait d'annoncer 2 400 pour être classé 2 400.
+  */
   useEffect(() => {
     if (phase !== 'fini' || !estimation) return
+
     enregistrerNiveauEstime({
       elo: estimation.partie,
       source: 'test',
       le: aujourdhui(),
       positions: etapes.length,
     })
+
+    void fetch('/api/niveau', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        positions: etapes.map((etape) => ({ id: etape.id, reussie: etape.reussie })),
+      }),
+    })
+      .then((reponse) => (reponse.ok ? reponse.json() : null))
+      .then((donnees: Mesure | null) => {
+        if (!donnees || !Number.isFinite(donnees.partie)) return
+        setMesureServeur(donnees)
+        enregistrerNiveauEstime({
+          elo: donnees.partie,
+          source: 'test',
+          le: aujourdhui(),
+          positions: etapes.length,
+        })
+      })
+      .catch(() => {
+        // Le classement ne sera pas amorcé, le test reste juste : il vaut mieux
+        // un écran de résultat intact qu'une alerte sur un dépôt.
+      })
+
     void fetch('/api/progression', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -296,7 +353,7 @@ export default function TestDeNiveauPage() {
       // fin pour une requête ratée, le curseur se déplace à la main.
       toast.error(t('level.levelSetFailed'))
     })
-  }, [phase, estimation, etapes.length, t])
+  }, [phase, estimation, etapes, t])
 
   const dejaFait = useMemo(() => (phase === 'intro' ? lireNiveauEstime() : null), [phase])
 
@@ -364,7 +421,7 @@ export default function TestDeNiveauPage() {
                 d'œil combien il en reste, et ce qu'on a réussi. Une barre à
                 58 % ne dit ni l'un ni l'autre. */}
             <div className="mb-3 flex items-center gap-1.5" aria-hidden>
-              {PAS.map((_, marche) => {
+              {PAS_DU_TEST.map((_, marche) => {
                 const etape = etapes[marche]
                 return (
                   <span
@@ -389,8 +446,8 @@ export default function TestDeNiveauPage() {
                 « position 2 sur 12 » au-dessus de la première. */}
             <p className="mb-3 text-[13px] text-muted">
               {t('level.positionOf', {
-                n: Math.min(verdict ? index : index + 1, PAS.length),
-                total: PAS.length,
+                n: Math.min(verdict ? index : index + 1, PAS_DU_TEST.length),
+                total: PAS_DU_TEST.length,
               })}
               {position && phase !== 'chargement' && (
                 <>
@@ -488,10 +545,11 @@ export default function TestDeNiveauPage() {
       )}
 
       {/* ── Le résultat ─────────────────────────────────────────────────── */}
-      {phase === 'fini' && estimation && (
+      {phase === 'fini' && mesure && (
         <Resultat
-          cotePuzzle={estimation.cotePuzzle}
-          partie={estimation.partie}
+          cotePuzzle={mesure.cotePuzzle}
+          partie={mesure.partie}
+          sigma={mesure.sigma}
           reussies={reussies}
           total={etapes.length}
           onRefaire={commencer}
@@ -511,12 +569,14 @@ export default function TestDeNiveauPage() {
 function Resultat({
   cotePuzzle,
   partie,
+  sigma,
   reussies,
   total,
   onRefaire,
 }: {
   cotePuzzle: number
   partie: number
+  sigma: number
   reussies: number
   total: number
   onRefaire: () => void
@@ -524,6 +584,20 @@ function Resultat({
   const t = useT()
   const palier = palierPour(partie)
   const niveauBot = suggestedLevel(partie)
+
+  /*
+    La fourchette, à côté du nombre.
+
+    Douze réponses par oui ou par non mesurent une force à une centaine de
+    points près — c'est la précision intrinsèque d'un relevé binaire de cette
+    longueur, pas un défaut de l'estimateur. Afficher `1 072` tout seul, en
+    gros chiffres, promet une exactitude que rien ne soutient : deux tests du
+    même joueur dans la même heure peuvent s'écarter de deux cents points.
+    L'écart-type est ramené à l'échelle des parties par la même droite que la
+    mesure, et arrondi à la dizaine : à ce niveau d'incertitude, l'unité serait
+    une plaisanterie.
+  */
+  const marge = Math.max(10, Math.round((puzzleVersPartie(sigma) - puzzleVersPartie(0)) / 10) * 10)
 
   return (
     <Card className="overflow-hidden">
@@ -538,6 +612,9 @@ function Resultat({
           <div>
             <p className="font-display text-5xl font-bold leading-none tabular-nums">{partie}</p>
             <p className="mt-1.5 text-[13px] text-muted">{t('level.inGame')}</p>
+            <p className="mt-0.5 text-[12px] text-faint tabular-nums">
+              {t('level.range', { bas: partie - marge, haut: partie + marge })}
+            </p>
           </div>
           <div>
             <p className="font-display text-3xl font-bold leading-none tabular-nums text-muted">

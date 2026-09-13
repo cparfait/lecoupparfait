@@ -284,6 +284,84 @@ export async function applyGameToBothPlayers(options: {
 }
 
 /**
+ * Les catégories qui se jouent, par opposition aux puzzles.
+ *
+ * Ce sont celles qu'un test de niveau peut amorcer : il mesure la force *en
+ * partie*, sur une échelle que les puzzles n'ont pas — voir `puzzleVersPartie`
+ * côté web. Le classement de puzzles, lui, se construit en résolvant des
+ * puzzles, et le test refuse délibérément d'y toucher : une mesure qui déplace
+ * ce qu'elle mesure n'est plus une mesure.
+ */
+export const CATEGORIES_DE_PARTIE: RatingCategory[] = [
+  'bullet',
+  'blitz',
+  'rapid',
+  'classical',
+  'correspondence',
+]
+
+/**
+ * Amorce les classements d'un joueur à partir de sa mesure d'entrée.
+ *
+ * **Ce que ça répare.** `CLASSEMENT_DEPART` vaut 100 pour tout le monde, avec
+ * une incertitude de 350. C'est un bon choix pour qui débute vraiment, et un
+ * mauvais pour qui arrive en sachant jouer : simulé sur le vrai Glicko, un
+ * joueur de force 1 800 qui enchaîne ses deux premières parties classées est
+ * classé **345** — il lui faut une douzaine de parties pour rejoindre son
+ * niveau, et il les joue contre des adversaires qui ne lui apprennent rien.
+ * Avec l'amorce, il commence à sa mesure et les mêmes deux parties l'en
+ * rapprochent au lieu de l'en éloigner.
+ *
+ * **On n'amorce que ce qui n'a jamais servi.** La condition est `games = 0`, et
+ * non l'absence de ligne : lire un classement le crée — c'est `getRating` qui
+ * insère —, si bien qu'ouvrir le tableau des classements suffisait à se donner
+ * une ligne à 100. Une catégorie où une seule partie a été jouée garde ce
+ * qu'elle a mesuré : une partie vaut mieux qu'un test, c'est toute la hiérarchie
+ * de `niveauRetenu`.
+ *
+ * **Aucune ligne d'historique.** `rating_history` raconte des parties ; une
+ * amorce n'en est pas une, et l'y inscrire ferait apparaître une variation que
+ * personne n'a jouée.
+ *
+ * Rend les catégories effectivement amorcées, pour que l'appelant puisse le
+ * dire à l'écran plutôt que de l'affirmer.
+ */
+export async function amorcerClassements(
+  userId: string,
+  cote: number,
+  rd: number,
+): Promise<RatingCategory[]> {
+  const depart = Math.max(CLASSEMENT_PLANCHER, Math.round(cote))
+  const incertitude = Math.round(rd)
+
+  return getDb().transaction(async (tx) => {
+    const amorcees: RatingCategory[] = []
+    for (const category of CATEGORIES_DE_PARTIE) {
+      const actuel = await getRating(userId, category, tx, true)
+      // Une seule partie jouée suffit à rendre la ligne plus crédible que le
+      // test : on passe sans rien écrire.
+      if (actuel.games > 0) continue
+
+      await tx
+        .update(ratings)
+        .set({
+          rating: depart,
+          deviation: incertitude,
+          elo: depart,
+          // Le sommet part de la mesure lui aussi : sans quoi la page des
+          // records afficherait « meilleur classement : 100 » à quelqu'un qui
+          // n'est jamais descendu si bas.
+          peak: depart,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(ratings.userId, userId), eq(ratings.category, category)))
+      amorcees.push(category)
+    }
+    return amorcees
+  })
+}
+
+/**
  * Met à jour le classement puzzles.
  *
  * Un puzzle est traité comme un adversaire dont le classement est celui du

@@ -99,6 +99,7 @@ import { getEngine } from '@/lib/engine/client.ts'
 import { useEcranAllume } from '@/lib/ecranAllume.ts'
 import { useChessGame } from '@/lib/game/useChessGame.ts'
 import {
+  annoncerPartieClassee,
   chargerPartieEnCours,
   depuis,
   archiverPartie,
@@ -1405,6 +1406,28 @@ function GameScreen({
       : { initial: 600, increment: 5 }
   }, [timeControlId])
   const timed = timeControl.initial > 0
+
+  /*
+    L'annonce de la partie classée, faite au moment où l'écran de jeu s'ouvre.
+
+    C'est le seul instant où elle a un sens : le résultat est encore inconnu de
+    tout le monde, y compris de celui qui va jouer. Le serveur y fige le niveau,
+    la cadence et le camp, et refusera de classer une partie qui reviendrait
+    avec d'autres — voir `POST /api/parties/classee`.
+
+    Une seule fois, sans dépendances : ni le niveau ni la cadence ne changent en
+    cours de partie, et une partie reprise n'est jamais classée.
+  */
+  useEffect(() => {
+    if (!classee) return
+    annoncerPartieClassee({
+      botLevel: level,
+      playerColor,
+      initialTime: timeControl.initial,
+      increment: timeControl.increment,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const [outcome, setOutcome] = useState<{
     status: GameStatus

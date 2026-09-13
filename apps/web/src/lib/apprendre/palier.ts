@@ -402,10 +402,19 @@ export function enregistrerNiveauEstime(valeur: NiveauEstime): void {
  * qu'il y a quelque chose à trouver, une partie ne l'annonce jamais — mais il
  * est assez régulier pour être corrigé plutôt qu'ignoré.
  *
- * La correction est affine et grossière, calée sur deux points d'ancrage
- * couramment observés : 1 000 en puzzles ≈ 800 en parties, 2 000 en puzzles
- * ≈ 1 500. On ne prétend pas mieux, et c'est pour cela que la page dit
- * toujours d'où vient le nombre.
+ * La correction est affine et grossière : `300 + 0,6 c`, soit 1 000 en puzzles
+ * ≈ 900 en parties et 2 000 ≈ 1 500. On ne prétend pas mieux, et c'est pour
+ * cela que la page dit toujours d'où vient le nombre.
+ *
+ * **Le commentaire annonçait 1 000 → 800**, ce que la formule n'a jamais fait :
+ * les deux points énoncés donneraient `100 + 0,7 c`. Cent points d'écart en bas
+ * d'échelle, sur chaque résultat de test. La formule est conservée telle quelle
+ * parce que la changer déplacerait tout le monde d'un coup, et que rien ici ne
+ * dit laquelle des deux droites est la bonne : ces ancrages sont des ordres de
+ * grandeur de la littérature, pas une mesure faite sur cette population. La
+ * trancher demande de corréler, sur les comptes existants, le classement de
+ * puzzles et le classement en partie — c'est ce que `level_tests` conserve
+ * désormais les deux échelles pour permettre.
  */
 export function puzzleVersPartie(cote: number): number {
   return Math.round(300 + 0.6 * cote)
