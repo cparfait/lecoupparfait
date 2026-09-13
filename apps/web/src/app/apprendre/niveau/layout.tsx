@@ -7,11 +7,10 @@
  */
 
 import type { Metadata } from 'next'
+import { metadonnees } from '@/lib/i18n/metadonnees.ts'
 
-export const metadata: Metadata = {
-  title: 'Test de niveau',
-  description:
-    'Douze positions pour situer ton niveau, et la liste de ce qui te fait gagner des points ensuite.',
+export async function generateMetadata(): Promise<Metadata> {
+  return metadonnees('meta.levelTest', { description: 'meta.levelTestDesc' })
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

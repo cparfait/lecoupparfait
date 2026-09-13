@@ -7,11 +7,10 @@
  */
 
 import type { Metadata } from 'next'
+import { metadonnees } from '@/lib/i18n/metadonnees.ts'
 
-export const metadata: Metadata = {
-  title: 'Outils',
-  description:
-    'La pendule, le calculateur Elo, le tirage au sort et l’aide-mémoire d’arbitrage : ce qui sert autour d’un vrai échiquier.',
+export async function generateMetadata(): Promise<Metadata> {
+  return metadonnees('meta.tools', { description: 'meta.toolsDesc' })
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

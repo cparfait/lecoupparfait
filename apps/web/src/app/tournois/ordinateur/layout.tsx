@@ -8,9 +8,10 @@
  */
 
 import type { Metadata } from 'next'
+import { metadonnees } from '@/lib/i18n/metadonnees.ts'
 
-export const metadata: Metadata = {
-  title: 'Tournoi contre l’ordinateur',
+export async function generateMetadata(): Promise<Metadata> {
+  return metadonnees('meta.computerTournament')
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

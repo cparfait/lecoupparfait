@@ -28,8 +28,8 @@ import 'server-only'
  * qu'un code de langue, et son absence retombe sur le français.
  */
 
-import { dictionaries, fr, LOCALES, type Locale } from './dictionary.ts'
-import type { TranslationKey } from './index.tsx'
+import { LOCALES, type Locale } from './dictionary.ts'
+import { fabriquerT, type Traducteur } from './resoudre.ts'
 import { TEMOIN_LANGUE } from './temoin.ts'
 
 /**
@@ -53,38 +53,7 @@ export function localeDeLaRequete(request: Request): Locale {
   return 'fr'
 }
 
-/**
- * Le `t()` des routes, à la même chaîne de repli que celui de l'interface.
- *
- * Par clé et non par dictionnaire — langue choisie, puis anglais, puis français
- * — pour la raison expliquée dans `I18nProvider` : une langue à moitié traduite
- * doit rester à moitié traduite, et non basculer entièrement à la première clé
- * manquante.
- */
-export function tServeur(locale: Locale) {
-  const dictionnaire = dictionaries[locale] ?? fr
-
-  return (cle: TranslationKey, vars?: Record<string, string | number>): string => {
-    const brut = lire(dictionnaire, cle) ?? lire(dictionaries.en, cle) ?? lire(fr, cle)
-    if (brut === null) return cle
-    return vars
-      ? brut.replace(/\{(\w+)\}/g, (entier, nom: string) =>
-          nom in vars ? String(vars[nom]) : entier,
-        )
-      : brut
-  }
-}
-
 /** Raccourci : `const t = tDeLaRequete(request)`. */
-export function tDeLaRequete(request: Request) {
-  return tServeur(localeDeLaRequete(request))
-}
-
-function lire(dictionnaire: unknown, chemin: string): string | null {
-  let courant: unknown = dictionnaire
-  for (const segment of chemin.split('.')) {
-    if (typeof courant !== 'object' || courant === null) return null
-    courant = (courant as Record<string, unknown>)[segment]
-  }
-  return typeof courant === 'string' ? courant : null
+export function tDeLaRequete(request: Request): Traducteur {
+  return fabriquerT(localeDeLaRequete(request))
 }

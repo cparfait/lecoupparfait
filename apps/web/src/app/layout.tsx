@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from 'next'
+import { tDesMetadonnees } from '@/lib/i18n/metadonnees.ts'
+import type { Traducteur } from '@/lib/i18n/resoudre.ts'
 import { Inter, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/Providers.tsx'
@@ -31,34 +33,45 @@ const spaceGrotesk = Space_Grotesk({
   variable: '--font-space-grotesk',
 })
 
-export const metadata: Metadata = {
-  title: {
-    default: 'Le Coup Parfait — apprendre, jouer, progresser aux échecs',
-    template: '%s · Le Coup Parfait',
-  },
-  description:
-    'Plateforme d’échecs libre et gratuite : leçons guidées à la voix, analyse expliquée coup par coup, 25 niveaux d’adversaires et parties entre amis. Sans publicité, sans compte obligatoire.',
-  applicationName: 'Le Coup Parfait',
-  manifest: '/manifest.webmanifest',
-  appleWebApp: {
-    capable: true,
-    title: 'Le Coup Parfait',
-    statusBarStyle: 'black-translucent',
-  },
-  formatDetection: { telephone: false },
-  icons: {
-    icon: [
-      { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-    ],
-    apple: '/icons/icon-192.png',
-  },
-  openGraph: {
-    title: 'Le Coup Parfait — les échecs, enfin expliqués',
-    description:
-      'Un moteur qui explique pourquoi, une voix qui accompagne, et zéro euro. Libre et auto-hébergeable.',
-    type: 'website',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  return metadonneesRacine(await tDesMetadonnees())
+}
+
+/**
+ * Les métadonnées du document, à part pour rester lisibles.
+ *
+ * Tout ce qui est du texte passe par le dictionnaire ; tout ce qui est un nom, un
+ * chemin ou un drapeau reste écrit tel quel. « Le Coup Parfait » est le nom du
+ * site : il ne se traduit nulle part, gabarit de titre compris.
+ */
+function metadonneesRacine(t: Traducteur): Metadata {
+  return {
+    title: {
+      default: t('meta.rootTitle'),
+      template: '%s · Le Coup Parfait',
+    },
+    description: t('meta.rootDesc'),
+    applicationName: 'Le Coup Parfait',
+    manifest: '/manifest.webmanifest',
+    appleWebApp: {
+      capable: true,
+      title: 'Le Coup Parfait',
+      statusBarStyle: 'black-translucent',
+    },
+    formatDetection: { telephone: false },
+    icons: {
+      icon: [
+        { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
+        { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      ],
+      apple: '/icons/icon-192.png',
+    },
+    openGraph: {
+      title: t('meta.ogTitle'),
+      description: t('meta.ogDesc'),
+      type: 'website',
+    },
+  }
 }
 
 export const viewport: Viewport = {

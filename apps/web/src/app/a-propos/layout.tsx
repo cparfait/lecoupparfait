@@ -12,11 +12,10 @@
  */
 
 import type { Metadata } from 'next'
+import { metadonnees } from '@/lib/i18n/metadonnees.ts'
 
-export const metadata: Metadata = {
-  title: 'À propos',
-  description:
-    'Ce qu’est Le Coup Parfait, pourquoi c’est gratuit, et ce qu’il advient de tes données. Réponse courte : rien, elles restent chez toi.',
+export async function generateMetadata(): Promise<Metadata> {
+  return metadonnees('meta.about', { description: 'meta.aboutDesc' })
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

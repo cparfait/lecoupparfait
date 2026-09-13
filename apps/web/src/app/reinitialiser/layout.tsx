@@ -8,12 +8,10 @@
  */
 
 import type { Metadata } from 'next'
+import { metadonnees } from '@/lib/i18n/metadonnees.ts'
 
-export const metadata: Metadata = {
-  title: 'Nouveau mot de passe',
-  // Rien à indexer : un écran d'administration ou une porte de
-  // récupération n'ont pas à apparaître dans un moteur de recherche.
-  robots: { index: false, follow: false },
+export async function generateMetadata(): Promise<Metadata> {
+  return metadonnees('meta.reset', { sansIndexation: true })
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

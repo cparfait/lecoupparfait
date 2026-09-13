@@ -8,21 +8,10 @@
  */
 
 import type { Metadata } from 'next'
+import { metadonneesDeRubrique } from '@/lib/i18n/metadonnees.ts'
 
-export const metadata: Metadata = {
-  /*
-    Un objet et non une chaîne : ce dossier a des pages en dessous de lui.
-
-    Un `title` en chaîne consomme le gabarit de la mise en page racine et n'en
-    repose aucun — les pages filles se retrouvaient alors sans le suffixe
-    « · Le Coup Parfait », leur onglet s'appelant simplement « Contre
-    l'ordinateur ». On redonne donc le gabarit à ce niveau.
-  */
-  title: {
-    default: 'Études',
-    template: '%s · Le Coup Parfait',
-  },
-  description: 'Des parcours commentés, à lire et à partager.',
+export async function generateMetadata(): Promise<Metadata> {
+  return metadonneesDeRubrique('meta.studies', 'meta.studiesDesc')
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

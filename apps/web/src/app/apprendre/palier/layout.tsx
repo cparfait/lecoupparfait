@@ -6,11 +6,10 @@
  */
 
 import type { Metadata } from 'next'
+import { metadonnees } from '@/lib/i18n/metadonnees.ts'
 
-export const metadata: Metadata = {
-  title: 'Ton palier',
-  description:
-    'Le programme rangé par ce qui coûte le plus de points à ton niveau, et les motifs que tu rates vraiment.',
+export async function generateMetadata(): Promise<Metadata> {
+  return metadonnees('meta.tier', { description: 'meta.tierDesc' })
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

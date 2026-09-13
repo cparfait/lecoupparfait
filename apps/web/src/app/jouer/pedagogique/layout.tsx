@@ -6,11 +6,10 @@
  */
 
 import type { Metadata } from 'next'
+import { metadonnees } from '@/lib/i18n/metadonnees.ts'
 
-export const metadata: Metadata = {
-  title: 'Séance pédagogique',
-  description:
-    'Une partie contre un adversaire calibré, un thème annoncé avant de commencer, et un bilan qui dit où il est apparu.',
+export async function generateMetadata(): Promise<Metadata> {
+  return metadonnees('meta.lesson', { description: 'meta.lessonDesc' })
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

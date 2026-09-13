@@ -8,14 +8,10 @@
  */
 
 import type { Metadata } from 'next'
+import { metadonneesDeRubrique } from '@/lib/i18n/metadonnees.ts'
 
-export const metadata: Metadata = {
-  title: {
-    default: 'Les adversaires artificiels',
-    template: '%s · Le Coup Parfait',
-  },
-  description:
-    'Sept adversaires, sept styles de jeu réellement différents — leur histoire, leurs penchants chiffrés, et comment battre chacun d’eux.',
+export async function generateMetadata(): Promise<Metadata> {
+  return metadonneesDeRubrique('meta.opponents', 'meta.opponentsDesc')
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

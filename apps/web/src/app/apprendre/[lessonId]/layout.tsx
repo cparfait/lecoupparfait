@@ -15,6 +15,7 @@
 
 import type { Metadata } from 'next'
 import { findLesson } from '@/lib/lessons/index.ts'
+import { tDesMetadonnees } from '@/lib/i18n/metadonnees.ts'
 
 export async function generateMetadata({
   params,
@@ -26,7 +27,7 @@ export async function generateMetadata({
 
   // Adresse inventée ou leçon renommée : la page affiche « cette leçon n'existe
   // pas », et l'onglet doit dire la même chose plutôt qu'un titre alléchant.
-  if (!lecon) return { title: 'Leçon introuvable' }
+  if (!lecon) return { title: (await tDesMetadonnees())('meta.lessonNotFound') }
 
   return {
     title: lecon.title,

@@ -6,6 +6,7 @@
  */
 
 import type { Metadata } from 'next'
+import { tDesMetadonnees } from '@/lib/i18n/metadonnees.ts'
 
 export async function generateMetadata({
   params,
@@ -14,9 +15,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { pseudo } = await params
   const nom = decodeURIComponent(pseudo)
+  const t = await tDesMetadonnees()
   return {
-    title: `La partie de ${nom}`,
-    description: `Suis la partie de ${nom} contre l’ordinateur, coup par coup.`,
+    title: t('meta.watchSomeone', { pseudo: nom }),
+    description: t('meta.watchSomeoneDesc', { pseudo: nom }),
   }
 }
 

@@ -8,9 +8,10 @@
  * découvert en production.
  */
 
-import { createContext, useCallback, useContext, useMemo } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { dictionaries, fr, type Dictionary, type Locale, type Traduction } from './dictionary.ts'
+import { fabriquerT } from './resoudre.ts'
 
 /**
  * Tous les chemins pointés valides du dictionnaire, calculés par le typage.
@@ -46,39 +47,11 @@ export function I18nProvider({ locale, children }: { locale: Locale; children: R
   // bon — un code de langue inconnu ne doit pas produire un dictionnaire vide.
   const dictionary: Dictionary | Traduction = dictionaries[locale] ?? fr
 
-  /**
-   * La chaîne de repli, clé par clé.
-   *
-   * Trente-quatre des trente-six langues sont partielles par construction (voir
-   * l'en-tête de `dictionary.ts`), et une clé manquante ne doit surtout pas
-   * afficher son chemin : « settings.theme » au milieu d'un écran est pire que
-   * la même phrase en anglais.
-   *
-   * L'ordre n'est pas indifférent. L'anglais avant le français parce qu'il est
-   * la seconde langue de la quasi-totalité des gens qui ne parlent ni l'un ni
-   * l'autre ; le français en dernier parce qu'il est la langue de référence et
-   * qu'il a donc, par construction, toutes les clés. Le repli se fait **par
-   * clé** et non par dictionnaire : une langue à moitié traduite reste à moitié
-   * traduite à l'écran, au lieu de basculer entièrement en anglais à la
-   * première clé manquante.
-   */
-  const t = useCallback(
-    (key: TranslationKey, vars?: Record<string, string | number>) => {
-      const raw = resolve(dictionary, key) ?? resolve(dictionaries.en, key) ?? resolve(fr, key)
-
-      if (raw === null) {
-        // Un chemin invalide ne doit jamais casser l'affichage : on montre la
-        // clé, ce qui rend le problème visible sans faire tomber la page.
-        // Le typage l'interdit déjà ; il reste les appels dynamiques.
-        if (process.env.NODE_ENV !== 'production') {
-          console.warn(`[i18n] clé manquante : ${key}`)
-        }
-        return key
-      }
-      return vars ? interpolate(raw, vars) : raw
-    },
-    [dictionary],
-  )
+  // La chaîne de repli vit dans `resoudre.ts` : l'écran de secours et les routes
+  // d'API en ont besoin aussi, et trois copies d'une même règle finissent par
+  // diverger sur celle qui compte — le repli se fait par clé, pas par
+  // dictionnaire.
+  const t = useMemo(() => fabriquerT(locale), [locale])
 
   const value = useMemo<I18nValue>(() => ({ locale, t, dictionary }), [locale, t, dictionary])
 
@@ -96,22 +69,6 @@ export function useI18n(): I18nValue {
 /** Raccourci le plus courant : `const t = useT()`. */
 export function useT() {
   return useI18n().t
-}
-
-function resolve(dictionary: unknown, path: string): string | null {
-  let current: unknown = dictionary
-  for (const segment of path.split('.')) {
-    if (typeof current !== 'object' || current === null) return null
-    current = (current as Record<string, unknown>)[segment]
-  }
-  return typeof current === 'string' ? current : null
-}
-
-/** Remplace `{nom}` par la valeur correspondante. */
-function interpolate(template: string, vars: Record<string, string | number>): string {
-  return template.replace(/\{(\w+)\}/g, (match, key: string) =>
-    key in vars ? String(vars[key]) : match,
-  )
 }
 
 /**

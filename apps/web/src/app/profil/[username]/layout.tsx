@@ -14,6 +14,7 @@
  */
 
 import type { Metadata } from 'next'
+import { tDesMetadonnees } from '@/lib/i18n/metadonnees.ts'
 
 export async function generateMetadata({
   params,
@@ -22,10 +23,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { username } = await params
   const pseudo = decodeURIComponent(username)
+  const t = await tDesMetadonnees()
 
   return {
     title: pseudo,
-    description: `Classements, progression et dernières parties de ${pseudo}.`,
+    description: t('meta.profileDesc', { pseudo }),
   }
 }
 

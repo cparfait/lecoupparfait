@@ -6,11 +6,10 @@
  */
 
 import type { Metadata } from 'next'
+import { metadonnees } from '@/lib/i18n/metadonnees.ts'
 
-export const metadata: Metadata = {
-  title: 'Les enjeux des ouvertures',
-  description:
-    'Vingt-cinq ouvertures expliquées par leur idée, leur structure de pions, le plan de chaque camp et le piège des dix premiers coups.',
+export async function generateMetadata(): Promise<Metadata> {
+  return metadonnees('meta.stakes', { description: 'meta.stakesDesc' })
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

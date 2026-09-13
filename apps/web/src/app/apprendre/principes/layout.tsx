@@ -6,11 +6,10 @@
  */
 
 import type { Metadata } from 'next'
+import { metadonnees } from '@/lib/i18n/metadonnees.ts'
 
-export const metadata: Metadata = {
-  title: 'Principes et mémo',
-  description:
-    'Quatre questions à se poser avant chaque coup, et les principes de conduite des trois phases — chacun avec son exception.',
+export async function generateMetadata(): Promise<Metadata> {
+  return metadonnees('meta.principles', { description: 'meta.principlesDesc' })
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

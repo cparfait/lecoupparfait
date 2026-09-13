@@ -8,11 +8,10 @@
  */
 
 import type { Metadata } from 'next'
+import { metadonnees } from '@/lib/i18n/metadonnees.ts'
 
-export const metadata: Metadata = {
-  title: 'Crédits & licences',
-  description:
-    'Les logiciels, jeux de données et ressources graphiques libres sur lesquels Le Coup Parfait est construit, avec leurs auteurs et leurs licences.',
+export async function generateMetadata(): Promise<Metadata> {
+  return metadonnees('meta.credits', { description: 'meta.creditsDesc' })
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

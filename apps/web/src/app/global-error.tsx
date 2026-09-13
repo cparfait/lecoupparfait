@@ -16,7 +16,39 @@
  * Minimal aussi par prudence : ce composant doit s'afficher quand le reste a
  * échoué. Chaque import qu'on lui ajoute est une chose de plus qui peut
  * l'empêcher de s'afficher.
+ *
+ * ── Et pourtant il est traduit ──────────────────────────────────────────────
+ *
+ * Ses quatre phrases étaient écrites en français, au motif qu'il vit hors du
+ * fournisseur de traduction. C'était vrai et ce n'était pas une raison : l'écran
+ * qui s'affiche quand tout a échoué est le dernier endroit où l'on peut se
+ * permettre de n'être pas compris.
+ *
+ * Les deux imports qu'il s'autorise ne coûtent rien à la prudence : le
+ * dictionnaire est de la donnée pure — pas de React, pas d'API du navigateur,
+ * rien qui puisse lever —, et il est déjà chargé par le reste de l'application,
+ * si bien qu'aucun module nouveau n'arrive dans ce chemin d'erreur.
+ *
+ * La langue vient du témoin, lu à la main : `useI18n` est un crochet, et il n'y a
+ * ici aucun fournisseur pour le porter.
  */
+
+import { fabriquerT } from '@/lib/i18n/resoudre.ts'
+import { TEMOIN_LANGUE } from '@/lib/i18n/temoin.ts'
+import { langue } from '@/lib/i18n/langues.ts'
+
+/**
+ * La langue choisie, ou le français.
+ *
+ * Rendu serveur compris : `document` n'existe pas au premier rendu, et le lire
+ * sans précaution ferait échouer l'écran qui sert justement à rattraper un
+ * échec.
+ */
+function localeDuTemoin(): string {
+  if (typeof document === 'undefined') return 'fr'
+  const trouve = new RegExp(`(?:^|;\\s*)${TEMOIN_LANGUE}=([A-Za-z-]{2,8})`).exec(document.cookie)
+  return trouve?.[1] ?? 'fr'
+}
 
 export default function ErreurGlobale({
   error,
@@ -25,8 +57,12 @@ export default function ErreurGlobale({
   error: Error & { digest?: string }
   retry: () => void
 }) {
+  const locale = localeDuTemoin()
+  const t = fabriquerT(locale)
+  const choisie = langue(locale)
+
   return (
-    <html lang="fr">
+    <html lang={choisie.bcp47} dir={choisie.rtl ? 'rtl' : 'ltr'}>
       <body
         style={{
           margin: 0,
@@ -40,12 +76,9 @@ export default function ErreurGlobale({
         }}
       >
         <main>
-          <h1 style={{ fontSize: '1.25rem', margin: '0 0 .5rem' }}>
-            Le Coup Parfait n’a pas pu démarrer
-          </h1>
+          <h1 style={{ fontSize: '1.25rem', margin: '0 0 .5rem' }}>{t('crash.title')}</h1>
           <p style={{ margin: '0 0 1.25rem', opacity: 0.75, maxWidth: '32rem' }}>
-            L’application elle-même a rencontré un problème. Réessayer relance le chargement
-            complet.
+            {t('crash.blurb')}
           </p>
           <button
             type="button"
@@ -60,11 +93,11 @@ export default function ErreurGlobale({
               cursor: 'pointer',
             }}
           >
-            Réessayer
+            {t('crash.retry')}
           </button>
           {error.digest && (
             <p style={{ marginTop: '1.25rem', fontSize: '.75rem', opacity: 0.6 }}>
-              Référence de l’incident : <code>{error.digest}</code>
+              {t('crash.reference')} <code>{error.digest}</code>
             </p>
           )}
         </main>

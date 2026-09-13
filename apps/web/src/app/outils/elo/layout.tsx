@@ -6,11 +6,10 @@
  */
 
 import type { Metadata } from 'next'
+import { metadonnees } from '@/lib/i18n/metadonnees.ts'
 
-export const metadata: Metadata = {
-  title: 'Calculateur Elo',
-  description:
-    'Ce qu’un tournoi te rapporte ou te coûte, partie par partie, et ta performance — au barème de la FIDE.',
+export async function generateMetadata(): Promise<Metadata> {
+  return metadonnees('meta.elo', { description: 'meta.eloDesc' })
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
