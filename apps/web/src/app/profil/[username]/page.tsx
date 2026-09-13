@@ -24,6 +24,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import clsx from 'clsx'
+import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
 import { SPEED_LABELS, ratingTitle } from '@coupparfait/core'
 import { Button, Card, Chip, EmptyState, Skeleton } from '@/components/ui/index.tsx'
 import { AvatarPicker } from '@/components/profile/AvatarPicker.tsx'
@@ -93,6 +94,9 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 export default function ProfilePage() {
+  const t = useT()
+  /* Dates et nombres suivent la langue de l'interface : voir `langue()`. */
+  const bcp47 = langue(useI18n().locale).bcp47
   const params = useParams<{ username: string }>()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -136,9 +140,9 @@ export default function ProfilePage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'signout' }),
     })
-    toast.success('À bientôt !')
+    toast.success(t('profile.seeYouSoon'))
     window.location.assign('/')
-  }, [])
+  }, [t])
 
   /**
    * Efface une partie, à l'écran d'abord.
@@ -162,7 +166,7 @@ export default function ProfilePage() {
         actuel ? { ...actuel, games: actuel.games.filter((g) => g.slug !== slug) } : actuel,
       )
       if (await effacerPartie(slug)) return
-      toast.error('Suppression impossible.', 'Réessaie dans un instant.')
+      toast.error(t('profile.deleteFailed'), t('analysis.tryAgainSoon'))
       try {
         const reponse = await fetch(`/api/profil/${params.username}`, { cache: 'no-store' })
         if (reponse.ok) setProfile(await reponse.json())
@@ -170,7 +174,7 @@ export default function ProfilePage() {
         // Serveur injoignable : la ligne réapparaîtra au prochain chargement.
       }
     },
-    [params.username],
+    [params.username, t],
   )
 
   /**
@@ -182,32 +186,36 @@ export default function ProfilePage() {
    * pas y être — on va donc le chercher sur la route privée, qui ne rend que
    * ses propres parties.
    */
-  const analyser = useCallback(async (slug: string, colour: 'w' | 'b') => {
-    setEnvoi(slug)
-    try {
-      const reponse = await fetch(`/api/parties/terminee?slug=${encodeURIComponent(slug)}`, {
-        cache: 'no-store',
-      })
-      const partie = reponse.ok ? (await reponse.json()).parties?.[0] : null
-      if (!partie?.pgn) {
-        toast.error('Partie introuvable.', 'Elle a peut-être été effacée.')
+  const analyser = useCallback(
+    async (slug: string, colour: 'w' | 'b') => {
+      setEnvoi(slug)
+      try {
+        const reponse = await fetch(`/api/parties/terminee?slug=${encodeURIComponent(slug)}`, {
+          cache: 'no-store',
+        })
+        const partie = reponse.ok ? (await reponse.json()).parties?.[0] : null
+        if (!partie?.pgn) {
+          toast.error(t('profile.gameNotFound'), t('profile.gameNotFoundHint'))
+          setEnvoi(null)
+          return
+        }
+        // Même dépôt que la boîte de fin de partie : l'écran d'analyse le ramasse
+        // au chargement et démarre tout seul.
+        sessionStorage.setItem('coupparfait.pendingAnalysis', partie.pgn)
+        sessionStorage.setItem('coupparfait.pendingAnalysisSide', colour)
+        if (partie.result)
+          sessionStorage.setItem('coupparfait.pendingAnalysisResult', partie.result)
+      } catch {
+        // Stockage refusé ou serveur muet : on n'ira nulle part, et le message
+        // ci-dessus vaut mieux qu'un écran d'analyse vide.
+        toast.error(t('profile.analysisFailed'), t('analysis.tryAgainSoon'))
         setEnvoi(null)
         return
       }
-      // Même dépôt que la boîte de fin de partie : l'écran d'analyse le ramasse
-      // au chargement et démarre tout seul.
-      sessionStorage.setItem('coupparfait.pendingAnalysis', partie.pgn)
-      sessionStorage.setItem('coupparfait.pendingAnalysisSide', colour)
-      if (partie.result) sessionStorage.setItem('coupparfait.pendingAnalysisResult', partie.result)
-    } catch {
-      // Stockage refusé ou serveur muet : on n'ira nulle part, et le message
-      // ci-dessus vaut mieux qu'un écran d'analyse vide.
-      toast.error('Analyse impossible.', 'Réessaie dans un instant.')
-      setEnvoi(null)
-      return
-    }
-    window.location.assign('/analyse')
-  }, [])
+      window.location.assign('/analyse')
+    },
+    [t],
+  )
 
   if (loading) {
     return (
@@ -227,12 +235,12 @@ export default function ProfilePage() {
             title={notFound ? 'Joueur introuvable' : 'Profil indisponible'}
             description={
               notFound
-                ? `Aucun compte au pseudo « ${params.username} ».`
-                : 'Le service de profils ne répond pas. Réessaie dans un instant.'
+                ? t('profile.noSuchAccount', { pseudo: params.username })
+                : t('profile.serviceDown')
             }
             action={
               <Link href="/classement">
-                <Button variant="secondary">Voir le classement</Button>
+                <Button variant="secondary">{t('profile.seeLeaderboard')}</Button>
               </Link>
             }
           />
@@ -294,7 +302,9 @@ export default function ProfilePage() {
             )}
             <p className="mt-1.5 flex items-center gap-1.5 text-xs text-faint">
               <CalendarDays size={12} aria-hidden />
-              Membre depuis {formatMonth(profile.user.memberSince)}
+              {t('profile.memberSinceDate', {
+                date: formatMonth(profile.user.memberSince, bcp47),
+              })}
             </p>
           </div>
         </div>
@@ -310,7 +320,7 @@ export default function ProfilePage() {
           compte sont maintenant tout en bas, sous leur propre titre. */}
       <div className="mt-6 flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-display text-lg font-semibold tracking-tight">
-          {isMe ? 'Tes classements' : 'Ses classements'}
+          {t(isMe ? 'profile.yourRatings' : 'profile.theirRatings')}
         </h2>
         {/* Les statistiques ne concernent que soi : leur porte est ici, à côté
             des chiffres qu'elles détaillent, et non plus dans la fiche
@@ -321,7 +331,7 @@ export default function ProfilePage() {
             className="inline-flex items-center gap-1.5 text-[14px] font-medium text-accent hover:underline"
           >
             <BarChart3 size={14} aria-hidden />
-            Statistiques détaillées
+            {t('profile.detailedStats')}
           </Link>
         )}
       </div>
@@ -372,11 +382,11 @@ export default function ProfilePage() {
         <Card className="mt-4">
           <EmptyState
             icon={<TrendingUp size={26} />}
-            title="Aucune partie classée"
-            description="Les classements apparaîtront après la première partie classée contre un autre compte."
+            title={t('profile.noRatedGame')}
+            description={t('profile.noRatedGameHint')}
             action={
               <Link href="/jouer/ami">
-                <Button variant="primary">Défier un ami</Button>
+                <Button variant="primary">{t('profile.challengeFriend')}</Button>
               </Link>
             }
           />
@@ -386,7 +396,9 @@ export default function ProfilePage() {
       {/* ── Courbe de progression ────────────────────────────────── */}
       {profile.history.length > 3 && (
         <Card className="mt-4 p-4">
-          <p className="mb-3 text-[12px] font-semibold text-faint">Évolution du classement</p>
+          <p className="mb-3 text-[12px] font-semibold text-faint">
+            {t('profile.ratingHistoryTitle')}
+          </p>
           <RatingChart history={profile.history} />
         </Card>
       )}
@@ -401,10 +413,10 @@ export default function ProfilePage() {
           c'est un déplié qu'on cherche quand on veut remonter le temps. */}
       <Card className="mt-4 overflow-hidden">
         <p className="border-b border-line/60 px-4 py-2.5 text-[12px] font-semibold text-faint">
-          Parties récentes
+          {t('profile.recentGames')}
         </p>
         {profile.games.length === 0 ? (
-          <EmptyState title="Aucune partie enregistrée" />
+          <EmptyState title={t('profile.noGameSaved')} />
         ) : (
           <ul>
             {(toutesLesParties ? profile.games : profile.games.slice(0, PARTIES_VISIBLES)).map(
@@ -449,8 +461,10 @@ export default function ProfilePage() {
                       )}
                     </span>
                     <span className="block truncate text-[12px] text-faint">
-                      {game.opening ?? 'ouverture non répertoriée'} · {game.moveCount} demi-coups
-                      {game.accuracy != null && ` · ${Math.round(game.accuracy)} % de précision`}
+                      {game.opening ?? t('profile.unlistedOpening')} ·{' '}
+                      {t('profile.halfMoves', { n: game.moveCount })}
+                      {game.accuracy != null &&
+                        t('profile.accuracySuffix', { n: Math.round(game.accuracy) })}
                     </span>
                   </span>
                   {game.ratingDelta !== null && (
@@ -465,7 +479,7 @@ export default function ProfilePage() {
                     </span>
                   )}
                   <span className="shrink-0 text-[12px] text-faint">
-                    {formatDate(game.playedAt)}
+                    {formatDate(game.playedAt, t, bcp47)}
                   </span>
                   {/*
                   La porte de sortie de cette liste. Sans elle, l'historique ne
@@ -478,8 +492,8 @@ export default function ProfilePage() {
                       type="button"
                       onClick={() => void analyser(game.slug, game.colour)}
                       disabled={envoi !== null}
-                      title="Analyser cette partie"
-                      aria-label={`Analyser la partie contre ${game.opponent}`}
+                      title={t('profile.analyseThisGame')}
+                      aria-label={t('profile.analyseAgainst', { adversaire: game.opponent })}
                       className="shrink-0 rounded-[var(--radius-sm)] p-1 text-faint transition-colors hover:bg-surface-strong hover:text-accent disabled:opacity-40"
                     >
                       <Gauge
@@ -499,8 +513,8 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       onClick={() => void oublier(game.slug)}
-                      title="Effacer cette partie de ton historique"
-                      aria-label={`Effacer la partie contre ${game.opponent}`}
+                      title={t('profile.forgetThisGame')}
+                      aria-label={t('profile.forgetAgainst', { adversaire: game.opponent })}
                       className="shrink-0 rounded-[var(--radius-sm)] p-1 text-faint transition-colors hover:bg-surface-strong hover:text-[var(--q-blunder)]"
                     >
                       <Trash2 size={13} aria-hidden />
@@ -525,12 +539,12 @@ export default function ProfilePage() {
             {toutesLesParties ? (
               <>
                 <ChevronUp size={14} aria-hidden />
-                Réduire la liste
+                {t('profile.collapseList')}
               </>
             ) : (
               <>
                 <ChevronDown size={14} aria-hidden />
-                Voir les {profile.games.length - PARTIES_VISIBLES} autres parties
+                {t('profile.showOthers', { n: profile.games.length - PARTIES_VISIBLES })}
               </>
             )}
           </button>
@@ -547,7 +561,9 @@ export default function ProfilePage() {
           que soi, et ne s'affichent donc que chez soi. */}
       {isMe && (
         <section className="mt-4">
-          <h2 className="mb-2 font-display text-lg font-semibold tracking-tight">Ton compte</h2>
+          <h2 className="mb-2 font-display text-lg font-semibold tracking-tight">
+            {t('profile.yourAccount')}
+          </h2>
           <Card className="p-5">
             {/* Ses pseudos d'ailleurs, pour que l'analyse les trouve remplis. */}
             <ComptesAilleurs />
@@ -564,7 +580,7 @@ export default function ProfilePage() {
                 onClick={signOut}
                 className="max-sm:w-full"
               >
-                Se déconnecter
+                {t('profile.signOut')}
               </Button>
             </div>
           </Card>
@@ -592,6 +608,8 @@ export default function ProfilePage() {
  * toutes lettres plutôt que laissé à déduire.
  */
 function RatingChart({ history }: { history: Profile['history'] }) {
+  const t = useT()
+  const bcp47 = langue(useI18n().locale).bcp47
   /** Les séries assez fournies pour qu'une courbe veuille dire quelque chose. */
   const series = useMemo(() => {
     const parCategorie = new Map<string, Profile['history']>()
@@ -683,7 +701,10 @@ function RatingChart({ history }: { history: Profile['history'] }) {
           {ecart}
         </span>{' '}
         <span className="text-muted">
-          depuis {formatDate(serie.entrees[0]!.at)}, sur {valeurs.length} parties classées.
+          {t('profile.sinceGames', {
+            date: formatDate(serie.entrees[0]!.at, t, bcp47),
+            parties: valeurs.length,
+          })}
         </span>
       </p>
 
@@ -739,7 +760,7 @@ function RatingChart({ history }: { history: Profile['history'] }) {
             durée ne veut rien dire — cent points en un mois ou en deux ans ne
             racontent pas la même chose. */}
         <text x={MARGE.gauche} y={H - 4} className="fill-[var(--text-faint)] text-[12px]">
-          {formatShortDate(serie.entrees[0]!.at)}
+          {formatShortDate(serie.entrees[0]!.at, bcp47)}
         </text>
         <text
           x={L - MARGE.droite}
@@ -747,54 +768,45 @@ function RatingChart({ history }: { history: Profile['history'] }) {
           textAnchor="end"
           className="fill-[var(--text-faint)] text-[12px]"
         >
-          {formatShortDate(serie.entrees[serie.entrees.length - 1]!.at)}
+          {formatShortDate(serie.entrees[serie.entrees.length - 1]!.at, bcp47)}
         </text>
       </svg>
 
-      <p className="mt-1 text-[12px] text-faint">
-        Plus haut : {max} · plus bas : {min}
-      </p>
+      <p className="mt-1 text-[12px] text-faint">{t('profile.highestLowest', { max, min })}</p>
     </div>
   )
 }
 
-function formatMonth(value: string): string {
+/*
+  Le mois en toutes lettres, dans la langue de l'interface.
+
+  Les douze noms étaient écrits en français dans un tableau : `Intl` les
+  connaît déjà dans les quarante et une langues, et l'étiquette BCP 47 de
+  chacune est précisément ce que porte le registre `LANGUES`.
+*/
+function formatMonth(value: string, bcp47: string): string {
   const [year, month] = value.split('-')
-  const names = [
-    'janvier',
-    'février',
-    'mars',
-    'avril',
-    'mai',
-    'juin',
-    'juillet',
-    'août',
-    'septembre',
-    'octobre',
-    'novembre',
-    'décembre',
-  ]
-  const index = Number(month) - 1
-  return `${names[index] ?? ''} ${year}`
+  const date = new Date(Number(year), Number(month) - 1, 1)
+  return date.toLocaleDateString(bcp47, { month: 'long', year: 'numeric' })
 }
 
 /** « 4 mars 2026 » — pour les deux bouts d'une courbe. */
-function formatShortDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('fr-FR', {
+function formatShortDate(iso: string, bcp47: string): string {
+  return new Date(iso).toLocaleDateString(bcp47, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   })
 }
 
-function formatDate(iso: string): string {
+function formatDate(iso: string, t: ReturnType<typeof useT>, bcp47: string): string {
   const date = new Date(iso)
   const days = Math.floor((Date.now() - date.getTime()) / 86_400_000)
-  if (days === 0) return 'aujourd’hui'
-  if (days === 1) return 'hier'
-  if (days < 7) return `il y a ${days} j`
-  if (days < 30) return `il y a ${Math.floor(days / 7)} sem.`
-  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+  if (days === 0) return t('profile.today')
+  if (days === 1) return t('profile.yesterday')
+  if (days < 7) return t('profile.daysAgo', { n: days })
+  if (days < 30) return t('profile.weeksAgo', { n: Math.floor(days / 7) })
+  return date.toLocaleDateString(bcp47, { day: 'numeric', month: 'short' })
 }
 
 /**
@@ -829,6 +841,7 @@ function formatDate(iso: string): string {
 const CONFIRMATION_PAR_COURRIEL: boolean = false
 
 function EmailStatus({ email }: { email: { email: string | null; verified: boolean } }) {
+  const t = useT()
   const [busy, setBusy] = useState(false)
   const [sent, setSent] = useState(false)
   const courriel = useCourrielDisponible()
@@ -849,10 +862,8 @@ function EmailStatus({ email }: { email: { email: string | null; verified: boole
     <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line/60 pt-4">
       <MailWarning size={14} className="shrink-0 text-[var(--q-inaccuracy)]" aria-hidden />
       <p className="min-w-0 flex-1 text-xs leading-relaxed text-muted">
-        <strong className="font-semibold text-ink">Adresse à confirmer</strong> — {email.email}.
-        {courriel === false
-          ? ' Ce serveur n’envoie pas encore de courriel : la confirmation n’est pas possible pour l’instant, et l’adresse ne sert donc à rien. Rien n’est perdu, elle reste enregistrée.'
-          : ' Tant que ce n’est pas fait, elle ne pourra pas servir à retrouver ton mot de passe.'}
+        <strong className="font-semibold text-ink">{t('profile.emailToConfirm')}</strong> —{' '}
+        {email.email}.{t(courriel === false ? 'profile.emailNoMail' : 'profile.emailUntilThen')}
       </p>
       <Button
         size="sm"
@@ -872,7 +883,7 @@ function EmailStatus({ email }: { email: { email: string | null; verified: boole
               return
             }
             setSent(true)
-            toast.success('Lien renvoyé.', 'Regarde ta boîte de réception.')
+            toast.success(t('profile.linkResent'), t('profile.linkResentHint'))
           } finally {
             setBusy(false)
           }
@@ -880,7 +891,13 @@ function EmailStatus({ email }: { email: { email: string | null; verified: boole
       >
         {/* « Confirmer » et non « Renvoyer » : plus rien n'a été envoyé
             auparavant, l'inscription n'expédiant plus de lien d'elle-même. */}
-        {sent ? 'Envoyé' : courriel === false ? 'Indisponible' : 'Confirmer'}
+        {t(
+          sent
+            ? 'profile.emailSent'
+            : courriel === false
+              ? 'profile.emailUnavailable'
+              : 'profile.emailConfirm',
+        )}
       </Button>
     </div>
   )

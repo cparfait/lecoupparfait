@@ -17,6 +17,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { BookOpen, RotateCcw, Search, Undo2 } from 'lucide-react'
 import clsx from 'clsx'
+import { langue, useI18n, useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 import { Chess } from 'chess.js'
 import type { PieceSymbol, Square } from 'chess.js'
 import { ECO_VOLUMES, toEpd } from '@coupparfait/core'
@@ -35,6 +36,9 @@ import { useLegalMoves } from '@/lib/game/useLegalMoves.ts'
 const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
 export default function OpeningsPage() {
+  const t = useT()
+  /* Les nombres suivent la langue de l'interface : voir `langue()`. */
+  const bcp47 = langue(useI18n().locale).bcp47
   const { book, ready } = useOpeningBook()
   /*
     La langue du **contenu**, et non celle de l'interface.
@@ -296,16 +300,15 @@ export default function OpeningsPage() {
         {/* En paysage sur téléphone, cette phrase coûterait trois rangées
             d'échiquier ; elle reste partout ailleurs. */}
         <p className="mt-1.5 text-sm text-muted paysage:hidden">
-          {book?.size.toLocaleString('fr-FR')} ouvertures répertoriées.{' '}
-          <strong className="font-semibold text-ink">Tu joues les deux couleurs</strong> — personne
-          ne répond à ta place : c’est un plateau d’étude, pas une partie. Avance coup par coup, sur
-          l’échiquier ou en cliquant dans les listes, et vois où mène chaque branche.
+          {t('openings.catalogued', { n: (book?.size ?? 0).toLocaleString(bcp47) })}{' '}
+          <strong className="font-semibold text-ink">{t('openings.bothColours')}</strong>{' '}
+          {t('openings.bothColoursAfter')}
         </p>
         {/* Le lien vers les fiches, ici et pas seulement dans le menu : c'est
             en explorant qu'on se demande « oui, mais qu'est-ce que je cherche
             avec ça ? », et la réponse est à un clic. */}
         <Link href="/ouvertures/enjeux" className="lien mt-1.5 inline-block paysage:hidden">
-          Les enjeux des 25 ouvertures qui se jouent en club →
+          {t('openings.stakesLink')}
         </Link>
       </div>
 
@@ -381,8 +384,8 @@ export default function OpeningsPage() {
                 </div>
                 <p className="mt-1.5 text-xs text-faint">
                   {current
-                    ? 'Position exactement répertoriée.'
-                    : `Dernière position connue au coup ${Math.ceil((deepest?.atPly ?? 0) / 2)}. Tu es sorti de la théorie.`}
+                    ? t('openings.exactlyListed')
+                    : t('openings.lastKnown', { n: Math.ceil((deepest?.atPly ?? 0) / 2) })}
                 </p>
                 <p className="mt-1 text-xs text-muted">
                   Nom anglais : {(current ?? deepest)!.name}
@@ -399,16 +402,9 @@ export default function OpeningsPage() {
                 un mauvais accueil : on ne sait pas ce qu'on est censé faire,
                 on croit avoir cassé quelque chose avant d'avoir joué un coup.
               */
-              <p className="text-sm leading-relaxed text-muted">
-                Joue un premier coup sur l’échiquier, ou choisis une ouverture dans la liste. Chaque
-                branche porte son nom et son code&nbsp;: tu verras l’ouverture se préciser à mesure
-                que tu avances.
-              </p>
+              <p className="text-sm leading-relaxed text-muted">{t('openings.startHint')}</p>
             ) : (
-              <p className="text-sm text-muted">
-                Cette position n’est pas répertoriée. Joue un coup connu, ou choisis une ouverture
-                dans la liste.
-              </p>
+              <p className="text-sm text-muted">{t('openings.unlisted')}</p>
             )}
           </Card>
         </div>
@@ -450,7 +446,7 @@ export default function OpeningsPage() {
           {continuations.length > 0 && (
             <Card className="overflow-hidden">
               <p className="border-b border-line/60 px-4 py-2.5 text-[12px] font-semibold text-faint">
-                Continuations théoriques
+                {t('openings.continuations')}
               </p>
               <ul className="max-h-64 overflow-y-auto">
                 {continuations.map(({ san, opening }) => (
@@ -489,8 +485,8 @@ export default function OpeningsPage() {
                   setQuery(event.target.value)
                   setVolume(null)
                 }}
-                placeholder="Chercher une ouverture ou un code ECO…"
-                aria-label="Rechercher une ouverture"
+                placeholder={t('openings.searchOpening')}
+                aria-label={t('openings.searchAria')}
                 className="h-10 w-full rounded-[var(--radius-sm)] border border-line bg-surface pl-9 pr-3 text-sm placeholder:text-faint focus:border-accent focus:outline-none"
               />
             </div>
@@ -531,8 +527,8 @@ export default function OpeningsPage() {
             {results.length === 0 ? (
               <EmptyState
                 icon={<BookOpen size={26} />}
-                title="Cherche une ouverture"
-                description="Tape un nom — sicilienne, française, gambit dame — ou choisis un volume ECO ci-dessus."
+                title={t('openings.searchTitle')}
+                description={t('openings.searchHint')}
               />
             ) : (
               <ul className="max-h-[520px] overflow-y-auto">
@@ -578,8 +574,7 @@ export default function OpeningsPage() {
       </div>
 
       <p className="mt-6 text-center text-[12px] text-faint">
-        Jeu de données <span className="font-mono">lichess-org/chess-openings</span>, domaine public
-        (CC0).
+        {t('openings.datasetNote', { source: 'lichess-org/chess-openings' })}
       </p>
     </div>
   )
@@ -589,10 +584,10 @@ export default function OpeningsPage() {
 //  Ce que les joueurs jouent vraiment
 // ─────────────────────────────────────────────────────────────────────────────
 
-const BANDS: Array<{ id: StatsBand; label: string }> = [
-  { id: 'debutant', label: 'Débutant' },
-  { id: 'club', label: 'Club' },
-  { id: 'fort', label: 'Fort' },
+const BANDS: Array<{ id: StatsBand; label: TranslationKey }> = [
+  { id: 'debutant', label: 'openings.bandBeginner' },
+  { id: 'club', label: 'openings.bandClub' },
+  { id: 'fort', label: 'openings.bandStrong' },
 ]
 
 /**
@@ -623,6 +618,8 @@ function PopularMoves({
   /** Profondeur couverte par les données, en demi-coups. */
   maxPlies: number
 }) {
+  const t = useT()
+  const bcp47 = langue(useI18n().locale).bcp47
   const moves = useMoveStats(fen, band)
   const dire = useMoveWords()
   const total = moves.reduce((sum, move) => sum + move.games, 0)
@@ -635,7 +632,9 @@ function PopularMoves({
   return (
     <Card className="overflow-hidden">
       <div className="flex items-center gap-2 border-b border-line/60 px-4 py-2.5">
-        <p className="min-w-0 flex-1 text-[12px] font-semibold text-faint">Ce qu’on joue ici</p>
+        <p className="min-w-0 flex-1 text-[12px] font-semibold text-faint">
+          {t('openings.whatIsPlayed')}
+        </p>
         <div className="flex shrink-0 gap-0.5 rounded-full bg-surface-strong p-0.5">
           {BANDS.map((entry) => (
             <button
@@ -650,7 +649,7 @@ function PopularMoves({
                   : 'text-muted hover:text-ink',
               )}
             >
-              {entry.label}
+              {t(entry.label)}
             </button>
           ))}
         </div>
@@ -663,16 +662,14 @@ function PopularMoves({
         <p className="px-4 py-4 text-[14px] text-muted">
           {tropLoin ? (
             <>
-              Les statistiques couvrent les{' '}
-              <strong className="font-semibold text-ink">{maxPlies / 2} premiers coups</strong>.
-              Au-delà, chaque position devient trop rare pour qu’un pourcentage veuille dire quelque
-              chose.
+              {t('openings.coverageBefore')}{' '}
+              <strong className="font-semibold text-ink">
+                {t('openings.coverageStrong', { n: maxPlies / 2 })}
+              </strong>
+              {t('openings.coverageAfter')}
             </>
           ) : (
-            <>
-              Moins de quarante parties à ce niveau depuis cette position : trop peu pour dire quoi
-              que ce soit d’honnête. Tu es déjà sorti des sentiers battus.
-            </>
+            <>{t('openings.tooRare')}</>
           )}
         </p>
       ) : (
@@ -731,9 +728,11 @@ function PopularMoves({
           </ul>
 
           <p className="border-t border-line/60 px-4 py-2 text-[12px] text-faint">
-            {total.toLocaleString('fr-FR')} parties · coup {Math.floor(ply / 2) + 1} sur{' '}
-            {maxPlies / 2} couverts · le second pourcentage est le score du camp au trait, nulle
-            comptée pour un demi-point.
+            {t('openings.footer', {
+              parties: total.toLocaleString(bcp47),
+              coup: Math.floor(ply / 2) + 1,
+              total: maxPlies / 2,
+            })}
           </p>
         </>
       )}
