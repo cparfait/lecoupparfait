@@ -60,7 +60,7 @@ import {
 } from '@/lib/analysis/runner.ts'
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
-import { localeDuContenu } from '@/lib/i18n/index.tsx'
+import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { positionEnPng, telecharger } from '@/lib/board/imagePosition.ts'
 import { ImportEnLigne } from '@/components/import/ImportEnLigne.tsx'
@@ -138,6 +138,7 @@ function ImportScreen({
   onDone: (outcome: AnalysisOutcome) => void
   onError: () => void
 }) {
+  const t = useT()
   const [input, setInput] = useState('')
   /**
    * Dix-huit par défaut, et le curseur monte jusqu'à trente-quatre.
@@ -239,7 +240,7 @@ function ImportScreen({
 
   const start = useCallback(async () => {
     if (!parsed || parsed.moves.length === 0) {
-      toast.error('Aucun coup reconnu.', 'Colle un PGN, une FEN ou une liste de coups.')
+      toast.error(t('analysis.noMove'), t('analysis.noMoveHint'))
       return
     }
 
@@ -297,8 +298,8 @@ function ImportScreen({
       }
       console.error(error)
       toast.error(
-        'L’analyse a échoué.',
-        error instanceof Error ? error.message : 'Réessaie dans un instant.',
+        t('analysis.failed'),
+        error instanceof Error ? error.message : t('analysis.tryAgainSoon'),
       )
       onError()
     } finally {
@@ -317,6 +318,7 @@ function ImportScreen({
     onProgress,
     onDone,
     onError,
+    t,
   ])
 
   /**
@@ -334,7 +336,7 @@ function ImportScreen({
       try {
         const gardee = await chargerAnalyse(id)
         if (!gardee) {
-          toast.error('Analyse introuvable.', 'Elle a peut-être été supprimée.')
+          toast.error(t('analysis.notFound'), t('analysis.notFoundHint'))
           onError()
           return
         }
@@ -358,11 +360,11 @@ function ImportScreen({
         )
       } catch (error) {
         console.error(error)
-        toast.error('Impossible de rouvrir cette analyse.', 'Réessaie dans un instant.')
+        toast.error(t('analysis.reopenFailed'), t('analysis.tryAgainSoon'))
         onError()
       }
     },
-    [book, locale, notation, onStart, onDone, onError, onSide],
+    [book, locale, notation, onStart, onDone, onError, onSide, t],
   )
 
   /**
@@ -390,11 +392,8 @@ function ImportScreen({
     if (parsed && parsed.moves.length > 0) return
     if (parsed === null && !input.trim()) return
     videPrevenu.current = true
-    toast.warning(
-      'La partie transmise ne contenait aucun coup.',
-      'Colle le PGN à la main, ou rejoue une partie.',
-    )
-  }, [handedOver, parsed, input])
+    toast.warning(t('analysis.handedOverEmpty'), t('analysis.handedOverEmptyHint'))
+  }, [handedOver, parsed, input, t])
 
   /*
     Sauf quand le clic *est* le choix.
@@ -465,9 +464,9 @@ function ImportScreen({
     try {
       setInput(await navigator.clipboard.readText())
     } catch {
-      toast.warning('Le presse-papiers est inaccessible.', 'Colle le texte à la main.')
+      toast.warning(t('analysis.clipboardUnavailable'), t('analysis.clipboardUnavailableHint'))
     }
-  }, [])
+  }, [t])
 
   return (
     <div className="page-etroite">
@@ -478,16 +477,11 @@ function ImportScreen({
           commande, à chaque visite. La phrase longue reste, mais à partir de
           `sm` : c'est là qu'elle ne coûte rien. */}
       <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-        Analyse expliquée
+        {t('analysis.pageTitle')}
       </h1>
       <p className="mt-1.5 max-w-2xl text-sm text-muted sm:mt-2 sm:text-base">
-        <span className="sm:hidden">
-          Coup par coup, ce qui a basculé et le meilleur coup, expliqué.
-        </span>
-        <span className="max-sm:hidden">
-          Colle une partie et découvre, coup par coup, ce qui a basculé — avec le meilleur coup
-          montré sur l’échiquier et la raison écrite en toutes lettres.
-        </span>
+        <span className="sm:hidden">{t('analysis.tagShort')}</span>
+        <span className="max-sm:hidden">{t('analysis.tagLong')}</span>
       </p>
 
       {/* ── D'où vient la partie ? ───────────────────────────────────────
@@ -528,11 +522,8 @@ function ImportScreen({
 
       {!handedOver && (
         <Card className="mt-3 overflow-hidden p-5">
-          <SectionTitle>Tes parties en ligne</SectionTitle>
-          <p className="mt-1 text-xs text-muted">
-            Chess.com ou Lichess, à partir du seul pseudo. Aucun compte n’est nécessaire ici, et
-            rien n’est enregistré.
-          </p>
+          <SectionTitle>{t('analysis.onlineGames')}</SectionTitle>
+          <p className="mt-1 text-xs text-muted">{t('analysis.onlineGamesHint')}</p>
           <div className="mt-3">
             <ImportEnLigne
               serviceInitial={
@@ -563,16 +554,16 @@ function ImportScreen({
               aria-hidden
               className="shrink-0 text-faint transition-transform group-open:rotate-90"
             />
-            <span className="font-medium">Partie à analyser</span>
+            <span className="font-medium">{t('analysis.gameToAnalyse')}</span>
             <span className="min-w-0 flex-1 truncate text-xs text-faint">
               {parsed
-                ? `${parsed.moves.length} demi-coups`
-                : 'Colle un PGN, une liste de coups ou une FEN'}
+                ? t('analysis.halfMoves', { n: parsed.moves.length })
+                : t('analysis.pastePlaceholder')}
             </span>
           </summary>
           <div className="px-5 pb-5">
             <label htmlFor="pgn" className="sr-only">
-              Partie à analyser
+              {t('analysis.gameToAnalyse')}
             </label>
             <textarea
               id="pgn"
@@ -620,12 +611,12 @@ function ImportScreen({
             l'extérieur. */}
         {parsed?.headers.White && parsed.headers.Black && (
           <div className="border-t border-line/60 px-5 py-4">
-            <p className="mb-2 text-sm font-medium">Tu joues quel camp&nbsp;?</p>
+            <p className="mb-2 text-sm font-medium">{t('analysis.whichSide')}</p>
             <div className="grid grid-cols-3 gap-1.5">
               {[
                 { valeur: 'w' as const, label: parsed.headers.White },
                 { valeur: 'b' as const, label: parsed.headers.Black },
-                { valeur: null, label: 'Ni l’un ni l’autre' },
+                { valeur: null, label: t('analysis.neitherSide') },
               ].map((choix) => (
                 <button
                   key={choix.label}
@@ -643,16 +634,14 @@ function ImportScreen({
                 </button>
               ))}
             </div>
-            <p className="mt-2 text-xs text-faint">
-              Les explications s’adresseront à ce joueur, y compris sur les coups de son adversaire.
-            </p>
+            <p className="mt-2 text-xs text-faint">{t('analysis.sideHint')}</p>
           </div>
         )}
 
         <div className="border-t border-line/60 px-5 py-4">
           <label htmlFor="depth" className="mb-2 flex items-baseline justify-between text-sm">
-            <span className="font-medium">Profondeur d’analyse</span>
-            <span className="tabular-nums text-muted">{depth} demi-coups</span>
+            <span className="font-medium">{t('analysis.depthLabel')}</span>
+            <span className="tabular-nums text-muted">{t('analysis.halfMoves', { n: depth })}</span>
           </label>
           <input
             id="depth"
@@ -666,10 +655,7 @@ function ImportScreen({
               background: `linear-gradient(to right, var(--accent) ${((depth - 10) / 16) * 100}%, var(--surface-strong) ${((depth - 10) / 16) * 100}%)`,
             }}
           />
-          <p className="mt-1.5 text-xs text-faint">
-            Plus profond = plus fiable, mais plus long. 18 suffit pour repérer toutes les fautes
-            d’un joueur de club ; 24 pour départager deux bons coups.
-          </p>
+          <p className="mt-1.5 text-xs text-faint">{t('analysis.depthHint')}</p>
         </div>
 
         <div className="border-t border-line/60 p-5">
@@ -678,8 +664,7 @@ function ImportScreen({
               d'où il sort ni ce qu'on attend de nous. */}
           {handedOver && !running && parsed && parsed.moves.length > 0 && (
             <p className="mb-2.5 text-[14px] leading-relaxed text-muted">
-              Ta partie est prête, avec ton camp déjà retenu. Règle la profondeur si tu veux, puis
-              lance l’analyse.
+              {t('analysis.handedOverReady')}
             </p>
           )}
 
@@ -692,7 +677,7 @@ function ImportScreen({
             onClick={start}
             icon={running ? undefined : <Gauge size={17} />}
           >
-            {running ? 'Analyse en cours…' : 'Lancer l’analyse'}
+            {t(running ? 'analysis.analysing' : 'analysis.analyse')}
           </Button>
 
           {/* Pourquoi c'est long, dit avant qu'on se le demande.
@@ -709,12 +694,7 @@ function ImportScreen({
               par tout le monde. C'est le prix de la gratuité, et l'annoncer
               transforme une lenteur inexpliquée en choix assumé. */}
           {running && (
-            <p className="mt-3 text-xs leading-relaxed text-faint">
-              Le moteur analyse chaque position à la profondeur demandée, sur un serveur partagé —
-              comptez une trentaine de secondes pour une partie complète. C’est le prix du service
-              gratuit&nbsp;: aucune limite de nombre, aucune formule payante, mais une seule
-              machine.
-            </p>
+            <p className="mt-3 text-xs leading-relaxed text-faint">{t('analysis.sharedServer')}</p>
           )}
 
           {running && progress && (
@@ -722,8 +702,12 @@ function ImportScreen({
               <div className="mb-1.5 flex justify-between text-xs text-muted">
                 <span>
                   {progress.phase === 'positions'
-                    ? `Évaluation des positions (${progress.source === 'server' ? 'moteur serveur' : 'moteur navigateur'})`
-                    : 'Rédaction des explications'}
+                    ? t(
+                        progress.source === 'server'
+                          ? 'analysis.phasePositionsServer'
+                          : 'analysis.phasePositionsBrowser',
+                      )
+                    : t('analysis.phaseWriting')}
                 </span>
                 <span className="tabular-nums">
                   {progress.done} / {progress.total}
@@ -741,17 +725,14 @@ function ImportScreen({
                 onClick={() => abandonRef.current?.abort()}
                 className="mt-2.5 text-xs font-medium text-muted transition-colors hover:text-ink hover:underline"
               >
-                Abandonner l’analyse
+                {t('analysis.abort')}
               </button>
             </div>
           )}
         </div>
       </Card>
 
-      <p className="mt-4 text-center text-xs text-faint">
-        L’analyse tourne d’abord sur le Stockfish natif du serveur. S’il est indisponible, elle se
-        poursuit dans ton navigateur, un peu moins profondément.
-      </p>
+      <p className="mt-4 text-center text-xs text-faint">{t('analysis.engineNote')}</p>
 
       <AutresDeLaSection section="analyser" />
     </div>
@@ -854,6 +835,7 @@ export function ReviewScreen({
    */
   lectureSeule?: boolean
 }) {
+  const t = useT()
   const { report, coach, source } = outcome
   /*
     La langue du **contenu** : le rapport, les explications et les définitions
@@ -1302,7 +1284,7 @@ export function ReviewScreen({
       includeEvaluations: true,
       locale,
       headers: {
-        Event: 'Analyse Le Coup Parfait',
+        Event: t('analysis.pgnEvent'),
         Date: formatPgnDate(new Date()),
         ECO: report.opening?.eco,
         Opening: report.opening?.name,
@@ -1314,7 +1296,7 @@ export function ReviewScreen({
         ]),
       ),
     })
-  }, [report, locale])
+  }, [report, locale, t])
 
   const exportPgn = useCallback(() => {
     telecharger(new Blob([pgnAnnote()], { type: 'application/x-chess-pgn' }), 'partie-analysee.pgn')
@@ -1324,14 +1306,14 @@ export function ReviewScreen({
     const pgn = pgnAnnote()
     try {
       await navigator.clipboard.writeText(pgn)
-      toast.success('PGN copié', 'Colle-le où tu veux : il porte les annotations.')
+      toast.success(t('analysis.pgnCopied'), t('analysis.pgnCopiedHint'))
     } catch {
       // Presse-papiers refusé — contexte non sécurisé, permission absente. Le
       // fichier reste la sortie de secours, et on le dit plutôt que d'échouer
       // en silence.
-      toast.info('Copie refusée par le navigateur', 'Utilise « PGN » pour le fichier.')
+      toast.info(t('analysis.copyRefused'), t('analysis.copyRefusedHint'))
     }
-  }, [pgnAnnote])
+  }, [pgnAnnote, t])
 
   /**
    * La position en image.
@@ -1350,12 +1332,12 @@ export function ReviewScreen({
       legende: report.opening?.name ?? null,
     })
     if (!image) {
-      toast.error('Image impossible', 'Le navigateur a refusé de dessiner la position.')
+      toast.error(t('analysis.imageFailed'), t('analysis.imageFailedHint'))
       return
     }
     telecharger(image, 'position.png')
-    toast.success('Image enregistrée', 'La position, avec le dernier coup souligné.')
-  }, [move, report.moves, report.opening, orientation, habillage, jeuDePieces])
+    toast.success(t('analysis.imageSaved'), t('analysis.imageSavedHint'))
+  }, [move, report.moves, report.opening, orientation, habillage, jeuDePieces, t])
 
   const style = move ? QUALITY_STYLES[move.quality] : null
 
@@ -1409,14 +1391,18 @@ export function ReviewScreen({
           <Chip
             tone={issue === 'nulle' ? 'neutral' : 'success'}
             style={{ textTransform: 'none' }}
-            title="Résultat de la partie"
+            title={t('analysis.gameResult')}
           >
             <Trophy size={11} aria-hidden />
-            <span className={issue === 'w' ? 'font-bold' : 'opacity-70'}>{noms.w ?? 'Blancs'}</span>
+            <span className={issue === 'w' ? 'font-bold' : 'opacity-70'}>
+              {noms.w ?? t('settings.white')}
+            </span>
             <span className="tabular-nums opacity-90">
               {issue === 'w' ? '1–0' : issue === 'b' ? '0–1' : '½–½'}
             </span>
-            <span className={issue === 'b' ? 'font-bold' : 'opacity-70'}>{noms.b ?? 'Noirs'}</span>
+            <span className={issue === 'b' ? 'font-bold' : 'opacity-70'}>
+              {noms.b ?? t('settings.black')}
+            </span>
           </Chip>
         )}
         {/* `flex-wrap`, et il manquait.
@@ -1435,13 +1421,9 @@ export function ReviewScreen({
             variant={relecture ? 'primary' : 'ghost'}
             icon={<Footprints size={14} />}
             onClick={() => setPreference('relectureGuidee', !relecture)}
-            title={
-              relecture
-                ? 'Revenir au tableau de bord : courbe, alternatives, moments clés'
-                : 'Relire pas à pas : un échiquier, une phrase, un bouton'
-            }
+            title={t(relecture ? 'analysis.backToDashboard' : 'analysis.stepByStepTitle')}
           >
-            Pas à pas
+            {t('analysis.stepByStep')}
           </Button>
           <Button
             size="sm"
@@ -1452,7 +1434,7 @@ export function ReviewScreen({
               setPreference('voiceEnabled', !voiceEnabled)
             }}
           >
-            {voiceEnabled ? 'Voix activée' : 'Voix coupée'}
+            {t(voiceEnabled ? 'analysis.voiceOn' : 'analysis.voiceOff')}
           </Button>
           {/* Trois sorties, et elles ne servent pas la même chose : copier
               pour relire ailleurs tout de suite, le fichier pour archiver,
@@ -1462,9 +1444,9 @@ export function ReviewScreen({
             variant="ghost"
             icon={<Copy size={14} />}
             onClick={() => void copierPgn()}
-            title="Copier le PGN annoté, pour l’analyser ailleurs"
+            title={t('analysis.copyPgnTitle')}
           >
-            Copier
+            {t('common.copy')}
           </Button>
           <Button
             size="sm"
@@ -1472,7 +1454,7 @@ export function ReviewScreen({
             icon={<Download size={14} />}
             onClick={exportPgn}
             className={relecture ? 'max-sm:hidden' : undefined}
-            title="Télécharger la partie annotée au format PGN"
+            title={t('analysis.downloadPgnTitle')}
           >
             PGN
           </Button>
@@ -1482,7 +1464,7 @@ export function ReviewScreen({
             icon={<ImageDown size={14} />}
             onClick={() => void exportImage()}
             className={relecture ? 'max-sm:hidden' : undefined}
-            title="Enregistrer la position affichée en image PNG"
+            title={t('analysis.saveImageTitle')}
           >
             Image
           </Button>
@@ -1491,11 +1473,11 @@ export function ReviewScreen({
               ici. Le lien vers l'analyse prend sa place. */}
           {lectureSeule ? (
             <ButtonLink href="/analyse" size="sm" variant="secondary">
-              Analyser une partie
+              {t('analysis.analyseAGame')}
             </ButtonLink>
           ) : (
             <Button size="sm" variant="secondary" onClick={onReset}>
-              Autre partie
+              {t('analysis.otherGame')}
             </Button>
           )}
         </div>
@@ -1685,7 +1667,9 @@ export function ReviewScreen({
                   {move.bestLine && move.bestLine.length > 0 && move.bestMove && (
                     <div className="mt-3 rounded-[var(--radius-sm)] bg-surface p-2.5">
                       <div className="flex items-baseline justify-between gap-2">
-                        <p className="text-[12px] font-semibold text-faint">Suite recommandée</p>
+                        <p className="text-[12px] font-semibold text-faint">
+                          {t('analysis.recommendedLine')}
+                        </p>
                         <span className="flex shrink-0 items-center gap-3">
                           {/* Deux gestes, et ils ne demandent pas la même chose.
                             « Montrer » déplace les pièces — pour qui n'arrive
@@ -1759,8 +1743,7 @@ export function ReviewScreen({
                           // moteur ne se rejoue pas sur la position. On le dit
                           // plutôt que de laisser un bouton qui n'ouvre rien.
                           <p className="mt-2.5 text-[14px] leading-relaxed text-faint">
-                            Ce coup ne se rejoue pas sur cette position : impossible de l’expliquer
-                            sans risquer d’inventer.
+                            {t('analysis.notReplayable')}
                           </p>
                         ))}
                     </div>
@@ -1783,7 +1766,7 @@ export function ReviewScreen({
                   {move.alternatives && move.alternatives.length > 1 && (
                     <div className="mt-3 overflow-hidden rounded-[var(--radius-sm)] border border-line/60">
                       <p className="border-b border-line/60 bg-surface px-3 py-1.5 text-[12px] font-semibold text-faint">
-                        Ce que tu pouvais jouer
+                        {t('analysis.whatYouCouldPlay')}
                       </p>
                       <ul>
                         {move.alternatives.map((option, rang) => {
@@ -1824,28 +1807,33 @@ export function ReviewScreen({
                                     : undefined
                                 }
                                 aria-hidden
-                                title={`Coup classé ${rang + 1} sur ${move.alternatives!.length} par le moteur`}
+                                title={t('analysis.rankTitle', {
+                                  rang: rang + 1,
+                                  total: move.alternatives!.length,
+                                })}
                               >
                                 {rang + 1}
                               </span>
                               <span
                                 className="w-16 shrink-0 font-mono text-[14px] font-semibold"
-                                title="Le coup, en notation d'échecs"
+                                title={t('analysis.moveNotationTitle')}
                               >
                                 {format(option.san)}
                               </span>
                               <span
                                 className="w-12 shrink-0 text-xs tabular-nums text-muted"
-                                title="Évaluation de la position après ce coup, en pions. Positif : les Blancs sont mieux."
+                                title={t('analysis.scoreTitle')}
                               >
                                 {formatScore(option.score)}
                               </span>
                               <span
                                 className="min-w-0 flex-1 truncate text-[12px] text-faint"
-                                title={`Suite prévue par le moteur : ${option.line
-                                  .slice(1, 6)
-                                  .map((san) => format(san))
-                                  .join(' ')}`}
+                                title={t('analysis.engineLineTitle', {
+                                  coups: option.line
+                                    .slice(1, 6)
+                                    .map((san) => format(san))
+                                    .join(' '),
+                                })}
                               >
                                 {option.line
                                   .slice(1, 4)
@@ -1855,17 +1843,17 @@ export function ReviewScreen({
                               {joue && (
                                 <Chip
                                   className="shrink-0 border-transparent"
-                                  title="Le coup que tu as joué dans la partie"
+                                  title={t('analysis.playedTitle')}
                                 >
-                                  joué
+                                  {t('analysis.played')}
                                 </Chip>
                               )}
                               {!joue && rang === 0 && (
                                 <Chip
                                   className="shrink-0 border-transparent"
-                                  title="Le premier choix du moteur dans cette position — celui qu'il fallait jouer"
+                                  title={t('analysis.bestTitle')}
                                 >
-                                  meilleur
+                                  {t('analysis.best')}
                                 </Chip>
                               )}
                             </li>
@@ -1929,6 +1917,7 @@ function AccuracySummary({
   noms: { w: string | null; b: string | null }
   issue: 'w' | 'b' | 'nulle' | null
 }) {
+  const t = useT()
   /*
     On ne montre que les lignes qui existent.
 
@@ -1945,7 +1934,7 @@ function AccuracySummary({
   return (
     <Card className="overflow-hidden">
       <p className="border-b border-line/60 px-3 py-2 text-[12px] font-semibold text-faint">
-        Bilan de la partie
+        {t('analysis.summary')}
       </p>
 
       <div className="p-3">
@@ -1955,12 +1944,14 @@ function AccuracySummary({
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
           {(['w', 'b'] as const).map((colour, rang) => (
             <Fragment key={colour}>
-              {rang === 1 && <span className="px-1 text-[12px] text-faint">précision</span>}
+              {rang === 1 && (
+                <span className="px-1 text-[12px] text-faint">{t('analysis.accuracy')}</span>
+              )}
               <div className={clsx('min-w-0', rang === 0 ? 'text-left' : 'text-right')}>
                 <p className="flex items-center gap-1.5 truncate text-[12px] font-medium">
                   {rang === 1 && (
                     <span className="min-w-0 flex-1 truncate text-right">
-                      {noms[colour] ?? 'Noirs'}
+                      {noms[colour] ?? t('settings.black')}
                     </span>
                   )}
                   <span
@@ -2052,6 +2043,7 @@ function KeyMoments({
   format: (san: string) => string
   onSeek: (ply: number) => void
 }) {
+  const t = useT()
   const moments = report.turningPoints
     .map((ply) => report.moves.find((move) => move.ply === ply))
     .filter((move): move is NonNullable<typeof move> => move != null)
@@ -2059,16 +2051,14 @@ function KeyMoments({
   if (moments.length === 0) {
     return (
       <Card className="p-3">
-        <p className="text-[14px] leading-snug text-muted">
-          Aucun coup n’a fait basculer la partie : l’avantage n’a jamais changé de camp brutalement.
-        </p>
+        <p className="text-[14px] leading-snug text-muted">{t('analysis.noTurningPoint')}</p>
       </Card>
     )
   }
 
   return (
     <Card className="p-3">
-      <p className="mb-2 text-[12px] font-semibold text-faint">Moments clés</p>
+      <p className="mb-2 text-[12px] font-semibold text-faint">{t('analysis.keyMoments')}</p>
       <div className="space-y-0.5">
         {moments.map((move) => {
           const style = QUALITY_STYLES[move.quality]
@@ -2125,6 +2115,7 @@ function PlayerReport({
   estimatedElo: number
   coach: AnalysisOutcome['coach']['w']
 }) {
+  const t = useT()
   // On n'affiche que les catégories qui apportent une information.
   const shown: MoveQuality[] = [
     'brilliant',
@@ -2162,7 +2153,7 @@ function PlayerReport({
             personne à désigner.
           */}
           {issue === colour && (
-            <Crown size={14} className="shrink-0 text-accent" aria-label="Vainqueur de la partie" />
+            <Crown size={14} className="shrink-0 text-accent" aria-label={t('analysis.winner')} />
           )}
         </h3>
         <div className="text-right">
@@ -2174,7 +2165,7 @@ function PlayerReport({
       </div>
 
       <p className="mt-0.5 text-xs text-faint">
-        perte moyenne {acpl} centipions ·{' '}
+        {t('analysis.averageLossOf', { acpl })}{' '}
         {/*
           « Niveau estimé » était un mensonge poli : le chiffre ne mesure pas
           le niveau de quelqu'un mais la qualité de ses coups dans cette
@@ -2183,8 +2174,8 @@ function PlayerReport({
           problème — la mesure monte sans que rien ne l'ait mérité. Le dire
           coûte trois mots et évite qu'on se croie classé.
         */}
-        <span title="Ce que valent les coups joués dans cette partie, pas ton classement. Une seule gaffe suffit à perdre une partie par ailleurs bien jouée, et un adversaire faible flatte la mesure.">
-          performance sur cette partie ≈ {estimatedElo} Elo
+        <span title={t('analysis.performanceTitle')}>
+          {t('analysis.performanceOf', { elo: estimatedElo })}
         </span>
       </p>
 
