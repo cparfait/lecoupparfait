@@ -291,9 +291,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       <MesureEnAttente />
 
       {/* Le mot de l'équipe — annonce générale ou message adressé à une
-          personne. Hors écran de partie, pour la même raison que ci-dessus :
-          ce qu'on a à dire peut attendre la fin de la partie. */}
-      {!immersive && <MotDeLEquipe />}
+          personne. **Sur tous les écrans, partie comprise**, contrairement à
+          `MiseEnRoute` : celle-ci propose et peut attendre, un message
+          d'administration existe pour être lu. Il se ferme d'un bouton, d'Échap
+          ou d'un clic à côté. */}
+      <MotDeLEquipe />
 
       {/* ── Barre inférieure mobile ──────────────────────────────────── */}
       {!immersive && <BottomBar pathname={pathname} />}

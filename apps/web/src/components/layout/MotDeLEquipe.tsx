@@ -3,22 +3,26 @@
 /**
  * Le message de l'équipe, quand il y en a un.
  *
- * Un bandeau en bas de l'écran, au même endroit et de la même façon que le
- * retour vers une partie en direct : c'est la place déjà réservée aux choses
- * qui arrivent pendant qu'on fait autre chose.
+ * Une boîte au milieu de l'écran, et non plus un bandeau en bas. Le bandeau
+ * était le choix prudent — il ne coupait rien — et c'était son défaut : posé
+ * dans un coin, il se referme d'un geste machinal sans avoir été lu, et il ne
+ * s'affichait pas du tout pendant une partie. Un message d'administration
+ * existe précisément pour les cas où il faut être sûr qu'il est passé : une
+ * maintenance dans l'heure, un avertissement adressé à quelqu'un. S'il peut
+ * être manqué, il ne sert à rien.
  *
- * **Un seul message à la fois**, le plus récent — la route n'en rend jamais
- * plus d'un. Trois bandeaux empilés ne se lisent pas, ils se referment.
+ * **Y compris pendant une partie**, donc, contrairement à `MiseEnRoute` qui
+ * propose et peut attendre. Ce que ça coûte est réel : la boîte s'ouvre sur
+ * une position en cours et la pendule continue de tourner derrière. C'est la
+ * raison pour laquelle elle se ferme de trois façons — le bouton, Échap,
+ * l'arrière-plan — et pour laquelle on n'en montre **jamais deux** : la route
+ * n'en rend qu'une à la fois, la plus récente.
  *
  * **Refermer vaut lecture**, et c'est consigné pour les comptes : le message ne
- * revient pas à la page suivante, et l'administration peut voir qu'il est
- * arrivé. Sans compte, la fermeture ne vit que dans le navigateur — il n'y a
- * pas de ligne où l'écrire, et une annonce générale n'a pas de destinataire à
- * qui demander des comptes.
- *
- * **Jamais pendant une partie.** Le montage est décidé par la coque, qui sait
- * ce qu'est un écran immersif : un mot de l'équipe n'a pas à s'inviter au
- * milieu d'une finale.
+ * revient pas à la page suivante, et l'administration voit qu'il est arrivé.
+ * Sans compte, la fermeture ne vit que dans le navigateur — il n'y a pas de
+ * ligne où l'écrire, et une annonce générale n'a de destinataire à qui
+ * demander des comptes.
  *
  * Le texte est celui qu'un humain a écrit, dans sa langue. C'est pour cela
  * qu'il est présenté comme un mot signé et non comme de l'interface : le reste
@@ -26,9 +30,11 @@
  * plus honnête que de le laisser croire.
  */
 
-import { useCallback, useEffect, useState } from 'react'
-import { Megaphone, UserRound, X } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Megaphone, UserRound } from 'lucide-react'
 import clsx from 'clsx'
+import { Button } from '@/components/ui/index.tsx'
+import { useDialogue } from '@/lib/useDialogue.ts'
 import { useT } from '@/lib/i18n/index.tsx'
 
 interface Annonce {
@@ -66,6 +72,7 @@ function retenirLue(id: string): void {
 export function MotDeLEquipe() {
   const t = useT()
   const [annonce, setAnnonce] = useState<Annonce | null>(null)
+  const boite = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let vivant = true
@@ -98,53 +105,65 @@ export function MotDeLEquipe() {
     }).catch(() => {})
   }, [annonce])
 
+  // Échap ferme, le focus vient ici et y reste tant que la boîte est ouverte,
+  // puis retourne d'où il venait — au plateau, s'il en venait. `actif` est
+  // indispensable : le crochet est appelé à chaque rendu, y compris quand il
+  // n'y a aucun message, et il poserait sinon un piège à focus autour d'un
+  // conteneur qui n'existe pas.
+  useDialogue(boite, { onFermer: fermer, actif: annonce !== null })
+
   if (!annonce) return null
 
   const important = annonce.tone === 'important'
 
   return (
     <div
-      role="status"
-      aria-live="polite"
-      className="fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] z-40 mx-auto w-[min(34rem,calc(100%-1.5rem))] lg:bottom-6"
+      className="fixed inset-0 z-[93] grid place-items-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="mot-equipe-titre"
     >
+      {/* L'arrière-plan ferme, comme partout ailleurs dans l'application. Il
+          est assombri sans être flouté : derrière, il y a peut-être une
+          position qu'on est en train de calculer. */}
+      <div className="absolute inset-0 bg-black/40" onClick={fermer} aria-hidden />
+
       <div
+        ref={boite}
         className={clsx(
-          'flex items-start gap-3 rounded-[var(--radius)] border bg-[var(--flottant)]/95 p-3.5 shadow-lg backdrop-blur-xl',
-          important
-            ? 'border-[color-mix(in_oklab,var(--q-blunder)_45%,transparent)]'
-            : 'border-line-strong',
+          'popover animate-slide-up relative w-full max-w-md overflow-hidden p-6 shadow-[var(--shadow-lg)]',
+          important && 'border-[color-mix(in_oklab,var(--q-blunder)_45%,transparent)]',
         )}
       >
         <span
-          className="mt-0.5 shrink-0 text-accent"
-          style={important ? { color: 'var(--q-blunder)' } : undefined}
+          className="mb-3 grid h-11 w-11 place-items-center rounded-full"
+          style={{
+            background: important
+              ? 'color-mix(in oklab, var(--q-blunder) 18%, transparent)'
+              : 'color-mix(in oklab, var(--accent) 18%, transparent)',
+            color: important ? 'var(--q-blunder)' : 'var(--accent)',
+          }}
           aria-hidden
         >
-          {annonce.personnel ? <UserRound size={17} /> : <Megaphone size={17} />}
+          {annonce.personnel ? <UserRound size={20} /> : <Megaphone size={20} />}
         </span>
 
-        <div className="min-w-0 flex-1">
-          <p className="text-[12px] font-semibold uppercase tracking-wide text-faint">
-            {t(annonce.personnel ? 'announce.forYou' : 'announce.fromTeam')}
-          </p>
-          <p className="mt-1 whitespace-pre-wrap text-[14px] leading-relaxed text-ink">
-            {annonce.message}
-          </p>
-          <p className="mt-1.5 text-[12px] text-faint">
-            {t('announce.signed', { auteur: annonce.auteur })}
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={fermer}
-          aria-label={t('announce.dismiss')}
-          title={t('announce.dismiss')}
-          className="-m-1 shrink-0 rounded-full p-1 text-faint transition-colors hover:text-ink"
+        <p
+          id="mot-equipe-titre"
+          className="text-[12px] font-semibold uppercase tracking-wide text-faint"
         >
-          <X size={16} />
-        </button>
+          {t(annonce.personnel ? 'announce.forYou' : 'announce.fromTeam')}
+        </p>
+        <p className="mt-1.5 whitespace-pre-wrap text-[15px] leading-relaxed text-ink">
+          {annonce.message}
+        </p>
+        <p className="mt-2 text-[12px] text-faint">
+          {t('announce.signed', { auteur: annonce.auteur })}
+        </p>
+
+        <Button variant="primary" fullWidth className="mt-5" onClick={fermer}>
+          {t('announce.dismiss')}
+        </Button>
       </div>
     </div>
   )
