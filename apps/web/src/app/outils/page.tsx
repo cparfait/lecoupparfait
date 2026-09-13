@@ -12,46 +12,47 @@ import { Calculator, Dices, Scale, Timer } from 'lucide-react'
 import { CarteDestination } from '@/components/ui/CarteDestination.tsx'
 import { TitreDePage } from '@/components/ui/index.tsx'
 import { SECTIONS } from '@/lib/navigation.ts'
+import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 
 const TEINTE = SECTIONS.find((s) => s.id === 'outils')?.teinte
 
-const OUTILS = [
+const OUTILS: Array<{
+  href: string
+  titre: TranslationKey
+  phrase: TranslationKey
+  icon: typeof Timer
+}> = [
   {
     href: '/outils/pendule',
-    titre: 'Pendule',
-    phrase:
-      'Deux temps, un incrément, on tape son côté après avoir joué. Branchée sur un échiquier électronique, elle note la partie.',
+    titre: 'nav.clock',
+    phrase: 'tools.clockBlurb',
     icon: Timer,
   },
   {
     href: '/outils/elo',
-    titre: 'Calculateur Elo',
-    phrase:
-      'Ta cote, ton coefficient, tes parties : ce que le tournoi te rapporte ou te coûte, et ta performance. Au barème de la FIDE.',
+    titre: 'elo.title',
+    phrase: 'tools.eloBlurb',
     icon: Calculator,
   },
   {
     href: '/outils/tirage',
-    titre: 'Tirage au sort',
-    phrase:
-      'Qui a les Blancs, qui joue contre qui, dans quel ordre on passe. Un tirage que tout le monde voit.',
+    titre: 'tools.drawTitle',
+    phrase: 'tools.drawBlurb',
     icon: Dices,
   },
   {
     href: '/outils/arbitrage',
-    titre: 'Aide-mémoire d’arbitrage',
-    phrase:
-      'Pièce touchée, coup illégal, drapeau, nulle réclamée : ce que disent les Règles du jeu de la FIDE, en une page.',
+    titre: 'tools.arbiterTitle',
+    phrase: 'tools.arbiterBlurb',
     icon: Scale,
   },
 ]
 
 export default function OutilsPage() {
+  const t = useT()
   return (
     <div className="page">
-      <TitreDePage intro="Ce qui sert autour de l’échiquier plutôt que dessus : de quoi accompagner une partie jouée sur un vrai plateau, en face de quelqu’un.">
-        Outils
-      </TitreDePage>
+      <TitreDePage intro={t('tools.intro')}>{t('nav.tools')}</TitreDePage>
 
       <div className="grille-cartes">
         {OUTILS.map((outil) => (
@@ -60,8 +61,8 @@ export default function OutilsPage() {
             href={outil.href}
             icon={outil.icon}
             teinte={TEINTE}
-            titre={outil.titre}
-            phrase={outil.phrase}
+            titre={t(outil.titre)}
+            phrase={t(outil.phrase)}
           />
         ))}
       </div>

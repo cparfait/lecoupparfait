@@ -19,18 +19,25 @@ import { Gauge } from 'lucide-react'
 import { Button } from '@/components/ui/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { MarqueService } from '@/components/brand/MarqueService.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 const SERVICES = [
   {
     cle: 'chesscomUsername',
     service: 'chesscom',
     label: 'Chess.com',
-    exemple: 'ton pseudo Chess.com',
+    exemple: 'misc.chesscomHandle',
   },
-  { cle: 'lichessUsername', service: 'lichess', label: 'Lichess', exemple: 'ton pseudo Lichess' },
+  {
+    cle: 'lichessUsername',
+    service: 'lichess',
+    label: 'Lichess',
+    exemple: 'misc.lichessHandle',
+  },
 ] as const
 
 export function ComptesAilleurs() {
+  const t = useT()
   const chesscom = usePreferences((state) => state.chesscomUsername)
   const lichess = usePreferences((state) => state.lichessUsername)
   const set = usePreferences((state) => state.set)
@@ -39,11 +46,8 @@ export function ComptesAilleurs() {
 
   return (
     <div className="mt-4 border-t border-line/60 pt-4">
-      <p className="text-sm font-medium">Tes comptes ailleurs</p>
-      <p className="mt-0.5 text-xs leading-relaxed text-muted">
-        L’analyse retrouve tes parties Chess.com et Lichess à partir du pseudo. Note-les ici une
-        fois ; tu pourras toujours en chercher un autre sur le moment.
-      </p>
+      <p className="text-sm font-medium">{t('misc.yourAccountsElsewhere')}</p>
+      <p className="mt-0.5 text-xs leading-relaxed text-muted">{t('misc.accountsElsewhereHint')}</p>
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         {SERVICES.map((service) => (
           <label key={service.cle} className="block">
@@ -57,7 +61,7 @@ export function ComptesAilleurs() {
             <input
               value={valeurs[service.cle]}
               onChange={(event) => set(service.cle, event.target.value)}
-              placeholder={service.exemple}
+              placeholder={t(service.exemple)}
               spellCheck={false}
               autoComplete="off"
               autoCapitalize="none"
@@ -72,7 +76,7 @@ export function ComptesAilleurs() {
           className="mt-3 inline-block"
         >
           <Button size="sm" variant="secondary" icon={<Gauge size={14} />}>
-            Analyser une de ces parties
+            {t('misc.analyseOneOfThese')}
           </Button>
         </Link>
       )}

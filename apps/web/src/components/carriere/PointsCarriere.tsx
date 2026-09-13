@@ -112,11 +112,9 @@ function PanneauPoints({ progression }: { progression: Progression }) {
       </div>
 
       {/* ── D'où ils viennent ─────────────────────────────────────────── */}
-      <p className="mt-3 px-1 text-[12px] text-faint">D’où ils viennent</p>
+      <p className="mt-3 px-1 text-[12px] text-faint">{t('misc.whereTheyComeFrom')}</p>
       {lignes.length === 0 ? (
-        <p className="mt-1 px-1 text-[12px] text-muted">
-          Rien encore. La première leçon en rapporte {XP.lecon}.
-        </p>
+        <p className="mt-1 px-1 text-[12px] text-muted">{t('misc.nothingYet', { n: XP.lecon })}</p>
       ) : (
         <ul className="mt-1 space-y-0.5">
           {lignes.map((ligne) => (
@@ -134,7 +132,7 @@ function PanneauPoints({ progression }: { progression: Progression }) {
               className="flex items-baseline gap-2 px-1 text-[12px]"
               title={t('career2.oldScale')}
             >
-              <span className="min-w-0 flex-1 truncate text-muted">non détaillés</span>
+              <span className="min-w-0 flex-1 truncate text-muted">{t('misc.undetailed')}</span>
               <span className="shrink-0 tabular-nums font-semibold text-ink">
                 {ecart > 0 ? '+' : ''}
                 {ecart}

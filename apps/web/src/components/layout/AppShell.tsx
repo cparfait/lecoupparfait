@@ -63,8 +63,8 @@ import {
 type Intercepteur = (href: string) => AvantageCompte | null
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const pathname = usePathname()
   const t = useT()
+  const pathname = usePathname()
   const identite = useIdentite()
   const [porte, setPorte] = useState<{ avantage: AvantageCompte; href: string } | null>(null)
 
@@ -548,10 +548,7 @@ function SiteFooter() {
   return (
     <footer className="browser-only mt-auto hidden border-t border-line/60 py-6 lg:block">
       <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-3 px-5 text-xs text-faint">
-        <p>
-          Le Coup Parfait — logiciel libre sous licence AGPL-3.0. Aucune publicité, aucun traqueur,
-          aucune donnée revendue.
-        </p>
+        <p>{t('misc.footer')}</p>
         <nav className="flex gap-4" aria-label="Liens secondaires">
           {PAGES_APPLICATION.map((page) => (
             <Link key={page.href} href={page.href} className="transition-colors hover:text-ink">

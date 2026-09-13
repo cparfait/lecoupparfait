@@ -10,6 +10,7 @@
 
 import clsx from 'clsx'
 import type { Color } from 'chess.js'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /** Indique quel camp joue et l'état de la partie, en une ligne. */
 export function TurnIndicator({
@@ -25,6 +26,7 @@ export function TurnIndicator({
   gameOver?: boolean
   className?: string
 }) {
+  const t = useT()
   if (gameOver) return null
   const yours = yourColor !== null && turn === yourColor
 
@@ -43,12 +45,10 @@ export function TurnIndicator({
       />
       <span className={yours ? 'font-semibold' : 'text-muted'}>
         {thinking
-          ? 'L’adversaire réfléchit…'
+          ? t('misc.opponentThinking')
           : yours
-            ? 'À toi de jouer'
-            : turn === 'w'
-              ? 'Trait aux Blancs'
-              : 'Trait aux Noirs'}
+            ? t('misc.yourTurn')
+            : t(turn === 'w' ? 'misc.whiteToMove' : 'misc.blackToMove')}
       </span>
     </div>
   )

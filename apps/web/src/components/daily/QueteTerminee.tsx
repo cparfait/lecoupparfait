@@ -26,6 +26,7 @@ import { ArrowRight, Check, Flame, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/index.tsx'
 import { useDialogue } from '@/lib/useDialogue.ts'
 import type { Quete } from '@/lib/daily/quotidien.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export function QueteTerminee({
   quete,
@@ -43,6 +44,7 @@ export function QueteTerminee({
   /** « Puzzle suivant », « Rejouer une partie » : chaque écran a son verbe. */
   libelleContinuer?: string
 }) {
+  const t = useT()
   const boite = useRef<HTMLDivElement>(null)
   useDialogue(boite, { onFermer: onContinuer })
 
@@ -78,7 +80,7 @@ export function QueteTerminee({
           />
         </span>
 
-        <p className="text-[12px] font-semibold text-faint">Quête du jour</p>
+        <p className="text-[12px] font-semibold text-faint">{t('misc.dailyQuest')}</p>
         <h2 id="quete-terminee-titre" className="font-display text-2xl font-bold tracking-tight">
           {quete.label}
         </h2>
@@ -94,7 +96,7 @@ export function QueteTerminee({
 
         <p className="mt-3 text-[14px] leading-relaxed text-muted">
           {restantes === 0
-            ? 'Toutes les quêtes du jour sont faites. La suivante arrive à minuit.'
+            ? t('misc.allQuestsDone')
             : `Il te reste ${restantes} quête${restantes > 1 ? 's' : ''} aujourd’hui.`}
         </p>
 
@@ -117,7 +119,7 @@ export function QueteTerminee({
               fullWidth
               icon={<ArrowRight size={16} />}
             >
-              {restantes === 0 ? 'Voir ma journée' : 'Retour aux quêtes'}
+              {t(restantes === 0 ? 'misc.seeMyDay' : 'misc.backToQuests')}
             </Button>
           </Link>
         </div>

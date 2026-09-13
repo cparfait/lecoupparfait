@@ -391,9 +391,9 @@ export function ViewToggle({
   fullscreen?: boolean
   onToggleFullscreen?: () => void
 }) {
+  const t = useT()
   const view = usePreferences((state) => state.view)
   const setPreference = usePreferences((state) => state.set)
-  const t = useT()
 
   return (
     <div
@@ -434,7 +434,7 @@ export function ViewToggle({
           type="button"
           onClick={onToggleFullscreen}
           aria-pressed={fullscreen}
-          title={fullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+          title={t(fullscreen ? 'misc.exitFullscreen' : 'misc.fullscreen')}
           className="grid h-8 w-8 place-items-center rounded-full text-muted transition-all hover:bg-surface-hover hover:text-ink pointer-coarse:h-11 pointer-coarse:w-11"
         >
           {fullscreen ? (
@@ -442,7 +442,9 @@ export function ViewToggle({
           ) : (
             <Maximize2 size={15} strokeWidth={2.2} aria-hidden />
           )}
-          <span className="sr-only">{fullscreen ? 'Quitter le plein écran' : 'Plein écran'}</span>
+          <span className="sr-only">
+            {t(fullscreen ? 'misc.exitFullscreen' : 'misc.fullscreen')}
+          </span>
         </button>
       )}
     </div>

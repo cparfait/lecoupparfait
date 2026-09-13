@@ -48,6 +48,8 @@ import {
   Spinner,
 } from '@/components/ui/index.tsx'
 import { PartiesDAmis, type PartieDAmi } from '@/components/social/PartiesDAmis.tsx'
+import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
+import { usePreferences } from '@/lib/store/preferences.ts'
 
 interface LiveGame {
   slug: string
@@ -76,6 +78,9 @@ interface LiveGame {
 const POLL_MS = 6000
 
 export default function WatchPage() {
+  const t = useT()
+  /* Les noms de cadence viennent du cœur : voir `localeDuContenu`. */
+  const contenu = usePreferences((state) => localeDuContenu(state.locale))
   const [games, setGames] = useState<LiveGame[] | null>(null)
   const [offline, setOffline] = useState(false)
   /**
@@ -192,9 +197,7 @@ export default function WatchPage() {
 
   return (
     <div className="page-etroite">
-      <SectionTitle hint="Les parties en cours, celles qui cherchent un adversaire, et ce que tes amis jouent contre l’ordinateur.">
-        Regarder
-      </SectionTitle>
+      <SectionTitle hint={t('watch.intro')}>Regarder</SectionTitle>
 
       {/* ── Les parties solo de ses amis ─────────────────────────────────
           Elles ne passent pas par le serveur temps réel — une partie contre
@@ -223,8 +226,8 @@ export default function WatchPage() {
       {offline ? (
         <EmptyState
           icon={<Eye size={28} />}
-          title="Serveur de parties injoignable"
-          description="Impossible de savoir qui joue en ce moment. Vérifie que le serveur temps réel tourne."
+          title={t('watch.serverDown')}
+          description={t('watch.serverDownHint')}
         />
       ) : affichees.length === 0 && solo.length === 0 ? (
         /* Deux vides différents, et ils ne se soignent pas pareil : « personne
@@ -233,19 +236,19 @@ export default function WatchPage() {
         filtre === 'amis' ? (
           <EmptyState
             icon={<Eye size={28} />}
-            title="Aucun de tes amis ne joue en ce moment"
-            description="Dès que l’un d’eux commence une partie, elle apparaîtra ici, et tu pourras la suivre coup par coup."
+            title={t('watch.noFriendPlaying')}
+            description={t('watch.noFriendPlayingHint')}
             action={
               <button type="button" onClick={() => setFiltre('tout')} className="lien">
-                Voir toutes les parties
+                {t('watch.seeAllGames')}
               </button>
             }
           />
         ) : (
           <EmptyState
             icon={<Eye size={28} />}
-            title="Personne ne joue en ce moment"
-            description="Les parties commencées apparaîtront ici, et tu pourras les suivre coup par coup."
+            title={t('watch.nobodyPlaying')}
+            description={t('watch.nobodyPlayingHint')}
           />
         )
       ) : (
@@ -281,16 +284,16 @@ export default function WatchPage() {
                         )}
                       </span>
                       <span className="mt-0.5 block text-[12px] text-faint">
-                        {SPEED_LABELS[speed]?.icon} {SPEED_LABELS[speed]?.fr}
+                        {SPEED_LABELS[speed]?.icon} {SPEED_LABELS[speed]?.[contenu]}
                         {game.statut === 'waiting' ? (
-                          ' · une place libre'
+                          t('watch.freeSeat')
                         ) : (
                           <>
                             {' · '}
-                            {game.moves} demi-coup{game.moves > 1 ? 's' : ''}
+                            {t('analysis.halfMoves', { n: game.moves })}
                           </>
                         )}
-                        {game.rated ? ' · classée' : ''}
+                        {game.rated ? t('watch.rated') : ''}
                       </span>
                     </span>
 

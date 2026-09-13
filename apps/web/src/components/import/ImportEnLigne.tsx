@@ -26,6 +26,7 @@ import {
   type SourceEnLigne,
 } from '@/lib/import/enligne.ts'
 import { MarqueService } from '@/components/brand/MarqueService.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export function ImportEnLigne({
   onChoisir,
@@ -36,6 +37,7 @@ export function ImportEnLigne({
   /** Service présélectionné : celui de la fiche, ou celui dont on a le pseudo. */
   serviceInitial?: SourceEnLigne
 }) {
+  const t = useT()
   const chesscomUsername = usePreferences((state) => state.chesscomUsername)
   const lichessUsername = usePreferences((state) => state.lichessUsername)
   const set = usePreferences((state) => state.set)
@@ -68,15 +70,15 @@ export function ImportEnLigne({
       if (numero !== demande.current) return
       setParties(resultat)
       if (resultat.length === 0) {
-        setErreur('Aucune partie standard récente sur ce compte.')
+        setErreur(t('misc.noRecentGame'))
       }
     } catch (echec) {
       if (numero !== demande.current) return
-      setErreur(echec instanceof Error ? echec.message : 'Récupération impossible.')
+      setErreur(echec instanceof Error ? echec.message : t('misc.fetchFailed'))
     } finally {
       if (numero === demande.current) setChargement(false)
     }
-  }, [source, pseudo])
+  }, [source, pseudo, t])
 
   /*
     Le service choisi charge tout seul.
@@ -150,7 +152,7 @@ export function ImportEnLigne({
 
       {chargement && (
         <p className="flex items-center gap-2 text-xs text-muted">
-          <Spinner size={12} /> Lecture des parties publiques…
+          <Spinner size={12} /> {t('misc.readingPublic')}
         </p>
       )}
 
@@ -174,9 +176,7 @@ export function ImportEnLigne({
               </li>
             ))}
           </ul>
-          <p className="text-[12px] text-faint">
-            Ces parties ne sont pas enregistrées : elles disparaissent en quittant la page.
-          </p>
+          <p className="text-[12px] text-faint">{t('misc.notSaved')}</p>
         </>
       )}
     </div>
@@ -190,6 +190,7 @@ function LignePartie({
   partie: PartieImportee
   onChoisir: (pgn: string, camp: Color) => void
 }) {
+  const t = useT()
   const issue = issuePour(partie)
   const adversaire = partie.monCamp === 'w' ? partie.noir : partie.blanc
 
@@ -232,7 +233,7 @@ function LignePartie({
           href={partie.url}
           target="_blank"
           rel="noreferrer noopener"
-          aria-label="Voir la partie chez la source"
+          aria-label={t('misc.seeAtSource')}
           className="shrink-0 text-faint transition-colors hover:text-ink"
         >
           <ExternalLink size={13} aria-hidden />

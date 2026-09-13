@@ -8,6 +8,8 @@
  * divergeraient.
  */
 
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
+
 /*
   `analyse` reste dans le type sans figurer dans la liste.
 
@@ -24,9 +26,16 @@ export type QueteId = 'defi' | 'partie' | 'victoire' | 'puzzles' | 'analyse'
 
 export interface Quete {
   id: QueteId
-  label: string
+  /*
+    Libellé et action, par clé de dictionnaire.
+
+    `QUETES` est une constante de module : elle ne peut pas appeler `useT()`
+    elle-même, et portait donc son texte français en dur. Ce sont les écrans
+    qui résolvent — la liste des quêtes, la boîte de fin, l'accueil.
+  */
+  label: TranslationKey
   /** Précision affichée sous le libellé, quand il ne se suffit pas. */
-  detail?: string
+  detail?: TranslationKey
   xp: number
   /** Nombre d'occurrences nécessaires. 1 pour la plupart. */
   objectif: number
@@ -59,11 +68,11 @@ export interface Quete {
 export const QUETES: Quete[] = [
   {
     id: 'defi',
-    label: 'Résoudre le défi du jour',
+    label: 'quests.daily',
     xp: 25,
     objectif: 1,
     lien: '/puzzles?defi=1&quete=defi',
-    action: 'Chercher le coup',
+    action: 'quests.dailyAction',
   },
   // « Jouer » et « gagner » mènent à l'ordinateur plutôt qu'au sommaire des
   // façons de jouer : la quête se compte en parties finies, et c'est le seul
@@ -75,28 +84,28 @@ export const QUETES: Quete[] = [
   // devant « Revanche » et « Analyser », sans savoir si la quête était faite.
   {
     id: 'partie',
-    label: 'Jouer une partie',
+    label: 'quests.play',
     xp: 10,
     objectif: 1,
     lien: '/jouer/ordinateur?quete=partie',
-    action: 'Jouer une partie',
+    action: 'quests.play',
   },
   {
     id: 'victoire',
-    label: 'Gagner une partie',
+    label: 'quests.win',
     xp: 15,
     objectif: 1,
     lien: '/jouer/ordinateur?quete=victoire',
-    action: 'Jouer une partie',
+    action: 'quests.play',
   },
   {
     id: 'puzzles',
-    label: 'Enchaîner 3 puzzles',
-    detail: 'trois résolus dans la journée',
+    label: 'quests.threePuzzles',
+    detail: 'quests.threePuzzlesDetail',
     xp: 20,
     objectif: 3,
     lien: '/puzzles?quete=puzzles',
-    action: 'Résoudre des puzzles',
+    action: 'quests.solvePuzzles',
   },
 ]
 

@@ -2283,6 +2283,112 @@ export const fr = {
       'Deux points par victoire, un par nulle. À partir de la deuxième victoire d’affilée, les points doublent — c’est ce qui rend l’arène rattrapable jusqu’au bout.',
   },
 
+  watch: {
+    intro:
+      'Les parties en cours, celles qui cherchent un adversaire, et ce que tes amis jouent contre l’ordinateur.',
+    serverDown: 'Serveur de parties injoignable',
+    serverDownHint:
+      'Impossible de savoir qui joue en ce moment. Vérifie que le serveur temps réel tourne.',
+    noFriendPlaying: 'Aucun de tes amis ne joue en ce moment',
+    noFriendPlayingHint:
+      'Dès que l’un d’eux commence une partie, elle apparaîtra ici, et tu pourras la suivre coup par coup.',
+    seeAllGames: 'Voir toutes les parties',
+    nobodyPlaying: 'Personne ne joue en ce moment',
+    nobodyPlayingHint:
+      'Les parties commencées apparaîtront ici, et tu pourras les suivre coup par coup.',
+    freeSeat: ' · une place libre',
+    rated: ' · classée',
+    gameGone:
+      'La partie est peut-être terminée, ou elle date de plus de vingt minutes. Seules les parties de tes amis, fraîches, sont visibles ici.',
+    seeWhoPlays: 'Voir qui joue',
+    readOnly: '. Lecture seule : tu ne peux pas jouer à sa place.',
+  },
+
+  tools: {
+    clockBlurb:
+      'Deux temps, un incrément, on tape son côté après avoir joué. Branchée sur un échiquier électronique, elle note la partie.',
+    eloBlurb:
+      'Ta cote, ton coefficient, tes parties : ce que le tournoi te rapporte ou te coûte, et ta performance. Au barème de la FIDE.',
+    drawTitle: 'Tirage au sort',
+    drawBlurb:
+      'Qui a les Blancs, qui joue contre qui, dans quel ordre on passe. Un tirage que tout le monde voit.',
+    arbiterTitle: 'Aide-mémoire d’arbitrage',
+    arbiterBlurb:
+      'Pièce touchée, coup illégal, drapeau, nulle réclamée : ce que disent les Règles du jeu de la FIDE, en une page.',
+    intro:
+      'Ce qui sert autour de l’échiquier plutôt que dessus : de quoi accompagner une partie jouée sur un vrai plateau, en face de quelqu’un.',
+    seeThePage: 'Voir la page',
+  },
+
+  community: {
+    title: 'Communauté',
+    leaderboardBlurb:
+      'Qui joue ici, et à quel niveau. Chaque cadence a le sien, et les puzzles comptent à part.',
+    friendsBlurb:
+      'Ton carnet : qui est en ligne, qui t’a défié, et le lien d’invitation à envoyer à quelqu’un qui n’a pas encore de compte.',
+    statsBlurb:
+      'Ce que tes parties disent de ton jeu : l’ouverture où tu marques le moins, la cadence qui te réussit, l’heure où tu joues mal.',
+    intro:
+      'Les autres joueurs, et ce que tu fais avec eux : se comparer, se retrouver, et regarder ce que tes parties disent de ton jeu.',
+  },
+
+  misc: {
+    collapse: 'Réduire',
+    readMore: 'Lire la suite',
+    searchGlossary: 'Chercher un mot, ou une idée dans les définitions…',
+    searchGlossaryAria: 'Chercher dans le glossaire',
+    loading3d: 'Chargement de la 3D…',
+    exitFullscreen: 'Quitter le plein écran',
+    fullscreen: 'Plein écran',
+    dailyQuest: 'Quête du jour',
+    allQuestsDone: 'Toutes les quêtes du jour sont faites. La suivante arrive à minuit.',
+    seeMyDay: 'Voir ma journée',
+    backToQuests: 'Retour aux quêtes',
+    opponentThinking: 'L’adversaire réfléchit…',
+    yourTurn: 'À toi de jouer',
+    whiteToMove: 'Trait aux Blancs',
+    blackToMove: 'Trait aux Noirs',
+    noRecentGame: 'Aucune partie standard récente sur ce compte.',
+    fetchFailed: 'Récupération impossible.',
+    readingPublic: 'Lecture des parties publiques…',
+    notSaved: 'Ces parties ne sont pas enregistrées : elles disparaissent en quittant la page.',
+    wonShort: 'gagnée',
+    noResult: 'sans résultat',
+    seeAtSource: 'Voir la partie chez la source',
+    stopReading: 'Arrêter la lecture',
+    listenDefinitionOf: 'Écouter la définition de « {quoi} »',
+    listenDefinition: 'Écouter la définition',
+    threeD: {
+      unavailable: 'La vue 3D n’est pas disponible ici',
+      interrupted: 'La vue 3D s’est interrompue',
+    },
+    yourAccountsElsewhere: 'Tes comptes ailleurs',
+    accountsElsewhereHint:
+      'L’analyse retrouve tes parties Chess.com et Lichess à partir du pseudo. Note-les ici une fois ; tu pourras toujours en chercher un autre sur le moment.',
+    chesscomHandle: 'ton pseudo Chess.com',
+    lichessHandle: 'ton pseudo Lichess',
+    analyseOneOfThese: 'Analyser une de ces parties',
+    challengeExpired: 'Défi expiré.',
+    busyPlaying: 'Tu joues une partie : accepter t’emmène ailleurs.',
+    careerSuffix: 'de carrière',
+    nothingYet: 'Rien encore. La première leçon en rapporte {n}.',
+    whereTheyComeFrom: 'D’où ils viennent',
+    undetailed: 'non détaillés',
+    footer:
+      'Le Coup Parfait — logiciel libre sous licence AGPL-3.0. Aucune publicité, aucun traqueur, aucune donnée revendue.',
+    wholeSection: 'toute la rubrique, présentée en grand',
+  },
+
+  quests: {
+    daily: 'Résoudre le défi du jour',
+    dailyAction: 'Chercher le coup',
+    play: 'Jouer une partie',
+    win: 'Gagner une partie',
+    threePuzzles: 'Enchaîner 3 puzzles',
+    threePuzzlesDetail: 'trois résolus dans la journée',
+    solvePuzzles: 'Résoudre des puzzles',
+  },
+
   common: {
     loading: 'Chargement…',
     error: 'Erreur',

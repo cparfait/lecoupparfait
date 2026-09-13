@@ -22,6 +22,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Volume2 } from 'lucide-react'
 import clsx from 'clsx'
 import { speak, stopSpeaking } from '@/lib/speech.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /**
  * Le bouton qui lit en ce moment.
@@ -51,6 +52,7 @@ export function BoutonEcouter({
   annonce?: string
   className?: string
 }) {
+  const t = useT()
   const [parle, setParle] = useState(false)
   /*
     Le même état, lisible tout de suite.
@@ -104,9 +106,9 @@ export function BoutonEcouter({
       type="button"
       onClick={basculer}
       aria-label={
-        parle ? 'Arrêter la lecture' : (annonce ?? `Écouter la définition de « ${quoi} »`)
+        parle ? t('misc.stopReading') : (annonce ?? t('misc.listenDefinitionOf', { quoi }))
       }
-      title={parle ? 'Arrêter la lecture' : (annonce ?? 'Écouter la définition')}
+      title={parle ? t('misc.stopReading') : (annonce ?? t('misc.listenDefinition'))}
       aria-pressed={parle}
       className={clsx(
         // Trente-deux points de côté : la plus petite cible qu'on vise au

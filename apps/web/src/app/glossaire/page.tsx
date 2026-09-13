@@ -30,6 +30,7 @@ import { BoutonEcouter } from '@/components/ui/BoutonEcouter.tsx'
 import { renderBold } from '@/lib/gras.tsx'
 import { localeDuContenu } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 /** Ignore accents et casse : on cherche « echec » et on trouve « échec ». */
 function normalise(value: string): string {
@@ -111,6 +112,7 @@ function couperEnDeux(texte: string): { chapeau: string; suite: string | null } 
 }
 
 export default function GlossaryPage() {
+  const t = useT()
   /*
     La langue du **contenu**, et non celle de l'interface.
 
@@ -245,8 +247,8 @@ export default function GlossaryPage() {
           type="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Chercher un mot, ou une idée dans les définitions…"
-          aria-label="Chercher dans le glossaire"
+          placeholder={t('misc.searchGlossary')}
+          aria-label={t('misc.searchGlossaryAria')}
           className="h-11 w-full rounded-[var(--radius-sm)] border border-line bg-surface pl-9 pr-3 text-sm placeholder:text-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--accent)_30%,transparent)]"
         />
       </div>

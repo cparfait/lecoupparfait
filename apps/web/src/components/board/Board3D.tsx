@@ -386,7 +386,7 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
       {webglAbsent && (
         <div className="absolute inset-0 grid place-items-center bg-[var(--bg)]/92 p-6 text-center">
           <div>
-            <p className="text-sm font-semibold">La vue 3D n’est pas disponible ici</p>
+            <p className="text-sm font-semibold">{t('misc.threeD.unavailable')}</p>
             <p className="mx-auto mt-1.5 max-w-xs text-[14px] leading-relaxed text-muted">
               {t('board3d.noWebgl')}
             </p>
@@ -409,7 +409,7 @@ export const Board3D = memo(function Board3D(props: Board2DProps) {
       {contextePerdu && (
         <div className="absolute inset-0 grid place-items-center bg-[var(--bg)]/92 p-6 text-center">
           <div>
-            <p className="text-sm font-semibold">La vue 3D s’est interrompue</p>
+            <p className="text-sm font-semibold">{t('misc.threeD.interrupted')}</p>
             <p className="mx-auto mt-1.5 max-w-xs text-[14px] leading-relaxed text-muted">
               {t('board3d.contextLost')}
             </p>

@@ -40,6 +40,7 @@ import { playSound } from '@/lib/sound.ts'
 import { Alerte } from '@/components/ui/Alerte.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 interface Challenge {
   id: string
@@ -70,6 +71,7 @@ interface Outgoing {
 const POLL_MS = 4000
 
 export function ChallengeWatcher() {
+  const t = useT()
   const router = useRouter()
   const pathname = usePathname()
   const [challenge, setChallenge] = useState<Challenge | null>(null)
@@ -158,7 +160,7 @@ export function ChallengeWatcher() {
         const data = await response.json().catch(() => ({}))
 
         if (!response.ok) {
-          toast.error(data.error ?? 'Défi expiré.')
+          toast.error(data.error ?? t('misc.challengeExpired'))
           setChallenge(null)
           return
         }
@@ -172,7 +174,7 @@ export function ChallengeWatcher() {
         setAnswering(false)
       }
     },
-    [challenge, answering, router],
+    [challenge, answering, router, t],
   )
 
   // Une proposition qu'on n'a pas vue passer ne sert à rien : on la signale
@@ -235,7 +237,7 @@ export function ChallengeWatcher() {
                 de tourner. On le dit avant, pas après. */}
           {enPartie && (
             <p className="mt-0.5 text-[12px] font-medium text-[var(--q-inaccuracy)]">
-              Tu joues une partie : accepter t’emmène ailleurs.
+              {t('misc.busyPlaying')}
             </p>
           )}
         </div>

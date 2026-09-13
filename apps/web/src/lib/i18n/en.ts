@@ -2264,6 +2264,110 @@ export const en: Dictionary = {
       'Two points for a win, one for a draw. From the second win in a row, points double — that is what keeps an arena winnable to the very end.',
   },
 
+  watch: {
+    intro:
+      'Games in progress, those looking for an opponent, and what your friends are playing against the computer.',
+    serverDown: 'Game server unreachable',
+    serverDownHint: 'No way to know who is playing. Check that the realtime server is running.',
+    noFriendPlaying: 'None of your friends is playing right now',
+    noFriendPlayingHint:
+      'As soon as one of them starts a game, it will appear here and you can follow it move by move.',
+    seeAllGames: 'See all the games',
+    nobodyPlaying: 'Nobody is playing right now',
+    nobodyPlayingHint:
+      'Games that have started will appear here, and you can follow them move by move.',
+    freeSeat: ' · a free seat',
+    rated: ' · rated',
+    gameGone:
+      'The game may be over, or it is more than twenty minutes old. Only your friends’ games, recent ones, are visible here.',
+    seeWhoPlays: 'See who is playing',
+    readOnly: '. Read only: you cannot play in their place.',
+  },
+
+  tools: {
+    clockBlurb:
+      'Two clocks, an increment, each player taps their side after moving. Connected to an electronic board, it writes the game down.',
+    eloBlurb:
+      'Your rating, your K factor, your games: what the tournament earns or costs you, and your performance. On the FIDE formula.',
+    drawTitle: 'Random draw',
+    drawBlurb: 'Who has White, who plays whom, in what order. A draw everyone can see.',
+    arbiterTitle: 'Arbiter’s cheat sheet',
+    arbiterBlurb:
+      'Touched piece, illegal move, flag, claimed draw: what the FIDE Laws of Chess say, on one page.',
+    intro:
+      'What is useful around the board rather than on it: things to go with a game played on a real set, facing someone.',
+    seeThePage: 'See the page',
+  },
+
+  community: {
+    title: 'Community',
+    leaderboardBlurb:
+      'Who plays here, and at what level. Each time control has its own, and puzzles count separately.',
+    friendsBlurb:
+      'Your book: who is online, who has challenged you, and the invitation link to send to someone without an account.',
+    statsBlurb:
+      'What your games say about your play: the opening where you score least, the time control that suits you, the hour when you play badly.',
+    intro:
+      'The other players, and what you do with them: compare yourself, find each other, and look at what your games say about your play.',
+  },
+
+  misc: {
+    collapse: 'Collapse',
+    readMore: 'Read more',
+    searchGlossary: 'Search a word, or an idea in the definitions…',
+    searchGlossaryAria: 'Search the glossary',
+    loading3d: 'Loading 3D…',
+    exitFullscreen: 'Leave full screen',
+    fullscreen: 'Full screen',
+    dailyQuest: 'Daily quest',
+    allQuestsDone: 'Every daily quest is done. The next arrives at midnight.',
+    seeMyDay: 'See my day',
+    backToQuests: 'Back to the quests',
+    opponentThinking: 'Your opponent is thinking…',
+    yourTurn: 'Your turn',
+    whiteToMove: 'White to move',
+    blackToMove: 'Black to move',
+    noRecentGame: 'No recent standard game on this account.',
+    fetchFailed: 'Could not fetch them.',
+    readingPublic: 'Reading the public games…',
+    notSaved: 'These games are not saved: they disappear when you leave the page.',
+    wonShort: 'won',
+    noResult: 'no result',
+    seeAtSource: 'See the game at the source',
+    stopReading: 'Stop reading',
+    listenDefinitionOf: 'Listen to the definition of “{quoi}”',
+    listenDefinition: 'Listen to the definition',
+    threeD: {
+      unavailable: 'The 3D view is not available here',
+      interrupted: 'The 3D view was interrupted',
+    },
+    yourAccountsElsewhere: 'Your accounts elsewhere',
+    accountsElsewhereHint:
+      'The analysis finds your Chess.com and Lichess games from the username. Note them here once; you can always look up another one on the spot.',
+    chesscomHandle: 'your Chess.com username',
+    lichessHandle: 'your Lichess username',
+    analyseOneOfThese: 'Analyse one of these games',
+    challengeExpired: 'Challenge expired.',
+    busyPlaying: 'You are in a game: accepting takes you elsewhere.',
+    careerSuffix: 'career',
+    nothingYet: 'Nothing yet. The first lesson earns {n}.',
+    whereTheyComeFrom: 'Where they come from',
+    undetailed: 'not itemised',
+    footer:
+      'Le Coup Parfait — free software under the AGPL-3.0 licence. No advertising, no tracker, no data sold.',
+    wholeSection: 'the whole section, shown large',
+  },
+
+  quests: {
+    daily: 'Solve the daily challenge',
+    dailyAction: 'Find the move',
+    play: 'Play a game',
+    win: 'Win a game',
+    threePuzzles: 'Solve 3 puzzles in a row',
+    threePuzzlesDetail: 'three solved in the day',
+    solvePuzzles: 'Solve puzzles',
+  },
+
   common: {
     loading: 'Loading…',
     error: 'Error',
