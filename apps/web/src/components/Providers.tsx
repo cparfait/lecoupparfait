@@ -12,7 +12,7 @@
 
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
-import { I18nProvider, langue } from '@/lib/i18n/index.tsx'
+import { I18nProvider, langue, type Locale } from '@/lib/i18n/index.tsx'
 import { TEMOIN_LANGUE } from '@/lib/i18n/temoin.ts'
 import { detectEffectsCapability, usePreferences } from '@/lib/store/preferences.ts'
 import { unlockAudio } from '@/lib/sound.ts'
@@ -20,12 +20,28 @@ import { loadNeuralVoices, loadVoices } from '@/lib/speech.ts'
 import { enregistrerTravailleur } from '@/lib/notifications.ts'
 import { ToastHost } from '@/components/ui/Toast.tsx'
 
-export function Providers({ children }: { children: ReactNode }) {
-  const locale = usePreferences((state) => state.locale)
+/**
+ * @param localeInitiale La langue décidée au serveur — témoin, sinon
+ *   `Accept-Language`, sinon le français. Elle ne sert qu'au rendu serveur et
+ *   au tout premier rendu du navigateur : dès que le magasin a relu le stockage
+ *   local, c'est lui qui décide. Sans cette propriété, le serveur rendait la
+ *   page en français quoi qu'annonce le navigateur, et le texte changeait sous
+ *   les yeux du lecteur une fois la page affichée.
+ */
+export function Providers({
+  children,
+  localeInitiale,
+}: {
+  children: ReactNode
+  localeInitiale: Locale
+}) {
+  const choisie = usePreferences((state) => state.locale)
   const theme = usePreferences((state) => state.theme)
   const effects = usePreferences((state) => state.effects)
   const hydrated = usePreferences((state) => state.hydrated)
   const patch = usePreferences((state) => state.patch)
+
+  const locale = hydrated ? choisie : localeInitiale
 
   /*
     Répercute thème, langue et sens de lecture sur l'élément racine.

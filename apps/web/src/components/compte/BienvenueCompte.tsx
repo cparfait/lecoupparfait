@@ -430,67 +430,87 @@ function EtapeNiveau({ onTest }: { onTest: () => void }) {
   return (
     <Etage
       icone={<Gauge size={18} aria-hidden />}
-      titre={t('auth.levelTitle')}
-      detail={t('auth.levelHint')}
+      titre={t('auth.eloTitle')}
+      detail={t('auth.eloHint')}
     >
-      <div className="space-y-1.5">
-        {REPERES.map((repere) => (
-          <button
-            key={repere.id}
-            type="button"
-            onClick={() => {
-              setChoix(repere.id)
-              setElo('')
-            }}
-            aria-pressed={choix === repere.id && !elo}
-            className={clsx(
-              'w-full rounded-[var(--radius-sm)] border px-3 py-2 text-left transition-colors',
-              choix === repere.id && !elo
-                ? 'border-accent bg-accent/15 ring-1 ring-accent'
-                : 'border-line hover:bg-surface-hover',
-            )}
-          >
-            <span className="block text-[14px] font-medium">{t(repere.labelKey)}</span>
-            <span className="block text-[12px] leading-snug text-faint">{t(repere.detailKey)}</span>
-          </button>
-        ))}
-      </div>
+      {/*
+        Le chiffre d'abord, et c'est l'inverse de ce qu'on demandait.
 
-      {/* Pour qui connaît son chiffre : plus précis que n'importe quel repère,
-          et c'est aussi la seule façon de viser entre deux paliers. */}
-      <label className="mt-3 flex items-center gap-2 text-[12px] text-muted">
-        <span className="shrink-0">{t('auth.orYourRating')}</span>
+        L'étape s'ouvrait sur cinq appréciations — « je joue de temps en temps »,
+        « je joue en club » — et reléguait le classement à une petite ligne en
+        dessous. Or il n'y a que deux cas. Ou bien on connaît son Elo, et c'est
+        la réponse la plus précise possible, celle qui vise entre deux paliers là
+        où un repère retombe toujours sur le même. Ou bien on ne le connaît pas,
+        et l'on ne sait pas davantage se situer sur une échelle en cinq crans :
+        les repères posent alors la question qu'on ne sait justement pas
+        trancher. Le test, lui, ne demande rien — il mesure.
+
+        Les repères restent, en troisième voie, pour qui n'a pas de chiffre et ne
+        veut pas y passer six minutes. Repliés : ce n'est plus la question.
+      */}
+      <label className="block">
+        <span className="mb-1.5 block text-[13px] font-medium">{t('auth.eloField')}</span>
         <input
           type="number"
           inputMode="numeric"
           min={400}
           max={3000}
           value={elo}
-          onChange={(event) => setElo(event.target.value)}
+          onChange={(event) => {
+            setElo(event.target.value)
+            setChoix(null)
+          }}
           placeholder="1450"
           aria-label={t('auth.yourEloAria')}
-          className="h-8 w-24 rounded-[var(--radius-sm)] border border-line bg-surface px-2 text-sm tabular-nums placeholder:text-faint focus:border-accent focus:outline-none"
+          className="h-11 w-full rounded-[var(--radius-sm)] border border-line bg-surface px-3 text-base tabular-nums placeholder:text-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--accent)_35%,transparent)]"
         />
       </label>
 
-      {/* Pour qui ne sait pas répondre — et c'est le cas le plus fréquent chez
-          quelqu'un qui débute : les cinq repères demandent déjà de se situer,
-          ce qui est justement ce qu'on ne sait pas faire. Le test, lui, ne
-          demande rien : il mesure. On le propose ici plutôt que de laisser
-          deviner, quitte à quitter la mise en route. */}
+      {/* Pour qui ne le connaît pas — et c'est le cas de la plupart de ceux qui
+          débutent, pour qui aucun classement n'a jamais été calculé. */}
       <button
         type="button"
         onClick={onTest}
-        className="mt-3 w-full rounded-[var(--radius-sm)] border border-dashed border-line px-3 py-2.5 text-left transition-colors hover:bg-surface-hover"
+        className="mt-3 w-full rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2.5 text-left transition-colors hover:bg-accent/15"
       >
         <span className="flex items-center gap-2 text-[14px] font-medium">
           <Target size={15} className="shrink-0 text-accent" aria-hidden />
           {t('auth.dontKnow')}
         </span>
-        <span className="mt-0.5 block text-[12px] leading-snug text-faint">
+        <span className="mt-0.5 block text-[12px] leading-snug text-muted">
           {t('auth.dontKnowHint')}
         </span>
       </button>
+
+      <details className="mt-3">
+        <summary className="cursor-pointer text-[12px] text-muted transition-colors hover:text-ink">
+          {t('auth.orPlaceYourself')}
+        </summary>
+        <div className="mt-2 space-y-1.5">
+          {REPERES.map((repere) => (
+            <button
+              key={repere.id}
+              type="button"
+              onClick={() => {
+                setChoix(repere.id)
+                setElo('')
+              }}
+              aria-pressed={choix === repere.id && !elo}
+              className={clsx(
+                'w-full rounded-[var(--radius-sm)] border px-3 py-2 text-left transition-colors',
+                choix === repere.id && !elo
+                  ? 'border-accent bg-accent/15 ring-1 ring-accent'
+                  : 'border-line hover:bg-surface-hover',
+              )}
+            >
+              <span className="block text-[14px] font-medium">{t(repere.labelKey)}</span>
+              <span className="block text-[12px] leading-snug text-faint">
+                {t(repere.detailKey)}
+              </span>
+            </button>
+          ))}
+        </div>
+      </details>
 
       {niveau !== null && (
         <p className="mt-3 rounded-[var(--radius-sm)] bg-surface-strong px-3 py-2 text-[12px] leading-relaxed text-muted">

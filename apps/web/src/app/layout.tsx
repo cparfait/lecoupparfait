@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { tDesMetadonnees } from '@/lib/i18n/metadonnees.ts'
+import { localeDuVisiteur } from '@/lib/i18n/serveur.ts'
+import { langue } from '@/lib/i18n/langues.ts'
 import type { Traducteur } from '@/lib/i18n/resoudre.ts'
 import { Inter, Space_Grotesk } from 'next/font/google'
 import './globals.css'
@@ -121,7 +123,21 @@ const THEME_BOOTSTRAP = `
       theme = matchMedia('(prefers-color-scheme: light)').matches ? 'clair' : 'aurora';
     }
     document.documentElement.dataset.theme = theme;
-    document.documentElement.lang = state.locale || 'fr';
+    // La langue vient du serveur, qui a lu le témoin puis \`Accept-Language\` :
+    // \`data-langue\` est déjà posé sur l'élément, et le magasin le relira si rien
+    // n'est enregistré. On ne le remplace que si une langue **est** enregistrée
+    // et que les deux se contredisent — témoin expiré, réglages restaurés — pour
+    // éviter que la page s'affiche une seconde dans la mauvaise, à l'envers si
+    // elle se lit de droite à gauche.
+    if (state.locale && state.locale !== document.documentElement.dataset.langue) {
+      document.documentElement.dataset.langue = state.locale;
+      document.documentElement.lang = state.locale;
+      // Les langues de droite à gauche, recopiées de \`lib/i18n/langues.ts\` :
+      // ce script est en ligne, il ne peut rien importer. Toute modification se
+      // fait aux deux endroits.
+      var rtl = ['ar', 'fa', 'he'];
+      document.documentElement.dir = rtl.indexOf(state.locale) >= 0 ? 'rtl' : 'ltr';
+    }
     var effects = state.effects;
     if (!effects) {
       var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -138,10 +154,24 @@ const THEME_BOOTSTRAP = `
 })();
 `
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+/**
+ * La langue est décidée au serveur, et posée sur l'élément racine.
+ *
+ * `data-langue` porte le code de la langue — c'est le canal que relit le magasin
+ * des préférences quand rien n'est enregistré. `lang` porte l'étiquette BCP-47,
+ * que lisent la synthèse vocale, les correcteurs et les lecteurs d'écran. `dir`
+ * retourne la mise en page pour l'arabe, l'hébreu et le persan, **avant** le
+ * premier rendu : posé par un effet, il faisait basculer toute la page une fois
+ * celle-ci affichée.
+ */
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await localeDuVisiteur()
+  const choisie = langue(locale)
   return (
     <html
-      lang="fr"
+      lang={choisie.bcp47}
+      dir={choisie.rtl ? 'rtl' : 'ltr'}
+      data-langue={locale}
       data-theme="aurora"
       className={`${inter.variable} ${spaceGrotesk.variable}`}
       suppressHydrationWarning
@@ -151,7 +181,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="antialiased">
         <div className="ambient-backdrop" aria-hidden />
-        <Providers>
+        <Providers localeInitiale={locale}>
           <AppShell>{children}</AppShell>
         </Providers>
       </body>

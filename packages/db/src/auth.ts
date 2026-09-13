@@ -175,6 +175,18 @@ export interface CreateUserInput {
    * qui en tire un au sort, et cette couche-ci se contente de l'écrire.
    */
   avatar?: string | null
+  /**
+   * Langue du compte, code ISO 639-1.
+   *
+   * Elle est demandée au formulaire d'inscription et voyage avec le compte,
+   * pas avec l'appareil : se connecter depuis un navigateur neuf retrouvait
+   * une interface en français, quelle que soit la langue dans laquelle on
+   * s'était inscrit. Rangée dans `preferences`, qui est prévue pour cela.
+   *
+   * La liste des langues vit dans l'application web, qui la valide déjà ;
+   * cette couche-ci se contente de l'écrire — même partage que pour l'avatar.
+   */
+  locale?: string | null
 }
 
 export async function createUser(
@@ -215,6 +227,7 @@ export async function createUser(
       email,
       passwordHash,
       ...(input.avatar ? { avatar: input.avatar } : {}),
+      ...(input.locale ? { preferences: { locale: input.locale } } : {}),
     })
     .returning()
 

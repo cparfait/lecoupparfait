@@ -13,7 +13,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useShallow } from 'zustand/react/shallow'
 import type { Notation } from '@coupparfait/core'
-import type { Locale } from '../i18n/dictionary.ts'
+import { LOCALES, type Locale } from '../i18n/dictionary.ts'
 import type { TranslationKey } from '../i18n/index.tsx'
 import type { CustomProviderDef } from '../ia/providers/custom.ts'
 
@@ -204,6 +204,14 @@ export interface Preferences {
 }
 
 const DEFAULTS: Preferences = {
+  /*
+    Le français par défaut, mais ce défaut ne se voit presque jamais.
+
+    Il ne vaut que pour le rendu serveur, avant que `merge` n'ait relu ce que
+    le document porte : la langue réelle du premier affichage est celle du
+    témoin, sinon celle du navigateur — voir `langueDuDocument` plus bas et
+    `localeDuVisiteur` dans `lib/i18n/serveur.ts`.
+  */
   locale: 'fr',
   /*
     Les coups s'écrivent avec la pièce dessinée, pas avec son initiale.
@@ -338,18 +346,23 @@ export const usePreferences = create<PreferencesStore>()(
         return state as Preferences
       },
       /**
+       * Deux réglages que le document connaît déjà avant le premier rendu.
+       *
        * Le thème, quand rien n'est enregistré, est celui que l'amorce de
-       * `layout.tsx` a posé sur le document avant le premier rendu — clair ou
-       * sombre selon le système. On relit l'attribut au lieu de recalculer :
-       * une seule décision, prise une seule fois, et le magasin ne peut pas
-       * contredire ce que la page affiche déjà. `merge` n'est appelé qu'au
-       * navigateur, pendant la relecture du stockage ; le rendu serveur garde
-       * la valeur par défaut, et l'attribut posé par l'amorce couvre l'écart.
+       * `layout.tsx` a posé — clair ou sombre selon le système. La langue est
+       * celle que le serveur a lue au témoin puis dans `Accept-Language`. On
+       * relit les attributs au lieu de recalculer : une seule décision, prise
+       * une seule fois, et le magasin ne peut pas contredire ce que la page
+       * affiche déjà. `merge` n'est appelé qu'au navigateur, pendant la
+       * relecture du stockage ; le rendu serveur garde la valeur par défaut, et
+       * `Providers` couvre l'écart en lisant la langue reçue en propriété tant
+       * que la relecture n'a pas eu lieu.
        */
       merge: (persisted, current) => {
         const enregistre = (persisted ?? {}) as Partial<Preferences>
         const theme = enregistre.theme ?? themeDuDocument() ?? current.theme
-        return { ...current, ...enregistre, theme }
+        const locale = enregistre.locale ?? langueDuDocument() ?? current.locale
+        return { ...current, ...enregistre, theme, locale }
       },
       partialize: ({ set: _set, patch: _patch, reset: _reset, hydrated: _h, ...rest }) => rest,
       /**
@@ -428,6 +441,24 @@ function themeDuDocument(): ThemeId | undefined {
   if (typeof document === 'undefined') return undefined
   const theme = document.documentElement.dataset.theme
   return theme === 'aurora' || theme === 'clair' ? theme : undefined
+}
+
+/**
+ * La langue que le document porte déjà, s'il en connaît une.
+ *
+ * La mise en page racine la pose sur `<html data-langue>` après l'avoir lue au
+ * témoin puis dans `Accept-Language` — voir `lib/i18n/serveur.ts`. C'est ce qui
+ * donne sa langue à quelqu'un qui arrive pour la première fois : sans cela,
+ * `locale` valait « fr » par défaut, et trente-six traductions ne servaient
+ * qu'à ceux qui savaient déjà où les trouver.
+ *
+ * Lue ici et non calculée : le serveur a rendu la page dans cette langue-là, et
+ * le magasin ne doit pas pouvoir le contredire.
+ */
+function langueDuDocument(): Locale | undefined {
+  if (typeof document === 'undefined') return undefined
+  const code = document.documentElement.dataset.langue
+  return code && LOCALES.includes(code) ? code : undefined
 }
 
 /**

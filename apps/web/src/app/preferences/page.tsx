@@ -39,6 +39,7 @@ import {
 import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
 import type { TranslationKey } from '@/lib/i18n/index.tsx'
 import { LANGUES } from '@/lib/i18n/langues.ts'
+import { enregistrerLangueDuCompte } from '@/lib/auth/langueDuCompte.ts'
 import { Drapeau } from '@/components/ui/Drapeau.tsx'
 import {
   listVoices,
@@ -763,7 +764,12 @@ export default function PreferencesPage() {
                       type="button"
                       role="radio"
                       aria-checked={choisie}
-                      onClick={() => set('locale', langue.code)}
+                      onClick={() => {
+                        set('locale', langue.code)
+                        // La même langue sur le compte : voir
+                        // `enregistrerLangueDuCompte`.
+                        enregistrerLangueDuCompte(langue.code)
+                      }}
                       className={clsx(
                         'flex items-center gap-2 rounded-[var(--radius-sm)] border px-2.5 py-2 text-left transition-colors',
                         'pointer-coarse:min-h-11',

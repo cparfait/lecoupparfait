@@ -27,12 +27,27 @@
  *
  * ── Les drapeaux ────────────────────────────────────────────────────────────
  *
- * Une langue n'est pas un pays. L'espagnol n'appartient pas à l'Espagne, le
- * portugais pas plus au Portugal qu'au Brésil, et l'arabe n'a pas de drapeau du
- * tout. On en met quand même un quand il ne prête pas à confusion, parce qu'on
- * repère sa langue dans une liste de trente-six par la vignette bien avant
- * d'avoir lu le mot — et on n'en met aucun quand il faudrait choisir un pays
- * pour une langue qui en couvre vingt. Le code ISO prend alors sa place.
+ * **Toutes en ont une**, et il a fallu revenir sur le contraire.
+ *
+ * Une langue n'est pas un pays : l'espagnol n'appartient pas à l'Espagne, le
+ * portugais pas plus au Portugal qu'au Brésil, et l'arabe n'appartient à aucun
+ * État. Cinq langues n'avaient donc aucun drapeau, et montraient à la place une
+ * pastille de deux lettres. L'argument était juste et le résultat mauvais : au
+ * milieu de trente-six vignettes colorées, cinq rectangles gris se lisent comme
+ * cinq images qui n'ont pas chargé. On corrigeait une approximation par ce qui
+ * ressemble à une panne.
+ *
+ * Or c'est la vignette qui fait le travail — on repère sa langue dans une liste
+ * de quarante et une par la couleur bien avant d'avoir lu le mot, et surtout
+ * **avant de savoir lire la langue de la page**, ce qui est le cas de quiconque
+ * arrive sur une interface qu'il ne comprend pas. C'est exactement à ces cinq
+ * langues-là qu'on la refusait.
+ *
+ * On prend donc le drapeau le plus honnête disponible : le Brésil pour le
+ * portugais — c'est aussi son étiquette BCP-47 —, la Catalogne pour le catalan,
+ * et le pavillon de la Ligue arabe pour l'arabe, qui n'est le drapeau d'aucun
+ * pays en particulier. La pastille de lettres reste en secours pour un fichier
+ * manquant ; elle n'est plus le cas nominal de personne.
  *
  * Les vignettes sont des images SVG posées dans `public/drapeaux/`, pas des
  * émojis : Windows n'a pas de police de drapeaux et affiche les deux lettres du
@@ -82,11 +97,11 @@ export const LANGUES: Langue[] = [
   // parlent espagnol, quarante-sept millions vivent en Espagne. L'allemand,
   // l'italien ou le russe gardent le leur — leur pays d'origine y abrite la
   // grande majorité des locuteurs, et la vignette aide à retrouver sa ligne.
-  { code: 'es', nom: 'Español', drapeau: null, bcp47: 'es-ES' },
-  { code: 'pt', nom: 'Português', drapeau: null, bcp47: 'pt-BR' },
+  { code: 'es', nom: 'Español', drapeau: 'es', bcp47: 'es-ES' },
+  { code: 'pt', nom: 'Português', drapeau: 'br', bcp47: 'pt-BR' },
   { code: 'it', nom: 'Italiano', drapeau: 'it', bcp47: 'it-IT' },
   { code: 'ro', nom: 'Română', drapeau: 'ro', bcp47: 'ro-RO' },
-  { code: 'ca', nom: 'Català', drapeau: null, bcp47: 'ca-ES' },
+  { code: 'ca', nom: 'Català', drapeau: 'es-ct', bcp47: 'ca-ES' },
 
   // ── Langues germaniques ─────────────────────────────────────────────────
   { code: 'de', nom: 'Deutsch', drapeau: 'de', bcp47: 'de-DE' },
@@ -125,7 +140,7 @@ export const LANGUES: Langue[] = [
 
   // ── Asie ────────────────────────────────────────────────────────────────
   { code: 'hi', nom: 'हिन्दी', drapeau: 'in', bcp47: 'hi-IN' },
-  { code: 'zh', nom: '简体中文', drapeau: null, bcp47: 'zh-CN' },
+  { code: 'zh', nom: '简体中文', drapeau: 'cn', bcp47: 'zh-CN' },
   { code: 'ja', nom: '日本語', drapeau: 'jp', bcp47: 'ja-JP' },
   { code: 'ko', nom: '한국어', drapeau: 'kr', bcp47: 'ko-KR' },
   { code: 'vi', nom: 'Tiếng Việt', drapeau: 'vn', bcp47: 'vi-VN' },
@@ -134,7 +149,7 @@ export const LANGUES: Langue[] = [
   // ── Écritures de droite à gauche ────────────────────────────────────────
   // L'arabe sans drapeau : vingt-cinq pays le parlent, en choisir un serait
   // arbitraire et, dans cette région du monde, tout sauf neutre.
-  { code: 'ar', nom: 'العربية', drapeau: null, bcp47: 'ar-SA', rtl: true },
+  { code: 'ar', nom: 'العربية', drapeau: 'arab', bcp47: 'ar-SA', rtl: true },
   { code: 'fa', nom: 'فارسی', drapeau: 'ir', bcp47: 'fa-IR', rtl: true },
   { code: 'he', nom: 'עברית', drapeau: 'il', bcp47: 'he-IL', rtl: true },
 ]

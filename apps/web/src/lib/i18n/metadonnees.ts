@@ -23,27 +23,25 @@ import 'server-only'
  */
 
 import type { Metadata } from 'next'
-import { cookies } from 'next/headers'
-import { LOCALES } from './dictionary.ts'
 import type { TranslationKey } from './index.tsx'
 import { fabriquerT, type Traducteur } from './resoudre.ts'
-import { TEMOIN_LANGUE } from './temoin.ts'
+import { localeDuVisiteur } from './serveur.ts'
 
 /**
  * Le `t()` du rendu de page.
  *
- * Le témoin seul, sans repli sur `Accept-Language` : contrairement aux routes
- * d'API, on est ici dans le tout premier chargement possible, où le témoin peut
- * manquer — et l'en-tête du navigateur donnerait alors une langue que
- * l'application n'utilise pas encore, puisqu'elle démarre en français et ne lit
- * pas `navigator.language`. Le titre de l'onglet ne correspondrait pas à l'écran
- * qu'il surmonte. Le témoin est posé dès le premier rendu du client ; seule la
- * toute première page d'une visite sans témoin porte donc un titre français.
+ * Il ne lisait que le témoin, délibérément : `Accept-Language` aurait donné une
+ * langue que l'application n'utilisait pas, puisqu'elle démarrait en français
+ * quoi qu'annonce le navigateur. Le titre de l'onglet aurait contredit l'écran
+ * qu'il surmonte.
+ *
+ * Ce n'est plus vrai : la mise en page racine lit le même ordre — témoin, puis
+ * `Accept-Language`, puis le français — et rend la page dans cette langue-là.
+ * Les deux doivent donc décider pareil, d'où l'appel commun ; les faire diverger
+ * rendrait l'onglet menteur, ce qui est précisément ce qu'on voulait éviter.
  */
 export async function tDesMetadonnees(): Promise<Traducteur> {
-  const boite = await cookies()
-  const code = boite.get(TEMOIN_LANGUE)?.value
-  return fabriquerT(code && LOCALES.includes(code) ? code : 'fr')
+  return fabriquerT(await localeDuVisiteur())
 }
 
 /**

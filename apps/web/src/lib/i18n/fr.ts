@@ -1996,7 +1996,7 @@ export const fr = {
     usernameHint: '3 à 20 caractères : lettres, chiffres, tiret et souligné.',
     passwordHint: '8 caractères minimum.',
     signInTitle: 'Content de te revoir',
-    signUpTitle: 'Rejoins Le Coup Parfait',
+    signUpTitle: 'Rejoins **Le Coup Parfait**',
     signInBlurb: 'Retrouve ton classement, tes parties et ta progression.',
     signUpBlurb: 'Un pseudo, un mot de passe. C’est tout, et c’est gratuit pour toujours.',
     usernameHintLong: '3 à 20 caractères : lettres, chiffres, tiret, souligné.',
@@ -2021,6 +2021,10 @@ export const fr = {
     accountsUnreachable:
       'Le service de comptes est injoignable. Tu peux continuer à jouer sans compte.',
     welcome: 'Bienvenue, {pseudo}.',
+    welcomeBack: 'Content de te revoir, {pseudo}.',
+    language: 'Langue',
+    languageHint:
+      'Celle de ton compte : tu la retrouveras sur n’importe quel appareil où tu te connectes. Modifiable à tout moment dans les préférences.',
     welcomeHint: 'Ton compte est créé. Quelques réglages, et tu joues.',
     skipAll: 'Passer, je réglerai plus tard',
     nothingFinal: 'Tout se retrouve dans tes préférences et sur ton profil. Rien n’est définitif.',
@@ -2043,6 +2047,11 @@ export const fr = {
     levelClubHint: 'J’ai des ouvertures, je vois les tactiques courantes.',
     levelStrong: 'Je suis un joueur fort',
     levelStrongHint: 'Classé, ou l’équivalent en ligne.',
+    eloTitle: 'Quel est ton classement ?',
+    eloHint:
+      'Ton Elo, si tu le connais — celui de ta fédération, ou celui d’un autre site. Il règle l’adversaire qu’on te proposera en premier, et rien d’autre : ton classement ici se gagnera en jouant.',
+    eloField: 'Mon classement',
+    orPlaceYourself: 'Ou situe-toi à peu près',
     orYourRating: 'Ou ton classement :',
     yourEloAria: 'Ton classement Elo',
     dontKnow: 'Je ne sais pas — mesure-le',
@@ -2086,6 +2095,13 @@ export const fr = {
       invalidCredentials: 'Pseudo ou mot de passe incorrect.',
       weakPassword: 'Mot de passe trop court (8 caractères minimum).',
       invalidUsername: 'Pseudo invalide : 3 à 20 caractères alphanumériques.',
+      usernameTooShort: 'Pseudo trop court : trois caractères au minimum.',
+      usernameTooLong: 'Pseudo trop long : vingt caractères au maximum.',
+      // Le pseudo sert d'adresse au profil : le dire explique la restriction
+      // au lieu de la faire subir.
+      usernameCharacters:
+        'Un pseudo n’accepte ni espace ni accent : il sert d’adresse à ton profil. Lettres, chiffres, tiret et souligné uniquement.',
+      linkExpired: 'Ce lien a expiré ou ne correspond à rien. Demande-en un nouveau.',
       emailTaken: 'Cette adresse est déjà utilisée.',
       generic: 'Quelque chose s’est mal passé. Réessaie.',
     },
@@ -2520,6 +2536,7 @@ export const fr = {
     noAddressOnFile: 'Aucune adresse enregistrée.',
     noMailYet: 'Ce serveur n’envoie pas encore de courriel.',
     unknownAvatar: 'Avatar inconnu.',
+    unknownLanguage: 'Langue inconnue.',
     nameAndPasswordRequired: 'Pseudo et mot de passe sont requis.',
     accountsDown: 'Le service de comptes est indisponible. Tu peux continuer à jouer sans compte.',
     leaderboardDown: 'Le classement est momentanément indisponible.',

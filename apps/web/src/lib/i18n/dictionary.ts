@@ -41,14 +41,19 @@ import type { Dictionary } from './fr.ts'
 /**
  * Un dictionnaire partiel : chaque section et chaque clé peuvent manquer.
  *
- * Récursif, parce que le dictionnaire l'est : une langue peut avoir traduit
- * `nav` en entier et n'avoir que trois clés de `settings`.
+ * Récursif **pour de bon**, et il ne l'était pas : la forme précédente rendait
+ * optionnelles les sections et leurs clés, mais s'arrêtait là. Une clé dont la
+ * valeur est elle-même un objet — `auth.errors`, `settings.themes` — devait donc
+ * être fournie **entière**, et ajouter une phrase à l'une d'elles cassait la
+ * compilation des trente-neuf langues d'un coup, pour un texte que `t()` sait
+ * pourtant aller chercher ailleurs clé par clé.
+ *
+ * Le typage disait ainsi le contraire de ce que fait l'exécution. Il dit
+ * maintenant la même chose : tout peut manquer, rien ne peut être inventé.
  */
-export type Traduction = {
-  [K in keyof Dictionary]?: Dictionary[K] extends string
-    ? string
-    : { [S in keyof Dictionary[K]]?: Dictionary[K][S] }
-}
+type Partielle<T> = { [K in keyof T]?: T[K] extends string ? string : Partielle<T[K]> }
+
+export type Traduction = Partielle<Dictionary>
 
 /**
  * Les dictionnaires, par code de langue.

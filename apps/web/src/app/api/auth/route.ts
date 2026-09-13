@@ -28,6 +28,8 @@ import { estAdministrateur } from '@/lib/server/admin.ts'
 import { creerLimiteur } from '@/lib/server/limiteur.ts'
 import { endSession, getCurrentUser, startSession } from '@/lib/server/session.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
+import { LOCALES } from '@/lib/i18n/dictionary.ts'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -39,17 +41,38 @@ export const dynamic = 'force-dynamic'
  */
 const tentatives = creerLimiteur(10 * 60 * 1000, 12)
 
-const ERROR_MESSAGES: Record<ValidationError, string> = {
-  usernameTooShort: 'Pseudo trop court : trois caractères au minimum.',
-  usernameTooLong: 'Pseudo trop long : vingt caractères au maximum.',
-  // Le pseudo sert d'adresse au profil : le dire explique la restriction au
-  // lieu de la faire subir.
-  usernameCharacters:
-    'Un pseudo n’accepte ni espace ni accent : il sert d’adresse à ton profil. Lettres, chiffres, tiret et souligné uniquement.',
-  usernameTaken: 'Ce pseudo est déjà pris.',
-  weakPassword: 'Mot de passe trop court (8 caractères minimum).',
-  emailTaken: 'Cette adresse est déjà utilisée.',
-  invalidCredentials: 'Pseudo ou mot de passe incorrect.',
+/**
+ * La langue enregistrée sur le compte, quand elle en a une.
+ *
+ * `preferences` est un objet libre : rien n'y garantit la présence ni la forme
+ * de quoi que ce soit. On ne rend donc un code que s'il fait partie des langues
+ * de l'application — un compte créé avant que ce champ n'existe n'en a aucune,
+ * et c'est le cas normal.
+ */
+function langueDuCompte(preferences: Record<string, unknown> | null): string | null {
+  const code = preferences?.locale
+  return typeof code === 'string' && LOCALES.includes(code) ? code : null
+}
+
+/**
+ * Le refus d'une inscription, dans la langue de celui qui s'inscrit.
+ *
+ * Ces sept phrases étaient écrites en français dans la route, et ce sont les
+ * seules que lit quelqu'un qui n'a pas encore de compte : il découvrait donc
+ * l'application par un message qu'il ne comprenait pas, sans même avoir eu
+ * l'occasion de choisir sa langue.
+ *
+ * La moitié existait déjà au dictionnaire, sous `auth.errors` — écrite deux
+ * fois, donc, et les deux versions avaient déjà divergé d'un mot.
+ */
+const CLES_DE_REFUS: Record<ValidationError, TranslationKey> = {
+  usernameTooShort: 'auth.errors.usernameTooShort',
+  usernameTooLong: 'auth.errors.usernameTooLong',
+  usernameCharacters: 'auth.errors.usernameCharacters',
+  usernameTaken: 'auth.errors.usernameTaken',
+  weakPassword: 'auth.errors.weakPassword',
+  emailTaken: 'auth.errors.emailTaken',
+  invalidCredentials: 'auth.errors.invalidCredentials',
 }
 
 export async function GET() {
@@ -89,6 +112,7 @@ export async function POST(request: Request) {
     password?: string
     email?: string
     avatar?: string
+    locale?: string
     token?: string
   }
 
@@ -155,8 +179,8 @@ export async function POST(request: Request) {
         {
           error:
             result.reason === 'weakPassword'
-              ? ERROR_MESSAGES.weakPassword
-              : 'Ce lien a expiré ou ne correspond à rien. Demande-en un nouveau.',
+              ? t('auth.errors.weakPassword')
+              : t('auth.errors.linkExpired'),
         },
         { status: 400 },
       )
@@ -209,6 +233,37 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, avatar: body.avatar })
   }
 
+  /*
+    La langue du compte suit celle qu'on choisit dans les préférences.
+
+    Sans cela, elle serait figée à ce qu'on avait répondu au formulaire
+    d'inscription : on en changerait dans les réglages, on se connecterait
+    ailleurs, et le compte imposerait l'ancienne. Un réglage qu'on ne peut
+    corriger que d'un seul appareil n'est pas un réglage de compte.
+
+    Anonyme, il n'y a rien à écrire : la préférence vit alors dans le navigateur
+    et cela suffit. On répond donc sans erreur — ce n'en est pas une.
+  */
+  if (body.action === 'langue') {
+    const me = await getCurrentUser()
+    if (!me) return NextResponse.json({ ok: true })
+    const code = String(body.locale ?? '')
+    if (!LOCALES.includes(code)) {
+      return NextResponse.json({ error: t('api.unknownLanguage') }, { status: 400 })
+    }
+    const base = getDb()
+    const ligne = await base
+      .select({ preferences: users.preferences })
+      .from(users)
+      .where(eq(users.id, me.userId))
+      .limit(1)
+    await base
+      .update(users)
+      .set({ preferences: { ...(ligne[0]?.preferences ?? {}), locale: code } })
+      .where(eq(users.id, me.userId))
+    return NextResponse.json({ ok: true, locale: code })
+  }
+
   const username = String(body.username ?? '').trim()
   const password = String(body.password ?? '')
 
@@ -236,13 +291,17 @@ export async function POST(request: Request) {
         // Un avatar tiré au sort plutôt que le pion de tout le monde : voir
         // `avatarAuHasard`. Il reste changeable d'un clic depuis le profil.
         avatar: avatarAuHasard(),
+        // La langue choisie au formulaire, validée ici : le corps d'une requête
+        // s'écrit à la main, et un code inconnu s'installerait dans le compte
+        // pour n'être jamais lu par personne.
+        locale: LOCALES.includes(String(body.locale)) ? String(body.locale) : null,
       })
       if (!result.ok) {
         // Refuser sans proposer oblige à retâtonner : on joint le pseudo le
         // plus proche qui serait accepté, quand il y en a un.
         return NextResponse.json(
           {
-            error: ERROR_MESSAGES[result.error],
+            error: t(CLES_DE_REFUS[result.error]),
             suggestion: result.error === 'usernameCharacters' ? suggestUsername(username) : null,
           },
           { status: 400 },
@@ -274,6 +333,7 @@ export async function POST(request: Request) {
           username: result.user.username,
           avatar: result.user.avatar,
           role: result.user.role,
+          locale: langueDuCompte(result.user.preferences),
         },
       })
     }
@@ -281,7 +341,7 @@ export async function POST(request: Request) {
     if (body.action === 'signin') {
       const result = await authenticate(username, password)
       if (!result.ok) {
-        return NextResponse.json({ error: ERROR_MESSAGES[result.error] }, { status: 401 })
+        return NextResponse.json({ error: t(CLES_DE_REFUS[result.error]) }, { status: 401 })
       }
       await startSession(result.user.id)
       // Une connexion réussie remet le compteur à zéro.
@@ -292,6 +352,7 @@ export async function POST(request: Request) {
           username: result.user.username,
           avatar: result.user.avatar,
           role: result.user.role,
+          locale: langueDuCompte(result.user.preferences),
         },
       })
     }

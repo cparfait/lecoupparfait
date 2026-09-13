@@ -16,16 +16,20 @@
  * rien envoyer ailleurs ne va pas chercher trente-six images sur un serveur
  * tiers, qui verrait au passage l'adresse de chaque lecteur.
  *
- * ── Trois cas, et aucun ne doit casser ──────────────────────────────────────
+ * ── Deux cas, et aucun ne doit casser ───────────────────────────────────────
  *
- *  1. **Un drapeau existe et le fichier est là** : on l'affiche.
- *  2. **La langue n'a pas de drapeau honnête** — l'espagnol, l'arabe, le
- *     portugais : voir l'en-tête de `langues.ts` — on montre le code ISO dans
- *     une pastille. Ce n'est pas un repli, c'est le cas nominal pour elles.
- *  3. **Le fichier manque**, parce que le téléchargement des ressources n'a pas
- *     été lancé : on retombe sur la pastille. L'application reste utilisable
- *     sans avoir rien à installer, ce qui est la règle de tous les autres
- *     téléchargements du projet.
+ *  1. **Le fichier est là** : on l'affiche. C'est désormais le cas des quarante
+ *     et une langues — y compris de celles qu'aucun pays ne représente
+ *     honnêtement, qui prennent le drapeau le plus proche ou celui d'une union :
+ *     voir l'en-tête de `langues.ts`.
+ *  2. **Le fichier manque**, parce que le téléchargement des ressources n'a pas
+ *     été lancé : on retombe sur une pastille de deux lettres. L'application
+ *     reste utilisable sans avoir rien à installer, ce qui est la règle de tous
+ *     les autres téléchargements du projet.
+ *
+ * La pastille était autrefois le cas **nominal** de cinq langues, et c'est ce
+ * qui a changé : cinq rectangles gris au milieu de trente-six vignettes
+ * colorées se lisaient comme cinq images qui n'ont pas chargé.
  */
 
 import { useState } from 'react'
@@ -56,8 +60,8 @@ export function Drapeau({
       >
         {/* Les deux premières lettres du nom de la langue, et non son code ISO :
             « ES » ne dit rien de plus que « Español » écrit juste à côté, alors
-            que la vignette sert à retrouver sa ligne dans une liste de
-            trente-six. Deux lettres de son propre alphabet s'y repèrent — « Ру »
+            que la vignette sert à retrouver sa ligne dans une liste de quarante
+            et une. Deux lettres de son propre alphabet s'y repèrent — « Ру »
             pour le russe, « عر » pour l'arabe. */}
         {langue.slice(0, 2)}
       </span>

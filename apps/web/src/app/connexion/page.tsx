@@ -13,14 +13,48 @@
  */
 
 import { Suspense, useCallback, useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
+import clsx from 'clsx'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowRight, Swords } from 'lucide-react'
 import { Button, Card, Input } from '@/components/ui/index.tsx'
+import { ChoixDeLangue } from '@/components/ui/ChoixDeLangue.tsx'
 import { BienvenueCompte } from '@/components/compte/BienvenueCompte.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useCourrielDisponible, useIdentite } from '@/lib/auth/useIdentite.ts'
 import { useT } from '@/lib/i18n/index.tsx'
+import { usePreferences } from '@/lib/store/preferences.ts'
+
+/**
+ * Met le nom du site en évidence dans un titre.
+ *
+ * « Rejoins Le Coup Parfait » était écrit d'un seul trait, du même gris que le
+ * reste : rien ne disait lequel de ces quatre mots était le nom de l'endroit où
+ * l'on venait de tomber. C'est pourtant la seule page où quelqu'un le découvre.
+ *
+ * Le nom est marqué dans le dictionnaire — `**Le Coup Parfait**` — et non
+ * découpé en deux clés. L'ordre des mots n'est pas le même partout : « Join Le
+ * Coup Parfait », mais « Le Coup Parfaitに参加する ». Deux clés à recoller
+ * auraient imposé l'ordre français à quarante langues.
+ *
+ * La couleur d'accent, en aplat, et non le dégradé du titre de l'accueil : ce
+ * dégradé part de la couleur du texte pour n'arriver au violet qu'aux deux
+ * tiers. Il est fait pour une ligne entière ; sur trois mots au milieu d'une
+ * phrase, il coupait « Le Cou » du gris et « p Parfait » du violet, ce qui
+ * ressemblait à un défaut d'affichage plutôt qu'à une mise en avant.
+ */
+function marque(texte: string): ReactNode[] {
+  return texte.split(/(\*\*[^*]+\*\*)/g).map((morceau, index) =>
+    morceau.startsWith('**') && morceau.endsWith('**') ? (
+      <span key={index} className="text-accent-soft">
+        {morceau.slice(2, -2)}
+      </span>
+    ) : (
+      <span key={index}>{morceau}</span>
+    ),
+  )
+}
 
 type Mode = 'signin' | 'signup'
 
@@ -111,6 +145,24 @@ function AuthForm() {
   /** Pseudo choisi par un invité qui préfère jouer tout de suite. */
   const [guestName, setGuestName] = useState('')
 
+  /*
+    La langue, posée dès l'inscription.
+
+    Elle n'est pas là pour faire un champ de plus : c'est le seul moment où
+    quelqu'un s'attend à décrire son compte, et la langue en fait partie au même
+    titre que le pseudo. Elle part avec l'inscription et reste attachée au
+    compte — on la retrouve sur un autre appareil, où le navigateur n'a rien
+    d'enregistré.
+
+    Le choix s'applique **tout de suite** à l'interface. Un formulaire qui reste
+    en français pendant qu'on vient d'y désigner le japonais donnerait à croire
+    que le réglage n'a pas pris ; et la fin du formulaire — les indications sous
+    les champs, les messages d'erreur — se lit alors dans la langue choisie,
+    c'est-à-dire là où elle sert le plus.
+  */
+  const locale = usePreferences((state) => state.locale)
+  const setPreference = usePreferences((state) => state.set)
+
   /**
    * Entrer dans la partie sans compte.
    *
@@ -165,6 +217,7 @@ function AuthForm() {
             username: username.trim(),
             password,
             email: email.trim() || undefined,
+            locale,
           }),
         })
         const data = await response.json()
@@ -196,7 +249,11 @@ function AuthForm() {
           return
         }
 
-        toast.success(`Content de te revoir, ${data.user.username}.`)
+        // La langue du compte reprend la main sur celle de l'appareil : on se
+        // connecte d'ordinaire depuis un navigateur qui n'a rien enregistré,
+        // et c'est précisément le cas où le compte a quelque chose à dire.
+        if (data.user.locale) setPreference('locale', data.user.locale)
+        toast.success(t('auth.welcomeBack', { pseudo: data.user.username }))
         // Même destination que ci-dessus, pour la même raison : on arrive à
         // l'accueil, là où se trouve ce qu'on a à faire.
         router.push(destination)
@@ -207,7 +264,7 @@ function AuthForm() {
         setBusy(false)
       }
     },
-    [mode, username, password, email, destination, router, t],
+    [mode, username, password, email, locale, setPreference, destination, router, t],
   )
 
   /*
@@ -314,8 +371,15 @@ function AuthForm() {
               La page s'ouvre donc sur sa phrase, qui est ce qu'on est venu
               lire. `LogoMark` reste utilisé par l'en-tête, où il a un sens :
               y revenir d'un clic. */}
-          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-            {t(mode === 'signin' ? 'auth.signInTitle' : 'auth.signUpTitle')}
+          <h1
+            className={clsx(
+              'font-display font-bold tracking-tight',
+              // Plus grand à l'inscription : c'est le seul écran où l'on
+              // présente la marque à quelqu'un qui ne la connaît pas encore.
+              mode === 'signin' ? 'text-2xl sm:text-3xl' : 'text-[28px] sm:text-4xl',
+            )}
+          >
+            {mode === 'signin' ? t('auth.signInTitle') : marque(t('auth.signUpTitle'))}
           </h1>
           <p className="mt-1.5 text-sm text-muted">
             {t(mode === 'signin' ? 'auth.signInBlurb' : 'auth.signUpBlurb')}
@@ -368,6 +432,19 @@ function AuthForm() {
                   {t('auth.forgotPassword')}
                 </Link>
               </p>
+            )}
+
+            {mode === 'signup' && (
+              <div className="w-full">
+                <span className="mb-1.5 block text-sm font-medium">{t('auth.language')}</span>
+                <ChoixDeLangue
+                  id="langue"
+                  label={t('auth.language')}
+                  valeur={locale}
+                  onChange={(code) => setPreference('locale', code)}
+                />
+                <p className="mt-1.5 text-xs text-faint">{t('auth.languageHint')}</p>
+              </div>
             )}
 
             {mode === 'signup' && (
