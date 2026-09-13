@@ -6149,8 +6149,12 @@ export const fr = {
       'Sans destinataire, le message s’affiche à tout le monde. Avec un pseudo, il n’est vu que par cette personne.',
     announcePlaceholder: 'Le message, tel qu’il sera lu…',
     announceTarget: 'Destinataire',
-    announceTargetHint: 'Laisse vide pour t’adresser à tout le monde.',
+    announceTargetHint:
+      'Tape deux lettres pour chercher. Laisse vide pour t’adresser à tout le monde.',
     announceEveryone: 'Tout le monde',
+    announceNoMatch: 'Aucun compte ne commence ainsi.',
+    announceDisabled: 'désactivé',
+    halfMovesGames: '{n} parties',
     announceDays: 'Durée d’affichage, en jours',
     announceDaysHint: '0 pour l’afficher jusqu’à ce que tu le retires.',
     announceToneInfo: 'Information',
