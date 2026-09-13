@@ -22,6 +22,7 @@ import { Chess } from 'chess.js'
 import type { Color, Square } from 'chess.js'
 import { Check, Flame, RotateCcw, Timer, X } from 'lucide-react'
 import clsx from 'clsx'
+import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, Card, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { playMoveFor, playSound } from '@/lib/sound.ts'
@@ -35,24 +36,29 @@ interface Puzzle {
 
 type Mode = '3min' | '5min' | 'survie'
 
-const MODES: Array<{ id: Mode; label: string; seconds: number | null; hint: string }> = [
+const MODES: Array<{
+  id: Mode
+  labelKey: TranslationKey
+  seconds: number | null
+  hintKey: TranslationKey
+}> = [
   {
     id: '3min',
-    label: '3 minutes',
+    labelKey: 'rush.threeMinutes',
     seconds: 180,
-    hint: 'La plus tendue. On ne réfléchit plus, on reconnaît.',
+    hintKey: 'rush.threeMinutesHint',
   },
   {
     id: '5min',
-    label: '5 minutes',
+    labelKey: 'rush.fiveMinutes',
     seconds: 300,
-    hint: 'De quoi trouver son rythme avant que ça morde.',
+    hintKey: 'rush.fiveMinutesHint',
   },
   {
     id: 'survie',
-    label: 'Survie',
+    labelKey: 'rush.survival',
     seconds: null,
-    hint: 'Pas de chronomètre. Trois erreurs, et c’est fini.',
+    hintKey: 'rush.survivalHint',
   },
 ]
 
@@ -65,6 +71,7 @@ const SERIES = 40
 const BEST_KEY = 'coupparfait.rushBest'
 
 export default function RushPage() {
+  const t = useT()
   const [mode, setMode] = useState<Mode>('3min')
   const [phase, setPhase] = useState<'choix' | 'chargement' | 'jeu' | 'fin'>('choix')
 
@@ -268,9 +275,7 @@ export default function RushPage() {
   if (phase === 'choix' || phase === 'chargement') {
     return (
       <div className="page-etroite">
-        <SectionTitle hint="Enchaîne les puzzles, de plus en plus durs. Trois erreurs et la manche s’arrête.">
-          Manche chronométrée
-        </SectionTitle>
+        <SectionTitle hint={t('rush.hint')}>{t('rush.title')}</SectionTitle>
 
         <div className="mt-4 space-y-2">
           {MODES.map((entry) => (
@@ -285,8 +290,8 @@ export default function RushPage() {
                   : 'border-line hover:bg-surface-hover',
               )}
             >
-              <span className="block text-sm font-semibold">{entry.label}</span>
-              <span className="mt-0.5 block text-[14px] text-muted">{entry.hint}</span>
+              <span className="block text-sm font-semibold">{t(entry.labelKey)}</span>
+              <span className="mt-0.5 block text-[14px] text-muted">{t(entry.hintKey)}</span>
             </button>
           ))}
         </div>
@@ -294,7 +299,8 @@ export default function RushPage() {
         {best > 0 && (
           <p className="mt-3 flex items-center gap-1.5 text-[14px] text-muted">
             <Flame size={14} className="text-[var(--q-inaccuracy)]" aria-hidden />
-            Ton record : <strong className="font-semibold text-ink">{best}</strong> puzzles.
+            {t('rush.recordIs')} <strong className="font-semibold text-ink">{best}</strong>{' '}
+            {t('rush.puzzlesWord')}
           </p>
         )}
 
@@ -307,14 +313,13 @@ export default function RushPage() {
           disabled={phase === 'chargement'}
           icon={phase === 'chargement' ? <Spinner size={16} /> : <Timer size={16} />}
         >
-          {phase === 'chargement' ? 'Préparation…' : 'Commencer'}
+          {t(phase === 'chargement' ? 'rush.preparing' : 'rush.start')}
         </Button>
 
         <p className="mt-4 text-center text-xs text-faint">
-          Les puzzles ordinaires apprennent à trouver ; celui-ci apprend à reconnaître. C’est ce qui
-          manque le plus en partie rapide.{' '}
+          {t('rush.footer')}{' '}
           <Link href="/puzzles" className="text-accent hover:underline">
-            Revenir aux puzzles
+            {t('rush.backToPuzzles')}
           </Link>
         </p>
       </div>
@@ -328,15 +333,15 @@ export default function RushPage() {
         <Card glow className="w-full p-6 text-center">
           <p className="font-display text-5xl font-bold tabular-nums">{solved}</p>
           <p className="mt-1 text-sm text-muted">
-            puzzle{solved > 1 ? 's' : ''} résolu{solved > 1 ? 's' : ''}
+            {t(solved > 1 ? 'rush.solvedCount' : 'rush.solvedOne')}
           </p>
           {record ? (
             <p className="mt-3 flex items-center justify-center gap-1.5 text-sm font-semibold text-[var(--q-best)]">
               <Flame size={15} aria-hidden />
-              Nouveau record
+              {t('rush.newRecord')}
             </p>
           ) : (
-            <p className="mt-3 text-[14px] text-faint">Ton record reste à {best}.</p>
+            <p className="mt-3 text-[14px] text-faint">{t('rush.recordStays', { n: best })}</p>
           )}
           <div className="mt-5 space-y-1.5">
             <Button
@@ -345,10 +350,10 @@ export default function RushPage() {
               icon={<RotateCcw size={15} />}
               onClick={() => void start()}
             >
-              Rejouer
+              {t('rush.playAgain')}
             </Button>
             <Button variant="ghost" fullWidth onClick={() => setPhase('choix')}>
-              Changer de mode
+              {t('rush.changeMode')}
             </Button>
           </div>
         </Card>
@@ -368,10 +373,10 @@ export default function RushPage() {
           erreurs. Une ligne suffit : ce qu'on fait, dans quel mode, et le
           bouton pour s'arrêter. */}
       <div className="mb-2 flex items-center gap-2">
-        <h1 className="font-display text-base font-bold tracking-tight">Manche chronométrée</h1>
+        <h1 className="font-display text-base font-bold tracking-tight">{t('rush.title')}</h1>
         {modeCourant && (
           <span className="rounded-full bg-surface px-2 py-0.5 text-[12px] font-medium text-muted">
-            {modeCourant.label}
+            {t(modeCourant.labelKey)}
           </span>
         )}
         <button
@@ -379,14 +384,14 @@ export default function RushPage() {
           onClick={() => setPhase('fin')}
           className="ml-auto rounded-[var(--radius-sm)] px-2 py-1 text-[12px] font-medium text-muted transition-colors hover:bg-surface-hover hover:text-ink"
         >
-          Arrêter la manche
+          {t('rush.stopRun')}
         </button>
       </div>
 
       {/* ── Compteurs ────────────────────────────────────────────── */}
       <div className="mb-2 flex items-center gap-3">
         <span className="font-display text-2xl font-bold tabular-nums">{solved}</span>
-        <span className="text-[14px] text-muted">résolus</span>
+        <span className="text-[14px] text-muted">{t('rush.solvedWord')}</span>
 
         <span
           className="ml-auto flex items-center gap-1"

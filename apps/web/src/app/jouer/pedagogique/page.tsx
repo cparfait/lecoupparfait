@@ -29,8 +29,12 @@ import {
   themesPour,
   type SeancesFaites,
 } from '@/lib/game/seance.ts'
+import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
+import { usePreferences } from '@/lib/store/preferences.ts'
 
 export default function SeancePage() {
+  const t = useT()
+  const contenu = usePreferences((state) => localeDuContenu(state.locale))
   const [palierId, setPalierId] = useState<string | null>(null)
   const [themeId, setThemeId] = useState<string | null>(null)
   const [commente, setCommente] = useState(true)
@@ -70,17 +74,14 @@ export default function SeancePage() {
 
   return (
     <div className="page">
-      <TitreDePage
-        retour={{ href: '/jouer', label: 'Jouer' }}
-        intro="Une partie contre l’ordinateur, avec un adversaire calibré sur ton niveau, un thème annoncé avant de commencer, et un bilan qui dit où ce thème est apparu dans ta partie."
-      >
-        Séance pédagogique
+      <TitreDePage retour={{ href: '/jouer', label: 'Jouer' }} intro={t('session.intro')}>
+        {t('session.title')}
       </TitreDePage>
 
       {/* ── 1. Le palier ────────────────────────────────────────────────── */}
       <Card className="overflow-hidden">
         <EnTeteDeCarte
-          titre="À quel niveau"
+          titre={t('session.whichLevel')}
           icone={<Target size={14} aria-hidden />}
           teinte="var(--rub-jouer)"
           fin={adversaire ? `${adversaire.elo} Elo · niveau ${adversaire.level}` : undefined}
@@ -114,10 +115,9 @@ export default function SeancePage() {
 
           {palier && adversaire && (
             <p className="mt-3 text-[13px] leading-relaxed text-muted">
-              Ton adversaire sera <strong className="text-ink">{adversaire.name.fr}</strong>,
-              annoncé à {adversaire.elo} Elo — c’est-à-dire à peu près ton niveau. Une séance n’est
-              pas un exercice de force : si l’adversaire est trop fort, le thème n’a jamais le temps
-              d’apparaître.
+              {t('session.opponentBefore')}{' '}
+              <strong className="text-ink">{adversaire.name[contenu]}</strong>
+              {t('session.opponentAfter', { elo: adversaire.elo })}
             </p>
           )}
         </div>
@@ -126,7 +126,7 @@ export default function SeancePage() {
       {/* ── 2. Le thème ─────────────────────────────────────────────────── */}
       <Card className="mt-4 overflow-hidden">
         <EnTeteDeCarte
-          titre="Sur quel thème"
+          titre={t('session.whichTheme')}
           icone={<GraduationCap size={14} aria-hidden />}
           teinte="var(--rub-apprendre)"
           fin={`${themes.length} à ce palier`}
@@ -178,7 +178,7 @@ export default function SeancePage() {
             className="lien mt-3 inline-flex items-center gap-1.5"
           >
             <Shuffle size={13} aria-hidden />
-            Choisis pour moi
+            {t('session.pickForMe')}
           </button>
         </div>
       </Card>
@@ -186,7 +186,7 @@ export default function SeancePage() {
       {/* ── 3. Lancer ───────────────────────────────────────────────────── */}
       <Card className="mt-4 overflow-hidden">
         <EnTeteDeCarte
-          titre="Avant de commencer"
+          titre={t('session.beforeStarting')}
           icone={<MessageSquare size={14} aria-hidden />}
           teinte="var(--rub-analyser)"
         />
@@ -195,8 +195,8 @@ export default function SeancePage() {
             <Toggle
               checked={commente}
               onChange={setCommente}
-              label="Commenter chaque coup"
-              description="Après chacun de tes coups, les trois meilleures options avec la raison de chacune, et le coup proposé fléché. C’est ce qui fait d’une partie une séance — mais elle reste jouable sans."
+              label={t('session.commentEachMove')}
+              description={t('session.commentEachMoveHint')}
             />
           </div>
 
@@ -204,12 +204,11 @@ export default function SeancePage() {
               donne une raison de tenir le thème pendant quarante coups. */}
           {theme && (
             <div className="mt-4 rounded-[var(--radius)] border border-line bg-bg-deep p-4">
-              <p className="text-[13px] font-semibold text-faint">Ce que tu regardes</p>
+              <p className="text-[13px] font-semibold text-faint">{t('session.whatYouWatch')}</p>
               <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{theme.aRegarder}</p>
-              <p className="mt-3 text-[13px] font-semibold text-faint">À la fin</p>
+              <p className="mt-3 text-[13px] font-semibold text-faint">{t('session.atTheEnd')}</p>
               <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
-                Le bilan comptera les positions où « {theme.nom.toLowerCase()} » est apparu dans ta
-                partie — pour toi et contre toi — et dira à quels coups.
+                {t('session.debriefPromise', { theme: theme.nom.toLowerCase() })}
               </p>
             </div>
           )}
@@ -222,11 +221,11 @@ export default function SeancePage() {
                 size="lg"
                 icon={<Play size={16} />}
               >
-                Commencer la séance
+                {t('session.start')}
               </ButtonLink>
             ) : (
               <Button variant="primary" size="lg" icon={<Play size={16} />} disabled>
-                Choisis un thème
+                {t('session.pickTheme')}
               </Button>
             )}
             <ButtonLink href="/apprendre/palier" size="lg" icon={<Crown size={15} />}>

@@ -24,6 +24,7 @@ import { Chess } from 'chess.js'
 import type { Square } from 'chess.js'
 import { Clock, Flag, Mailbox, Plus } from 'lucide-react'
 import clsx from 'clsx'
+import { useT } from '@/lib/i18n/index.tsx'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, Card, EmptyState, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
@@ -43,16 +44,23 @@ interface Game {
 }
 
 /** Reste avant de perdre par dépassement, dit en clair. */
-function remaining(deadline: string | null): string {
+/*
+  Le traducteur passe en argument.
+
+  La fonction est pure et vit hors de tout composant : elle ne peut pas
+  appeler `useT()` elle-même, comme `libelleDeLaCible` de la page du palier.
+*/
+function remaining(deadline: string | null, t: ReturnType<typeof useT>): string {
   if (!deadline) return ''
   const ms = Date.parse(deadline) - Date.now()
-  if (ms <= 0) return 'délai dépassé'
+  if (ms <= 0) return t('correspondence.overdue')
   const hours = Math.round(ms / 3600_000)
-  if (hours < 24) return `${hours} h restantes`
+  if (hours < 24) return t('correspondence.hoursLeft', { n: hours })
   return `${Math.round(hours / 24)} j restants`
 }
 
 export default function CorrespondencePage() {
+  const t = useT()
   const [games, setGames] = useState<Game[] | null | undefined>(undefined)
   const [current, setCurrent] = useState<string | null>(null)
 
@@ -87,12 +95,12 @@ export default function CorrespondencePage() {
       })
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
-        toast.error(data.error ?? 'Coup refusé.')
+        toast.error(data.error ?? t('correspondence.moveRefused'))
         return
       }
       await refresh()
     },
-    [game, refresh],
+    [game, refresh, t],
   )
 
   if (games === undefined) {
@@ -108,11 +116,11 @@ export default function CorrespondencePage() {
       <div className="page-etroite">
         <EmptyState
           icon={<Mailbox size={28} />}
-          title="La correspondance demande un compte"
-          description="Une partie qui dure des semaines doit te retrouver d’une session à l’autre."
+          title={t('correspondence.needsAccount')}
+          description={t('correspondence.needsAccountHint')}
           action={
             <Link href="/connexion">
-              <Button variant="primary">Se connecter</Button>
+              <Button variant="primary">{t('nav.signIn')}</Button>
             </Link>
           }
         />
@@ -124,9 +132,7 @@ export default function CorrespondencePage() {
 
   return (
     <div className="page">
-      <SectionTitle hint="Un coup quand tu peux. Personne n’attend devant son écran.">
-        Correspondance
-      </SectionTitle>
+      <SectionTitle hint={t('correspondence.hint')}>{t('correspondence.title')}</SectionTitle>
 
       <div className="grid gap-3 lg:grid-cols-[280px_minmax(0,1fr)]">
         {/* ── Parties et nouvelle partie ────────────────────────────── */}
@@ -134,7 +140,7 @@ export default function CorrespondencePage() {
           <Card className="p-2">
             {games.length === 0 ? (
               <p className="px-1 py-2 text-[14px] leading-relaxed text-faint">
-                Aucune partie. Lance-en une avec quelqu’un de ton carnet.
+                {t('correspondence.noGame')}
               </p>
             ) : (
               <div className="space-y-0.5">
@@ -165,10 +171,12 @@ export default function CorrespondencePage() {
                       </span>
                       <span className="block text-[12px] text-faint">
                         {entry.result !== '*'
-                          ? `terminée · ${entry.result}`
+                          ? t('correspondence.finished', { resultat: entry.result })
                           : entry.yourTurn
-                            ? `à toi · ${remaining(entry.deadline)}`
-                            : 'en attente'}
+                            ? t('correspondence.yourTurnShort', {
+                                temps: remaining(entry.deadline, t),
+                              })
+                            : t('correspondence.waitingShort')}
                       </span>
                     </span>
                   </button>
@@ -186,16 +194,18 @@ export default function CorrespondencePage() {
             d'une partie en direct. Les deux se choisissent donc au même endroit.
           */}
           <Card className="p-3">
-            <p className="mb-2 text-[12px] font-semibold text-faint">Nouvelle partie</p>
+            <p className="mb-2 text-[12px] font-semibold text-faint">
+              {t('correspondence.newGame')}
+            </p>
             <p className="mb-2 text-[12px] leading-relaxed text-muted">
-              Elle se lance depuis l’écran de partie, en choisissant une cadence en jours.
+              {t('correspondence.newGameHint')}
             </p>
             <Link
               href="/jouer/ami"
               className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-accent hover:underline"
             >
               <Plus size={13} aria-hidden />
-              Jouer contre quelqu’un
+              {t('correspondence.playSomeone')}
             </Link>
           </Card>
         </div>
@@ -218,7 +228,9 @@ export default function CorrespondencePage() {
                     )}
                   >
                     <Clock size={13} aria-hidden />
-                    {game.yourTurn ? `À toi — ${remaining(game.deadline)}` : 'En attente'}
+                    {game.yourTurn
+                      ? t('correspondence.yourTurnIn', { temps: remaining(game.deadline, t) })
+                      : t('correspondence.waiting')}
                   </span>
                 )}
               </div>
@@ -244,7 +256,7 @@ export default function CorrespondencePage() {
                     variant="ghost"
                     icon={<Flag size={14} />}
                     onClick={async () => {
-                      if (!confirm('Abandonner cette partie ?')) return
+                      if (!confirm(t('correspondence.resignConfirm'))) return
                       await fetch('/api/correspondance', {
                         method: 'POST',
                         headers: { 'content-type': 'application/json' },
@@ -260,9 +272,7 @@ export default function CorrespondencePage() {
             </>
           ) : (
             <Card className="grid min-h-[300px] place-items-center p-6 text-center">
-              <p className="text-sm text-muted">
-                Choisis une partie à gauche, ou lance-en une avec quelqu’un de ton carnet.
-              </p>
+              <p className="text-sm text-muted">{t('correspondence.pickAGame')}</p>
             </Card>
           )}
         </div>
