@@ -90,8 +90,12 @@ export default function PrincipesPage() {
           fin={
             <BoutonEcouter
               quoi={t('principles.theMemo')}
-              texte={`${t('principles.beforeEveryMove')} ${MEMO_AVANT_COUP.map(
-                (entree, rang) => `${rang + 1}. ${entree.question} ${entree.comment}`,
+              texte={`${t('principles.beforeEveryMove')} ${MEMO_AVANT_COUP.map((entree, rang) =>
+                t('principles.spokenMemo', {
+                  rang: rang + 1,
+                  question: t(entree.question),
+                  comment: t(entree.comment),
+                }),
               ).join(' ')}`}
             />
           }
@@ -104,7 +108,7 @@ export default function PrincipesPage() {
           <ol className="space-y-2">
             {MEMO_AVANT_COUP.map((entree, rang) => (
               <li
-                key={entree.question}
+                key={entree.id}
                 className="flex items-start gap-3 rounded-[var(--radius-sm)] border border-line bg-bg-elev p-3.5"
               >
                 <span
@@ -119,10 +123,10 @@ export default function PrincipesPage() {
                 </span>
                 <span className="min-w-0">
                   <span className="block text-[15px] font-semibold leading-snug">
-                    {entree.question}
+                    {t(entree.question)}
                   </span>
                   <span className="mt-1 block text-[14px] leading-relaxed text-muted">
-                    {entree.comment}
+                    {t(entree.comment)}
                   </span>
                 </span>
               </li>
@@ -172,19 +176,25 @@ export default function PrincipesPage() {
 
         <div className="grid gap-2 sm:grid-cols-2">
           {visibles.map((principe) => (
-            <Card key={principe.regle} className="p-4">
+            <Card key={principe.id} className="p-4">
               <div className="flex items-start gap-2">
                 <p className="min-w-0 flex-1 text-[15px] font-semibold leading-snug">
-                  {principe.regle}
+                  {t(principe.regle)}
                 </p>
                 <BoutonEcouter
                   quoi="ce principe"
-                  texte={`${principe.regle} ${principe.pourquoi} Sauf : ${principe.sauf}`}
+                  texte={t('principles.spokenPrinciple', {
+                    regle: t(principe.regle),
+                    pourquoi: t(principe.pourquoi),
+                    sauf: t(principe.sauf),
+                  })}
                   className="-mr-1 -mt-1"
                 />
               </div>
 
-              {famille === 'toutes' && <Chip className="mt-2">{principe.famille}</Chip>}
+              {famille === 'toutes' && (
+                <Chip className="mt-2">{t(CLE_FAMILLE[principe.famille])}</Chip>
+              )}
 
               {/* Les noms d'ouverture cités deviennent des liens vers leur
                   fiche. C'est surtout vrai des exceptions : « sauf les
@@ -193,7 +203,7 @@ export default function PrincipesPage() {
                   c'est précisément la moitié de l'information qu'on vient
                   chercher ici. */}
               <TexteAvecOuvertures
-                texte={principe.pourquoi}
+                texte={t(principe.pourquoi)}
                 className="mt-2 text-[14px] leading-relaxed text-muted"
               />
 
@@ -207,7 +217,7 @@ export default function PrincipesPage() {
                 )}
               >
                 <span className="font-semibold text-ink">{t('bits.except')} </span>
-                <TexteAvecOuvertures as="span" texte={principe.sauf} />
+                <TexteAvecOuvertures as="span" texte={t(principe.sauf)} />
               </p>
             </Card>
           ))}

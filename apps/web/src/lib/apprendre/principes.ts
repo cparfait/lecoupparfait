@@ -24,12 +24,22 @@
  * développe pendant que l'adversaire mate.
  */
 
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
+
 /** Une question du mémo, avec ce qu'elle évite concrètement. */
 export interface QuestionMemo {
+  /**
+   * Identifiant stable, qui nomme la clé de dictionnaire.
+   *
+   * Dérivé de l'énoncé et non du rang : sans lui, insérer une question au milieu
+   * du mémo renommerait silencieusement toutes les suivantes, et chaque
+   * traduction se retrouverait sur la mauvaise phrase.
+   */
+  id: string
   /** La question, formulée à la deuxième personne et tenant sur une ligne. */
-  question: string
+  question: TranslationKey
   /** Ce qu'on regarde pour y répondre. */
-  comment: string
+  comment: TranslationKey
 }
 
 /**
@@ -42,24 +52,24 @@ export interface QuestionMemo {
  */
 export const MEMO_AVANT_COUP: QuestionMemo[] = [
   {
-    question: 'Qu’est-ce que son dernier coup a changé ?',
-    comment:
-      'Une case libérée, une ligne ouverte, une pièce qui attaque maintenant ce qu’elle n’attaquait pas. Un coup sert toujours à quelque chose — même mauvais.',
+    id: 'qu-est-ce-que',
+    question: 'memo.qu-est-ce-que.question',
+    comment: 'memo.qu-est-ce-que.comment',
   },
   {
-    question: 'Qu’est-ce qu’il attaque ?',
-    comment:
-      'Fais le tour de tes pièces : lesquelles sont attaquées, lesquelles sont défendues, et par quoi. Une pièce attaquée deux fois et défendue une fois est perdue.',
+    id: 'qu-est-ce-qu',
+    question: 'memo.qu-est-ce-qu.question',
+    comment: 'memo.qu-est-ce-qu.comment',
   },
   {
-    question: 'Qu’est-ce que mon coup laisse en prise ?',
-    comment:
-      'La pièce que tu déplaces ne défend plus ce qu’elle défendait, et la case où tu la poses peut être attaquée. C’est l’erreur qui coûte le plus de points sous 1 200.',
+    id: 'qu-est-ce-que-mon',
+    question: 'memo.qu-est-ce-que-mon.question',
+    comment: 'memo.qu-est-ce-que-mon.comment',
   },
   {
-    question: 'S’il joue le coup le plus méchant, ça tient ?',
-    comment:
-      'Un seul coup à examiner : le plus agressif qu’il ait. Échec, prise, menace de mat. Si ça tient contre celui-là, ça tient.',
+    id: 's-il-joue-le',
+    question: 'memo.s-il-joue-le.question',
+    comment: 'memo.s-il-joue-le.comment',
   },
 ]
 
@@ -70,11 +80,13 @@ export const MEMO_AVANT_COUP: QuestionMemo[] = [
 export type FamillePrincipe = 'Ouverture' | 'Milieu de partie' | 'Finale' | 'Jeu positionnel'
 
 export interface Principe {
+  /** Identifiant stable, qui nomme la clé. Voir `QuestionMemo`. */
+  id: string
   famille: FamillePrincipe
   /** L'énoncé, à l'impératif : c'est une conduite, pas une observation. */
-  regle: string
+  regle: TranslationKey
   /** Pourquoi ça marche. Une phrase, concrète. */
-  pourquoi: string
+  pourquoi: TranslationKey
   /**
    * Quand ça ne marche pas.
    *
@@ -83,281 +95,282 @@ export interface Principe {
    * exactement ce qui arrive à « développe avant d'attaquer » quand on est en
    * train d'être maté.
    */
-  sauf: string
+  sauf: TranslationKey
 }
 
 export const PRINCIPES: Principe[] = [
   // ── Ouverture ─────────────────────────────────────────────────────────────
   {
+    id: 'occupe-le-centre-avec',
     famille: 'Ouverture',
-    regle: 'Occupe le centre avec un pion.',
-    pourquoi:
-      'Un pion au centre prend de l’espace, ouvre des lignes à tes pièces et leur donne deux fois plus de cases qu’en bord d’échiquier.',
-    sauf: 'Les ouvertures qui le contrôlent de loin — est-indienne, sicilienne — le rendent volontairement pour le frapper ensuite.',
+    regle: 'principesListe.occupe-le-centre-avec.regle',
+    pourquoi: 'principesListe.occupe-le-centre-avec.pourquoi',
+    sauf: 'principesListe.occupe-le-centre-avec.sauf',
   },
   {
+    id: 'sors-les-cavaliers-avant',
     famille: 'Ouverture',
-    regle: 'Sors les cavaliers avant les fous.',
-    pourquoi:
-      'Un cavalier n’a qu’une bonne case dans la plupart des ouvertures, un fou en a trois ou quatre. On joue d’abord ce qu’on sait, on garde le choix pour après.',
-    sauf: 'Les systèmes où le fou sort en premier sont précisément construits pour cela — Londres, fianchetto.',
+    regle: 'principesListe.sors-les-cavaliers-avant.regle',
+    pourquoi: 'principesListe.sors-les-cavaliers-avant.pourquoi',
+    sauf: 'principesListe.sors-les-cavaliers-avant.sauf',
   },
   {
+    id: 'ne-bouge-pas-deux',
     famille: 'Ouverture',
-    regle: 'Ne bouge pas deux fois la même pièce sans raison.',
-    pourquoi:
-      'Chaque coup perdu est un coup offert. Développer huit pièces en huit coups, c’est arriver au milieu de partie avec une armée entière.',
-    sauf: 'Si un coup de l’adversaire attaque cette pièce et que la reculer est le moindre mal, il faut la reculer.',
+    regle: 'principesListe.ne-bouge-pas-deux.regle',
+    pourquoi: 'principesListe.ne-bouge-pas-deux.pourquoi',
+    sauf: 'principesListe.ne-bouge-pas-deux.sauf',
   },
   {
+    id: 'roque-tot-et-du',
     famille: 'Ouverture',
-    regle: 'Roque tôt, et du bon côté.',
-    pourquoi:
-      'Le roi au centre est la cible de toutes les ouvertures de lignes. Roquer met le roi à l’abri et la tour au travail d’un seul coup.',
-    sauf: 'Quand l’adversaire a déjà roqué à l’opposé et que la course aux pions est lancée, le roi peut rester au centre pour ne pas offrir de cible.',
+    regle: 'principesListe.roque-tot-et-du.regle',
+    pourquoi: 'principesListe.roque-tot-et-du.pourquoi',
+    sauf: 'principesListe.roque-tot-et-du.sauf',
   },
   {
+    id: 'ne-sors-pas-la',
     famille: 'Ouverture',
-    regle: 'Ne sors pas la dame trop tôt.',
-    pourquoi:
-      'Elle vaut neuf points : tout ce qui l’attaque gagne un temps. Une dame sortie au troisième coup passe les dix suivants à fuir.',
-    sauf: 'Quelques ouvertures la sortent immédiatement et l’assument — la scandinave, par exemple, où elle s’installe en a5 avec un plan.',
+    regle: 'principesListe.ne-sors-pas-la.regle',
+    pourquoi: 'principesListe.ne-sors-pas-la.pourquoi',
+    sauf: 'principesListe.ne-sors-pas-la.sauf',
   },
   {
+    id: 'ne-pousse-pas-les',
     famille: 'Ouverture',
-    regle: 'Ne pousse pas les pions de l’aile avant d’avoir développé.',
-    pourquoi:
-      'Un pion qui avance ne revient pas, et il laisse derrière lui des cases que personne ne défendra plus.',
-    sauf: 'Un gain de temps ou d’espace clair — h3 pour empêcher un clouage, a4 pour bloquer l’expansion adverse — vaut le coup.',
+    regle: 'principesListe.ne-pousse-pas-les.regle',
+    pourquoi: 'principesListe.ne-pousse-pas-les.pourquoi',
+    sauf: 'principesListe.ne-pousse-pas-les.sauf',
   },
   {
+    id: 'connecte-tes-tours',
     famille: 'Ouverture',
-    regle: 'Connecte tes tours.',
-    pourquoi:
-      'Quand il n’y a plus rien entre elles, le développement est fini : c’est le signal qu’on peut commencer à jouer pour gagner.',
-    sauf: 'Rien, ou presque. C’est le principe le plus fiable de la liste.',
+    regle: 'principesListe.connecte-tes-tours.regle',
+    pourquoi: 'principesListe.connecte-tes-tours.pourquoi',
+    sauf: 'principesListe.connecte-tes-tours.sauf',
   },
   {
+    id: 'ne-cherche-pas-le',
     famille: 'Ouverture',
-    regle: 'Ne cherche pas le mat en quatre coups.',
-    pourquoi:
-      'Le mat du berger et ses cousins perdent contre n’importe qui les connaît, et on y laisse trois temps de développement.',
-    sauf: 'Il faut les connaître pour les parer : c’est l’objet du chapitre « Les mats de l’ouverture ».',
+    regle: 'principesListe.ne-cherche-pas-le.regle',
+    pourquoi: 'principesListe.ne-cherche-pas-le.pourquoi',
+    sauf: 'principesListe.ne-cherche-pas-le.sauf',
   },
 
   // ── Milieu de partie ──────────────────────────────────────────────────────
   {
+    id: 'ameliore-ta-pire-piece',
     famille: 'Milieu de partie',
-    regle: 'Améliore ta pire pièce.',
-    pourquoi:
-      'Quand aucun plan ne s’impose, la question « laquelle de mes pièces travaille le moins ? » en produit un à tous les coups.',
-    sauf: 'Si une tactique est disponible, elle passe devant : un plan ne rattrape pas une pièce gagnée laissée de côté.',
+    regle: 'principesListe.ameliore-ta-pire-piece.regle',
+    pourquoi: 'principesListe.ameliore-ta-pire-piece.pourquoi',
+    sauf: 'principesListe.ameliore-ta-pire-piece.sauf',
   },
   {
+    id: 'les-tours-vont-sur',
     famille: 'Milieu de partie',
-    regle: 'Les tours vont sur les colonnes ouvertes.',
-    pourquoi:
-      'Une tour ne vaut ses cinq points que si elle voit loin. Sur une colonne fermée, elle regarde son propre pion.',
-    sauf: 'Une colonne semi-ouverte où l’adversaire a un pion faible vaut mieux qu’une colonne ouverte qui ne mène nulle part.',
+    regle: 'principesListe.les-tours-vont-sur.regle',
+    pourquoi: 'principesListe.les-tours-vont-sur.pourquoi',
+    sauf: 'principesListe.les-tours-vont-sur.sauf',
   },
   {
+    id: 'attaque-du-cote-ou',
     famille: 'Milieu de partie',
-    regle: 'Attaque du côté où tu as plus d’espace.',
-    pourquoi:
-      'L’espace se compte en pions avancés. Attaquer là où l’on est à l’étroit, c’est attaquer avec deux pièces contre quatre.',
-    sauf: 'Un roi adverse exposé justifie d’attaquer n’importe où, même à un contre trois.',
+    regle: 'principesListe.attaque-du-cote-ou.regle',
+    pourquoi: 'principesListe.attaque-du-cote-ou.pourquoi',
+    sauf: 'principesListe.attaque-du-cote-ou.sauf',
   },
   {
+    id: 'avant-d-attaquer-sur',
     famille: 'Milieu de partie',
-    regle: 'Avant d’attaquer sur une aile, assure le centre.',
-    pourquoi:
-      'Une attaque d’aile se réfute par un coup au centre : les lignes s’ouvrent là où ton roi se trouve, et l’attaque n’a plus le temps d’aboutir.',
-    sauf: 'Avec les rois roqués à l’opposé, la course est lancée et compter les temps remplace le principe.',
+    regle: 'principesListe.avant-d-attaquer-sur.regle',
+    pourquoi: 'principesListe.avant-d-attaquer-sur.pourquoi',
+    sauf: 'principesListe.avant-d-attaquer-sur.sauf',
   },
   {
+    id: 'n-echange-pas-sans',
     famille: 'Milieu de partie',
-    regle: 'N’échange pas sans savoir ce que l’échange te laisse.',
-    pourquoi:
-      'Chaque échange simplifie, et la simplification favorise celui qui a l’avantage matériel. Si c’est l’autre, elle te coûte.',
-    sauf: 'Échanger pour se débarrasser de la pièce qui attaque ton roi est presque toujours bon, même en étant moins bien.',
+    regle: 'principesListe.n-echange-pas-sans.regle',
+    pourquoi: 'principesListe.n-echange-pas-sans.pourquoi',
+    sauf: 'principesListe.n-echange-pas-sans.sauf',
   },
   {
+    id: 'deux-faiblesses-valent-mieux',
     famille: 'Milieu de partie',
-    regle: 'Deux faiblesses valent mieux qu’une.',
-    pourquoi:
-      'Une position ne tombe presque jamais sur un seul point faible : on en crée un second à l’autre bout, et la défense ne peut plus couvrir les deux.',
-    sauf: 'Si la première faiblesse suffit à gagner du matériel tout de suite, ne cherche pas la seconde.',
+    regle: 'principesListe.deux-faiblesses-valent-mieux.regle',
+    pourquoi: 'principesListe.deux-faiblesses-valent-mieux.pourquoi',
+    sauf: 'principesListe.deux-faiblesses-valent-mieux.sauf',
   },
   {
+    id: 'regarde-le-coup-le',
     famille: 'Milieu de partie',
-    regle: 'Regarde le coup le plus méchant avant de jouer le tien.',
-    pourquoi:
-      'C’est la version courte du mémo. Un seul coup examiné — le plus agressif qu’il ait — écarte la quasi-totalité des gaffes.',
-    sauf: 'Rien. Celui-là ne souffre aucune exception.',
+    regle: 'principesListe.regarde-le-coup-le.regle',
+    pourquoi: 'principesListe.regarde-le-coup-le.pourquoi',
+    sauf: 'principesListe.regarde-le-coup-le.sauf',
   },
   {
+    id: 'quand-tu-as-gagne',
     famille: 'Milieu de partie',
-    regle: 'Quand tu as gagné du matériel, simplifie.',
-    pourquoi:
-      'Une pièce de plus sur un échiquier vide décide la partie ; la même pièce dans une position compliquée se perd en un coup.',
-    sauf: 'Ne simplifie pas vers une finale nulle par nature — fou de mauvaise couleur, pion a ou h isolé.',
+    regle: 'principesListe.quand-tu-as-gagne.regle',
+    pourquoi: 'principesListe.quand-tu-as-gagne.pourquoi',
+    sauf: 'principesListe.quand-tu-as-gagne.sauf',
   },
 
   // ── Finale ────────────────────────────────────────────────────────────────
   {
+    id: 'active-ton-roi',
     famille: 'Finale',
-    regle: 'Active ton roi.',
-    pourquoi:
-      'Sans dames, le roi devient une pièce forte et gratuite. Celui qui le garde au fond joue avec une pièce de moins.',
-    sauf: 'Tant qu’il reste des dames ou deux tours chacun, le roi reste une cible.',
+    regle: 'principesListe.active-ton-roi.regle',
+    pourquoi: 'principesListe.active-ton-roi.pourquoi',
+    sauf: 'principesListe.active-ton-roi.sauf',
   },
   {
+    id: 'la-tour-se-place',
     famille: 'Finale',
-    regle: 'La tour se place derrière le pion passé.',
-    pourquoi:
-      'Derrière, elle gagne de l’espace à mesure que le pion avance — qu’il soit à toi ou à lui. Devant, elle se fait pousser.',
-    sauf: 'Sur la septième rangée, une tour qui mange des pions fait souvent mieux que la règle.',
+    regle: 'principesListe.la-tour-se-place.regle',
+    pourquoi: 'principesListe.la-tour-se-place.pourquoi',
+    sauf: 'principesListe.la-tour-se-place.sauf',
   },
   {
+    id: 'cree-un-pion-passe',
     famille: 'Finale',
-    regle: 'Crée un pion passé du côté où tu as la majorité.',
-    pourquoi:
-      'Deux pions contre un produisent un pion passé par la force des choses. C’est le plan le plus mécanique de toutes les finales.',
-    sauf: 'Si ta majorité est du côté du roi adverse, elle ne produira qu’un pion passé qu’il arrêtera du pied.',
+    regle: 'principesListe.cree-un-pion-passe.regle',
+    pourquoi: 'principesListe.cree-un-pion-passe.pourquoi',
+    sauf: 'principesListe.cree-un-pion-passe.sauf',
   },
   {
+    id: 'prends-l-opposition',
     famille: 'Finale',
-    regle: 'Prends l’opposition.',
-    pourquoi:
-      'Dans les finales de rois et de pions, celui qui oblige l’autre à céder le passage gagne. L’opposition est la façon de le savoir à l’avance.',
-    sauf: 'Les positions à plusieurs pions se décident d’abord au calcul des temps ; l’opposition ne tranche que les cas simples.',
+    regle: 'principesListe.prends-l-opposition.regle',
+    pourquoi: 'principesListe.prends-l-opposition.pourquoi',
+    sauf: 'principesListe.prends-l-opposition.sauf',
   },
   {
+    id: 'compte-avant-de-courir',
     famille: 'Finale',
-    regle: 'Compte avant de courir.',
-    pourquoi:
-      'La règle du carré, ou deux colonnes de calcul : on sait en cinq secondes si le roi rattrape le pion. C’est plus fiable que n’importe quelle intuition.',
-    sauf: 'Les pions qui se gênent entre eux cassent le carré : il faut alors calculer pour de vrai.',
+    regle: 'principesListe.compte-avant-de-courir.regle',
+    pourquoi: 'principesListe.compte-avant-de-courir.pourquoi',
+    sauf: 'principesListe.compte-avant-de-courir.sauf',
   },
   {
+    id: 'ne-te-precipite-pas',
     famille: 'Finale',
-    regle: 'Ne te précipite pas.',
-    pourquoi:
-      'Une finale gagnante se gagne en améliorant sa position coup après coup. La hâte est la première cause de nulle dans les positions gagnées.',
-    sauf: 'La règle des cinquante coups existe : si rien ne bouge, il faudra bien pousser un pion.',
+    regle: 'principesListe.ne-te-precipite-pas.regle',
+    pourquoi: 'principesListe.ne-te-precipite-pas.pourquoi',
+    sauf: 'principesListe.ne-te-precipite-pas.sauf',
   },
   {
+    id: 'cherche-le-pat-quand',
     famille: 'Finale',
-    regle: 'Cherche le pat quand tu perds.',
-    pourquoi:
-      'C’est la planche de salut de celui qui est derrière, et elle fonctionne d’autant mieux que l’autre se croit gagnant.',
-    sauf: 'Ne joue pas pour le pat au prix d’une position encore tenable : on ne sacrifie pas une nulle probable pour une nulle miraculeuse.',
+    regle: 'principesListe.cherche-le-pat-quand.regle',
+    pourquoi: 'principesListe.cherche-le-pat-quand.pourquoi',
+    sauf: 'principesListe.cherche-le-pat-quand.sauf',
   },
   {
+    id: 'echange-les-pieces-pas',
     famille: 'Finale',
-    regle: 'Échange les pièces, pas les pions.',
-    pourquoi:
-      'Avec un pion de plus, chaque pièce échangée te rapproche du gain ; chaque pion échangé t’en éloigne.',
-    sauf: 'Inverse exact quand tu as un pion de moins : échange les pions et garde les pièces.',
+    regle: 'principesListe.echange-les-pieces-pas.regle',
+    pourquoi: 'principesListe.echange-les-pieces-pas.pourquoi',
+    sauf: 'principesListe.echange-les-pieces-pas.sauf',
   },
 
   // ── Jeu positionnel ───────────────────────────────────────────────────────
   {
+    id: 'un-cavalier-veut-un',
     famille: 'Jeu positionnel',
-    regle: 'Un cavalier veut un avant-poste.',
-    pourquoi:
-      'Une case avancée qu’aucun pion ne peut attaquer, défendue par l’un des tiens : le cavalier qui s’y installe ne partira plus.',
-    sauf: 'Un avant-poste qui ne regarde rien d’important n’est qu’une jolie case.',
+    regle: 'principesListe.un-cavalier-veut-un.regle',
+    pourquoi: 'principesListe.un-cavalier-veut-un.pourquoi',
+    sauf: 'principesListe.un-cavalier-veut-un.sauf',
   },
   {
+    id: 'un-fou-veut-des',
     famille: 'Jeu positionnel',
-    regle: 'Un fou veut des diagonales ouvertes.',
-    pourquoi: 'Il ne coûte rien à placer et tout à débloquer : on déplace les pions, pas le fou.',
-    sauf: 'Un fou peut rester derrière ses pions pour les tenir, le temps que la position s’ouvre.',
+    regle: 'principesListe.un-fou-veut-des.regle',
+    pourquoi: 'principesListe.un-fou-veut-des.pourquoi',
+    sauf: 'principesListe.un-fou-veut-des.sauf',
   },
   {
+    id: 'la-paire-de-fous',
     famille: 'Jeu positionnel',
-    regle: 'La paire de fous aime les positions ouvertes.',
-    pourquoi:
-      'À deux, ils couvrent les deux couleurs de cases : l’avantage vaut environ un demi-pion, et plus la position est ouverte, plus il compte.',
-    sauf: 'Dans une position bloquée, un bon cavalier vaut mieux que deux fous qui ne voient rien.',
+    regle: 'principesListe.la-paire-de-fous.regle',
+    pourquoi: 'principesListe.la-paire-de-fous.pourquoi',
+    sauf: 'principesListe.la-paire-de-fous.sauf',
   },
   {
+    id: 'ne-cree-pas-de',
     famille: 'Jeu positionnel',
-    regle: 'Ne crée pas de faiblesse de pion sans compensation.',
-    pourquoi:
-      'Un pion isolé, doublé ou arriéré est une cible permanente : il ne bouge plus et il faut le garder.',
-    sauf: 'Le pion isolé donne de l’espace et des cases au milieu de partie. C’est un défaut de finale payé en activité.',
+    regle: 'principesListe.ne-cree-pas-de.regle',
+    pourquoi: 'principesListe.ne-cree-pas-de.pourquoi',
+    sauf: 'principesListe.ne-cree-pas-de.sauf',
   },
   {
+    id: 'les-cases-faibles-se',
     famille: 'Jeu positionnel',
-    regle: 'Les cases faibles se prennent, pas se regrettent.',
-    pourquoi:
-      'Une case que plus aucun pion adverse ne défend est à occuper avec une pièce, pas à contempler.',
-    sauf: 'Occuper une case faible avec sa seule pièce active peut la rendre passive à son tour.',
+    regle: 'principesListe.les-cases-faibles-se.regle',
+    pourquoi: 'principesListe.les-cases-faibles-se.pourquoi',
+    sauf: 'principesListe.les-cases-faibles-se.sauf',
   },
   {
+    id: 'empeche-avant-de-faire',
     famille: 'Jeu positionnel',
-    regle: 'Empêche avant de faire.',
-    pourquoi:
-      'La prophylaxie : voir ce que l’adversaire veut faire et le rendre impossible. C’est la compétence qui sépare 1 900 de 2 200.',
-    sauf: 'À trop empêcher, on ne fait rien. Il faut un plan à soi en plus.',
+    regle: 'principesListe.empeche-avant-de-faire.regle',
+    pourquoi: 'principesListe.empeche-avant-de-faire.pourquoi',
+    sauf: 'principesListe.empeche-avant-de-faire.sauf',
   },
   {
+    id: 'le-pion-passe-protege',
     famille: 'Jeu positionnel',
-    regle: 'Le pion passé protégé est un avantage durable.',
-    pourquoi:
-      'Il ne peut pas être pris, il doit être surveillé, et il fixe une pièce adverse pour le reste de la partie.',
-    sauf: 'Il ne gagne rien tout seul : il faut une seconde faiblesse ailleurs.',
+    regle: 'principesListe.le-pion-passe-protege.regle',
+    pourquoi: 'principesListe.le-pion-passe-protege.pourquoi',
+    sauf: 'principesListe.le-pion-passe-protege.sauf',
   },
   {
+    id: 'une-colonne-se-prend',
     famille: 'Jeu positionnel',
-    regle: 'Une colonne se prend avec deux tours.',
-    pourquoi:
-      'La première tour occupe, la seconde double. C’est la façon de transformer une colonne ouverte en pénétration sur la septième.',
-    sauf: 'Si l’adversaire contrôle la case d’entrée, doubler ne sert à rien tant qu’on ne l’a pas contestée.',
+    regle: 'principesListe.une-colonne-se-prend.regle',
+    pourquoi: 'principesListe.une-colonne-se-prend.pourquoi',
+    sauf: 'principesListe.une-colonne-se-prend.sauf',
   },
   {
+    id: 'les-pions-ne-reviennent',
     famille: 'Jeu positionnel',
-    regle: 'Les pions ne reviennent pas.',
-    pourquoi:
-      'Chaque poussée est définitive. C’est pour cela qu’une structure de pions raconte la suite de la partie mieux que la position des pièces.',
-    sauf: 'Rien. C’est une règle du jeu, pas un principe.',
+    regle: 'principesListe.les-pions-ne-reviennent.regle',
+    pourquoi: 'principesListe.les-pions-ne-reviennent.pourquoi',
+    sauf: 'principesListe.les-pions-ne-reviennent.sauf',
   },
   {
+    id: 'bloque-le-pion-passe',
     famille: 'Jeu positionnel',
-    regle: 'Bloque le pion passé de l’adversaire, de préférence avec un cavalier.',
-    pourquoi:
-      'Un pion bloqué ne va plus à dame, et le cavalier qui le bloque garde toute son activité — contrairement à une tour.',
-    sauf: 'Si tu peux le gagner plutôt que le bloquer, gagne-le.',
+    regle: 'principesListe.bloque-le-pion-passe.regle',
+    pourquoi: 'principesListe.bloque-le-pion-passe.pourquoi',
+    sauf: 'principesListe.bloque-le-pion-passe.sauf',
   },
   {
+    id: 'un-roi-expose-change',
     famille: 'Jeu positionnel',
-    regle: 'Un roi exposé change tous les calculs.',
-    pourquoi:
-      'Face à un roi sans abri, le matériel compte moins que le nombre de pièces qui le regardent. C’est la seule situation où sacrifier se fait à l’instinct.',
-    sauf: 'Un roi exposé mais bien défendu tient très bien : compte les attaquants et les défenseurs avant de donner.',
+    regle: 'principesListe.un-roi-expose-change.regle',
+    pourquoi: 'principesListe.un-roi-expose-change.pourquoi',
+    sauf: 'principesListe.un-roi-expose-change.sauf',
   },
   {
+    id: 'les-roques-opposes-veulent',
     famille: 'Jeu positionnel',
-    regle: 'Les roques opposés veulent des pions, pas des pièces.',
-    pourquoi:
-      'Quand chacun attaque de son côté, les pions arrivent sans affaiblir son propre roi. Le plus rapide gagne.',
-    sauf: 'Si son attaque est plus rapide que la tienne, il faut défendre — et ce calcul-là se fait coup par coup.',
+    regle: 'principesListe.les-roques-opposes-veulent.regle',
+    pourquoi: 'principesListe.les-roques-opposes-veulent.pourquoi',
+    sauf: 'principesListe.les-roques-opposes-veulent.sauf',
   },
   {
+    id: 'echange-le-fou-qui',
     famille: 'Jeu positionnel',
-    regle: 'Échange le fou qui défend la couleur de cases que tu attaques.',
-    pourquoi:
-      'Supprimer le défenseur des cases noires autour du roi rend toutes tes pièces noires soudainement utiles.',
-    sauf: 'Pas au prix de deux temps si l’attaque est une course.',
+    regle: 'principesListe.echange-le-fou-qui.regle',
+    pourquoi: 'principesListe.echange-le-fou-qui.pourquoi',
+    sauf: 'principesListe.echange-le-fou-qui.sauf',
   },
   {
+    id: 'quand-tu-ne-sais',
     famille: 'Jeu positionnel',
-    regle: 'Quand tu ne sais pas quoi faire, regarde les pions.',
-    pourquoi:
-      'La structure dit où attaquer, de quel côté l’espace se trouve et quelle finale t’attend. Elle répond quand plus rien ne répond.',
-    sauf: 'Rien — c’est le principe de secours, il sert précisément quand les autres se taisent.',
+    regle: 'principesListe.quand-tu-ne-sais.regle',
+    pourquoi: 'principesListe.quand-tu-ne-sais.pourquoi',
+    sauf: 'principesListe.quand-tu-ne-sais.sauf',
   },
 ]
 

@@ -58,7 +58,7 @@ export function AideMemoire({
         <div className="p-3">
           <ol className="space-y-1">
             {MEMO_AVANT_COUP.map((entree, rang) => (
-              <li key={entree.question} className="flex items-start gap-2.5">
+              <li key={entree.id} className="flex items-start gap-2.5">
                 <span
                   className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full text-[11px] font-bold tabular-nums"
                   style={{
@@ -74,8 +74,8 @@ export function AideMemoire({
                     d'une liste de coups et d'une barre d'évaluation. Quatre
                     paragraphes de deux lignes y auraient poussé tout le reste
                     hors de l'écran. */}
-                <span className="text-[13px] leading-snug" title={entree.comment}>
-                  {entree.question}
+                <span className="text-[13px] leading-snug" title={t(entree.comment)}>
+                  {t(entree.question)}
                 </span>
               </li>
             ))}

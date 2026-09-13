@@ -1122,6 +1122,8 @@ export const en: Dictionary = {
     phase: 'Phase of the game',
     allPhases: 'All',
     middlegameShort: 'Middlegame',
+    spokenPrinciple: '{regle} {pourquoi} Except: {sauf}',
+    spokenMemo: '{rang}. {question} {comment}',
     practise: 'Putting them into practice',
     practiseHint:
       'A principle you read changes nothing; a principle you have had to apply twenty times in a row changes everything. Coaching sessions announce a theme before you start, precisely for that.',
@@ -2533,6 +2535,258 @@ export const en: Dictionary = {
     purgedSessions: 'expired sessions',
     purgedEvaluations: 'evaluations under 14 plies, too shallow to be reused',
     purgedEmptyAccounts: 'accounts with no game and no analysis, inactive for six months',
+  },
+  memo: {
+    'qu-est-ce-que': {
+      question: 'What did their last move change?',
+      comment:
+        'A square freed, a line opened, a piece now attacking what it was not attacking before. A move always does something — even a bad one.',
+    },
+    'qu-est-ce-qu': {
+      question: 'What are they attacking?',
+      comment:
+        'Go round your pieces: which are attacked, which are defended, and by what. A piece attacked twice and defended once is lost.',
+    },
+    'qu-est-ce-que-mon': {
+      question: 'What does my move leave hanging?',
+      comment:
+        'The piece you move no longer defends what it was defending, and the square you put it on may be attacked. It is the mistake that costs the most points below 1,200.',
+    },
+    's-il-joue-le': {
+      question: 'If they play the nastiest move, does it hold?',
+      comment:
+        'One move to examine: the most aggressive one they have. A check, a capture, a mate threat. If it holds against that one, it holds.',
+    },
+  },
+  principesListe: {
+    'occupe-le-centre-avec': {
+      regle: 'Occupy the centre with a pawn.',
+      pourquoi:
+        'A pawn in the centre takes space, opens lines for your pieces and gives them twice as many squares as one at the edge of the board.',
+      sauf: 'The openings that control it from a distance — King’s Indian, Sicilian — give it up on purpose in order to strike at it afterwards.',
+    },
+    'sors-les-cavaliers-avant': {
+      regle: 'Bring the knights out before the bishops.',
+      pourquoi:
+        'A knight has only one good square in most openings, a bishop has three or four. You play what you know first, and keep the choice for later.',
+      sauf: 'The systems where the bishop comes out first are built precisely for that — London, fianchetto.',
+    },
+    'ne-bouge-pas-deux': {
+      regle: 'Do not move the same piece twice without a reason.',
+      pourquoi:
+        'Every move lost is a move given away. Developing eight pieces in eight moves means reaching the middlegame with a whole army.',
+      sauf: 'If a move of your opponent’s attacks that piece and retreating it is the lesser evil, retreat it.',
+    },
+    'roque-tot-et-du': {
+      regle: 'Castle early, and on the right side.',
+      pourquoi:
+        'A king in the centre is the target of every opened line. Castling puts the king in safety and the rook to work in a single move.',
+      sauf: 'When your opponent has already castled on the opposite side and the pawn race is on, the king can stay in the centre so as not to offer a target.',
+    },
+    'ne-sors-pas-la': {
+      regle: 'Do not bring the queen out too early.',
+      pourquoi:
+        'She is worth nine points: anything that attacks her gains a tempo. A queen out on move three spends the next ten running away.',
+      sauf: 'A few openings bring her out at once and accept it — the Scandinavian, for instance, where she settles on a5 with a plan.',
+    },
+    'ne-pousse-pas-les': {
+      regle: 'Do not push the wing pawns before you have developed.',
+      pourquoi:
+        'A pawn that advances does not come back, and it leaves behind it squares nobody will defend again.',
+      sauf: 'A clear gain of time or space — h3 to prevent a pin, a4 to block your opponent’s expansion — is worth the move.',
+    },
+    'connecte-tes-tours': {
+      regle: 'Connect your rooks.',
+      pourquoi:
+        'When there is nothing left between them, development is finished: that is the signal that you can start playing to win.',
+      sauf: 'Nothing, or almost. It is the most reliable principle on the list.',
+    },
+    'ne-cherche-pas-le': {
+      regle: 'Do not go looking for mate in four.',
+      pourquoi:
+        'Scholar’s mate and its cousins lose against anybody who knows them, and you leave three tempi of development behind.',
+      sauf: 'You do have to know them in order to parry them: that is what the chapter “The opening mates” is for.',
+    },
+    'ameliore-ta-pire-piece': {
+      regle: 'Improve your worst piece.',
+      pourquoi:
+        'When no plan suggests itself, the question “which of my pieces is working least?” produces one every time.',
+      sauf: 'If a tactic is available, it comes first: a plan does not make up for a won piece left on the table.',
+    },
+    'les-tours-vont-sur': {
+      regle: 'Rooks belong on open files.',
+      pourquoi:
+        'A rook is only worth its five points if it sees far. On a closed file, it stares at its own pawn.',
+      sauf: 'A half-open file where your opponent has a weak pawn is better than an open file leading nowhere.',
+    },
+    'attaque-du-cote-ou': {
+      regle: 'Attack on the side where you have more space.',
+      pourquoi:
+        'Space is counted in advanced pawns. Attacking where you are cramped means attacking with two pieces against four.',
+      sauf: 'An exposed enemy king justifies attacking anywhere, even one against three.',
+    },
+    'avant-d-attaquer-sur': {
+      regle: 'Before attacking on a wing, secure the centre.',
+      pourquoi:
+        'A wing attack is refuted by a move in the centre: the lines open where your king is, and the attack no longer has time to arrive.',
+      sauf: 'With kings castled on opposite sides, the race is on and counting tempi replaces the principle.',
+    },
+    'n-echange-pas-sans': {
+      regle: 'Do not exchange without knowing what the exchange leaves you.',
+      pourquoi:
+        'Every exchange simplifies, and simplification favours whoever is materially ahead. If that is the other player, it costs you.',
+      sauf: 'Exchanging to get rid of the piece attacking your king is almost always good, even when you are worse.',
+    },
+    'deux-faiblesses-valent-mieux': {
+      regle: 'Two weaknesses are better than one.',
+      pourquoi:
+        'A position almost never falls on a single weak point: you create a second one at the other end, and the defence can no longer cover both.',
+      sauf: 'If the first weakness is enough to win material right now, do not go looking for the second.',
+    },
+    'regarde-le-coup-le': {
+      regle: 'Look at the nastiest move before playing your own.',
+      pourquoi:
+        'It is the short version of the checklist. A single move examined — the most aggressive one they have — rules out almost every blunder.',
+      sauf: 'Nothing. That one admits no exception.',
+    },
+    'quand-tu-as-gagne': {
+      regle: 'When you have won material, simplify.',
+      pourquoi:
+        'An extra piece on an empty board decides the game; the same piece in a complicated position is lost in one move.',
+      sauf: 'Do not simplify into an endgame that is drawn by nature — wrong-coloured bishop, isolated a- or h-pawn.',
+    },
+    'active-ton-roi': {
+      regle: 'Activate your king.',
+      pourquoi:
+        'Without queens, the king becomes a strong piece and a free one. Whoever keeps him at the back is playing a piece down.',
+      sauf: 'As long as queens or two rooks each remain, the king is a target.',
+    },
+    'la-tour-se-place': {
+      regle: 'The rook goes behind the passed pawn.',
+      pourquoi:
+        'Behind it, the rook gains space as the pawn advances — whether the pawn is yours or theirs. In front, it gets pushed.',
+      sauf: 'On the seventh rank, a rook eating pawns often does better than the rule.',
+    },
+    'cree-un-pion-passe': {
+      regle: 'Create a passed pawn on the side where you have the majority.',
+      pourquoi:
+        'Two pawns against one produce a passed pawn by force. It is the most mechanical plan in all of endgame play.',
+      sauf: 'If your majority is on the side of the enemy king, it will only produce a passed pawn he stops on the spot.',
+    },
+    'prends-l-opposition': {
+      regle: 'Take the opposition.',
+      pourquoi:
+        'In king and pawn endings, whoever forces the other to give way wins. The opposition is how you know in advance.',
+      sauf: 'Positions with several pawns are decided first by counting tempi; the opposition only settles the simple cases.',
+    },
+    'compte-avant-de-courir': {
+      regle: 'Count before you run.',
+      pourquoi:
+        'The rule of the square, or two columns of arithmetic: you know in five seconds whether the king catches the pawn. That is more reliable than any intuition.',
+      sauf: 'Pawns that get in each other’s way break the square: then you have to calculate for real.',
+    },
+    'ne-te-precipite-pas': {
+      regle: 'Do not rush.',
+      pourquoi:
+        'A winning endgame is won by improving your position move after move. Haste is the leading cause of draws in won positions.',
+      sauf: 'The fifty-move rule exists: if nothing moves, a pawn will have to be pushed eventually.',
+    },
+    'cherche-le-pat-quand': {
+      regle: 'Look for stalemate when you are losing.',
+      pourquoi:
+        'It is the lifeline of whoever is behind, and it works all the better when the other player thinks they have won.',
+      sauf: 'Do not play for stalemate at the cost of a position that is still holdable: you do not trade a likely draw for a miraculous one.',
+    },
+    'echange-les-pieces-pas': {
+      regle: 'Exchange pieces, not pawns.',
+      pourquoi:
+        'With an extra pawn, every piece exchanged brings you closer to the win; every pawn exchanged takes you further from it.',
+      sauf: 'Exactly the reverse when you are a pawn down: exchange pawns and keep the pieces.',
+    },
+    'un-cavalier-veut-un': {
+      regle: 'A knight wants an outpost.',
+      pourquoi:
+        'An advanced square no pawn can attack, defended by one of yours: the knight that settles there will not leave.',
+      sauf: 'An outpost that looks at nothing important is just a pretty square.',
+    },
+    'un-fou-veut-des': {
+      regle: 'A bishop wants open diagonals.',
+      pourquoi:
+        'It costs nothing to place and everything to unblock: you move the pawns, not the bishop.',
+      sauf: 'A bishop can stay behind its pawns to hold them, until the position opens.',
+    },
+    'la-paire-de-fous': {
+      regle: 'The bishop pair likes open positions.',
+      pourquoi:
+        'Together they cover both colours of square: the advantage is worth about half a pawn, and the more open the position, the more it counts.',
+      sauf: 'In a blocked position, a good knight is worth more than two bishops that see nothing.',
+    },
+    'ne-cree-pas-de': {
+      regle: 'Do not create a pawn weakness without compensation.',
+      pourquoi:
+        'An isolated, doubled or backward pawn is a permanent target: it no longer moves, and it has to be guarded.',
+      sauf: 'The isolated pawn gives space and squares in the middlegame. It is an endgame flaw paid for in activity.',
+    },
+    'les-cases-faibles-se': {
+      regle: 'Weak squares are for taking, not for regretting.',
+      pourquoi:
+        'A square no enemy pawn defends any more is to be occupied with a piece, not contemplated.',
+      sauf: 'Occupying a weak square with your only active piece can make that piece passive in turn.',
+    },
+    'empeche-avant-de-faire': {
+      regle: 'Prevent before you proceed.',
+      pourquoi:
+        'Prophylaxis: seeing what your opponent wants to do and making it impossible. It is the skill that separates 1,900 from 2,200.',
+      sauf: 'Prevent too much and you do nothing. You need a plan of your own as well.',
+    },
+    'le-pion-passe-protege': {
+      regle: 'The protected passed pawn is a lasting advantage.',
+      pourquoi:
+        'It cannot be taken, it has to be watched, and it ties an enemy piece down for the rest of the game.',
+      sauf: 'It wins nothing on its own: you need a second weakness elsewhere.',
+    },
+    'une-colonne-se-prend': {
+      regle: 'A file is taken with two rooks.',
+      pourquoi:
+        'The first rook occupies, the second doubles. That is how an open file is turned into penetration on the seventh.',
+      sauf: 'If your opponent controls the entry square, doubling achieves nothing until you have contested it.',
+    },
+    'les-pions-ne-reviennent': {
+      regle: 'Pawns do not come back.',
+      pourquoi:
+        'Every push is final. That is why a pawn structure tells the rest of the game better than the position of the pieces does.',
+      sauf: 'Nothing. It is a rule of the game, not a principle.',
+    },
+    'bloque-le-pion-passe': {
+      regle: 'Blockade your opponent’s passed pawn, preferably with a knight.',
+      pourquoi:
+        'A blockaded pawn no longer queens, and the knight blockading it keeps all its activity — unlike a rook.',
+      sauf: 'If you can win it rather than blockade it, win it.',
+    },
+    'un-roi-expose-change': {
+      regle: 'An exposed king changes every calculation.',
+      pourquoi:
+        'Against a king with no shelter, material counts for less than the number of pieces looking at him. It is the one situation where sacrificing is done on instinct.',
+      sauf: 'An exposed but well-defended king holds up very well: count the attackers and the defenders before giving anything up.',
+    },
+    'les-roques-opposes-veulent': {
+      regle: 'Opposite castling wants pawns, not pieces.',
+      pourquoi:
+        'When each side attacks on their own wing, the pawns arrive without weakening your own king. The faster one wins.',
+      sauf: 'If their attack is faster than yours, you have to defend — and that calculation is made move by move.',
+    },
+    'echange-le-fou-qui': {
+      regle: 'Exchange the bishop that defends the colour of square you are attacking.',
+      pourquoi:
+        'Removing the defender of the dark squares around the king makes all your dark-squared pieces suddenly useful.',
+      sauf: 'Not at the cost of two tempi if the attack is a race.',
+    },
+    'quand-tu-ne-sais': {
+      regle: 'When you do not know what to do, look at the pawns.',
+      pourquoi:
+        'The structure says where to attack, which side the space is on and what endgame awaits you. It answers when nothing else does.',
+      sauf: 'Nothing — it is the fallback principle, and it is there precisely for when the others fall silent.',
+    },
   },
   fiches: {
     italienne: {
