@@ -858,6 +858,81 @@ export const en: Dictionary = {
     testedOn: ' of {date}',
   },
 
+  principles: {
+    title: 'Principles and checklist',
+    intro:
+      'Four questions to ask before you play, and {n} guiding principles — each with the case where it does not apply.',
+    theMemo: 'the checklist',
+    beforeEveryMove: 'Before every move.',
+    memoHint:
+      'Ten seconds, in this order. The first question is the most important and the most neglected: at every weak level, the commonest fault is playing your own plan without having looked at the move opposite.',
+    showInGame: 'Show the checklist during my games',
+    showInGameHint:
+      'A collapsible panel under the board, against the computer. Turn it off as soon as the habit is there — that is the point of every aid.',
+    listTitle: 'The principles, and their exceptions',
+    shownCount: '{n} shown',
+    phase: 'Phase of the game',
+    allPhases: 'All',
+    middlegameShort: 'Middlegame',
+    practise: 'Putting them into practice',
+    practiseHint:
+      'A principle you read changes nothing; a principle you have had to apply twenty times in a row changes everything. Coaching sessions announce a theme before you start, precisely for that.',
+    readAloud: 'Every principle can be read out loud — the speaker, on the right.',
+  },
+
+  elo: {
+    title: 'Elo calculator',
+    intro:
+      'Your rating, your K factor, your games: what the tournament earns or costs you, game by game, and your performance. The formula is FIDE’s.',
+    yourRating: 'Your rating',
+    ratingRange: 'Between 1000 and 3500.',
+    coefficient: 'K factor',
+    k40: 'fewer than 30 rated games, or under 18 and below 2300',
+    k20: 'the general case, below 2400',
+    k10: 'once 2400 has been reached, even after dropping back',
+    win: 'Win',
+    drawResult: 'Draw',
+    loss: 'Loss',
+    gamesHint: 'opponent’s rating, then the result',
+    yourGames: 'Your games',
+    opponentRating: 'Rating of opponent {n}',
+    gameResult: 'Result of game {n}',
+    removeGame: 'Remove game {n}',
+    addGame: 'Add a game',
+    summary: 'Summary',
+    change: 'Change',
+    newRating: 'new rating',
+    score: 'Score',
+    expected: 'expected',
+    performance: 'Performance',
+    opponentsAt: 'opponents at',
+    onAverage: 'on average',
+    formulaNote:
+      'Expected score from the logistic formula, with the gap capped at 400 points as FIDE does; performance read from its conversion table, bounded to ±800. The French federation applies the same formula to its national rating.',
+  },
+
+  listen: {
+    title: 'Listen to the curriculum',
+    intro:
+      'The curriculum read out loud, with nothing to touch: the coach speaks, the board follows, the next step comes when the sentence ends. For revising while doing something else.',
+    revisionBefore:
+      'The steps that normally ask you to play a move are played for you: you listen to the solution instead of looking for it. So this is',
+    revisionStrong: 'revision',
+    revisionMiddle: ', not learning — come back to',
+    revisionLink: 'the guided lessons',
+    revisionAfter: 'for the first time through, and listen to them afterwards.',
+    wholeCurriculum: 'The whole curriculum',
+    wouldAskYou:
+      'In a lesson, this is where you would be asked: {consigne}. The move is played for you.',
+    previousStep: 'Previous step',
+    nextStep: 'Next step',
+    pause: 'Pause',
+    listen: 'Listen',
+    previousLesson: 'Previous lesson',
+    nextLesson: 'Next lesson',
+    playedNotHeard: '. What sticks is what you played, not what you heard.',
+  },
+
   puzzles: {
     title: 'Puzzles',
     subtitle: 'Six million tactical positions, sorted by theme and rating.',

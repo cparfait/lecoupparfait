@@ -37,11 +37,13 @@ import {
   PRINCIPES,
   type FamillePrincipe,
 } from '@/lib/apprendre/principes.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
 const TEINTE = 'var(--rub-apprendre)'
 
 export default function PrincipesPage() {
+  const t = useT()
   /** Famille affichée, ou `null` pour tout. */
   const [famille, setFamille] = useState<FamillePrincipe | 'toutes'>('toutes')
   const memoEnPartie = usePreferences((state) => state.memoAvantCoup)
@@ -54,9 +56,9 @@ export default function PrincipesPage() {
     <div className="page">
       <TitreDePage
         retour={{ href: '/apprendre', label: 'Apprendre' }}
-        intro={`Quatre questions à se poser avant de jouer, et ${PRINCIPES.length} principes de conduite — chacun avec le cas où il ne s’applique pas.`}
+        intro={t('principles.intro', { n: PRINCIPES.length })}
       >
-        Principes et mémo
+        {t('principles.title')}
       </TitreDePage>
 
       {/* ── Le mémo ─────────────────────────────────────────────────────────
@@ -70,16 +72,16 @@ export default function PrincipesPage() {
           teinte={TEINTE}
           fin={
             <BoutonEcouter
-              quoi="le mémo"
-              texte={`Avant chaque coup. ${MEMO_AVANT_COUP.map((entree, rang) => `${rang + 1}. ${entree.question} ${entree.comment}`).join(' ')}`}
+              quoi={t('principles.theMemo')}
+              texte={`${t('principles.beforeEveryMove')} ${MEMO_AVANT_COUP.map(
+                (entree, rang) => `${rang + 1}. ${entree.question} ${entree.comment}`,
+              ).join(' ')}`}
             />
           }
         />
         <div className="p-4 sm:p-5">
           <p className="mb-4 max-w-2xl text-[14px] leading-relaxed text-muted">
-            Dix secondes, dans cet ordre. La première question est la plus importante et la plus
-            négligée : à tous les niveaux faibles, la faute la plus fréquente est de jouer son
-            propre plan sans avoir regardé le coup d’en face.
+            {t('principles.memoHint')}
           </p>
 
           <ol className="space-y-2">
@@ -117,8 +119,8 @@ export default function PrincipesPage() {
             <Toggle
               checked={memoEnPartie}
               onChange={(valeur) => reglerPreference('memoAvantCoup', valeur)}
-              label="Afficher le mémo pendant mes parties"
-              description="Un panneau repliable sous l’échiquier, contre l’ordinateur. À couper dès que le réflexe est pris — c’est le but de toutes les aides."
+              label={t('principles.showInGame')}
+              description={t('principles.showInGameHint')}
             />
           </div>
         </div>
@@ -128,22 +130,24 @@ export default function PrincipesPage() {
       <section className="mt-8">
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-3">
           <h2 className="font-display text-xl font-bold tracking-tight">
-            Les principes, et leurs exceptions
+            {t('principles.listTitle')}
           </h2>
-          <p className="text-[12px] text-faint">{visibles.length} affichés</p>
+          <p className="text-[12px] text-faint">
+            {t('principles.shownCount', { n: visibles.length })}
+          </p>
         </div>
 
         <div className="mb-4">
           <SegmentedControl
             size="sm"
-            label="Phase de la partie"
+            label={t('principles.phase')}
             value={famille}
             onChange={setFamille}
             options={[
-              { value: 'toutes' as const, label: 'Tout' },
+              { value: 'toutes' as const, label: t('principles.allPhases') },
               ...FAMILLES_PRINCIPES.map((entree) => ({
                 value: entree,
-                label: entree === 'Milieu de partie' ? 'Milieu' : entree,
+                label: entree === 'Milieu de partie' ? t('principles.middlegameShort') : entree,
               })),
             ]}
           />
@@ -196,18 +200,16 @@ export default function PrincipesPage() {
       {/* ── Et ensuite ──────────────────────────────────────────────────── */}
       <Card className="mt-8 overflow-hidden">
         <EnTeteDeCarte
-          titre="Les mettre en pratique"
+          titre={t('principles.practise')}
           icone={<Play size={14} aria-hidden />}
           teinte="var(--rub-jouer)"
         />
         <div className="flex flex-wrap items-center gap-3 p-5">
           <p className="min-w-[14rem] flex-1 text-[14px] leading-relaxed text-muted">
-            Un principe qu’on lit ne change rien ; un principe qu’on a dû appliquer vingt fois de
-            suite change tout. Les séances pédagogiques annoncent justement un thème avant de
-            commencer.
+            {t('principles.practiseHint')}
           </p>
           <ButtonLink href="/jouer/pedagogique" variant="primary" icon={<Play size={15} />}>
-            Séance pédagogique
+            {t('tier.session')}
           </ButtonLink>
           <ButtonLink href="/glossaire" icon={<BookOpen size={15} />}>
             Glossaire
@@ -217,7 +219,7 @@ export default function PrincipesPage() {
 
       <p className="mt-8 flex items-center justify-center gap-1.5 text-center text-xs text-faint">
         <Volume2 size={12} aria-hidden />
-        Chaque principe se lit à voix haute — le haut-parleur, à droite.
+        {t('principles.readAloud')}
       </p>
 
       <AutresDeLaSection section="apprendre" />

@@ -24,6 +24,7 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import clsx from 'clsx'
+import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 import { Button, Card, Input } from '@/components/ui/index.tsx'
 import { bilan, scoreAttendu, variation, type Resultat } from '@/lib/outils/elo.ts'
 
@@ -33,16 +34,16 @@ interface Ligne {
   resultat: Resultat
 }
 
-const RESULTATS: Array<{ valeur: Resultat; libelle: string; titre: string }> = [
-  { valeur: 1, libelle: '1', titre: 'Victoire' },
-  { valeur: 0.5, libelle: '½', titre: 'Nulle' },
-  { valeur: 0, libelle: '0', titre: 'Défaite' },
+const RESULTATS: Array<{ valeur: Resultat; libelle: string; titre: TranslationKey }> = [
+  { valeur: 1, libelle: '1', titre: 'elo.win' },
+  { valeur: 0.5, libelle: '½', titre: 'elo.drawResult' },
+  { valeur: 0, libelle: '0', titre: 'elo.loss' },
 ]
 
-const COEFFICIENTS: Array<{ k: 40 | 20 | 10; pour: string }> = [
-  { k: 40, pour: 'moins de 30 parties classées, ou moins de 18 ans sous 2300' },
-  { k: 20, pour: 'le cas général, sous 2400' },
-  { k: 10, pour: 'une fois 2400 atteint, même redescendu' },
+const COEFFICIENTS: Array<{ k: 40 | 20 | 10; pour: TranslationKey }> = [
+  { k: 40, pour: 'elo.k40' },
+  { k: 20, pour: 'elo.k20' },
+  { k: 10, pour: 'elo.k10' },
 ]
 
 /** Signe explicite et virgule : « +12,4 » et « −7,1 », « 0 » quand il ne se passe rien. */
@@ -60,6 +61,7 @@ function points(n: number): string {
 let prochainId = 1
 
 export default function EloPage() {
+  const t = useT()
   const [cote, setCote] = useState('1500')
   const [k, setK] = useState<40 | 20 | 10>(20)
   const [lignes, setLignes] = useState<Ligne[]>([{ id: 0, adversaire: '1500', resultat: 1 }])
@@ -93,20 +95,17 @@ export default function EloPage() {
         className="inline-flex items-center gap-1.5 text-[14px] text-muted transition-colors hover:text-ink"
       >
         <ArrowLeft size={14} aria-hidden />
-        Outils
+        {t('nav.tools')}
       </Link>
       <h1 className="mt-3 font-display text-2xl font-bold tracking-tight sm:text-3xl">
-        Calculateur Elo
+        {t('elo.title')}
       </h1>
-      <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
-        Ta cote, ton coefficient, tes parties : ce que le tournoi te rapporte ou te coûte, partie
-        par partie, et ta performance. Le barème est celui de la FIDE.
-      </p>
+      <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">{t('elo.intro')}</p>
 
       <Card className="mt-5 p-4">
         <div className="grid gap-4 sm:grid-cols-[10rem_1fr]">
           <Input
-            label="Ta cote"
+            label={t('elo.yourRating')}
             name="cote"
             type="number"
             inputMode="numeric"
@@ -114,10 +113,10 @@ export default function EloPage() {
             max={3500}
             value={cote}
             onChange={(e) => setCote(e.target.value)}
-            error={cote !== '' && !coteValide ? 'Entre 1000 et 3500.' : undefined}
+            error={cote !== '' && !coteValide ? t('elo.ratingRange') : undefined}
           />
           <div>
-            <p className="mb-1.5 block text-sm font-medium">Coefficient K</p>
+            <p className="mb-1.5 block text-sm font-medium">{t('elo.coefficient')}</p>
             <div className="flex flex-wrap gap-2">
               {COEFFICIENTS.map((choix) => (
                 <button
@@ -139,7 +138,7 @@ export default function EloPage() {
             <p className="mt-1.5 text-xs text-faint">
               {COEFFICIENTS.map((choix) => (
                 <span key={choix.k} className="block">
-                  <strong className="font-semibold text-muted">{choix.k}</strong> : {choix.pour}
+                  <strong className="font-semibold text-muted">{choix.k}</strong> : {t(choix.pour)}
                 </span>
               ))}
             </p>
@@ -149,8 +148,8 @@ export default function EloPage() {
 
       <Card className="mt-3 p-4">
         <div className="flex items-baseline justify-between gap-3">
-          <p className="text-[12px] font-semibold text-faint">Tes parties</p>
-          <p className="text-xs text-faint">cote de l’adversaire, puis le résultat</p>
+          <p className="text-[12px] font-semibold text-faint">{t('elo.yourGames')}</p>
+          <p className="text-xs text-faint">{t('elo.gamesHint')}</p>
         </div>
         <ul className="mt-2 space-y-2">
           {lignes.map((ligne, index) => (
@@ -161,7 +160,7 @@ export default function EloPage() {
                 {index + 1}
               </span>
               <input
-                aria-label={`Cote de l’adversaire ${index + 1}`}
+                aria-label={t('elo.opponentRating', { n: index + 1 })}
                 type="number"
                 inputMode="numeric"
                 min={1000}
@@ -173,7 +172,7 @@ export default function EloPage() {
               />
               <div
                 role="radiogroup"
-                aria-label={`Résultat de la partie ${index + 1}`}
+                aria-label={t('elo.gameResult', { n: index + 1 })}
                 className="inline-flex gap-0.5 rounded-[var(--radius-sm)] border border-line bg-surface p-0.5"
               >
                 {RESULTATS.map((choix) => (
@@ -182,7 +181,7 @@ export default function EloPage() {
                     type="button"
                     role="radio"
                     aria-checked={ligne.resultat === choix.valeur}
-                    title={choix.titre}
+                    title={t(choix.titre)}
                     onClick={() => modifier(ligne.id, { resultat: choix.valeur })}
                     className={clsx(
                       'h-8 w-8 rounded-[calc(var(--radius-sm)-2px)] text-sm font-semibold transition-colors sm:w-9',
@@ -222,7 +221,7 @@ export default function EloPage() {
                 type="button"
                 onClick={() => setLignes((liste) => liste.filter((l) => l.id !== ligne.id))}
                 disabled={lignes.length === 1}
-                aria-label={`Retirer la partie ${index + 1}`}
+                aria-label={t('elo.removeGame', { n: index + 1 })}
                 className="grid h-8 w-7 shrink-0 place-items-center rounded-[var(--radius-sm)] text-faint transition-colors hover:bg-surface-hover hover:text-ink disabled:opacity-30 sm:w-8"
               >
                 <Trash2 size={14} aria-hidden />
@@ -246,16 +245,16 @@ export default function EloPage() {
             ])
           }
         >
-          Ajouter une partie
+          {t('elo.addGame')}
         </Button>
       </Card>
 
       {resultat && parties.length > 0 && (
         <Card className="mt-3 p-4">
-          <p className="text-[12px] font-semibold text-faint">Bilan</p>
+          <p className="text-[12px] font-semibold text-faint">{t('elo.summary')}</p>
           <div className="mt-2 grid gap-3 sm:grid-cols-3">
             <div>
-              <p className="text-xs text-muted">Variation</p>
+              <p className="text-xs text-muted">{t('elo.change')}</p>
               <p
                 className={clsx(
                   'font-display text-3xl font-bold tabular-nums',
@@ -269,41 +268,39 @@ export default function EloPage() {
                 {signe(resultat.variation, 1)}
               </p>
               <p className="text-xs text-faint">
-                nouvelle cote{' '}
+                {t('elo.newRating')}{' '}
                 <strong className="font-semibold text-muted tabular-nums">
                   {resultat.nouvelleCote}
                 </strong>
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted">Score</p>
+              <p className="text-xs text-muted">{t('elo.score')}</p>
               <p className="font-display text-3xl font-bold tabular-nums">
                 {points(resultat.points)}
                 <span className="text-lg text-faint"> / {parties.length}</span>
               </p>
               <p className="text-xs text-faint">
-                attendu{' '}
+                {t('elo.expected')}{' '}
                 <strong className="font-semibold text-muted tabular-nums">
                   {resultat.attendu.toFixed(2).replace('.', ',')}
                 </strong>
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted">Performance</p>
+              <p className="text-xs text-muted">{t('elo.performance')}</p>
               <p className="font-display text-3xl font-bold tabular-nums">{resultat.performance}</p>
               <p className="text-xs text-faint">
-                adversaires à{' '}
+                {t('elo.opponentsAt')}{' '}
                 <strong className="font-semibold text-muted tabular-nums">
                   {Math.round(resultat.moyenneAdversaires ?? 0)}
                 </strong>{' '}
-                en moyenne
+                {t('elo.onAverage')}
               </p>
             </div>
           </div>
           <p className="mt-3 border-t border-line/60 pt-2.5 text-xs leading-relaxed text-faint">
-            Score attendu par la formule logistique, écart plafonné à 400 points comme à la FIDE ;
-            performance lue dans sa table de conversion, bornée à ±800. La FFE applique le même
-            barème à sa cote nationale.
+            {t('elo.formulaNote')}
           </p>
         </Card>
       )}

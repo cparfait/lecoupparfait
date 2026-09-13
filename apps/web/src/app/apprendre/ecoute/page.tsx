@@ -38,6 +38,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Headphones, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react'
 import clsx from 'clsx'
+import { useT } from '@/lib/i18n/index.tsx'
 import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, Card, Chip, TitreDePage } from '@/components/ui/index.tsx'
@@ -70,6 +71,7 @@ interface Piste {
 }
 
 export default function EcoutePage() {
+  const t = useT()
   /** Chapitre écouté, ou `null` pour tout le programme. */
   const [chapitreId, setChapitreId] = useState<string | null>(null)
   const [position, setPosition] = useState(0)
@@ -234,24 +236,21 @@ export default function EcoutePage() {
 
   return (
     <div className="page">
-      <TitreDePage
-        retour={{ href: '/apprendre', label: 'Apprendre' }}
-        intro="Le programme lu à voix haute, sans rien à toucher : le coach parle, l’échiquier suit, l’étape suivante arrive quand la phrase est finie. Pour réviser en faisant autre chose."
-      >
-        Écouter le programme
+      <TitreDePage retour={{ href: '/apprendre', label: 'Apprendre' }} intro={t('listen.intro')}>
+        {t('listen.title')}
       </TitreDePage>
 
       {/* L'honnêteté d'abord : ce mode ne remplace pas les leçons, et le dire
           évite qu'on l'utilise à la place. */}
       <Card className="p-4">
         <p className="max-w-3xl text-[14px] leading-relaxed text-muted">
-          Les étapes qui demandent normalement de jouer un coup sont jouées pour toi : tu écoutes la
-          solution au lieu de la chercher. C’est donc une{' '}
-          <strong className="text-ink">révision</strong>, pas un apprentissage — reviens sur{' '}
+          {t('listen.revisionBefore')}{' '}
+          <strong className="text-ink">{t('listen.revisionStrong')}</strong>
+          {t('listen.revisionMiddle')}{' '}
           <Link href="/apprendre" className="lien">
-            les leçons guidées
+            {t('listen.revisionLink')}
           </Link>{' '}
-          pour la première fois, et écoute-les ensuite.
+          {t('listen.revisionAfter')}
         </p>
       </Card>
 
@@ -271,7 +270,7 @@ export default function EcoutePage() {
               : 'border-line bg-bg-elev hover:bg-surface-hover',
           )}
         >
-          Tout le programme
+          {t('listen.wholeCurriculum')}
         </button>
         {CHAPTERS.map((chapitre) => (
           <button
@@ -335,8 +334,7 @@ export default function EcoutePage() {
                 <p className="mt-3 text-[16px] leading-relaxed">{etape.say}</p>
                 {etape.instruction && (
                   <p className="mt-2 text-[13px] text-faint">
-                    En leçon, c’est ici qu’on te demanderait&nbsp;: {etape.instruction}. Le coup est
-                    joué pour toi.
+                    {t('listen.wouldAskYou', { consigne: etape.instruction })}
                   </p>
                 )}
               </div>
@@ -351,7 +349,7 @@ export default function EcoutePage() {
                   icon={<SkipBack size={16} />}
                   onClick={() => allerA(position - 1)}
                   disabled={position === 0}
-                  aria-label="Étape précédente"
+                  aria-label={t('listen.previousStep')}
                 />
                 <Button
                   variant="primary"
@@ -359,7 +357,7 @@ export default function EcoutePage() {
                   icon={enLecture ? <Pause size={18} /> : <Play size={18} />}
                   onClick={() => (enLecture ? arreter() : setEnLecture(true))}
                 >
-                  {enLecture ? 'Pause' : 'Écouter'}
+                  {t(enLecture ? 'listen.pause' : 'listen.listen')}
                 </Button>
                 <Button
                   size="sm"
@@ -367,7 +365,7 @@ export default function EcoutePage() {
                   icon={<SkipForward size={16} />}
                   onClick={() => allerA(position + 1)}
                   disabled={position + 1 >= total}
-                  aria-label="Étape suivante"
+                  aria-label={t('listen.nextStep')}
                 />
               </div>
 
@@ -381,7 +379,7 @@ export default function EcoutePage() {
                   disabled={position - piste.etape - 1 < 0}
                   className="lien disabled:pointer-events-none disabled:opacity-40"
                 >
-                  Leçon précédente
+                  {t('listen.previousLesson')}
                 </button>
                 <button
                   type="button"
@@ -389,7 +387,7 @@ export default function EcoutePage() {
                   disabled={position + (piste.lesson.steps.length - piste.etape) >= total}
                   className="lien disabled:pointer-events-none disabled:opacity-40"
                 >
-                  Leçon suivante
+                  {t('listen.nextLesson')}
                 </button>
               </div>
 
@@ -420,7 +418,7 @@ export default function EcoutePage() {
                 <Link href={`/apprendre/${piste.lesson.id}`} className="lien">
                   {piste.lesson.title}
                 </Link>
-                . On retient ce qu’on a joué, pas ce qu’on a entendu.
+                {t('listen.playedNotHeard')}
               </p>
             </Card>
           </div>

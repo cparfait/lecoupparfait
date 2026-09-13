@@ -868,6 +868,81 @@ export const fr = {
     testedOn: ' du {date}',
   },
 
+  principles: {
+    title: 'Principes et mémo',
+    intro:
+      'Quatre questions à se poser avant de jouer, et {n} principes de conduite — chacun avec le cas où il ne s’applique pas.',
+    theMemo: 'le mémo',
+    beforeEveryMove: 'Avant chaque coup.',
+    memoHint:
+      'Dix secondes, dans cet ordre. La première question est la plus importante et la plus négligée : à tous les niveaux faibles, la faute la plus fréquente est de jouer son propre plan sans avoir regardé le coup d’en face.',
+    showInGame: 'Afficher le mémo pendant mes parties',
+    showInGameHint:
+      'Un panneau repliable sous l’échiquier, contre l’ordinateur. À couper dès que le réflexe est pris — c’est le but de toutes les aides.',
+    listTitle: 'Les principes, et leurs exceptions',
+    shownCount: '{n} affichés',
+    phase: 'Phase de la partie',
+    allPhases: 'Tout',
+    middlegameShort: 'Milieu',
+    practise: 'Les mettre en pratique',
+    practiseHint:
+      'Un principe qu’on lit ne change rien ; un principe qu’on a dû appliquer vingt fois de suite change tout. Les séances pédagogiques annoncent justement un thème avant de commencer.',
+    readAloud: 'Chaque principe se lit à voix haute — le haut-parleur, à droite.',
+  },
+
+  elo: {
+    title: 'Calculateur Elo',
+    intro:
+      'Ta cote, ton coefficient, tes parties : ce que le tournoi te rapporte ou te coûte, partie par partie, et ta performance. Le barème est celui de la FIDE.',
+    yourRating: 'Ta cote',
+    ratingRange: 'Entre 1000 et 3500.',
+    coefficient: 'Coefficient K',
+    k40: 'moins de 30 parties classées, ou moins de 18 ans sous 2300',
+    k20: 'le cas général, sous 2400',
+    k10: 'une fois 2400 atteint, même redescendu',
+    win: 'Victoire',
+    drawResult: 'Nulle',
+    loss: 'Défaite',
+    gamesHint: 'cote de l’adversaire, puis le résultat',
+    yourGames: 'Tes parties',
+    opponentRating: 'Cote de l’adversaire {n}',
+    gameResult: 'Résultat de la partie {n}',
+    removeGame: 'Retirer la partie {n}',
+    addGame: 'Ajouter une partie',
+    summary: 'Bilan',
+    change: 'Variation',
+    newRating: 'nouvelle cote',
+    score: 'Score',
+    expected: 'attendu',
+    performance: 'Performance',
+    opponentsAt: 'adversaires à',
+    onAverage: 'en moyenne',
+    formulaNote:
+      'Score attendu par la formule logistique, écart plafonné à 400 points comme à la FIDE ; performance lue dans sa table de conversion, bornée à ±800. La FFE applique le même barème à sa cote nationale.',
+  },
+
+  listen: {
+    title: 'Écouter le programme',
+    intro:
+      'Le programme lu à voix haute, sans rien à toucher : le coach parle, l’échiquier suit, l’étape suivante arrive quand la phrase est finie. Pour réviser en faisant autre chose.',
+    revisionBefore:
+      'Les étapes qui demandent normalement de jouer un coup sont jouées pour toi : tu écoutes la solution au lieu de la chercher. C’est donc une',
+    revisionStrong: 'révision',
+    revisionMiddle: ', pas un apprentissage — reviens sur',
+    revisionLink: 'les leçons guidées',
+    revisionAfter: 'pour la première fois, et écoute-les ensuite.',
+    wholeCurriculum: 'Tout le programme',
+    wouldAskYou:
+      'En leçon, c’est ici qu’on te demanderait : {consigne}. Le coup est joué pour toi.',
+    previousStep: 'Étape précédente',
+    nextStep: 'Étape suivante',
+    pause: 'Pause',
+    listen: 'Écouter',
+    previousLesson: 'Leçon précédente',
+    nextLesson: 'Leçon suivante',
+    playedNotHeard: '. On retient ce qu’on a joué, pas ce qu’on a entendu.',
+  },
+
   puzzles: {
     title: 'Puzzles',
     subtitle: 'Six millions de positions tactiques, triées par thème et par niveau.',
