@@ -193,7 +193,7 @@ export function Celebration({
         )}
 
         <Button variant="primary" className="mt-5 w-full" onClick={onFermer} autoFocus>
-          Continuer
+          {t('lessonExtra.carryOn')}
         </Button>
       </div>
     </div>

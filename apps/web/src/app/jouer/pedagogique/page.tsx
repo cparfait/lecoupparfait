@@ -229,7 +229,7 @@ export default function SeancePage() {
               </Button>
             )}
             <ButtonLink href="/apprendre/palier" size="lg" icon={<Crown size={15} />}>
-              Voir mon palier
+              {t('bits.seeMyTier')}
             </ButtonLink>
           </div>
         </div>

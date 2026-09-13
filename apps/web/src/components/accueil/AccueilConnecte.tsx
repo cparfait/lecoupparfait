@@ -432,7 +432,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                           cliquer une ligne ouvrait l'analyse. */}
                       <span className="flex shrink-0 items-center gap-1 text-[12px] font-semibold text-faint transition-colors group-hover:text-accent">
                         <Gauge size={13} aria-hidden />
-                        Analyser
+                        {t('bits.analyse')}
                       </span>
                     </button>
                   </li>

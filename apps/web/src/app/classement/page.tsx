@@ -79,7 +79,7 @@ export default function LeaderboardPage() {
     <div className="page-etroite">
       <h1 className="flex items-center gap-2.5 font-display text-2xl font-bold tracking-tight sm:text-3xl">
         <Trophy size={26} className="text-accent" aria-hidden />
-        Classement
+        {t('nav.leaderboard')}
       </h1>
       <p className="mt-2 text-sm text-muted">
         Classement Glicko-2, comme sur les grandes plateformes. Il faut au moins {minGames} parties

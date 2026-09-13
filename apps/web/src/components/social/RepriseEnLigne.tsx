@@ -61,7 +61,7 @@ export function RepriseEnLigne() {
           <div className="mt-2.5 flex items-center gap-2">
             <Link href={partie.href}>
               <Button size="sm" variant="primary" icon={<Swords size={14} />}>
-                Reprendre
+                {t('next.resume')}
               </Button>
             </Link>
             <button
@@ -71,14 +71,14 @@ export function RepriseEnLigne() {
               onClick={oublierPartieEnLigne}
               className="rounded-[var(--radius-sm)] px-2 py-1 text-[12px] font-medium text-muted transition-colors hover:bg-surface-hover hover:text-ink"
             >
-              Laisser tomber
+              {t('bits.giveUp')}
             </button>
           </div>
         </div>
         <button
           type="button"
           onClick={oublierPartieEnLigne}
-          aria-label="Fermer"
+          aria-label={t('common.close')}
           className="-mr-1 -mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-[var(--radius-sm)] text-faint transition-colors hover:bg-surface-hover hover:text-ink"
         >
           <X size={15} aria-hidden />

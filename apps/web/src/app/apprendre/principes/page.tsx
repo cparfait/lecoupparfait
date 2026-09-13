@@ -84,7 +84,7 @@ export default function PrincipesPage() {
           consultent ; ces quatre questions se récitent. */}
       <Card className="overflow-hidden">
         <EnTeteDeCarte
-          titre="Avant chaque coup"
+          titre={t('bits.beforeEachMove')}
           icone={<ListChecks size={14} aria-hidden />}
           teinte={TEINTE}
           fin={
@@ -206,7 +206,7 @@ export default function PrincipesPage() {
                   'border-[color-mix(in_oklab,var(--q-inaccuracy)_45%,transparent)]',
                 )}
               >
-                <span className="font-semibold text-ink">Sauf </span>
+                <span className="font-semibold text-ink">{t('bits.except')} </span>
                 <TexteAvecOuvertures as="span" texte={principe.sauf} />
               </p>
             </Card>
@@ -229,7 +229,7 @@ export default function PrincipesPage() {
             {t('tier.session')}
           </ButtonLink>
           <ButtonLink href="/glossaire" icon={<BookOpen size={15} />}>
-            Glossaire
+            {t('nav.glossary')}
           </ButtonLink>
         </div>
       </Card>

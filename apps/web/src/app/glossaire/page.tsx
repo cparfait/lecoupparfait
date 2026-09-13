@@ -229,7 +229,9 @@ export default function GlossaryPage() {
 
   return (
     <div className="page">
-      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Glossaire</h1>
+      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+        {t('nav.glossary')}
+      </h1>
       <p className="mt-2 max-w-2xl text-muted max-lg:text-[14px] max-lg:leading-relaxed">
         {entries.length} termes définis en français clair — les règles, le matériel, les phases de
         la partie, et les motifs que le coach sait reconnaître et nommer dans tes parties.{' '}

@@ -577,7 +577,7 @@ function ImportScreen({
 
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <Button size="sm" variant="ghost" icon={<ClipboardPaste size={14} />} onClick={paste}>
-                Coller
+                {t('bits.paste')}
               </Button>
               {parsed && (
                 <Chip tone="success">
@@ -587,7 +587,7 @@ function ImportScreen({
                     : ''}
                 </Chip>
               )}
-              {input.trim() && !parsed && <Chip tone="danger">Format non reconnu</Chip>}
+              {input.trim() && !parsed && <Chip tone="danger">{t('bits.unrecognisedFormat')}</Chip>}
             </div>
           </div>
         </details>
@@ -1464,7 +1464,7 @@ export function ReviewScreen({
             className={relecture ? 'max-sm:hidden' : undefined}
             title={t('analysis.saveImageTitle')}
           >
-            Image
+            {t('bits.asImage')}
           </Button>
           {/* Une analyse ouverte par un lien n'a pas d'« autre partie » : il
               n'y a pas d'écran d'import derrière, on est arrivé directement
@@ -1541,7 +1541,7 @@ export function ReviewScreen({
               variant="ghost"
               onClick={() => setOrientation((o) => (o === 'w' ? 'b' : 'w'))}
             >
-              Retourner
+              {t('bits.flip')}
             </Button>
             <div className="min-w-0 basis-full sm:basis-auto sm:flex-1">
               <EvalGraph

@@ -106,7 +106,7 @@ export function ImportEnLigne({
           setParties(null)
           setErreur(null)
         }}
-        label="Service"
+        label={t('bits.service')}
         // La vignette du service dans l'onglet : les deux se choisissent d'un
         // coup d'œil, à leur couleur, plutôt qu'en lisant deux mots proches.
         options={SOURCES.map((entry) => ({
@@ -144,7 +144,7 @@ export function ImportEnLigne({
           disabled={!pseudo.trim()}
           icon={<Download size={15} aria-hidden />}
         >
-          Charger
+          {t('bits.load')}
         </Button>
       </form>
 

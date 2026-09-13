@@ -101,14 +101,14 @@ export default function PlusPage() {
                 href="/connexion"
                 icon={LogIn}
                 titre={t('nav.signIn')}
-                phrase="un pseudo et un mot de passe"
+                phrase={t('bits.aNameAndPassword')}
                 compacte
               />
               <CarteDestination
                 href="/connexion?inscription=1"
                 icon={UserPlus}
                 titre={t('nav.signUp')}
-                phrase="gratuit, et sans courriel obligatoire"
+                phrase={t('bits.freeNoEmail')}
                 compacte
               />
             </>

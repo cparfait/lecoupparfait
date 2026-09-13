@@ -183,7 +183,7 @@ export default function ArenaPage() {
                   })}
             </p>
             <Button variant="primary" icon={<Play size={15} />} onClick={() => void act('join')}>
-              Rejoindre
+              {t('friends.join')}
             </Button>
           </div>
         ) : mine?.playing ? (
@@ -214,7 +214,7 @@ export default function ArenaPage() {
               icon={<Play size={14} />}
               onClick={() => void act('join')}
             >
-              Reprendre
+              {t('next.resume')}
             </Button>
           </div>
         )}
@@ -222,7 +222,7 @@ export default function ArenaPage() {
 
       {/* ── Classement ───────────────────────────────────────────────── */}
       <Card className="mt-3 p-3">
-        <p className="mb-2 text-[12px] font-semibold text-faint">Classement</p>
+        <p className="mb-2 text-[12px] font-semibold text-faint">{t('arena.standings')}</p>
         {standings.length === 0 ? (
           <p className="text-[14px] text-faint">{t('tournament.nobodyRegistered')}</p>
         ) : (

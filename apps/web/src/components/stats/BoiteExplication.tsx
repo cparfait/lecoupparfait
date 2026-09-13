@@ -59,6 +59,7 @@ export function BoiteExplication({
   demande: DemandeExplication
   onFermer: () => void
 }) {
+  const t = useT()
   const boite = useRef<HTMLDivElement>(null)
   useDialogue(boite, { onFermer })
 
@@ -79,7 +80,7 @@ export function BoiteExplication({
           type="button"
           onClick={onFermer}
           className="absolute right-3 top-3 rounded p-1 text-faint transition-colors hover:text-ink"
-          aria-label="Fermer"
+          aria-label={t('common.close')}
         >
           <X size={16} aria-hidden />
         </button>

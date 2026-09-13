@@ -340,7 +340,7 @@ export default function OpeningsPage() {
               onClick={undo}
               disabled={history.length === 0}
             >
-              Reculer
+              {t('bits.back')}
             </Button>
             <Button
               size="sm"
@@ -349,7 +349,7 @@ export default function OpeningsPage() {
               onClick={reset}
               disabled={history.length === 0}
             >
-              Position initiale
+              {t('bits.startPosition')}
             </Button>
           </div>
 

@@ -212,7 +212,7 @@ export function RubanCoups({
         type="button"
         onClick={() => onSeek(Math.min(coups.length - 1, cursor + 1))}
         disabled={cursor >= coups.length - 1}
-        aria-label="Coup suivant"
+        aria-label={t('bits.nextMove')}
         className="grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius-sm)] bg-surface-strong text-ink ring-1 ring-inset ring-line-strong transition-colors hover:bg-surface-hover disabled:opacity-30 disabled:ring-line pointer-coarse:h-12 pointer-coarse:w-12"
       >
         <ChevronRight size={18} aria-hidden />

@@ -88,7 +88,7 @@ export default function MailboxPage() {
               icon={<RefreshCw size={14} />}
               onClick={() => void refresh()}
             >
-              Actualiser
+              {t('bits.refresh')}
             </Button>
             <Button
               size="sm"
@@ -99,7 +99,7 @@ export default function MailboxPage() {
                 await refresh()
               }}
             >
-              Vider
+              {t('bits.clear')}
             </Button>
           </div>
         }
@@ -110,7 +110,7 @@ export default function MailboxPage() {
       {mails.length === 0 ? (
         <EmptyState
           icon={<Mail size={28} />}
-          title="Aucun message"
+          title={t('bits.noMessage')}
           description={t('rest.mailboxEmptyHint')}
           action={
             <Link href="/connexion">

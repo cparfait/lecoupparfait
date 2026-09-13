@@ -151,7 +151,7 @@ export function MiseEnRoute() {
             void installation.installer()
           }}
         >
-          Installer
+          {t('auth.install')}
         </Button>
       }
     />
@@ -224,7 +224,7 @@ function ProposerNotifications({
             void activer()
           }}
         >
-          Activer
+          {t('notifications.enable')}
         </Button>
       }
     />
@@ -279,7 +279,7 @@ function Bandeau({
         <button
           type="button"
           onClick={onFermer}
-          aria-label="Fermer"
+          aria-label={t('common.close')}
           className="-mr-1 -mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-[var(--radius-sm)] text-faint transition-colors hover:bg-surface-hover hover:text-ink"
         >
           <X size={15} aria-hidden />

@@ -241,7 +241,7 @@ export default function VisionPage() {
                     icon={phase === 'fini' ? <RotateCcw size={16} /> : <Play size={16} />}
                     onClick={start}
                   >
-                    {phase === 'fini' ? 'Recommencer' : 'Commencer'}
+                    {phase === 'fini' ? t('puzzles.restart') : t('learn.start')}
                   </Button>
                 </div>
               </div>

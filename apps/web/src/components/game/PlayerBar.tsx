@@ -15,6 +15,7 @@ import { clockUrgency, formatClock, type ClockState, type TimeControl } from '@c
 import { PenduleVive } from './PenduleVive.tsx'
 import { pieceUrl } from '@/components/board/boardKit.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export interface PlayerBarProps {
   name: string
@@ -259,6 +260,7 @@ function CapturedRow({
   pieceSet: string
   color: Color
 }) {
+  const t = useT()
   const order: PieceSymbol[] = ['q', 'r', 'b', 'n', 'p']
   const sorted = [...pieces].sort((a, b) => order.indexOf(a) - order.indexOf(b))
 
@@ -283,7 +285,7 @@ function CapturedRow({
       : 'drop-shadow(0 0 1px rgb(0 0 0 / .95)) drop-shadow(0 0 1.5px rgb(0 0 0 / .6))'
 
   return (
-    <span className="flex items-center" role="img" aria-label="Pièces capturées">
+    <span className="flex items-center" role="img" aria-label={t('bits.capturedPieces')}>
       {sorted.map((type, index) => (
         <img
           key={`${type}-${index}`}

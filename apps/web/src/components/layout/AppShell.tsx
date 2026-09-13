@@ -138,7 +138,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               Au-delà, il n'y a plus qu'elle, et c'est là qu'elle sert. */}
           <Link
             href="/"
-            title="Accueil"
+            title={t('nav.home')}
             className="flex shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] px-2 py-1.5 font-display text-[15px] font-semibold tracking-tight text-ink transition-colors hover:bg-surface-hover sm:text-[17px]"
           >
             <Home size={16} className="hidden shrink-0 text-accent lg:block" aria-hidden />
@@ -152,10 +152,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               source de défilement horizontal de tout le site. En dessous, la
               barre du bas et le menu font le travail, et ils sont faits pour
               le doigt. */}
-          <nav
-            className="ml-2 hidden items-center gap-0.5 lg:flex"
-            aria-label="Navigation principale"
-          >
+          <nav className="ml-2 hidden items-center gap-0.5 lg:flex" aria-label={t('bits.mainNav')}>
             {SECTIONS.map((section) => (
               <MenuSection
                 key={section.id}
@@ -207,7 +204,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                 cette rangée. Les icônes sont nommées pour les lecteurs d'écran
                 et par leur infobulle, et l'on voit d'un coup d'œil laquelle
                 est ouverte. Rien n'est plus replié nulle part. */}
-            <nav className="hidden items-center gap-0.5 max-lg:paysage:flex" aria-label="Rubriques">
+            <nav
+              className="hidden items-center gap-0.5 max-lg:paysage:flex"
+              aria-label={t('bits.sections')}
+            >
               {RACCOURCIS_MOBILES.map((entree) => {
                 const Icone = entree.icon
                 const active = estActif(entree, pathname)
@@ -418,7 +418,11 @@ function MenuSection({
               )}
             </span>
             {reservee && (
-              <Lock size={12} className="mt-1 shrink-0 text-faint" aria-label="demande un compte" />
+              <Lock
+                size={12}
+                className="mt-1 shrink-0 text-faint"
+                aria-label={t('bits.needsAccount')}
+              />
             )}
           </Link>
         )
@@ -457,7 +461,7 @@ function BottomBar({ pathname }: { pathname: string }) {
       // un filet à 9 % de blanc. Une barre de navigation posée par-dessus le
       // contenu doit se voir comme posée.
       className="fixed inset-x-0 bottom-0 z-50 border-t border-line-strong bg-[var(--flottant)]/95 backdrop-blur-xl safe-bottom lg:hidden paysage:hidden"
-      aria-label="Navigation rapide"
+      aria-label={t('bits.quickNav')}
     >
       <div className="mx-auto flex max-w-md items-stretch justify-around px-1 pt-1.5">
         {RACCOURCIS_MOBILES.map((entree) => {
@@ -549,7 +553,7 @@ function SiteFooter() {
     <footer className="browser-only mt-auto hidden border-t border-line/60 py-6 lg:block">
       <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-3 px-5 text-xs text-faint">
         <p>{t('misc.footer')}</p>
-        <nav className="flex gap-4" aria-label="Liens secondaires">
+        <nav className="flex gap-4" aria-label={t('bits.secondaryLinks')}>
           {PAGES_APPLICATION.map((page) => (
             <Link key={page.href} href={page.href} className="transition-colors hover:text-ink">
               {t(page.labelKey)}

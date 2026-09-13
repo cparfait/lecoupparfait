@@ -33,7 +33,7 @@ export function QueteTerminee({
   restantes,
   serie,
   onContinuer,
-  libelleContinuer = 'Continuer',
+  libelleContinuer,
 }: {
   quete: Quete
   /** Quêtes encore à faire aujourd'hui, celle-ci déduite. */
@@ -42,6 +42,7 @@ export function QueteTerminee({
   serie?: number
   onContinuer: () => void
   /** « Puzzle suivant », « Rejouer une partie » : chaque écran a son verbe. */
+  /** Absent : « Continuer ». Le défaut se résout au rendu, avec `t()`. */
   libelleContinuer?: string
 }) {
   const t = useT()
@@ -110,7 +111,7 @@ export function QueteTerminee({
             fullWidth
             onClick={onContinuer}
           >
-            {libelleContinuer}
+            {libelleContinuer ?? t('lessonExtra.carryOn')}
           </Button>
           <Link href="/" className="block">
             <Button

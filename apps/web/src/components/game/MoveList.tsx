@@ -218,14 +218,14 @@ export function MoveList({
           <NavButton
             onClick={() => onSeek(cursor + 1)}
             disabled={cursor >= moves.length - 1}
-            label="Coup suivant"
+            label={t('bits.nextMove')}
           >
             <ChevronRight size={17} aria-hidden />
           </NavButton>
           <NavButton
             onClick={() => onSeek(moves.length - 1)}
             disabled={cursor >= moves.length - 1}
-            label="Fin"
+            label={t('bits.toEnd')}
           >
             <ChevronLast size={17} aria-hidden />
           </NavButton>

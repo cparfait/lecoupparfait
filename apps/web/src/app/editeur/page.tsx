@@ -220,13 +220,13 @@ export default function EditorPage() {
               )}
             >
               <Eraser size={14} aria-hidden />
-              Enlever
+              {t('bits.remove')}
             </button>
           </Card>
 
           {/* ── Trait et plateau ───────────────────────────────── */}
           <Card className="p-3">
-            <p className="mb-2 text-[12px] font-semibold text-faint">Trait</p>
+            <p className="mb-2 text-[12px] font-semibold text-faint">{t('bits.toMove')}</p>
             <div className="flex gap-1.5">
               {(['w', 'b'] as const).map((colour) => (
                 <button
@@ -253,7 +253,7 @@ export default function EditorPage() {
                 onClick={() => setOrientation((o) => (o === 'w' ? 'b' : 'w'))}
                 fullWidth
               >
-                Retourner
+                {t('bits.flip')}
               </Button>
               <Button
                 size="sm"
@@ -262,7 +262,7 @@ export default function EditorPage() {
                 onClick={() => setFen(EMPTY.replace('w', turn))}
                 fullWidth
               >
-                Vider
+                {t('bits.clear')}
               </Button>
             </div>
             <Button

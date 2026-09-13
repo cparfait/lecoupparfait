@@ -372,7 +372,7 @@ function RubanDesCoups({
         type="button"
         onClick={() => onCursor(Math.min(report.moves.length - 1, cursor + 1))}
         disabled={cursor >= report.moves.length - 1}
-        aria-label="Coup suivant"
+        aria-label={t('bits.nextMove')}
         className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)] text-muted transition-colors hover:bg-surface-hover disabled:opacity-30"
       >
         <ChevronRight size={18} aria-hidden />

@@ -240,15 +240,15 @@ export default function PendulePage() {
             className="inline-flex items-center gap-1.5 text-[14px] text-muted transition-colors hover:text-ink"
           >
             <ArrowLeft size={14} aria-hidden />
-            Outils
+            {t('nav.tools')}
           </Link>
           <h1 className="mt-3 font-display text-2xl font-bold tracking-tight sm:text-3xl">
-            Pendule
+            {t('nav.clock')}
           </h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">{t('clock.intro')}</p>
 
           <Card className="mt-5 p-4">
-            <p className="text-[12px] font-semibold text-faint">Cadence</p>
+            <p className="text-[12px] font-semibold text-faint">{t('play.timeControl')}</p>
             <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
               {CADENCES.map((cadence) => (
                 <button
@@ -307,7 +307,7 @@ export default function PendulePage() {
             <Chip tone="neutral">coup {Math.floor(state.moves.length / 2) + 1}</Chip>
             {clock.running && !tombe && (
               <Button variant="ghost" size="sm" icon={<Pause size={14} />} onClick={basculerPause}>
-                Pause
+                {t('commentary.pauseShort')}
               </Button>
             )}
             {enPause && !tombe && (
@@ -317,11 +317,11 @@ export default function PendulePage() {
                 icon={<Play size={14} />}
                 onClick={() => reprendre(clock.running ?? 'w')}
               >
-                Reprendre
+                {t('commentary.resumeShort')}
               </Button>
             )}
             <Button variant="ghost" size="sm" icon={<RotateCcw size={14} />} onClick={remettre}>
-              Remettre
+              {t('bits.reset')}
             </Button>
           </div>
 
@@ -340,7 +340,7 @@ export default function PendulePage() {
               </p>
               <div className="mt-3 flex flex-wrap justify-center gap-2">
                 <Button variant="secondary" icon={<RotateCcw size={15} />} onClick={remettre}>
-                  Nouvelle partie
+                  {t('game.newGame')}
                 </Button>
                 {state.moves.length > 0 && (
                   <Button variant="primary" icon={<Gauge size={15} />} onClick={analyser}>
@@ -369,7 +369,7 @@ export default function PendulePage() {
                 icon={<Gauge size={14} />}
                 onClick={analyser}
               >
-                Analyser
+                {t('bits.analyse')}
               </Button>
             </Card>
           )}

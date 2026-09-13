@@ -104,7 +104,7 @@ export function QuestionLibre({
           icon={<Sparkles size={14} aria-hidden />}
           onClick={() => void envoyer(questionParDefaut)}
         >
-          Approfondir
+          {t('bits.goDeeper')}
         </Button>
       )}
 
@@ -165,7 +165,7 @@ export function QuestionLibre({
           size="sm"
           variant="ghost"
           disabled={!question.trim() || encours}
-          aria-label="Envoyer"
+          aria-label={t('bits.send')}
           icon={<Send size={14} aria-hidden />}
         />
       </form>

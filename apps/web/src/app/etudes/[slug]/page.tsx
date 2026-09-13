@@ -266,7 +266,7 @@ export default function StudyPage() {
       <div className="grid gap-3 lg:grid-cols-[190px_minmax(0,1fr)_300px]">
         {/* ── Chapitres ────────────────────────────────────────────── */}
         <Card className="p-2">
-          <p className="mb-1.5 px-1 text-[12px] font-semibold text-faint">Chapitres</p>
+          <p className="mb-1.5 px-1 text-[12px] font-semibold text-faint">{t('learn.chapters')}</p>
           <div className="space-y-0.5">
             {study.chapters.map((entry) => (
               <button
@@ -299,7 +299,7 @@ export default function StudyPage() {
               icon={<Plus size={14} />}
               onClick={() => void addChapter()}
             >
-              Chapitre
+              {t('bits.chapter')}
             </Button>
           )}
         </Card>
@@ -341,7 +341,7 @@ export default function StudyPage() {
         {/* ── Coups et commentaire ─────────────────────────────────── */}
         <div className="flex min-w-0 flex-col gap-2">
           <Card className="max-h-52 overflow-y-auto p-2">
-            <p className="mb-1 px-1 text-[12px] font-semibold text-faint">Coups</p>
+            <p className="mb-1 px-1 text-[12px] font-semibold text-faint">{t('game.moves')}</p>
             {chapter && chapter.moves.length > 0 ? (
               <div className="flex flex-wrap gap-0.5">
                 {chapter.moves.map((san, index) => (

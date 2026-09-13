@@ -224,7 +224,7 @@ export function ChallengeWatcher() {
         </span>
 
         <div className="min-w-0 flex-1">
-          <p className="text-[12px] font-bold text-accent">Invitation</p>
+          <p className="text-[12px] font-bold text-accent">{t('bits.invitation')}</p>
           <p className="text-sm font-semibold leading-snug">
             {challenge.from.username} te propose une partie
           </p>
@@ -247,8 +247,8 @@ export function ChallengeWatcher() {
           onClick={() => void respond(false)}
           disabled={answering}
           className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)] text-faint transition-colors hover:bg-surface-hover hover:text-ink disabled:opacity-50"
-          aria-label="Refuser"
-          title="Refuser"
+          aria-label={t('friends.decline')}
+          title={t('friends.decline')}
         >
           <X size={17} aria-hidden />
         </button>
@@ -259,7 +259,7 @@ export function ChallengeWatcher() {
           className="flex h-9 shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] bg-accent px-3 text-sm font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110 disabled:opacity-50"
         >
           <Check size={15} aria-hidden />
-          Accepter
+          {t('friends.accept')}
         </button>
       </div>
     </Alerte>

@@ -197,7 +197,7 @@ export default function WatchPage() {
 
   return (
     <div className="page-etroite">
-      <SectionTitle hint={t('watch.intro')}>Regarder</SectionTitle>
+      <SectionTitle hint={t('watch.intro')}>{t('bits.watch')}</SectionTitle>
 
       {/* ── Les parties solo de ses amis ─────────────────────────────────
           Elles ne passent pas par le serveur temps réel — une partie contre
@@ -212,7 +212,7 @@ export default function WatchPage() {
         <div className="mb-3">
           <SegmentedControl
             size="sm"
-            label="Quelles parties afficher"
+            label={t('bits.whichGames')}
             value={filtre}
             onChange={setFiltre}
             options={[

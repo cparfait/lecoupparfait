@@ -149,7 +149,7 @@ export function DemandesDAmi({ className }: { className?: string }) {
               disabled={enCours === demande.id}
               onClick={() => void repondre(demande, true)}
             >
-              Accepter
+              {t('friends.accept')}
             </Button>
             <Button
               size="sm"

@@ -265,7 +265,7 @@ export default function CorrespondencePage() {
                       await refresh()
                     }}
                   >
-                    Abandonner
+                    {t('game.resign')}
                   </Button>
                 </div>
               )}

@@ -126,7 +126,7 @@ export function BoiteTerme({
           type="button"
           onClick={onFermer}
           className="absolute right-3 top-3 rounded p-1 text-faint transition-colors hover:text-ink"
-          aria-label="Fermer"
+          aria-label={t('common.close')}
         >
           <X size={16} aria-hidden />
         </button>

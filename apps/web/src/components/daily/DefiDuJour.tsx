@@ -292,7 +292,7 @@ function DefiCliquable({
       {defiFait ? (
         <Check size={18} className="shrink-0 text-[var(--q-best)]" aria-hidden />
       ) : (
-        <span className="shrink-0 text-sm font-semibold text-accent">Jouer →</span>
+        <span className="shrink-0 text-sm font-semibold text-accent">{t('bits.playArrow')}</span>
       )}
     </>
   )

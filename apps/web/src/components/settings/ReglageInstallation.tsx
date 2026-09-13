@@ -47,7 +47,7 @@ export function ReglageInstallation() {
             icon={<Download size={14} />}
             onClick={() => void installer()}
           >
-            Installer
+            {t('auth.install')}
           </Button>
         </>
       ) : (

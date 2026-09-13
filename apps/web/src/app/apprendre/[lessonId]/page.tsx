@@ -379,7 +379,7 @@ export default function LessonPage() {
             className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
           >
             <ArrowLeft size={15} aria-hidden />
-            Programme
+            {t('bits.syllabus')}
           </Link>
           <span className="text-faint" aria-hidden>
             /

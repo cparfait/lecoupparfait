@@ -241,7 +241,7 @@ export default function LocalGamePage() {
         title={t('local.flipBoard')}
         aria-label={t('local.flipBoard')}
       >
-        <span className="max-sm:hidden">Retourner</span>
+        <span className="max-sm:hidden">{t('bits.flip')}</span>
       </Button>
       <Button
         size="sm"
@@ -252,17 +252,17 @@ export default function LocalGamePage() {
         title={t('local.undoLast')}
         aria-label={t('local.undoLast')}
       >
-        <span className="max-sm:hidden">Annuler</span>
+        <span className="max-sm:hidden">{t('bits.undo')}</span>
       </Button>
       <Button
         size="sm"
         variant="ghost"
         icon={<RefreshCw size={14} />}
         onClick={newGame}
-        title="Nouvelle partie"
-        aria-label="Nouvelle partie"
+        title={t('game.newGame')}
+        aria-label={t('game.newGame')}
       >
-        <span className="max-sm:hidden">Nouvelle partie</span>
+        <span className="max-sm:hidden">{t('game.newGame')}</span>
       </Button>
       <CommentaryToggle
         active={commentaryMode}
@@ -426,7 +426,7 @@ export default function LocalGamePage() {
           <Card className="flex max-h-[45vh] flex-col overflow-hidden lg:max-h-none lg:min-h-[220px] lg:flex-1">
             {grandEcran && (
               <div className="flex items-center gap-2 border-b border-line/60 px-3 py-2">
-                <span className="text-[12px] font-semibold text-faint">Coups</span>
+                <span className="text-[12px] font-semibold text-faint">{t('game.moves')}</span>
                 {(state.isGameOver || rotationEnAttente) && (
                   <span className="truncate text-[12px] text-muted">· {etatDuTrait}</span>
                 )}

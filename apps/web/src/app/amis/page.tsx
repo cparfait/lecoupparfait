@@ -527,7 +527,7 @@ function FriendsBook() {
                       icon={<Eye size={14} />}
                       title={`Regarder la partie de ${friend.username} contre ${enPartie.adversaire}`}
                     >
-                      Regarder
+                      {t('bits.watch')}
                     </ButtonLink>
                   )}
                   <Button

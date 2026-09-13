@@ -960,7 +960,7 @@ function SetupScreen({
             bord. Le même décalage borne la graduation en dessous. */}
         <div className="mt-4">
           <label htmlFor="level" className="block text-sm font-medium">
-            Niveau fin
+            {t('bits.fineLevel')}
           </label>
           {/* Le repère prend la teinte de l'adversaire, éclaircie pour que
               l'encre reste lisible sur toutes les matières. */}
@@ -2342,19 +2342,19 @@ function GameScreen({
             variant="primary"
             icon={<RefreshCw size={14} />}
             onClick={onNewGame}
-            title="Nouvelle partie"
-            aria-label="Nouvelle partie"
+            title={t('game.newGame')}
+            aria-label={t('game.newGame')}
           >
-            <span className="max-sm:hidden">Nouvelle partie</span>
+            <span className="max-sm:hidden">{t('game.newGame')}</span>
           </Button>
           <ButtonLink
             href="/jouer"
             size="sm"
             variant="ghost"
             icon={<LayoutGrid size={14} />}
-            title="Menu"
+            title={t('nav.menu')}
           >
-            <span className="max-sm:hidden">Menu</span>
+            <span className="max-sm:hidden">{t('nav.menu')}</span>
           </ButtonLink>
         </>
       ) : sansAide ? null : (
@@ -2369,7 +2369,7 @@ function GameScreen({
         >
           {/* Le libellé disparaît sous `sm` : l'icône est parlante, le titre
               reste, et la barre tient sur une ligne au lieu de trois. */}
-          <span className="max-sm:hidden">Indice</span>
+          <span className="max-sm:hidden">{t('game.hint')}</span>
         </Button>
       )}
       {/* Masqué une fois la partie finie, comme sur la barre du pouce : on
@@ -2386,7 +2386,7 @@ function GameScreen({
           title={t('computer.undoTitle')}
           aria-label={t('computer.undoAria')}
         >
-          <span className="max-sm:hidden">Annuler</span>
+          <span className="max-sm:hidden">{t('bits.undo')}</span>
         </Button>
       )}
 
@@ -2404,7 +2404,7 @@ function GameScreen({
           onClick={onNewGame}
           icone={<RefreshCw size={15} className="shrink-0 text-accent" aria-hidden />}
         >
-          Nouvelle partie
+          {t('game.newGame')}
         </MenuItem>
         <MenuItem
           onClick={handleResign}
@@ -2412,7 +2412,7 @@ function GameScreen({
           danger
           icone={<Flag size={15} className="shrink-0" aria-hidden />}
         >
-          Abandonner
+          {t('game.resign')}
         </MenuItem>
 
         {/* Absent en partie classée, comme dans la barre du pouce : le mode y
@@ -2688,7 +2688,9 @@ function GameScreen({
                 declencheur={() => (
                   <span className="flex min-h-11 w-full flex-col items-center justify-center gap-0.5">
                     <MoreHorizontal size={19} aria-hidden />
-                    <span className="text-[12px] font-medium leading-none">Options</span>
+                    <span className="text-[12px] font-medium leading-none">
+                      {t('bits.options')}
+                    </span>
                   </span>
                 )}
               >
@@ -2696,7 +2698,7 @@ function GameScreen({
                   onClick={onNewGame}
                   icone={<RefreshCw size={15} className="shrink-0 text-accent" aria-hidden />}
                 >
-                  Nouvelle partie
+                  {t('game.newGame')}
                 </MenuItem>
                 <MenuItem
                   href="/jouer"
@@ -2723,12 +2725,12 @@ function GameScreen({
                 <>
                   <ActionDuPouce
                     icone={<RefreshCw size={19} aria-hidden />}
-                    libelle="Rejouer"
+                    libelle={t('rush.playAgain')}
                     onClick={onRematch}
                   />
                   <ActionDuPouce
                     icone={<LayoutGrid size={19} aria-hidden />}
-                    libelle="Menu"
+                    libelle={t('nav.menu')}
                     href="/jouer"
                   />
                 </>
@@ -2736,7 +2738,7 @@ function GameScreen({
                 <>
                   <ActionDuPouce
                     icone={<Flag size={19} aria-hidden />}
-                    libelle="Abandonner"
+                    libelle={t('game.resign')}
                     onClick={handleResign}
                     danger
                   />
@@ -2744,13 +2746,13 @@ function GameScreen({
                     <>
                       <ActionDuPouce
                         icone={<Lightbulb size={19} aria-hidden />}
-                        libelle="Indice"
+                        libelle={t('game.hint')}
                         onClick={handleHint}
                         disabled={state.turn !== playerColor}
                       />
                       <ActionDuPouce
                         icone={<Undo2 size={19} aria-hidden />}
-                        libelle="Annuler"
+                        libelle={t('bits.undo')}
                         onClick={handleUndo}
                         disabled={state.moves.length === 0}
                       />
@@ -2860,7 +2862,7 @@ function GameScreen({
           <Card className="flex max-h-[45vh] flex-col overflow-hidden lg:max-h-none lg:min-h-[220px] lg:flex-1">
             {grandEcran && (
               <div className="flex items-center gap-2 border-b border-line/60 px-3 py-2">
-                <span className="text-[12px] font-semibold text-faint">Coups</span>
+                <span className="text-[12px] font-semibold text-faint">{t('game.moves')}</span>
                 {classee && pastilleClassee}
                 <div ref={setEmplacementBascule} className="ml-auto" />
               </div>

@@ -589,23 +589,23 @@ function EndgameTrainer({
                   icon={<RotateCcw size={14} />}
                   onClick={() => setAttempt((n) => n + 1)}
                 >
-                  Recommencer
+                  {t('puzzles.restart')}
                 </Button>
                 <Button variant="ghost" onClick={() => undo(2)} disabled={state.moves.length < 2}>
-                  Annuler
+                  {t('bits.undo')}
                 </Button>
               </>
             ) : (
               <>
                 <Button variant="primary" fullWidth onClick={onNext}>
-                  Position suivante
+                  {t('level.nextPosition')}
                 </Button>
                 <Button
                   variant="ghost"
                   icon={<RotateCcw size={14} />}
                   onClick={() => setAttempt((n) => n + 1)}
                 >
-                  Rejouer
+                  {t('rush.playAgain')}
                 </Button>
               </>
             )}

@@ -18,6 +18,7 @@ import { useEffect, useRef, useState } from 'react'
 import { AlertTriangle, Check, Info, X } from 'lucide-react'
 import clsx from 'clsx'
 import { Alerte } from '@/components/ui/Alerte.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export type ToastKind = 'info' | 'success' | 'warning' | 'error'
 
@@ -142,6 +143,7 @@ export function ToastHost() {
  * le lecteur d'écran, une confirmation attend qu'il ait fini sa phrase.
  */
 function Message({ item }: { item: Toast }) {
+  const t = useT()
   const Icon = ICONS[item.kind]
   const restant = useRef(item.durationMs)
   const departDu = useRef<number | null>(null)
@@ -170,7 +172,7 @@ function Message({ item }: { item: Toast }) {
   return (
     <Alerte
       role={item.kind === 'error' ? 'alert' : 'status'}
-      label="Notification"
+      label={t('bits.notification')}
       teinte={TEINTES[item.kind]}
       // Opaque : un message posé par-dessus la page se lit d'un coup
       // d'œil ou ne sert à rien, et le verre laissait passer le texte
@@ -195,7 +197,7 @@ function Message({ item }: { item: Toast }) {
           type="button"
           onClick={() => dismiss(item.id)}
           className="-my-3 -mr-3 grid h-11 w-11 shrink-0 place-items-center rounded text-faint transition-colors hover:text-ink"
-          aria-label="Fermer"
+          aria-label={t('common.close')}
         >
           <X size={14} aria-hidden />
         </button>

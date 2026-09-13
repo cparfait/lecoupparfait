@@ -1068,7 +1068,7 @@ export default function LiveGamePage() {
           <Card className="flex max-h-[40vh] flex-col overflow-hidden lg:max-h-none lg:min-h-[120px]">
             {grandEcran && (
               <div className="flex items-center gap-2 border-b border-line/60 px-3 py-2">
-                <span className="text-[12px] font-semibold text-faint">Coups</span>
+                <span className="text-[12px] font-semibold text-faint">{t('game.moves')}</span>
                 <div ref={setEmplacementBascule} className="ml-auto" />
               </div>
             )}
