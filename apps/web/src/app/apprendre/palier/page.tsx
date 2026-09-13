@@ -149,7 +149,7 @@ export default function PalierPage() {
 
   return (
     <div className="page">
-      <TitreDePage retour={{ href: '/apprendre', label: 'Apprendre' }} intro={t('tier.intro')}>
+      <TitreDePage retour={{ href: '/apprendre', label: t('nav.learn') }} intro={t('tier.intro')}>
         {t('tier.title')}
       </TitreDePage>
 

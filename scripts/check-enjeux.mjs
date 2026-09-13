@@ -21,6 +21,12 @@
  *    au-delà, la fiche ne s'afficherait presque jamais d'elle-même, puisqu'il
  *    faudrait que la partie suive exactement la théorie aussi longtemps.
  *
+ * Les textes ne sont plus dans les fiches mais dans le dictionnaire : elles ne
+ * portent que des clés depuis qu'elles existent en deux langues. Le contrôle les
+ * résout donc avant de les mesurer, **dans les deux langues complètes** — une
+ * fiche traduite à moitié est exactement le genre de trou que ce script existe
+ * pour attraper.
+ *
  * Usage :  node scripts/check-enjeux.mjs
  */
 
@@ -28,6 +34,23 @@ import { Chess } from 'chess.js'
 
 const { FICHES_ENJEUX } = await import('../apps/web/src/lib/ouvertures/enjeux.ts')
 const { ALL_LESSONS } = await import('../apps/web/src/lib/lessons/index.ts')
+const { fr } = await import('../apps/web/src/lib/i18n/fr.ts')
+const { en } = await import('../apps/web/src/lib/i18n/en.ts')
+
+const LANGUES = [
+  ['fr', fr],
+  ['en', en],
+]
+
+/** La valeur d'un chemin pointé, ou `null`. */
+function resoudre(dictionnaire, chemin) {
+  let courant = dictionnaire
+  for (const segment of String(chemin).split('.')) {
+    if (!courant || typeof courant !== 'object') return null
+    courant = courant[segment]
+  }
+  return typeof courant === 'string' ? courant : null
+}
 
 const ECO = /^[A-E][0-9]{2}$/
 /** Au-delà, la fiche ne se reconnaîtrait plus d'elle-même sur un échiquier. */
@@ -82,10 +105,18 @@ for (const fiche of FICHES_ENJEUX) {
     refusait donc les vingt-deux noms légitimes du catalogue, ce qui est le
     meilleur moyen de faire désactiver un contrôle.
   */
-  if (!fiche.nom || fiche.nom.trim().length < 4) echec(fiche, 'nom vide ou trop court')
-  for (const champ of ['idee', 'structure', 'planBlancs', 'planNoirs', 'piege']) {
-    if (!fiche[champ] || String(fiche[champ]).trim().length < 40) {
-      echec(fiche, `champ « ${champ} » vide ou trop court pour expliquer quoi que ce soit`)
+  for (const [langue, dictionnaire] of LANGUES) {
+    const nom = resoudre(dictionnaire, fiche.nom)
+    if (!nom || nom.trim().length < 4) echec(fiche, `[${langue}] nom vide ou trop court`)
+
+    for (const champ of ['idee', 'structure', 'planBlancs', 'planNoirs', 'piege']) {
+      const texte = resoudre(dictionnaire, fiche[champ])
+      if (!texte || texte.trim().length < 40) {
+        echec(
+          fiche,
+          `[${langue}] champ « ${champ} » vide ou trop court pour expliquer quoi que ce soit`,
+        )
+      }
     }
   }
 
@@ -109,21 +140,33 @@ for (const fiche of FICHES_ENJEUX) {
     Minuscules imposées, parce que la reconnaissance compare en minuscules : un
     alias écrit « Sicilienne » ne correspondrait à rien, en silence.
   */
-  if (!Array.isArray(fiche.alias) || fiche.alias.length === 0) {
-    echec(fiche, 'aucun alias de prose : le nom ne sera jamais cliquable dans un texte')
-  }
-  for (const alias of fiche.alias ?? []) {
-    if (alias !== alias.toLowerCase()) {
-      echec(fiche, `alias « ${alias} » : attendu en minuscules`)
+  for (const [langue, dictionnaire] of LANGUES) {
+    const liste = resoudre(dictionnaire, fiche.aliasKey)
+    const alias = (liste ?? '')
+      .split(',')
+      .map((mot) => mot.trim())
+      .filter(Boolean)
+
+    if (alias.length === 0) {
+      echec(fiche, `[${langue}] aucun alias de prose : le nom ne sera jamais cliquable`)
     }
-    if (alias.length < 4) {
-      echec(fiche, `alias « ${alias} » trop court : il accrocherait n'importe quel mot`)
+    for (const mot of alias) {
+      if (mot !== mot.toLowerCase()) {
+        echec(fiche, `[${langue}] alias « ${mot} » : attendu en minuscules`)
+      }
+      if (mot.length < 4) {
+        echec(fiche, `[${langue}] alias « ${mot} » trop court : il accrocherait n'importe quel mot`)
+      }
+      // Le propriétaire est suivi par langue : « london » appartient au système
+      // de Londres en anglais, et rien n'interdit qu'un autre mot le revendique
+      // en français.
+      const clef = `${langue}:${mot}`
+      const proprietaire = aliasVus.get(clef)
+      if (proprietaire && proprietaire !== fiche.id) {
+        echec(fiche, `[${langue}] alias « ${mot} » déjà revendiqué par ${proprietaire}`)
+      }
+      aliasVus.set(clef, fiche.id)
     }
-    const proprietaire = aliasVus.get(alias)
-    if (proprietaire && proprietaire !== fiche.id) {
-      echec(fiche, `alias « ${alias} » déjà revendiqué par ${proprietaire}`)
-    }
-    aliasVus.set(alias, fiche.id)
   }
 }
 

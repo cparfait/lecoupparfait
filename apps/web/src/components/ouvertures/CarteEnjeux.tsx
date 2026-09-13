@@ -66,14 +66,21 @@ export function CarteEnjeux({
       )}
     >
       <EnTeteDeCarte
-        titre={fiche.nom}
+        titre={t(fiche.nom)}
         icone={<Grid3x3 size={14} aria-hidden />}
         teinte={TEINTE}
         fin={
           <BoutonEcouter
-            quoi={fiche.nom}
-            annonce={`Écouter les enjeux de ${fiche.nom}`}
-            texte={`${fiche.nom}. ${fiche.idee} La structure : ${fiche.structure} Le plan des Blancs : ${fiche.planBlancs} Le plan des Noirs : ${fiche.planNoirs} Le piège : ${fiche.piege}`}
+            quoi={t(fiche.nom)}
+            annonce={t('stakes.listenStakes', { nom: t(fiche.nom) })}
+            texte={t('stakes.spoken', {
+              nom: t(fiche.nom),
+              idee: t(fiche.idee),
+              structure: t(fiche.structure),
+              planBlancs: t(fiche.planBlancs),
+              planNoirs: t(fiche.planNoirs),
+              piege: t(fiche.piege),
+            })}
           />
         }
       />
@@ -81,15 +88,15 @@ export function CarteEnjeux({
       <div className="p-4">
         <div className="flex flex-wrap items-center gap-1.5">
           <Chip tone="accent">{fiche.eco}</Chip>
-          <Chip>pour les {fiche.pour}</Chip>
+          <Chip>{t(fiche.pour === 'Blancs' ? 'stakes.forWhite' : 'stakes.forBlack')}</Chip>
           <span className="font-mono text-[12px] text-muted">{suite}</span>
         </div>
 
-        <p className="mt-3 text-[15px] leading-relaxed">{fiche.idee}</p>
+        <p className="mt-3 text-[15px] leading-relaxed">{t(fiche.idee)}</p>
 
         <div className="mt-4">
           <p className="text-[12px] font-semibold text-faint">{t('stakes.structure')}</p>
-          <p className="mt-1 text-[14px] leading-relaxed text-muted">{fiche.structure}</p>
+          <p className="mt-1 text-[14px] leading-relaxed text-muted">{t(fiche.structure)}</p>
         </div>
 
         {/* Les deux plans côte à côte sur grand écran : une ouverture n'a pas un
@@ -101,7 +108,7 @@ export function CarteEnjeux({
               <span className="h-2.5 w-2.5 rounded-full bg-[var(--eval-white)]" aria-hidden />
               {t('stakes.whitePlan')}
             </p>
-            <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{fiche.planBlancs}</p>
+            <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{t(fiche.planBlancs)}</p>
           </div>
           <div className="rounded-[var(--radius-sm)] border border-line bg-bg-elev p-3">
             <p className="flex items-center gap-1.5 text-[12px] font-semibold text-faint">
@@ -111,7 +118,7 @@ export function CarteEnjeux({
               />
               {t('stakes.blackPlan')}
             </p>
-            <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{fiche.planNoirs}</p>
+            <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{t(fiche.planNoirs)}</p>
           </div>
         </div>
 
@@ -128,7 +135,7 @@ export function CarteEnjeux({
             <AlertTriangle size={12} aria-hidden />
             {t('stakes.trap')}
           </p>
-          <p className="mt-1.5 text-[14px] leading-relaxed">{fiche.piege}</p>
+          <p className="mt-1.5 text-[14px] leading-relaxed">{t(fiche.piege)}</p>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">

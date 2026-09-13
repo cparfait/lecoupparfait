@@ -74,7 +74,7 @@ export default function SeancePage() {
 
   return (
     <div className="page">
-      <TitreDePage retour={{ href: '/jouer', label: 'Jouer' }} intro={t('session.intro')}>
+      <TitreDePage retour={{ href: '/jouer', label: t('nav.play') }} intro={t('session.intro')}>
         {t('session.title')}
       </TitreDePage>
 

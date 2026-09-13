@@ -33,9 +33,19 @@
  * se pose, c'est-à-dire la main sur les pièces.
  */
 
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
+
 export interface FicheEnjeux {
   id: string
-  nom: string
+  /**
+   * Nom de catalogue, par clé de dictionnaire.
+   *
+   * Les vingt-cinq fiches étaient écrites en français, et elles n'existaient
+   * qu'en français : c'est le seul endroit de l'application qui explique ce
+   * qu'une ouverture *cherche à faire*, et il n'était lisible que pour un
+   * francophone.
+   */
+  nom: TranslationKey
   /** Code ECO de la position de référence. */
   eco: string
   /**
@@ -58,15 +68,23 @@ export interface FicheEnjeux {
    *
    * Écrits en minuscules et sans article : la reconnaissance ignore la casse, et
    * l'article reste en dehors du lien.
+   *
+   * Par clé de dictionnaire, et séparés par des virgules. Ce ne sont pas des
+   * intitulés mais des formes de reconnaissance, et elles ne pouvaient
+   * reconnaître que du français : la prose devenant traduite, les liens vers les
+   * fiches disparaissaient de toute l'application dès qu'on changeait de langue.
+   * Une liste dans une chaîne plutôt qu'un tableau, parce que le dictionnaire ne
+   * porte que des chaînes — couper sur la virgule au chargement coûte moins
+   * qu'une structure de plus.
    */
-  alias: string[]
+  aliasKey: TranslationKey
   /** Qui choisit cette ouverture. */
   pour: 'Blancs' | 'Noirs'
-  idee: string
-  structure: string
-  planBlancs: string
-  planNoirs: string
-  piege: string
+  idee: TranslationKey
+  structure: TranslationKey
+  planBlancs: TranslationKey
+  planNoirs: TranslationKey
+  piege: TranslationKey
   /** Leçon guidée correspondante, quand il y en a une. */
   lecon?: string
 }
@@ -75,434 +93,339 @@ export const FICHES_ENJEUX: FicheEnjeux[] = [
   // ── Après 1.e4 e5 ───────────────────────────────────────────────────────
   {
     id: 'italienne',
-    nom: 'Partie italienne',
+    nom: 'fiches.italienne.nom',
     eco: 'C50',
     coups: ['e4', 'e5', 'Nf3', 'Nc6', 'Bc4'],
-    alias: ['italienne', 'giuoco piano', 'partie italienne'],
+    aliasKey: 'fiches.italienne.alias',
     pour: 'Blancs',
     lecon: 'italienne',
-    idee: 'Le développement le plus direct qui existe : pion au centre, cavalier, fou, et le fou regarde f7 — la case la plus faible tant que le roi noir n’a pas roqué.',
-    structure:
-      'Pions e4 contre e5, centre symétrique et fermé tant que personne ne joue d4 ou d5. Tout se décide sur le moment où ce centre s’ouvre.',
-    planBlancs:
-      'Roquer, puis c3 et d4 pour construire un gros centre de pions. À défaut, la version lente : d3, Nbd2, Nf1-g3 et une attaque de pions sur l’aile roi.',
-    planNoirs:
-      'La même chose en miroir — c6, d5 — ou bien ...Nf6 pour aller vers la défense des deux cavaliers, qui est plus tranchante.',
-    piege:
-      'Ne joue jamais Dh5 en espérant le mat du berger : les Noirs parent en développant, et tu passes trois coups à ramener ta dame.',
+    idee: 'fiches.italienne.idee',
+    structure: 'fiches.italienne.structure',
+    planBlancs: 'fiches.italienne.planBlancs',
+    planNoirs: 'fiches.italienne.planNoirs',
+    piege: 'fiches.italienne.piege',
   },
   {
     id: 'espagnole',
-    nom: 'Partie espagnole',
+    nom: 'fiches.espagnole.nom',
     eco: 'C60',
     coups: ['e4', 'e5', 'Nf3', 'Nc6', 'Bb5'],
-    alias: ['espagnole', 'ruy lopez', 'partie espagnole'],
+    aliasKey: 'fiches.espagnole.alias',
     pour: 'Blancs',
     lecon: 'espagnole',
-    idee: 'Attaquer le défenseur plutôt que le pion : le fou en b5 ne prend pas e5, il neutralise le cavalier qui le garde.',
-    structure:
-      'Centre e4 contre e5, souvent refermé par d3 et c3 côté blanc. Les parties se jouent longtemps sans aucun échange de pions.',
-    planBlancs:
-      'c3, d3, Nbd2, puis la manœuvre de cavalier vers f1 et g3 ou e3. On réarrange lentement et on attaque ensuite sur l’aile roi.',
-    planNoirs:
-      'a6 pour chasser le fou, puis d6, Be7, 0-0, et la poussée ...b5 qui gagne de l’espace sur l’aile dame.',
-    piege:
-      'L’arche de Noé : après a6, b5 et c4, les pions noirs enferment le fou blanc sur b3 et le gagnent purement et simplement.',
+    idee: 'fiches.espagnole.idee',
+    structure: 'fiches.espagnole.structure',
+    planBlancs: 'fiches.espagnole.planBlancs',
+    planNoirs: 'fiches.espagnole.planNoirs',
+    piege: 'fiches.espagnole.piege',
   },
   {
     id: 'deux-cavaliers',
-    nom: 'Défense des deux cavaliers',
+    nom: 'fiches.deux-cavaliers.nom',
     eco: 'C55',
     coups: ['e4', 'e5', 'Nf3', 'Nc6', 'Bc4', 'Nf6'],
-    alias: ['défense des deux cavaliers', 'deux cavaliers', 'fegatello', 'fried liver'],
+    aliasKey: 'fiches.deux-cavaliers.alias',
     pour: 'Noirs',
-    idee: 'Les Noirs ignorent la menace sur f7 et développent. C’est un pari sur le calcul : la position devient immédiatement tranchante.',
-    structure:
-      'Centre ouvert dès que d4 ou d5 arrive. Les pions comptent moins que le temps, dans les dix premiers coups.',
-    planBlancs:
-      'Ng5 pour taper f7 tout de suite, ou le d4 tranquille. Le premier mène au Fegatello, le second à une partie ordinaire.',
-    planNoirs: 'Après Ng5, la réponse est d5 — et surtout pas de reprendre en d5 avec le cavalier.',
-    piege:
-      'Le Fegatello : 4.Cg5 d5 5.exd5 Cxd5 perd sur 6.Cxf7 Rxf7 7.Df3+. Le coup juste est 5…Ca5, qui chasse le fou et garde tout.',
+    idee: 'fiches.deux-cavaliers.idee',
+    structure: 'fiches.deux-cavaliers.structure',
+    planBlancs: 'fiches.deux-cavaliers.planBlancs',
+    planNoirs: 'fiches.deux-cavaliers.planNoirs',
+    piege: 'fiches.deux-cavaliers.piege',
   },
   {
     id: 'ecossaise',
-    nom: 'Partie écossaise',
+    nom: 'fiches.ecossaise.nom',
     eco: 'C45',
     coups: ['e4', 'e5', 'Nf3', 'Nc6', 'd4'],
-    alias: ['écossaise', 'partie écossaise'],
+    aliasKey: 'fiches.ecossaise.alias',
     pour: 'Blancs',
-    idee: 'Ouvrir le centre au troisième coup, avant que les Noirs n’aient fini de s’installer. Rien à mémoriser : les pièces sortent sur des cases évidentes.',
-    structure:
-      'Le centre s’ouvre tout de suite. Les pions blancs et noirs s’échangent en d4, et il reste deux camps avec des pièces libres.',
-    planBlancs:
-      'Reprendre en d4 avec le cavalier, puis développer vite et occuper les colonnes ouvertes. Les positions sont simples et les pièges rares.',
-    planNoirs:
-      '...Bc5 ou ...Nf6 pour attaquer le cavalier d4 et obtenir le même développement libre.',
-    piege:
-      'Après 4…Fc5, ne joue pas Cxc6 machinalement : les Noirs reprennent en dxc6 et leur fou c5 devient très fort sur la diagonale.',
+    idee: 'fiches.ecossaise.idee',
+    structure: 'fiches.ecossaise.structure',
+    planBlancs: 'fiches.ecossaise.planBlancs',
+    planNoirs: 'fiches.ecossaise.planNoirs',
+    piege: 'fiches.ecossaise.piege',
   },
   {
     id: 'gambit-roi',
-    nom: 'Gambit du roi',
+    nom: 'fiches.gambit-roi.nom',
     eco: 'C33',
     coups: ['e4', 'e5', 'f4'],
-    alias: ['gambit du roi'],
+    aliasKey: 'fiches.gambit-roi.alias',
     pour: 'Blancs',
-    idee: 'Donner un pion pour prendre tout le centre et ouvrir la colonne f vers le roi noir. C’est la plus romantique des ouvertures et la plus risquée.',
-    structure:
-      'Colonne f ouverte pour les Blancs, pion noir en plus et diagonale e1-h4 dangereusement dégarnie.',
-    planBlancs:
-      'Nf3, d4, Bc4 et attaquer en colonne f avant que les Noirs ne consolident leur pion de plus.',
-    planNoirs:
-      'Rendre le pion au bon moment et viser le roi blanc — la case g3 et la diagonale vers e1 sont les points faibles.',
-    piege:
-      'Après 2.f4 exf4, ne joue pas 3.Cf3 g5 4.h4 sans savoir où va ta tour : la colonne h s’ouvre dans les deux sens.',
+    idee: 'fiches.gambit-roi.idee',
+    structure: 'fiches.gambit-roi.structure',
+    planBlancs: 'fiches.gambit-roi.planBlancs',
+    planNoirs: 'fiches.gambit-roi.planNoirs',
+    piege: 'fiches.gambit-roi.piege',
   },
   {
     id: 'petroff',
-    nom: 'Défense russe',
+    nom: 'fiches.petroff.nom',
     eco: 'C42',
     coups: ['e4', 'e5', 'Nf3', 'Nf6'],
-    alias: ['défense russe', 'petroff', 'pétroff'],
+    aliasKey: 'fiches.petroff.alias',
     pour: 'Noirs',
-    idee: 'Répondre à l’attaque par une attaque symétrique. L’ouverture la plus solide contre 1.e4, et celle qui mène au plus grand nombre de nulles.',
-    structure:
-      'Souvent un échange de pions centraux et une position presque symétrique, où le moindre avantage se joue sur une colonne.',
-    planBlancs: 'Cxe5 puis d4, ou le calme Cc3. L’avantage est minime et se travaille longtemps.',
-    planNoirs:
-      'Après 3.Cxe5, jouer d6 pour chasser le cavalier avant de reprendre en e4. Jamais 3…Cxe4 tout de suite.',
-    piege:
-      '3.Cxe5 Cxe4 perd du matériel sur 4.De2 : le cavalier noir est attaqué et la colonne e se retourne contre lui.',
+    idee: 'fiches.petroff.idee',
+    structure: 'fiches.petroff.structure',
+    planBlancs: 'fiches.petroff.planBlancs',
+    planNoirs: 'fiches.petroff.planNoirs',
+    piege: 'fiches.petroff.piege',
   },
   {
     id: 'philidor',
-    nom: 'Défense Philidor',
+    nom: 'fiches.philidor.nom',
     eco: 'C41',
     coups: ['e4', 'e5', 'Nf3', 'd6'],
-    alias: ['philidor', 'défense philidor'],
+    aliasKey: 'fiches.philidor.alias',
     pour: 'Noirs',
-    idee: 'Tenir e5 avec un pion plutôt qu’avec une pièce. Solide, et volontairement passif — il faudra un plan actif plus tard.',
-    structure:
-      'Pions noirs en e5 et d6, qui enferment le fou f8. Les Blancs ont plus d’espace pour rien.',
-    planBlancs:
-      'd4 pour ouvrir, Nc3, Bc4, et profiter de l’espace pendant que les Noirs se débrouillent avec leur fou.',
-    planNoirs:
-      'Nf6, Be7, 0-0, puis chercher ...c6 et ...d5 pour se libérer. Sans cette poussée, la position reste étroite.',
-    piege:
-      'Le mat de Légal : après 3…d6 4.Fc4 Fg4 5.h3 Fh5, prendre le cavalier f3 offre un mat en trois. On ne cloue pas un cavalier qu’on ne peut pas garder.',
+    idee: 'fiches.philidor.idee',
+    structure: 'fiches.philidor.structure',
+    planBlancs: 'fiches.philidor.planBlancs',
+    planNoirs: 'fiches.philidor.planNoirs',
+    piege: 'fiches.philidor.piege',
     lecon: 'mat-legal',
   },
 
   // ── Après 1.e4, réponses asymétriques ───────────────────────────────────
   {
     id: 'sicilienne',
-    nom: 'Défense sicilienne',
+    nom: 'fiches.sicilienne.nom',
     eco: 'B20',
     coups: ['e4', 'c5'],
-    alias: ['sicilienne', 'défense sicilienne'],
+    aliasKey: 'fiches.sicilienne.alias',
     pour: 'Noirs',
     lecon: 'sicilienne',
-    idee: 'Refuser la symétrie dès le premier coup. Les Noirs échangent un pion d’aile contre un pion central et obtiennent la colonne c.',
-    structure:
-      'Après l’échange en d4, les Blancs ont un pion e4 et une colonne d ; les Noirs une colonne c ouverte et une majorité au centre.',
-    planBlancs:
-      'Attaquer sur l’aile roi : f4, g4, et souvent le roque long pour lancer les pions. La course est le thème de l’ouverture.',
-    planNoirs:
-      'La colonne c vers le roi blanc, la poussée ...b5, et un cavalier en c4 ou d4. Compter les temps avant de défendre.',
-    piege:
-      'Ne prends pas le pion b2 avec la dame sans avoir compté : elle se fait souvent enfermer, et les Blancs gagnent l’attaque pour un pion.',
+    idee: 'fiches.sicilienne.idee',
+    structure: 'fiches.sicilienne.structure',
+    planBlancs: 'fiches.sicilienne.planBlancs',
+    planNoirs: 'fiches.sicilienne.planNoirs',
+    piege: 'fiches.sicilienne.piege',
   },
   {
     id: 'najdorf',
-    nom: 'Sicilienne Najdorf',
+    nom: 'fiches.najdorf.nom',
     eco: 'B90',
     coups: ['e4', 'c5', 'Nf3', 'd6', 'd4'],
-    alias: ['najdorf'],
+    aliasKey: 'fiches.najdorf.alias',
     pour: 'Noirs',
-    idee: 'Le coup a6 avant tout le reste : il enlève la case b5 aux pièces blanches et prépare ...b5 et ...e5 sans concession.',
-    structure:
-      'Centre ouvert, pions noirs en d6 et e6 ou e5, et un trou permanent en d5 que les Blancs visent.',
-    planBlancs:
-      'Fe3, f3, Dd2, roque long, puis g4 et h4. Ou le Fg5 classique, qui attaque tout de suite.',
-    planNoirs:
-      '...e5 ou ...e6, ...b5, et la contre-attaque en colonne c. La case d5 se défend avec des pièces, pas avec des pions.',
-    piege:
-      'L’attaque anglaise arrive vite : si tu laisses g4 et h4 venir sans jouer, ton roque tombe en dix coups.',
+    idee: 'fiches.najdorf.idee',
+    structure: 'fiches.najdorf.structure',
+    planBlancs: 'fiches.najdorf.planBlancs',
+    planNoirs: 'fiches.najdorf.planNoirs',
+    piege: 'fiches.najdorf.piege',
   },
   {
     id: 'francaise',
-    nom: 'Défense française',
+    nom: 'fiches.francaise.nom',
     eco: 'C00',
     coups: ['e4', 'e6'],
-    alias: ['française', 'défense française'],
+    aliasKey: 'fiches.francaise.alias',
     pour: 'Noirs',
     lecon: 'francaise',
-    idee: 'Préparer ...d5 pour frapper e4 au coup suivant, en acceptant un inconvénient connu : le fou c8 reste longtemps enfermé.',
-    structure:
-      'Chaîne de pions e6-d5 contre e4-d4, souvent bloquée après e5. Les Blancs ont de l’espace à l’aile roi, les Noirs la colonne c et la base d4 à attaquer.',
-    planBlancs: 'e5 pour fermer, puis attaquer le roi : f4, Nf3, et les pièces vers h5 et g5.',
-    planNoirs:
-      'Frapper la base de la chaîne avec ...c5, et trouver une case au fou c8 — b7 après ...b6, ou a6.',
-    piege:
-      'Après 2.d4 d5 3.Cc3 Cf6 4.e5, ne laisse pas ton cavalier f6 sans case : il se retrouve en d7 et le jeu noir s’étouffe.',
+    idee: 'fiches.francaise.idee',
+    structure: 'fiches.francaise.structure',
+    planBlancs: 'fiches.francaise.planBlancs',
+    planNoirs: 'fiches.francaise.planNoirs',
+    piege: 'fiches.francaise.piege',
   },
   {
     id: 'caro-kann',
-    nom: 'Défense Caro-Kann',
+    nom: 'fiches.caro-kann.nom',
     eco: 'B10',
     coups: ['e4', 'c6'],
-    alias: ['caro-kann', 'caro kann'],
+    aliasKey: 'fiches.caro-kann.alias',
     pour: 'Noirs',
-    idee: 'La française sans son défaut : on prépare ...d5 avec le pion c6 plutôt qu’avec e6, et le fou c8 garde sa diagonale.',
-    structure:
-      'Souvent un pion noir en d5 échangé contre e4, une structure saine et aucune faiblesse. Les finales y sont bonnes pour les Noirs.',
-    planBlancs:
-      'L’avance c’est e5 et la poussée c4 ; l’échange c’est exd5 puis une bataille d’espace. Dans les deux cas, jouer vite pour empêcher la consolidation.',
-    planNoirs:
-      'Sortir le fou c8 en f5 ou g4 avant de jouer e6, développer proprement, et viser la finale.',
-    piege:
-      'Après 2.d4 d5 3.exd5 cxd5 4.Fd3, ne réponds pas Fg4 : le fou se fait chasser par f3 et tu perds le temps que tu venais de gagner.',
+    idee: 'fiches.caro-kann.idee',
+    structure: 'fiches.caro-kann.structure',
+    planBlancs: 'fiches.caro-kann.planBlancs',
+    planNoirs: 'fiches.caro-kann.planNoirs',
+    piege: 'fiches.caro-kann.piege',
   },
   {
     id: 'scandinave',
-    nom: 'Défense scandinave',
+    nom: 'fiches.scandinave.nom',
     eco: 'B01',
     coups: ['e4', 'd5'],
-    alias: ['scandinave', 'défense scandinave'],
+    aliasKey: 'fiches.scandinave.alias',
     pour: 'Noirs',
-    idee: 'Échanger tout de suite le pion central, au prix d’une sortie de dame assumée. La plus simple des défenses à apprendre contre 1.e4.',
-    structure:
-      'Pion blanc en d4, aucun pion noir au centre, et une dame noire active sur a5 ou d6.',
-    planBlancs:
-      'Cc3 pour gagner un temps sur la dame, puis d4, Cf3, Fc4 et le roque : un développement plus rapide, c’est tout l’avantage.',
-    planNoirs:
-      'Dame en a5 ou d6 — une case où elle ne se fait plus chasser — puis Cf6, c6, Ff5, e6 et le roque. Le plan est le même à chaque partie.',
-    piege:
-      'Dame en d8 après 3.Cc3 concède deux temps pour rien. Et si la dame va en a5, attention au clouage Fd2 suivi de Cd5.',
+    idee: 'fiches.scandinave.idee',
+    structure: 'fiches.scandinave.structure',
+    planBlancs: 'fiches.scandinave.planBlancs',
+    planNoirs: 'fiches.scandinave.planNoirs',
+    piege: 'fiches.scandinave.piege',
   },
   {
     id: 'pirc',
-    nom: 'Défense Pirc',
+    nom: 'fiches.pirc.nom',
     eco: 'B07',
     coups: ['e4', 'd6', 'd4', 'Nf6'],
-    alias: ['pirc', 'défense pirc'],
+    aliasKey: 'fiches.pirc.alias',
     pour: 'Noirs',
-    idee: 'Laisser les Blancs prendre tout le centre, puis le frapper à coups de ...e5 ou ...c5 quand il est trop grand pour être tenu.',
-    structure:
-      'Gros centre blanc e4-d4, fou noir en g7 sur la longue diagonale, et un roque noir solide.',
-    planBlancs:
-      'f4 et l’attaque autrichienne, ou le calme Fe2 et 0-0. Tenir le centre est la seule obligation.',
-    planNoirs:
-      'Fg7, 0-0, puis ...c5 ou ...e5 selon ce que les Blancs ont joué. Le fou g7 doit finir par voir d4.',
-    piege:
-      'Si tu oublies de frapper le centre, les Blancs jouent e5 et ton fou g7 regarde son propre cavalier jusqu’à la fin.',
+    idee: 'fiches.pirc.idee',
+    structure: 'fiches.pirc.structure',
+    planBlancs: 'fiches.pirc.planBlancs',
+    planNoirs: 'fiches.pirc.planNoirs',
+    piege: 'fiches.pirc.piege',
   },
   {
     id: 'alekhine',
-    nom: 'Défense Alekhine',
+    nom: 'fiches.alekhine.nom',
     eco: 'B02',
     coups: ['e4', 'Nf6'],
-    alias: ['alekhine', 'défense alekhine'],
+    aliasKey: 'fiches.alekhine.alias',
     pour: 'Noirs',
-    idee: 'Provoquer e5 pour donner au pion blanc une avance qu’il devra défendre, et le harceler ensuite avec ...d6.',
-    structure:
-      'Pions blancs très avancés, souvent e5 et d4 voire c4 : beaucoup d’espace, et autant de points à tenir.',
-    planBlancs:
-      'Les quatre pions — e5, d4, c4, f4 — si l’on aime le risque ; sinon Cf3, Fe2 et un jeu d’espace tranquille.',
-    planNoirs:
-      '...d6 pour attaquer e5, échanger, et exploiter les cases que les pions blancs ont laissées derrière eux.',
-    piege:
-      'Le cavalier noir est chassé trois fois de suite au début : compte bien ses cases de repli avant de t’y engager.',
+    idee: 'fiches.alekhine.idee',
+    structure: 'fiches.alekhine.structure',
+    planBlancs: 'fiches.alekhine.planBlancs',
+    planNoirs: 'fiches.alekhine.planNoirs',
+    piege: 'fiches.alekhine.piege',
   },
 
   // ── Après 1.d4 ──────────────────────────────────────────────────────────
   {
     id: 'gambit-dame',
-    nom: 'Gambit dame',
+    nom: 'fiches.gambit-dame.nom',
     eco: 'D06',
     coups: ['d4', 'd5', 'c4'],
-    alias: ['gambit dame', 'gambit de la dame'],
+    aliasKey: 'fiches.gambit-dame.alias',
     pour: 'Blancs',
     lecon: 'gambit-dame',
-    idee: 'Ce n’est pas un vrai gambit : si les Noirs prennent en c4, les Blancs récupèrent le pion quand ils veulent avec e3 ou Da4.',
-    structure:
-      'Tension au centre entre c4 et d5. Tout dépend de qui prend le premier, et avec quoi.',
-    planBlancs:
-      'Cc3, Cf3, Fg5, e3 : on développe, on garde la tension, et la minorité à l’aile dame attaque plus tard.',
-    planNoirs:
-      'Tenir d5 avec e6 ou c6, ou prendre en c4 et rendre le centre contre du développement.',
-    piege:
-      'Le piège de l’éléphant : après Fg5 Cbd7, la prise Cxd5 perd une pièce sur Cxd5 Fxd8 Fb4+. Ne prends pas un pion « cloué » qui ne l’est pas.',
+    idee: 'fiches.gambit-dame.idee',
+    structure: 'fiches.gambit-dame.structure',
+    planBlancs: 'fiches.gambit-dame.planBlancs',
+    planNoirs: 'fiches.gambit-dame.planNoirs',
+    piege: 'fiches.gambit-dame.piege',
   },
   {
     id: 'gambit-dame-accepte',
-    nom: 'Gambit dame accepté',
+    nom: 'fiches.gambit-dame-accepte.nom',
     eco: 'D20',
     coups: ['d4', 'd5', 'c4', 'dxc4'],
-    alias: ['gambit dame accepté'],
+    aliasKey: 'fiches.gambit-dame-accepte.alias',
     pour: 'Noirs',
-    idee: 'Rendre le centre tout de suite pour gagner du temps et placer ses pièces. Les Noirs ne garderont pas le pion, et ce n’est pas le but.',
-    structure:
-      'Pions blancs e3-d4 contre un pion noir en c-quelque-chose ; les Blancs ont un centre mobile, les Noirs la colonne c.',
-    planBlancs:
-      'e3 ou e4, reprendre c4, et pousser d4-d5 au bon moment. Le pion isolé qui en résulte est une arme, pas un défaut.',
-    planNoirs: '...e6, ...c5 et ...Cc6 pour attaquer d4. Le fou c8 sort avant d’être enfermé.',
-    piege:
-      'Ne cherche pas à garder le pion c4 avec ...b5 : les Blancs jouent a4 et ta structure d’aile dame s’effondre.',
+    idee: 'fiches.gambit-dame-accepte.idee',
+    structure: 'fiches.gambit-dame-accepte.structure',
+    planBlancs: 'fiches.gambit-dame-accepte.planBlancs',
+    planNoirs: 'fiches.gambit-dame-accepte.planNoirs',
+    piege: 'fiches.gambit-dame-accepte.piege',
   },
   {
     id: 'slave',
-    nom: 'Défense slave',
+    nom: 'fiches.slave.nom',
     eco: 'D10',
     coups: ['d4', 'd5', 'c4', 'c6'],
-    alias: ['slave', 'défense slave'],
+    aliasKey: 'fiches.slave.alias',
     pour: 'Noirs',
-    idee: 'Défendre d5 avec c6 plutôt qu’avec e6 : le fou c8 garde sa sortie, et c’est toute la différence avec le gambit dame ordinaire.',
-    structure:
-      'Pions c6 et d5 très solides. Les Noirs n’ont aucune faiblesse, et aucun jeu avant d’avoir joué ...dxc4 ou ...e6.',
-    planBlancs: 'Cf3, Cc3, e3, puis Fd3 et 0-0 ; on cherche ensuite e4 pour ouvrir le centre.',
-    planNoirs:
-      '...dxc4 suivi de ...Ff5 ou ...b5, ou le plan lent ...e6, ...Cbd7 et ...dxc4 plus tard.',
-    piege:
-      'Le piège de l’échange : après 3…c6 4.cxd5 cxd5, la position est rigoureusement symétrique et ne donne rien aux Blancs. Ne joue cet échange que si tu veux la nulle.',
+    idee: 'fiches.slave.idee',
+    structure: 'fiches.slave.structure',
+    planBlancs: 'fiches.slave.planBlancs',
+    planNoirs: 'fiches.slave.planNoirs',
+    piege: 'fiches.slave.piege',
   },
   {
     id: 'londres',
-    nom: 'Système de Londres',
+    nom: 'fiches.londres.nom',
     eco: 'D02',
     coups: ['d4', 'd5', 'Nf3', 'Nf6', 'Bf4'],
-    alias: ['système de londres', 'londres'],
+    aliasKey: 'fiches.londres.alias',
     pour: 'Blancs',
-    idee: 'Sortir le fou avant de jouer e3, pour ne pas l’enfermer. Un système : les mêmes six coups quoi que jouent les Noirs.',
-    structure:
-      'Pions blancs d4 et e3, pion noir d5, centre fermé. La partie se joue sur la case e5 et sur l’aile roi.',
-    planBlancs:
-      'e3, Fd3, Cbd2, c3, puis Ce5 et une attaque lente sur le roque noir. Rien à mémoriser, tout à comprendre.',
-    planNoirs:
-      'Contester e5 avec ...Cbd7 et ...c5, ou échanger le fou f4 par ...Fd6. Une fois ce fou parti, le système perd son tranchant.',
-    piege:
-      'Ne joue pas Fd3 avant que le fou c8 ne soit sorti : les Noirs répondent Ff5 et échangent ton meilleur attaquant.',
+    idee: 'fiches.londres.idee',
+    structure: 'fiches.londres.structure',
+    planBlancs: 'fiches.londres.planBlancs',
+    planNoirs: 'fiches.londres.planNoirs',
+    piege: 'fiches.londres.piege',
   },
   {
     id: 'nimzo-indienne',
-    nom: 'Défense nimzo-indienne',
+    nom: 'fiches.nimzo-indienne.nom',
     eco: 'E20',
     coups: ['d4', 'Nf6', 'c4', 'e6', 'Nc3', 'Bb4'],
-    alias: ['nimzo-indienne', 'nimzo indienne', 'nimzo'],
+    aliasKey: 'fiches.nimzo-indienne.alias',
     pour: 'Noirs',
-    idee: 'Clouer le cavalier c3 pour empêcher e4. Les Noirs échangent un fou contre un cavalier et obtiennent le contrôle des cases claires.',
-    structure:
-      'Souvent des pions blancs doublés en c après ...Fxc3 : une faiblesse contre la paire de fous. Tout le jeu part de cet échange.',
-    planBlancs:
-      'a3 pour forcer l’échange, ou Dc2 pour l’éviter. Ensuite e4 à tout prix, et la paire de fous dans une position ouverte.',
-    planNoirs:
-      'Empêcher e4 le plus longtemps possible, fixer les pions c doublés et jouer ...c5, ...d6, ...Cc6.',
-    piege:
-      'Ne rends pas le fou en b4 sans contrepartie : s’il part sans avoir provoqué a3 ni doublé les pions, les Noirs ont perdu la paire pour rien.',
+    idee: 'fiches.nimzo-indienne.idee',
+    structure: 'fiches.nimzo-indienne.structure',
+    planBlancs: 'fiches.nimzo-indienne.planBlancs',
+    planNoirs: 'fiches.nimzo-indienne.planNoirs',
+    piege: 'fiches.nimzo-indienne.piege',
   },
   {
     id: 'est-indienne',
-    nom: 'Défense est-indienne',
+    nom: 'fiches.est-indienne.nom',
     eco: 'E60',
     coups: ['d4', 'Nf6', 'c4', 'g6'],
-    alias: ['est-indienne', 'est indienne', 'indienne du roi'],
+    aliasKey: 'fiches.est-indienne.alias',
     pour: 'Noirs',
     lecon: 'est-indienne',
-    idee: 'Laisser les Blancs prendre le centre entier, roquer derrière le fou g7, puis tout faire sauter avec ...e5.',
-    structure:
-      'Gros centre blanc, chaîne de pions, et une bataille d’ailes : Blancs à l’aile dame, Noirs à l’aile roi.',
-    planBlancs:
-      'e4, Fe2, 0-0, puis d5 et la poussée c5 à l’aile dame. Tenir le centre et ne pas s’occuper de l’attaque noire trop tôt.',
-    planNoirs:
-      '...e5, puis ...f5, ...g4 et les pions sur le roi blanc. L’ouverture la plus tranchante qui existe contre 1.d4.',
-    piege:
-      'Si le centre se ferme par d5 et que tu n’as pas joué ...f5, ton attaque n’a pas de munitions : la course est perdue avant de commencer.',
+    idee: 'fiches.est-indienne.idee',
+    structure: 'fiches.est-indienne.structure',
+    planBlancs: 'fiches.est-indienne.planBlancs',
+    planNoirs: 'fiches.est-indienne.planNoirs',
+    piege: 'fiches.est-indienne.piege',
   },
   {
     id: 'grunfeld',
-    nom: 'Défense Grünfeld',
+    nom: 'fiches.grunfeld.nom',
     eco: 'D80',
     coups: ['d4', 'Nf6', 'c4', 'g6', 'Nc3', 'd5'],
-    alias: ['grünfeld', 'grunfeld'],
+    aliasKey: 'fiches.grunfeld.alias',
     pour: 'Noirs',
-    idee: 'Frapper le centre avant même de roquer. Les Noirs donnent le centre pour l’attaquer à la pièce — c’est l’ouverture hypermoderne par excellence.',
-    structure:
-      'Grand centre de pions blanc en c3-d4-e4 contre un fou g7 et les pions ...c5. Tout se joue sur la solidité de ce centre.',
-    planBlancs:
-      'Construire e4-d4-c3 et avancer : si le centre tient, il écrase. Fe3, Cf3, Fe2, 0-0.',
-    planNoirs:
-      '...Fg7, ...c5, ...Cc6 et la pression sur d4. Le fou g7 est la pièce de toute la partie.',
-    piege:
-      'Ne prends pas le pion d4 avec la dame trop tôt : les Blancs gagnent deux temps et ton roi n’a pas encore roqué.',
+    idee: 'fiches.grunfeld.idee',
+    structure: 'fiches.grunfeld.structure',
+    planBlancs: 'fiches.grunfeld.planBlancs',
+    planNoirs: 'fiches.grunfeld.planNoirs',
+    piege: 'fiches.grunfeld.piege',
   },
   {
     id: 'catalane',
-    nom: 'Ouverture catalane',
+    nom: 'fiches.catalane.nom',
     eco: 'E00',
     coups: ['d4', 'Nf6', 'c4', 'e6', 'g3'],
-    alias: ['catalane', 'ouverture catalane'],
+    aliasKey: 'fiches.catalane.alias',
     pour: 'Blancs',
-    idee: 'Un fou en g2 qui regarde d5 à travers tout l’échiquier. Pression lente, sans risque, et très difficile à jouer contre sans plan.',
-    structure:
-      'Pion blanc d4, pion noir d5 souvent échangé en c4, et une longue diagonale blanche ouverte.',
-    planBlancs:
-      'Fg2, 0-0, Dc2 ou Da4 pour récupérer c4, puis e4 ou la pression en colonne c et sur d5.',
-    planNoirs:
-      'Tenir c4 avec ...b5 et ...Fb7, ou rendre le pion et jouer ...c5 pour ouvrir la diagonale de son propre fou.',
-    piege:
-      'Rendre le pion c4 sans obtenir ...c5 en échange laisse les Noirs sans le moindre jeu pour vingt coups.',
+    idee: 'fiches.catalane.idee',
+    structure: 'fiches.catalane.structure',
+    planBlancs: 'fiches.catalane.planBlancs',
+    planNoirs: 'fiches.catalane.planNoirs',
+    piege: 'fiches.catalane.piege',
   },
   {
     id: 'hollandaise',
-    nom: 'Défense hollandaise',
+    nom: 'fiches.hollandaise.nom',
     eco: 'A80',
     coups: ['d4', 'f5'],
-    alias: ['hollandaise', 'défense hollandaise'],
+    aliasKey: 'fiches.hollandaise.alias',
     pour: 'Noirs',
-    idee: 'Jouer pour ...e5 dès le premier coup et obtenir une attaque sur l’aile roi. Le prix est connu : la case e6 et la diagonale vers le roi s’affaiblissent.',
-    structure:
-      'Pions noirs f5 et e6 ou g6, centre fermé, et une colonne f qui sert aux deux camps.',
-    planBlancs:
-      'g3 et Fg2 pour exploiter les cases claires, ou le gambit Staunton e4 pour ouvrir tout de suite.',
-    planNoirs:
-      '...Cf6, ...e6, ...Fe7, 0-0, puis ...De8 et ...e5. La poussée e5 est la raison d’être de l’ouverture.',
-    piege:
-      'Attention à Dh5+ et au fou en g5 dans les premiers coups : le trou en e6 et la diagonale h5-e8 sont le défaut du premier coup.',
+    idee: 'fiches.hollandaise.idee',
+    structure: 'fiches.hollandaise.structure',
+    planBlancs: 'fiches.hollandaise.planBlancs',
+    planNoirs: 'fiches.hollandaise.planNoirs',
+    piege: 'fiches.hollandaise.piege',
   },
   {
     id: 'anglaise',
-    nom: 'Ouverture anglaise',
+    nom: 'fiches.anglaise.nom',
     eco: 'A10',
     coups: ['c4'],
-    alias: ['anglaise', 'ouverture anglaise'],
+    aliasKey: 'fiches.anglaise.alias',
     pour: 'Blancs',
-    idee: 'Une sicilienne à l’envers, avec un temps de plus. On prend d5 sous contrôle sans engager le moindre pion central.',
-    structure:
-      'Très variable : elle transpose dans presque tout. C’est sa force et la raison pour laquelle on la joue par système plutôt que par théorie.',
-    planBlancs:
-      'Cc3, g3, Fg2, Cf3, 0-0, puis la poussée d4 ou b4 selon ce que les Noirs ont construit.',
-    planNoirs:
-      '...e5 pour la symétrie, ...Cf6 et ...e6 pour transposer vers le gambit dame, ou ...c5 pour une bataille d’aile dame.',
-    piege:
-      'Ne joue pas d4 trop tôt : la transposition vers le gambit dame annule l’intérêt de l’ouverture et te fait affronter une théorie que l’anglaise évitait.',
+    idee: 'fiches.anglaise.idee',
+    structure: 'fiches.anglaise.structure',
+    planBlancs: 'fiches.anglaise.planBlancs',
+    planNoirs: 'fiches.anglaise.planNoirs',
+    piege: 'fiches.anglaise.piege',
   },
   {
     id: 'reti',
-    nom: 'Ouverture Réti',
+    nom: 'fiches.reti.nom',
     eco: 'A09',
     coups: ['Nf3', 'd5', 'c4'],
-    alias: ['réti', 'reti'],
+    aliasKey: 'fiches.reti.alias',
     pour: 'Blancs',
-    idee: 'Attaquer le pion d5 de loin, sans poser un seul pion au centre. Le centre se prend avec des pièces, pas avec des pions.',
-    structure:
-      'Aucun pion blanc au centre au début, un fou en g2, et une pression durable sur d5 et c6.',
-    planBlancs:
-      'g3, Fg2, 0-0, b3 et Fb2 : deux fous sur les longues diagonales, puis d4 ou e4 quand la position est mûre.',
-    planNoirs:
-      'Tenir d5 avec ...c6 et ...e6, ou prendre en c4 et jouer ...Ff5 pour sortir le fou avant de fermer.',
-    piege:
-      'Prendre en c4 et vouloir garder le pion coûte l’aile dame : les Blancs jouent a4 et la structure noire se démonte.',
+    idee: 'fiches.reti.idee',
+    structure: 'fiches.reti.structure',
+    planBlancs: 'fiches.reti.planBlancs',
+    planNoirs: 'fiches.reti.planNoirs',
+    piege: 'fiches.reti.piege',
   },
 ]
 

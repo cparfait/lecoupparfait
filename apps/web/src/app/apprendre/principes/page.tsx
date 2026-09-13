@@ -72,7 +72,7 @@ export default function PrincipesPage() {
   return (
     <div className="page">
       <TitreDePage
-        retour={{ href: '/apprendre', label: 'Apprendre' }}
+        retour={{ href: '/apprendre', label: t('nav.learn') }}
         intro={t('principles.intro', { n: PRINCIPES.length })}
       >
         {t('principles.title')}

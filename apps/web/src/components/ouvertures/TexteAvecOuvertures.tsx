@@ -24,6 +24,8 @@
 import { useMemo } from 'react'
 import Link from 'next/link'
 import { FICHES_ENJEUX, type FicheEnjeux } from '@/lib/ouvertures/enjeux.ts'
+import { useI18n } from '@/lib/i18n/index.tsx'
+import type { Traducteur } from '@/lib/i18n/resoudre.ts'
 
 /**
  * Le dictionnaire des noms, construit une fois pour toute l'application.
@@ -32,18 +34,41 @@ import { FICHES_ENJEUX, type FicheEnjeux } from '@/lib/ouvertures/enjeux.ts'
  * Trié par longueur décroissante : sans cela « indienne » l'emporterait sur
  * « est-indienne », et l'on pointerait la mauvaise fiche.
  */
-function construireNoms(): Array<{ texte: string; fiche: FicheEnjeux }> {
+function construireNoms(t: Traducteur): Array<{ texte: string; fiche: FicheEnjeux }> {
   const noms: Array<{ texte: string; fiche: FicheEnjeux }> = []
   for (const fiche of FICHES_ENJEUX) {
-    for (const texte of [fiche.nom, ...fiche.alias]) {
-      noms.push({ texte: texte.toLowerCase(), fiche })
+    const formes = [t(fiche.nom), ...t(fiche.aliasKey).split(',')]
+    for (const texte of formes) {
+      const propre = texte.trim().toLowerCase()
+      if (propre) noms.push({ texte: propre, fiche })
     }
   }
   return noms.sort((a, b) => b.texte.length - a.texte.length)
 }
 
-let noms: Array<{ texte: string; fiche: FicheEnjeux }> | null = null
-let motif: RegExp | null = null
+/**
+ * Le dictionnaire et son expression, une fois par langue.
+ *
+ * Ils étaient construits une fois pour toute l'application, ce qui allait tant
+ * que les noms d'ouvertures étaient écrits en français dans le code. Traduits,
+ * ils changent avec la langue : un cache unique aurait gardé les noms de la
+ * première langue affichée et cessé de reconnaître quoi que ce soit après un
+ * changement. Quarante-et-une entrées au pire, construites à la demande.
+ */
+const caches = new Map<
+  string,
+  { noms: Array<{ texte: string; fiche: FicheEnjeux }>; motif: RegExp }
+>()
+
+function cachePour(locale: string, t: Traducteur) {
+  let cache = caches.get(locale)
+  if (!cache) {
+    const noms = construireNoms(t)
+    cache = { noms, motif: construireMotif(noms) }
+    caches.set(locale, cache)
+  }
+  return cache
+}
 
 /**
  * L'expression qui repère les noms.
@@ -78,7 +103,8 @@ export function TexteAvecOuvertures({
   sauf?: string
   as?: 'p' | 'span'
 }) {
-  const morceaux = useMemo(() => decouper(texte, sauf), [texte, sauf])
+  const { t, locale } = useI18n()
+  const morceaux = useMemo(() => decouper(texte, locale, t, sauf), [texte, locale, t, sauf])
 
   return (
     <Tag className={className}>
@@ -89,7 +115,7 @@ export function TexteAvecOuvertures({
           <Link
             key={index}
             href={`/ouvertures/enjeux#${morceau.fiche.id}`}
-            title={`${morceau.fiche.nom} — ${morceau.fiche.idee}`}
+            title={`${t(morceau.fiche.nom)} — ${t(morceau.fiche.idee)}`}
             className="underline decoration-dotted decoration-from-font underline-offset-2 transition-colors hover:text-accent"
           >
             {morceau.mot}
@@ -103,10 +129,11 @@ export function TexteAvecOuvertures({
 /** Découpe un texte en morceaux bruts et en noms d'ouverture reconnus. */
 function decouper(
   texte: string,
+  locale: string,
+  t: Traducteur,
   sauf?: string,
 ): Array<string | { mot: string; fiche: FicheEnjeux }> {
-  noms ??= construireNoms()
-  motif ??= construireMotif(noms)
+  const { noms, motif } = cachePour(locale, t)
 
   const morceaux: Array<string | { mot: string; fiche: FicheEnjeux }> = []
   const dejaVues = new Set<string>()

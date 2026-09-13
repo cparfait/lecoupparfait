@@ -25,6 +25,7 @@ import { CarteEnjeux } from '@/components/ouvertures/CarteEnjeux.tsx'
 import { FICHES_ENJEUX, type FicheEnjeux } from '@/lib/ouvertures/enjeux.ts'
 import { useSan } from '@/lib/notation.ts'
 import { useT } from '@/lib/i18n/index.tsx'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 
 /** Ignore accents et casse : on cherche « francaise » et on trouve « française ». */
 function normalise(valeur: string): string {
@@ -37,20 +38,24 @@ function normalise(valeur: string): string {
  * « Autres » regroupe l'anglaise et le Réti : deux ouvertures qui ne posent
  * aucun pion au centre au premier coup, et qui se jouent pour cette raison même.
  */
-const FAMILLES: Array<{ titre: string; sous: string; test: (fiche: FicheEnjeux) => boolean }> = [
+const FAMILLES: Array<{
+  titreKey: TranslationKey
+  sousKey: TranslationKey
+  test: (fiche: FicheEnjeux) => boolean
+}> = [
   {
-    titre: 'stakesList.afterE4',
-    sous: 'stakesList.afterE4Sub',
+    titreKey: 'stakesList.afterE4',
+    sousKey: 'stakesList.afterE4Sub',
     test: (fiche) => fiche.coups[0] === 'e4',
   },
   {
-    titre: 'stakesList.afterD4',
-    sous: 'stakesList.afterD4Sub',
+    titreKey: 'stakesList.afterD4',
+    sousKey: 'stakesList.afterD4Sub',
     test: (fiche) => fiche.coups[0] === 'd4',
   },
   {
-    titre: 'stakesList.noCentrePawn',
-    sous: 'stakesList.noCentrePawnSub',
+    titreKey: 'stakesList.noCentrePawn',
+    sousKey: 'stakesList.noCentrePawnSub',
     test: (fiche) => fiche.coups[0] !== 'e4' && fiche.coups[0] !== 'd4',
   },
 ]
@@ -65,18 +70,18 @@ export default function EnjeuxPage() {
     if (aiguille.length < 2) return FICHES_ENJEUX
     return FICHES_ENJEUX.filter(
       (fiche) =>
-        normalise(fiche.nom).includes(aiguille) ||
+        normalise(t(fiche.nom)).includes(aiguille) ||
         normalise(fiche.eco).includes(aiguille) ||
-        normalise(fiche.idee).includes(aiguille) ||
-        normalise(fiche.piege).includes(aiguille),
+        normalise(t(fiche.idee)).includes(aiguille) ||
+        normalise(t(fiche.piege)).includes(aiguille),
     )
-  }, [recherche])
+  }, [recherche, t])
 
   return (
     <div className="page">
       <TitreDePage
-        retour={{ href: '/ouvertures', label: 'Ouvertures' }}
-        intro={`${FICHES_ENJEUX.length} ouvertures expliquées par ce qu’elles cherchent, et non par leurs variantes : l’idée, la structure de pions, le plan de chaque camp, et le piège des dix premiers coups.`}
+        retour={{ href: '/ouvertures', label: t('nav.openings') }}
+        intro={t('stakesList.pageIntro', { n: FICHES_ENJEUX.length })}
       >
         {t('stakesList.title')}
       </TitreDePage>
@@ -117,12 +122,14 @@ export default function EnjeuxPage() {
           if (fiches.length === 0) return null
 
           return (
-            <section key={famille.titre}>
+            <section key={famille.titreKey}>
               <div className="mb-1 flex items-baseline gap-2.5">
-                <h2 className="font-display text-xl font-bold tracking-tight">{famille.titre}</h2>
+                <h2 className="font-display text-xl font-bold tracking-tight">
+                  {t(famille.titreKey)}
+                </h2>
                 <Chip>{fiches.length}</Chip>
               </div>
-              <p className="mb-3 text-[13px] text-muted">{famille.sous}</p>
+              <p className="mb-3 text-[13px] text-muted">{t(famille.sousKey)}</p>
 
               <div className="space-y-3">
                 {fiches.map((fiche) => (

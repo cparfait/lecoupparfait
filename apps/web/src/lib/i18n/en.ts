@@ -605,6 +605,8 @@ export const en: Dictionary = {
   },
 
   stakesList: {
+    pageIntro:
+      '{n} openings explained by what they are after, not by their variations: the idea, the pawn structure, each side’s plan, and the trap in the first ten moves.',
     afterE4: 'After 1.e4',
     afterE4Sub: 'The centre taken at once, and the six ways of answering it.',
     afterD4: 'After 1.d4',
@@ -1398,6 +1400,11 @@ export const en: Dictionary = {
   },
 
   stakes: {
+    listenStakes: 'Listen to what is at stake in the {nom}',
+    spoken:
+      '{nom}. {idee} The structure: {structure} White’s plan: {planBlancs} Black’s plan: {planNoirs} The trap: {piege}',
+    forWhite: 'for White',
+    forBlack: 'for Black',
     whitePlan: 'White’s plan',
     blackPlan: 'Black’s plan',
     structure: 'The structure',
@@ -2526,6 +2533,330 @@ export const en: Dictionary = {
     purgedSessions: 'expired sessions',
     purgedEvaluations: 'evaluations under 14 plies, too shallow to be reused',
     purgedEmptyAccounts: 'accounts with no game and no analysis, inactive for six months',
+  },
+  fiches: {
+    italienne: {
+      nom: 'Italian Game',
+      alias: 'italian game, giuoco piano, italian',
+      idee: 'The most direct development there is: pawn in the centre, knight, bishop, and the bishop looks at f7 — the weakest square as long as the black king has not castled.',
+      structure:
+        'Pawns e4 against e5, a symmetrical centre that stays closed until somebody plays d4 or d5. Everything is decided by the moment that centre opens.',
+      planBlancs:
+        'Castle, then c3 and d4 to build a big pawn centre. Failing that, the slow version: d3, Nbd2, Nf1-g3 and a pawn attack on the kingside.',
+      planNoirs:
+        'The same thing mirrored — c6, d5 — or else ...Nf6 heading for the Two Knights Defence, which is sharper.',
+      piege:
+        'Never play Qh5 hoping for Scholar’s mate: Black parries while developing, and you spend three moves bringing your queen home.',
+    },
+    espagnole: {
+      nom: 'Ruy Lopez',
+      alias: 'ruy lopez, spanish game, spanish opening',
+      idee: 'Attack the defender rather than the pawn: the bishop on b5 does not take e5, it neutralises the knight that guards it.',
+      structure:
+        'Centre e4 against e5, often closed again by d3 and c3 on the white side. These games go a long time without a single pawn exchange.',
+      planBlancs:
+        'c3, d3, Nbd2, then the knight manoeuvre towards f1 and g3 or e3. You rearrange slowly and attack on the kingside afterwards.',
+      planNoirs:
+        'a6 to chase the bishop, then d6, Be7, 0-0, and the ...b5 push that gains space on the queenside.',
+      piege:
+        'Noah’s Ark: after a6, b5 and c4, the black pawns shut the white bishop in on b3 and win it outright.',
+    },
+    'deux-cavaliers': {
+      nom: 'Two Knights Defence',
+      alias: 'two knights defence, two knights, fegatello, fried liver',
+      idee: 'Black ignores the threat against f7 and develops. It is a bet on calculation: the position turns sharp immediately.',
+      structure:
+        'An open centre as soon as d4 or d5 arrives. In the first ten moves, pawns matter less than time.',
+      planBlancs:
+        'Ng5 to hit f7 at once, or the quiet d4. The first leads to the Fegatello, the second to an ordinary game.',
+      planNoirs:
+        'After Ng5, the answer is d5 — and above all not taking back on d5 with the knight.',
+      piege:
+        'The Fegatello: 4.Ng5 d5 5.exd5 Nxd5 loses to 6.Nxf7 Kxf7 7.Qf3+. The right move is 5…Na5, which chases the bishop and keeps everything.',
+    },
+    ecossaise: {
+      nom: 'Scotch Game',
+      alias: 'scotch game, scotch',
+      idee: 'Open the centre on move three, before Black has finished settling in. Nothing to memorise: the pieces come out on obvious squares.',
+      structure:
+        'The centre opens straight away. White and black pawns trade on d4, and two camps with free pieces are left.',
+      planBlancs:
+        'Take back on d4 with the knight, then develop quickly and occupy the open files. The positions are simple and traps are rare.',
+      planNoirs: '...Bc5 or ...Nf6 to attack the knight on d4 and get the same free development.',
+      piege:
+        'After 4…Bc5, do not play Nxc6 automatically: Black takes back with dxc6 and their bishop on c5 becomes very strong on the diagonal.',
+    },
+    'gambit-roi': {
+      nom: 'King’s Gambit',
+      alias: 'king’s gambit, kings gambit',
+      idee: 'Give a pawn to take the whole centre and open the f-file towards the black king. The most romantic of openings and the riskiest.',
+      structure:
+        'Open f-file for White, an extra pawn for Black, and the e1-h4 diagonal dangerously bare.',
+      planBlancs:
+        'Nf3, d4, Bc4 and attack down the f-file before Black consolidates their extra pawn.',
+      planNoirs:
+        'Give the pawn back at the right moment and aim at the white king — the g3 square and the diagonal towards e1 are the weak points.',
+      piege:
+        'After 2.f4 exf4, do not play 3.Nf3 g5 4.h4 without knowing where your rook is going: the h-file opens both ways.',
+    },
+    petroff: {
+      nom: 'Petrov’s Defence',
+      alias: 'petrov’s defence, petroff, petrov, russian game',
+      idee: 'Answer an attack with a symmetrical attack. The most solid opening against 1.e4, and the one that leads to the most draws.',
+      structure:
+        'Often an exchange of central pawns and an almost symmetrical position, where the slightest advantage is played out on a single file.',
+      planBlancs:
+        'Nxe5 then d4, or the quiet Nc3. The advantage is minimal and takes a long time to work with.',
+      planNoirs:
+        'After 3.Nxe5, play d6 to chase the knight before taking on e4. Never 3…Nxe4 straight away.',
+      piege:
+        '3.Nxe5 Nxe4 loses material to 4.Qe2: the black knight is attacked and the e-file turns against it.',
+    },
+    philidor: {
+      nom: 'Philidor Defence',
+      alias: 'philidor, philidor defence',
+      idee: 'Hold e5 with a pawn rather than with a piece. Solid, and deliberately passive — an active plan will be needed later.',
+      structure:
+        'Black pawns on e5 and d6, shutting in the f8 bishop. White has more space for nothing in return.',
+      planBlancs:
+        'd4 to open, Nc3, Bc4, and profit from the space while Black sorts out their bishop.',
+      planNoirs:
+        'Nf6, Be7, 0-0, then look for ...c6 and ...d5 to break free. Without that push, the position stays cramped.',
+      piege:
+        'Légal’s mate: after 3…d6 4.Bc4 Bg4 5.h3 Bh5, taking the knight on f3 offers mate in three. Do not pin a knight you cannot hold.',
+    },
+    sicilienne: {
+      nom: 'Sicilian Defence',
+      alias: 'sicilian defence, sicilian',
+      idee: 'Refuse symmetry from the very first move. Black trades a wing pawn for a central pawn and gets the c-file.',
+      structure:
+        'After the exchange on d4, White has an e4 pawn and the d-file; Black an open c-file and a central majority.',
+      planBlancs:
+        'Attack on the kingside: f4, g4, and often castling long to launch the pawns. The race is the theme of the opening.',
+      planNoirs:
+        'The c-file towards the white king, the ...b5 push, and a knight on c4 or d4. Count the tempi before defending.',
+      piege:
+        'Do not take the b2 pawn with the queen without counting: she often gets trapped, and White wins the attack for a pawn.',
+    },
+    najdorf: {
+      nom: 'Sicilian Najdorf',
+      alias: 'najdorf',
+      idee: 'The move a6 before anything else: it takes the b5 square away from the white pieces and prepares ...b5 and ...e5 without concessions.',
+      structure:
+        'An open centre, black pawns on d6 and e6 or e5, and a permanent hole on d5 that White aims at.',
+      planBlancs:
+        'Be3, f3, Qd2, castle long, then g4 and h4. Or the classical Bg5, which attacks at once.',
+      planNoirs:
+        '...e5 or ...e6, ...b5, and the counter-attack down the c-file. The d5 square is defended with pieces, not with pawns.',
+      piege:
+        'The English Attack comes fast: if you let g4 and h4 arrive without playing, your castled king falls in ten moves.',
+    },
+    francaise: {
+      nom: 'French Defence',
+      alias: 'french defence, french',
+      idee: 'Prepare ...d5 to strike at e4 on the next move, accepting a known drawback: the c8 bishop stays shut in for a long time.',
+      structure:
+        'A pawn chain e6-d5 against e4-d4, often blocked after e5. White has kingside space, Black has the c-file and the d4 base to attack.',
+      planBlancs: 'e5 to close, then attack the king: f4, Nf3, and the pieces towards h5 and g5.',
+      planNoirs:
+        'Strike at the base of the chain with ...c5, and find a square for the c8 bishop — b7 after ...b6, or a6.',
+      piege:
+        'After 2.d4 d5 3.Nc3 Nf6 4.e5, do not leave your knight on f6 without a square: it ends up on d7 and Black’s game suffocates.',
+    },
+    'caro-kann': {
+      nom: 'Caro-Kann Defence',
+      alias: 'caro-kann, caro kann',
+      idee: 'The French without its flaw: you prepare ...d5 with the c6 pawn rather than e6, and the c8 bishop keeps its diagonal.',
+      structure:
+        'Often a black pawn on d5 traded for e4, a healthy structure and no weaknesses. The endgames are good for Black.',
+      planBlancs:
+        'The Advance means e5 and the c4 push; the Exchange means exd5 and a battle for space. Either way, play fast to stop Black consolidating.',
+      planNoirs:
+        'Bring the c8 bishop out to f5 or g4 before playing e6, develop cleanly, and aim for the endgame.',
+      piege:
+        'After 2.d4 d5 3.exd5 cxd5 4.Bd3, do not answer Bg4: the bishop gets chased by f3 and you lose the tempo you had just gained.',
+    },
+    scandinave: {
+      nom: 'Scandinavian Defence',
+      alias: 'scandinavian defence, scandinavian, centre counter',
+      idee: 'Trade the central pawn immediately, at the cost of an early queen sortie you accept. The simplest defence to learn against 1.e4.',
+      structure:
+        'A white pawn on d4, no black pawn in the centre, and an active black queen on a5 or d6.',
+      planBlancs:
+        'Nc3 to gain a tempo on the queen, then d4, Nf3, Bc4 and castling: faster development is the whole advantage.',
+      planNoirs:
+        'The queen to a5 or d6 — a square where she stops being chased — then Nf6, c6, Bf5, e6 and castling. The plan is the same every game.',
+      piege:
+        'The queen back to d8 after 3.Nc3 concedes two tempi for nothing. And if the queen goes to a5, watch out for the Bd2 pin followed by Nd5.',
+    },
+    pirc: {
+      nom: 'Pirc Defence',
+      alias: 'pirc defence, pirc',
+      idee: 'Let White take the whole centre, then strike at it with ...e5 or ...c5 once it is too big to hold.',
+      structure:
+        'A big white centre on e4-d4, a black bishop on g7 along the long diagonal, and a solid black king.',
+      planBlancs:
+        'f4 and the Austrian Attack, or the quiet Be2 and 0-0. Holding the centre is the only obligation.',
+      planNoirs:
+        'Bg7, 0-0, then ...c5 or ...e5 depending on what White has played. The g7 bishop must end up seeing d4.',
+      piege:
+        'If you forget to strike at the centre, White plays e5 and your g7 bishop stares at its own knight until the end.',
+    },
+    alekhine: {
+      nom: 'Alekhine’s Defence',
+      alias: 'alekhine’s defence, alekhine',
+      idee: 'Provoke e5 to give the white pawn an advance it will have to defend, then harass it with ...d6.',
+      structure:
+        'Very advanced white pawns, often e5 and d4 or even c4: plenty of space, and just as many points to hold.',
+      planBlancs:
+        'The Four Pawns — e5, d4, c4, f4 — if you like risk; otherwise Nf3, Be2 and a quiet space game.',
+      planNoirs:
+        '...d6 to attack e5, trade, and exploit the squares the white pawns have left behind them.',
+      piege:
+        'The black knight gets chased three times in a row at the start: count its retreat squares carefully before committing it.',
+    },
+    'gambit-dame': {
+      nom: 'Queen’s Gambit',
+      alias: 'queen’s gambit, queens gambit',
+      idee: 'It is not a real gambit: if Black takes on c4, White recovers the pawn whenever they like with e3 or Qa4.',
+      structure:
+        'Tension in the centre between c4 and d5. Everything depends on who takes first, and with what.',
+      planBlancs:
+        'Nc3, Nf3, Bg5, e3: you develop, you keep the tension, and the minority attack on the queenside comes later.',
+      planNoirs:
+        'Hold d5 with e6 or c6, or take on c4 and give the centre back in exchange for development.',
+      piege:
+        'The Elephant trap: after Bg5 Nbd7, taking Nxd5 loses a piece to Nxd5 Bxd8 Bb4+. Do not take a “pinned” pawn that is not pinned.',
+    },
+    'gambit-dame-accepte': {
+      nom: 'Queen’s Gambit Accepted',
+      alias: 'queen’s gambit accepted, queens gambit accepted',
+      idee: 'Give the centre back at once to gain time and place your pieces. Black will not keep the pawn, and that is not the point.',
+      structure:
+        'White pawns on e3-d4 against a black pawn somewhere on the c-file; White has a mobile centre, Black the c-file.',
+      planBlancs:
+        'e3 or e4, take back on c4, and push d4-d5 at the right moment. The isolated pawn that results is a weapon, not a flaw.',
+      planNoirs:
+        '...e6, ...c5 and ...Nc6 to attack d4. The c8 bishop comes out before it gets shut in.',
+      piege:
+        'Do not try to keep the c4 pawn with ...b5: White plays a4 and your queenside structure collapses.',
+    },
+    slave: {
+      nom: 'Slav Defence',
+      alias: 'slav defence, slav',
+      idee: 'Defend d5 with c6 rather than e6: the c8 bishop keeps its way out, and that is the whole difference from the ordinary Queen’s Gambit.',
+      structure:
+        'Very solid pawns on c6 and d5. Black has no weaknesses, and no play either until ...dxc4 or ...e6 has been played.',
+      planBlancs: 'Nf3, Nc3, e3, then Bd3 and 0-0; after that you look for e4 to open the centre.',
+      planNoirs:
+        '...dxc4 followed by ...Bf5 or ...b5, or the slow plan ...e6, ...Nbd7 and ...dxc4 later.',
+      piege:
+        'The Exchange trap: after 3…c6 4.cxd5 cxd5 the position is strictly symmetrical and gives White nothing. Only play that exchange if you want the draw.',
+    },
+    londres: {
+      nom: 'London System',
+      alias: 'london system, london',
+      idee: 'Bring the bishop out before playing e3, so as not to shut it in. A system: the same six moves whatever Black plays.',
+      structure:
+        'White pawns on d4 and e3, a black pawn on d5, a closed centre. The game is played on the e5 square and on the kingside.',
+      planBlancs:
+        'e3, Bd3, Nbd2, c3, then Ne5 and a slow attack on the black king. Nothing to memorise, everything to understand.',
+      planNoirs:
+        'Contest e5 with ...Nbd7 and ...c5, or trade the f4 bishop with ...Bd6. Once that bishop has gone, the system loses its bite.',
+      piege:
+        'Do not play Bd3 before the c8 bishop has come out: Black answers Bf5 and trades off your best attacker.',
+    },
+    'nimzo-indienne': {
+      nom: 'Nimzo-Indian Defence',
+      alias: 'nimzo-indian defence, nimzo-indian, nimzo indian, nimzo',
+      idee: 'Pin the knight on c3 to stop e4. Black trades a bishop for a knight and gets control of the light squares.',
+      structure:
+        'Often doubled white c-pawns after ...Bxc3: a weakness against the bishop pair. The whole game starts from that exchange.',
+      planBlancs:
+        'a3 to force the exchange, or Qc2 to avoid it. Then e4 at all costs, and the bishop pair in an open position.',
+      planNoirs:
+        'Stop e4 for as long as possible, fix the doubled c-pawns and play ...c5, ...d6, ...Nc6.',
+      piege:
+        'Do not give the bishop up on b4 for nothing: if it leaves without having provoked a3 or doubled the pawns, Black has lost the pair for free.',
+    },
+    'est-indienne': {
+      nom: 'King’s Indian Defence',
+      alias: 'king’s indian defence, kings indian, king’s indian',
+      idee: 'Let White take the entire centre, castle behind the g7 bishop, then blow it all up with ...e5.',
+      structure:
+        'A big white centre, a pawn chain, and a battle of wings: White on the queenside, Black on the kingside.',
+      planBlancs:
+        'e4, Be2, 0-0, then d5 and the c5 push on the queenside. Hold the centre and do not worry about Black’s attack too early.',
+      planNoirs:
+        '...e5, then ...f5, ...g4 and the pawns at the white king. The sharpest opening there is against 1.d4.',
+      piege:
+        'If the centre closes with d5 and you have not played ...f5, your attack has no ammunition: the race is lost before it starts.',
+    },
+    grunfeld: {
+      nom: 'Grünfeld Defence',
+      alias: 'grünfeld defence, grunfeld, gruenfeld',
+      idee: 'Strike at the centre before even castling. Black gives up the centre in order to attack it with pieces — the hypermodern opening par excellence.',
+      structure:
+        'A big white pawn centre on c3-d4-e4 against a g7 bishop and the ...c5 pawns. Everything turns on how solid that centre is.',
+      planBlancs:
+        'Build e4-d4-c3 and advance: if the centre holds, it crushes. Be3, Nf3, Be2, 0-0.',
+      planNoirs:
+        '...Bg7, ...c5, ...Nc6 and pressure on d4. The g7 bishop is the piece the whole game is about.',
+      piege:
+        'Do not take the d4 pawn with the queen too early: White gains two tempi and your king has not castled yet.',
+    },
+    catalane: {
+      nom: 'Catalan Opening',
+      alias: 'catalan opening, catalan',
+      idee: 'A bishop on g2 looking at d5 right across the board. Slow pressure, risk-free, and very hard to face without a plan.',
+      structure:
+        'A white pawn on d4, a black pawn on d5 often traded on c4, and an open long white diagonal.',
+      planBlancs:
+        'Bg2, 0-0, Qc2 or Qa4 to recover c4, then e4 or pressure down the c-file and against d5.',
+      planNoirs:
+        'Hold c4 with ...b5 and ...Bb7, or give the pawn back and play ...c5 to open your own bishop’s diagonal.',
+      piege:
+        'Giving the c4 pawn back without getting ...c5 in exchange leaves Black with no play at all for twenty moves.',
+    },
+    hollandaise: {
+      nom: 'Dutch Defence',
+      alias: 'dutch defence, dutch',
+      idee: 'Play for ...e5 from the very first move and get a kingside attack. The price is known: the e6 square and the diagonal towards the king are weakened.',
+      structure:
+        'Black pawns on f5 and e6 or g6, a closed centre, and an f-file that serves both sides.',
+      planBlancs:
+        'g3 and Bg2 to exploit the light squares, or the Staunton Gambit e4 to open at once.',
+      planNoirs:
+        '...Nf6, ...e6, ...Be7, 0-0, then ...Qe8 and ...e5. The e5 push is the whole point of the opening.',
+      piege:
+        'Watch out for Qh5+ and the bishop on g5 in the first few moves: the hole on e6 and the h5-e8 diagonal are the flaw in the first move.',
+    },
+    anglaise: {
+      nom: 'English Opening',
+      alias: 'english opening, english',
+      idee: 'A Sicilian in reverse, with an extra tempo. You bring d5 under control without committing a single central pawn.',
+      structure:
+        'Highly variable: it transposes into almost everything. That is its strength, and the reason it is played by system rather than by theory.',
+      planBlancs:
+        'Nc3, g3, Bg2, Nf3, 0-0, then the d4 or b4 push depending on what Black has built.',
+      planNoirs:
+        '...e5 for symmetry, ...Nf6 and ...e6 to transpose towards the Queen’s Gambit, or ...c5 for a queenside battle.',
+      piege:
+        'Do not play d4 too early: transposing to the Queen’s Gambit cancels the point of the opening and sends you into the theory the English was avoiding.',
+    },
+    reti: {
+      nom: 'Réti Opening',
+      alias: 'réti opening, reti opening, reti, réti',
+      idee: 'Attack the d5 pawn from a distance, without putting a single pawn in the centre. The centre is taken with pieces, not with pawns.',
+      structure:
+        'No white pawn in the centre at the start, a bishop on g2, and lasting pressure on d5 and c6.',
+      planBlancs:
+        'g3, Bg2, 0-0, b3 and Bb2: two bishops on the long diagonals, then d4 or e4 once the position is ripe.',
+      planNoirs:
+        'Hold d5 with ...c6 and ...e6, or take on c4 and play ...Bf5 to get the bishop out before closing.',
+      piege:
+        'Taking on c4 and trying to keep the pawn costs the queenside: White plays a4 and the black structure comes apart.',
+    },
   },
   lecons: {
     bases: {
