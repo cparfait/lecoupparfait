@@ -15,6 +15,7 @@ import { Button, Card, Chip, SectionTitle } from '@/components/ui/index.tsx'
 import { availableDrivers } from '@/lib/board/registry.ts'
 import type { BoardDriver } from '@/lib/board/types.ts'
 import type { PhysicalBoardState } from '@/lib/board/usePhysicalBoard.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 const PROMOTION_LABELS: ReadonlyArray<{ piece: PieceSymbol; label: string }> = [
   { piece: 'q', label: 'Dame' },
@@ -30,6 +31,7 @@ export function PhysicalBoardPanel({
   state: PhysicalBoardState
   className?: string
 }) {
+  const t = useT()
   // Les trois APIs se lisent sur `navigator` : le rendu serveur n'en sait
   // rien, et afficher la liste dès le premier rendu produirait une
   // discordance d'hydratation. On attend donc le navigateur.
@@ -62,7 +64,7 @@ export function PhysicalBoardPanel({
         className="flex w-full items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-left text-xs text-faint transition-colors hover:bg-surface-hover hover:text-muted pointer-coarse:min-h-11"
       >
         <Bluetooth size={13} className="shrink-0" aria-hidden />
-        <span className="min-w-0 flex-1 truncate">Brancher un échiquier électronique</span>
+        <span className="min-w-0 flex-1 truncate">{t('board.connect')}</span>
         <span aria-hidden>+</span>
       </button>
     )
@@ -71,7 +73,7 @@ export function PhysicalBoardPanel({
   return (
     <Card className={className ?? 'p-4'}>
       <SectionTitle
-        hint="Jouez sur votre plateau, la partie suit."
+        hint={t('board.hint')}
         action={
           !state.board ? (
             <button
@@ -84,7 +86,7 @@ export function PhysicalBoardPanel({
           ) : null
         }
       >
-        Échiquier électronique
+        {t('board.title')}
       </SectionTitle>
 
       {!state.board && (
@@ -119,21 +121,14 @@ export function PhysicalBoardPanel({
               icon={<Unplug size={14} />}
               onClick={() => void state.disconnect()}
             >
-              Débrancher
+              {t('board.disconnect')}
             </Button>
           </div>
 
-          {state.flipped && (
-            <p className="text-xs text-muted">
-              Plateau posé à l’envers — c’est pris en compte, rien à changer.
-            </p>
-          )}
+          {state.flipped && <p className="text-xs text-muted">{t('board.upsideDown')}</p>}
 
           {!state.board.lights && state.status === 'mismatch' && (
-            <p className="text-xs text-muted">
-              Cette carte n’a pas de LEDs : les cases à corriger sont listées ici plutôt que
-              montrées sur le plateau.
-            </p>
+            <p className="text-xs text-muted">{t('board.noLeds')}</p>
           )}
 
           {state.message && <p className="text-xs text-muted">{state.message}</p>}
@@ -164,10 +159,12 @@ export function PhysicalBoardPanel({
 }
 
 function StatusChip({ state }: { state: PhysicalBoardState }) {
+  const t = useT()
   if (state.status === 'mismatch') {
     return (
       <Chip tone="warning">
-        <CircleAlert size={12} className="mr-1 inline" />À corriger
+        <CircleAlert size={12} className="mr-1 inline" />
+        {t('board.toFix')}
       </Chip>
     )
   }
@@ -175,7 +172,7 @@ function StatusChip({ state }: { state: PhysicalBoardState }) {
     return (
       <Chip tone="neutral">
         <Hand size={12} className="mr-1 inline" />
-        Pièce en main
+        {t('board.pieceInHand')}
       </Chip>
     )
   }
@@ -183,7 +180,7 @@ function StatusChip({ state }: { state: PhysicalBoardState }) {
   return (
     <Chip tone="success">
       <Check size={12} className="mr-1 inline" />
-      Prêt
+      {t('board.ready')}
     </Chip>
   )
 }

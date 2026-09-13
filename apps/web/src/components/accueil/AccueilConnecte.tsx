@@ -56,6 +56,7 @@ import {
   prochaineEtape,
 } from '@coupparfait/core'
 import clsx from 'clsx'
+import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 import { Button, ButtonLink, Card, Chip, Skeleton } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { useCarriere } from '@/lib/carriere/useCarriere.ts'
@@ -108,10 +109,10 @@ const TEINTE: Record<PartieJouee['issue'], string> = {
   nulle: 'var(--q-forced)',
 }
 
-const ISSUE: Record<PartieJouee['issue'], string> = {
-  gagnee: 'Gagnée',
-  perdue: 'Perdue',
-  nulle: 'Nulle',
+const ISSUE: Record<PartieJouee['issue'], TranslationKey> = {
+  gagnee: 'homeIn.won',
+  perdue: 'homeIn.lost',
+  nulle: 'game.draw',
 }
 
 /**
@@ -137,6 +138,7 @@ function analyser(partie: PartieJouee): void {
 }
 
 export function AccueilConnecte({ pseudo }: { pseudo: string }) {
+  const t = useT()
   const progression = useCarriere()
   const { etat: journee } = useQuotidien()
 
@@ -230,13 +232,13 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
           ? {
               chapitre: chapitre.titre,
               numero: chapitre.numero,
-              libelle: suite?.libelle ?? 'Voir la carte',
+              libelle: suite?.libelle ?? t('homeIn.seeTheMap'),
               lien: suite?.lien ?? '/carriere',
             }
           : null,
     }
     return prochainesChoses(etat)
-  }, [enDirect, correspondances, reprise, defiFait, journee, carriereEnCours, chapitre, suite])
+  }, [enDirect, correspondances, reprise, defiFait, journee, carriereEnCours, chapitre, suite, t])
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:py-8">
@@ -261,7 +263,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
               l'ordre de la feuille de style, pas dans celui des classes. */}
           {journee != null && journee.serie > 0 && (
             <div className="hidden sm:block">
-              <Chip tone="warning" title="Jours d’affilée avec au moins une quête faite">
+              <Chip tone="warning" title={t('homeIn.streakTitle')}>
                 <Flame size={11} aria-hidden />
                 {journee.serie} jour{journee.serie > 1 ? 's' : ''} d’affilée
               </Chip>
@@ -297,7 +299,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                 plus celle du chapitre : douze chapitres, douze couleurs, et
                 l'accueil changeait de palette à chaque étape. */}
             <EnTeteDeCarte
-              titre="Ton parcours"
+              titre={t('homeIn.yourPath')}
               icone={<Map size={14} aria-hidden />}
               teinte="var(--rub-jouer)"
               fin={`chapitre ${chapitre.numero} / ${CHAPITRES.length}`}
@@ -342,24 +344,26 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                   est *la* chose à faire, elle est déjà en haut avec le bouton
                   primaire. Ici on ouvre la carte, on ne relance pas. */}
               <ButtonLink href="/carriere" variant="secondary" size="sm" fullWidth className="mt-3">
-                Voir la carte
+                {t('homeIn.seeTheMap')}
               </ButtonLink>
             </div>
           </Card>
         ) : (
           <Card className="p-4">
             <p className="font-display text-base font-bold leading-tight">
-              {progression && progression.chapter >= CARRIERE_TERMINEE
-                ? 'Carrière terminée 👑'
-                : 'Commence ta carrière'}
+              {t(
+                progression && progression.chapter >= CARRIERE_TERMINEE
+                  ? 'homeIn.careerDone'
+                  : 'homeIn.startCareer',
+              )}
             </p>
-            <p className="mt-1 text-[12px] leading-snug text-muted">
-              Douze chapitres, du premier coup à la première victoire nette.
-            </p>
+            <p className="mt-1 text-[12px] leading-snug text-muted">{t('homeIn.careerBlurb')}</p>
             <ButtonLink href="/carriere" variant="secondary" size="sm" className="mt-3">
-              {progression && progression.chapter >= CARRIERE_TERMINEE
-                ? 'Revoir le parcours'
-                : 'Commencer'}
+              {t(
+                progression && progression.chapter >= CARRIERE_TERMINEE
+                  ? 'homeIn.reviewPath'
+                  : 'homeIn.start',
+              )}
             </ButtonLink>
           </Card>
         )}
@@ -374,7 +378,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
           <Card className="overflow-hidden">
             {/* La teinte d'« Analyse » : c'est là que mène chaque ligne. */}
             <EnTeteDeCarte
-              titre="Tes dernières parties"
+              titre={t('homeIn.lastGames')}
               icone={<History size={14} aria-hidden />}
               teinte="var(--rub-analyser)"
               fin={
@@ -393,9 +397,9 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
               </div>
             ) : parties.length === 0 ? (
               <div className="px-4 py-5 text-center">
-                <p className="text-[14px] text-muted">Aucune partie enregistrée.</p>
+                <p className="text-[14px] text-muted">{t('homeIn.noGameSaved')}</p>
                 <ButtonLink href="/jouer/ordinateur" variant="secondary" size="sm" className="mt-3">
-                  Jouer une partie
+                  {t('homeIn.playAGame')}
                 </ButtonLink>
               </div>
             ) : (
@@ -420,8 +424,8 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                           </strong>
                         </span>
                         <span className="block truncate text-[12px] text-faint">
-                          {ISSUE[partie.issue]} · {partie.opening ?? 'ouverture non répertoriée'} ·{' '}
-                          {partie.coups} demi-coups
+                          {t(ISSUE[partie.issue])} · {partie.opening ?? t('homeIn.unlistedOpening')}{' '}
+                          · {t('homeIn.halfMoves', { n: partie.coups })}
                         </span>
                       </span>
                       {/* Le mot, et pas seulement l'icône : rien ne disait que
@@ -440,7 +444,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
           {analyses && analyses.length > 0 ? (
             <Card className="overflow-hidden">
               <EnTeteDeCarte
-                titre="Tes analyses"
+                titre={t('homeIn.yourAnalyses')}
                 icone={<Gauge size={14} aria-hidden />}
                 fin={
                   <Link href="/analyse" className="text-accent hover:underline">
@@ -458,7 +462,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                       {analyse.whiteName ?? 'Blancs'} — {analyse.blackName ?? 'Noirs'}
                     </span>
                     <span className="block truncate text-[12px] text-faint">
-                      {analyse.opening ?? 'sans ouverture répertoriée'}
+                      {analyse.opening ?? t('homeIn.noOpeningListed')}
                     </span>
                   </li>
                 ))}
@@ -474,17 +478,16 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                   même ligne, et l'on sait de quoi parle chacun sans le lire en
                   entier. */}
               <EnTeteDeCarte
-                titre="Fais analyser une partie"
+                titre={t('homeIn.getAnalysed')}
                 icone={<Sparkles size={14} aria-hidden />}
               />
               <div className="flex flex-1 flex-col justify-center p-4">
                 <p className="text-[12px] leading-relaxed text-muted">
-                  Coup par coup, ce qui a basculé et pourquoi — avec le meilleur coup montré sur
-                  l’échiquier. Tes analyses restent ici.
+                  {t('homeIn.getAnalysedHint')}
                 </p>
                 <Link href="/analyse" className="mt-3">
                   <Button variant="secondary" size="sm" fullWidth icon={<Gauge size={14} />}>
-                    Analyser une partie
+                    {t('homeIn.analyseAGame')}
                   </Button>
                 </Link>
               </div>

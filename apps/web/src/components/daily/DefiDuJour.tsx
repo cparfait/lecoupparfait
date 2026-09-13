@@ -22,6 +22,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Check, ChevronDown, ChevronUp, Sun, Swords } from 'lucide-react'
 import clsx from 'clsx'
+import { useT } from '@/lib/i18n/index.tsx'
 import { Card, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import { QUETES, queteFaite, jourLocal } from '@/lib/daily/quotidien.ts'
@@ -47,6 +48,7 @@ interface Tranche {
 }
 
 export function DefiDuJour({ className }: { className?: string }) {
+  const t = useT()
   const { etat, xp, marquer: _marquer } = useQuotidien()
   const [defi, setDefi] = useState<DefiPuzzle | null>(null)
   const [tranche, setTranche] = useState<Tranche | null>(null)
@@ -100,7 +102,7 @@ export function DefiDuJour({ className }: { className?: string }) {
     // se voir avant de se lire.
     <Card className={clsx('relative p-5', defiFait ? 'teinte-reussi' : 'teinte-defi', className)}>
       <SectionTitle
-        hint="La même position pour tout le monde de ton niveau, jusqu’à minuit."
+        hint={t('daily.hint')}
         // La même flamme que dans la barre du haut, et volontairement le même
         // composant : `FlammeSerie` décide seul quand se montrer — il faut une
         // série, et il faut un compte.
@@ -111,7 +113,7 @@ export function DefiDuJour({ className }: { className?: string }) {
       >
         <span className="flex items-center gap-2">
           <Swords size={16} className="text-accent" aria-hidden />
-          Le défi du jour
+          {t('daily.title')}
         </span>
       </SectionTitle>
 
@@ -129,17 +131,21 @@ export function DefiDuJour({ className }: { className?: string }) {
             <Check size={14} className="text-[var(--q-best)]" />
           </span>
           <span className="min-w-0 flex-1 text-[14px] leading-snug">
-            <span className="block font-semibold text-[var(--q-best)]">Défi du jour relevé</span>
+            <span className="block font-semibold text-[var(--q-best)]">{t('daily.doneToday')}</span>
             <span className="block text-muted">
-              {quetesFaites} quête{quetesFaites > 1 ? 's' : ''} sur {QUETES.length} · {xp} /{' '}
-              {XP_TOTAL} points · la prochaine position arrive à minuit
+              {t(quetesFaites > 1 ? 'daily.questsDone' : 'daily.oneQuestDone', {
+                faites: quetesFaites,
+                total: QUETES.length,
+                xp,
+                max: XP_TOTAL,
+              })}
             </span>
           </span>
           <ChevronDown size={16} className="shrink-0 text-faint" aria-hidden />
         </button>
       ) : chargement ? (
         <p className="flex items-center gap-2 py-2 text-sm text-muted">
-          <Spinner size={13} /> Tirage du jour…
+          <Spinner size={13} /> {t('daily.drawing')}
         </p>
       ) : defi ? (
         <>
@@ -147,10 +153,7 @@ export function DefiDuJour({ className }: { className?: string }) {
           {tranche && <PlusDur tranche={tranche} />}
         </>
       ) : (
-        <p className="py-2 text-sm text-muted">
-          Le défi du jour n’est pas disponible — la base de puzzles n’est peut-être pas encore
-          importée.
-        </p>
+        <p className="py-2 text-sm text-muted">{t('daily.unavailable')}</p>
       )}
 
       {/* ── Les autres quêtes ─────────────────────────────────────────── */}
@@ -173,7 +176,7 @@ export function DefiDuJour({ className }: { className?: string }) {
                 juste dessous le compte — et il est l'encadré au-dessus. Le mot
                 « autres » dit les deux choses, et dispense de le répéter dans
                 la liste. */}
-            Les autres quêtes du jour
+            {t('daily.otherQuests')}
           </span>
           <span className="text-xs tabular-nums text-muted">
             {xp} / {XP_TOTAL} points
@@ -186,7 +189,7 @@ export function DefiDuJour({ className }: { className?: string }) {
           aria-valuenow={xp}
           aria-valuemin={0}
           aria-valuemax={XP_TOTAL}
-          aria-label="Points du jour"
+          aria-label={t('daily.pointsAria')}
         >
           <div
             className="h-full rounded-full bg-[var(--q-inaccuracy)] transition-[width] duration-500"
@@ -209,7 +212,7 @@ export function DefiDuJour({ className }: { className?: string }) {
             className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-[var(--radius-sm)] py-1.5 text-[12px] font-medium text-muted transition-colors hover:bg-surface-hover hover:text-ink"
           >
             <ChevronUp size={13} aria-hidden />
-            Replier le défi du jour
+            {t('daily.collapse')}
           </button>
         )}
       </div>
@@ -245,6 +248,7 @@ function DefiCliquable({
   defiFait: boolean
   tranche: Tranche | null
 }) {
+  const t = useT()
   const identite = useIdentite()
   const router = useRouter()
 
@@ -276,11 +280,13 @@ function DefiCliquable({
     <>
       <span className="min-w-0">
         <span className="block text-sm font-semibold">
-          {defiFait ? 'Défi relevé' : 'Trouve le coup gagnant'}
+          {t(defiFait ? 'daily.done' : 'daily.findTheMove')}
         </span>
         <span className="block text-xs text-muted">
-          {tranche ? `${tranche.nom} · niveau ${defi.rating}` : `Niveau ${defi.rating}`}
-          {defiFait ? ' · reviens demain' : ' · une seule position'}
+          {tranche
+            ? t('daily.tierLevel', { tranche: tranche.nom, cote: defi.rating })
+            : t('daily.levelOnly', { cote: defi.rating })}
+          {t(defiFait ? 'daily.comeBackTomorrow' : 'daily.onePosition')}
         </span>
       </span>
       {defiFait ? (
@@ -300,10 +306,7 @@ function DefiCliquable({
         type="button"
         className={apparence}
         onClick={() => {
-          toast.info(
-            'Le défi du jour demande un compte — gratuit, et sans publicité.',
-            'Il est le même pour tout le monde et compte pour ta série : sans compte, on ne saurait ni à qui l’attribuer, ni la retrouver demain. Jouer, apprendre et analyser restent accessibles sans rien créer.',
-          )
+          toast.info(t('daily.needsAccount'), t('daily.needsAccountHint'))
           router.push('/connexion')
         }}
       >
@@ -335,12 +338,13 @@ function DefiCliquable({
  * Deux et pas six : au-delà, un défi quotidien devient un catalogue.
  */
 function PlusDur({ tranche }: { tranche: Tranche }) {
+  const t = useT()
   const superieures = tranchesAuDessus(tranche)
   if (superieures.length === 0) return null
 
   return (
     <p className="relative z-10 mt-2 flex flex-wrap items-center gap-1.5 text-[12px] text-faint">
-      <span>Plus dur&nbsp;:</span>
+      <span>{t('daily.harder')}</span>
       {superieures.map((autre) => (
         <Link
           key={autre.id}

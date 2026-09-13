@@ -19,6 +19,7 @@ import { Chess } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { Eraser, Gauge, RotateCcw, Swords, Trash2 } from 'lucide-react'
 import clsx from 'clsx'
+import { useT } from '@/lib/i18n/index.tsx'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, Card, SectionTitle } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
@@ -67,6 +68,7 @@ const PIECES: Array<{ type: PieceSymbol; white: string; black: string; nom: stri
 ]
 
 export default function EditorPage() {
+  const t = useT()
   const [fen, setFen] = useState(START)
   const [brush, setBrush] = useState<{ type: PieceSymbol; color: Color } | null>({
     type: 'p',
@@ -90,25 +92,22 @@ export default function EditorPage() {
     if (rois.w !== 1 || rois.b !== 1) {
       return {
         ok: false,
-        message:
-          rois.w === 0 || rois.b === 0
-            ? 'Il faut un roi de chaque couleur.'
-            : 'Il ne peut y avoir qu’un roi par couleur.',
+        message: rois.w === 0 || rois.b === 0 ? t('editor.needAKing') : t('editor.oneKingEach'),
       }
     }
     if (/[pP]/.test((placed.split('/')[0] ?? '') + (placed.split('/')[7] ?? ''))) {
       return {
         ok: false,
-        message: 'Un pion ne peut pas être sur la première ni la dernière rangée.',
+        message: t('editor.pawnOnEdge'),
       }
     }
     try {
       board.load(fen)
       return { ok: true, message: `${board.moves().length} coups légaux.` }
     } catch {
-      return { ok: false, message: 'Position impossible : un roi est peut-être déjà en prise.' }
+      return { ok: false, message: t('editor.impossible') }
     }
-  }, [fen])
+  }, [fen, t])
 
   /** Repose la position avec un autre trait, sans toucher aux pièces. */
   const withTurn = useCallback(
@@ -151,7 +150,7 @@ export default function EditorPage() {
 
   const analyse = useCallback(() => {
     if (!verdict.ok) {
-      toast.error('Position incomplète.', verdict.message)
+      toast.error(t('editor.incomplete'), verdict.message)
       return
     }
     try {
@@ -160,13 +159,11 @@ export default function EditorPage() {
       // Stockage refusé : on collera la position à la main.
     }
     window.location.assign('/analyse')
-  }, [fen, verdict])
+  }, [fen, verdict, t])
 
   return (
     <div className="etude mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
-      <SectionTitle hint="Reproduis une position vue ailleurs, puis analyse-la ou joue-la.">
-        Éditeur de position
-      </SectionTitle>
+      <SectionTitle hint={t('editor.hint')}>{t('editor.title')}</SectionTitle>
 
       <div className="etude-corps grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="etude-plateau min-w-0">
@@ -186,7 +183,7 @@ export default function EditorPage() {
         <div className="etude-aside flex min-w-0 flex-col gap-3">
           {/* ── Pièces ─────────────────────────────────────────── */}
           <Card className="p-3">
-            <p className="mb-2 text-[12px] font-semibold text-faint">Pièce à poser</p>
+            <p className="mb-2 text-[12px] font-semibold text-faint">{t('editor.pieceToPlace')}</p>
             {(['w', 'b'] as const).map((colour) => (
               <div key={colour} className="mb-1.5 flex gap-1">
                 {PIECES.map((piece) => {
@@ -278,7 +275,7 @@ export default function EditorPage() {
               }}
               fullWidth
             >
-              Position de départ
+              {t('editor.startingPosition')}
             </Button>
           </Card>
 
@@ -301,14 +298,14 @@ export default function EditorPage() {
                 disabled={!verdict.ok}
                 fullWidth
               >
-                Analyser cette position
+                {t('editor.analyseThis')}
               </Button>
               <Link
                 href={`/jouer/ordinateur?fen=${encodeURIComponent(fen)}`}
                 className={clsx('block', !verdict.ok && 'pointer-events-none opacity-50')}
               >
                 <Button variant="secondary" icon={<Swords size={15} />} fullWidth>
-                  La jouer contre l’ordinateur
+                  {t('editor.playVsComputer')}
                 </Button>
               </Link>
             </div>
@@ -324,7 +321,7 @@ export default function EditorPage() {
                   if (side === 'w' || side === 'b') setTurn(side)
                 }}
                 spellCheck={false}
-                aria-label="Position au format FEN"
+                aria-label={t('editor.fenAria')}
                 className="w-full rounded-[var(--radius-sm)] border border-line bg-surface px-2 py-1.5 font-mono text-[12px] focus:border-accent focus:outline-none"
               />
             </label>

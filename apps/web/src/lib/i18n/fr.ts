@@ -1492,6 +1492,105 @@ export const fr = {
       'Damier « {damier} », pièces « {pieces} ». Clique une pièce pour voir les indications de coups légaux.',
   },
 
+  editor: {
+    title: 'Éditeur de position',
+    hint: 'Reproduis une position vue ailleurs, puis analyse-la ou joue-la.',
+    needAKing: 'Il faut un roi de chaque couleur.',
+    oneKingEach: 'Il ne peut y avoir qu’un roi par couleur.',
+    pawnOnEdge: 'Un pion ne peut pas être sur la première ni la dernière rangée.',
+    impossible: 'Position impossible : un roi est peut-être déjà en prise.',
+    incomplete: 'Position incomplète.',
+    startingPosition: 'Position de départ',
+    analyseThis: 'Analyser cette position',
+    playVsComputer: 'La jouer contre l’ordinateur',
+    pieceToPlace: 'Pièce à poser',
+    fenAria: 'Position au format FEN',
+  },
+
+  board: {
+    title: 'Échiquier électronique',
+    hint: 'Jouez sur votre plateau, la partie suit.',
+    connect: 'Brancher un échiquier électronique',
+    disconnect: 'Débrancher',
+    upsideDown: 'Plateau posé à l’envers — c’est pris en compte, rien à changer.',
+    noLeds:
+      'Cette carte n’a pas de LEDs : les cases à corriger sont listées ici plutôt que montrées sur le plateau.',
+    toFix: 'À corriger',
+    pieceInHand: 'Pièce en main',
+    ready: 'Prêt',
+  },
+
+  explain: {
+    noExplanation:
+      'Pas d’explication pour « {cle} » — c’est un cas que l’application ne sait pas encore nommer.',
+    yourGamesBefore: 'Tes parties :',
+    yourGamesAfter: ', pour',
+    pointsScored: '% de points marqués.',
+    endedThusBefore: 'Tes parties finies ainsi :',
+    endedThusMiddle: ', dont',
+    wonSuffix: 'gagnées.',
+    wonSuffixOne: 'gagnée.',
+    definingMoves: 'Les coups qui la définissent',
+    youPlayedItBefore: 'Tu l’as jouée',
+    youPlayedItAfter: 'fois — dont',
+    inGlossary: 'Voir « {terme} » dans le glossaire',
+    readingBook: 'Lecture du livre d’ouvertures…',
+    notInBook:
+      'Cette ouverture n’est pas dans le livre : elle vient du nom enregistré avec la partie.',
+    withWhite: '{n} avec les Blancs — pour',
+    exploreOpening: 'Explorer cette ouverture',
+  },
+
+  homeIn: {
+    won: 'Gagnée',
+    lost: 'Perdue',
+    seeTheMap: 'Voir la carte',
+    streakTitle: 'Jours d’affilée avec au moins une quête faite',
+    yourPath: 'Ton parcours',
+    careerDone: 'Carrière terminée 👑',
+    startCareer: 'Commence ta carrière',
+    careerBlurb: 'Douze chapitres, du premier coup à la première victoire nette.',
+    reviewPath: 'Revoir le parcours',
+    start: 'Commencer',
+    lastGames: 'Tes dernières parties',
+    noGameSaved: 'Aucune partie enregistrée.',
+    playAGame: 'Jouer une partie',
+    unlistedOpening: 'ouverture non répertoriée',
+    halfMoves: '{n} demi-coups',
+    yourAnalyses: 'Tes analyses',
+    noOpeningListed: 'sans ouverture répertoriée',
+    getAnalysed: 'Fais analyser une partie',
+    getAnalysedHint:
+      'Coup par coup, ce qui a basculé et pourquoi — avec le meilleur coup montré sur l’échiquier. Tes analyses restent ici.',
+    analyseAGame: 'Analyser une partie',
+  },
+
+  daily: {
+    title: 'Le défi du jour',
+    questsDone:
+      '{faites} quêtes sur {total} · {xp} / {max} points · la prochaine position arrive à minuit',
+    oneQuestDone:
+      '{faites} quête sur {total} · {xp} / {max} points · la prochaine position arrive à minuit',
+    drawing: 'Tirage du jour…',
+    unavailable:
+      'Le défi du jour n’est pas disponible — la base de puzzles n’est peut-être pas encore importée.',
+    hint: 'La même position pour tout le monde de ton niveau, jusqu’à minuit.',
+    doneToday: 'Défi du jour relevé',
+    harder: 'Plus dur :',
+    otherQuests: 'Les autres quêtes du jour',
+    pointsAria: 'Points du jour',
+    collapse: 'Replier le défi du jour',
+    done: 'Défi relevé',
+    findTheMove: 'Trouve le coup gagnant',
+    tierLevel: '{tranche} · niveau {cote}',
+    levelOnly: 'Niveau {cote}',
+    comeBackTomorrow: ' · reviens demain',
+    onePosition: ' · une seule position',
+    needsAccount: 'Le défi du jour demande un compte — gratuit, et sans publicité.',
+    needsAccountHint:
+      'Il est le même pour tout le monde et compte pour ta série : sans compte, on ne saurait ni à qui l’attribuer, ni la retrouver demain. Jouer, apprendre et analyser restent accessibles sans rien créer.',
+  },
+
   auth: {
     signIn: 'Connexion',
     signUp: 'Créer un compte',

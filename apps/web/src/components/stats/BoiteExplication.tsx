@@ -23,6 +23,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useT } from '@/lib/i18n/index.tsx'
 import { BookOpen, ExternalLink, X } from 'lucide-react'
 import { Chess } from 'chess.js'
 import type { Square, PieceSymbol } from 'chess.js'
@@ -105,16 +106,12 @@ function TexteEcrit({
 }: {
   demande: Extract<DemandeExplication, { type: 'cadence' | 'fin' }>
 }) {
+  const t = useT()
   const source = demande.type === 'cadence' ? CADENCES : FINS
   const explication = source[demande.cle]
 
   if (!explication) {
-    return (
-      <p className="text-sm text-muted">
-        Pas d’explication pour « {demande.cle} » — c’est un cas que l’application ne sait pas encore
-        nommer.
-      </p>
-    )
+    return <p className="text-sm text-muted">{t('explain.noExplanation', { cle: demande.cle })}</p>
   }
 
   return (
@@ -139,15 +136,19 @@ function TexteEcrit({
 
       {demande.type === 'cadence' && demande.parties !== undefined && (
         <p className="mt-4 rounded-[var(--radius-sm)] bg-surface px-3 py-2 text-[14px]">
-          Tes parties : <strong className="font-semibold">{demande.parties}</strong>, pour{' '}
-          <strong className="font-semibold">{demande.taux} %</strong> de points marqués.
+          {t('explain.yourGamesBefore')}{' '}
+          <strong className="font-semibold">{demande.parties}</strong>
+          {t('explain.yourGamesAfter')} <strong className="font-semibold">{demande.taux}</strong>{' '}
+          {t('explain.pointsScored')}
         </p>
       )}
       {demande.type === 'fin' && demande.parties !== undefined && (
         <p className="mt-4 rounded-[var(--radius-sm)] bg-surface px-3 py-2 text-[14px]">
-          Tes parties finies ainsi : <strong className="font-semibold">{demande.parties}</strong>,
-          dont <strong className="font-semibold">{demande.gagnees}</strong> gagnée
-          {(demande.gagnees ?? 0) > 1 ? 's' : ''}.
+          {t('explain.endedThusBefore')}{' '}
+          <strong className="font-semibold">{demande.parties}</strong>
+          {t('explain.endedThusMiddle')}{' '}
+          <strong className="font-semibold">{demande.gagnees}</strong>{' '}
+          {t((demande.gagnees ?? 0) > 1 ? 'explain.wonSuffix' : 'explain.wonSuffixOne')}
         </p>
       )}
 
@@ -157,7 +158,7 @@ function TexteEcrit({
           className="mt-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-accent hover:underline"
         >
           <BookOpen size={13} aria-hidden />
-          Voir « {explication.terme} » dans le glossaire
+          {t('explain.inGlossary', { terme: explication.terme })}
         </Link>
       )}
     </>
@@ -173,6 +174,7 @@ function TexteEcrit({
  * qui permet de la ranger dans ce qu'on connaît déjà.
  */
 function Ouverture({ demande }: { demande: Extract<DemandeExplication, { type: 'ouverture' }> }) {
+  const t = useT()
   const { book, ready } = useOpeningBook()
   const format = useSan()
   /*
@@ -227,15 +229,13 @@ function Ouverture({ demande }: { demande: Extract<DemandeExplication, { type: '
 
       {/* ── La ligne ─────────────────────────────────────────────────── */}
       <div className="mt-4">
-        <p className="mb-1.5 text-[12px] font-semibold text-faint">Les coups qui la définissent</p>
+        <p className="mb-1.5 text-[12px] font-semibold text-faint">{t('explain.definingMoves')}</p>
         {!ready || ligne === null ? (
           <span className="flex items-center gap-2 text-[14px] text-faint">
-            <Spinner size={14} /> Lecture du livre d’ouvertures…
+            <Spinner size={14} /> {t('explain.readingBook')}
           </span>
         ) : ligne.length === 0 ? (
-          <p className="text-[14px] text-faint">
-            Cette ouverture n’est pas dans le livre : elle vient du nom enregistré avec la partie.
-          </p>
+          <p className="text-[14px] text-faint">{t('explain.notInBook')}</p>
         ) : (
           <p className="rounded-[var(--radius-sm)] bg-surface px-3 py-2 font-mono text-[14px] leading-relaxed">
             {ligne.map((san, index) => (
@@ -250,9 +250,10 @@ function Ouverture({ demande }: { demande: Extract<DemandeExplication, { type: '
 
       {/* ── Ton bilan ────────────────────────────────────────────────── */}
       <p className="mt-4 rounded-[var(--radius-sm)] bg-surface px-3 py-2 text-[14px] leading-relaxed">
-        Tu l’as jouée <strong className="font-semibold">{demande.parties}</strong> fois — dont{' '}
-        {demande.blancs} avec les Blancs — pour{' '}
-        <strong className="font-semibold">{demande.taux} %</strong> de points marqués.
+        {t('explain.youPlayedItBefore')}{' '}
+        <strong className="font-semibold">{demande.parties}</strong> {t('explain.youPlayedItAfter')}{' '}
+        {t('explain.withWhite', { n: demande.blancs ?? 0 })}{' '}
+        <strong className="font-semibold">{demande.taux}</strong> {t('explain.pointsScored')}
       </p>
 
       <Link
@@ -260,7 +261,7 @@ function Ouverture({ demande }: { demande: Extract<DemandeExplication, { type: '
         className="mt-4 inline-flex items-center gap-1.5 text-[14px] font-medium text-accent hover:underline"
       >
         <ExternalLink size={13} aria-hidden />
-        Explorer cette ouverture
+        {t('explain.exploreOpening')}
       </Link>
     </>
   )
