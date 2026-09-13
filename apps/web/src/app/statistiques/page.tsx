@@ -18,6 +18,8 @@ import clsx from 'clsx'
 import { SPEED_LABELS } from '@coupparfait/core'
 import { Button, Card, EmptyState, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { BoiteExplication, type DemandeExplication } from '@/components/stats/BoiteExplication.tsx'
+import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
+import { usePreferences } from '@/lib/store/preferences.ts'
 
 interface Stats {
   days: number
@@ -39,15 +41,22 @@ interface Stats {
   endings: Array<{ status: string; games: number; won: number }>
 }
 
-const ENDING_LABELS: Record<string, string> = {
-  checkmate: 'Échec et mat',
-  resigned: 'Abandon',
-  timeout: 'Temps écoulé',
-  draw: 'Nulle',
-  stalemate: 'Pat',
-  abandoned: 'Adversaire parti',
-  aborted: 'Annulée',
-}
+/*
+  Les fins de partie que le serveur sait nommer.
+
+  Leur libellé vit dans le dictionnaire, sous `stats.endings` : un état qui
+  n'y figure pas s'affiche tel quel, ce qui reste lisible et signale au passage
+  qu'il manque une traduction.
+*/
+const FINS = [
+  'checkmate',
+  'resigned',
+  'timeout',
+  'draw',
+  'stalemate',
+  'abandoned',
+  'aborted',
+] as const
 
 /** Barre de score : verte au-dessus de la moitié, rouge en dessous. */
 function Bar({ rate }: { rate: number }) {
@@ -107,6 +116,15 @@ function MotExplique({
 }
 
 export default function StatsPage() {
+  const t = useT()
+  /* Les noms de cadence viennent du cœur : voir `localeDuContenu`. */
+  const contenu = usePreferences((state) => localeDuContenu(state.locale))
+
+  /* Le libellé d'une fin de partie, ou son identifiant brut si le dictionnaire
+     ne la connaît pas — ce qui reste lisible et signale l'oubli. */
+  const nommerLaFin = (statut: string) =>
+    (FINS as readonly string[]).includes(statut) ? t(`stats.endings.${statut}` as never) : statut
+
   const [stats, setStats] = useState<Stats | null | undefined>(undefined)
   const [days, setDays] = useState(365)
   /**
@@ -143,11 +161,11 @@ export default function StatsPage() {
       <div className="page-etroite">
         <EmptyState
           icon={<BarChart3 size={28} />}
-          title="Les statistiques demandent un compte"
-          description="Elles se calculent sur tes parties enregistrées : il faut donc savoir lesquelles sont les tiennes."
+          title={t('stats.needsAccount')}
+          description={t('stats.needsAccountHint')}
           action={
             <Link href="/connexion">
-              <Button variant="primary">Se connecter</Button>
+              <Button variant="primary">{t('nav.signIn')}</Button>
             </Link>
           }
         />
@@ -160,11 +178,11 @@ export default function StatsPage() {
       <div className="page-etroite">
         <EmptyState
           icon={<BarChart3 size={28} />}
-          title="Pas encore de partie classée"
-          description="Joue quelques parties contre un ami : tes statistiques apparaîtront ici, ouverture par ouverture."
+          title={t('stats.noGame')}
+          description={t('stats.noGameHint')}
           action={
             <Link href="/jouer">
-              <Button variant="primary">Jouer</Button>
+              <Button variant="primary">{t('nav.play')}</Button>
             </Link>
           }
         />
@@ -181,7 +199,7 @@ export default function StatsPage() {
   return (
     <div className="page-etroite">
       <SectionTitle
-        hint={`Sur tes ${stats.totals.games} parties terminées.`}
+        hint={t('stats.hint', { n: stats.totals.games })}
         action={
           <div className="flex gap-1">
             {[30, 365, 3650].map((period) => (
@@ -194,26 +212,26 @@ export default function StatsPage() {
                   days === period ? 'bg-accent/18 text-ink' : 'text-muted hover:bg-surface-hover',
                 )}
               >
-                {period === 30 ? '30 jours' : period === 365 ? '1 an' : 'Tout'}
+                {t(period === 30 ? 'stats.days30' : period === 365 ? 'stats.year1' : 'stats.all')}
               </button>
             ))}
           </div>
         }
       >
-        Mes statistiques
+        {t('stats.title')}
       </SectionTitle>
 
       {/* ── L'essentiel ─────────────────────────────────────────────── */}
       <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
         {[
-          { label: 'Toutes parties', value: stats.totals.rate, games: stats.totals.games },
+          { label: t('stats.allGames'), value: stats.totals.rate, games: stats.totals.games },
           {
-            label: 'Avec les Blancs',
+            label: t('stats.asWhite'),
             value: stats.totals.white.rate,
             games: stats.totals.white.games,
           },
           {
-            label: 'Avec les Noirs',
+            label: t('stats.asBlack'),
             value: stats.totals.black.rate,
             games: stats.totals.black.games,
           },
@@ -224,7 +242,9 @@ export default function StatsPage() {
               {entry.value}
               <span className="text-sm font-normal text-muted"> %</span>
             </p>
-            <p className="mt-0.5 text-[12px] text-faint">{entry.games} parties</p>
+            <p className="mt-0.5 text-[12px] text-faint">
+              {t('stats.gamesCount', { n: entry.games })}
+            </p>
             <span className="mt-1.5 block">
               <Bar rate={entry.value} />
             </span>
@@ -242,14 +262,14 @@ export default function StatsPage() {
               aria-hidden
             />
             <span>
-              Ton point faible :{' '}
+              {t('stats.weakSpot')}{' '}
               <MotExplique
-                aide={worst.name ?? 'cette ouverture'}
+                aide={worst.name ?? t('stats.thisOpening')}
                 onClick={() =>
                   setExplication({
                     type: 'ouverture',
                     eco: worst.eco,
-                    nom: worst.name ?? 'Ouverture non répertoriée',
+                    nom: worst.name ?? t('stats.unlistedOpening'),
                     parties: worst.games,
                     taux: worst.rate,
                     blancs: worst.asWhite,
@@ -259,8 +279,7 @@ export default function StatsPage() {
               >
                 {worst.name}
               </MotExplique>{' '}
-              — tu y marques {worst.rate} % sur {worst.games} parties. C’est la ligne qui rapporte
-              le plus à travailler.
+              {t('stats.weakSpotAfter', { taux: worst.rate, parties: worst.games })}
             </span>
           </p>
         </Card>
@@ -268,11 +287,9 @@ export default function StatsPage() {
 
       {/* ── Par ouverture ───────────────────────────────────────────── */}
       <Card className="mt-3 p-3">
-        <p className="mb-2 text-[12px] font-semibold text-faint">Par ouverture</p>
+        <p className="mb-2 text-[12px] font-semibold text-faint">{t('stats.byOpening')}</p>
         {stats.openings.length === 0 ? (
-          <p className="text-[14px] text-faint">
-            Aucune ouverture jouée au moins trois fois : trop tôt pour en tirer quoi que ce soit.
-          </p>
+          <p className="text-[14px] text-faint">{t('stats.noOpening')}</p>
         ) : (
           <div className="space-y-1.5">
             {stats.openings.map((opening) => (
@@ -282,12 +299,12 @@ export default function StatsPage() {
                 </span>
                 <span className="min-w-0 flex-1">
                   <MotExplique
-                    aide={opening.name ?? 'cette ouverture'}
+                    aide={opening.name ?? t('stats.thisOpening')}
                     onClick={() =>
                       setExplication({
                         type: 'ouverture',
                         eco: opening.eco,
-                        nom: opening.name ?? 'Ouverture non répertoriée',
+                        nom: opening.name ?? t('stats.unlistedOpening'),
                         parties: opening.games,
                         taux: opening.rate,
                         blancs: opening.asWhite,
@@ -319,12 +336,14 @@ export default function StatsPage() {
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {/* ── Par cadence ───────────────────────────────────────────── */}
         <Card className="p-3">
-          <p className="mb-2 text-[12px] font-semibold text-faint">Par cadence</p>
+          <p className="mb-2 text-[12px] font-semibold text-faint">{t('stats.bySpeed')}</p>
           <div className="space-y-1.5">
             {stats.speeds.map((entry) => (
               <div key={entry.speed} className="flex items-center gap-2">
                 <MotExplique
-                  aide={SPEED_LABELS[entry.speed as keyof typeof SPEED_LABELS]?.fr ?? entry.speed}
+                  aide={
+                    SPEED_LABELS[entry.speed as keyof typeof SPEED_LABELS]?.[contenu] ?? entry.speed
+                  }
                   onClick={() =>
                     setExplication({
                       type: 'cadence',
@@ -335,7 +354,7 @@ export default function StatsPage() {
                   }
                   className="w-24 shrink-0 text-[14px]"
                 >
-                  {SPEED_LABELS[entry.speed as keyof typeof SPEED_LABELS]?.fr ?? entry.speed}
+                  {SPEED_LABELS[entry.speed as keyof typeof SPEED_LABELS]?.[contenu] ?? entry.speed}
                 </MotExplique>
                 <span className="min-w-0 flex-1">
                   <Bar rate={entry.rate} />
@@ -350,12 +369,12 @@ export default function StatsPage() {
 
         {/* ── Comment ça se termine ─────────────────────────────────── */}
         <Card className="p-3">
-          <p className="mb-2 text-[12px] font-semibold text-faint">Comment tes parties finissent</p>
+          <p className="mb-2 text-[12px] font-semibold text-faint">{t('stats.howGamesEnd')}</p>
           <div className="space-y-1">
             {stats.endings.map((entry) => (
               <div key={entry.status} className="flex items-center gap-2 text-[14px]">
                 <MotExplique
-                  aide={ENDING_LABELS[entry.status] ?? entry.status}
+                  aide={nommerLaFin(entry.status)}
                   onClick={() =>
                     setExplication({
                       type: 'fin',
@@ -366,10 +385,11 @@ export default function StatsPage() {
                   }
                   className="min-w-0 flex-1"
                 >
-                  {ENDING_LABELS[entry.status] ?? entry.status}
+                  {nommerLaFin(entry.status)}
                 </MotExplique>
                 <span className="shrink-0 tabular-nums text-faint">
-                  {entry.games} · {entry.won} gagnée{entry.won > 1 ? 's' : ''}
+                  {entry.games} ·{' '}
+                  {t(entry.won > 1 ? 'stats.wonCount' : 'stats.wonOne', { n: entry.won })}
                 </span>
               </div>
             ))}
@@ -381,15 +401,13 @@ export default function StatsPage() {
       {bestHour && worstHour && bestHour.hour !== worstHour.hour && (
         <Card className="mt-3 p-3">
           <p className="text-[14px] leading-relaxed text-muted">
-            Tu marques <strong className="font-semibold text-ink">{bestHour.rate} %</strong> vers{' '}
-            {bestHour.hour} h, contre{' '}
-            <strong className="font-semibold text-ink">{worstHour.rate} %</strong> vers{' '}
-            {worstHour.hour} h.
+            {t('stats.scoreBefore')}{' '}
+            <strong className="font-semibold text-ink">{bestHour.rate} %</strong>{' '}
+            {t('stats.scoreAround', { heure: bestHour.hour })}{' '}
+            <strong className="font-semibold text-ink">{worstHour.rate} %</strong>{' '}
+            {t('stats.scoreAgainst', { heure: worstHour.hour })}
           </p>
-          <p className="mt-1 text-[12px] leading-relaxed text-faint">
-            Heure du serveur, et non la tienne : le fuseau des joueurs n’est pas enregistré. L’écart
-            reste parlant, l’heure exacte moins.
-          </p>
+          <p className="mt-1 text-[12px] leading-relaxed text-faint">{t('stats.serverHour')}</p>
         </Card>
       )}
 
@@ -397,7 +415,7 @@ export default function StatsPage() {
           n'annonce qu'ils ouvrent une définition plutôt qu'une infobulle. */}
       <p className="mt-3 flex items-center justify-center gap-1.5 text-[12px] text-faint">
         <HelpCircle size={11} aria-hidden />
-        Un nom d’ouverture, de cadence ou de fin de partie s’ouvre : on y trouve ce qu’il veut dire.
+        {t('stats.clickToExplain')}
       </p>
 
       {explication && (

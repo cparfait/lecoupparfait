@@ -20,8 +20,10 @@ import { Bell, BellOff, BellRing, Send } from 'lucide-react'
 import { Button, Card, SectionTitle, Toggle } from '@/components/ui/index.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { iosSansInstallation, useNotifications } from '@/lib/notifications.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export function ReglageNotifications() {
+  const t = useT()
   const identite = useIdentite()
   const { etat, occupe, erreur, choix, activer, desactiver, changerChoix, essayer } =
     useNotifications()
@@ -37,53 +39,40 @@ export function ReglageNotifications() {
 
   return (
     <Card className="p-5">
-      <SectionTitle hint="Sur cet appareil uniquement.">
+      <SectionTitle hint={t('notifications.thisDeviceOnly')}>
         <span className="flex items-center gap-2">
           <Bell size={16} className="text-accent" aria-hidden />
-          Notifications
+          {t('notifications.title')}
         </span>
       </SectionTitle>
 
       {etat === 'impossible' ? (
         <p className="text-sm leading-relaxed text-muted">
-          {iosSansInstallation() ? (
-            <>
-              Sur iPhone et iPad, les notifications ne fonctionnent qu’une fois l’application
-              installée. Touche le bouton de partage, puis «&nbsp;Sur l’écran d’accueil&nbsp;», et
-              reviens ici depuis l’icône.
-            </>
-          ) : (
-            <>Ce navigateur ne sait pas recevoir de notifications.</>
-          )}
+          {t(iosSansInstallation() ? 'notifications.iosNeedsInstall' : 'notifications.unsupported')}
         </p>
       ) : !identite ? (
-        <p className="text-sm leading-relaxed text-muted">
-          Il faut un compte : une invitation s’adresse à quelqu’un.
-        </p>
+        <p className="text-sm leading-relaxed text-muted">{t('notifications.needsAccount')}</p>
       ) : etat === 'refuse' ? (
-        <p className="text-sm leading-relaxed text-muted">
-          Les notifications ont été refusées pour ce site. Le navigateur ne redemandera pas — il
-          faut les réautoriser dans ses réglages, à côté de l’adresse du site.
-        </p>
+        <p className="text-sm leading-relaxed text-muted">{t('notifications.refused')}</p>
       ) : etat === 'actif' ? (
         <>
           <p className="flex items-center gap-2 text-sm text-ink">
             <BellRing size={15} className="text-accent" aria-hidden />
-            Cet appareil est prévenu.
+            {t('notifications.active')}
           </p>
 
           <div className="mt-2 divide-y divide-line">
             <Toggle
               checked={choix.invitations}
               onChange={(value) => void changerChoix({ ...choix, invitations: value })}
-              label="Quand quelqu’un t’attend"
-              description="Une partie proposée, une demande d’ami, un coup joué contre toi en correspondance."
+              label={t('notifications.whenWaiting')}
+              description={t('notifications.whenWaitingHint')}
             />
             <Toggle
               checked={choix.defiDuJour}
               onChange={(value) => void changerChoix({ ...choix, defiDuJour: value })}
-              label="Défi du jour"
-              description="Un rappel en fin de journée, si tu n’y as pas encore touché."
+              label={t('notifications.dailyChallenge')}
+              description={t('notifications.dailyChallengeHint')}
             />
           </div>
 
@@ -95,7 +84,7 @@ export function ReglageNotifications() {
               disabled={occupe}
               onClick={() => void essayer()}
             >
-              Envoyer un essai
+              {t('notifications.sendTest')}
             </Button>
             <Button
               size="sm"
@@ -104,16 +93,13 @@ export function ReglageNotifications() {
               disabled={occupe}
               onClick={() => void desactiver()}
             >
-              Ne plus recevoir
+              {t('notifications.stop')}
             </Button>
           </div>
         </>
       ) : (
         <>
-          <p className="text-sm leading-relaxed text-muted">
-            Être prévenu quand un ami t’invite à jouer, et rappelé du défi du jour. Rien d’autre :
-            ni actualités, ni relances.
-          </p>
+          <p className="text-sm leading-relaxed text-muted">{t('notifications.blurb')}</p>
           <Button
             className="mt-3"
             size="sm"
@@ -121,7 +107,7 @@ export function ReglageNotifications() {
             disabled={occupe}
             onClick={() => void activer()}
           >
-            Activer les notifications
+            {t('notifications.enable')}
           </Button>
         </>
       )}

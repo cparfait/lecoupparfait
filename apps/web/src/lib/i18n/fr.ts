@@ -1073,6 +1073,74 @@ export const fr = {
     memberSince: 'Membre depuis',
   },
 
+  stats: {
+    title: 'Mes statistiques',
+    hint: 'Sur tes {n} parties terminées.',
+    needsAccount: 'Les statistiques demandent un compte',
+    needsAccountHint:
+      'Elles se calculent sur tes parties enregistrées : il faut donc savoir lesquelles sont les tiennes.',
+    noGame: 'Pas encore de partie classée',
+    noGameHint:
+      'Joue quelques parties contre un ami : tes statistiques apparaîtront ici, ouverture par ouverture.',
+    days30: '30 jours',
+    year1: '1 an',
+    all: 'Tout',
+    allGames: 'Toutes parties',
+    asWhite: 'Avec les Blancs',
+    asBlack: 'Avec les Noirs',
+    gamesCount: '{n} parties',
+    weakSpot: 'Ton point faible :',
+    thisOpening: 'cette ouverture',
+    unlistedOpening: 'Ouverture non répertoriée',
+    weakSpotAfter:
+      '— tu y marques {taux} % sur {parties} parties. C’est la ligne qui rapporte le plus à travailler.',
+    byOpening: 'Par ouverture',
+    noOpening:
+      'Aucune ouverture jouée au moins trois fois : trop tôt pour en tirer quoi que ce soit.',
+    bySpeed: 'Par cadence',
+    howGamesEnd: 'Comment tes parties finissent',
+    wonCount: '{n} gagnées',
+    wonOne: '{n} gagnée',
+    scoreBefore: 'Tu marques',
+    scoreAround: 'vers {heure} h, contre',
+    scoreAgainst: 'vers {heure} h.',
+    serverHour:
+      'Heure du serveur, et non la tienne : le fuseau des joueurs n’est pas enregistré. L’écart reste parlant, l’heure exacte moins.',
+    clickToExplain:
+      'Un nom d’ouverture, de cadence ou de fin de partie s’ouvre : on y trouve ce qu’il veut dire.',
+    endings: {
+      checkmate: 'Échec et mat',
+      resigned: 'Abandon',
+      timeout: 'Temps écoulé',
+      draw: 'Nulle',
+      stalemate: 'Pat',
+      abandoned: 'Adversaire parti',
+      aborted: 'Annulée',
+    },
+  },
+
+  notifications: {
+    title: 'Notifications',
+    thisDeviceOnly: 'Sur cet appareil uniquement.',
+    iosNeedsInstall:
+      'Sur iPhone et iPad, les notifications ne fonctionnent qu’une fois l’application installée. Touche le bouton de partage, puis « Sur l’écran d’accueil », et reviens ici depuis l’icône.',
+    unsupported: 'Ce navigateur ne sait pas recevoir de notifications.',
+    needsAccount: 'Il faut un compte : une invitation s’adresse à quelqu’un.',
+    refused:
+      'Les notifications ont été refusées pour ce site. Le navigateur ne redemandera pas — il faut les réautoriser dans ses réglages, à côté de l’adresse du site.',
+    active: 'Cet appareil est prévenu.',
+    whenWaiting: 'Quand quelqu’un t’attend',
+    whenWaitingHint:
+      'Une partie proposée, une demande d’ami, un coup joué contre toi en correspondance.',
+    dailyChallenge: 'Défi du jour',
+    dailyChallengeHint: 'Un rappel en fin de journée, si tu n’y as pas encore touché.',
+    sendTest: 'Envoyer un essai',
+    stop: 'Ne plus recevoir',
+    blurb:
+      'Être prévenu quand un ami t’invite à jouer, et rappelé du défi du jour. Rien d’autre : ni actualités, ni relances.',
+    enable: 'Activer les notifications',
+  },
+
   settings: {
     title: 'Préférences',
     subtitle: 'Tout s’applique immédiatement et reste enregistré dans ton navigateur.',

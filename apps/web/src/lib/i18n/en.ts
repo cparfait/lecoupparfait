@@ -1063,6 +1063,73 @@ export const en: Dictionary = {
     memberSince: 'Member since',
   },
 
+  stats: {
+    title: 'My statistics',
+    hint: 'Over your {n} finished games.',
+    needsAccount: 'Statistics require an account',
+    needsAccountHint:
+      'They are worked out from your saved games: so we need to know which ones are yours.',
+    noGame: 'No rated game yet',
+    noGameHint:
+      'Play a few games against a friend: your statistics will appear here, opening by opening.',
+    days30: '30 days',
+    year1: '1 year',
+    all: 'All',
+    allGames: 'All games',
+    asWhite: 'With White',
+    asBlack: 'With Black',
+    gamesCount: '{n} games',
+    weakSpot: 'Your weak spot:',
+    thisOpening: 'this opening',
+    unlistedOpening: 'Unlisted opening',
+    weakSpotAfter:
+      '— you score {taux}% there over {parties} games. That is the line most worth working on.',
+    byOpening: 'By opening',
+    noOpening: 'No opening played at least three times: too early to draw anything from it.',
+    bySpeed: 'By time control',
+    howGamesEnd: 'How your games end',
+    wonCount: '{n} won',
+    wonOne: '{n} won',
+    scoreBefore: 'You score',
+    scoreAround: 'around {heure}:00, against',
+    scoreAgainst: 'around {heure}:00.',
+    serverHour:
+      'Server time, not yours: players’ time zones are not stored. The gap still means something, the exact hour less so.',
+    clickToExplain:
+      'The name of an opening, a time control or an ending opens up: you will find what it means there.',
+    endings: {
+      checkmate: 'Checkmate',
+      resigned: 'Resignation',
+      timeout: 'Time out',
+      draw: 'Draw',
+      stalemate: 'Stalemate',
+      abandoned: 'Opponent left',
+      aborted: 'Aborted',
+    },
+  },
+
+  notifications: {
+    title: 'Notifications',
+    thisDeviceOnly: 'On this device only.',
+    iosNeedsInstall:
+      'On iPhone and iPad, notifications only work once the app is installed. Touch the share button, then “Add to Home Screen”, and come back here from the icon.',
+    unsupported: 'This browser cannot receive notifications.',
+    needsAccount: 'An account is needed: an invitation is addressed to someone.',
+    refused:
+      'Notifications have been refused for this site. The browser will not ask again — you have to allow them in its settings, next to the site address.',
+    active: 'This device will be notified.',
+    whenWaiting: 'When someone is waiting for you',
+    whenWaitingHint:
+      'A game offered, a friend request, a move played against you by correspondence.',
+    dailyChallenge: 'Daily challenge',
+    dailyChallengeHint: 'A reminder at the end of the day, if you have not touched it yet.',
+    sendTest: 'Send a test',
+    stop: 'Stop receiving them',
+    blurb:
+      'Be told when a friend invites you to play, and reminded of the daily challenge. Nothing else: no news, no nagging.',
+    enable: 'Turn on notifications',
+  },
+
   settings: {
     title: 'Settings',
     subtitle: 'Everything applies right away and stays saved in your browser.',
