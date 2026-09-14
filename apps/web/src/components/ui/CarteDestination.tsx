@@ -106,7 +106,8 @@ export function CarteDestination({
           <span
             className={clsx(
               'mt-0.5 line-clamp-2 block text-[14px] leading-snug text-muted',
-              !compacte && 'md:col-span-2 md:mt-0 md:self-start md:line-clamp-none md:leading-relaxed',
+              !compacte &&
+                'md:col-span-2 md:mt-0 md:self-start md:line-clamp-none md:leading-relaxed',
             )}
           >
             {phrase}
