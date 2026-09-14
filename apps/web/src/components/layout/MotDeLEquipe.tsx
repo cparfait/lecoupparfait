@@ -32,6 +32,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { usePathname } from 'next/navigation'
 import { Megaphone, UserRound } from 'lucide-react'
 import clsx from 'clsx'
 import { Button } from '@/components/ui/index.tsx'
@@ -80,12 +81,21 @@ function retenirLue(id: string): void {
  * d'administration doit couvrir — prévenir quelqu'un qui est là, en train de
  * jouer.
  *
- * Trente secondes : un message de l'équipe n'est pas un défi qui expire en
- * cinq minutes — le guetteur de défis, lui, interroge toutes les quatre
- * secondes. Une requête par demi-minute et par onglet reste négligeable, et la
- * boucle s'arrête dès qu'un message est affiché : il n'y en a jamais deux.
+ * La boucle a d'abord battu toutes les trente secondes, et c'était encore trop
+ * long. Une demi-minute, ce n'est pas une attente : c'est une panne. On envoie
+ * le message, on regarde l'écran d'en face, il ne se passe rien — on conclut
+ * que ça ne marche pas et l'on renvoie. Le délai passait même pour une
+ * conséquence du jeu, puisque le message finissait par apparaître à peu près
+ * quand on bougeait une pièce.
+ *
+ * Dix secondes, donc : l'ordre de grandeur d'un geste, assez court pour que le
+ * message arrive pendant qu'on regarde. Ce que ça coûte est mesuré — une ligne
+ * au plus, `limit 1` sur une table qui en contient quelques dizaines, et le
+ * guetteur de défis interroge déjà toutes les quatre secondes à côté. La boucle
+ * se tait dès qu'un message est affiché — il n'y en a jamais deux — et dès que
+ * l'onglet passe en arrière-plan.
  */
-const RYTHME_MS = 30_000
+const RYTHME_MS = 10_000
 
 /**
  * Le nœud du portail, replacé à chaque appel.
@@ -112,6 +122,7 @@ function hoteDuDialogue(): HTMLElement {
 
 export function MotDeLEquipe() {
   const t = useT()
+  const pathname = usePathname()
   const [annonce, setAnnonce] = useState<Annonce | null>(null)
   const boite = useRef<HTMLDivElement>(null)
   /** Lu par la boucle sans la relancer : une dépendance la redémarrerait. */
@@ -150,7 +161,12 @@ export function MotDeLEquipe() {
       clearInterval(minuteur)
       document.removeEventListener('visibilitychange', demander)
     }
-  }, [])
+    // `pathname` en dépendance : changer de page redemande tout de suite, au
+    // lieu d'attendre le tour suivant. La coque ne se remonte pas d'une page à
+    // l'autre — sans cette dépendance, naviguer ne provoquait aucune demande,
+    // alors que c'est le moment où l'on passe d'un écran à l'autre et où l'on
+    // est le plus disponible pour lire.
+  }, [pathname])
 
   // Le portail ne peut viser le document qu'une fois monté, et il suit le plein
   // écran dans les deux sens.
