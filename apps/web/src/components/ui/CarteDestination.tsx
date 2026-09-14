@@ -13,8 +13,11 @@
  * la règle « une couleur, un rôle » de `globals.css`.
  *
  * Deux tailles :
- *   - ordinaire : sur grand écran, l'icône au-dessus du titre, le détail en
- *     bas ; sur téléphone, une rangée — icône, texte, flèche ;
+ *   - ordinaire : sur grand écran, une grille de deux colonnes — l'icône et le
+ *     titre sur la même ligne, la phrase et le détail dessous sur toute la
+ *     largeur. L'icône était au-dessus du titre : trois lignes empilées pour
+ *     ce qui en tient sur deux, et les huit portes de « Jouer » ne rentraient
+ *     plus dans un écran. Sur téléphone, une rangée — icône, texte, flèche ;
  *   - compacte : toujours une rangée. Pour les listes longues et « Plus ».
  */
 
@@ -66,7 +69,11 @@ export function CarteDestination({
       onClick={onClick}
       className={clsx(
         'group glass relative flex items-center gap-3.5 overflow-hidden p-3.5 pr-11 transition-transform duration-200 hover:-translate-y-0.5',
-        !compacte && 'md:flex-col md:items-stretch md:gap-0 md:p-5',
+        /* `grid-rows` : la phrase occupe la rangée souple, ce qui garde le
+           détail contre le bas quand la grille étire les cartes à la même
+           hauteur — ce que faisait `flex-1` dans la colonne. */
+        !compacte &&
+          'md:grid md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr_auto] md:items-center md:gap-x-3.5 md:gap-y-1.5 md:p-5',
         className,
       )}
       style={style}
@@ -74,7 +81,7 @@ export function CarteDestination({
       <span
         className={clsx(
           'grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius-sm)]',
-          !compacte && 'md:mb-4 md:h-12 md:w-12 md:rounded-[var(--radius)]',
+          !compacte && 'md:h-12 md:w-12 md:rounded-[var(--radius)]',
         )}
         style={pastille}
         aria-hidden
@@ -83,8 +90,8 @@ export function CarteDestination({
       </span>
 
       {/* `md:contents` : au-delà de `md`, la boîte disparaît de la mise en
-          page et ses enfants redeviennent ceux de la carte, ce qui rend au
-          `flex-1` de la phrase son effet — pousser le détail contre le bas. */}
+          page et ses trois enfants deviennent les cases de la grille — le
+          titre à côté de l'icône, la phrase et le détail sur deux colonnes. */}
       <span className={clsx('min-w-0 flex-1', !compacte && 'md:contents')}>
         <span
           className={clsx(
@@ -99,14 +106,16 @@ export function CarteDestination({
           <span
             className={clsx(
               'mt-0.5 line-clamp-2 block text-[14px] leading-snug text-muted',
-              !compacte && 'md:mt-1.5 md:line-clamp-none md:flex-1 md:leading-relaxed',
+              !compacte && 'md:col-span-2 md:mt-0 md:self-start md:line-clamp-none md:leading-relaxed',
             )}
           >
             {phrase}
           </span>
         )}
         {detail && !compacte && (
-          <span className="mt-4 hidden text-[12px] text-faint md:block">{detail}</span>
+          <span className="mt-4 hidden text-[12px] text-faint md:col-span-2 md:mt-2 md:block">
+            {detail}
+          </span>
         )}
       </span>
 
@@ -114,7 +123,10 @@ export function CarteDestination({
         size={17}
         className={clsx(
           'absolute right-4 top-1/2 -translate-y-1/2 text-faint transition-all duration-200 group-hover:text-ink',
-          !compacte && 'md:top-5 md:translate-y-0 md:group-hover:translate-x-1',
+          /* Sur la ligne de l'icône : 20 px de marge + la moitié des 48 px de
+             la pastille. Elle était calée sur le haut de la carte, où plus
+             rien ne commence maintenant que le titre a rejoint l'icône. */
+          !compacte && 'md:top-11 md:group-hover:translate-x-1',
         )}
         aria-hidden
       />
