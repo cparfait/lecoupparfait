@@ -54,7 +54,7 @@ export interface Quete {
    * « Y aller » convenait à toutes et ne disait rien d'aucune ; on lit ce
    * qu'on va faire, pas où l'on va.
    */
-  action: string
+  action: TranslationKey
 }
 
 /**

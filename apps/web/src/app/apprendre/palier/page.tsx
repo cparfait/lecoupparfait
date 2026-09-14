@@ -295,10 +295,13 @@ export default function PalierPage() {
                     >
                       <span className="min-w-0 flex-1">
                         <span className="block text-[14px] font-semibold">
-                          {copy?.name ?? faiblesse.motif}
+                          {copy ? tCoeur(t, copy.name) : faiblesse.motif}
                         </span>
                         <span className="mt-0.5 block text-[12px] text-faint">
-                          {faiblesse.reussies} trouvés sur {faiblesse.tentatives}
+                          {t('tier.weaknessFound', {
+                            n: faiblesse.reussies,
+                            total: faiblesse.tentatives,
+                          })}
                         </span>
                       </span>
                       {/* La barre dit le taux mieux que le nombre : on compare

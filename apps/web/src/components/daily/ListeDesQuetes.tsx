@@ -57,6 +57,7 @@ import { Check } from 'lucide-react'
 import clsx from 'clsx'
 import { QUETES_HORS_DEFI } from '@/lib/daily/quetes.ts'
 import { queteFaite, type EtatQuotidien } from '@/lib/daily/quotidien.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export function ListeDesQuetes({
   etat,
@@ -76,6 +77,7 @@ export function ListeDesQuetes({
   teinte?: string
   className?: string
 }) {
+  const t = useT()
   return (
     <ul className={clsx('space-y-0.5', className)}>
       {QUETES_HORS_DEFI.map((quete) => {
@@ -111,7 +113,7 @@ export function ListeDesQuetes({
               >
                 {faite && <Check size={9} strokeWidth={3} />}
               </span>
-              <span className="min-w-0 flex-1 truncate">{quete.label}</span>
+              <span className="min-w-0 flex-1 truncate">{t(quete.label)}</span>
               {!faite && quete.objectif > 1 && (
                 <span className="shrink-0 text-[12px] tabular-nums text-faint">
                   {avancement} / {quete.objectif}

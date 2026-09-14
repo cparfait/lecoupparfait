@@ -1118,6 +1118,7 @@ export const en: Dictionary = {
     weaknessesCount: '{n} patterns measured',
     weaknessesHint:
       'Worked out from your puzzles, pattern by pattern. Patterns seen fewer than five times are not counted: two failures out of two mean nothing.',
+    weaknessFound: '{n} found out of {total}',
     bestReturn: 'What pays off most, right now',
     tierNamed: 'Tier',
     eloAndAbove: '{min} Elo and above',

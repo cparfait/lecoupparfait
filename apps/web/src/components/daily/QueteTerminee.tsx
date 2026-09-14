@@ -83,7 +83,7 @@ export function QueteTerminee({
 
         <p className="text-[12px] font-semibold text-faint">{t('misc.dailyQuest')}</p>
         <h2 id="quete-terminee-titre" className="font-display text-2xl font-bold tracking-tight">
-          {quete.label}
+          {t(quete.label)}
         </h2>
         <p className="mt-1.5 text-sm font-semibold text-[var(--q-best)]">
           +{quete.xp} points

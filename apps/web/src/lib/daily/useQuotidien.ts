@@ -19,6 +19,7 @@
 import { useCallback, useEffect, useSyncExternalStore } from 'react'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { useT } from '@/lib/i18n/index.tsx'
 import {
   avancerQuete,
   definirCompte,
@@ -44,6 +45,7 @@ const instantaneServeur = () => null
 export function useQuotidien(): JourneeCourante {
   const etat = useSyncExternalStore(souscrire, instantane, instantaneServeur)
   const identite = useIdentite()
+  const t = useT()
   /*
     Le pseudo, et non l'objet.
 
@@ -77,18 +79,21 @@ export function useQuotidien(): JourneeCourante {
     void reprendreDepuisLeServeur()
   }, [pseudo])
 
-  const marquer = useCallback((id: QueteId, pas = 1) => {
-    const resultat = avancerQuete(id, pas)
+  const marquer = useCallback(
+    (id: QueteId, pas = 1) => {
+      const resultat = avancerQuete(id, pas)
 
-    if (resultat.queteTerminee) {
-      toast.success(
-        `${resultat.queteTerminee.label} ✓`,
-        resultat.serieAugmentee
-          ? `+${resultat.queteTerminee.xp} points · série de ${resultat.etat.serie} jour${resultat.etat.serie > 1 ? 's' : ''}`
-          : `+${resultat.queteTerminee.xp} points`,
-      )
-    }
-  }, [])
+      if (resultat.queteTerminee) {
+        toast.success(
+          `${t(resultat.queteTerminee.label)} ✓`,
+          resultat.serieAugmentee
+            ? `+${resultat.queteTerminee.xp} points · série de ${resultat.etat.serie} jour${resultat.etat.serie > 1 ? 's' : ''}`
+            : `+${resultat.queteTerminee.xp} points`,
+        )
+      }
+    },
+    [t],
+  )
 
   return { etat, xp: etat ? xpDuJour(etat) : 0, marquer }
 }

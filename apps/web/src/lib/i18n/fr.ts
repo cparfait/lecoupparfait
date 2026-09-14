@@ -1131,6 +1131,7 @@ export const fr = {
     weaknessesCount: '{n} motifs mesurés',
     weaknessesHint:
       'Calculé sur tes puzzles, motif par motif. Les motifs vus moins de cinq fois ne sont pas comptés : deux échecs sur deux ne veulent rien dire.',
+    weaknessFound: '{n} trouvés sur {total}',
     bestReturn: 'Ce qui rapporte le plus, maintenant',
     tierNamed: 'Palier',
     eloAndAbove: '{min} Elo et plus',

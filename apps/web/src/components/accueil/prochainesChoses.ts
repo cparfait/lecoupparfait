@@ -42,7 +42,7 @@
  */
 
 import { quetePar } from '@/lib/daily/quetes.ts'
-import type { useT } from '@/lib/i18n/index.tsx'
+import type { TranslationKey, useT } from '@/lib/i18n/index.tsx'
 
 export type ProchaineChoseId =
   | 'tonTour'
@@ -96,7 +96,7 @@ export interface EtatAccueil {
    * Avec les points déjà gagnés et le total, pour dire où l'on en est.
    */
   quetes: {
-    restantes: Array<{ label: string; lien: string; action: string }>
+    restantes: Array<{ label: TranslationKey; lien: string; action: TranslationKey }>
     xp: number
     total: number
   }
@@ -218,11 +218,11 @@ export function prochainesChoses(etat: EtatAccueil, t: ReturnType<typeof useT>):
       // sort cette ligne — de la liste d'à côté, dont on montre ici la
       // première qui reste.
       categorie: t('next.aDailyQuest'),
-      titre: prochaine.label,
+      titre: t(prochaine.label),
       detail:
         t('next.pointsOfDay', { xp: etat.quetes.xp, total: etat.quetes.total }) +
         (n > 1 ? t('next.questsLeft', { n }) : t('next.lastQuestBefore')),
-      action: prochaine.action,
+      action: t(prochaine.action),
       lien: prochaine.lien,
     })
   }

@@ -2990,7 +2990,7 @@ function GameScreen({
           quete={
             mission.quete
               ? {
-                  libelle: mission.quete.label,
+                  libelle: t(mission.quete.label),
                   faite: mission.faite,
                   restantes: mission.restantes,
                 }
