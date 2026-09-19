@@ -53,9 +53,20 @@
      écran peu contrasté ou en plein jour. Une surface flottante doit se lire
      comme un objet posé, pas comme une découpe du fond. */
   --flottant: #1e1e2f;
-  --surface: rgb(255 255 255 / 0.06);
-  --surface-hover: rgb(255 255 255 / 0.09);
-  --surface-strong: rgb(255 255 255 / 0.12);
+
+  /* Surfaces opaques, et non plus un voile de blanc.
+
+     Un voile à 6 % ne définit pas une couleur : il définit une opération sur
+     ce qu'il y a derrière. Le contraste du texte posé dessus dépendait donc
+     du fond traversé — l'aurore, un halo, une autre carte, l'échiquier —, et
+     il changeait d'un écran à l'autre sans que rien dans le code ne bouge.
+     Les valeurs ci-dessous sont ces mêmes voiles, mais aplatis une bonne fois
+     sur `--bg` : la carte a la même couleur partout, et le rapport de
+     contraste devient une propriété du thème plutôt qu'un accident de
+     superposition. */
+  --surface: #1a1a22;
+  --surface-hover: #212129;
+  --surface-strong: #282830;
   --border: rgb(255 255 255 / 0.12);
   --border-strong: rgb(255 255 255 / 0.22);
 
@@ -113,8 +124,15 @@
   --rub-outils: #f2c14e;
 
   /* Halo lumineux caractéristique du thème */
-  --glow: 0 0 0 1px rgb(124 92 255 / 0.25), 0 0 32px -4px rgb(124 92 255 / 0.45);
-  --glow-2: 0 0 28px -6px rgb(0 229 168 / 0.5);
+  /* Un liseré net plutôt qu'un halo.
+
+     Le halo à 32 px étalait la couleur de l'accent bien au-delà du bouton :
+     son bord devenait flou, et le texte blanc posé dessus perdait la limite
+     franche qui le sépare du fond. On garde le liseré — il définit l'arête —
+     et on remplace la lueur par une ombre portée, qui pose l'objet au lieu de
+     le faire briller. */
+  --glow: 0 0 0 1px rgb(124 92 255 / 0.35), 0 8px 20px -8px rgb(124 92 255 / 0.55);
+  --glow-2: 0 0 0 1px rgb(0 229 168 / 0.3), 0 8px 20px -8px rgb(0 229 168 / 0.5);
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
   --shadow: 0 8px 30px -8px rgb(0 0 0 / 0.7);
   --shadow-lg: 0 30px 80px -20px rgb(0 0 0 / 0.85);
@@ -174,9 +192,12 @@
      blanc : c'est l'ombre portée et le liseré qui la détachent, et ils sont
      posés par l'utilitaire `popover`. */
   --flottant: #ffffff;
-  --surface: rgb(255 255 255 / 0.85);
+  /* Même raison qu'en thème sombre : un blanc à 85 % laisse remonter le gris
+     de la page, et une carte posée sur une autre carte n'a pas la même
+     couleur qu'une carte posée sur le fond. */
+  --surface: #ffffff;
   --surface-hover: #ffffff;
-  --surface-strong: #ffffff;
+  --surface-strong: #f1f1f5;
   --border: rgb(16 16 24 / 0.13);
   --border-strong: rgb(16 16 24 / 0.24);
 

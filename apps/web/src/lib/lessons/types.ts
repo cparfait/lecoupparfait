@@ -82,6 +82,30 @@ export interface LessonStep {
   botLevel?: number
 }
 
+/**
+ * Ce qu'il faut savoir **avant** d'ouvrir un piège.
+ *
+ * Une leçon ordinaire peut se lancer sans préambule : on ne risque rien à
+ * apprendre comment bouge le fou. Un piège, si. Il se joue dans une ouverture
+ * précise, depuis un camp précis, et il a un coût quand l'adversaire ne mord
+ * pas — c'est même ce qui le distingue d'une bonne ouverture. Partir sans le
+ * savoir, c'est apprendre à donner un pion sans comprendre pourquoi.
+ *
+ * Ces cinq champs sont donc affichés sur une fiche, avant la première étape.
+ */
+export interface TrapBrief {
+  /** L'ouverture où le piège vit réellement. */
+  opening: TranslationKey
+  /** Le camp que l'apprenant tient pendant qu'il tend le piège. */
+  color: 'w' | 'b'
+  /** Ce que ça coûte si l'adversaire ne tombe pas dedans. */
+  risk: TranslationKey
+  /** Le motif tactique qui conclut — dame piégée, pièce enfermée, mat étouffé. */
+  theme: TranslationKey
+  /** L'avertissement honnête : quand ce piège se retourne contre toi. */
+  caution: TranslationKey
+}
+
 export interface Lesson {
   id: string
   title: TranslationKey
@@ -92,6 +116,11 @@ export interface Lesson {
   minutes: number
   /** Emoji identifiant la leçon dans la liste. */
   icon: string
+  /**
+   * Présent sur les leçons qui enseignent un piège, absent partout ailleurs.
+   * Sa présence est ce qui déclenche la fiche d'accueil et le mode révision.
+   */
+  trap?: TrapBrief
   steps: LessonStep[]
 }
 
