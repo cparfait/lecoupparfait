@@ -2167,6 +2167,27 @@ export const en: Dictionary = {
     previous: 'Previous',
     nextLesson: 'Next lesson',
     replayStep: 'Replay this step',
+
+    trapBrief: 'Before you start',
+    trapOpening: 'Opening',
+    trapSide: 'You play',
+    trapSideWhite: 'You play White',
+    trapSideBlack: 'You play Black',
+    trapRisk: 'If they do not bite',
+    trapTheme: 'Pattern',
+    trapLength: '{minutes} min · {steps} steps',
+    trapDuration: 'Length',
+    trapDiscover: 'Learn it',
+    trapDiscoverHint: 'the coach explains every move',
+    trapResume: 'Resume',
+    trapResumeHint: 'you are on step {n}',
+    trapRevise: 'Revise',
+    trapReviseHint: 'replay the line with no help',
+    trapVerified: 'Line verified move by move',
+    trapBackToBrief: 'Back to the brief',
+    revisionBadge: 'Revision',
+    revisionSilent: 'The coach stays quiet. Play the line from memory.',
+    revisionWatch: 'Watch — this move plays itself.',
   },
 
   lessonExtra: {
@@ -4748,6 +4769,11 @@ export const en: Dictionary = {
         title: 'Fool’s mate',
         summary:
           'Two moves. The fastest mate there is — and the one you need to know how to avoid.',
+        opening: 'Barnes Opening',
+        risk: 'Nothing',
+        theme: 'The e1-h4 diagonal',
+        caution:
+          'Nobody will ever hand it to you: it takes two absurd moves in a row. This lesson is about never suffering it, not about trying it.',
         e1: {
           say: 'The fastest mate in the game takes two moves. You will probably never give it — the opponent has to play along — but it teaches you the most dangerous diagonal on the board.',
         },
@@ -4789,6 +4815,11 @@ export const en: Dictionary = {
         title: 'Scholar’s mate',
         summary:
           'Four moves and the game is over. Knowing it is mostly about never walking into it.',
+        opening: 'Parham Attack',
+        risk: 'Your queen comes out too early',
+        theme: 'Mate on f7',
+        caution:
+          'Bringing the queen out on move two is a mistake of principle. Against anyone who knows the defence you lose tempo chasing her back and play a worse position.',
         e1: {
           say: 'At the very start of the game, one square is weaker than all the others: f7. Look at who defends it. Nobody, except the king himself.',
         },
@@ -4833,6 +4864,11 @@ export const en: Dictionary = {
         title: 'The Shilling trap',
         summary:
           'Black offers a pawn. Whoever takes it is mated in seven moves, by their own pieces.',
+        opening: 'Italian Game',
+        risk: 'A pawn',
+        theme: 'Smothered mate',
+        caution:
+          'The move Nd4 is objectively dubious. If White plays Nxd4 instead of taking on e5, you are a pawn down for nothing.',
         e1: {
           say: 'The Italian Game, the most played of all. You have Black. This trap used to sell for a shilling in the chess cafés of London: you bet that coin on the game, and you won it.',
         },
@@ -4889,6 +4925,11 @@ export const en: Dictionary = {
       'mat-legal': {
         title: 'Légal’s mate',
         summary: 'A pinned piece can move. Whoever forgets it loses in seven moves.',
+        opening: 'Philidor Defence',
+        risk: 'Your queen',
+        theme: 'Smothered mate',
+        caution:
+          'You really do give up your queen. If Black declines and retreats the bishop, you have sacrificed for nothing — check that every mating piece is in place before playing Nxe5.',
         e1: {
           say: 'The black bishop on g4 aims at your knight on f3, and behind that knight sits your queen on d1. So the knight is pinned: if it moves, you lose your queen.',
         },
@@ -4930,11 +4971,16 @@ export const en: Dictionary = {
     pieges: {
       title: 'Setting and dodging traps',
       description:
-        'Five opening traps that win a piece, learned from both sides: you set it through to the win, then you see it coming and you dodge it. These decide club games long before theory does.',
+        'Fourteen opening traps, learned from both sides: you set it through to the win, then you see it coming and you dodge it. Each one lives in an opening people actually play, and every brief tells you what it costs when they do not bite.',
       'piege-fegatello': {
         title: 'The Fegatello',
         summary:
           'Two pieces on f7, a knight given up, and the black king out in the open on move seven. Then the single move that refutes it all.',
+        opening: 'Italian Game, Two Knights Defence',
+        risk: 'A knight',
+        theme: 'King dragged out',
+        caution:
+          'You give a piece for an attack, not for material. If Black knows the Na5 defence, you are simply a piece down with nothing to show for it.',
         e1: {
           say: 'The Fegatello, or “fried liver” in Italian. White gives up a knight on f7 to drag the black king out. We start by setting it.',
         },
@@ -5008,6 +5054,11 @@ export const en: Dictionary = {
         title: 'The Elephant trap',
         summary:
           'A pawn that looks like it is falling off, and a queen given up to win a piece. The most profitable trap in the Queen’s Gambit.',
+        opening: 'Queen’s Gambit Declined',
+        risk: 'Nothing',
+        theme: 'Overloaded defender',
+        caution:
+          'You provoke nothing: you wait for a capture on d5 that White has no reason to play. This is a trap you profit from, not one you set.',
         e1: {
           say: 'This one gets suffered more often than it gets set. You play Black, and you are going to let White take a pawn they cannot take.',
         },
@@ -5063,6 +5114,11 @@ export const en: Dictionary = {
         title: 'The Kieninger trap',
         summary:
           'A smothered mate on move eight, in the middle of the opening, because a pawn taken on the wing opens a file nobody had looked at.',
+        opening: 'Budapest Gambit',
+        risk: 'A pawn',
+        theme: 'Smothered mate',
+        caution:
+          'The Budapest gives up a pawn on move two and does not always get it back. Against a correct defence you play a slightly worse position.',
         e1: {
           say: 'The Budapest Gambit, and the prettiest opening mate there is. You play Black.',
         },
@@ -5111,6 +5167,11 @@ export const en: Dictionary = {
         title: 'The Lasker trap',
         summary:
           'The only opening trap where promoting to a queen loses and promoting to a knight wins. An underpromotion, on move seven.',
+        opening: 'Queen’s Gambit Declined, Albin Counter-Gambit',
+        risk: 'A pawn',
+        theme: 'Underpromotion',
+        caution:
+          'The Albin is a gambit: you give a pawn with no guarantee. The trap only fires if White plays the natural Bd2 on move five.',
         e1: {
           say: 'The Albin Counter-Gambit. You play Black, and you are going to end up promoting a pawn to a knight — not to a queen.',
         },
@@ -5161,6 +5222,11 @@ export const en: Dictionary = {
         title: 'Noah’s Ark',
         summary:
           'Three black pawns advance, and the white bishop finds itself without a single square. The oldest trap in the Ruy Lopez.',
+        opening: 'Ruy Lopez',
+        risk: 'Nothing',
+        theme: 'Trapped piece',
+        caution:
+          'It needs the white bishop to retreat to b3 and your a- and b-pawns to advance without counterplay. That does not happen against everyone.',
         e1: {
           say: 'The Ruy Lopez. You play Black, and you are going to shut the white bishop in with pawns. It is called Noah’s Ark because the trap is as old as the flood.',
         },
@@ -5216,6 +5282,590 @@ export const en: Dictionary = {
         },
         e15: {
           say: 'The bishop has no square: its own pawns block a2 and c2, your pawns hold a4 and c4. It falls next move. Remember the mechanism rather than the move order: pawns can trap a piece, and a bishop retreating on a wing is often already lost.',
+        },
+      },
+      'piege-englund': {
+        title: 'The Englund trap',
+        summary:
+          'You give a pawn on move one, and if White develops the bishop naturally, they are mated on move eight.',
+        opening: 'Englund Gambit',
+        risk: 'A pawn',
+        theme: 'Back-rank mate',
+        caution:
+          'This trap costs a pawn immediately, and a good player does not give it back. If they play Nc3 on move six you have a worse position and nothing in return. Keep it for fast games.',
+        e1: {
+          say: 'White opens d4. The Englund Gambit answers by offering a pawn straight away — and setting a trap that ends in mate.',
+        },
+        e2: {
+          say: 'Push e5. White will take it, and that is exactly what we want.',
+          instruction: 'Play e5',
+        },
+        e3: {
+          say: 'The pawn is gone. We do not win it back: we attack. Knight to c6, hitting the pawn on e5.',
+          instruction: 'Play the knight to c6',
+        },
+        e4: {
+          say: 'They defend with the knight on f3. Add another attacker: queen to e7.',
+          instruction: 'Play the queen to e7',
+        },
+        e5: {
+          say: 'They defend again with the bishop on f4. Now the queen strikes on b4: check, and she hits the bishop on f4 and the pawn on b2 at the same time.',
+          instruction: 'Play the queen to b4, with check',
+        },
+        e6: {
+          say: 'They block with the bishop on d2. Take the pawn on b2 — your queen walks into their camp.',
+          instruction: 'Take on b2 with the queen',
+        },
+        e7: {
+          say: 'Here is the mistake. The bishop comes to c3 to attack your queen and block the file. It looks strong. It loses.',
+        },
+        e8: {
+          say: 'Bishop b4. You pin the bishop on c3 against the king: it cannot move, and your queen is safe.',
+          instruction: 'Play the bishop to b4',
+          hint: 'The f8 bishop comes out to b4, on the diagonal leading to the white king on e1.',
+        },
+        e9: {
+          say: 'They defend the bishop with the queen. Take it anyway.',
+          instruction: 'Take on c3 with the bishop',
+        },
+        e10: {
+          say: 'They recapture with the queen, and the c1 square is empty. Queen c1: checkmate.',
+          instruction: 'Play the queen to c1',
+          hint: 'White’s back rank is blocked by their own knight on b1. The a1 rook cannot come to the rescue.',
+        },
+        e11: {
+          say: 'Look at why it mates: the knight on b1 never moved, and it stops their own rook on a1 from reaching c1. The king has neither escape nor defender. A back-rank mate, in eight moves.',
+        },
+        e12: {
+          say: 'Now you play White, with the black queen on b2. The bishop to c3 loses. There is a move that holds.',
+        },
+        e13: {
+          say: 'Knight c3. It blocks the diagonal just like the bishop, but it cannot be pinned against the king in the same fatal way.',
+          instruction: 'Play the knight to c3',
+          hint: 'A minor piece has to come to c3. Not the one you think.',
+        },
+        e14: {
+          say: 'The bishop still comes to b4, but the pin is no longer fatal: your rook on a1 keeps the back rank and your queen is not boxed in. You stay a pawn up. The general lesson: when someone offers you a pawn very early, the danger is not the pawn, it is the piece they invite you to move.',
+        },
+      },
+      'piege-canne-a-peche': {
+        title: 'The Fishing Pole',
+        summary:
+          'You hang a knight on g4 as bait, add the pawn to h5, and whoever bites gets mated down the h-file.',
+        opening: 'Ruy Lopez',
+        risk: 'A knight',
+        theme: 'Open file onto the castled king',
+        caution:
+          'If White does not take the knight, you have a knight hanging and an advanced h-pawn for nothing. The trap only works against someone who captures on reflex.',
+        e1: {
+          say: 'The Fishing Pole: a knight parked on g4 is the bait, and the h5 pawn is the line. Whoever bites opens the h-file onto their own king.',
+        },
+        e2: {
+          say: 'We start with a perfectly normal Ruy Lopez. Answer in the centre.',
+          instruction: 'Play e5',
+        },
+        e3: {
+          say: 'Defend your pawn with the knight.',
+          instruction: 'Play the knight to c6',
+        },
+        e4: {
+          say: 'The bishop comes to b5. Develop your king’s knight.',
+          instruction: 'Play the knight to f6',
+        },
+        e5: {
+          say: 'White castles. Now the bait: knight to g4. It threatens almost nothing, and it can be attacked.',
+          instruction: 'Play the knight to g4',
+        },
+        e6: {
+          say: 'The h3 pawn attacks your knight. A normal player would retreat it. You are going to leave it there.',
+        },
+        e7: {
+          say: 'Push h5. You defend the knight once, and above all you prepare to open the h-file.',
+          instruction: 'Play h5',
+          hint: 'The h7 pawn moves two squares. The knight stays where it is.',
+        },
+        e8: {
+          say: 'They took the knight. Recapture with the h-pawn: the h-file opens, and your rook on h8 is already looking at their king.',
+          instruction: 'Recapture on g4 with the h-pawn',
+        },
+        e9: {
+          say: 'Their knight retreats to e1 to cover h4. Bring the queen to h4 anyway.',
+          instruction: 'Play the queen to h4',
+        },
+        e10: {
+          say: 'They play f3 to chase your pawn. Push it to g3: it attacks h2, the square your queen wants.',
+          instruction: 'Play g3',
+          hint: 'The g4 pawn moves one square. It captures nothing — it defends.',
+        },
+        e11: {
+          say: 'Queen h2. The g3 pawn defends her, the king cannot take, and he has no square. Mate.',
+          instruction: 'Play the queen to h2',
+        },
+        e12: {
+          say: 'The mechanism matters far beyond this trap: a pawn defending the square the queen lands on turns an ordinary check into mate. Here it is the g3 pawn, and it came from a knight given up three moves earlier.',
+        },
+        e13: {
+          say: 'You play White. The knight on g4 is attacked and defended by h5. Taking it opens your own h-file. Do not take it.',
+        },
+        e14: {
+          say: 'Play d4, in the centre. You ignore the bait and open your position — always the right answer to a premature wing attack.',
+          instruction: 'Play d4',
+          hint: 'Answer a wing attack with a move in the centre.',
+        },
+        e15: {
+          say: 'The knight goes hunting on f2, but that is only a pawn, and your position is sound. Remember the rule: answer a wing attack in the centre. It works both ways.',
+        },
+      },
+      'piege-damiano': {
+        title: 'The Damiano Defence',
+        summary:
+          'Black defends the pawn with f6. You give up a knight and get a rook back four moves later.',
+        opening: 'Open Game',
+        risk: 'Nothing',
+        theme: 'King with no escape square',
+        caution:
+          'This is not a trap you set: it is a punishment you need to know how to deliver when it appears. f6 is a bad move, not bait.',
+        e1: {
+          say: 'The Damiano Defence is not a defence, it is a mistake. But it is so common below 1000 that you have to know how to punish it.',
+        },
+        e2: {
+          say: 'King’s pawn.',
+          instruction: 'Play e4',
+        },
+        e3: {
+          say: 'Knight f3, attacking e5.',
+          instruction: 'Play the knight to f3',
+        },
+        e4: {
+          say: 'And there is f6. Black defends the pawn — with the one move that shuts f6 off from their own king and opens your queen’s diagonal towards e8.',
+        },
+        e5: {
+          say: 'Take on e5 with the knight. You are giving it up, and you know why.',
+          instruction: 'Take on e5 with the knight',
+          hint: 'The f3 knight captures the e5 pawn. Yes, it gets taken right back.',
+        },
+        e6: {
+          say: 'They recaptured. Queen h5, check. The king has no square: f6 is occupied by their own pawn.',
+          instruction: 'Play the queen to h5, with check',
+        },
+        e7: {
+          say: 'They block with g6. Take the e5 pawn with check — and look at the diagonal: your queen now eyes the rook on h8.',
+          instruction: 'Take on e5 with the queen',
+        },
+        e8: {
+          say: 'They block the check with the queen. Take the rook.',
+          instruction: 'Take on h8 with the queen',
+          hint: 'The queen on e5 runs through f6 and g7 to h8.',
+        },
+        e9: {
+          say: 'Count it: you gave a knight, you took two pawns and a rook. That is a clear gain, and Black’s position is in ruins.',
+        },
+        e10: {
+          say: 'Now you play Black, and the knight has just taken on e5. Recapturing with the pawn loses. There is a move that holds.',
+        },
+        e11: {
+          say: 'Queen e7. You do not recapture: you attack the knight by pinning it against the e4 pawn, and you keep your king covered.',
+          instruction: 'Play the queen to e7',
+          hint: 'Do not take the knight. Attack it.',
+        },
+        e12: {
+          say: 'The knight has to leave, and you win the e4 pawn afterwards. You are still slightly worse, but you are alive. The lesson: when a piece is handed to you near your king, first work out what happens if you do not take it.',
+        },
+      },
+      'piege-petroff': {
+        title: 'The Petroff trap',
+        summary:
+          'Black copies your moves one move too many. A discovered check, and their queen falls.',
+        opening: 'Petroff Defence',
+        risk: 'Nothing',
+        theme: 'Discovered check',
+        caution:
+          'Black has a simple, well-known defence. Do not count on this against someone who really plays the Petroff: it is a trap against imitation, not against theory.',
+        e1: {
+          say: 'The Petroff: Black answers a knight with a knight. The idea is sound — but copying one move too many costs the queen.',
+        },
+        e2: {
+          say: 'King’s pawn.',
+          instruction: 'Play e4',
+        },
+        e3: {
+          say: 'Knight f3. They reply knight f6: they do not defend their pawn, they attack yours.',
+          instruction: 'Play the knight to f3',
+        },
+        e4: {
+          say: 'Take on e5. They will be tempted to recapture symmetrically.',
+          instruction: 'Take on e5 with the knight',
+        },
+        e5: {
+          say: 'And they took on e4. That is the classic mistake: both knights are in the centre, but it is your move.',
+        },
+        e6: {
+          say: 'Queen e2. She lands on the black king’s file, with your own knight in between — which is exactly what you want.',
+          instruction: 'Play the queen to e2',
+          hint: 'Line your queen up with their king on the e-file.',
+        },
+        e7: {
+          say: 'They retreat the knight to f6. Now the only thing between your queen and their king is your knight on e5. If it moves, it is check.',
+        },
+        e8: {
+          say: 'Knight c6. Discovered check — and on arrival the knight attacks their queen.',
+          instruction: 'Play the knight to c6',
+          hint: 'The e5 knight leaves attacking the queen on d8, and uncovers your queen’s check.',
+        },
+        e9: {
+          say: 'They have to answer the check. The queen is still hanging.',
+          instruction: 'Take the queen on d8',
+        },
+        e10: {
+          say: 'Queen for a knight. The mechanism to remember: a piece that leaves with check can go anywhere, including onto a defended square.',
+        },
+        e11: {
+          say: 'You play Black. Your knight is on e4, their queen on e2, and your king is behind it. Retreating the knight loses the queen.',
+        },
+        e12: {
+          say: 'Queen e7. You put your queen in front of your king: now, if their knight leaves, there is no discovery on the king — only a queen trade.',
+          instruction: 'Play the queen to e7',
+          hint: 'Do not move the knight. Protect the e-file another way.',
+        },
+        e13: {
+          say: 'They have to retreat, you win the pawn back, and the game is level. Remember: when your piece is pinned by a distant queen, the answer is often to interpose your own queen, not to run.',
+        },
+      },
+      'piege-mortimer': {
+        title: 'The Mortimer trap',
+        summary:
+          'You deliberately retreat a developed knight to offer a pawn. Whoever takes it loses a piece.',
+        opening: 'Ruy Lopez',
+        risk: 'A pawn and a tempo',
+        theme: 'Double attack with check',
+        caution:
+          'Retreating the knight to e7 is objectively a bad move: you lose a tempo and block your own bishop. If White declines, you are simply worse.',
+        e1: {
+          say: 'The Mortimer trap asks you to play an ugly move: retreat a developed knight, to offer a pawn that cannot be taken.',
+        },
+        e2: {
+          say: 'A normal Ruy Lopez. Answer in the centre.',
+          instruction: 'Play e5',
+        },
+        e3: {
+          say: 'Defend your pawn.',
+          instruction: 'Play the knight to c6',
+        },
+        e4: {
+          say: 'Bishop to b5. Develop your king’s knight.',
+          instruction: 'Play the knight to f6',
+        },
+        e5: {
+          say: 'They play d3, quietly. Look carefully: the d2 square is now empty, and the a5-e1 diagonal runs all the way to their king. The whole trap is right there.',
+        },
+        e6: {
+          say: 'Retreat your c6 knight to e7. You give up the e5 pawn. That is deliberate.',
+          instruction: 'Play the knight from c6 to e7',
+          hint: 'The knight that retreats is the one on c6, not the one on f6.',
+        },
+        e7: {
+          say: 'They took the pawn. Play c6: you attack their bishop, and above all you clear the a5 square for your queen.',
+          instruction: 'Play c6',
+          hint: 'The c7 pawn moves one square and attacks the bishop on b5.',
+        },
+        e8: {
+          say: 'The bishop retreats to c4, and b5 is free. Queen a5: check, and she looks at the knight on e5 along the fifth rank.',
+          instruction: 'Play the queen to a5, with check',
+        },
+        e9: {
+          say: 'They block with the knight on c3. Take the knight on e5.',
+          instruction: 'Take on e5 with the queen',
+        },
+        e10: {
+          say: 'A piece for a pawn. The move that makes it all possible is their d3: without it, a5 was not check, and the trap did not exist.',
+        },
+        e11: {
+          say: 'You play White. The black knight has just retreated to e7 and the e5 pawn is free. Do not take it.',
+        },
+        e12: {
+          say: 'Castle. You ignore the poisoned pawn and tuck your king away — what Black has just given you is a tempo, not a pawn.',
+          instruction: 'Castle kingside',
+          hint: 'The e5 pawn is bait. Play the soundest move in the position.',
+        },
+        e13: {
+          say: 'Your king is safe, their knight has lost two moves, and the e5 pawn will fall later on good terms. The rule: a pawn offered by a move that looks bad is almost always poisoned.',
+        },
+      },
+      'piege-siberien': {
+        title: 'The Siberian trap',
+        summary:
+          'Against the Smith-Morra Gambit, your queen and a knight meet on h2. Mate arrives on move ten.',
+        opening: 'Sicilian, Smith-Morra Gambit',
+        risk: 'Nothing — you are already a pawn up',
+        theme: 'Supported queen mate',
+        caution:
+          'The trap only fires if White plays h3 on move nine. Anyone who knows the Smith-Morra plays g3 and you get nothing — but you keep your pawn.',
+        e1: {
+          say: 'The Smith-Morra Gambit: White gives a pawn for development. The Siberian trap is the punishment for playing it without knowing it.',
+        },
+        e2: {
+          say: 'The Sicilian.',
+          instruction: 'Play c5',
+        },
+        e3: {
+          say: 'They push d4. Take.',
+          instruction: 'Take on d4 with the c-pawn',
+        },
+        e4: {
+          say: 'And there is the gambit: c3, offering a second pawn to open lines. We accept.',
+        },
+        e5: {
+          say: 'Take on c3.',
+          instruction: 'Take on c3 with the d-pawn',
+        },
+        e6: {
+          say: 'They recapture with the knight. Develop yours.',
+          instruction: 'Play the knight to c6',
+        },
+        e7: {
+          say: 'Play e6. Solid, and it frees your king’s bishop.',
+          instruction: 'Play e6',
+        },
+        e8: {
+          say: 'Their bishop arrives on c4. Queen c7: she sits on the diagonal that runs straight to h2, behind their future castled king.',
+          instruction: 'Play the queen to c7',
+          hint: 'The queen comes out to c7, on the c7-h2 diagonal.',
+        },
+        e9: {
+          say: 'They castle. Develop your king’s knight.',
+          instruction: 'Play the knight to f6',
+        },
+        e10: {
+          say: 'Queen e2 for them. Now the bait: knight to g4. It defends the h2 square, where your queen wants to go.',
+          instruction: 'Play the knight to g4',
+          hint: 'The f6 knight jumps to g4. Look at which square it defends on arrival.',
+        },
+        e11: {
+          say: 'They play h3 to chase it. That is the mistake: the pawn leaves h2, and your queen only has to land there — provided you win a tempo.',
+        },
+        e12: {
+          say: 'Knight d4. You do not retreat: you attack their queen, and you win exactly the tempo you need.',
+          instruction: 'Play the knight from c6 to d4',
+          hint: 'The c6 knight jumps to d4 and attacks the queen on e2.',
+        },
+        e13: {
+          say: 'They take your knight. Queen h2: the knight on g4 defends her, the king cannot take. Mate.',
+          instruction: 'Play the queen to h2',
+        },
+        e14: {
+          say: 'Two pieces are enough, if one defends the square the other lands on. It is the most profitable pattern in chess, and you will see it everywhere.',
+        },
+        e15: {
+          say: 'You play White. Their knight has just landed on g4 and their queen eyes h2. h3 loses on the spot.',
+        },
+        e16: {
+          say: 'Play g3. The pawn steps into the c7-h2 diagonal: the queen has no road left, and the trap no longer exists.',
+          instruction: 'Play g3',
+          hint: 'Do not chase the knight. Cut the queen’s diagonal.',
+        },
+        e17: {
+          say: 'The threat is dead and you can carry on with your gambit. Remember the general answer: against a queen-and-piece battery, blocking the line beats chasing the piece.',
+        },
+      },
+      'piege-francaise-avance': {
+        title: 'The French Advance trap',
+        summary:
+          'You attack the d4 pawn three times. If they develop the bishop to d3, the chain collapses and you win a pawn.',
+        opening: 'French Defence, Advance Variation',
+        risk: 'Nothing',
+        theme: 'Overloaded defender',
+        caution:
+          'This trap wins a pawn, not a piece. On the other hand it comes up constantly, and the losing move Bd3 is perfectly natural.',
+        e1: {
+          say: 'The French Advance. White locks the centre, and the whole game revolves around a single pawn: the one on d4.',
+        },
+        e2: {
+          say: 'The French starts with e6.',
+          instruction: 'Play e6',
+        },
+        e3: {
+          say: 'And d5, challenging the centre.',
+          instruction: 'Play d5',
+        },
+        e4: {
+          say: 'They push e5 and close the centre. Their e5 pawn is defended by d4 — and d4 is the real target of the whole variation.',
+        },
+        e5: {
+          say: 'Attack the base: c5.',
+          instruction: 'Play c5',
+        },
+        e6: {
+          say: 'They defend with c3. Add an attacker: knight c6.',
+          instruction: 'Play the knight to c6',
+        },
+        e7: {
+          say: 'And the third: queen b6. The d4 pawn is attacked three times and defended twice.',
+          instruction: 'Play the queen to b6',
+          hint: 'The queen comes out to b6, on the diagonal aiming at d4 and f2.',
+        },
+        e8: {
+          say: 'Here is the mistake: bishop to d3. It looks like development, but it takes the knight’s square on b1 and defends nothing on d4.',
+        },
+        e9: {
+          say: 'Take on d4.',
+          instruction: 'Take on d4 with the c-pawn',
+        },
+        e10: {
+          say: 'They recapture with the c-pawn. Take again, with the knight.',
+          instruction: 'Take on d4 with the knight',
+          hint: 'The c6 knight captures on d4, even though it gets taken straight back.',
+        },
+        e11: {
+          say: 'And you recapture with the queen. She lands on d4 hitting the bishop on d3 along the way.',
+          instruction: 'Recapture on d4 with the queen',
+        },
+        e12: {
+          say: 'A clean pawn, and their bishop still has to move. The mechanism: count the attackers and defenders of a pawn, and strike the moment the count tips.',
+        },
+        e13: {
+          say: 'You play White. The d4 pawn is attacked three times. Bd3 loses a pawn. Find the move that keeps the count.',
+        },
+        e14: {
+          say: 'Bishop e2. Modest, but it leaves d3 for the knight and removes no defender from d4.',
+          instruction: 'Play the bishop to e2',
+          hint: 'The f1 bishop comes out — but not to the square that looks most active.',
+        },
+        e15: {
+          say: 'The count holds and the position stays playable. Remember: in a closed structure the most active square is not always the right one — the number of defenders decides.',
+        },
+      },
+      'piege-gambit-dame-accepte': {
+        title: 'The Queen’s Gambit Accepted trap',
+        summary:
+          'Black takes your c4 pawn and tries to hold it with b5. Two moves later you take their rook.',
+        opening: 'Queen’s Gambit Accepted',
+        risk: 'A pawn',
+        theme: 'Open long diagonal',
+        caution:
+          'The trap only fires if Black plays b5 and then recaptures on b5 with the c-pawn. A correct player gives the pawn back and nothing happens.',
+        e1: {
+          say: 'The Queen’s Gambit: you offer the c4 pawn. Taking it is perfectly playable — trying to keep it is not.',
+        },
+        e2: {
+          say: 'We start with d4.',
+          instruction: 'Play d4',
+        },
+        e3: {
+          say: 'And c4, the gambit. They take.',
+          instruction: 'Play c4',
+        },
+        e4: {
+          say: 'Play e3, quietly. You prepare to win the pawn back with your bishop, and you wait to see whether they try to hold it.',
+          instruction: 'Play e3',
+          hint: 'A modest pawn move that opens the f1 bishop’s diagonal.',
+        },
+        e5: {
+          say: 'And there is b5. They want to keep the pawn at all costs. Look at what that just did: the b7 square is empty, and the long diagonal runs to their rook on a8.',
+        },
+        e6: {
+          say: 'a4. You attack the chain at its base.',
+          instruction: 'Play a4',
+        },
+        e7: {
+          say: 'They defend with c6. Take on b5.',
+          instruction: 'Take on b5 with the a-pawn',
+        },
+        e8: {
+          say: 'They recapture with the c-pawn — and that is the decisive mistake. The c6 square is now empty too: the f3-a8 diagonal is completely clear.',
+        },
+        e9: {
+          say: 'Queen f3. She looks at the rook on a8 right across the board.',
+          instruction: 'Play the queen to f3',
+          hint: 'The queen comes out to f3, on the diagonal through e4, d5, c6 and b7.',
+        },
+        e10: {
+          say: 'They block with the knight on c6, but nothing defends it. Take it with check.',
+          instruction: 'Take on c6 with the queen',
+        },
+        e11: {
+          say: 'They block with the bishop on d7. Take the rook.',
+          instruction: 'Take on a8 with the queen',
+        },
+        e12: {
+          say: 'A rook for a pawn. The lesson holds for every gambit: the pawn you took is not the problem, it is the string of pawn moves you invent to keep it.',
+        },
+        e13: {
+          say: 'You play Black, you have the c4 pawn, and White plays a4. Defending with c6 will open the diagonal. There is far better.',
+        },
+        e14: {
+          say: 'Play e6. You let the pawn go and you develop: that is how the Queen’s Gambit Accepted has always been played.',
+          instruction: 'Play e6',
+          hint: 'Stop defending the pawn. Open your king’s bishop.',
+        },
+        e15: {
+          say: 'They win their pawn back, you have a sound position, and your a8 rook is still there. A pawn returned at the right moment beats a pawn kept at the wrong one.',
+        },
+      },
+      'piege-ecossaise': {
+        title: 'The Scotch trap',
+        summary:
+          'They trade on c6 too early. Your queen hits f2 and the knight at once, and you come out a pawn up with their king stuck in the middle.',
+        opening: 'Scotch Game',
+        risk: 'Nothing',
+        theme: 'Queen double attack',
+        caution:
+          'This trap wins a pawn and their castling rights, not a piece. White has a better defence than the one shown here — the gain is modest, but real.',
+        e1: {
+          say: 'The Scotch opens the centre very early. That gives both sides play, and it leaves one fragile square: f2.',
+        },
+        e2: {
+          say: 'Answer in the centre.',
+          instruction: 'Play e5',
+        },
+        e3: {
+          say: 'Defend your pawn.',
+          instruction: 'Play the knight to c6',
+        },
+        e4: {
+          say: 'They push d4, the Scotch. Take.',
+          instruction: 'Take on d4 with the e-pawn',
+        },
+        e5: {
+          say: 'They recapture with the knight. Bishop c5: it comes out aiming at f2, the weakest square in their camp.',
+          instruction: 'Play the bishop to c5',
+        },
+        e6: {
+          say: 'And here is the mistake: they trade on c6. It looks harmless — it abandons the defence of f2 and leaves a knight unprotected.',
+        },
+        e7: {
+          say: 'Queen f6. She attacks f2 and the knight on c6 in one move.',
+          instruction: 'Play the queen to f6',
+          hint: 'The queen comes out to f6: look at the f-file and the sixth rank.',
+        },
+        e8: {
+          say: 'They defend f2 with the queen on d2. The knight on c6 is now completely undefended — but there is something better than taking it.',
+        },
+        e9: {
+          say: 'Take on f2 with check. You are giving up your queen, and you know what you get back.',
+          instruction: 'Take on f2 with the queen, with check',
+          hint: 'Count the pieces that are going to fall before you judge the move.',
+        },
+        e10: {
+          say: 'They recapture. Bishop f2, check again — and this time you take their queen.',
+          instruction: 'Take on f2 with the bishop',
+        },
+        e11: {
+          say: 'The king recaptures. And now you win the knight back on c6.',
+          instruction: 'Take on c6 with the d-pawn',
+        },
+        e12: {
+          say: 'Add it up: one pawn more, their king in the middle and unable to castle ever again. That is little and it is a lot — at this level, a king that never castles often loses on its own.',
+        },
+        e13: {
+          say: 'You play White, knight on d4, black bishop on c5. Trading on c6 gives away a pawn. Develop instead.',
+        },
+        e14: {
+          say: 'Bishop e3. You defend your knight on d4, you shore up f2 indirectly, and you offer to trade the bishop that bothers you.',
+          instruction: 'Play the bishop to e3',
+          hint: 'Develop the queen’s bishop while supporting the d4 knight.',
+        },
+        e15: {
+          say: 'The black queen comes to f6, but f2 is held and nothing is hanging. Remember: a trade that “simplifies” is often a gift of tempo — check what it stops defending.',
         },
       },
     },

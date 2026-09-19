@@ -22,14 +22,31 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, ArrowRight, Check, Eye, RotateCcw, Volume2, VolumeX } from 'lucide-react'
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  Check,
+  Eye,
+  Repeat,
+  RotateCcw,
+  ShieldCheck,
+  Volume2,
+  VolumeX,
+} from 'lucide-react'
 import clsx from 'clsx'
 import { Chess } from 'chess.js'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { ArrowLegend, LEGEND, legendFor } from '@/components/board/ArrowLegend.tsx'
 import { Button, Card, Chip } from '@/components/ui/index.tsx'
-import { findLesson, nextLesson, previousLesson, saveProgress } from '@/lib/lessons/index.ts'
+import {
+  findLesson,
+  loadProgress,
+  nextLesson,
+  previousLesson,
+  saveProgress,
+} from '@/lib/lessons/index.ts'
 import { chapitreDeLUrl, deposerGains, signaler } from '@/lib/carriere/useCarriere.ts'
 import { chapitre as chapitreCarriere } from '@coupparfait/core'
 import type { LessonStep } from '@/lib/lessons/index.ts'
@@ -75,6 +92,19 @@ export default function LessonPage() {
   const ecrire = useSan()
 
   const [stepIndex, setStepIndex] = useState(0)
+  /**
+   * Fiche ou échiquier.
+   *
+   * Une leçon ordinaire s'ouvre sur l'échiquier : on ne risque rien à apprendre
+   * comment bouge le fou. Un piège s'ouvre sur sa fiche, parce qu'il faut savoir
+   * ce qu'il coûte **avant** de le jouer, et parce que c'est le seul endroit où
+   * proposer la révision à celui qui l'a déjà vu.
+   */
+  const [screen, setScreen] = useState<'brief' | 'run'>(lesson?.trap ? 'brief' : 'run')
+  /** Rejouer la ligne sans texte, sans flèche et sans consigne. */
+  const [revision, setRevision] = useState(false)
+  /** Étapes déjà faites, lues une fois au montage — `localStorage` n'existe pas au rendu serveur. */
+  const [dejaFait, setDejaFait] = useState(0)
   /** À droite du fil d'Ariane, où le plateau pose sa bascule 2D / 3D / plein écran. */
   const [emplacementBascule, setEmplacementBascule] = useState<HTMLElement | null>(null)
   /** Coups réellement choisis par l'apprenant, pour rejouer fidèlement. */
@@ -105,7 +135,11 @@ export default function LessonPage() {
     setAttempts(0)
     setRevealArrow(null)
 
-    saveProgress(lesson.id, stepIndex + 1, false)
+    // Ouvrir la fiche d'un piège n'est pas commencer la leçon. Sans ce garde-fou
+    // la fiche s'annonçait « Reprendre — tu en es à l'étape 1 » à quelqu'un qui
+    // venait seulement de la regarder, et le bouton « Découvrir » n'apparaissait
+    // jamais.
+    if (screen === 'run') saveProgress(lesson.id, stepIndex + 1, false)
 
     // Un enchaînement resté en attente sauterait l'étape qu'on vient d'ouvrir.
     if (advanceTimer.current) {
@@ -136,7 +170,7 @@ export default function LessonPage() {
     // `played` est volontairement hors des dépendances : il ne change que
     // pendant une étape, et la relecture doit se faire au changement d'étape.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stepIndex, lesson?.id])
+  }, [stepIndex, lesson?.id, screen])
 
   // ── Lecture à voix haute ──────────────────────────────────────────────────
   //
@@ -146,18 +180,27 @@ export default function LessonPage() {
   // était prononcée, aussitôt coupée par le démontage, puis considérée comme
   // « déjà lue » au remontage. Résultat : le message d'introduction restait muet
   // alors que les suivants passaient.
-  const spoken = step ? t(step.say) : ''
+  const spoken = step && !revision ? t(step.say) : ''
   useEffect(() => {
     if (!spoken || !voiceEnabled) return
     speak(spoken)
     return () => stopSpeaking()
   }, [spoken, voiceEnabled])
 
+  // Progression réelle, pour que la fiche propose « Reprendre » plutôt que
+  // « Découvrir » à celui qui a déjà commencé. Lue au montage seulement : la
+  // sauvegarde de l'étape courante la ferait bouger à chaque coup.
+  const lessonId = lesson?.id
+  useEffect(() => {
+    if (!lessonId) return
+    setDejaFait(loadProgress()[lessonId]?.steps ?? 0)
+  }, [lessonId])
+
   // La voix neuronale demande une seconde ou deux de calcul. On prépare donc
   // l'étape suivante pendant qu'on écoute celle-ci : au moment de cliquer sur
   // « Continuer », la phrase est déjà prête et part sans attente.
   const suivante = lesson?.steps[stepIndex + 1]
-  const upcomingSay = suivante ? t(suivante.say) : ''
+  const upcomingSay = suivante && !revision ? t(suivante.say) : ''
   useEffect(() => {
     if (!upcomingSay || !voiceEnabled) return
     prefetchSpeech(upcomingSay)
@@ -175,11 +218,14 @@ export default function LessonPage() {
    * désigné une case précise, il a une raison de ne pas montrer les autres.
    */
   const spokenSquares = useMemo<Square[]>(() => {
+    // En révision, montrer les cases citées reviendrait à souffler la réponse :
+    // c'est exactement ce qu'on vient de retirer.
+    if (revision) return []
     if (step?.highlight?.length) return step.highlight as Square[]
     if (!step?.say) return []
     const found = t(step.say).match(/\b[a-h][1-8]\b/g) ?? []
     return [...new Set(found)] as Square[]
-  }, [step, t])
+  }, [step, t, revision])
 
   /**
    * Roi maté, s'il y en a un.
@@ -352,23 +398,174 @@ export default function LessonPage() {
 
   if (!step) return null
 
+  // En révision, l'échiquier est nu : ni flèche d'auteur, ni cercle, ni
+  // projecteur. La flèche « montre-moi » reste, elle : la demander est un
+  // geste volontaire, et refuser d'aider quelqu'un qui bloque n'apprend rien.
   const arrows: Arrow[] = [
-    ...((step.arrows ?? []).map((arrow) => ({
-      from: arrow.from,
-      to: arrow.to,
-      color: arrow.color ?? ('green' as const),
-    })) as Arrow[]),
+    ...(revision
+      ? []
+      : ((step.arrows ?? []).map((arrow) => ({
+          from: arrow.from,
+          to: arrow.to,
+          color: arrow.color ?? ('green' as const),
+        })) as Arrow[])),
     ...(revealArrow ? [revealArrow] : []),
   ]
 
-  const circles: CircleMark[] = (step.circles ?? []).map((circle) => ({
-    square: circle.square,
-    color: circle.color ?? 'green',
-  }))
+  const circles: CircleMark[] = revision
+    ? []
+    : (step.circles ?? []).map((circle) => ({
+        square: circle.square,
+        color: circle.color ?? 'green',
+      }))
 
   const orientation: Color = (step.orientation as Color) ?? 'w'
   const previous = previousLesson(lesson.id)
   const upcoming = nextLesson(lesson.id)
+
+  // ── La fiche du piège ─────────────────────────────────────────────────────
+  if (screen === 'brief' && lesson.trap) {
+    const brief = lesson.trap
+    const commence = dejaFait > 0
+    const depart = lesson.steps.find((candidat) => candidat.fen)?.fen ?? ''
+    const tuiles = [
+      { label: t('lesson.trapOpening'), value: t(brief.opening) },
+      {
+        label: t('lesson.trapSide'),
+        value: t(brief.color === 'w' ? 'lesson.trapSideWhite' : 'lesson.trapSideBlack'),
+      },
+      { label: t('lesson.trapRisk'), value: t(brief.risk) },
+      { label: t('lesson.trapTheme'), value: t(brief.theme) },
+    ]
+
+    return (
+      <div className="mx-auto w-full max-w-[1200px] px-3 py-4 sm:px-5 lg:py-8">
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <Link
+            href="/apprendre"
+            className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
+          >
+            <ArrowLeft size={15} aria-hidden />
+            {t('bits.syllabus')}
+          </Link>
+          <span className="text-faint" aria-hidden>
+            /
+          </span>
+          <span className="text-sm font-medium">
+            {lesson.icon} {t(lesson.title)}
+          </span>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_440px]">
+          {/* Le plateau de la leçon, à sa position de départ et sans interaction. */}
+          <div className="min-w-0">
+            <ChessBoard
+              fen={depart}
+              orientation={brief.color}
+              playable={null}
+              lastMove={null}
+              allowAnnotations={false}
+            />
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <Card className="p-5">
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-accent">
+                {t(brief.opening)}
+              </p>
+              <h1 className="mt-1 font-display text-[26px] font-semibold leading-tight">
+                {t(lesson.title)}
+              </h1>
+              <p className="mt-2 text-[15px] leading-relaxed text-muted">{t(lesson.summary)}</p>
+
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                {tuiles.map((tuile) => (
+                  <div
+                    key={tuile.label}
+                    className="rounded-[var(--radius-sm)] bg-surface px-3 py-2"
+                  >
+                    <div className="text-[11px] uppercase tracking-wide text-faint">
+                      {tuile.label}
+                    </div>
+                    <div className="mt-0.5 text-sm font-medium">{tuile.value}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <Button
+                  variant="primary"
+                  fullWidth
+                  icon={<BookOpen size={15} />}
+                  onClick={() => {
+                    setRevision(false)
+                    setStepIndex(commence ? Math.min(dejaFait, lesson.steps.length) - 1 : 0)
+                    setScreen('run')
+                  }}
+                >
+                  {commence ? t('lesson.trapResume') : t('lesson.trapDiscover')}
+                </Button>
+                <Button
+                  fullWidth
+                  icon={<Repeat size={15} />}
+                  onClick={() => {
+                    setRevision(true)
+                    setStepIndex(0)
+                    setScreen('run')
+                  }}
+                >
+                  {t('lesson.trapRevise')}
+                </Button>
+              </div>
+              <p className="mt-2 text-xs text-faint">
+                {commence
+                  ? t('lesson.trapResumeHint', { n: dejaFait })
+                  : t('lesson.trapDiscoverHint')}{' '}
+                · {t('lesson.trapReviseHint')}
+              </p>
+            </Card>
+
+            <Card className="p-5">
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-faint">
+                {t('lesson.trapBrief')}
+              </p>
+              <p className="mt-2 text-[15px] leading-relaxed">{t(brief.caution)}</p>
+              <p className="mt-3 flex items-center gap-1.5 text-xs text-faint">
+                <ShieldCheck size={13} aria-hidden />
+                {t('lesson.trapVerified')} ·{' '}
+                {t('lesson.trapLength', { minutes: lesson.minutes, steps: lesson.steps.length })}
+              </p>
+            </Card>
+
+            <div className="grid gap-2 text-xs">
+              {previous && (
+                <Link
+                  href={`/apprendre/${previous.id}`}
+                  className="flex items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-muted transition-colors hover:bg-surface-hover hover:text-ink"
+                >
+                  <ArrowLeft size={12} aria-hidden />
+                  <span className="truncate">
+                    {previous.icon} {t(previous.title)}
+                  </span>
+                </Link>
+              )}
+              {upcoming && (
+                <Link
+                  href={`/apprendre/${upcoming.id}`}
+                  className="flex items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-muted transition-colors hover:bg-surface-hover hover:text-ink"
+                >
+                  <ArrowRight size={12} aria-hidden />
+                  <span className="truncate">
+                    {upcoming.icon} {t(upcoming.title)}
+                  </span>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="etude mx-auto w-full max-w-[1200px] px-3 py-4 sm:px-5 lg:py-8">
@@ -395,6 +592,19 @@ export default function LessonPage() {
               troisième, à gauche, sans rien pour dire ce qu'il coupait. Trois
               lignes d'en-tête, c'est autant de pris sur l'échiquier et sur le
               texte, qui sont toute la leçon. */}
+          {lesson.trap && (
+            <button
+              type="button"
+              onClick={() => {
+                stopSpeaking()
+                setScreen('brief')
+              }}
+              className="text-sm text-muted underline-offset-2 transition-colors hover:text-ink hover:underline"
+            >
+              {t('lesson.trapBackToBrief')}
+            </button>
+          )}
+          {revision && <Chip className="text-accent">{t('lesson.revisionBadge')}</Chip>}
           <Chip className="ml-auto">
             {t('lesson.stepOf', { n: stepIndex + 1, total: lesson.steps.length })}
           </Chip>
@@ -457,7 +667,9 @@ export default function LessonPage() {
             >
               {solved ? <Check size={15} aria-hidden /> : null}
               <span className="min-w-0 flex-1">
-                {feedback?.text ?? (step.instruction ? t(step.instruction) : t('lesson.yourTurn'))}
+                {/* La consigne nomme le coup : en révision, elle est la réponse. */}
+                {feedback?.text ??
+                  (step.instruction && !revision ? t(step.instruction) : t('lesson.yourTurn'))}
               </span>
               {!solved && attempts >= 1 && (
                 <Button size="sm" variant="ghost" icon={<Eye size={13} />} onClick={reveal}>
@@ -514,7 +726,11 @@ export default function LessonPage() {
               </button>
             </div>
 
-            <p className="text-[15px] leading-relaxed">{renderBold(t(step.say))}</p>
+            <p className="text-[15px] leading-relaxed">
+              {revision
+                ? t(needsAction ? 'lesson.revisionSilent' : 'lesson.revisionWatch')
+                : renderBold(t(step.say))}
+            </p>
           </Card>
 
           {/* Collées en bas sur téléphone, comme dans les puzzles et la

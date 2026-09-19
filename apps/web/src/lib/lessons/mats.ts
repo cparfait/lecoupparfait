@@ -413,6 +413,13 @@ export const openingMatesChapter: Chapter = {
       level: 'beginner',
       minutes: 5,
       icon: '🤦',
+      trap: {
+        opening: 'lecons.mats-ouverture.mat-imbecile.opening',
+        color: 'b',
+        risk: 'lecons.mats-ouverture.mat-imbecile.risk',
+        theme: 'lecons.mats-ouverture.mat-imbecile.theme',
+        caution: 'lecons.mats-ouverture.mat-imbecile.caution',
+      },
       steps: [
         {
           kind: 'show',
@@ -494,6 +501,13 @@ export const openingMatesChapter: Chapter = {
       level: 'beginner',
       minutes: 7,
       icon: '🐑',
+      trap: {
+        opening: 'lecons.mats-ouverture.mat-berger.opening',
+        color: 'w',
+        risk: 'lecons.mats-ouverture.mat-berger.risk',
+        theme: 'lecons.mats-ouverture.mat-berger.theme',
+        caution: 'lecons.mats-ouverture.mat-berger.caution',
+      },
       steps: [
         {
           kind: 'show',
@@ -585,6 +599,13 @@ export const openingMatesChapter: Chapter = {
       level: 'intermediate',
       minutes: 8,
       icon: '🪙',
+      trap: {
+        opening: 'lecons.mats-ouverture.mat-shilling.opening',
+        color: 'b',
+        risk: 'lecons.mats-ouverture.mat-shilling.risk',
+        theme: 'lecons.mats-ouverture.mat-shilling.theme',
+        caution: 'lecons.mats-ouverture.mat-shilling.caution',
+      },
       steps: [
         {
           kind: 'show',
@@ -702,6 +723,13 @@ export const openingMatesChapter: Chapter = {
       level: 'advanced',
       minutes: 8,
       icon: '📌',
+      trap: {
+        opening: 'lecons.mats-ouverture.mat-legal.opening',
+        color: 'w',
+        risk: 'lecons.mats-ouverture.mat-legal.risk',
+        theme: 'lecons.mats-ouverture.mat-legal.theme',
+        caution: 'lecons.mats-ouverture.mat-legal.caution',
+      },
       steps: [
         {
           kind: 'show',

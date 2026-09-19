@@ -2190,6 +2190,29 @@ export const fr = {
     previous: 'Précédent',
     nextLesson: 'Leçon suivante',
     replayStep: 'Rejouer cette étape',
+
+    // La fiche qui précède un piège. Une leçon ordinaire s'ouvre sur
+    // l'échiquier ; un piège s'ouvre sur ce qu'il coûte.
+    trapBrief: 'Avant de commencer',
+    trapOpening: 'Ouverture',
+    trapSide: 'Camp joué',
+    trapSideWhite: 'Tu joues les Blancs',
+    trapSideBlack: 'Tu joues les Noirs',
+    trapRisk: 'Si l’adversaire ne mord pas',
+    trapTheme: 'Motif',
+    trapLength: '{minutes} min · {steps} étapes',
+    trapDuration: 'Durée',
+    trapDiscover: 'Découvrir',
+    trapDiscoverHint: 'le coach explique chaque coup',
+    trapResume: 'Reprendre',
+    trapResumeHint: 'tu en es à l’étape {n}',
+    trapRevise: 'Réviser',
+    trapReviseHint: 'rejouer la ligne sans indice',
+    trapVerified: 'Ligne vérifiée coup par coup',
+    trapBackToBrief: 'Revoir la fiche',
+    revisionBadge: 'Révision',
+    revisionSilent: 'Le coach se tait. Joue la ligne de mémoire.',
+    revisionWatch: 'Observe — le coup se joue tout seul.',
   },
 
   lessonExtra: {
@@ -4769,6 +4792,11 @@ export const fr = {
       'mat-imbecile': {
         title: 'Le mat de l’imbécile',
         summary: 'Deux coups. Le mat le plus rapide possible — et celui qu’il faut savoir éviter.',
+        opening: 'Ouverture Barnes',
+        risk: 'Rien',
+        theme: 'Diagonale e1-h4',
+        caution:
+          'Personne ne te le donnera jamais : il faut deux coups absurdes d’affilée. Cette leçon sert à ne pas le subir, pas à le tenter.',
         e1: {
           say: 'Le mat le plus rapide du jeu tient en deux coups. Tu ne le donneras probablement jamais — il faut que l’adversaire s’y prête — mais il t’apprend la diagonale la plus dangereuse de l’échiquier.',
         },
@@ -4810,6 +4838,11 @@ export const fr = {
         title: 'Le mat du berger',
         summary:
           'Quatre coups, et la partie est finie. Le connaître, c’est surtout ne plus le subir.',
+        opening: 'Attaque Parham',
+        risk: 'Ta dame sort trop tôt',
+        theme: 'Mat sur f7',
+        caution:
+          'Sortir la dame au deuxième coup est une faute de principe. Contre quelqu’un qui connaît la parade, tu perds des temps à la faire fuir et tu joues une position moins bonne.',
         e1: {
           say: 'Au tout début de la partie, une case est plus faible que toutes les autres : f7. Regarde qui la défend. Personne, sauf le roi lui-même.',
         },
@@ -4854,6 +4887,11 @@ export const fr = {
         title: 'Le piège du Shilling',
         summary:
           'Les Noirs offrent un pion. Celui qui le prend est maté en sept coups, par ses propres pièces.',
+        opening: 'Partie italienne',
+        risk: 'Un pion',
+        theme: 'Mat étouffé',
+        caution:
+          'Le coup Cd4 est objectivement douteux. Si les Blancs jouent Cxd4 au lieu de prendre en e5, tu es un pion en moins pour rien.',
         e1: {
           say: 'Partie italienne, la plus jouée de toutes. Tu as les Noirs. Ce piège se vendait un shilling dans les cafés d’échecs de Londres : on pariait cette pièce sur la partie, et on la gagnait.',
         },
@@ -4910,6 +4948,11 @@ export const fr = {
       'mat-legal': {
         title: 'Le mat de Légal',
         summary: 'Une pièce clouée peut bouger. Celui qui l’oublie perd en sept coups.',
+        opening: 'Défense Philidor',
+        risk: 'Ta dame',
+        theme: 'Mat étouffé',
+        caution:
+          'Tu donnes réellement ta dame. Si les Noirs refusent le cadeau et reculent leur fou, tu as sacrifié pour rien — vérifie que toutes les pièces du mat sont en place avant de jouer Cxe5.',
         e1: {
           say: 'Le fou noir en g4 vise ton cavalier f3, et derrière ce cavalier il y a ta dame en d1. Le cavalier est donc cloué : s’il bouge, tu perds ta dame.',
         },
@@ -4951,11 +4994,16 @@ export const fr = {
     pieges: {
       title: 'Tendre et déjouer les pièges',
       description:
-        'Cinq pièges d’ouverture qui gagnent une pièce, appris des deux côtés : on le tend jusqu’au gain, puis on le voit venir et on le déjoue. Ce sont eux qui décident les parties en club, bien avant la théorie.',
+        'Quatorze pièges d’ouverture, appris des deux côtés : on le tend jusqu’au gain, puis on le voit venir et on le déjoue. Chacun vit dans une ouverture qui se joue vraiment, et chaque fiche dit ce qu’il coûte quand l’adversaire ne mord pas.',
       'piege-fegatello': {
         title: 'Le Fegatello',
         summary:
           'Deux pièces sur f7, un cavalier donné, et le roi noir dehors au septième coup. Puis le coup unique qui annule tout.',
+        opening: 'Partie italienne, défense des deux cavaliers',
+        risk: 'Un cavalier',
+        theme: 'Roi délogé',
+        caution:
+          'Tu donnes une pièce pour une attaque, pas pour du matériel. Si les Noirs connaissent la parade Ca5, tu es une pièce en moins sans compensation.',
         e1: {
           say: 'Le Fegatello, ou « foie frit » en italien. Les Blancs donnent un cavalier sur f7 pour sortir le roi noir. On commence par le tendre.',
         },
@@ -5029,6 +5077,11 @@ export const fr = {
         title: 'Le piège de l’éléphant',
         summary:
           'Un pion qui a l’air de tomber tout seul, et une dame qui se donne pour gagner une pièce. Le piège le plus rentable du gambit dame.',
+        opening: 'Gambit dame refusé',
+        risk: 'Rien',
+        theme: 'Défenseur surchargé',
+        caution:
+          'Tu ne provoques rien : tu attends une prise en d5 que les Blancs n’ont aucune raison de jouer. C’est un piège qu’on subit avec profit, pas qu’on tend.',
         e1: {
           say: 'Celui-ci se subit plus souvent qu’il ne se tend. Tu joues les Noirs, et tu vas laisser les Blancs prendre un pion qu’ils ne peuvent pas prendre.',
         },
@@ -5084,6 +5137,11 @@ export const fr = {
         title: 'Le piège de Kieninger',
         summary:
           'Un mat étouffé au huitième coup, en pleine ouverture, parce qu’un pion pris à l’aile ouvre une colonne qu’on n’avait pas regardée.',
+        opening: 'Gambit Budapest',
+        risk: 'Un pion',
+        theme: 'Mat étouffé',
+        caution:
+          'Le Budapest donne un pion dès le deuxième coup et ne le récupère pas toujours. Contre une défense correcte, tu joues une position un peu moins bonne.',
         e1: {
           say: 'Le gambit Budapest, et le plus joli mat d’ouverture qui existe. Tu joues les Noirs.',
         },
@@ -5132,6 +5190,11 @@ export const fr = {
         title: 'Le piège de Lasker',
         summary:
           'Le seul piège d’ouverture où promouvoir en dame perd et promouvoir en cavalier gagne. Une sous-promotion, au septième coup.',
+        opening: 'Gambit dame refusé, défense Albin',
+        risk: 'Un pion',
+        theme: 'Sous-promotion',
+        caution:
+          'La défense Albin est un gambit : tu donnes un pion sans garantie. Le piège ne se déclenche que si les Blancs jouent le naturel Fd2 au cinquième coup.',
         e1: {
           say: 'Le gambit Albin. Tu joues les Noirs, et tu vas finir par promouvoir un pion en cavalier — pas en dame.',
         },
@@ -5182,6 +5245,11 @@ export const fr = {
         title: 'L’arche de Noé',
         summary:
           'Trois pions noirs qui avancent, et le fou blanc se retrouve sans une seule case. Le piège le plus vieux de l’espagnole.',
+        opening: 'Partie espagnole',
+        risk: 'Rien',
+        theme: 'Pièce enfermée',
+        caution:
+          'Il faut que le fou blanc accepte de reculer en b3 et que les pions a et b puissent avancer sans contre-jeu. Ça n’arrive pas contre n’importe qui.',
         e1: {
           say: 'L’espagnole. Tu joues les Noirs, et tu vas enfermer le fou blanc avec des pions. On appelle ça l’arche de Noé parce que le piège est aussi vieux que le déluge.',
         },
@@ -5237,6 +5305,590 @@ export const fr = {
         },
         e15: {
           say: 'Le fou n’a aucune case : ses propres pions lui bouchent a2 et c2, tes pions tiennent a4 et c4. Il tombera au coup suivant. Retiens le mécanisme plutôt que la suite de coups : des pions peuvent enfermer une pièce, et un fou qui recule sur une aile est souvent déjà perdu.',
+        },
+      },
+      'piege-englund': {
+        title: 'Le piège Englund',
+        summary:
+          'Tu donnes un pion au premier coup, et si les Blancs développent naturellement leur fou, ils sont matés au huitième.',
+        opening: 'Gambit Englund',
+        risk: 'Un pion',
+        theme: 'Mat sur la première rangée',
+        caution:
+          'Ce piège coûte un pion tout de suite, et un bon joueur ne le rend pas. S’il joue Cc3 au sixième coup, tu as une position inférieure et rien en échange. À réserver aux parties rapides.',
+        e1: {
+          say: 'Les Blancs ouvrent d4. Le gambit Englund répond en offrant tout de suite un pion — et en tendant un piège qui finit par un mat.',
+        },
+        e2: {
+          say: 'Pousse e5. Les Blancs vont le prendre, et c’est exactement ce qu’on veut.',
+          instruction: 'Joue e5',
+        },
+        e3: {
+          say: 'Le pion est pris. On ne le reprend pas : on attaque. Cavalier en c6, qui vise le pion e5.',
+          instruction: 'Joue le cavalier en c6',
+        },
+        e4: {
+          say: 'Ils défendent avec le cavalier f3. On ajoute un attaquant : la dame en e7.',
+          instruction: 'Joue la dame en e7',
+        },
+        e5: {
+          say: 'Ils défendent encore, avec le fou f4. Maintenant la dame frappe en b4 : échec, et elle attaque le fou f4 et le pion b2 en même temps.',
+          instruction: 'Joue la dame en b4, avec échec',
+        },
+        e6: {
+          say: 'Ils parent avec le fou d2. Prends le pion b2 — ta dame entre dans leur camp.',
+          instruction: 'Prends en b2 avec la dame',
+        },
+        e7: {
+          say: 'Voilà la faute. Le fou vient en c3 pour attaquer ta dame et boucher la colonne. Ça a l’air très fort. C’est perdant.',
+        },
+        e8: {
+          say: 'Fou b4. Tu cloues le fou c3 contre le roi : il ne peut plus bouger, et ta dame n’a plus rien à craindre.',
+          instruction: 'Joue le fou en b4',
+          hint: 'Le fou f8 sort en b4, sur la diagonale qui mène au roi blanc en e1.',
+        },
+        e9: {
+          say: 'Ils défendent le fou avec la dame. Prends-le quand même.',
+          instruction: 'Prends en c3 avec le fou',
+        },
+        e10: {
+          say: 'Ils reprennent avec la dame, et la case c1 est vide. Dame c1 : échec et mat.',
+          instruction: 'Joue la dame en c1',
+          hint: 'La première rangée blanche est bouchée par leur propre cavalier en b1. La tour a1 ne peut pas venir défendre.',
+        },
+        e11: {
+          say: 'Regarde pourquoi ça mate : le cavalier b1 n’a jamais bougé, et il empêche leur propre tour a1 de venir en c1. Le roi n’a ni fuite ni défenseur. C’est le mat de la première rangée, à huit coups.',
+        },
+        e12: {
+          say: 'Maintenant tu joues les Blancs, dame noire installée en b2. Le fou en c3 perd. Il existe un coup qui tient.',
+        },
+        e13: {
+          say: 'Cavalier c3. Il bouche la diagonale comme le fou, mais lui est défendu par le pion b2… qui n’existe plus. Peu importe : il n’est pas clouable contre le roi de la même façon.',
+          instruction: 'Joue le cavalier en c3',
+          hint: 'Une pièce mineure doit venir en c3. Pas celle que tu crois.',
+        },
+        e14: {
+          say: 'Le fou vient bien en b4, mais il ne cloue plus rien de fatal : ta tour a1 garde la première rangée, et ta dame n’est pas enfermée. Le pion en plus reste. Retiens la leçon générale : quand on t’offre un pion très tôt, le danger n’est pas le pion, c’est la pièce qu’on t’invite à sortir.',
+        },
+      },
+      'piege-canne-a-peche': {
+        title: 'La canne à pêche',
+        summary:
+          'Tu poses un cavalier en g4 comme un appât, tu ajoutes le pion h5, et celui qui mord se fait mater sur la colonne h.',
+        opening: 'Partie espagnole',
+        risk: 'Un cavalier',
+        theme: 'Colonne ouverte sur le roque',
+        caution:
+          'Si les Blancs ne prennent pas le cavalier, tu as un cavalier en l’air et un pion h avancé pour rien. Le piège ne marche que contre quelqu’un qui prend par réflexe.',
+        e1: {
+          say: 'La canne à pêche : un cavalier posé en g4 sert d’appât, et le pion h5 est le fil. Celui qui mord ouvre la colonne h sur son propre roi.',
+        },
+        e2: {
+          say: 'On commence par une espagnole tout à fait normale. Réponds au centre.',
+          instruction: 'Joue e5',
+        },
+        e3: {
+          say: 'Défends ton pion avec le cavalier.',
+          instruction: 'Joue le cavalier en c6',
+        },
+        e4: {
+          say: 'Le fou vient en b5. Développe ton cavalier roi.',
+          instruction: 'Joue le cavalier en f6',
+        },
+        e5: {
+          say: 'Les Blancs roquent. Maintenant l’appât : cavalier en g4. Il ne menace presque rien, et il est attaquable.',
+          instruction: 'Joue le cavalier en g4',
+        },
+        e6: {
+          say: 'Le pion h3 attaque ton cavalier. Un joueur normal le reculerait. Toi, tu vas le laisser là.',
+        },
+        e7: {
+          say: 'Pousse h5. Tu défends le cavalier une fois, et surtout tu prépares l’ouverture de la colonne h.',
+          instruction: 'Joue h5',
+          hint: 'Le pion h7 avance de deux cases. Le cavalier reste où il est.',
+        },
+        e8: {
+          say: 'Ils ont pris le cavalier. Reprends avec le pion h : la colonne h s’ouvre, et ta tour h8 regarde déjà leur roi.',
+          instruction: 'Reprends en g4 avec le pion h',
+        },
+        e9: {
+          say: 'Leur cavalier recule en e1 pour défendre h4. Amène la dame en h4 quand même.',
+          instruction: 'Joue la dame en h4',
+        },
+        e10: {
+          say: 'Ils jouent f3 pour chasser ton pion. Pousse-le en g3 : il attaque h2, la case où ta dame veut se poser.',
+          instruction: 'Joue g3',
+          hint: 'Le pion g4 avance d’une case. Il ne prend rien — il défend.',
+        },
+        e11: {
+          say: 'Dame h2. Le pion g3 la défend, le roi ne peut pas la prendre, et il n’a aucune case. Mat.',
+          instruction: 'Joue la dame en h2',
+        },
+        e12: {
+          say: 'Le mécanisme vaut bien au-delà de ce piège : un pion qui défend la case d’arrivée de la dame transforme un échec ordinaire en mat. Ici c’est le pion g3, et il vient d’un cavalier qu’on a donné trois coups plus tôt.',
+        },
+        e13: {
+          say: 'Tu joues les Blancs. Le cavalier g4 est attaqué et défendu par h5. Le prendre ouvre ta propre colonne h. Ne le prends pas.',
+        },
+        e14: {
+          say: 'Joue d4, au centre. Tu ignores l’appât et tu ouvres ton jeu — c’est toujours la bonne réponse à une attaque d’aile prématurée.',
+          instruction: 'Joue d4',
+          hint: 'Réponds à une attaque sur l’aile par un coup au centre.',
+        },
+        e15: {
+          say: 'Le cavalier va chercher f2, mais ce n’est qu’un pion, et ta position est saine. Retiens la règle : à une attaque d’aile, on répond au centre. Elle vaut dans les deux sens.',
+        },
+      },
+      'piege-damiano': {
+        title: 'La défense Damiano',
+        summary:
+          'Les Noirs défendent leur pion avec f6. Tu donnes un cavalier, et tu récupères une tour quatre coups plus tard.',
+        opening: 'Partie ouverte',
+        risk: 'Rien',
+        theme: 'Roi privé de fuite',
+        caution:
+          'Ce n’est pas un piège que tu tends : c’est une punition que tu dois savoir infliger quand elle se présente. f6 est un mauvais coup, pas un appât.',
+        e1: {
+          say: 'La défense Damiano n’est pas une défense, c’est une faute. Mais elle est si fréquente en dessous de mille points qu’il faut savoir la punir.',
+        },
+        e2: {
+          say: 'Pion roi.',
+          instruction: 'Joue e4',
+        },
+        e3: {
+          say: 'Cavalier f3, qui attaque e5.',
+          instruction: 'Joue le cavalier en f3',
+        },
+        e4: {
+          say: 'Et voilà f6. Les Noirs défendent leur pion — avec le seul coup qui ferme la case f6 à leur roi et ouvre la diagonale de ta dame vers e8.',
+        },
+        e5: {
+          say: 'Prends en e5 avec le cavalier. Tu le donnes, et tu sais pourquoi.',
+          instruction: 'Prends en e5 avec le cavalier',
+          hint: 'Le cavalier f3 capture le pion e5. Oui, il est pris juste après.',
+        },
+        e6: {
+          say: 'Ils ont repris. Dame h5, échec. Le roi n’a pas de case : f6 est occupée par leur propre pion.',
+          instruction: 'Joue la dame en h5, avec échec',
+        },
+        e7: {
+          say: 'Ils bouchent avec g6. Prends le pion e5 avec échec — et regarde la diagonale : ta dame vise maintenant la tour h8.',
+          instruction: 'Prends en e5 avec la dame',
+        },
+        e8: {
+          say: 'Ils parent l’échec avec la dame. Prends la tour.',
+          instruction: 'Prends en h8 avec la dame',
+          hint: 'La dame e5 traverse f6 et g7 jusqu’en h8.',
+        },
+        e9: {
+          say: 'Compte : tu as donné un cavalier, tu as pris deux pions et une tour. C’est du gain net, et la position noire est en ruine.',
+        },
+        e10: {
+          say: 'Maintenant tu joues les Noirs, le cavalier vient de prendre en e5. Reprendre avec le pion perd. Il y a un coup qui tient.',
+        },
+        e11: {
+          say: 'Dame e7. Tu ne reprends pas : tu attaques le cavalier en le clouant contre le pion e4, et tu gardes ton roi couvert.',
+          instruction: 'Joue la dame en e7',
+          hint: 'Ne reprends pas le cavalier. Attaque-le.',
+        },
+        e12: {
+          say: 'Le cavalier doit partir, et tu récupères le pion e4 ensuite. Tu es toujours un peu moins bien, mais tu es en vie. La leçon : quand on te donne une pièce près de ton roi, cherche d’abord ce qui arrive si tu ne la prends pas.',
+        },
+      },
+      'piege-petroff': {
+        title: 'Le piège de la Petroff',
+        summary:
+          'Les Noirs copient tes coups un de trop. Un échec à la découverte, et leur dame tombe.',
+        opening: 'Défense Petroff',
+        risk: 'Rien',
+        theme: 'Échec à la découverte',
+        caution:
+          'Les Noirs ont une parade simple et connue. Ne compte pas dessus contre quelqu’un qui joue vraiment la Petroff : c’est un piège contre l’imitation, pas contre la théorie.',
+        e1: {
+          say: 'La Petroff : les Noirs répondent au cavalier par un cavalier. L’idée est saine — mais continuer à copier un coup de trop coûte la dame.',
+        },
+        e2: {
+          say: 'Pion roi.',
+          instruction: 'Joue e4',
+        },
+        e3: {
+          say: 'Cavalier f3. Ils répondent cavalier f6 : ils ne défendent pas leur pion, ils attaquent le tien.',
+          instruction: 'Joue le cavalier en f3',
+        },
+        e4: {
+          say: 'Prends en e5. Ils vont être tentés de reprendre symétriquement.',
+          instruction: 'Prends en e5 avec le cavalier',
+        },
+        e5: {
+          say: 'Et ils ont pris en e4. C’est la faute classique : les deux cavaliers sont au centre, mais c’est à toi de jouer.',
+        },
+        e6: {
+          say: 'Dame e2. Elle se pose sur la colonne du roi noir, avec ton propre cavalier au milieu — c’est exactement ce qu’il faut.',
+          instruction: 'Joue la dame en e2',
+          hint: 'Aligne ta dame et leur roi sur la colonne e.',
+        },
+        e7: {
+          say: 'Ils reculent le cavalier en f6. Maintenant, la seule chose entre ta dame et leur roi, c’est ton cavalier e5. S’il bouge, c’est échec.',
+        },
+        e8: {
+          say: 'Cavalier c6. Échec à la découverte — et en arrivant, le cavalier attaque leur dame.',
+          instruction: 'Joue le cavalier en c6',
+          hint: 'Le cavalier e5 part en attaquant la dame d8, et découvre l’échec de ta dame.',
+        },
+        e9: {
+          say: 'Ils doivent parer l’échec. La dame reste en prise.',
+          instruction: 'Prends la dame en d8',
+        },
+        e10: {
+          say: 'Dame contre cavalier. Le mécanisme à retenir : une pièce qui s’en va avec échec peut se permettre d’aller n’importe où, y compris sur une case défendue.',
+        },
+        e11: {
+          say: 'Tu joues les Noirs. Ton cavalier est en e4, leur dame en e2, et ton roi est derrière. Reculer le cavalier perd la dame.',
+        },
+        e12: {
+          say: 'Dame e7. Tu mets ta dame devant ton roi : maintenant, si leur cavalier s’en va, il n’y a plus de découverte sur le roi — seulement un échange de dames.',
+          instruction: 'Joue la dame en e7',
+          hint: 'Ne bouge pas le cavalier. Protège la colonne e autrement.',
+        },
+        e13: {
+          say: 'Ils doivent reculer, tu reprends le pion, et la partie est égale. Retiens : quand ta pièce est clouée par une dame lointaine, la parade est souvent d’interposer ta propre dame, pas de fuir.',
+        },
+      },
+      'piege-mortimer': {
+        title: 'Le piège Mortimer',
+        summary:
+          'Tu recules volontairement un cavalier déjà développé pour offrir un pion. Celui qui le prend perd une pièce.',
+        opening: 'Partie espagnole',
+        risk: 'Un pion et un temps',
+        theme: 'Échec double sur la diagonale',
+        caution:
+          'Reculer le cavalier en e7 est objectivement un mauvais coup : tu perds un temps et tu encombres ton fou. Si les Blancs ne prennent pas, tu es simplement moins bien.',
+        e1: {
+          say: 'Le piège Mortimer demande d’assumer un coup laid : reculer un cavalier déjà sorti, pour offrir un pion qu’on ne peut pas prendre.',
+        },
+        e2: {
+          say: 'Une espagnole normale. Réponds au centre.',
+          instruction: 'Joue e5',
+        },
+        e3: {
+          say: 'Défends ton pion.',
+          instruction: 'Joue le cavalier en c6',
+        },
+        e4: {
+          say: 'Le fou en b5. Développe ton cavalier roi.',
+          instruction: 'Joue le cavalier en f6',
+        },
+        e5: {
+          say: 'Ils jouent d3, tranquillement. Regarde bien : la case d2 est maintenant vide, et la diagonale a5-e1 est ouverte jusqu’à leur roi. Tout le piège est là.',
+        },
+        e6: {
+          say: 'Recule ton cavalier c6 en e7. Tu abandonnes le pion e5. C’est volontaire.',
+          instruction: 'Joue le cavalier de c6 en e7',
+          hint: 'Le cavalier qui recule est celui de c6, pas celui de f6.',
+        },
+        e7: {
+          say: 'Ils ont pris le pion. Joue c6 : tu attaques leur fou, et tu prépares surtout la case a5 pour ta dame.',
+          instruction: 'Joue c6',
+          hint: 'Le pion c7 avance d’une case et attaque le fou b5.',
+        },
+        e8: {
+          say: 'Le fou recule en c4, et la case b5 se libère. Dame a5 : échec, et la dame regarde le cavalier e5 le long de la cinquième rangée.',
+          instruction: 'Joue la dame en a5, avec échec',
+        },
+        e9: {
+          say: 'Ils bouchent avec le cavalier c3. Prends le cavalier e5.',
+          instruction: 'Prends en e5 avec la dame',
+        },
+        e10: {
+          say: 'Une pièce pour un pion. Le coup qui rend tout possible, c’est leur d3 : sans lui, a5 n’était pas un échec, et le piège n’existait pas.',
+        },
+        e11: {
+          say: 'Tu joues les Blancs. Le cavalier noir vient de reculer en e7 et le pion e5 est libre. Ne le prends pas.',
+        },
+        e12: {
+          say: 'Roque. Tu ignores le pion empoisonné et tu mets ton roi à l’abri — ce que les Noirs viennent de te donner, c’est un temps, pas un pion.',
+          instruction: 'Roque du petit côté',
+          hint: 'Le pion e5 est un appât. Fais le coup le plus sain de la position.',
+        },
+        e13: {
+          say: 'Ton roi est en sécurité, leur cavalier a perdu deux coups, et le pion e5 tombera plus tard dans de bonnes conditions. La règle : un pion offert par un coup qui a l’air mauvais est presque toujours empoisonné.',
+        },
+      },
+      'piege-siberien': {
+        title: 'Le piège sibérien',
+        summary:
+          'Face au gambit Smith-Morra, ta dame et un cavalier se donnent rendez-vous en h2. Le mat arrive au dixième coup.',
+        opening: 'Sicilienne, gambit Smith-Morra',
+        risk: 'Rien — tu es déjà un pion devant',
+        theme: 'Mat de la dame soutenue',
+        caution:
+          'Ce piège ne se déclenche que si les Blancs jouent h3 au neuvième coup. Un joueur qui connaît le Smith-Morra joue g3 et tu n’as rien — mais tu gardes ton pion.',
+        e1: {
+          say: 'Le gambit Smith-Morra : les Blancs donnent un pion pour du développement. Le piège sibérien est la punition de ceux qui le jouent sans le connaître.',
+        },
+        e2: {
+          say: 'La sicilienne.',
+          instruction: 'Joue c5',
+        },
+        e3: {
+          say: 'Ils poussent d4. Prends.',
+          instruction: 'Prends en d4 avec le pion c',
+        },
+        e4: {
+          say: 'Et voilà le gambit : c3, qui offre un deuxième pion pour ouvrir des colonnes. On accepte.',
+        },
+        e5: {
+          say: 'Prends en c3.',
+          instruction: 'Prends en c3 avec le pion d',
+        },
+        e6: {
+          say: 'Ils reprennent avec le cavalier. Développe le tien.',
+          instruction: 'Joue le cavalier en c6',
+        },
+        e7: {
+          say: 'Joue e6. Solide, et ça libère ton fou roi.',
+          instruction: 'Joue e6',
+        },
+        e8: {
+          say: 'Leur fou arrive en c4. Dame c7 : elle se pose sur la diagonale qui mène tout droit à h2, derrière leur futur roque.',
+          instruction: 'Joue la dame en c7',
+          hint: 'La dame sort en c7, sur la grande diagonale c7-h2.',
+        },
+        e9: {
+          say: 'Ils roquent. Développe ton cavalier roi.',
+          instruction: 'Joue le cavalier en f6',
+        },
+        e10: {
+          say: 'Dame e2 pour eux. Maintenant l’appât : cavalier en g4. Il défend la case h2, où ta dame veut aller.',
+          instruction: 'Joue le cavalier en g4',
+          hint: 'Le cavalier f6 saute en g4. Regarde quelle case il défend en arrivant.',
+        },
+        e11: {
+          say: 'Ils jouent h3 pour le chasser. C’est la faute : le pion quitte h2, et ta dame n’a plus qu’à s’y poser — à condition d’avoir un temps.',
+        },
+        e12: {
+          say: 'Cavalier d4. Tu ne recules pas : tu attaques leur dame, et tu gagnes exactement le temps qu’il te faut.',
+          instruction: 'Joue le cavalier de c6 en d4',
+          hint: 'Le cavalier c6 saute en d4 et attaque la dame e2.',
+        },
+        e13: {
+          say: 'Ils prennent ton cavalier. Dame h2 : le cavalier g4 la défend, le roi ne peut pas la prendre. Mat.',
+          instruction: 'Joue la dame en h2',
+        },
+        e14: {
+          say: 'Deux pièces suffisent, si l’une défend la case où l’autre se pose. C’est la figure la plus rentable des échecs, et tu la reverras partout.',
+        },
+        e15: {
+          say: 'Tu joues les Blancs. Leur cavalier vient d’arriver en g4 et leur dame regarde h2. h3 perd sur-le-champ.',
+        },
+        e16: {
+          say: 'Joue g3. Le pion se met en travers de la diagonale c7-h2 : la dame n’a plus de chemin, et le piège n’existe plus.',
+          instruction: 'Joue g3',
+          hint: 'Ne chasse pas le cavalier. Coupe la diagonale de la dame.',
+        },
+        e17: {
+          say: 'La menace est morte, et tu peux continuer à jouer ton gambit. Retiens la réponse générale : contre une batterie dame plus pièce, boucher la ligne vaut mieux que chasser la pièce.',
+        },
+      },
+      'piege-francaise-avance': {
+        title: 'Le piège de la française d’avance',
+        summary:
+          'Tu attaques le pion d4 trois fois. S’ils développent leur fou en d3, la chaîne s’effondre et tu gagnes un pion.',
+        opening: 'Française, variante d’avance',
+        risk: 'Rien',
+        theme: 'Défenseur surchargé',
+        caution:
+          'Ce piège ne gagne qu’un pion, pas une pièce. En revanche il se présente très souvent, et le coup fautif Fd3 est parfaitement naturel.',
+        e1: {
+          say: 'La française d’avance. Les Blancs verrouillent le centre, et toute la partie se joue autour d’un seul pion : celui de d4.',
+        },
+        e2: {
+          say: 'La française commence par e6.',
+          instruction: 'Joue e6',
+        },
+        e3: {
+          say: 'Et d5, qui conteste le centre.',
+          instruction: 'Joue d5',
+        },
+        e4: {
+          say: 'Ils poussent e5 et ferment le centre. Leur pion e5 est défendu par d4 — et d4 est la vraie cible de toute la variante.',
+        },
+        e5: {
+          say: 'Attaque la base : c5.',
+          instruction: 'Joue c5',
+        },
+        e6: {
+          say: 'Ils défendent avec c3. Ajoute un attaquant : cavalier c6.',
+          instruction: 'Joue le cavalier en c6',
+        },
+        e7: {
+          say: 'Et le troisième : dame b6. Le pion d4 est attaqué trois fois et défendu deux fois.',
+          instruction: 'Joue la dame en b6',
+          hint: 'La dame sort en b6, sur la diagonale qui vise d4 et f2.',
+        },
+        e8: {
+          say: 'Voilà la faute : le fou en d3. Il a l’air de développer, mais il ôte au cavalier b1 sa case et surtout il ne défend rien de d4.',
+        },
+        e9: {
+          say: 'Prends en d4.',
+          instruction: 'Prends en d4 avec le pion c',
+        },
+        e10: {
+          say: 'Ils reprennent avec le pion c. Prends encore, avec le cavalier.',
+          instruction: 'Prends en d4 avec le cavalier',
+          hint: 'Le cavalier c6 capture en d4, même s’il est repris juste après.',
+        },
+        e11: {
+          say: 'Et tu reprends avec la dame. Elle atterrit en d4 en attaquant le fou d3 au passage.',
+          instruction: 'Reprends en d4 avec la dame',
+        },
+        e12: {
+          say: 'Un pion net, et leur fou doit encore bouger. Le mécanisme : compter les attaquants et les défenseurs d’un pion, et frapper dès que le compte bascule.',
+        },
+        e13: {
+          say: 'Tu joues les Blancs. Le pion d4 est attaqué trois fois. Fd3 perd un pion. Trouve le coup qui garde le compte.',
+        },
+        e14: {
+          say: 'Fou e2. Modeste, mais il laisse la case d3 au cavalier et il ne retire aucun défenseur de d4.',
+          instruction: 'Joue le fou en e2',
+          hint: 'Le fou f1 sort — mais pas sur la case qui a l’air la plus active.',
+        },
+        e15: {
+          say: 'Le compte tient, et la position reste jouable. Retiens : en structure fermée, la case la plus active n’est pas toujours la bonne — c’est le nombre de défenseurs qui décide.',
+        },
+      },
+      'piege-gambit-dame-accepte': {
+        title: 'Le piège du gambit dame accepté',
+        summary:
+          'Les Noirs prennent ton pion c4 et veulent le garder avec b5. Deux coups plus tard, tu prends leur tour.',
+        opening: 'Gambit dame accepté',
+        risk: 'Un pion',
+        theme: 'Grande diagonale ouverte',
+        caution:
+          'Le piège ne se déclenche que si les Noirs jouent b5 puis reprennent en b5 avec le pion c. Un joueur correct rend le pion et il ne se passe rien.',
+        e1: {
+          say: 'Le gambit dame : tu offres le pion c4. Le prendre est tout à fait jouable — vouloir le garder ne l’est pas.',
+        },
+        e2: {
+          say: 'On commence par d4.',
+          instruction: 'Joue d4',
+        },
+        e3: {
+          say: 'Et c4, le gambit. Ils prennent.',
+          instruction: 'Joue c4',
+        },
+        e4: {
+          say: 'Joue e3, tranquillement. Tu prépares de reprendre le pion avec ton fou, et tu attends de voir s’ils essaient de le garder.',
+          instruction: 'Joue e3',
+          hint: 'Un coup de pion modeste, qui ouvre la diagonale du fou f1.',
+        },
+        e5: {
+          say: 'Et voilà b5. Ils veulent tenir le pion coûte que coûte. Regarde ce que ça vient de faire : la case b7 est vide, et la grande diagonale mène jusqu’à leur tour a8.',
+        },
+        e6: {
+          say: 'a4. Tu attaques la chaîne à sa base.',
+          instruction: 'Joue a4',
+        },
+        e7: {
+          say: 'Ils défendent avec c6. Prends en b5.',
+          instruction: 'Prends en b5 avec le pion a',
+        },
+        e8: {
+          say: 'Ils reprennent avec le pion c — et c’est la faute décisive. La case c6 est maintenant vide elle aussi : la diagonale f3-a8 est entièrement dégagée.',
+        },
+        e9: {
+          say: 'Dame f3. Elle regarde la tour a8 à travers tout l’échiquier.',
+          instruction: 'Joue la dame en f3',
+          hint: 'La dame sort en f3, sur la diagonale qui traverse e4, d5, c6 et b7.',
+        },
+        e10: {
+          say: 'Ils bouchent avec le cavalier c6, mais il n’est défendu par rien. Prends-le avec échec.',
+          instruction: 'Prends en c6 avec la dame',
+        },
+        e11: {
+          say: 'Ils parent avec le fou d7. Prends la tour.',
+          instruction: 'Prends en a8 avec la dame',
+        },
+        e12: {
+          say: 'Une tour pour un pion. La leçon vaut pour tous les gambits : le pion pris n’est pas le problème, c’est la suite de coups de pion qu’on invente pour le garder.',
+        },
+        e13: {
+          say: 'Tu joues les Noirs, tu as le pion c4, et les Blancs jouent a4. Défendre avec c6 va ouvrir la diagonale. Il y a bien mieux.',
+        },
+        e14: {
+          say: 'Joue e6. Tu laisses partir le pion et tu développes : c’est la bonne façon de jouer le gambit dame accepté depuis toujours.',
+          instruction: 'Joue e6',
+          hint: 'Arrête de défendre le pion. Ouvre ton fou roi.',
+        },
+        e15: {
+          say: 'Ils récupèrent leur pion, tu as une position saine, et ta tour a8 est toujours là. Un pion rendu au bon moment vaut mieux qu’un pion gardé au mauvais.',
+        },
+      },
+      'piege-ecossaise': {
+        title: 'Le piège de l’écossaise',
+        summary:
+          'Ils échangent en c6 trop vite. Ta dame attaque f2 et le cavalier en même temps, et tu sors avec un pion et leur roque.',
+        opening: 'Partie écossaise',
+        risk: 'Rien',
+        theme: 'Double attaque de la dame',
+        caution:
+          'Ce piège gagne un pion et le droit de roquer, pas une pièce. Les Blancs ont une meilleure défense que celle montrée ici — c’est un gain modeste, mais réel.',
+        e1: {
+          say: 'L’écossaise ouvre le centre très tôt. Ça donne du jeu aux deux camps, et ça laisse une case fragile : f2.',
+        },
+        e2: {
+          say: 'Réponds au centre.',
+          instruction: 'Joue e5',
+        },
+        e3: {
+          say: 'Défends ton pion.',
+          instruction: 'Joue le cavalier en c6',
+        },
+        e4: {
+          say: 'Ils poussent d4, c’est l’écossaise. Prends.',
+          instruction: 'Prends en d4 avec le pion e',
+        },
+        e5: {
+          say: 'Ils reprennent avec le cavalier. Fou c5 : il sort en visant f2, la case la plus faible de leur camp.',
+          instruction: 'Joue le fou en c5',
+        },
+        e6: {
+          say: 'Et voilà la faute : ils échangent en c6. Ça a l’air anodin — ça abandonne la défense de f2 et ça laisse un cavalier sans protection.',
+        },
+        e7: {
+          say: 'Dame f6. Elle attaque f2 et le cavalier c6 d’un seul coup.',
+          instruction: 'Joue la dame en f6',
+          hint: 'La dame sort en f6 : regarde la colonne f et la sixième rangée.',
+        },
+        e8: {
+          say: 'Ils défendent f2 avec la dame en d2. Le cavalier c6, lui, n’est plus défendu du tout — mais il y a mieux que de le prendre.',
+        },
+        e9: {
+          say: 'Prends f2 avec échec. Tu donnes ta dame, et tu sais ce que tu récupères.',
+          instruction: 'Prends en f2 avec la dame, avec échec',
+          hint: 'Compte les pièces qui vont tomber avant de juger le coup.',
+        },
+        e10: {
+          say: 'Ils reprennent. Fou f2, échec à nouveau — cette fois tu prends leur dame.',
+          instruction: 'Prends en f2 avec le fou',
+        },
+        e11: {
+          say: 'Le roi reprend. Et maintenant tu récupères le cavalier en c6.',
+          instruction: 'Prends en c6 avec le pion d',
+        },
+        e12: {
+          say: 'Fais le compte : un pion de plus, leur roi au milieu et privé du roque définitivement. C’est peu et c’est beaucoup — à ce niveau, un roi qui ne roque pas perd souvent tout seul.',
+        },
+        e13: {
+          say: 'Tu joues les Blancs, cavalier en d4, fou noir en c5. L’échange en c6 donne un pion. Développe plutôt.',
+        },
+        e14: {
+          say: 'Fou e3. Tu défends ton cavalier d4, tu renforces f2 indirectement, et tu proposes l’échange du fou qui te gêne.',
+          instruction: 'Joue le fou en e3',
+          hint: 'Développe le fou dame en soutenant le cavalier d4.',
+        },
+        e15: {
+          say: 'La dame noire arrive en f6, mais f2 est tenu et rien ne pend. Retiens : un échange qui « simplifie » est souvent un cadeau de temps — vérifie ce qu’il cesse de défendre.',
         },
       },
     },

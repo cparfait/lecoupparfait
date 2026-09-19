@@ -22,13 +22,23 @@
  * c'est délibéré : une suite de coups légaux est vérifiable par
  * `check:lessons`, une FEN recopiée à la main ne l'est pas.
  *
- * ── Pourquoi ces cinq-là ────────────────────────────────────────────────────
+ * ── Pourquoi ceux-là ────────────────────────────────────────────────────────
  *
- * Ils couvrent les cinq mécanismes qu'on retrouve ensuite partout : le
- * sacrifice sur f7, la fausse prise d'un pion « cloué », le mat étouffé au
- * milieu du développement, la sous-promotion, et la pièce enfermée par des
- * pions. Chacun vient d'une ouverture qui se joue réellement — personne
- * n'apprend un piège dans une ligne qu'il ne verra jamais.
+ * Ils couvrent les mécanismes qu'on retrouve ensuite partout : le sacrifice
+ * sur f7, la fausse prise d'un pion « cloué », le mat étouffé au milieu du
+ * développement, la sous-promotion, la pièce enfermée par des pions, le
+ * défenseur surchargé, l'échec à la découverte, le mat de la dame soutenue.
+ * Chacun vient d'une ouverture qui se joue réellement — personne n'apprend un
+ * piège dans une ligne qu'il ne verra jamais —, et le chapitre en couvre une
+ * par ouverture du répertoire, sicilienne et française comprises.
+ *
+ * ── Ce que la fiche promet ──────────────────────────────────────────────────
+ *
+ * Chaque leçon porte un `trap` (voir `types.ts`) : l'ouverture, le camp, le
+ * coût quand l'adversaire ne mord pas, le motif, et la mise en garde. C'est
+ * `check-pieges.mjs` qui refuse qu'une de ces promesses contredise la leçon —
+ * un camp annoncé qui n'est pas celui qu'on joue s'apprend par cœur avant
+ * qu'on ne s'en aperçoive.
  */
 
 import type { Chapter } from './types.ts'
@@ -51,6 +61,13 @@ export const piegesChapter: Chapter = {
       level: 'beginner',
       minutes: 7,
       icon: '🍖',
+      trap: {
+        opening: 'lecons.pieges.piege-fegatello.opening',
+        color: 'w',
+        risk: 'lecons.pieges.piege-fegatello.risk',
+        theme: 'lecons.pieges.piege-fegatello.theme',
+        caution: 'lecons.pieges.piege-fegatello.caution',
+      },
       steps: [
         {
           kind: 'show',
@@ -196,6 +213,13 @@ export const piegesChapter: Chapter = {
       level: 'intermediate',
       minutes: 7,
       icon: '🐘',
+      trap: {
+        opening: 'lecons.pieges.piege-elephant.opening',
+        color: 'b',
+        risk: 'lecons.pieges.piege-elephant.risk',
+        theme: 'lecons.pieges.piege-elephant.theme',
+        caution: 'lecons.pieges.piege-elephant.caution',
+      },
       steps: [
         {
           kind: 'show',
@@ -308,6 +332,13 @@ export const piegesChapter: Chapter = {
       level: 'intermediate',
       minutes: 6,
       icon: '😵',
+      trap: {
+        opening: 'lecons.pieges.piege-kieninger.opening',
+        color: 'b',
+        risk: 'lecons.pieges.piege-kieninger.risk',
+        theme: 'lecons.pieges.piege-kieninger.theme',
+        caution: 'lecons.pieges.piege-kieninger.caution',
+      },
       steps: [
         {
           kind: 'show',
@@ -405,6 +436,13 @@ export const piegesChapter: Chapter = {
       level: 'advanced',
       minutes: 6,
       icon: '♘',
+      trap: {
+        opening: 'lecons.pieges.piege-lasker.opening',
+        color: 'b',
+        risk: 'lecons.pieges.piege-lasker.risk',
+        theme: 'lecons.pieges.piege-lasker.theme',
+        caution: 'lecons.pieges.piege-lasker.caution',
+      },
       steps: [
         {
           kind: 'show',
@@ -507,6 +545,13 @@ export const piegesChapter: Chapter = {
       level: 'intermediate',
       minutes: 7,
       icon: '🛶',
+      trap: {
+        opening: 'lecons.pieges.piege-arche-de-noe.opening',
+        color: 'b',
+        risk: 'lecons.pieges.piege-arche-de-noe.risk',
+        theme: 'lecons.pieges.piege-arche-de-noe.theme',
+        caution: 'lecons.pieges.piege-arche-de-noe.caution',
+      },
       steps: [
         {
           kind: 'show',
@@ -621,6 +666,1195 @@ export const piegesChapter: Chapter = {
           orientation: 'b',
           say: 'lecons.pieges.piege-arche-de-noe.e15.say',
           highlight: ['b3', 'c4', 'b5'],
+        },
+      ],
+    },
+
+    // ── Le piège Englund ────────────────────────────────────────────────────
+    //
+    // 1.d4 e5 2.dxe5 Cc6 3.Cf3 De7 4.Ff4 Db4+ 5.Fd2 Dxb2 6.Fc3 Fb4 7.Dd2
+    // Fxc3 8.Dxc3 Dc1 mat. Le mat est possible parce que le cavalier b1 n'a
+    // pas bougé : il bouche la première rangée devant sa propre tour.
+    {
+      id: 'piege-englund',
+      title: 'lecons.pieges.piege-englund.title',
+      summary: 'lecons.pieges.piege-englund.summary',
+      level: 'intermediate',
+      minutes: 7,
+      icon: '🪤',
+      trap: {
+        opening: 'lecons.pieges.piege-englund.opening',
+        color: 'b',
+        risk: 'lecons.pieges.piege-englund.risk',
+        theme: 'lecons.pieges.piege-englund.theme',
+        caution: 'lecons.pieges.piege-englund.caution',
+      },
+      steps: [
+        {
+          kind: 'show',
+          fen: START,
+          orientation: 'b',
+          say: 'lecons.pieges.piege-englund.e1.say',
+          reply: 'd4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-englund.e2.say',
+          instruction: 'lecons.pieges.piege-englund.e2.instruction',
+          answers: ['e5'],
+          reply: 'dxe5',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-englund.e3.say',
+          instruction: 'lecons.pieges.piege-englund.e3.instruction',
+          answers: ['Nc6'],
+          arrows: [{ from: 'c6', to: 'e5', color: 'red' }],
+          reply: 'Nf3',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-englund.e4.say',
+          instruction: 'lecons.pieges.piege-englund.e4.instruction',
+          answers: ['Qe7'],
+          arrows: [{ from: 'e7', to: 'e5', color: 'red' }],
+          reply: 'Bf4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-englund.e5.say',
+          instruction: 'lecons.pieges.piege-englund.e5.instruction',
+          answers: ['Qb4+'],
+          arrows: [
+            { from: 'b4', to: 'f4', color: 'red' },
+            { from: 'b4', to: 'b2', color: 'red' },
+            { from: 'b4', to: 'e1', color: 'orange' },
+          ],
+          reply: 'Bd2',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-englund.e6.say',
+          instruction: 'lecons.pieges.piege-englund.e6.instruction',
+          answers: ['Qxb2'],
+          reply: 'Bc3',
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-englund.e7.say',
+          highlight: ['c3', 'b2'],
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-englund.e8.say',
+          instruction: 'lecons.pieges.piege-englund.e8.instruction',
+          answers: ['Bb4'],
+          arrows: [{ from: 'b4', to: 'c3', color: 'red' }],
+          hint: 'lecons.pieges.piege-englund.e8.hint',
+          reply: 'Qd2',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-englund.e9.say',
+          instruction: 'lecons.pieges.piege-englund.e9.instruction',
+          answers: ['Bxc3'],
+          reply: 'Qxc3',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-englund.e10.say',
+          instruction: 'lecons.pieges.piege-englund.e10.instruction',
+          answers: ['Qc1#'],
+          hint: 'lecons.pieges.piege-englund.e10.hint',
+          arrows: [{ from: 'c1', to: 'e1', color: 'red' }],
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-englund.e11.say',
+          highlight: ['b1', 'a1', 'c1'],
+        },
+        // ── On passe du côté qui subit ────────────────────────────────────
+        {
+          kind: 'show',
+          fen: 'r1b1kbnr/pppp1ppp/2n5/4P3/8/5N2/PqPBPPPP/RN1QKB1R w KQkq - 1 6',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-englund.e12.say',
+          highlight: ['b2'],
+        },
+        {
+          kind: 'play',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-englund.e13.say',
+          instruction: 'lecons.pieges.piege-englund.e13.instruction',
+          answers: ['Nc3'],
+          hint: 'lecons.pieges.piege-englund.e13.hint',
+          reply: 'Bb4',
+        },
+        {
+          kind: 'show',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-englund.e14.say',
+          highlight: ['c3', 'a1'],
+        },
+      ],
+    },
+
+    // ── La canne à pêche ────────────────────────────────────────────────────
+    //
+    // 1.e4 e5 2.Cf3 Cc6 3.Fb5 Cf6 4.O-O Cg4 5.h3 h5 6.hxg4 hxg4 7.Ce1 Dh4
+    // 8.f3 g3 9.Cd3 Dh2 mat. Le cavalier g4 est l'appât : le prendre ouvre la
+    // colonne h sur un roi qui vient d'y roquer.
+    {
+      id: 'piege-canne-a-peche',
+      title: 'lecons.pieges.piege-canne-a-peche.title',
+      summary: 'lecons.pieges.piege-canne-a-peche.summary',
+      level: 'intermediate',
+      minutes: 7,
+      icon: '🎣',
+      trap: {
+        opening: 'lecons.pieges.piege-canne-a-peche.opening',
+        color: 'b',
+        risk: 'lecons.pieges.piege-canne-a-peche.risk',
+        theme: 'lecons.pieges.piege-canne-a-peche.theme',
+        caution: 'lecons.pieges.piege-canne-a-peche.caution',
+      },
+      steps: [
+        {
+          kind: 'show',
+          fen: START,
+          orientation: 'b',
+          say: 'lecons.pieges.piege-canne-a-peche.e1.say',
+          reply: 'e4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-canne-a-peche.e2.say',
+          instruction: 'lecons.pieges.piege-canne-a-peche.e2.instruction',
+          answers: ['e5'],
+          reply: 'Nf3',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-canne-a-peche.e3.say',
+          instruction: 'lecons.pieges.piege-canne-a-peche.e3.instruction',
+          answers: ['Nc6'],
+          reply: 'Bb5',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-canne-a-peche.e4.say',
+          instruction: 'lecons.pieges.piege-canne-a-peche.e4.instruction',
+          answers: ['Nf6'],
+          reply: 'O-O',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-canne-a-peche.e5.say',
+          instruction: 'lecons.pieges.piege-canne-a-peche.e5.instruction',
+          answers: ['Ng4'],
+          arrows: [{ from: 'g4', to: 'h2', color: 'orange' }],
+          reply: 'h3',
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-canne-a-peche.e6.say',
+          highlight: ['g4', 'h3'],
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-canne-a-peche.e7.say',
+          instruction: 'lecons.pieges.piege-canne-a-peche.e7.instruction',
+          answers: ['h5'],
+          hint: 'lecons.pieges.piege-canne-a-peche.e7.hint',
+          reply: 'hxg4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-canne-a-peche.e8.say',
+          instruction: 'lecons.pieges.piege-canne-a-peche.e8.instruction',
+          answers: ['hxg4'],
+          arrows: [{ from: 'h8', to: 'h1', color: 'red' }],
+          reply: 'Ne1',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-canne-a-peche.e9.say',
+          instruction: 'lecons.pieges.piege-canne-a-peche.e9.instruction',
+          answers: ['Qh4'],
+          reply: 'f3',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-canne-a-peche.e10.say',
+          instruction: 'lecons.pieges.piege-canne-a-peche.e10.instruction',
+          answers: ['g3'],
+          hint: 'lecons.pieges.piege-canne-a-peche.e10.hint',
+          arrows: [{ from: 'g3', to: 'h2', color: 'red' }],
+          reply: 'Nd3',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-canne-a-peche.e11.say',
+          instruction: 'lecons.pieges.piege-canne-a-peche.e11.instruction',
+          answers: ['Qh2#'],
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-canne-a-peche.e12.say',
+          highlight: ['h2', 'g3'],
+        },
+        // ── Côté blanc : ne pas mordre ────────────────────────────────────
+        {
+          kind: 'show',
+          fen: 'r1bqkb1r/pppp1pp1/2n5/1B2p2p/4P1n1/5N1P/PPPP1PP1/RNBQ1RK1 w kq - 0 6',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-canne-a-peche.e13.say',
+          highlight: ['g4', 'h5'],
+        },
+        {
+          kind: 'play',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-canne-a-peche.e14.say',
+          instruction: 'lecons.pieges.piege-canne-a-peche.e14.instruction',
+          answers: ['d4'],
+          hint: 'lecons.pieges.piege-canne-a-peche.e14.hint',
+          reply: 'Nxf2',
+        },
+        {
+          kind: 'show',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-canne-a-peche.e15.say',
+          highlight: ['f2'],
+        },
+      ],
+    },
+
+    // ── La défense Damiano ──────────────────────────────────────────────────
+    //
+    // 1.e4 e5 2.Cf3 f6 3.Cxe5 fxe5 4.Dh5+ g6 5.Dxe5+ De7 6.Dxh8. Le cavalier
+    // donné revient en tour parce que f6 a ôté au roi sa seule case de fuite.
+    {
+      id: 'piege-damiano',
+      title: 'lecons.pieges.piege-damiano.title',
+      summary: 'lecons.pieges.piege-damiano.summary',
+      level: 'beginner',
+      minutes: 6,
+      icon: '🕳️',
+      trap: {
+        opening: 'lecons.pieges.piege-damiano.opening',
+        color: 'w',
+        risk: 'lecons.pieges.piege-damiano.risk',
+        theme: 'lecons.pieges.piege-damiano.theme',
+        caution: 'lecons.pieges.piege-damiano.caution',
+      },
+      steps: [
+        {
+          kind: 'show',
+          fen: START,
+          say: 'lecons.pieges.piege-damiano.e1.say',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-damiano.e2.say',
+          instruction: 'lecons.pieges.piege-damiano.e2.instruction',
+          answers: ['e4'],
+          reply: 'e5',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-damiano.e3.say',
+          instruction: 'lecons.pieges.piege-damiano.e3.instruction',
+          answers: ['Nf3'],
+          reply: 'f6',
+        },
+        {
+          kind: 'show',
+          say: 'lecons.pieges.piege-damiano.e4.say',
+          highlight: ['f6', 'e8', 'h5'],
+          arrows: [{ from: 'h5', to: 'e8', color: 'orange' }],
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-damiano.e5.say',
+          instruction: 'lecons.pieges.piege-damiano.e5.instruction',
+          answers: ['Nxe5'],
+          hint: 'lecons.pieges.piege-damiano.e5.hint',
+          reply: 'fxe5',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-damiano.e6.say',
+          instruction: 'lecons.pieges.piege-damiano.e6.instruction',
+          answers: ['Qh5+'],
+          reply: 'g6',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-damiano.e7.say',
+          instruction: 'lecons.pieges.piege-damiano.e7.instruction',
+          answers: ['Qxe5+'],
+          arrows: [{ from: 'e5', to: 'h8', color: 'red' }],
+          reply: 'Qe7',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-damiano.e8.say',
+          instruction: 'lecons.pieges.piege-damiano.e8.instruction',
+          answers: ['Qxh8'],
+          hint: 'lecons.pieges.piege-damiano.e8.hint',
+        },
+        {
+          kind: 'show',
+          say: 'lecons.pieges.piege-damiano.e9.say',
+          highlight: ['h8'],
+        },
+        // ── Côté noir : le coup qu'il fallait jouer ───────────────────────
+        {
+          kind: 'show',
+          fen: 'rnbqkbnr/pppp2pp/5p2/4N3/4P3/8/PPPP1PPP/RNBQKB1R b KQkq - 0 3',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-damiano.e10.say',
+          highlight: ['e5'],
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-damiano.e11.say',
+          instruction: 'lecons.pieges.piege-damiano.e11.instruction',
+          answers: ['Qe7'],
+          hint: 'lecons.pieges.piege-damiano.e11.hint',
+          reply: 'Nf3',
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-damiano.e12.say',
+          highlight: ['e7', 'e4'],
+        },
+      ],
+    },
+
+    // ── Le piège de la Petroff ──────────────────────────────────────────────
+    //
+    // 1.e4 e5 2.Cf3 Cf6 3.Cxe5 Cxe4 4.De2 Cf6 5.Cc6+ : échec à la découverte
+    // de la dame e2, et le cavalier attaque la dame d8 en arrivant.
+    {
+      id: 'piege-petroff',
+      title: 'lecons.pieges.piege-petroff.title',
+      summary: 'lecons.pieges.piege-petroff.summary',
+      level: 'intermediate',
+      minutes: 6,
+      icon: '🔭',
+      trap: {
+        opening: 'lecons.pieges.piege-petroff.opening',
+        color: 'w',
+        risk: 'lecons.pieges.piege-petroff.risk',
+        theme: 'lecons.pieges.piege-petroff.theme',
+        caution: 'lecons.pieges.piege-petroff.caution',
+      },
+      steps: [
+        {
+          kind: 'show',
+          fen: START,
+          say: 'lecons.pieges.piege-petroff.e1.say',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-petroff.e2.say',
+          instruction: 'lecons.pieges.piege-petroff.e2.instruction',
+          answers: ['e4'],
+          reply: 'e5',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-petroff.e3.say',
+          instruction: 'lecons.pieges.piege-petroff.e3.instruction',
+          answers: ['Nf3'],
+          reply: 'Nf6',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-petroff.e4.say',
+          instruction: 'lecons.pieges.piege-petroff.e4.instruction',
+          answers: ['Nxe5'],
+          reply: 'Nxe4',
+        },
+        {
+          kind: 'show',
+          say: 'lecons.pieges.piege-petroff.e5.say',
+          highlight: ['e4', 'e8'],
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-petroff.e6.say',
+          instruction: 'lecons.pieges.piege-petroff.e6.instruction',
+          answers: ['Qe2'],
+          arrows: [{ from: 'e2', to: 'e8', color: 'red' }],
+          hint: 'lecons.pieges.piege-petroff.e6.hint',
+          reply: 'Nf6',
+        },
+        {
+          kind: 'show',
+          say: 'lecons.pieges.piege-petroff.e7.say',
+          highlight: ['e5', 'c6', 'd8'],
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-petroff.e8.say',
+          instruction: 'lecons.pieges.piege-petroff.e8.instruction',
+          answers: ['Nc6+'],
+          hint: 'lecons.pieges.piege-petroff.e8.hint',
+          arrows: [
+            { from: 'c6', to: 'd8', color: 'red' },
+            { from: 'e2', to: 'e8', color: 'orange' },
+          ],
+          reply: 'Be7',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-petroff.e9.say',
+          instruction: 'lecons.pieges.piege-petroff.e9.instruction',
+          answers: ['Nxd8'],
+        },
+        {
+          kind: 'show',
+          say: 'lecons.pieges.piege-petroff.e10.say',
+          highlight: ['d8'],
+        },
+        // ── Côté noir : le coup intermédiaire qui sauve ───────────────────
+        {
+          kind: 'show',
+          fen: 'rnbqkb1r/pppp1ppp/8/4N3/4n3/8/PPPPQPPP/RNB1KB1R b KQkq - 3 4',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-petroff.e11.say',
+          highlight: ['e2', 'e8'],
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-petroff.e12.say',
+          instruction: 'lecons.pieges.piege-petroff.e12.instruction',
+          answers: ['Qe7'],
+          hint: 'lecons.pieges.piege-petroff.e12.hint',
+          reply: 'Nf3',
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-petroff.e13.say',
+          highlight: ['e7', 'e4'],
+        },
+      ],
+    },
+
+    // ── Le piège Mortimer ───────────────────────────────────────────────────
+    //
+    // 1.e4 e5 2.Cf3 Cc6 3.Fb5 Cf6 4.d3 Ce7 5.Cxe5 c6 6.Fc4 Da5+ 7.Cc3 Dxe5.
+    // Le cavalier recule volontairement pour offrir e5 ; la prise est punie
+    // par un échec en a5 que d3 a lui-même rendu possible.
+    {
+      id: 'piege-mortimer',
+      title: 'lecons.pieges.piege-mortimer.title',
+      summary: 'lecons.pieges.piege-mortimer.summary',
+      level: 'advanced',
+      minutes: 7,
+      icon: '🎭',
+      trap: {
+        opening: 'lecons.pieges.piege-mortimer.opening',
+        color: 'b',
+        risk: 'lecons.pieges.piege-mortimer.risk',
+        theme: 'lecons.pieges.piege-mortimer.theme',
+        caution: 'lecons.pieges.piege-mortimer.caution',
+      },
+      steps: [
+        {
+          kind: 'show',
+          fen: START,
+          orientation: 'b',
+          say: 'lecons.pieges.piege-mortimer.e1.say',
+          reply: 'e4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-mortimer.e2.say',
+          instruction: 'lecons.pieges.piege-mortimer.e2.instruction',
+          answers: ['e5'],
+          reply: 'Nf3',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-mortimer.e3.say',
+          instruction: 'lecons.pieges.piege-mortimer.e3.instruction',
+          answers: ['Nc6'],
+          reply: 'Bb5',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-mortimer.e4.say',
+          instruction: 'lecons.pieges.piege-mortimer.e4.instruction',
+          answers: ['Nf6'],
+          reply: 'd3',
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-mortimer.e5.say',
+          highlight: ['d3', 'd2'],
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-mortimer.e6.say',
+          instruction: 'lecons.pieges.piege-mortimer.e6.instruction',
+          answers: ['Ne7'],
+          hint: 'lecons.pieges.piege-mortimer.e6.hint',
+          arrows: [{ from: 'c6', to: 'e7', color: 'orange' }],
+          reply: 'Nxe5',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-mortimer.e7.say',
+          instruction: 'lecons.pieges.piege-mortimer.e7.instruction',
+          answers: ['c6'],
+          hint: 'lecons.pieges.piege-mortimer.e7.hint',
+          arrows: [{ from: 'c6', to: 'b5', color: 'red' }],
+          reply: 'Bc4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-mortimer.e8.say',
+          instruction: 'lecons.pieges.piege-mortimer.e8.instruction',
+          answers: ['Qa5+'],
+          arrows: [
+            { from: 'a5', to: 'e1', color: 'orange' },
+            { from: 'a5', to: 'e5', color: 'red' },
+          ],
+          reply: 'Nc3',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-mortimer.e9.say',
+          instruction: 'lecons.pieges.piege-mortimer.e9.instruction',
+          answers: ['Qxe5'],
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-mortimer.e10.say',
+          highlight: ['e5'],
+        },
+        // ── Côté blanc : laisser le pion ──────────────────────────────────
+        {
+          kind: 'show',
+          fen: 'r1bqkb1r/ppppnppp/5n2/1B2p3/4P3/3P1N2/PPP2PPP/RNBQK2R w KQkq - 4 5',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-mortimer.e11.say',
+          highlight: ['e5', 'e7'],
+        },
+        {
+          kind: 'play',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-mortimer.e12.say',
+          instruction: 'lecons.pieges.piege-mortimer.e12.instruction',
+          answers: ['O-O'],
+          hint: 'lecons.pieges.piege-mortimer.e12.hint',
+          reply: 'Ng6',
+        },
+        {
+          kind: 'show',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-mortimer.e13.say',
+          highlight: ['g1', 'e5'],
+        },
+      ],
+    },
+
+    // ── Le piège sibérien ───────────────────────────────────────────────────
+    //
+    // 1.e4 c5 2.d4 cxd4 3.c3 dxc3 4.Cxc3 Cc6 5.Cf3 e6 6.Fc4 Dc7 7.O-O Cf6
+    // 8.De2 Cg4 9.h3 Cd4 10.Cxd4 Dh2 mat. Le cavalier g4 défend h2 : c'est
+    // pour ça que la dame peut s'y poser sans être prise.
+    {
+      id: 'piege-siberien',
+      title: 'lecons.pieges.piege-siberien.title',
+      summary: 'lecons.pieges.piege-siberien.summary',
+      level: 'advanced',
+      minutes: 8,
+      icon: '❄️',
+      trap: {
+        opening: 'lecons.pieges.piege-siberien.opening',
+        color: 'b',
+        risk: 'lecons.pieges.piege-siberien.risk',
+        theme: 'lecons.pieges.piege-siberien.theme',
+        caution: 'lecons.pieges.piege-siberien.caution',
+      },
+      steps: [
+        {
+          kind: 'show',
+          fen: START,
+          orientation: 'b',
+          say: 'lecons.pieges.piege-siberien.e1.say',
+          reply: 'e4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-siberien.e2.say',
+          instruction: 'lecons.pieges.piege-siberien.e2.instruction',
+          answers: ['c5'],
+          reply: 'd4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-siberien.e3.say',
+          instruction: 'lecons.pieges.piege-siberien.e3.instruction',
+          answers: ['cxd4'],
+          reply: 'c3',
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-siberien.e4.say',
+          highlight: ['c3', 'd4'],
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-siberien.e5.say',
+          instruction: 'lecons.pieges.piege-siberien.e5.instruction',
+          answers: ['dxc3'],
+          reply: 'Nxc3',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-siberien.e6.say',
+          instruction: 'lecons.pieges.piege-siberien.e6.instruction',
+          answers: ['Nc6'],
+          reply: 'Nf3',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-siberien.e7.say',
+          instruction: 'lecons.pieges.piege-siberien.e7.instruction',
+          answers: ['e6'],
+          reply: 'Bc4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-siberien.e8.say',
+          instruction: 'lecons.pieges.piege-siberien.e8.instruction',
+          answers: ['Qc7'],
+          hint: 'lecons.pieges.piege-siberien.e8.hint',
+          arrows: [{ from: 'c7', to: 'h2', color: 'orange' }],
+          reply: 'O-O',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-siberien.e9.say',
+          instruction: 'lecons.pieges.piege-siberien.e9.instruction',
+          answers: ['Nf6'],
+          reply: 'Qe2',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-siberien.e10.say',
+          instruction: 'lecons.pieges.piege-siberien.e10.instruction',
+          answers: ['Ng4'],
+          hint: 'lecons.pieges.piege-siberien.e10.hint',
+          arrows: [{ from: 'g4', to: 'h2', color: 'green' }],
+          reply: 'h3',
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-siberien.e11.say',
+          highlight: ['g4', 'h3', 'h2'],
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-siberien.e12.say',
+          instruction: 'lecons.pieges.piege-siberien.e12.instruction',
+          answers: ['Nd4'],
+          hint: 'lecons.pieges.piege-siberien.e12.hint',
+          arrows: [{ from: 'd4', to: 'e2', color: 'red' }],
+          reply: 'Nxd4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-siberien.e13.say',
+          instruction: 'lecons.pieges.piege-siberien.e13.instruction',
+          answers: ['Qh2#'],
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-siberien.e14.say',
+          highlight: ['h2', 'g4'],
+        },
+        // ── Côté blanc : fermer la diagonale ──────────────────────────────
+        {
+          kind: 'show',
+          fen: 'r1b1kb1r/ppqp1ppp/2n1p3/8/2B1P1n1/2N2N2/PP2QPPP/R1B2RK1 w kq - 5 9',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-siberien.e15.say',
+          arrows: [{ from: 'c7', to: 'h2', color: 'red' }],
+        },
+        {
+          kind: 'play',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-siberien.e16.say',
+          instruction: 'lecons.pieges.piege-siberien.e16.instruction',
+          answers: ['g3'],
+          hint: 'lecons.pieges.piege-siberien.e16.hint',
+          reply: 'Nge5',
+        },
+        {
+          kind: 'show',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-siberien.e17.say',
+          highlight: ['g3'],
+        },
+      ],
+    },
+
+    // ── Le piège de la française d'avance ───────────────────────────────────
+    //
+    // 1.e4 e6 2.d4 d5 3.e5 c5 4.c3 Cc6 5.Cf3 Db6 6.Fd3 cxd4 7.cxd4 Cxd4
+    // 8.Cxd4 Dxd4. Le fou en d3 quitte la défense de d4 : la chaîne de pions
+    // tombe d'un coup.
+    {
+      id: 'piege-francaise-avance',
+      title: 'lecons.pieges.piege-francaise-avance.title',
+      summary: 'lecons.pieges.piege-francaise-avance.summary',
+      level: 'intermediate',
+      minutes: 7,
+      icon: '🥖',
+      trap: {
+        opening: 'lecons.pieges.piege-francaise-avance.opening',
+        color: 'b',
+        risk: 'lecons.pieges.piege-francaise-avance.risk',
+        theme: 'lecons.pieges.piege-francaise-avance.theme',
+        caution: 'lecons.pieges.piege-francaise-avance.caution',
+      },
+      steps: [
+        {
+          kind: 'show',
+          fen: START,
+          orientation: 'b',
+          say: 'lecons.pieges.piege-francaise-avance.e1.say',
+          reply: 'e4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-francaise-avance.e2.say',
+          instruction: 'lecons.pieges.piege-francaise-avance.e2.instruction',
+          answers: ['e6'],
+          reply: 'd4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-francaise-avance.e3.say',
+          instruction: 'lecons.pieges.piege-francaise-avance.e3.instruction',
+          answers: ['d5'],
+          reply: 'e5',
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-francaise-avance.e4.say',
+          highlight: ['d4', 'e5'],
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-francaise-avance.e5.say',
+          instruction: 'lecons.pieges.piege-francaise-avance.e5.instruction',
+          answers: ['c5'],
+          arrows: [{ from: 'c5', to: 'd4', color: 'red' }],
+          reply: 'c3',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-francaise-avance.e6.say',
+          instruction: 'lecons.pieges.piege-francaise-avance.e6.instruction',
+          answers: ['Nc6'],
+          arrows: [{ from: 'c6', to: 'd4', color: 'red' }],
+          reply: 'Nf3',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-francaise-avance.e7.say',
+          instruction: 'lecons.pieges.piege-francaise-avance.e7.instruction',
+          answers: ['Qb6'],
+          hint: 'lecons.pieges.piege-francaise-avance.e7.hint',
+          arrows: [{ from: 'b6', to: 'd4', color: 'red' }],
+          reply: 'Bd3',
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-francaise-avance.e8.say',
+          highlight: ['d3', 'd4'],
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-francaise-avance.e9.say',
+          instruction: 'lecons.pieges.piege-francaise-avance.e9.instruction',
+          answers: ['cxd4'],
+          reply: 'cxd4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-francaise-avance.e10.say',
+          instruction: 'lecons.pieges.piege-francaise-avance.e10.instruction',
+          answers: ['Nxd4'],
+          hint: 'lecons.pieges.piege-francaise-avance.e10.hint',
+          reply: 'Nxd4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-francaise-avance.e11.say',
+          instruction: 'lecons.pieges.piege-francaise-avance.e11.instruction',
+          answers: ['Qxd4'],
+          arrows: [{ from: 'd4', to: 'd3', color: 'red' }],
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-francaise-avance.e12.say',
+          highlight: ['d4', 'd3'],
+        },
+        // ── Côté blanc : garder d4 défendu ────────────────────────────────
+        {
+          kind: 'show',
+          fen: 'r1b1kbnr/pp3ppp/1qn1p3/2ppP3/3P4/2P2N2/PP3PPP/RNBQKB1R w KQkq - 1 6',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-francaise-avance.e13.say',
+          highlight: ['d4'],
+        },
+        {
+          kind: 'play',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-francaise-avance.e14.say',
+          instruction: 'lecons.pieges.piege-francaise-avance.e14.instruction',
+          answers: ['Be2'],
+          hint: 'lecons.pieges.piege-francaise-avance.e14.hint',
+          reply: 'cxd4',
+        },
+        {
+          kind: 'show',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-francaise-avance.e15.say',
+          highlight: ['e2', 'd4'],
+        },
+      ],
+    },
+
+    // ── Le piège du gambit dame accepté ─────────────────────────────────────
+    //
+    // 1.d4 d5 2.c4 dxc4 3.e3 b5 4.a4 c6 5.axb5 cxb5 6.Df3 Cc6 7.Dxc6+ Fd7
+    // 8.Dxa8. Vouloir garder le pion c4 avec b5 ouvre la grande diagonale
+    // jusqu'à la tour a8.
+    {
+      id: 'piege-gambit-dame-accepte',
+      title: 'lecons.pieges.piege-gambit-dame-accepte.title',
+      summary: 'lecons.pieges.piege-gambit-dame-accepte.summary',
+      level: 'intermediate',
+      minutes: 6,
+      icon: '💰',
+      trap: {
+        opening: 'lecons.pieges.piege-gambit-dame-accepte.opening',
+        color: 'w',
+        risk: 'lecons.pieges.piege-gambit-dame-accepte.risk',
+        theme: 'lecons.pieges.piege-gambit-dame-accepte.theme',
+        caution: 'lecons.pieges.piege-gambit-dame-accepte.caution',
+      },
+      steps: [
+        {
+          kind: 'show',
+          fen: START,
+          say: 'lecons.pieges.piege-gambit-dame-accepte.e1.say',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-gambit-dame-accepte.e2.say',
+          instruction: 'lecons.pieges.piege-gambit-dame-accepte.e2.instruction',
+          answers: ['d4'],
+          reply: 'd5',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-gambit-dame-accepte.e3.say',
+          instruction: 'lecons.pieges.piege-gambit-dame-accepte.e3.instruction',
+          answers: ['c4'],
+          reply: 'dxc4',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-gambit-dame-accepte.e4.say',
+          instruction: 'lecons.pieges.piege-gambit-dame-accepte.e4.instruction',
+          answers: ['e3'],
+          hint: 'lecons.pieges.piege-gambit-dame-accepte.e4.hint',
+          reply: 'b5',
+        },
+        {
+          kind: 'show',
+          say: 'lecons.pieges.piege-gambit-dame-accepte.e5.say',
+          highlight: ['b5', 'c4', 'b7'],
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-gambit-dame-accepte.e6.say',
+          instruction: 'lecons.pieges.piege-gambit-dame-accepte.e6.instruction',
+          answers: ['a4'],
+          arrows: [{ from: 'a4', to: 'b5', color: 'red' }],
+          reply: 'c6',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-gambit-dame-accepte.e7.say',
+          instruction: 'lecons.pieges.piege-gambit-dame-accepte.e7.instruction',
+          answers: ['axb5'],
+          reply: 'cxb5',
+        },
+        {
+          kind: 'show',
+          say: 'lecons.pieges.piege-gambit-dame-accepte.e8.say',
+          highlight: ['c6', 'b7', 'a8'],
+          arrows: [{ from: 'f3', to: 'a8', color: 'orange' }],
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-gambit-dame-accepte.e9.say',
+          instruction: 'lecons.pieges.piege-gambit-dame-accepte.e9.instruction',
+          answers: ['Qf3'],
+          hint: 'lecons.pieges.piege-gambit-dame-accepte.e9.hint',
+          reply: 'Nc6',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-gambit-dame-accepte.e10.say',
+          instruction: 'lecons.pieges.piege-gambit-dame-accepte.e10.instruction',
+          answers: ['Qxc6+'],
+          reply: 'Bd7',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.pieges.piege-gambit-dame-accepte.e11.say',
+          instruction: 'lecons.pieges.piege-gambit-dame-accepte.e11.instruction',
+          answers: ['Qxa8'],
+        },
+        {
+          kind: 'show',
+          say: 'lecons.pieges.piege-gambit-dame-accepte.e12.say',
+          highlight: ['a8'],
+        },
+        // ── Côté noir : rendre le pion ───────────────────────────────────
+        {
+          kind: 'show',
+          fen: 'rnbqkbnr/p1p1pppp/8/1p6/2pP4/4P3/PP3PPP/RNBQKBNR w KQkq - 0 4',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-gambit-dame-accepte.e13.say',
+          highlight: ['b5', 'c4'],
+          reply: 'a4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-gambit-dame-accepte.e14.say',
+          instruction: 'lecons.pieges.piege-gambit-dame-accepte.e14.instruction',
+          answers: ['e6'],
+          hint: 'lecons.pieges.piege-gambit-dame-accepte.e14.hint',
+          reply: 'axb5',
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-gambit-dame-accepte.e15.say',
+          highlight: ['e6', 'a8'],
+        },
+      ],
+    },
+
+    // ── Le piège de l'écossaise ─────────────────────────────────────────────
+    //
+    // 1.e4 e5 2.Cf3 Cc6 3.d4 exd4 4.Cxd4 Fc5 5.Cxc6 Df6 : la dame attaque f2
+    // et le cavalier c6 en même temps. Le gain est un pion, pas une pièce —
+    // c'est un piège à petite monnaie, et la fiche le dit.
+    {
+      id: 'piege-ecossaise',
+      title: 'lecons.pieges.piege-ecossaise.title',
+      summary: 'lecons.pieges.piege-ecossaise.summary',
+      level: 'intermediate',
+      minutes: 6,
+      icon: '🏴',
+      trap: {
+        opening: 'lecons.pieges.piege-ecossaise.opening',
+        color: 'b',
+        risk: 'lecons.pieges.piege-ecossaise.risk',
+        theme: 'lecons.pieges.piege-ecossaise.theme',
+        caution: 'lecons.pieges.piege-ecossaise.caution',
+      },
+      steps: [
+        {
+          kind: 'show',
+          fen: START,
+          orientation: 'b',
+          say: 'lecons.pieges.piege-ecossaise.e1.say',
+          reply: 'e4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-ecossaise.e2.say',
+          instruction: 'lecons.pieges.piege-ecossaise.e2.instruction',
+          answers: ['e5'],
+          reply: 'Nf3',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-ecossaise.e3.say',
+          instruction: 'lecons.pieges.piege-ecossaise.e3.instruction',
+          answers: ['Nc6'],
+          reply: 'd4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-ecossaise.e4.say',
+          instruction: 'lecons.pieges.piege-ecossaise.e4.instruction',
+          answers: ['exd4'],
+          reply: 'Nxd4',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-ecossaise.e5.say',
+          instruction: 'lecons.pieges.piege-ecossaise.e5.instruction',
+          answers: ['Bc5'],
+          arrows: [{ from: 'c5', to: 'f2', color: 'orange' }],
+          reply: 'Nxc6',
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-ecossaise.e6.say',
+          highlight: ['c6', 'f2'],
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-ecossaise.e7.say',
+          instruction: 'lecons.pieges.piege-ecossaise.e7.instruction',
+          answers: ['Qf6'],
+          hint: 'lecons.pieges.piege-ecossaise.e7.hint',
+          arrows: [
+            { from: 'f6', to: 'f2', color: 'red' },
+            { from: 'f6', to: 'c6', color: 'red' },
+          ],
+          reply: 'Qd2',
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-ecossaise.e8.say',
+          highlight: ['d2', 'f2'],
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-ecossaise.e9.say',
+          instruction: 'lecons.pieges.piege-ecossaise.e9.instruction',
+          answers: ['Qxf2+'],
+          hint: 'lecons.pieges.piege-ecossaise.e9.hint',
+          reply: 'Qxf2',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-ecossaise.e10.say',
+          instruction: 'lecons.pieges.piege-ecossaise.e10.instruction',
+          answers: ['Bxf2+'],
+          reply: 'Kxf2',
+        },
+        {
+          kind: 'play',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-ecossaise.e11.say',
+          instruction: 'lecons.pieges.piege-ecossaise.e11.instruction',
+          answers: ['dxc6'],
+        },
+        {
+          kind: 'show',
+          orientation: 'b',
+          say: 'lecons.pieges.piege-ecossaise.e12.say',
+          highlight: ['c6', 'f2'],
+        },
+        // ── Côté blanc : ne pas prendre en c6 ─────────────────────────────
+        {
+          kind: 'show',
+          fen: 'r1bqk1nr/pppp1ppp/2n5/2b5/3NP3/8/PPP2PPP/RNBQKB1R w KQkq - 3 5',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-ecossaise.e13.say',
+          highlight: ['d4', 'c6'],
+        },
+        {
+          kind: 'play',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-ecossaise.e14.say',
+          instruction: 'lecons.pieges.piege-ecossaise.e14.instruction',
+          answers: ['Be3'],
+          hint: 'lecons.pieges.piege-ecossaise.e14.hint',
+          reply: 'Qf6',
+        },
+        {
+          kind: 'show',
+          orientation: 'w',
+          say: 'lecons.pieges.piege-ecossaise.e15.say',
+          highlight: ['e3', 'd4'],
         },
       ],
     },
