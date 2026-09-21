@@ -21,6 +21,7 @@ import type { CSSProperties } from 'react'
 import {
   ArrowRight,
   Check,
+  ChevronDown,
   Eye,
   Flame,
   Home,
@@ -1191,18 +1192,29 @@ export default function PuzzlesPage() {
               il se pilote au clavier, s'ouvre au doigt, et ne réclame rien. */}
           {!modeDefi && (
             <label className="hidden h-11 items-center justify-between gap-3 rounded-full border border-line-strong/70 bg-surface-strong pl-4 pr-3 text-sm shadow-[inset_0_1px_0_var(--inner-edge)] transition-colors hover:border-[color-mix(in_oklab,var(--accent)_40%,var(--border-strong))] lg:flex">
-              <span className="font-medium text-muted">{t('puzzles.themes')}</span>
-              <select
-                value={theme}
-                onChange={(event) => setTheme(event.target.value)}
-                className="min-w-0 cursor-pointer bg-transparent text-right font-semibold text-ink outline-none"
-              >
-                {THEMES.map((entree) => (
-                  <option key={entree} value={entree}>
-                    {t(`puzzles.themeNames.${entree}` as never)}
-                  </option>
-                ))}
-              </select>
+              <span className="shrink-0 font-medium text-muted">{t('puzzles.themes')}</span>
+              {/* Sans apparence native : le navigateur peignait son propre
+                  rectangle sombre derrière la valeur. Le chevron est à nous,
+                  posé par-dessus ; la liste qui s'ouvre reste celle du
+                  système, c'est elle qui se pilote au clavier. */}
+              <span className="relative min-w-0 flex-1">
+                <select
+                  value={theme}
+                  onChange={(event) => setTheme(event.target.value)}
+                  className="w-full min-w-0 cursor-pointer appearance-none bg-transparent pr-6 text-right font-semibold text-ink outline-none [&>option]:bg-[var(--flottant)] [&>option]:text-ink"
+                >
+                  {THEMES.map((entree) => (
+                    <option key={entree} value={entree}>
+                      {t(`puzzles.themeNames.${entree}` as never)}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={15}
+                  className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-muted"
+                  aria-hidden
+                />
+              </span>
             </label>
           )}
 

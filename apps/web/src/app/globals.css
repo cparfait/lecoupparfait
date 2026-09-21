@@ -112,6 +112,11 @@
   --accent-contrast: #ffffff;
   --accent-2: #00e5a8;
   --accent-3: #ff7a59;
+  /* L'accent quand il *écrit* — lien, pastille, « tout voir » — et non quand
+     il remplit un bouton. `#7c5cff` tient 4,1:1 sur une carte sombre : un
+     lien de quatorze pixels y devenait une tache violette. Éclairci d'un
+     cran et demi (8:1), même teinte ; le bouton primaire garde le sien. */
+  --accent-text: #b7a8ff;
 
   /* Le rouge des actions destructrices, et l'encre qu'on pose dessus.
 
@@ -239,6 +244,8 @@
   --accent-contrast: #ffffff;
   --accent-2: #00926e;
   --accent-3: #d4562f;
+  /* Sur fond clair, l'accent est déjà une encre : il écrit tel quel. */
+  --accent-text: var(--accent);
 
   /* Même rouge que le barème : il tient déjà 5,2:1 sous l'encre blanche. */
   --danger-strong: #cf2b18;
@@ -1011,7 +1018,7 @@ button.glass:hover {
 
 /* Le lien en texte : la couleur de l'action, et rien d'autre. */
 @utility lien {
-  color: var(--accent);
+  color: var(--accent-text);
   font-size: 14px;
   font-weight: 500;
   transition: color 120ms ease;
@@ -1025,6 +1032,19 @@ button.glass:hover {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/*
+ * `text-accent` écrit avec l'accent-texte, pas avec l'accent des fonds.
+ *
+ * Cent quarante-cinq emplois de `text-accent` dans l'application, tous pour
+ * du texte, et la moitié illisibles sur le thème sombre. Plutôt que de les
+ * renommer un par un — et d'oublier le suivant —, on redirige la classe :
+ * écrite hors de toute couche, cette règle passe devant l'utilitaire. Le fond
+ * des boutons (`bg-accent`) n'est pas concerné.
+ */
+.text-accent {
+  color: var(--accent-text);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1838,9 +1858,15 @@ button.glass:hover {
    sait rien du fond translucide sur lequel le champ est posé. Avec un fond en
    blanc à 4,5 %, la liste ouverte se retrouvait en texte clair sur clair,
    illisible. On impose donc une couleur **opaque** au champ et à ses options. */
-select {
-  background-color: var(--bg-elev);
-  color: var(--text);
+/* Dans `base`, et pas hors de toute couche : écrite nue, cette règle battait
+   `bg-transparent` — un champ qu'on voulait fondu dans sa pilule gardait un
+   rectangle sombre derrière sa valeur. Les options, elles, restent opaques :
+   le menu ouvert est dessiné par le système. */
+@layer base {
+  select {
+    background-color: var(--bg-elev);
+    color: var(--text);
+  }
 }
 
 select option,
