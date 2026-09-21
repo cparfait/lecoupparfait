@@ -70,14 +70,23 @@ const args = Object.fromEntries(
 const PARTIES = Number(args.parties ?? 20)
 const DU = Number(args.du ?? 1)
 const AU = Number(args.au ?? 8)
+/**
+ * Le moteur à mesurer : nom court, ou chemin vers un autre paquet.
+ *
+ * Une échelle mesurée seule ne dit pas si elle a dérivé, seulement où elle en
+ * est. Pointer une version antérieure — installée de côté, hors du dépôt —
+ * donne le second point, et c'est la différence entre « l'échelle est mal
+ * graduée » et « la montée de version l'a déréglée ».
+ */
+const MOTEUR = args.moteur ?? 'lite-single'
 /** Au-delà, on déclare nulle : une partie qui s'éternise ne départage rien. */
 const COUPS_MAX = 180
 
 // ── Le moteur ───────────────────────────────────────────────────────────────
 
 /** Un moteur WebAssembly piloté en UCI, comme celui du navigateur. */
-function ouvrirMoteur() {
-  const enfant = spawn(process.execPath, ['scripts/moteur-wasm.mjs', 'lite-single'], {
+function ouvrirMoteur(quel = MOTEUR) {
+  const enfant = spawn(process.execPath, ['scripts/moteur-wasm.mjs', quel], {
     stdio: ['pipe', 'pipe', 'inherit'],
   })
   const lecteur = createInterface({ input: enfant.stdout })
@@ -224,7 +233,8 @@ function ecartDepuisScore(score) {
 // ── Le déroulé ──────────────────────────────────────────────────────────────
 
 console.log('\n♟  Étalonnage des adversaires artificiels')
-console.log(`   moteur du navigateur · ${PARTIES} parties par couple · niveaux ${DU} à ${AU}\n`)
+console.log(`   moteur : ${MOTEUR}`)
+console.log(`   ${PARTIES} parties par couple · niveaux ${DU} à ${AU}\n`)
 
 const moteur = ouvrirMoteur()
 await moteur.demarrer()
