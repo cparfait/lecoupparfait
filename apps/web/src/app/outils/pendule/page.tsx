@@ -242,7 +242,7 @@ export default function PendulePage() {
             <ArrowLeft size={14} aria-hidden />
             {t('nav.tools')}
           </Link>
-          <h1 className="mt-3 font-display text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="mt-3 titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
             {t('nav.clock')}
           </h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">{t('clock.intro')}</p>

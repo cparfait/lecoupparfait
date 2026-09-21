@@ -93,7 +93,7 @@ export function AccountButton() {
         <Link
           href="/connexion"
           title={t('nav.signIn')}
-          className="cible-doigt inline-flex h-9 items-center justify-center whitespace-nowrap rounded-[var(--radius-sm)] bg-accent px-3 text-[14px] font-semibold text-[var(--accent-contrast)] transition-all hover:brightness-110 sm:px-3.5"
+          className="cible-doigt bouton-lumineux inline-flex h-9 items-center justify-center whitespace-nowrap rounded-full px-4 text-[14px] font-semibold sm:px-4.5"
         >
           {t('nav.signIn')}
         </Link>
@@ -126,7 +126,7 @@ export function AccountButton() {
       align="right"
       largeur="w-60"
       label={t('nav.account')}
-      boutonClassName="inline-flex h-9 items-center gap-2 rounded-[var(--radius-sm)] px-1.5 text-[14px] font-semibold text-ink transition-colors hover:bg-surface-hover sm:px-2 cible-doigt"
+      boutonClassName="inline-flex h-9 items-center gap-2 rounded-full px-1.5 text-[14px] font-semibold text-ink transition-colors hover:bg-surface-hover sm:px-2 cible-doigt"
       declencheur={(ouvert) => (
         <>
           <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-surface-strong text-sm">

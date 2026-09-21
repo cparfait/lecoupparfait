@@ -154,7 +154,7 @@ export default function LearnPage() {
 
   return (
     <div className="page">
-      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+      <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
         {t('learn.pageTitle')}
       </h1>
       {/* La consigne, en petit.
@@ -343,13 +343,17 @@ export default function LearnPage() {
                l'écran, et les chapitres retombaient dans la colonne
                indifférenciée que ce bloc devait justement casser.
 
-               `bg-bg-deep` est un fond *creusé*, plus sombre que la page en
-               thème sombre et plus gris qu'elle en thème clair — dans les deux
-               cas un vrai cran, et dans les deux cas les cartes de leçons
-               remontent au-dessus. Le liseré passe au fort. */
+               Le panneau a d'abord été *creusé* — `bg-bg-deep`, plus sombre
+               que la page. En thème sombre, c'était du noir posé sur du noir :
+               un panneau creusé dans une page déjà noire ne se voit pas plus
+               qu'un panneau invisible. Il est maintenant une carte de verre
+               comme les autres, posée *sur* la page, et les leçons remontent
+               d'un cran de plus au-dessus d'elle (`bg-surface-strong`). La
+               hiérarchie se lit dans le sens de la lumière : page, carte,
+               leçon. */
             <section
               key={chapter.id}
-              className="animate-slide-up overflow-hidden rounded-[var(--radius)] border border-line-strong bg-bg-deep p-3 sm:p-4"
+              className="glass animate-slide-up overflow-hidden p-3 sm:p-4"
               style={{ animationDelay: `${chapterIndex * 60}ms` }}
             >
               <header>
@@ -447,7 +451,7 @@ export default function LearnPage() {
                         'hover:-translate-y-0.5 hover:bg-surface-hover',
                         completed
                           ? 'border-[color-mix(in_oklab,var(--q-best)_35%,transparent)] bg-[color-mix(in_oklab,var(--q-best)_10%,transparent)]'
-                          : 'border-line bg-bg-elev',
+                          : 'border-line-strong/60 bg-surface-strong',
                       )}
                     >
                       <span className="mt-0.5 text-xl" aria-hidden>

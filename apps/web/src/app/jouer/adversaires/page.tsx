@@ -32,7 +32,7 @@ export default function GalerieAdversaires() {
 
   return (
     <div className="page">
-      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+      <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
         {t('play.opponentsTitle')}
       </h1>
       <p className="mt-3 max-w-2xl leading-relaxed text-muted max-lg:text-[14px]">

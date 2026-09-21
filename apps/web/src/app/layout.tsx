@@ -3,7 +3,7 @@ import { tDesMetadonnees } from '@/lib/i18n/metadonnees.ts'
 import { localeDuVisiteur } from '@/lib/i18n/serveur.ts'
 import { langue } from '@/lib/i18n/langues.ts'
 import type { Traducteur } from '@/lib/i18n/resoudre.ts'
-import { Inter, Space_Grotesk } from 'next/font/google'
+import { Bricolage_Grotesque, Geist } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/Providers.tsx'
 import { AppShell } from '@/components/layout/AppShell.tsx'
@@ -21,18 +21,33 @@ import { AppShell } from '@/components/layout/AppShell.tsx'
  * ligne », et il était faux : rien n'est mis en cache. Ne dépendre d'aucun
  * tiers n'est pas se passer du réseau. Voir le README, « Ce que ça ne fait pas ».
  */
-const inter = Inter({
+/*
+ * Deux voix, et pas les deux que tout le monde a.
+ *
+ * Inter et Space Grotesk étaient le couple par défaut de tout ce qui s'est
+ * construit entre 2020 et 2024 : la page se lisait comme un gabarit avant
+ * même qu'on lise un mot. Bricolage Grotesque porte les titres — une grotesque
+ * à axes optique et de chasse, qui se resserre et s'affirme à grande taille
+ * sans qu'on ait à choisir une graisse par écran. Geist porte le texte : plus
+ * droite qu'Inter, des chiffres tabulaires nets, et une lecture longue qui ne
+ * fatigue pas.
+ *
+ * `variable` plutôt qu'une liste de graisses : un seul fichier par famille, et
+ * toutes les graisses intermédiaires disponibles au lieu de quatre paliers.
+ */
+const geist = Geist({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: 'variable',
   display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-texte',
 })
 
-const spaceGrotesk = Space_Grotesk({
+const bricolage = Bricolage_Grotesque({
   subsets: ['latin'],
-  weight: ['500', '600', '700'],
+  weight: 'variable',
+  axes: ['opsz', 'wdth'],
   display: 'swap',
-  variable: '--font-space-grotesk',
+  variable: '--font-titre',
 })
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -80,8 +95,8 @@ export const viewport: Viewport = {
   // Le fond de page de chaque thème (`--bg`), pour que la barre d'état se
   // fonde dans la page. Le manifeste dit la même chose pour le thème sombre.
   themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#0b0b14' },
-    { media: '(prefers-color-scheme: light)', color: '#f7f7f9' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a12' },
+    { media: '(prefers-color-scheme: light)', color: '#f3f2f8' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -173,7 +188,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       dir={choisie.rtl ? 'rtl' : 'ltr'}
       data-langue={locale}
       data-theme="aurora"
-      className={`${inter.variable} ${spaceGrotesk.variable}`}
+      className={`${geist.variable} ${bricolage.variable}`}
       suppressHydrationWarning
     >
       <head>

@@ -52,7 +52,7 @@ export default function CarrierePage() {
     <div className="page-etroite">
       <header className="mb-5">
         <p className="text-[12px] font-semibold text-accent">{t('career.tag')}</p>
-        <h1 className="mt-1 font-display text-2xl font-bold tracking-tight sm:text-3xl">
+        <h1 className="mt-1 titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
           {t('career.title')}
         </h1>
         <p className="mt-2 max-w-prose text-sm text-muted">{t('career.intro')}</p>

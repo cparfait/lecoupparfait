@@ -202,7 +202,7 @@ export default function SeancePage() {
           {/* La promesse du bilan, dite avant et non après : c'est elle qui
               donne une raison de tenir le thème pendant quarante coups. */}
           {theme && (
-            <div className="mt-4 rounded-[var(--radius)] border border-line bg-bg-deep p-4">
+            <div className="mt-4 glass p-4">
               <p className="text-[13px] font-semibold text-faint">{t('session.whatYouWatch')}</p>
               <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{t(theme.aRegarder)}</p>
               <p className="mt-3 text-[13px] font-semibold text-faint">{t('session.atTheEnd')}</p>

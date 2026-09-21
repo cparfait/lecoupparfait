@@ -37,15 +37,14 @@ type ButtonSize = 'sm' | 'md' | 'lg'
  * briller ; s'ils brillent tous, plus rien ne se distingue.
  */
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary:
-    'bg-[linear-gradient(140deg,var(--accent-soft),var(--accent)_55%,var(--accent-deep))] ' +
-    'text-[var(--accent-contrast)] shadow-[var(--glow)] ' +
-    'hover:brightness-108 hover:shadow-[var(--glow),0_10px_30px_-10px_color-mix(in_oklab,var(--accent)_70%,transparent)] ' +
-    'active:brightness-95',
+  // La recette du relief vit dans `bouton-lumineux` (globals.css) : quatre
+  // ombres imbriquées ne se lisent pas dans une liste de classes.
+  primary: 'bouton-lumineux',
   secondary:
-    'bg-surface-strong text-ink hover:bg-surface-hover border border-line hover:border-[color-mix(in_oklab,var(--accent)_32%,var(--border))]',
+    'bg-surface-strong text-ink border border-line-strong/70 shadow-[inset_0_1px_0_var(--inner-edge)] ' +
+    'hover:bg-surface-hover hover:border-[color-mix(in_oklab,var(--accent)_38%,var(--border-strong))] hover:-translate-y-px',
   outline:
-    'border border-line-strong text-ink hover:bg-surface-hover hover:border-[color-mix(in_oklab,var(--accent)_45%,var(--border-strong))]',
+    'border border-line-strong text-ink hover:bg-surface-hover hover:border-[color-mix(in_oklab,var(--accent)_45%,var(--border-strong))] hover:-translate-y-px',
   ghost: 'text-muted hover:text-ink hover:bg-surface-hover',
   // `--danger-strong` et non `--q-blunder` : le rouge du barème est fait pour
   // une pastille, et l'encre blanche n'y tenait que 3,8:1 sur le thème sombre.
@@ -61,10 +60,18 @@ const VARIANTS: Record<ButtonVariant, string> = {
  * une fois sur cinq. `min-h` plutôt que `h` : la hauteur fixe reste, et la
  * mise en page ne bouge pas quand la contrainte ne s'applique pas.
  */
+/*
+ * Des pilules, à toutes les tailles.
+ *
+ * Le bouton à angles arrondis de neuf pixels est la forme de tout ce qui s'est
+ * dessiné pendant dix ans ; la pilule a un avantage qui n'est pas de mode :
+ * elle ne se confond jamais avec une carte, un champ ou un onglet, qui gardent
+ * leurs angles.
+ */
 const SIZES: Record<ButtonSize, string> = {
-  sm: 'h-8 px-3 text-[14px] gap-1.5 rounded-[var(--radius-sm)] pointer-coarse:min-h-11',
-  md: 'h-10 px-4 text-sm gap-2 rounded-[var(--radius-sm)] pointer-coarse:min-h-11',
-  lg: 'h-12 px-6 text-[15px] gap-2.5 rounded-[var(--radius)]',
+  sm: 'h-8 px-3.5 text-[14px] gap-1.5 rounded-full pointer-coarse:min-h-11',
+  md: 'h-10 px-5 text-sm gap-2 rounded-full pointer-coarse:min-h-11',
+  lg: 'h-13 px-7 text-[16px] gap-2.5 rounded-full',
 }
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -94,7 +101,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       disabled={disabled || loading}
       className={clsx(
-        'inline-flex select-none items-center justify-center font-medium',
+        'inline-flex select-none items-center justify-center font-semibold tracking-[-0.01em]',
         'transition-all duration-150 active:scale-[.985]',
         'disabled:pointer-events-none disabled:opacity-45',
         VARIANTS[variant],
@@ -133,7 +140,7 @@ export function ButtonLink({
     <Link
       href={href}
       className={clsx(
-        'inline-flex select-none items-center justify-center font-medium',
+        'inline-flex select-none items-center justify-center font-semibold tracking-[-0.01em]',
         'transition-all duration-150 active:scale-[.985]',
         VARIANTS[variant],
         SIZES[size],
@@ -233,17 +240,20 @@ export function TitreDePage({
   retour?: { href: string; label: string }
 }) {
   return (
-    <header className="mb-6">
+    <header className="mb-8">
       {retour && (
-        <Link href={retour.href} className="lien mb-2 inline-flex items-center gap-1">
+        <Link href={retour.href} className="lien mb-3 inline-flex items-center gap-1">
           <span aria-hidden>←</span> {retour.label}
         </Link>
       )}
-      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
-        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">{children}</h1>
-        {action && <div className="shrink-0">{action}</div>}
+      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+        {/* Un titre d'affiche, pas un titre de document : c'est lui qui donne
+            son échelle à la page, et il doit se lire depuis l'autre bout de la
+            pièce. */}
+        <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">{children}</h1>
+        {action && <div className="shrink-0 pb-1">{action}</div>}
       </div>
-      {intro && <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-muted">{intro}</p>}
+      {intro && <p className="mt-4 max-w-2xl text-[17px] leading-relaxed text-muted">{intro}</p>}
     </header>
   )
 }
@@ -272,10 +282,14 @@ export function TitreDeSection({
       <div className="flex min-w-0 items-center gap-2.5">
         {Icon && (
           <span
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-[var(--radius-sm)] bg-surface-strong"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-[12px] bg-surface-strong"
             style={
               teinte
-                ? { background: `color-mix(in oklab, ${teinte} 16%, transparent)`, color: teinte }
+                ? {
+                    background: `linear-gradient(135deg, color-mix(in oklab, ${teinte} 30%, transparent), color-mix(in oklab, ${teinte} 10%, transparent))`,
+                    boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${teinte} 32%, transparent)`,
+                    color: teinte,
+                  }
                 : { color: 'var(--text-muted)' }
             }
             aria-hidden
@@ -284,7 +298,7 @@ export function TitreDeSection({
           </span>
         )}
         <div className="min-w-0">
-          <h2 className="font-display text-lg font-semibold tracking-tight">{children}</h2>
+          <h2 className="font-display text-[1.35rem] font-bold tracking-tight">{children}</h2>
           {hint && <p className="mt-0.5 text-xs text-muted">{hint}</p>}
         </div>
       </div>
@@ -399,9 +413,9 @@ export const Input = forwardRef<
         aria-invalid={!!error}
         aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
         className={clsx(
-          'h-11 w-full rounded-[var(--radius-sm)] border bg-surface px-3.5 text-sm',
-          'placeholder:text-faint transition-colors',
-          'focus:border-accent focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--accent)_35%,transparent)]',
+          'h-11 w-full rounded-[var(--radius-sm)] border bg-surface px-4 text-sm shadow-[inset_0_1px_2px_rgb(0_0_0/.12)]',
+          'placeholder:text-faint transition-[border-color,box-shadow] duration-150',
+          'focus:border-accent focus:outline-none focus:ring-[3px] focus:ring-[color-mix(in_oklab,var(--accent)_28%,transparent)]',
           error ? 'border-[var(--q-blunder)]' : 'border-line',
           className,
         )}
@@ -452,8 +466,10 @@ export function Toggle({
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={clsx(
-          'relative h-6 w-11 shrink-0 rounded-full transition-colors duration-150',
-          checked ? 'bg-accent' : 'bg-surface-strong border border-line',
+          'relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200',
+          checked
+            ? 'bg-accent shadow-[inset_0_1px_2px_rgb(0_0_0/.25),0_0_14px_-3px_var(--accent)]'
+            : 'bg-surface-strong border border-line-strong shadow-[inset_0_1px_2px_rgb(0_0_0/.2)]',
         )}
       >
         <span
@@ -529,7 +545,7 @@ export function SegmentedControl<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className="inline-flex w-full gap-0.5 rounded-[var(--radius-sm)] border border-line bg-surface p-0.5"
+      className="inline-flex w-full gap-0.5 rounded-full border border-line bg-surface p-1 shadow-[inset_0_1px_2px_rgb(0_0_0/.12)]"
     >
       {options.map((option) => (
         <button
@@ -544,13 +560,13 @@ export function SegmentedControl<T extends string>({
             // dé sur téléphone, et le segment prenait deux lignes de haut. Le
             // texte y est un peu plus grand et les trois cases plus étroites,
             // d'où la marge réduite sous `sm`.
-            'flex-1 whitespace-nowrap rounded-[calc(var(--radius-sm)-2px)] font-medium transition-all',
+            'flex-1 whitespace-nowrap rounded-full font-medium transition-all',
             // Quarante-quatre points au doigt, quelle que soit la taille : un
             // segment de 26 px de haut se rate une fois sur cinq au pouce.
             'pointer-coarse:min-h-11',
             size === 'sm' ? 'px-2 py-1 text-xs' : 'px-2 py-1.5 text-sm sm:px-3',
             value === option.value
-              ? 'bg-accent text-[var(--accent-contrast)] shadow-sm'
+              ? 'bg-surface-strong text-ink shadow-[var(--shadow-sm),inset_0_1px_0_var(--inner-edge)] ring-1 ring-line-strong'
               : 'text-muted hover:bg-surface-hover hover:text-ink',
           )}
         >

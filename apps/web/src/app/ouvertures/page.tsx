@@ -291,7 +291,7 @@ export default function OpeningsPage() {
   return (
     <div className="etude mx-auto w-full max-w-[1400px] px-3 py-5 sm:px-5 lg:py-8">
       <div className="mb-4">
-        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+        <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
           {t('rest.openingExplorer')}
         </h1>
         {/* Il fallait le dire : sans cette phrase, on attend que l'ordinateur

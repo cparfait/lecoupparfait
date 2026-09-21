@@ -294,7 +294,7 @@ export default function ProfilePage() {
               laisse comprimer jusqu'à zéro et le rang ne se replie jamais. */}
           <div className="min-w-[12rem] flex-1">
             <div className="flex flex-wrap items-baseline gap-2">
-              <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+              <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
                 {profile.user.username}
               </h1>
               {title && <Chip tone="accent">{title.fr}</Chip>}

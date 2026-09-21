@@ -45,7 +45,7 @@ export default function AboutPage() {
   return (
     <div className="page-etroite">
       <Chip tone="accent">{t('about.licence')}</Chip>
-      <h1 className="mt-4 font-display text-2xl font-bold tracking-tight sm:text-3xl">
+      <h1 className="mt-4 titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
         {t('about.title')}
       </h1>
 

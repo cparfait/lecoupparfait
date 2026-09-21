@@ -248,7 +248,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
           « 45 / 80 points » plus bas, laissait deviner un rapport entre les
           deux — il n'y en a aucun. */}
       <header className="mb-5 flex flex-wrap items-center justify-between gap-2">
-        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+        <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
           Bonjour {pseudo}
         </h1>
         <div className="flex flex-wrap items-center gap-2">

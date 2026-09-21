@@ -228,6 +228,9 @@ function Hero() {
         }}
         aria-hidden
       />
+      {/* Un damier en filigrane, qui s'efface vers les bords : la seule
+          décoration de la bannière, et elle dit le sujet sans le dessiner. */}
+      <div className="fond-damier pointer-events-none absolute inset-0 -z-10" aria-hidden />
 
       <CavalePortrait />
 
@@ -244,17 +247,21 @@ function Hero() {
             {t('home.badge')}
           </Chip>
 
-          <h1 className="font-display text-[clamp(2.2rem,6vw,4.1rem)] font-bold leading-[1.03] tracking-tight">
-            <span className="text-gradient">{t('home.heroTitleTop')}</span>
+          {/* Deux lignes, deux encres : la première en pleine encre, la
+              seconde en retrait. Pas de dégradé de couleur sur le titre —
+              c'est devenu la signature de toutes les pages faites à la chaîne,
+              et un titre n'a pas besoin d'être coloré pour être grand. */}
+          <h1 className="titre-affiche text-[clamp(2.7rem,6.6vw,5.2rem)]">
+            {t('home.heroTitleTop')}
             <br />
-            {t('home.heroTitleBottom')}
+            <span className="text-muted">{t('home.heroTitleBottom')}</span>
           </h1>
 
-          <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-muted">
+          <p className="mt-6 max-w-xl text-[18px] leading-relaxed text-muted lg:text-[19px]">
             {renderEmphasis(t('home.heroSubtitle'))}
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-9 flex flex-wrap gap-3">
             <ButtonLink href="/jouer" variant="primary" size="lg" icon={<ArrowRight size={17} />}>
               {t('home.ctaPlay')}
             </ButtonLink>
@@ -296,20 +303,20 @@ function Hero() {
             {/* L'échiquier passe devant le portrait : il lui faut une ombre
                 portée, pas un halo. Un halo derrière une photo se lit comme une
                 auréole ; une ombre creuse la profondeur qu'on cherche. */}
-            <div
-              className={
-                'mx-auto w-full max-w-[440px] overflow-hidden rounded-[var(--radius)] ' +
-                'border border-line-strong shadow-[0_40px_90px_-20px_rgb(0_0_0/.65)]'
-              }
-            >
-              <Board2D
-                fen={fen}
-                orientation="w"
-                playable={null}
-                lastMove={lastMove as never}
-                allowAnnotations={false}
-                skinId={DAMIER_PAR_THEME[theme]}
-              />
+            {/* L'échiquier a une monture : une carte de verre à marge étroite,
+                comme un plateau posé dans son cadre. Ni inclinaison ni halo
+                coloré — un échiquier se regarde de face. */}
+            <div className="glass mx-auto w-full max-w-[460px] rounded-[var(--radius-lg)] p-2.5 shadow-[var(--shadow-lg)]">
+              <div className="overflow-hidden rounded-[calc(var(--radius-lg)-10px)]">
+                <Board2D
+                  fen={fen}
+                  orientation="w"
+                  playable={null}
+                  lastMove={lastMove as never}
+                  allowAnnotations={false}
+                  skinId={DAMIER_PAR_THEME[theme]}
+                />
+              </div>
             </div>
           </div>
 
@@ -334,7 +341,7 @@ function Hero() {
               pour qu'on lise un bloc posé par-dessus plutôt qu'un panneau
               rapporté sous l'échiquier, et dix fois moins que les 183 px du
               premier jet, qui recouvraient la tête de Cavale. */}
-          <Card className="glass-lisible mx-auto mt-4 flex w-full max-w-[520px] items-start gap-3 p-3.5 backdrop-blur-md">
+          <Card className="glass-lisible mx-auto mt-4 flex w-full max-w-[520px] items-start gap-3 p-4 backdrop-blur-md">
             <span
               className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full"
               style={{ background: 'color-mix(in oklab, var(--accent) 20%, transparent)' }}
@@ -404,13 +411,15 @@ function Essentiel() {
       <div className="grid gap-8 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] lg:items-center lg:gap-14">
         <DefiDuJour />
 
-        <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-4">
+        {/* Deux colonnes, deux rangées, et jamais quatre : « 6 057 356 » ne
+            tient pas dans un quart de colonne sans se casser sur deux lignes,
+            et un chiffre cassé décale tous les libellés. Chaque nombre reste
+            sur sa ligne (`chiffre-affiche`), les libellés s'alignent. */}
+        <div className="grid grid-cols-2 gap-x-10 gap-y-10 sm:gap-x-14 lg:pl-4">
           {stats.map(({ value, label }) => (
             <div key={label}>
-              <p className="font-display text-3xl font-bold tabular-nums tracking-tight sm:text-4xl">
-                {value}
-              </p>
-              <p className="mt-1.5 text-xs leading-snug text-muted">{label}</p>
+              <p className="chiffre-affiche text-[clamp(2.2rem,4.6vw,3.6rem)]">{value}</p>
+              <p className="mt-3 max-w-[22ch] text-[14px] leading-snug text-muted">{label}</p>
             </div>
           ))}
         </div>

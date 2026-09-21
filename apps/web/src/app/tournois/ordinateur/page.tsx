@@ -138,7 +138,7 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
 
   return (
     <>
-      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+      <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
         {t('arena.soloTitle')}
       </h1>
       <p className="mt-2 max-w-prose text-muted max-lg:text-[14px] max-lg:leading-relaxed">
@@ -312,7 +312,7 @@ function Tableau({ tournoi, onAbandonner }: { tournoi: TournoiSolo; onAbandonner
   return (
     <>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+        <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
           {t('arena.yourTournament')}
         </h1>
         <Chip tone="accent">

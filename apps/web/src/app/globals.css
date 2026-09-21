@@ -35,16 +35,20 @@
   /* ── Matière ──────────────────────────────────────────────────────────
      Ce qui sépare une surface d'un rectangle gris : un reflet en haut, un
      liseré interne, et un fond qui n'est pas parfaitement uni. */
-  --sheen: rgb(255 255 255 / 0.06);
-  --inner-edge: rgb(255 255 255 / 0.07);
-  --halo-1: rgb(124 92 255 / 0.1);
-  --halo-2: rgb(0 229 168 / 0.055);
+  --sheen: rgb(255 255 255 / 0.07);
+  --inner-edge: rgb(255 255 255 / 0.09);
+  --halo-1: rgb(124 92 255 / 0.2);
+  --halo-2: rgb(0 229 168 / 0.1);
   color-scheme: dark;
 
-  /* Fonds, du plus profond au plus proche de l'œil */
-  --bg: #0b0b14;
-  --bg-deep: #07070f;
-  --bg-elev: #12121d;
+  /* Fonds, du plus profond au plus proche de l'œil.
+
+     `#0b0b14` était un noir de tableur : sans profondeur, la page se lisait
+     comme un fond d'écran éteint. Un cran plus bas et plus bleu, l'aurore
+     a de quoi se détacher et les cartes de quoi flotter. */
+  --bg: #0a0a12;
+  --bg-deep: #06060b;
+  --bg-elev: #14141f;
   /* Ce qui flotte au-dessus de la page : menus, barre du haut, barre du bas.
 
      `--bg-elev` ne suffisait pas. Six points de luminance séparent #07070c de
@@ -52,7 +56,7 @@
      liseré à 17 % de blanc, et disparaissait dès qu'on le regardait sur un
      écran peu contrasté ou en plein jour. Une surface flottante doit se lire
      comme un objet posé, pas comme une découpe du fond. */
-  --flottant: #1e1e2f;
+  --flottant: #222234;
 
   /* Surfaces opaques, et non plus un voile de blanc.
 
@@ -64,11 +68,14 @@
      sur `--bg` : la carte a la même couleur partout, et le rapport de
      contraste devient une propriété du thème plutôt qu'un accident de
      superposition. */
-  --surface: #1a1a22;
-  --surface-hover: #212129;
-  --surface-strong: #282830;
-  --border: rgb(255 255 255 / 0.12);
-  --border-strong: rgb(255 255 255 / 0.22);
+  /* Une carte doit se lire comme posée sur la page, pas découpée dedans :
+     du noir sur du noir, c'est ce qu'on voyait. Trois crans au-dessus du
+     fond, et un liseré qui se voit sans qu'on le cherche. */
+  --surface: #1b1b28;
+  --surface-hover: #222231;
+  --surface-strong: #2a2a3a;
+  --border: rgb(255 255 255 / 0.13);
+  --border-strong: rgb(255 255 255 / 0.24);
 
   /* Ce qu'il faut ajouter à `--surface` pour qu'une carte se voie.
 
@@ -78,8 +85,12 @@
      restait qu'un liseré à 12 % pour dire où l'une finit et où l'autre
      commence : les blocs de l'accueil se confondaient avec la page. Voir
      `glass`. */
-  --voile-carte: rgb(255 255 255 / 0.08);
-  --bord-carte: var(--border-strong);
+  --voile-carte: rgb(255 255 255 / 0.04);
+  --bord-carte: rgb(255 255 255 / 0.19);
+  /* Le liseré n'est plus uni : il s'éclaire en haut à gauche, là d'où vient
+     la lumière du reflet, et s'éteint en bas à droite. C'est ce qui fait
+     lire « verre posé » plutôt que « rectangle bordé ». Voir `glass`. */
+  --bord-lumiere: rgb(255 255 255 / 0.4);
 
   /* Texte
 
@@ -138,9 +149,9 @@
   --shadow-lg: 0 30px 80px -20px rgb(0 0 0 / 0.85);
 
   /* Dégradé d'ambiance de la page */
-  --aurora-1: rgb(124 92 255 / 0.16);
-  --aurora-2: rgb(0 229 168 / 0.1);
-  --aurora-3: rgb(255 122 89 / 0.07);
+  --aurora-1: rgb(124 92 255 / 0.3);
+  --aurora-2: rgb(0 229 168 / 0.15);
+  --aurora-3: rgb(255 122 89 / 0.13);
 
   /* Échiquier */
   --sq-light: #dfd7ea;
@@ -160,13 +171,16 @@
   --mat-metal: #7c5cff;
   --env-intensity: 0.9;
 
-  --blur: 22px;
-  --radius: 14px;
-  --radius-sm: 9px;
-  --radius-lg: 22px;
+  --blur: 24px;
+  /* Des angles plus ronds, à tous les étages : c'est le trait le plus visible
+     qui sépare une interface d'aujourd'hui d'une interface de bureau. */
+  --radius: 18px;
+  --radius-sm: 12px;
+  --radius-lg: 28px;
+  --radius-xl: 36px;
 
-  --font-display: var(--font-space-grotesk), 'Inter', system-ui, sans-serif;
-  --font-body: var(--font-inter), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: var(--font-titre), 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-body: var(--font-texte), 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -181,12 +195,15 @@
   /* Aucun liseré clair sur un thème clair : il serait invisible sur une
      surface déjà blanche. Ici c'est l'ombre portée qui détache la carte. */
   --inner-edge: rgb(255 255 255 / 0);
-  --halo-1: rgb(91 60 224 / 0.05);
-  --halo-2: rgb(0 146 110 / 0.035);
+  --halo-1: rgb(91 60 224 / 0.11);
+  --halo-2: rgb(0 146 110 / 0.07);
   color-scheme: light;
 
-  --bg: #f7f7f9;
-  --bg-deep: #eeeef2;
+  /* Un blanc teinté de lavande, et non un gris de bureau : la page claire
+     doit avoir une couleur à elle, sinon les cartes blanches n'ont rien sur
+     quoi se poser. */
+  --bg: #f3f2f8;
+  --bg-deep: #e9e8f1;
   --bg-elev: #ffffff;
   /* Sur fond clair, une surface flottante ne peut pas monter plus haut que le
      blanc : c'est l'ombre portée et le liseré qui la détachent, et ils sont
@@ -204,7 +221,10 @@
   /* Sur fond clair, une carte est déjà blanche sur gris : rien à ajouter au
      voile, et un contour à peine plus marqué suffit à la poser. */
   --voile-carte: transparent;
-  --bord-carte: rgb(16 16 24 / 0.18);
+  --bord-carte: rgb(16 16 24 / 0.14);
+  /* Sur blanc, le liseré ne s'éclaire pas : il s'efface en haut, et c'est
+     l'ombre qui pose la carte. */
+  --bord-lumiere: rgb(16 16 24 / 0.06);
 
   --text: #14141c;
   --text-muted: #55556a;
@@ -241,9 +261,9 @@
   --shadow: 0 6px 24px -8px rgb(16 16 24 / 0.16);
   --shadow-lg: 0 24px 60px -20px rgb(16 16 24 / 0.22);
 
-  --aurora-1: rgb(91 60 224 / 0.07);
-  --aurora-2: rgb(0 146 110 / 0.05);
-  --aurora-3: rgb(212 86 47 / 0.04);
+  --aurora-1: rgb(91 60 224 / 0.14);
+  --aurora-2: rgb(0 146 110 / 0.1);
+  --aurora-3: rgb(212 86 47 / 0.08);
 
   --sq-light: #eeeef4;
   --sq-dark: #8e93b8;
@@ -261,13 +281,14 @@
   --mat-metal: #5b3ce0;
   --env-intensity: 1.1;
 
-  --blur: 12px;
-  --radius: 14px;
-  --radius-sm: 9px;
-  --radius-lg: 22px;
+  --blur: 16px;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --radius-lg: 28px;
+  --radius-xl: 36px;
 
-  --font-display: var(--font-space-grotesk), 'Inter', system-ui, sans-serif;
-  --font-body: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-titre), 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-body: var(--font-texte), 'Geist', system-ui, sans-serif;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -370,6 +391,7 @@
   --radius-token: var(--radius);
   --radius-token-sm: var(--radius-sm);
   --radius-token-lg: var(--radius-lg);
+  --radius-token-xl: var(--radius-xl);
 
   --font-display: var(--font-display);
   --font-sans: var(--font-body);
@@ -464,8 +486,13 @@ h2,
 h3,
 h4 {
   font-family: var(--font-display);
-  letter-spacing: -0.02em;
-  font-weight: 600;
+  /* Bricolage se resserre à grande taille grâce à son axe optique ; on
+     resserre encore d'un cran l'interlettrage, et la chasse d'un souffle, pour
+     que les titres se lisent comme un mot et non comme une suite de lettres. */
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  font-variation-settings: 'wdth' 96;
+  text-wrap: balance;
 }
 
 ::selection {
@@ -561,20 +588,42 @@ h4 {
    * dans `glass-lisible` et pour la même raison : dans le raccourci
    * `background`, seule la dernière couche peut être une couleur.
    */
+  /*
+   * Le liseré est un dégradé, et il faut ruser pour qu'un bord le soit.
+   *
+   * Un `border` ne prend qu'une couleur. On le rend donc transparent, et l'on
+   * peint une couche de plus, en dernier, découpée sur `border-box` : elle
+   * n'apparaît que dans l'anneau d'un pixel que les couches précédentes —
+   * découpées sur `padding-box` — laissent libre. Le liseré s'éclaire en haut
+   * à gauche (`--bord-lumiere`), là où arrive la lumière du reflet, et
+   * retombe sur `--bord-carte` ailleurs. Le survol des cartes cliquables
+   * ne change plus `border-color`, qui ne ferait rien : il repose les deux
+   * variables, et la couche se repeint.
+   */
+  --bord-actuel: var(--bord-carte);
+  --lumiere-actuelle: var(--bord-lumiere);
+  border: 1px solid transparent;
   background:
-    linear-gradient(180deg, var(--sheen), transparent 46%),
-    linear-gradient(0deg, var(--voile-carte), var(--voile-carte)), var(--surface);
+    linear-gradient(180deg, var(--sheen), transparent 46%) padding-box,
+    linear-gradient(0deg, var(--voile-carte), var(--voile-carte)) padding-box,
+    linear-gradient(0deg, var(--surface), var(--surface)) padding-box,
+    linear-gradient(
+        150deg,
+        var(--lumiere-actuelle),
+        var(--bord-actuel) 34%,
+        var(--bord-actuel) 72%,
+        var(--lumiere-actuelle)
+      )
+      border-box;
   backdrop-filter: blur(var(--blur)) saturate(150%);
   -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
-  border: 1px solid var(--bord-carte);
   border-radius: var(--radius);
   box-shadow:
     inset 0 1px 0 0 var(--inner-edge),
     var(--shadow-sm);
   transition:
-    transform 160ms cubic-bezier(0.2, 0.7, 0.3, 1),
-    box-shadow 160ms ease,
-    border-color 160ms ease;
+    transform 220ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    box-shadow 220ms ease;
 }
 
 /*
@@ -586,11 +635,13 @@ h4 {
  */
 a.glass:hover,
 button.glass:hover {
-  border-color: color-mix(in oklab, var(--accent) 34%, var(--border));
+  --bord-actuel: color-mix(in oklab, var(--accent) 40%, var(--bord-carte));
+  --lumiere-actuelle: color-mix(in oklab, var(--accent-soft) 70%, var(--bord-lumiere));
+  transform: translateY(-2px);
   box-shadow:
     inset 0 1px 0 0 var(--inner-edge),
     var(--shadow),
-    0 0 26px -10px color-mix(in oklab, var(--accent) 55%, transparent);
+    0 0 40px -12px color-mix(in oklab, var(--accent) 60%, transparent);
 }
 
 /*
@@ -626,6 +677,9 @@ button.glass:hover {
     linear-gradient(180deg, var(--sheen), transparent 46%),
     linear-gradient(0deg, var(--surface), var(--surface)),
     color-mix(in oklab, var(--bg) 88%, transparent);
+  /* Le raccourci `background` efface la couche du liseré dégradé de `glass` :
+     on repose un bord uni, sinon la carte n'en a plus du tout. */
+  border-color: var(--bord-carte);
 }
 
 @utility glass-strong {
@@ -830,7 +884,7 @@ button.glass:hover {
      sur la couleur du texte — le seul repère qui reste franc dans les quatre
      thèmes, clair compris, où il devient une encre sur du blanc. */
   border: 1px solid color-mix(in oklab, var(--text) 26%, transparent);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   /* L'ombre était laissée à l'appelant, et la moitié l'oubliait : un panneau
      sans ombre sur un fond presque de la même couleur ne flotte pas, il se
      fond. Elle appartient à la surface, pas à l'endroit où on la pose. */
@@ -914,10 +968,187 @@ button.glass:hover {
 }
 
 @utility text-gradient {
-  background: linear-gradient(120deg, var(--text) 20%, var(--accent-soft) 55%, var(--accent-2));
+  background: linear-gradient(110deg, var(--text) 10%, var(--accent-soft) 48%, var(--accent-2) 90%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MISE EN SCÈNE
+
+   Ce qui donne à une page l'air d'avoir été composée plutôt que remplie. Peu
+   de choses, et chacune à un seul endroit.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/*
+ * L'entrée d'une page : une seule séquence, et rien après.
+ *
+ * Les enfants directs d'une page apparaissent l'un après l'autre, en
+ * soixante millisecondes d'écart, sur les six premiers. C'est le seul moment
+ * chorégraphié : les cartes ne glissent pas au défilement, les sections ne
+ * se dévoilent pas une à une — une entrée orchestrée se remarque, dix effets
+ * dispersés s'annulent.
+ *
+ * Pas de `filter: blur()` : ça coûte une texture par élément et par image,
+ * et l'effet ne se voit pas à cette vitesse. Opacité et translation suffisent,
+ * et se composent sur le GPU.
+ */
+@keyframes entree-de-page {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.page > *,
+.page-etroite > *,
+.entree > * {
+  animation: entree-de-page 640ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.page > :nth-child(2),
+.page-etroite > :nth-child(2),
+.entree > :nth-child(2) {
+  animation-delay: 60ms;
+}
+.page > :nth-child(3),
+.page-etroite > :nth-child(3),
+.entree > :nth-child(3) {
+  animation-delay: 120ms;
+}
+.page > :nth-child(4),
+.page-etroite > :nth-child(4),
+.entree > :nth-child(4) {
+  animation-delay: 180ms;
+}
+.page > :nth-child(5),
+.page-etroite > :nth-child(5),
+.entree > :nth-child(5) {
+  animation-delay: 240ms;
+}
+.page > :nth-child(n + 6),
+.page-etroite > :nth-child(n + 6),
+.entree > :nth-child(n + 6) {
+  animation-delay: 300ms;
+}
+[data-effects='low'] .page > *,
+[data-effects='low'] .page-etroite > *,
+[data-effects='low'] .entree > * {
+  animation: none;
+}
+
+/*
+ * La porte d'une rubrique — la carte de destination — s'allume au survol
+ * dans sa propre teinte, par un halo dans son coin haut-droit. La teinte
+ * arrive par `--teinte-porte`, posée par le composant ; sans elle, c'est
+ * l'accent. Le halo vit dans un pseudo-élément : la carte est déjà
+ * `position: relative` et `overflow: hidden`, il ne déborde donc jamais.
+ */
+.carte-porte::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    60% 70% at 100% 0%,
+    color-mix(in oklab, var(--teinte-porte, var(--accent)) 22%, transparent),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+.carte-porte:hover::before {
+  opacity: 1;
+}
+
+/*
+ * Le grand titre d'une page : très grand, très serré, et pesant.
+ *
+ * Bricolage porte un axe optique : à cette taille la police se dessine avec
+ * des contreformes plus serrées et des traits plus contrastés, sans qu'on
+ * ait rien à demander. On ajoute la graisse et l'interlettrage négatif qui
+ * font le titre d'affiche, et non le titre de document.
+ */
+@utility titre-affiche {
+  font-family: var(--font-display);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+  font-variation-settings: 'wdth' 92;
+  text-wrap: balance;
+}
+
+/* Le grand chiffre : un nombre qui se lit de loin. */
+@utility chiffre-affiche {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: 'wdth' 82;
+  white-space: nowrap;
+}
+
+/*
+ * Le bouton primaire brille — c'est le seul qui y a droit.
+ *
+ * Un reflet en haut, une arête interne, et l'ombre colorée qui le pose ; au
+ * survol il se soulève d'un pixel et l'ombre s'étend. Écrit ici plutôt que
+ * dans une liste de classes utilitaires : quatre ombres imbriquées ne se
+ * lisent pas dans un attribut `class`.
+ */
+@utility bouton-lumineux {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.18), transparent 50%),
+    linear-gradient(140deg, var(--accent-soft), var(--accent) 55%, var(--accent-deep));
+  color: var(--accent-contrast);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    inset 0 -1px 0 rgb(0 0 0 / 0.18),
+    0 1px 2px rgb(0 0 0 / 0.3),
+    0 10px 24px -10px color-mix(in oklab, var(--accent) 80%, transparent);
+  transition:
+    transform 160ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    box-shadow 200ms ease,
+    filter 160ms ease;
+}
+.bouton-lumineux:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    inset 0 -1px 0 rgb(0 0 0 / 0.18),
+    0 2px 4px rgb(0 0 0 / 0.3),
+    0 16px 34px -10px color-mix(in oklab, var(--accent) 90%, transparent);
+}
+.bouton-lumineux:active {
+  transform: translateY(0) scale(0.985);
+  filter: brightness(0.96);
+}
+[data-effects='low'] .bouton-lumineux {
+  background: var(--accent);
+  box-shadow: none;
+}
+
+/*
+ * La grille de fond : un damier à peine visible, qui dit « échecs » sans le
+ * dessiner. Posé sur les bannières seulement — partout, il ferait du bruit.
+ */
+@utility fond-damier {
+  --case: color-mix(in oklab, var(--text) 4.5%, transparent);
+  background-image: conic-gradient(
+    from 90deg at 50% 50%,
+    var(--case) 25%,
+    transparent 0 50%,
+    var(--case) 0 75%,
+    transparent 0
+  );
+  background-size: 128px 128px;
+  mask-image: radial-gradient(75% 80% at 72% 40%, black 10%, transparent 100%);
+  -webkit-mask-image: radial-gradient(75% 80% at 72% 40%, black 10%, transparent 100%);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1249,10 +1480,16 @@ button.glass:hover {
 [data-effects='low'] .glass-strong {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  /* Le voile de carte reste : `--bg-elev` vaut `#12121d` sur `aurora`, soit
+  /* Le voile de carte reste : `--bg-elev` vaut `#14141f` sur `aurora`, soit
      1,03:1 contre la page — sans lui, les effets réduits rendraient les cartes
-     encore plus invisibles que le verre qu'ils remplacent. */
+     encore plus invisibles que le verre qu'ils remplacent. Et un bord uni,
+     puisque la couche du liseré dégradé disparaît avec le raccourci. */
   background: linear-gradient(0deg, var(--voile-carte), var(--voile-carte)), var(--bg-elev);
+  border-color: var(--bord-carte);
+}
+[data-effects='low'] a.glass:hover,
+[data-effects='low'] button.glass:hover {
+  transform: none;
 }
 
 [data-effects='low'] .gradient-ring::before {

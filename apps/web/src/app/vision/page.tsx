@@ -145,7 +145,7 @@ export default function VisionPage() {
       {/* Sur téléphone, le titre est plus petit et la consigne disparaît pendant
           la manche : chaque ligne gardée ici est prise sur l'échiquier, et la
           consigne ne s'adresse qu'à celui qui n'a pas encore commencé. */}
-      <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+      <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
         {t('nav.vision')}
       </h1>
       <p

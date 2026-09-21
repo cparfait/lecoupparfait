@@ -636,7 +636,7 @@ function Resultat({
           {t('level.twoNumbers')}
         </p>
 
-        <div className="mt-5 rounded-[var(--radius)] border border-line bg-bg-deep p-4">
+        <div className="mt-5 glass p-4">
           <Chip tone="accent">{t('level.yourTier')}</Chip>
           <h2 className="mt-2 font-display text-xl font-bold tracking-tight">{t(palier.nom)}</h2>
           <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{t(palier.promesse)}</p>

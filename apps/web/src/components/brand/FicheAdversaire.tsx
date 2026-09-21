@@ -71,7 +71,7 @@ export function FicheAdversaire({ id }: { id: BotPersonalityId }) {
       <header className="mt-4 flex flex-wrap items-end gap-5">
         <PortraitAdversaire personality={personnalite} size={128} />
         <div className="min-w-0 flex-1">
-          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
             {tCoeur(t, personnalite.name)}
           </h1>
           <p className="mt-1 text-lg italic text-accent">« {tCoeur(t, personnalite.devise)} »</p>

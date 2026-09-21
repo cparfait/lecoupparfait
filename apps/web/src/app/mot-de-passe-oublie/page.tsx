@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
           >
             <KeyRound size={22} />
           </span>
-          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
             {t('password.title')}
           </h1>
           {/* Le sous-titre suit la même règle que la carte : promettre un lien

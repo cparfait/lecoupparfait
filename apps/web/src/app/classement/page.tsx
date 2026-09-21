@@ -77,7 +77,7 @@ export default function LeaderboardPage() {
 
   return (
     <div className="page-etroite">
-      <h1 className="flex items-center gap-2.5 font-display text-2xl font-bold tracking-tight sm:text-3xl">
+      <h1 className="flex items-center gap-2.5 titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
         <Trophy size={26} className="text-accent" aria-hidden />
         {t('nav.leaderboard')}
       </h1>

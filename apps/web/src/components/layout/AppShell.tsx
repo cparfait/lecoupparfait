@@ -26,9 +26,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronRight, Home, Lock } from 'lucide-react'
+import { ChevronRight, Lock } from 'lucide-react'
 import clsx from 'clsx'
 import { AccountButton } from '@/components/layout/AccountButton.tsx'
+import { LogoMark } from '@/components/brand/LogoMark.tsx'
 import { ChallengeWatcher } from '@/components/social/ChallengeWatcher.tsx'
 import { PastilleSerie } from '@/components/daily/PastilleSerie.tsx'
 import { MiseEnRoute } from '@/components/layout/MiseEnRoute.tsx'
@@ -96,14 +97,14 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Zone sûre en haut : `viewport-fit=cover` fait passer la page sous la
           barre d'état et l'encoche en mode installé, et l'en-tête collant
           commençait là-dessous. Le rembourrage vaut zéro partout ailleurs. */}
-      <header className="sticky top-0 z-50 border-b border-line-strong/70 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
+      <header className="sticky top-0 z-50 border-b border-line/80 backdrop-blur-2xl pt-[env(safe-area-inset-top)]">
         {/* La barre se peignait avec la couleur de la page à 72 % : sur trois
             thèmes sur quatre, elle avait donc exactement la teinte de ce qu'elle
             surplombe, et l'on ne voyait ni où elle commençait ni ce qui passait
             dessous en défilant. Elle prend la matière des surfaces qui flottent
             — la même que les menus qu'elle ouvre — et son filet inférieur passe
             au liseré fort. */}
-        <div className="absolute inset-0 -z-10 bg-[var(--flottant)]/92" aria-hidden />
+        <div className="absolute inset-0 -z-10 bg-[var(--flottant)]/78" aria-hidden />
         {/* Le resserrement sous 360 px n'est pas cosmétique.
             Cinq commandes à droite — série, thème, préférences, compte,
             menu — tiennent à 375 px, et débordaient à 320 du temps où la voix
@@ -141,9 +142,16 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link
             href="/"
             title={t('nav.home')}
-            className="flex shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] px-2 py-1.5 font-display text-[15px] font-semibold tracking-tight text-ink transition-colors hover:bg-surface-hover sm:text-[17px]"
+            className="flex shrink-0 items-center gap-2 rounded-full px-2.5 py-1.5 font-display text-[16px] font-bold tracking-[-0.03em] text-ink transition-colors hover:bg-surface-hover sm:text-[18px]"
           >
-            <Home size={16} className="hidden shrink-0 text-accent lg:block" aria-hidden />
+            {/* La marque plutôt qu'une maison générique : Cavale, le cavalier
+                de buis, est le seul dessin que personne d'autre n'a. Même rôle
+                que la maison — dire que ceci est un bouton, et qu'il ramène
+                chez soi — et il n'habite qu'un endroit à la fois, à partir de
+                `lg` (voir ci-dessus). */}
+            <span className="hidden lg:block">
+              <LogoMark size={26} />
+            </span>
             Le Coup Parfait
           </Link>
 
@@ -321,7 +329,7 @@ export function AppShell({ children }: { children: ReactNode }) {
  * surface apparaît au survol.
  */
 const MENU_BARRE =
-  'flex items-center gap-1 rounded-[var(--radius-sm)] px-3 py-1.5 text-[15px] font-medium text-muted transition-colors hover:bg-surface-hover hover:text-ink'
+  'flex items-center gap-1 rounded-full px-3.5 py-1.5 text-[15px] font-medium text-muted transition-colors hover:bg-surface-hover hover:text-ink'
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Navigation sur grand écran
