@@ -300,6 +300,47 @@ interface LevelSpec {
   l'occasion — dix ne suffisaient pas à contenir une vraie faute de débutant.
 */
 const LEVEL_TABLE: LevelSpec[] = [
+  /*
+    ── Les deux premiers échelons, et pourquoi la température n'y sert plus ───
+
+    Mesurés l'un contre l'autre sur soixante parties — `scripts/etalonner-bots.mjs`
+    —, ils ne se départageaient plus : le niveau 1 marquait 0,53 contre le
+    niveau 2, soit un écart légèrement **négatif** là où l'étiquette en promet
+    cent cinquante. Deux paliers pour une seule force.
+
+    La cause est une saturation, et elle se lit dans la formule de tolérance
+    quelques dizaines de lignes plus bas. À température 1,00 elle vaut mille
+    centipions, à 0,92 huit cent cinquante : dans les deux cas la fenêtre admet
+    déjà presque tout ce que le moteur propose. Les deux bots tirent donc
+    quasi uniformément dans leur vivier, et les huit centièmes de température
+    qui les séparent ne changent plus rien — le curseur est à son plafond
+    d'effet, pas à mi-course.
+
+    Ce qui sépare encore deux tirages presque uniformes, c'est **la taille du
+    vivier**. Et c'est là qu'était le défaut, mesuré et non deviné : les deux
+    échelons *demandaient* dix-huit et seize lignes, mais n'en recevaient que
+    onze et seize en milieu de jeu. Cinq cents nœuds ne suffisent pas à classer
+    dix-huit coups ; le moteur en rend ce qu'il peut, et le vivier du premier
+    échelon se refermait tout seul — plus étroit que celui du second, donc
+    meilleur. L'échelle était inversée à son propre insu.
+
+    D'où le réglage contre-intuitif qui suit : on **augmente** les nœuds du
+    niveau le plus faible. Ils ne servent pas à le rendre fort — le tirage reste
+    presque uniforme — mais à ce que les vingt mauvais coups existent vraiment.
+    En bas de cette échelle, `nodes` ne règle pas la force : il règle combien de
+    fautes sont disponibles. Une première tentative dans l'autre sens — trois
+    cents nœuds pour vingt lignes — a rendu sept lignes et un bot qui gagnait
+    quatre parties sur cinq contre son successeur.
+
+    Vingt est le plafond du client de moteur, et c'est voulu qu'on l'y colle :
+    le premier échelon doit pouvoir jouer un coup que le moteur classe
+    dix-neuvième.
+
+    Une mesure sous Stockfish 18 donne le même diagnostic ailleurs sur
+    l'échelle — les marches entre 550 et 1000 font le double de ce qu'elles
+    annoncent — mais ce cas-ci est le seul que la montée en version a aggravé :
+    l'écart y tombait de cent vingt-sept points à moins vingt-trois.
+  */
   {
     elo: 100,
     personality: 'novice',
@@ -307,8 +348,8 @@ const LEVEL_TABLE: LevelSpec[] = [
     depth: 1,
     movetimeMs: 120,
     temperature: 1.0,
-    multiPv: 18,
-    nodes: 500,
+    multiPv: 20,
+    nodes: 1200,
   },
   {
     elo: 250,
@@ -318,7 +359,7 @@ const LEVEL_TABLE: LevelSpec[] = [
     movetimeMs: 150,
     temperature: 0.92,
     multiPv: 16,
-    nodes: 900,
+    nodes: 1200,
   },
   {
     elo: 400,
