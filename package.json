@@ -61,6 +61,10 @@
     "brand:images": "node scripts/build-brand.mjs",
     "check:pieges": "node --experimental-strip-types scripts/check-pieges.mjs"
   },
+  "overrides": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
   "devDependencies": {
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.4",
