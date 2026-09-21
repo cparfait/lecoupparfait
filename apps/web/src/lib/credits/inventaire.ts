@@ -7,8 +7,8 @@
  *  - **un paquet non crédité** — ajouté un soir, jamais remonté sur la page des
  *    crédits, et sa licence exige peut-être l'attribution ;
  *  - **un crédit orphelin** — le paquet a été retiré, l'entrée est restée ;
- *  - **une version qui a dérivé** — « Stockfish 18 » écrit à la main pendant
- *    que le script d'installation va chercher `sf_19`.
+ *  - **une version qui a dérivé** — « Stockfish 19 » écrit à la main pendant
+ *    que le script d'installation va chercher `sf_20`.
  *
  * Lu par `/api/admin/outils` et par `scripts/check-credits.mjs`. Rien ici ne
  * touche au réseau : la recherche de mises à jour est le travail de la route,
@@ -172,7 +172,7 @@ export function inventorier(racine = racineDuDepot()): Inventaire {
 
     Comparaison volontairement grossière — on cherche la chaîne dans le fichier,
     sans savoir quelle constante la porte. C'est suffisant : le jour où
-    `sf_18` devient `sf_19`, « 18 » ne s'y trouve plus. Une analyse syntaxique
+    `sf_19` devient `sf_20`, « 19 » ne s'y trouve plus. Une analyse syntaxique
     du script serait plus juste et bien plus fragile, pour attraper les mêmes
     fautes.
   */

@@ -116,7 +116,7 @@ export const pt: Traduction = {
         'Cada lance é comentado em voz alta. O cravo, o garfo, o mate do corredor: você os ouve nomear no momento em que aparecem no seu tabuleiro.',
       analysisTitle: 'Análise explicada',
       analysisBody:
-        'O Stockfish 18 roda no servidor com toda a força. Cada erro é classificado, o melhor lance é mostrado e, acima de tudo, a razão está escrita por extenso.',
+        'O Stockfish 19 roda no servidor com toda a força. Cada erro é classificado, o melhor lance é mostrado e, acima de tudo, a razão está escrita por extenso.',
       levelsTitle: '25 níveis, 7 personalidades',
       levelsBody:
         'De 100 a 3200 de Elo. Adversários com estilo próprio: um ataca, outro sufoca, um terceiro sacrifica tudo. Escolha seu parceiro de treino.',

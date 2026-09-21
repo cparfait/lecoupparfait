@@ -73,7 +73,7 @@ export const CREDITS: readonly Credit[] = [
     note: 'creditsNotes.stockfish.note',
     categorie: 'moteur',
     github: 'official-stockfish/Stockfish',
-    version: '18',
+    version: '19',
     verifieeDans: 'scripts/install-stockfish.mjs',
   },
   {

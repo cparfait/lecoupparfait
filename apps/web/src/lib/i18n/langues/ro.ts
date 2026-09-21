@@ -115,7 +115,7 @@ export const ro: Traduction = {
         'Fiecare mutare este comentată cu voce tare. Legarea, furculița, matul pe ultima linie: le auzi numite chiar în clipa în care apar pe tabla ta.',
       analysisTitle: 'Analiză explicată',
       analysisBody:
-        'Stockfish 18 rulează pe server la putere maximă. Fiecare greșeală este clasificată, cea mai bună mutare este arătată — și, mai ales, motivul este scris în cuvinte.',
+        'Stockfish 19 rulează pe server la putere maximă. Fiecare greșeală este clasificată, cea mai bună mutare este arătată — și, mai ales, motivul este scris în cuvinte.',
       levelsTitle: '25 de niveluri, 7 caractere',
       levelsBody:
         'De la 100 la 3200 Elo. Adversari cu stil: unul atacă, altul sufocă, al treilea sacrifică tot. Alege-ți partenerul de antrenament.',

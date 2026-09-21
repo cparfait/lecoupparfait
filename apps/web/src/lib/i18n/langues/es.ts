@@ -115,7 +115,7 @@ export const es: Traduction = {
         'Cada jugada se comenta en voz alta. La clavada, el tenedor, el mate del pasillo: los oyes nombrar en el momento en que aparecen en tu tablero.',
       analysisTitle: 'Análisis explicado',
       analysisBody:
-        'Stockfish 18 funciona en el servidor a plena potencia. Cada error se clasifica, se muestra la mejor jugada y, sobre todo, la razón está escrita con todas las letras.',
+        'Stockfish 19 funciona en el servidor a plena potencia. Cada error se clasifica, se muestra la mejor jugada y, sobre todo, la razón está escrita con todas las letras.',
       levelsTitle: '25 niveles, 7 caracteres',
       levelsBody:
         'De 100 a 3200 Elo. Rivales con estilo propio: uno ataca, otro asfixia, un tercero lo sacrifica todo. Elige tu sparring.',

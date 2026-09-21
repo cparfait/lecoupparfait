@@ -35,7 +35,7 @@
     "@types/react-dom": "19.3.0",
     "@types/three": "0.185.4",
     "@types/web-push": "3.6.4",
-    "stockfish": "18.0.8",
+    "stockfish": "^19.0.0",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3"
   }

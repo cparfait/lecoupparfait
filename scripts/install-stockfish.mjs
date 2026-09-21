@@ -26,22 +26,30 @@ const here = dirname(fileURLToPath(import.meta.url))
 const root = resolve(here, '..')
 const target = join(root, 'data', 'stockfish')
 
-const VERSION = 'sf_18'
+const VERSION = 'sf_19'
 
 /**
  * Archive à récupérer selon la machine.
  *
- * On choisit délibérément la variante `avx2` plutôt que `bmi2` ou `avx512` :
- * elle fonctionne sur tout processeur postérieur à 2013 environ, là où les
- * autres plantent sur les machines qui ne les gèrent pas. Un serveur de
- * production compile son propre binaire, mieux ajusté.
+ * Il n'y a plus d'arbitrage à rendre ici. Jusqu'à Stockfish 18 ce tableau
+ * choisissait `avx2` plutôt que `bmi2` ou `avx512` : un compromis, pris à
+ * l'aveugle sur la machine de quelqu'un d'autre, qui laissait de la vitesse aux
+ * processeurs récents pour ne pas planter sur les anciens. Stockfish 19 publie
+ * des binaires **universels** qui reconnaissent le processeur au démarrage et
+ * choisissent eux-mêmes leur chemin de code. Vingt-sept archives deviennent
+ * huit, et le compromis disparaît avec elles.
+ *
+ * `linux-arm64` entre au passage : il n'existait pas d'archive pour lui, le
+ * script refusait la plateforme.
  */
 const ARCHIVES = {
-  'win32-x64': 'stockfish-windows-x86-64-avx2.zip',
-  'win32-arm64': 'stockfish-windows-armv8.zip',
-  'linux-x64': 'stockfish-ubuntu-x86-64-avx2.tar',
-  'darwin-x64': 'stockfish-macos-x86-64-avx2.tar',
-  'darwin-arm64': 'stockfish-macos-m1-apple-silicon.tar',
+  'win32-x64': 'stockfish-windows-x86-64-universal.zip',
+  'win32-arm64': 'stockfish-windows-arm64-universal.zip',
+  'linux-x64': 'stockfish-linux-x86-64-universal.tar.gz',
+  'linux-arm64': 'stockfish-linux-arm64-universal.tar.gz',
+  // Une seule archive pour les deux processeurs Apple, désormais.
+  'darwin-x64': 'stockfish-macos-universal.tar.gz',
+  'darwin-arm64': 'stockfish-macos-universal.tar.gz',
 }
 
 const platformKey = `${process.platform}-${process.arch}`
@@ -73,8 +81,8 @@ if (existsSync(binaryPath)) {
   await rm(archivePath, { force: true })
 
   // L'archive contient un dossier `stockfish/` dont le nom du binaire porte la
-  // variante (`stockfish-windows-x86-64-avx2.exe`). On le remonte sous un nom
-  // stable, pour que la configuration ne dépende pas de la variante choisie.
+  // plateforme (`stockfish-windows-x86-64-universal.exe`). On le remonte sous
+  // un nom stable, pour que le `.env` ne dépende pas de l'archive téléchargée.
   const found = findBinary(target)
   if (!found) {
     console.error(`✗ Binaire introuvable après décompression dans ${target}`)
@@ -155,7 +163,7 @@ function findBinary(directory, depth = 0) {
     }
     // On écarte les fichiers annexes de l'archive : licence, réseau NNUE, etc.
     if (!/^stockfish/i.test(entry)) continue
-    if (/\.(nnue|txt|md|zip|tar)$/i.test(entry)) continue
+    if (/\.(nnue|txt|md|zip|tar|gz)$/i.test(entry)) continue
     if (process.platform === 'win32' && !entry.toLowerCase().endsWith('.exe')) continue
 
     return full

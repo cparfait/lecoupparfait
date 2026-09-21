@@ -10,7 +10,7 @@
  * se fait donc ici, une fois pour toutes.
  */
 
-import { Chess } from 'chess.js'
+import { Chess, validateFen } from 'chess.js'
 import type { Color } from 'chess.js'
 import type { EngineLine, Score, UciMove } from './types.ts'
 
@@ -228,16 +228,82 @@ export function isUciMove(value: string): boolean {
   return /^[a-h][1-8][a-h][1-8][qrbn]?$/.test(value)
 }
 
+/** Ce qu'on peut reprocher à une position avant de l'envoyer au moteur. */
+export type VerdictPosition = { ok: true } | { ok: false; raison: string }
+
+/** Valeurs implicites des champs de queue d'un FEN, dans l'ordre. */
+const DEFAUTS_FEN = ['w', '-', '-', '0', '1']
+
+/**
+ * Complète un FEN tronqué, comme le moteur le ferait.
+ *
+ * Un FEN abrégé — « les pièces et le trait », sans droits de roque ni
+ * compteurs — est courant dans les recueils de positions et les EPD. Stockfish
+ * l'accepte et comble les champs manquants ; `chess.js`, lui, exige les six et
+ * refuse tout le reste.
+ *
+ * Valider sans compléter reviendrait donc à refuser des positions que le
+ * moteur aurait analysées sans broncher : une garde posée contre la version 19
+ * deviendrait une régression pour l'utilisateur qui colle une position. On
+ * comble d'abord, on juge ensuite, et le moteur reçoit la forme complète —
+ * ainsi `chess.js` et lui parlent de la même position.
+ *
+ * Ce qui est vraiment mal formé le reste : un champ présent mais absurde n'est
+ * pas touché, et les deux le refusent alors d'une même voix.
+ */
+export function completeFen(fen: string): string {
+  const champs = fen.trim().split(/\s+/)
+  if (champs.length === 0 || champs[0] === '') return fen
+  if (champs.length >= 6) return fen
+
+  return [...champs, ...DEFAUTS_FEN.slice(champs.length - 1)].join(' ')
+}
+
+/**
+ * Vérifie qu'une position est présentable à un moteur.
+ *
+ * Stockfish 19 ne tolère plus ce que 18 laissait passer : devant un FEN mal
+ * formé il écrit `info string CRITICAL ERROR` **et termine le processus**. Ce
+ * qui n'était qu'une analyse fausse devient un moteur mort, que la réserve met
+ * deux secondes à relancer — et la requête est perdue de toute façon. Autant
+ * refuser ici, où l'on sait encore dire pourquoi.
+ *
+ * Le contrôle porte sur la forme du FEN et sur celle des coups. La légalité de
+ * la suite n'est pas rejouée : elle coûterait un parcours complet à chaque
+ * recherche, et ces coups viennent de l'état de partie de l'application. Le
+ * FEN, lui, vient de l'éditeur, d'une partie collée, d'une URL — c'est par là
+ * que les fautes entrent, et c'est donc lui qu'on regarde.
+ */
+export function validatePosition(fen: string, moves: UciMove[] = []): VerdictPosition {
+  const verdict = validateFen(completeFen(fen))
+  if (!verdict.ok) return { ok: false, raison: verdict.error ?? 'FEN invalide' }
+
+  const malForme = moves.find((move) => !isUciMove(move))
+  if (malForme !== undefined) return { ok: false, raison: `coup UCI mal formé : ${malForme}` }
+
+  return { ok: true }
+}
+
 /**
  * Construit la commande `position` à envoyer au moteur.
  * On préfère `startpos moves …` quand c'est possible : certains moteurs
  * détectent mieux les répétitions avec l'historique complet.
+ *
+ * Lève plutôt que de laisser passer : c'est le seul point par lequel une
+ * position atteint un moteur, donc le seul endroit où la garde ne peut pas
+ * être contournée par un appelant distrait. Les deux clients vérifient déjà
+ * en amont, pour échouer avant d'avoir engagé une recherche ; ceci reste le
+ * filet.
  */
 export function positionCommand(fen: string, moves: UciMove[] = []): string {
+  const verdict = validatePosition(fen, moves)
+  if (!verdict.ok) throw new Error(`Position refusée par le moteur : ${verdict.raison}`)
+
+  const complet = completeFen(fen)
   const base =
-    fen === 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+    complet === 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
       ? 'position startpos'
-      : `position fen ${fen}`
+      : `position fen ${complet}`
   return moves.length > 0 ? `${base} moves ${moves.join(' ')}` : base
 }
 

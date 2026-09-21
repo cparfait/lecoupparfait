@@ -24,7 +24,7 @@ eux — fourchette, clouage, mat du couloir — et il te le dit à voix haute.
 | **Écouter**        | les 328 étapes du programme lues à voix haute et enchaînées tout seul, l'échiquier qui suit : pour réviser sans les mains                                                                                                               |
 | **S'entraîner**    | jusqu'à 6 057 356 puzzles tactiques notés et étiquetés, avec classement Glicko-2 dédié                                                                                                                                                  |
 | **Finales**        | 3 568 positions classées en 8 familles : on donne l'objectif — gagner ou tenir la nulle — et l'ordinateur défend au mieux                                                                                                               |
-| **Analyser**       | Stockfish 18 natif côté serveur · chaque coup classé (brillant → gaffe), meilleur coup fléché, **explication rédigée**, puis « et maintenant ? » : la phase la plus faible et trois puzzles sur le motif exact qui a coûté la partie    |
+| **Analyser**       | Stockfish 19 natif côté serveur · chaque coup classé (brillant → gaffe), meilleur coup fléché, **explication rédigée**, puis « et maintenant ? » : la phase la plus faible et trois puzzles sur le motif exact qui a coûté la partie    |
 | **Importer**       | tes parties Chess.com et Lichess, à partir du seul pseudo : rien à installer, aucun compte à créer, et rien n'est conservé                                                                                                              |
 | **Explorer**       | 3 810 ouvertures nommées, reconnues même par transposition. Les noms cités au fil des textes — « sauf l'est-indienne et la sicilienne » — mènent à leur fiche d'un clic                                                                 |
 | **Les enjeux**     | 25 fiches d'ouverture expliquées par ce qu'elles **cherchent** et non par leurs variantes : l'idée, la structure de pions, le plan de chaque camp, le piège des dix premiers coups. Elles apparaissent d'elles-mêmes dans l'explorateur |
@@ -323,7 +323,7 @@ Sur une base **déjà en service**, ne pas rejouer la migration initiale : elle
 crée les tables sans `IF NOT EXISTS` et échouera. Il faut d'abord la marquer
 comme appliquée — c'est le rôle de la table `__drizzle_migrations`.
 
-L'image du serveur **compile Stockfish 18 depuis les sources**, avec
+L'image du serveur **compile Stockfish 19 depuis les sources**, avec
 optimisation guidée par le profil et réseau NNUE complet, et installe la voix
 neuronale Piper. Comptez une vingtaine de minutes pour la première
 construction.
@@ -397,7 +397,7 @@ gambit/
 
 |                 | Navigateur                                      | Serveur                          |
 | --------------- | ----------------------------------------------- | -------------------------------- |
-| Version         | Stockfish 18 Lite (WebAssembly, 7 Mo)           | Stockfish 18 natif, NNUE complet |
+| Version         | Stockfish 19 Lite (WebAssembly, 1,6 Mo)         | Stockfish 19 natif, NNUE complet |
 | Rôle            | avis instantané, adversaires artificiels, repli | analyse de partie en profondeur  |
 | Profondeur      | 14–18                                           | 20–30                            |
 | Confidentialité | rien ne sort du navigateur                      | requêtes via l'API interne       |

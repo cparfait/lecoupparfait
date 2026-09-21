@@ -2,7 +2,7 @@
 #  Serveur Le Coup Parfait : Stockfish natif + temps réel
 #
 #  Stockfish est compilé depuis les sources plutôt qu'installé depuis le dépôt
-#  de la distribution : on obtient ainsi la version 18 (les paquets Debian ont
+#  de la distribution : on obtient ainsi la version 19 (les paquets Debian ont
 #  souvent plusieurs versions de retard) et surtout un binaire optimisé pour le
 #  jeu d'instructions de la machine de destination.
 # ─────────────────────────────────────────────────────────────────────────────
@@ -10,10 +10,24 @@
 # ── Étape 1 : compilation de Stockfish ───────────────────────────────────────
 FROM debian:bookworm-slim AS stockfish
 
-ARG STOCKFISH_TAG=sf_18
+ARG STOCKFISH_TAG=sf_19
 # `x86-64-avx2` fonctionne sur tout processeur postérieur à 2013 environ.
 # Pour un serveur récent, `x86-64-bmi2` ou `x86-64-avx512` sont plus rapides ;
 # pour un ARM (Raspberry Pi, Ampere), utiliser `armv8`.
+#
+# Stockfish 19 ajoute `x86-64-universal`, qui compile tous les chemins de code
+# et reconnaît le processeur au démarrage. On ne l'utilise **pas** ici, et ce
+# n'est pas un oubli : `profile-build` rejoue `./stockfish bench` pour chaque
+# sous-architecture afin d'en relever le profil, `avx512icl` comprise. Un
+# constructeur sans AVX-512 s'arrête alors sur une instruction illégale — c'est
+# pourquoi l'amont documente cette cible avec un `RUN_PREFIX` pointant sur
+# l'émulateur Intel SDE. Échanger les 10 % certains de la compilation guidée
+# contre une sélection à l'exécution dont cette image n'a pas besoin, au prix
+# d'un émulateur dans l'étape de construction, serait un mauvais marché : le
+# binaire est compilé pour la machine où il tournera, pas pour être distribué.
+#
+# C'est l'inverse pour `scripts/install-stockfish.mjs`, qui télécharge un
+# binaire publié sans savoir sur quoi il atterrira : lui prend l'universel.
 ARG STOCKFISH_ARCH=x86-64-avx2
 
 # `curl` n'est pas un confort : la cible `net` du Makefile de Stockfish

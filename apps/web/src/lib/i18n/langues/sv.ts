@@ -111,7 +111,7 @@ export const sv: Traduction = {
         'Varje drag kommenteras högt. Bindningen, gaffeln, grundradsmatten: du hör dem nämnas i samma stund som de dyker upp på ditt bräde.',
       analysisTitle: 'Förklarad analys',
       analysisBody:
-        'Stockfish 18 kör för fullt på servern. Varje misstag klassas, bästa draget visas — och framför allt står skälet utskrivet.',
+        'Stockfish 19 kör för fullt på servern. Varje misstag klassas, bästa draget visas — och framför allt står skälet utskrivet.',
       levelsTitle: '25 nivåer, 7 temperament',
       levelsBody:
         'Från 100 till 3200 i Elo. Motståndare med stil: en stormar fram, en annan kväver, en tredje offrar allt. Välj din sparringpartner.',

@@ -112,7 +112,7 @@ export const it: Traduction = {
         'Ogni mossa è commentata ad alta voce. L’inchiodatura, la forchetta, il matto del corridoio: li senti nominare nel momento in cui compaiono sulla tua scacchiera.',
       analysisTitle: 'Analisi spiegata',
       analysisBody:
-        'Stockfish 18 gira sul server a piena potenza. Ogni errore è classificato, la mossa migliore è mostrata e, soprattutto, la ragione è scritta per esteso.',
+        'Stockfish 19 gira sul server a piena potenza. Ogni errore è classificato, la mossa migliore è mostrata e, soprattutto, la ragione è scritta per esteso.',
       levelsTitle: '25 livelli, 7 caratteri',
       levelsBody:
         'Da 100 a 3200 Elo. Avversari con uno stile: uno attacca, uno soffoca, un terzo sacrifica tutto. Scegli il tuo sparring.',

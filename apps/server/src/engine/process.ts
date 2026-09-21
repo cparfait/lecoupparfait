@@ -20,6 +20,7 @@ import {
   goCommand,
   parseBestMove,
   positionCommand,
+  validatePosition,
   type EngineLine,
   type PositionAnalysis,
   type UciMove,
@@ -230,6 +231,13 @@ export class EngineProcess extends EventEmitter {
   // ── Recherche ─────────────────────────────────────────────────────────────
 
   async search(request: SearchRequest): Promise<PositionAnalysis> {
+    // Avant `start()`, et avant `busy` : une position refusée ne doit ni
+    // réveiller un processus ni en occuper un. Stockfish 19 terminerait sur
+    // un FEN mal formé, et la réserve mettrait deux secondes à le remplacer —
+    // pour une requête perdue dans tous les cas.
+    const verdict = validatePosition(request.fen, request.moves ?? [])
+    if (!verdict.ok) throw new Error(`Position refusée : ${verdict.raison}`)
+
     if (!this.child) await this.start()
     if (this.busy) throw new Error('Ce processus moteur est déjà occupé.')
 

@@ -114,7 +114,7 @@ export const pl: Traduction = {
         'Każdy ruch jest komentowany na głos. Związanie, widełki, mat na ostatniej linii: słyszysz ich nazwy dokładnie wtedy, gdy pojawiają się na twojej szachownicy.',
       analysisTitle: 'Analiza z wyjaśnieniem',
       analysisBody:
-        'Stockfish 18 działa na serwerze z pełną mocą. Każdy błąd zostaje sklasyfikowany, najlepszy ruch pokazany — a przede wszystkim powód jest napisany słowami.',
+        'Stockfish 19 działa na serwerze z pełną mocą. Każdy błąd zostaje sklasyfikowany, najlepszy ruch pokazany — a przede wszystkim powód jest napisany słowami.',
       levelsTitle: '25 poziomów, 7 charakterów',
       levelsBody:
         'Od 100 do 3200 Elo. Przeciwnicy mają styl: jeden szarżuje, drugi dusi, trzeci poświęca wszystko. Wybierz swojego sparingpartnera.',

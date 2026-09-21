@@ -82,8 +82,8 @@ rejoue à l’identique, et rien n’est téléversé nulle part.
 
 | Composant                             | Auteur                       | Licence          |
 | ------------------------------------- | ---------------------------- | ---------------- |
-| Stockfish 18 (natif, serveur)         | les auteurs de Stockfish     | GPL-3.0-or-later |
-| Stockfish 18 WebAssembly (navigateur) | Nathan Rugg (`stockfish.js`) | GPL-3.0-or-later |
+| Stockfish 19 (natif, serveur)         | les auteurs de Stockfish     | GPL-3.0-or-later |
+| Stockfish 19 WebAssembly (navigateur) | Nathan Rugg (`stockfish.js`) | GPL-3.0-or-later |
 
 C’est cette dépendance à Stockfish qui impose au projet une licence de la
 famille GPL ; Le Coup Parfait est donc publié sous **AGPL-3.0-or-later**.

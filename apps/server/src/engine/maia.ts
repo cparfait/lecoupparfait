@@ -27,6 +27,7 @@ import { spawn, type ChildProcessByStdio } from 'node:child_process'
 import type { Readable, Writable } from 'node:stream'
 import { existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { validatePosition } from '@coupparfait/core'
 
 /** Paliers publiés : de 1100 à 1900, de cent en cent. */
 export const MAIA_RATINGS = [1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900] as const
@@ -162,6 +163,12 @@ function touch(rating: MaiaRating, worker: Worker): void {
  * moyen de les distinguer.
  */
 export async function maiaMove(fen: string, rating: MaiaRating): Promise<string | null> {
+  // Maia écrit sa commande `position` à la main, hors de `positionCommand` :
+  // la garde du protocole ne la couvre pas, il faut la poser ici. Un processus
+  // par niveau, qu'aucune réserve ne relance — le perdre coûterait plus cher
+  // qu'un moteur d'analyse.
+  if (!validatePosition(fen).ok) return null
+
   const worker = workers.get(rating) ?? spawnWorker(rating)
   await worker.ready
   touch(rating, worker)

@@ -24,7 +24,13 @@
  */
 
 import type { EngineLine, PositionAnalysis, Score, UciMove } from '@coupparfait/core'
-import { MultiPvCollector, goCommand, parseBestMove, positionCommand } from '@coupparfait/core'
+import {
+  MultiPvCollector,
+  goCommand,
+  parseBestMove,
+  positionCommand,
+  validatePosition,
+} from '@coupparfait/core'
 import type { TranslationKey, useT } from '@/lib/i18n/index.tsx'
 
 /**
@@ -40,6 +46,7 @@ export const PANNES_MOTEUR = {
   arrete: 'moteur:arrete',
   nonDemarre: 'moteur:non-demarre',
   annulee: 'moteur:annulee',
+  positionRefusee: 'moteur:position-refusee',
 } as const
 
 const PHRASES_MOTEUR: Record<string, TranslationKey> = {
@@ -47,6 +54,7 @@ const PHRASES_MOTEUR: Record<string, TranslationKey> = {
   [PANNES_MOTEUR.arrete]: 'parts.engineStopped',
   [PANNES_MOTEUR.nonDemarre]: 'parts.engineNotStarted',
   [PANNES_MOTEUR.annulee]: 'parts.analysisCancelled',
+  [PANNES_MOTEUR.positionRefusee]: 'parts.positionRejected',
 }
 
 /**
@@ -144,9 +152,12 @@ export class EngineClient {
         const wantThreads =
           this.config.preferThreads === true && isCrossOriginIsolated() && !this.fallbackUsed
         this.threaded = wantThreads
+        // Sans numéro de version : `scripts/setup-engine.mjs` pose les deux
+        // variantes sous ces noms-là, quelle que soit la version livrée par le
+        // paquet. Monter Stockfish ne demande plus de toucher à ce fichier.
         const script = wantThreads
-          ? '/engine/stockfish-18-lite.js'
-          : '/engine/stockfish-18-lite-single.js'
+          ? '/engine/stockfish-lite.js'
+          : '/engine/stockfish-lite-single.js'
 
         this.setStatus('loading')
         const worker = new Worker(script)
@@ -304,6 +315,13 @@ export class EngineClient {
       }
       if (options.signal?.aborted) {
         reject(new DOMException(PANNES_MOTEUR.annulee, 'AbortError'))
+        return
+      }
+      // Avant d'avoir posé `pending` : un FEN mal formé tuerait le moteur
+      // WebAssembly comme il tuerait le natif, et ici il n'y a pas de réserve
+      // pour le relancer — c'est l'onglet qui perd son analyse.
+      if (!validatePosition(options.fen, options.moves ?? []).ok) {
+        reject(new Error(PANNES_MOTEUR.positionRefusee))
         return
       }
 

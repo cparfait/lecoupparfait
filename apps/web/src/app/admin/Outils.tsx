@@ -70,8 +70,8 @@ const ORDRE: CategorieCredit[] = ['moteur', 'donnees', 'ressources', 'bibliotheq
 /**
  * Deux versions désignent-elles la même chose ?
  *
- * Les étiquettes ne s'écrivent pas partout pareil : Stockfish publie `sf_18`
- * quand le catalogue dit « 18 », Lc0 publie `v0.32.1`. On normalise le peu
+ * Les étiquettes ne s'écrivent pas partout pareil : Stockfish publie `sf_19`
+ * quand le catalogue dit « 19 », Lc0 publie `v0.32.1`. On normalise le peu
  * qu'il faut, et l'on préfère répondre « à vérifier » plutôt que d'affirmer
  * « obsolète » sur une différence de préfixe.
  */

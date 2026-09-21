@@ -9,8 +9,8 @@
  *
  *  1. **un paquet d'exécution non crédité** — ajouté un soir, jamais remonté ;
  *  2. **un crédit orphelin** — le paquet est parti, l'entrée est restée ;
- *  3. **une version qui a dérivé** — « Stockfish 18 » sur la page pendant que
- *     `install-stockfish.mjs` va chercher `sf_19`.
+ *  3. **une version qui a dérivé** — « Stockfish 19 » sur la page pendant que
+ *     `install-stockfish.mjs` va chercher `sf_20`.
  *
  * Il ne va jamais sur le réseau : savoir s'il existe plus récent est le travail
  * de l'onglet « Outils » de l'administration, à la demande.
@@ -79,6 +79,72 @@ check(
   inventaire.versionsDivergentes.length === 0,
   inventaire.versionsDivergentes.map((v) => `${v.nom} ${v.version} ∉ ${v.fichier}`).join(', '),
 )
+
+/*
+  ── Et la version écrite dans les phrases ? ──────────────────────────────────
+
+  Le contrôle ci-dessus confronte le catalogue au script d'installation. Il ne
+  voit pas les textes : « Stockfish 18 » vivait aussi en toutes lettres dans
+  vingt fichiers de langue, dans le pied de page et dans `ATTRIBUTION.md`, et
+  la montée en version les laissait tous derrière sans que rien ne proteste.
+  Angle mort d'autant plus coûteux qu'il est multilingue : on corrige le
+  français, on oublie les dix-neuf autres, et l'erreur ne se voit que depuis
+  une langue qu'on ne lit pas.
+
+  On cherche donc « <nom> <nombre> » partout où l'application parle, et on
+  exige que le nombre soit celui du catalogue. Volontairement limité aux
+  crédits qui portent une version écrite à la main — les paquets npm ont leur
+  numéro dans un `package.json`, personne ne le recopie dans une phrase.
+*/
+const { readFileSync, readdirSync, existsSync } = await import('node:fs')
+const { join, dirname, resolve } = await import('node:path')
+const { fileURLToPath } = await import('node:url')
+
+const racine = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+
+/** Les fichiers où l'application s'adresse à quelqu'un. */
+function fichiersParlants() {
+  const trouves = []
+  const dossiers = [
+    join(racine, 'apps', 'web', 'src', 'lib', 'i18n'),
+    join(racine, 'apps', 'web', 'src', 'lib', 'i18n', 'langues'),
+    join(racine, 'apps', 'web', 'src', 'components', 'layout'),
+  ]
+  for (const dossier of dossiers) {
+    if (!existsSync(dossier)) continue
+    for (const nom of readdirSync(dossier)) {
+      if (/\.tsx?$/.test(nom)) trouves.push(join(dossier, nom))
+    }
+  }
+  for (const nom of ['ATTRIBUTION.md', 'README.md']) {
+    const chemin = join(racine, nom)
+    if (existsSync(chemin)) trouves.push(chemin)
+  }
+  return trouves
+}
+
+const parlants = fichiersParlants()
+const versionnes = CREDITS.filter((credit) => credit.version)
+
+for (const credit of versionnes) {
+  const motif = new RegExp(`${credit.nom}\\s+(\\d+(?:\\.\\d+)*)`, 'g')
+  const fautes = []
+
+  for (const chemin of parlants) {
+    const contenu = readFileSync(chemin, 'utf8')
+    for (const [, ecrite] of contenu.matchAll(motif)) {
+      if (ecrite === credit.version) continue
+      const relatif = chemin.slice(racine.length + 1).replace(/\\/g, '/')
+      fautes.push(`${relatif} dit « ${credit.nom} ${ecrite} »`)
+    }
+  }
+
+  check(
+    `les textes disent « ${credit.nom} ${credit.version} »`,
+    fautes.length === 0,
+    [...new Set(fautes)].slice(0, 6).join(' · '),
+  )
+}
 
 /*
   La licence annoncée est-elle celle du paquet ?

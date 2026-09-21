@@ -126,7 +126,7 @@ export const en: Dictionary = {
         'Every move is narrated aloud. Pins, forks, back-rank mates — you hear them named the moment they appear on your board.',
       analysisTitle: 'Explained analysis',
       analysisBody:
-        'Stockfish 18 runs server-side at full strength. Every error is classified, the best move is shown, and the reason is spelled out.',
+        'Stockfish 19 runs server-side at full strength. Every error is classified, the best move is shown, and the reason is spelled out.',
       levelsTitle: '25 levels, 7 personalities',
       levelsBody:
         'From 100 to 3200 Elo. Opponents with a style — one charges, one squeezes, one sacrifices everything. Pick your sparring partner.',
@@ -7071,6 +7071,7 @@ export const en: Dictionary = {
     engineStopped: 'Engine stopped',
     engineNotStarted: 'Engine not started',
     analysisCancelled: 'Analysis cancelled',
+    positionRejected: 'Invalid position: the engine cannot analyse it.',
     iaUnreadable: 'Unreadable answer from the provider.',
     iaNoStream: 'The provider returned no stream.',
     loading3d: 'Loading 3D…',

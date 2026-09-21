@@ -125,7 +125,7 @@ export const fr = {
         'Chaque coup est commenté à voix haute, en français. Le clouage, la fourchette, le mat du couloir : tu les entends nommer au moment où ils apparaissent sur ton échiquier.',
       analysisTitle: 'Analyse expliquée',
       analysisBody:
-        'Stockfish 18 tourne sur le serveur en pleine puissance. Chaque erreur est classée, le meilleur coup est montré, et surtout : la raison est écrite en toutes lettres.',
+        'Stockfish 19 tourne sur le serveur en pleine puissance. Chaque erreur est classée, le meilleur coup est montré, et surtout : la raison est écrite en toutes lettres.',
       levelsTitle: '25 niveaux, 7 caractères',
       levelsBody:
         'De 100 à 3200 Elo. Des adversaires qui ont un style — l’un fonce, l’autre étouffe, un troisième sacrifie tout. Choisis ton sparring-partner.',
@@ -7112,6 +7112,7 @@ export const fr = {
     engineStopped: 'Moteur arrêté',
     engineNotStarted: 'Moteur non démarré',
     analysisCancelled: 'Analyse annulée',
+    positionRejected: 'Position invalide : le moteur ne peut pas l’analyser.',
     iaUnreadable: 'Réponse illisible du fournisseur.',
     iaNoStream: 'Le fournisseur n’a renvoyé aucun flux.',
     loading3d: 'Chargement de la 3D…',

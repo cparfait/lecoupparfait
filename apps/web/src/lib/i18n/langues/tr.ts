@@ -112,7 +112,7 @@ export const tr: Traduction = {
         'Her hamle sesli olarak yorumlanır. Şiş, çatal, koridor matı: tahtanda belirdikleri anda adlarını duyarsın.',
       analysisTitle: 'Açıklamalı analiz',
       analysisBody:
-        'Stockfish 18 sunucuda tam güçle çalışır. Her hata sınıflandırılır, en iyi hamle gösterilir — ve en önemlisi, gerekçesi açıkça yazılır.',
+        'Stockfish 19 sunucuda tam güçle çalışır. Her hata sınıflandırılır, en iyi hamle gösterilir — ve en önemlisi, gerekçesi açıkça yazılır.',
       levelsTitle: '25 seviye, 7 karakter',
       levelsBody:
         '100’den 3200 Elo’ya. Üslubu olan rakipler: biri saldırır, biri boğar, üçüncüsü her şeyi feda eder. Antrenman rakibini seç.',

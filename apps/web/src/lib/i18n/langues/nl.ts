@@ -112,7 +112,7 @@ export const nl: Traduction = {
         'Elke zet wordt hardop becommentarieerd. De penning, de vork, het achterstemat: je hoort ze noemen op het moment dat ze op je bord verschijnen.',
       analysisTitle: 'Uitgelegde analyse',
       analysisBody:
-        'Stockfish 18 draait op volle kracht op de server. Elke fout wordt ingedeeld, de beste zet getoond — en vooral: de reden staat er voluit.',
+        'Stockfish 19 draait op volle kracht op de server. Elke fout wordt ingedeeld, de beste zet getoond — en vooral: de reden staat er voluit.',
       levelsTitle: '25 niveaus, 7 karakters',
       levelsBody:
         'Van 100 tot 3200 Elo. Tegenstanders met een eigen stijl: de een stormt, de ander verstikt, een derde offert alles. Kies je sparringpartner.',

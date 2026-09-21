@@ -111,7 +111,7 @@ export const cs: Traduction = {
         'Každý tah je komentován nahlas. Vazba, vidlička, mat na poslední řadě: slyšíš jejich názvy ve chvíli, kdy se objeví na tvé šachovnici.',
       analysisTitle: 'Vysvětlená analýza',
       analysisBody:
-        'Stockfish 18 běží na serveru naplno. Každá chyba je zařazena, nejlepší tah ukázán — a hlavně: důvod je napsaný slovy.',
+        'Stockfish 19 běží na serveru naplno. Každá chyba je zařazena, nejlepší tah ukázán — a hlavně: důvod je napsaný slovy.',
       levelsTitle: '25 úrovní, 7 povah',
       levelsBody:
         'Od 100 do 3200 Elo. Soupeři se stylem: jeden útočí, druhý dusí, třetí obětuje všechno. Vyber si sparingpartnera.',

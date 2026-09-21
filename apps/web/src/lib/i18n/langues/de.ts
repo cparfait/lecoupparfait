@@ -116,7 +116,7 @@ export const de: Traduction = {
         'Jeder Zug wird laut kommentiert. Fesselung, Gabel, Grundreihenmatt: Du hörst ihre Namen genau dann, wenn sie auf deinem Brett auftauchen.',
       analysisTitle: 'Erklärte Analyse',
       analysisBody:
-        'Stockfish 18 läuft mit voller Kraft auf dem Server. Jeder Fehler wird eingeordnet, der beste Zug gezeigt — und vor allem steht der Grund ausgeschrieben da.',
+        'Stockfish 19 läuft mit voller Kraft auf dem Server. Jeder Fehler wird eingeordnet, der beste Zug gezeigt — und vor allem steht der Grund ausgeschrieben da.',
       levelsTitle: '25 Stufen, 7 Charaktere',
       levelsBody:
         'Von 100 bis 3200 Elo. Gegner mit eigenem Stil: einer stürmt, einer erdrosselt, ein dritter opfert alles. Wähle deinen Sparringspartner.',

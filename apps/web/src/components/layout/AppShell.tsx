@@ -580,7 +580,7 @@ function SiteFooter() {
             rel="noreferrer noopener"
             className="transition-colors hover:text-ink"
           >
-            Stockfish 18
+            Stockfish 19
           </a>
         </nav>
       </div>

@@ -111,7 +111,7 @@ export const hu: Traduction = {
         'Minden lépést hangosan kommentál. A kötés, a villa, az alapsormatt: akkor hallod a nevüket, amikor megjelennek a tábládon.',
       analysisTitle: 'Elmagyarázott elemzés',
       analysisBody:
-        'A Stockfish 18 teljes erővel fut a kiszolgálón. Minden hiba besorolást kap, a legjobb lépés látszik — és ami a legfontosabb: az ok ki van írva szavakkal.',
+        'A Stockfish 19 teljes erővel fut a kiszolgálón. Minden hiba besorolást kap, a legjobb lépés látszik — és ami a legfontosabb: az ok ki van írva szavakkal.',
       levelsTitle: '25 szint, 7 jellem',
       levelsBody:
         '100-tól 3200 Élőig. Stílussal rendelkező ellenfelek: az egyik támad, a másik fojtogat, a harmadik mindent feláldoz. Válaszd ki az edzőpartnered.',
