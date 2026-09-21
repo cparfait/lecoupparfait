@@ -17,6 +17,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
 import {
   ArrowRight,
   Check,
@@ -928,40 +929,57 @@ export default function PuzzlesPage() {
               un liseré d'accent. C'est la première chose à lire devant une
               position, elle ne doit pas se confondre avec une carte
               d'information. */}
+          {/* Le panneau porte la couleur de son état — l'accent tant qu'on
+              cherche, le vert du meilleur coup une fois trouvé, le rouge de la
+              gaffe sinon — par un lavis dans son coin, comme les cartes de
+              rubrique. On sait où l'on en est avant de lire. */}
           <Card
             className={clsx(
-              'p-4',
-              status === 'playing' &&
-                'border-[color-mix(in_oklab,var(--accent)_40%,var(--border))]',
+              'relative overflow-hidden p-5',
+              status === 'playing' && 'teinte-defi',
+              status === 'solved' && 'teinte-reussi',
             )}
+            style={
+              status === 'failed'
+                ? ({
+                    '--teinte': 'var(--q-blunder)',
+                    borderColor: 'color-mix(in oklab, var(--q-blunder) 40%, var(--border))',
+                  } as CSSProperties)
+                : undefined
+            }
           >
             {status === 'playing' && (
               <>
-                <div className="flex flex-wrap items-center gap-2.5">
+                <div className="flex items-center gap-3">
+                  {/* Le disque du camp au trait, en grand : c'est la seule
+                      information qu'il faut avoir vue avant de toucher une
+                      pièce. */}
                   <span
                     className={clsx(
-                      'h-5 w-5 shrink-0 rounded-full',
+                      'h-9 w-9 shrink-0 rounded-full shadow-[inset_0_-2px_4px_rgb(0_0_0/.25)]',
                       orientation === 'w'
                         ? 'bg-[var(--eval-white)] ring-2 ring-[var(--piece-white-edge)]'
                         : 'bg-[var(--eval-black)] ring-2 ring-[var(--piece-black-edge)]',
                     )}
                     aria-hidden
                   />
-                  <p className="font-display text-base font-semibold tracking-tight">
-                    {t(orientation === 'w' ? 'puzzles.whiteToPlay' : 'puzzles.blackToPlay')}
-                  </p>
-                  <CategorieDuPuzzle
-                    puzzle={puzzle}
-                    filtre={theme}
-                    locale={locale}
-                    visible={categorieVisible}
-                    onDemander={() => setCategorieVisible(true)}
-                    className="ml-auto"
-                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="titre-affiche text-[1.35rem]">
+                      {t(orientation === 'w' ? 'puzzles.whiteToPlay' : 'puzzles.blackToPlay')}
+                    </p>
+                    <p className="mt-0.5 text-[13px] leading-snug text-muted">
+                      {t('puzzles.onlyOne')}
+                    </p>
+                  </div>
                 </div>
-                <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
-                  {t('puzzles.onlyOne')}
-                </p>
+                <CategorieDuPuzzle
+                  puzzle={puzzle}
+                  filtre={theme}
+                  locale={locale}
+                  visible={categorieVisible}
+                  onDemander={() => setCategorieVisible(true)}
+                  className="mt-3"
+                />
                 {wrongAttempts > 0 && (
                   <p className="mt-2 flex items-center gap-1.5 text-[14px] text-[var(--q-blunder)]">
                     <X size={13} aria-hidden />
@@ -978,15 +996,15 @@ export default function PuzzlesPage() {
             )}
 
             {status === 'solved' && (
-              <div className="flex items-start gap-2.5">
+              <div className="flex items-start gap-3">
                 <span
-                  className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[color-mix(in_oklab,var(--q-best)_20%,transparent)]"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--q-best)] text-white shadow-[0_6px_18px_-6px_var(--q-best)]"
                   aria-hidden
                 >
-                  <Check size={14} className="text-[var(--q-best)]" />
+                  <Check size={18} strokeWidth={3} />
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-[var(--q-best)]">
+                  <p className="titre-affiche text-[1.35rem] text-[var(--q-best)]">
                     {t(modeDefi ? 'puzzles.dailyDone' : 'puzzles.solvedTitle')}
                   </p>
                   {/* Dans le défi, on ne conseille pas « refais-en un du même
@@ -1004,15 +1022,15 @@ export default function PuzzlesPage() {
             )}
 
             {status === 'failed' && (
-              <div className="flex items-start gap-2.5">
+              <div className="flex items-start gap-3">
                 <span
-                  className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[color-mix(in_oklab,var(--q-blunder)_20%,transparent)]"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--q-blunder)] text-white shadow-[0_6px_18px_-6px_var(--q-blunder)]"
                   aria-hidden
                 >
-                  <X size={14} className="text-[var(--q-blunder)]" />
+                  <X size={18} strokeWidth={3} />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-[var(--q-blunder)]">
+                  <p className="titre-affiche text-[1.35rem] text-[var(--q-blunder)]">
                     {t('puzzles.failedTitle')}
                   </p>
                   {/* La solution reste offerte, jamais imposée.
@@ -1040,7 +1058,9 @@ export default function PuzzlesPage() {
           {/* Thèmes : révélés seulement après coup */}
           {(status === 'solved' || status === 'failed') && puzzle && (
             <Card className="p-4">
-              <p className="mb-2 text-[12px] font-semibold text-faint">{t('puzzles.whatToSee')}</p>
+              <p className="mb-2.5 font-display text-[15px] font-bold tracking-tight">
+                {t('puzzles.whatToSee')}
+              </p>
               <div className="flex flex-wrap gap-1.5">
                 {puzzle.themes.slice(0, 6).map((themeId) => {
                   const copy = motifCopy(themeId as MotifId, locale)
@@ -1170,8 +1190,8 @@ export default function PuzzlesPage() {
               au-dessus du plateau. Un `select` natif, et non un menu maison :
               il se pilote au clavier, s'ouvre au doigt, et ne réclame rien. */}
           {!modeDefi && (
-            <label className="hidden items-center justify-between gap-3 rounded-[var(--radius)] border border-line bg-surface px-3.5 py-2 text-sm lg:flex">
-              <span className="text-muted">{t('puzzles.themes')}</span>
+            <label className="hidden h-11 items-center justify-between gap-3 rounded-full border border-line-strong/70 bg-surface-strong pl-4 pr-3 text-sm shadow-[inset_0_1px_0_var(--inner-edge)] transition-colors hover:border-[color-mix(in_oklab,var(--accent)_40%,var(--border-strong))] lg:flex">
+              <span className="font-medium text-muted">{t('puzzles.themes')}</span>
               <select
                 value={theme}
                 onChange={(event) => setTheme(event.target.value)}

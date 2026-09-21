@@ -46,9 +46,9 @@
      `#0b0b14` était un noir de tableur : sans profondeur, la page se lisait
      comme un fond d'écran éteint. Un cran plus bas et plus bleu, l'aurore
      a de quoi se détacher et les cartes de quoi flotter. */
-  --bg: #0a0a12;
-  --bg-deep: #06060b;
-  --bg-elev: #14141f;
+  --bg: #0e0f1f;
+  --bg-deep: #08091a;
+  --bg-elev: #181a30;
   /* Ce qui flotte au-dessus de la page : menus, barre du haut, barre du bas.
 
      `--bg-elev` ne suffisait pas. Six points de luminance séparent #07070c de
@@ -56,7 +56,7 @@
      liseré à 17 % de blanc, et disparaissait dès qu'on le regardait sur un
      écran peu contrasté ou en plein jour. Une surface flottante doit se lire
      comme un objet posé, pas comme une découpe du fond. */
-  --flottant: #222234;
+  --flottant: #24263e;
 
   /* Surfaces opaques, et non plus un voile de blanc.
 
@@ -71,11 +71,11 @@
   /* Une carte doit se lire comme posée sur la page, pas découpée dedans :
      du noir sur du noir, c'est ce qu'on voyait. Trois crans au-dessus du
      fond, et un liseré qui se voit sans qu'on le cherche. */
-  --surface: #1b1b28;
-  --surface-hover: #222231;
-  --surface-strong: #2a2a3a;
-  --border: rgb(255 255 255 / 0.13);
-  --border-strong: rgb(255 255 255 / 0.24);
+  --surface: #1c1e33;
+  --surface-hover: #23253d;
+  --surface-strong: #2c2f4a;
+  --border: rgb(255 255 255 / 0.14);
+  --border-strong: rgb(255 255 255 / 0.26);
 
   /* Ce qu'il faut ajouter à `--surface` pour qu'une carte se voie.
 
@@ -85,8 +85,8 @@
      restait qu'un liseré à 12 % pour dire où l'une finit et où l'autre
      commence : les blocs de l'accueil se confondaient avec la page. Voir
      `glass`. */
-  --voile-carte: rgb(255 255 255 / 0.04);
-  --bord-carte: rgb(255 255 255 / 0.19);
+  --voile-carte: rgb(255 255 255 / 0.03);
+  --bord-carte: rgb(255 255 255 / 0.2);
   /* Le liseré n'est plus uni : il s'éclaire en haut à gauche, là d'où vient
      la lumière du reflet, et s'éteint en bas à droite. C'est ce qui fait
      lire « verre posé » plutôt que « rectangle bordé ». Voir `glass`. */
@@ -154,8 +154,8 @@
   --aurora-3: rgb(255 122 89 / 0.13);
 
   /* Échiquier */
-  --sq-light: #dfd7ea;
-  --sq-dark: #6b5f8c;
+  --sq-light: #e2dbee;
+  --sq-dark: #6e628f;
   --sq-border: rgb(255 255 255 / 0.08);
   --board-frame: rgb(255 255 255 / 0.06);
   --piece-white: #fbfaff;
@@ -470,6 +470,11 @@ body::before {
 
 body {
   background-color: var(--bg);
+  /* Le fond n'est pas un aplat : plus clair en haut, là où la lumière de
+     l'aurore arrive, et qui s'enfonce vers le bas. Un noir uni sous des
+     cartes grises, c'est l'écran éteint qu'on reprochait au thème sombre. */
+  background-image: linear-gradient(180deg, var(--bg-elev) 0%, var(--bg) 38rem);
+  background-repeat: no-repeat;
   color: var(--text);
   font-family: var(--font-body);
   font-size: 15px;
@@ -538,9 +543,10 @@ h4 {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(80ch 60ch at 15% -10%, var(--aurora-1), transparent 65%),
-    radial-gradient(70ch 55ch at 90% 5%, var(--aurora-2), transparent 60%),
-    radial-gradient(60ch 60ch at 50% 105%, var(--aurora-3), transparent 60%), var(--bg);
+    radial-gradient(90ch 70ch at 12% -12%, var(--aurora-1), transparent 65%),
+    radial-gradient(80ch 60ch at 92% 2%, var(--aurora-2), transparent 62%),
+    radial-gradient(70ch 60ch at 50% 108%, var(--aurora-3), transparent 60%),
+    linear-gradient(180deg, var(--bg-elev) 0%, var(--bg) 38rem);
 }
 
 /* Grain de film : casse les dégradés en bandes et donne de la matière. */
@@ -919,7 +925,10 @@ button.glass:hover {
 @utility page {
   margin-inline: auto;
   width: 100%;
-  max-width: 64rem;
+  /* 76 rem et non 64 : à 1 024 px de contenu sur un écran de 1 440, la page
+     laissait deux bandes noires de 200 px de chaque côté, et huit cartes en
+     deux colonnes descendaient sous le pli. */
+  max-width: 76rem;
   padding: 2rem 1rem;
 }
 @media (min-width: 640px) {
@@ -961,6 +970,43 @@ button.glass:hover {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
   }
+}
+/* Quatre colonnes dès qu'il y a la place : huit portes tiennent en deux
+   rangées et se voient d'un coup, sans faire défiler. */
+@media (min-width: 1200px) {
+  .grille-cartes {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.875rem;
+  }
+}
+
+/*
+ * Le bandeau de page : chaque rubrique ouvre sur sa couleur.
+ *
+ * Un titre gris posé sur une page noire ne dit pas où l'on est ; la teinte
+ * de la rubrique le dit avant qu'on lise. Un lavis dans le coin haut-gauche,
+ * l'icône de la rubrique en filigrane géant à droite, et le titre par-dessus.
+ * La teinte arrive par `--teinte-page`, posée par `TitreDePage` d'après la
+ * navigation ; sans rubrique, c'est une bande neutre.
+ */
+@utility bandeau-page {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in oklab, var(--teinte-page, var(--border)) 30%, var(--border));
+  background:
+    radial-gradient(
+      70% 140% at 0% 0%,
+      color-mix(in oklab, var(--teinte-page, var(--accent)) 24%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(180deg, var(--sheen), transparent 50%), var(--surface);
+  box-shadow:
+    inset 0 1px 0 0 var(--inner-edge),
+    var(--shadow-sm);
+}
+[data-effects='low'] .bandeau-page {
+  background: var(--bg-elev);
 }
 
 /* Le lien en texte : la couleur de l'action, et rien d'autre. */
@@ -1064,7 +1110,10 @@ button.glass:hover {
     color-mix(in oklab, var(--teinte-porte, var(--accent)) 22%, transparent),
     transparent 70%
   );
-  opacity: 0;
+  /* Un lavis au repos, franc au survol : huit cartes grises identiques
+     faisaient un mur ; un souffle de leur teinte dans le coin les distingue
+     sans peindre la carte. */
+  opacity: 0.45;
   transition: opacity 260ms ease;
 }
 .carte-porte:hover::before {

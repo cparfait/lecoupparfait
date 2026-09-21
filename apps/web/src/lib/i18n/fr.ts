@@ -526,6 +526,7 @@ export const fr = {
   },
 
   today: {
+    title: 'Aujourd’hui',
     done: 'Journée faite',
     yourQuests: 'Tes quêtes du jour',
     pointsAria: 'Points du jour',

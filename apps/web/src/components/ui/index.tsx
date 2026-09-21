@@ -17,8 +17,10 @@ import type {
   Ref,
 } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
 import type { LucideIcon } from 'lucide-react'
+import { SECTIONS, sectionActive } from '@/lib/navigation.ts'
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Bouton
@@ -101,7 +103,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       disabled={disabled || loading}
       className={clsx(
-        'inline-flex select-none items-center justify-center font-semibold tracking-[-0.01em]',
+        'inline-flex select-none items-center justify-center whitespace-nowrap font-semibold tracking-[-0.01em]',
         'transition-all duration-150 active:scale-[.985]',
         'disabled:pointer-events-none disabled:opacity-45',
         VARIANTS[variant],
@@ -140,7 +142,7 @@ export function ButtonLink({
     <Link
       href={href}
       className={clsx(
-        'inline-flex select-none items-center justify-center font-semibold tracking-[-0.01em]',
+        'inline-flex select-none items-center justify-center whitespace-nowrap font-semibold tracking-[-0.01em]',
         'transition-all duration-150 active:scale-[.985]',
         VARIANTS[variant],
         SIZES[size],
@@ -187,9 +189,12 @@ export function Card({
   as: Tag = 'div',
   id,
   ref,
+  style,
 }: {
   children: ReactNode
   className?: string
+  /** Des variables de thème posées sur la carte — une teinte d'état, le plus souvent. */
+  style?: CSSProperties
   /** Ancre, pour ce qu'un lien doit pouvoir viser depuis une autre page. */
   id?: string
   /**
@@ -212,7 +217,7 @@ export function Card({
   ref?: Ref<HTMLElement>
 }) {
   return (
-    <Tag id={id} ref={ref as never} className={clsx('glass', className)}>
+    <Tag id={id} ref={ref as never} className={clsx('glass', className)} style={style}>
       {children}
     </Tag>
   )
@@ -239,21 +244,49 @@ export function TitreDePage({
   /** Un lien de retour, au-dessus du titre. */
   retour?: { href: string; label: string }
 }) {
+  /*
+    La rubrique se lit sur la page, pas seulement dans la barre du haut.
+
+    Le titre est posé dans un bandeau à la couleur de sa rubrique — le lavis
+    dans le coin, l'icône en filigrane à droite —, trouvée d'après l'adresse :
+    aucune page n'a rien à déclarer, et toutes se ressemblent dans leur
+    différence. Hors rubrique (préférences, à propos), le bandeau reste, sans
+    couleur.
+  */
+  const pathname = usePathname()
+  const section = SECTIONS.find((candidate) => sectionActive(candidate, pathname))
+  const Icone = section?.icon
+
   return (
-    <header className="mb-8">
-      {retour && (
-        <Link href={retour.href} className="lien mb-3 inline-flex items-center gap-1">
-          <span aria-hidden>←</span> {retour.label}
-        </Link>
+    <header
+      className="bandeau-page mb-6 px-5 py-6 sm:px-7 sm:py-7 lg:px-8"
+      style={section ? ({ '--teinte-page': section.teinte } as CSSProperties) : undefined}
+    >
+      {Icone && (
+        <Icone
+          aria-hidden
+          strokeWidth={1}
+          className="pointer-events-none absolute -right-8 -top-10 h-[240px] w-[240px] opacity-[0.09] sm:-right-4"
+          style={{ color: section.teinte }}
+        />
       )}
-      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
-        {/* Un titre d'affiche, pas un titre de document : c'est lui qui donne
-            son échelle à la page, et il doit se lire depuis l'autre bout de la
-            pièce. */}
-        <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">{children}</h1>
-        {action && <div className="shrink-0 pb-1">{action}</div>}
+      <div className="relative">
+        {retour && (
+          <Link href={retour.href} className="lien mb-3 inline-flex items-center gap-1">
+            <span aria-hidden>←</span> {retour.label}
+          </Link>
+        )}
+        <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+          {/* Un titre d'affiche, pas un titre de document : c'est lui qui
+              donne son échelle à la page, et il doit se lire depuis l'autre
+              bout de la pièce. */}
+          <h1 className="titre-affiche text-[2rem] sm:text-[2.5rem] lg:text-[2.9rem]">
+            {children}
+          </h1>
+          {action && <div className="shrink-0 pb-1">{action}</div>}
+        </div>
+        {intro && <p className="mt-3 max-w-2xl text-[16px] leading-relaxed text-muted">{intro}</p>}
       </div>
-      {intro && <p className="mt-4 max-w-2xl text-[17px] leading-relaxed text-muted">{intro}</p>}
     </header>
   )
 }

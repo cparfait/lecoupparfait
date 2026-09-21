@@ -519,6 +519,7 @@ export const en: Dictionary = {
   },
 
   today: {
+    title: 'Today',
     done: 'Day done',
     yourQuests: 'Your quests for today',
     pointsAria: 'Points for today',

@@ -21,6 +21,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ChevronRight } from 'lucide-react'
+import type { CSSProperties } from 'react'
 import clsx from 'clsx'
 import { SECTIONS } from '@/lib/navigation.ts'
 import { useT } from '@/lib/i18n/index.tsx'
@@ -66,18 +67,11 @@ export function AutresDeLaSection({
           qui se ressemblaient, en bas d'une page longue, et qu'on prenait pour
           un pied de page. C'est pourtant la seule passerelle entre les écrans
           d'une même rubrique. */}
-      <div className="mb-3 flex items-center gap-2.5">
-        <span
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-[var(--radius-sm)]"
-          style={{ background: `color-mix(in oklab, ${section.teinte} 16%, transparent)` }}
-          aria-hidden
-        >
-          <section.icon size={16} style={{ color: section.teinte }} />
-        </span>
-        <p className="font-display text-lg font-semibold tracking-tight">
+      <div className="mb-2.5 flex items-center gap-2">
+        <section.icon size={14} style={{ color: section.teinte }} aria-hidden />
+        <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-faint">
           Aussi dans {t(section.labelKey)}
         </p>
-        <span aria-hidden className="h-px flex-1 rounded-full bg-line" />
       </div>
 
       <div className={clsx('grid gap-2', !colonne && 'sm:grid-cols-2')}>
@@ -95,12 +89,17 @@ export function AutresDeLaSection({
               /* Sans liseré de couleur sur le flanc : la pastille d'icône
                  porte déjà la teinte, et un trait de la même couleur juste à
                  côté d'elle ne faisait que l'épaissir. */
-              className="animate-slide-up group flex min-h-14 items-center gap-3 overflow-hidden rounded-[var(--radius)] border border-line bg-surface/70 px-3 py-2.5 transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-hover"
-              style={{ animationDelay: `${index * 60}ms` }}
+              className="animate-slide-up glass carte-porte group relative flex min-h-14 items-center gap-3 overflow-hidden px-3 py-2.5"
+              style={
+                { animationDelay: `${index * 60}ms`, '--teinte-porte': teinte } as CSSProperties
+              }
             >
               <span
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)] transition-transform duration-300 group-hover:scale-110"
-                style={{ background: `color-mix(in oklab, ${teinte} 16%, transparent)` }}
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] transition-transform duration-300 group-hover:scale-110"
+                style={{
+                  background: `linear-gradient(135deg, color-mix(in oklab, ${teinte} 34%, transparent), color-mix(in oklab, ${teinte} 10%, transparent))`,
+                  boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${teinte} 36%, transparent)`,
+                }}
                 aria-hidden
               >
                 <Icone size={17} style={{ color: teinte }} />

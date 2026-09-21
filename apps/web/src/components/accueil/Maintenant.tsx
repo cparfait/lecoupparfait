@@ -84,7 +84,7 @@ export function Maintenant({
     <Card
       glow
       className={clsx(
-        'overflow-hidden',
+        'flex h-full flex-col overflow-hidden',
         // Une personne qui attend mérite qu'on le voie avant de lire : le
         // liseré est la seule différence, et elle se remarque de loin.
         principale.urgent && 'border-accent/60',
@@ -103,21 +103,21 @@ export function Maintenant({
 
       <div
         className={clsx(
-          'p-5 sm:p-6',
-          plateau && 'grid gap-6 md:grid-cols-[1fr_auto] md:items-center',
+          'flex-1 p-5',
+          plateau && 'grid gap-5 md:grid-cols-[1fr_auto] md:items-center',
         )}
       >
         <div>
           {/* La phrase, en grand. C'est elle qu'on lit en arrivant, et elle
               doit se suffire : on doit savoir quoi faire sans lire la ligne
               d'après. */}
-          <h2 className="titre-affiche text-[1.6rem] sm:text-[2rem]">{principale.titre}</h2>
-          <p className="mt-3 max-w-prose text-[15px] leading-relaxed text-muted">
+          <h2 className="titre-affiche text-[1.45rem] sm:text-[1.75rem]">{principale.titre}</h2>
+          <p className="mt-2 max-w-prose text-[14px] leading-relaxed text-muted">
             {principale.detail}
           </p>
 
-          <Link href={principale.lien} className="mt-6 block sm:inline-block">
-            <Button variant="primary" size="lg" icon={<ArrowRight size={16} />} fullWidth>
+          <Link href={principale.lien} className="mt-4 block sm:inline-block">
+            <Button variant="primary" size="md" icon={<ArrowRight size={16} />} fullWidth>
               {principale.action}
             </Button>
           </Link>
@@ -127,7 +127,7 @@ export function Maintenant({
           <Link
             href={principale.lien}
             aria-label={principale.action}
-            className="group mx-auto block w-full max-w-[280px] md:w-[260px] lg:w-[300px]"
+            className="group mx-auto block w-full max-w-[240px] md:w-[200px] lg:w-[216px]"
           >
             {/* Une monture étroite, la même que sur l'accueil public : la
                 position est un objet posé sur la carte, pas un motif imprimé
@@ -142,7 +142,7 @@ export function Maintenant({
                 />
               </div>
             </div>
-            <p className="mt-2 text-center text-[12px] text-faint">
+            <p className="mt-1.5 text-center text-[12px] text-faint">
               {auTrait === 'w' ? t('puzzles.whiteToPlay') : t('puzzles.blackToPlay')}
             </p>
           </Link>
@@ -151,14 +151,14 @@ export function Maintenant({
 
       {suite.length > 0 && (
         <div className="border-t border-line/60">
-          <p className="px-5 pt-3 text-[12px] font-semibold text-faint">{t('last.andAlso')}</p>
-          <ul className="space-y-1 px-2 pb-2">
+          <p className="px-5 pt-2 text-[12px] font-semibold text-faint">{t('last.andAlso')}</p>
+          <ul className="px-2 pb-1.5">
             {suite.slice(0, SECONDAIRES_MAX).map((chose) => (
               <li key={`${chose.id}-${chose.lien}`}>
                 <Link
                   href={chose.lien}
                   className={clsx(
-                    'flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2.5 transition-colors',
+                    'flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-1.5 transition-colors',
                     // Rangé en second, le défi garde sa couleur : une ligne
                     // grise parmi les grises se manque, et lui meurt à minuit.
                     chose.id === 'defi'

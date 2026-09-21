@@ -76,11 +76,10 @@ export function CarteDestination({
       onClick={onClick}
       className={clsx(
         'group glass carte-porte relative flex items-center gap-3.5 overflow-hidden p-4 pr-14',
-        /* `grid-rows` : la phrase occupe la rangée souple, ce qui garde le
-           détail contre le bas quand la grille étire les cartes à la même
-           hauteur — ce que faisait `flex-1` dans la colonne. */
-        !compacte &&
-          'md:grid md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr_auto] md:items-center md:gap-x-4 md:gap-y-2 md:p-6',
+        /* En tuile à partir de `md` : la pastille en haut, la flèche en face
+           d'elle, le titre sur sa propre ligne, la phrase, et le détail
+           calé en bas. Rien ne se cogne, quelle que soit la colonne. */
+        !compacte && 'md:flex-col md:items-start md:gap-0 md:p-5 md:pr-5',
         className,
       )}
       style={{ ...halo, ...style }}
@@ -99,11 +98,16 @@ export function CarteDestination({
       {/* `md:contents` : au-delà de `md`, la boîte disparaît de la mise en
           page et ses trois enfants deviennent les cases de la grille — le
           titre à côté de l'icône, la phrase et le détail sur deux colonnes. */}
-      <span className={clsx('min-w-0 flex-1', !compacte && 'md:contents')}>
+      <span
+        className={clsx(
+          'min-w-0 flex-1',
+          !compacte && 'md:mt-4 md:flex md:w-full md:flex-1 md:flex-col',
+        )}
+      >
         <span
           className={clsx(
             'flex flex-wrap items-center gap-2 font-display text-[16px] font-bold tracking-[-0.015em]',
-            !compacte && 'md:text-[19px]',
+            !compacte && 'md:text-[18px] md:leading-tight',
           )}
         >
           {titre}
@@ -113,18 +117,14 @@ export function CarteDestination({
           <span
             className={clsx(
               'mt-0.5 line-clamp-2 block text-[14px] leading-snug text-muted',
-              !compacte && 'md:text-[15px]',
-              !compacte &&
-                'md:col-span-2 md:mt-0 md:self-start md:line-clamp-none md:leading-relaxed',
+              !compacte && 'md:mt-1.5 md:line-clamp-none md:leading-relaxed',
             )}
           >
             {phrase}
           </span>
         )}
         {detail && !compacte && (
-          <span className="mt-4 hidden text-[12px] text-faint md:col-span-2 md:mt-2 md:block">
-            {detail}
-          </span>
+          <span className="mt-auto hidden pt-4 text-[12px] text-faint md:block">{detail}</span>
         )}
       </span>
 
@@ -137,9 +137,9 @@ export function CarteDestination({
           'absolute right-4 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full',
           'bg-surface-strong text-muted ring-1 ring-line transition-all duration-300',
           'group-hover:translate-x-0.5 group-hover:bg-accent group-hover:text-[var(--accent-contrast)] group-hover:ring-transparent group-hover:shadow-[0_6px_18px_-6px_var(--accent)]',
-          /* Sur la ligne de l'icône : 24 px de marge + la moitié des 56 px de
-             la pastille. */
-          !compacte && 'md:top-[52px]',
+          /* Sur la ligne de la pastille : 20 px de marge + la moitié de ses
+             56 px. */
+          !compacte && 'md:top-12',
         )}
         aria-hidden
       >

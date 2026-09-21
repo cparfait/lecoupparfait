@@ -95,7 +95,7 @@ export const viewport: Viewport = {
   // Le fond de page de chaque thème (`--bg`), pour que la barre d'état se
   // fonde dans la page. Le manifeste dit la même chose pour le thème sombre.
   themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#0a0a12' },
+    { media: '(prefers-color-scheme: dark)', color: '#0e0f1f' },
     { media: '(prefers-color-scheme: light)', color: '#f3f2f8' },
   ],
   width: 'device-width',

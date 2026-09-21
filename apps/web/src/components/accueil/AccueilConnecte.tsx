@@ -47,7 +47,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Flame, Gauge, History, Map, Sparkles } from 'lucide-react'
+import { ArrowRight, Flame, Gauge, History, Map, Sparkles } from 'lucide-react'
 import {
   BOT_PERSONALITIES,
   CHAPITRES,
@@ -284,14 +284,20 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
     return prochainesChoses(etat, t)
   }, [enDirect, correspondances, reprise, defiFait, journee, carriereEnCours, chapitre, suite, t])
 
+  // Ce qui a quelqu'un à l'autre bout, ou une partie qui attend : la seule
+  // chose qui passe au-dessus de la journée.
+  const urgentes = choses.filter((chose) =>
+    ['tonTour', 'correspondance', 'partieOuverte', 'repriseOrdinateur'].includes(chose.id),
+  )
+
   return (
-    <div className="entree mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:py-10">
+    <div className="entree mx-auto w-full max-w-[1280px] px-4 py-5 sm:px-6 lg:py-6">
       {/* ── L'en-tête : qui je suis, où j'en suis ──────────────────────
           Les deux compteurs sont nommés. « 2560 points » seul, à côté d'un
           « 45 / 80 points » plus bas, laissait deviner un rapport entre les
           deux — il n'y en a aucun. */}
-      <header className="mb-8 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-        <h1 className="titre-affiche text-[2.3rem] sm:text-[3rem] lg:text-[3.6rem]">
+      <header className="mb-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+        <h1 className="titre-affiche text-[2rem] sm:text-[2.4rem] lg:text-[2.75rem]">
           Bonjour <span className="text-muted">{pseudo}</span>
         </h1>
         <div className="flex flex-wrap items-center gap-2">
@@ -325,20 +331,44 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
           s'affiche quand il n'y a aucune demande. */}
       <DemandesDAmi className="mb-4" />
 
-      {/* ── 1. Maintenant ─────────────────────────────────────────────── */}
-      <Maintenant choses={choses} chargement={chargement} positionDuJour={defi.fen} />
+      {/* ── Ce qui presse, et seulement ça ──────────────────────────────
+          « Maintenant » portait tout ce qu'il y avait à faire, défi et
+          carrière compris — et le défi se retrouvait dit deux fois, ici en
+          grand et dans les quêtes juste dessous. Il ne garde que ce qui a
+          quelqu'un à l'autre bout ou une partie ouverte : le reste a sa
+          carte, et une seule. */}
+      {urgentes.length > 0 && (
+        <div className="mb-4">
+          <Maintenant choses={urgentes} chargement={chargement} />
+        </div>
+      )}
 
-      {/* ── 2. Les deux états : la journée, et le chemin ────────────────
-          Côte à côte et de poids égal, parce qu'ils répondent à la même
-          question à deux échelles — « où j'en suis ? ». Ils s'empilent sous
-          `md`, la journée d'abord : c'est elle qui expire. */}
-      <div className="mt-5 grid gap-5 md:grid-cols-2">
-        <Aujourdhui defiFait={defiFait === true} tranche={defi.tranche} niveauDefi={defi.niveau} />
+      {/* ── Une grille, et elle tient dans l'écran ─────────────────────
+          Les blocs s'empilaient, et sur un écran de bureau il fallait faire
+          défiler pour voir ses dernières parties. Un tableau de bord qu'on
+          fait défiler n'en est plus un.
+
+          Douze colonnes, deux rangées. En haut, la journée sur huit — défi,
+          position, quêtes, en un seul bloc — et le parcours sur quatre. En
+          bas, les parties et les analyses, six chacune. Chaque carte remplit
+          sa case (`h-full`). Sous `lg`, tout s'empile dans l'ordre
+          d'urgence. */}
+      <div className="grid gap-4 lg:grid-cols-12">
+        <div className="lg:col-span-8">
+          <Aujourdhui
+            defiFait={defiFait === true}
+            tranche={defi.tranche}
+            niveauDefi={defi.niveau}
+            defi={choses.find((chose) => chose.id === 'defi') ?? null}
+            position={defi.fen}
+            chargement={chargement}
+          />
+        </div>
 
         {progression === undefined ? (
-          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full lg:col-span-4" />
         ) : carriereEnCours && chapitre && progression ? (
-          <Card className="overflow-hidden">
+          <Card className="h-full overflow-hidden lg:col-span-4">
             {/* La teinte de « Jouer », dont la carrière fait partie — et non
                 plus celle du chapitre : douze chapitres, douze couleurs, et
                 l'accueil changeait de palette à chaque étape. */}
@@ -348,27 +378,27 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
               teinte="var(--rub-jouer)"
               fin={`chapitre ${chapitre.numero} / ${CHAPITRES.length}`}
             />
-            <div className="p-5">
+            <div className="p-4">
               {/* Le numéro du chapitre, en grand, à côté de son titre : c'est
                   la seule chose qu'on retient d'un chemin en douze étapes —
                   où l'on en est. La jauge en dessous compte les chapitres, un
                   segment chacun, comme les cases d'une colonne. */}
               <div className="flex items-start gap-4">
                 <span
-                  className="chiffre-affiche shrink-0 text-[3rem] leading-none text-[var(--rub-jouer)]"
+                  className="chiffre-affiche shrink-0 text-[2.4rem] leading-none text-[var(--rub-jouer)]"
                   aria-hidden
                 >
                   {String(chapitre.numero).padStart(2, '0')}
                 </span>
-                <div className="min-w-0 pt-1">
-                  <p className="font-display text-[1.15rem] font-bold leading-tight">
+                <div className="min-w-0 pt-0.5">
+                  <p className="font-display text-[1.05rem] font-bold leading-tight">
                     {chapitre.titre}
                   </p>
                   <p className="mt-1 text-[13px] leading-snug text-muted">{chapitre.objectif}</p>
                 </div>
               </div>
               <div
-                className="mt-4 grid gap-1"
+                className="mt-3 grid gap-1"
                 style={{ gridTemplateColumns: `repeat(${CHAPITRES.length}, minmax(0, 1fr))` }}
                 role="progressbar"
                 aria-valuenow={chapitre.numero}
@@ -393,7 +423,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
 
               {/* Les trois temps du chapitre, en une ligne chacun : c'est ce
                   qui manquait pour savoir combien il reste avant le suivant. */}
-              <ul className="mt-4 space-y-1.5">
+              <ul className="mt-3 space-y-1">
                 {etapesDe(chapitre, progression).map((etape) => (
                   <li
                     key={etape.cle}
@@ -423,16 +453,31 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                 ))}
               </ul>
 
-              {/* Bouton secondaire, et c'est délibéré : si l'étape de carrière
-                  est *la* chose à faire, elle est déjà en haut avec le bouton
-                  primaire. Ici on ouvre la carte, on ne relance pas. */}
-              <ButtonLink href="/carriere" variant="secondary" size="sm" fullWidth className="mt-4">
-                {t('homeIn.seeTheMap')}
+              {/* L'étape en cours a son bouton ici, et nulle part ailleurs :
+                  la carrière n'est plus reprise dans « Maintenant ». La carte
+                  reste à un clic, en dessous, en petit. */}
+              <ButtonLink
+                href={suite?.lien ?? '/carriere'}
+                variant="primary"
+                size="md"
+                fullWidth
+                className="mt-4"
+                icon={<ArrowRight size={15} />}
+              >
+                {suite?.libelle ?? t('homeIn.seeTheMap')}
               </ButtonLink>
+              {suite && (
+                <Link
+                  href="/carriere"
+                  className="mt-2 block text-center text-[12px] font-medium text-faint hover:text-accent"
+                >
+                  {t('homeIn.seeTheMap')}
+                </Link>
+              )}
             </div>
           </Card>
         ) : (
-          <Card className="p-4">
+          <Card className="p-4 lg:col-span-4">
             <p className="font-display text-base font-bold leading-tight">
               {t(
                 progression && progression.chapter >= CARRIERE_TERMINEE
@@ -450,167 +495,172 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
             </ButtonLink>
           </Card>
         )}
-      </div>
 
-      {/* ── 3. Ce qu'on a fait ─────────────────────────────────────────
+        {/* ── Ce qu'on a fait ────────────────────────────────────────────
           En bas, et c'est sa place : on ne rouvre pas l'application pour
           relire ce qu'on a joué hier. Mais les lignes mènent à l'analyse, et
           le disent maintenant — un chevron gris ne l'annonçait pas. */}
-      {(parties === null || parties.length > 0 || (analyses?.length ?? 0) > 0) && (
-        <div className="mt-5 grid gap-5 md:grid-cols-2">
-          <Card className="overflow-hidden">
-            {/* La teinte d'« Analyse » : c'est là que mène chaque ligne. */}
-            <EnTeteDeCarte
-              titre={t('homeIn.lastGames')}
-              icone={<History size={14} aria-hidden />}
-              teinte="var(--rub-analyser)"
-              fin={
-                <Link
-                  href={`/profil/${encodeURIComponent(pseudo)}`}
-                  className="text-accent hover:underline"
-                >
-                  tout voir
-                </Link>
-              }
-            />
-
-            {parties === null ? (
-              <div className="p-4">
-                <Skeleton className="h-16 w-full" />
-              </div>
-            ) : parties.length === 0 ? (
-              <div className="px-4 py-5 text-center">
-                <p className="text-[14px] text-muted">{t('homeIn.noGameSaved')}</p>
-                <ButtonLink href="/jouer/ordinateur" variant="secondary" size="sm" className="mt-3">
-                  {t('homeIn.playAGame')}
-                </ButtonLink>
-              </div>
-            ) : (
-              <ul>
-                {parties.map((partie) => {
-                  const personnalite = personnaliteDe(partie.adversaire, t)
-                  return (
-                    <li key={partie.slug} className="border-b border-line/40 last:border-0">
-                      <button
-                        type="button"
-                        onClick={() => analyser(partie)}
-                        className="group flex w-full items-center gap-3.5 px-4 py-3 text-left transition-colors hover:bg-surface-hover"
-                      >
-                        {/* Le portrait de l'adversaire, quand c'est l'un des
-                          nôtres ; l'initiale du pseudo sinon. On reconnaît
-                          Rempart à sa tête avant de lire son nom. */}
-                        {personnalite ? (
-                          <PortraitAdversaire
-                            personality={personnalite}
-                            size={44}
-                            className="shrink-0 rounded-[10px]"
-                          />
-                        ) : (
-                          <span
-                            className="grid h-11 w-9 shrink-0 place-items-center rounded-[10px] bg-surface-strong font-display text-lg font-bold text-muted"
-                            aria-hidden
-                          >
-                            {(partie.adversaire ?? '?').slice(0, 1).toUpperCase()}
-                          </span>
-                        )}
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[15px]">
-                            contre{' '}
-                            <strong className="font-semibold">
-                              {partie.adversaire ?? 'un adversaire'}
-                            </strong>
-                          </span>
-                          <span className="block truncate text-[12px] text-faint">
-                            {partie.opening ?? t('homeIn.unlistedOpening')} ·{' '}
-                            {t('homeIn.halfMoves', { n: partie.coups })}
-                          </span>
-                        </span>
-                        {/* Le score en notation, dans la couleur de l'issue :
-                          « 1–0 » se lit plus vite que « Gagnée », et c'est
-                          la langue du jeu. */}
-                        <span
-                          className="chiffre-affiche shrink-0 text-[1.15rem]"
-                          style={{ color: TEINTE[partie.issue] }}
-                          title={t(ISSUE[partie.issue])}
-                        >
-                          {score(partie)}
-                        </span>
-                        {/* Le mot, et pas seulement l'icône : rien ne disait que
-                          cliquer une ligne ouvrait l'analyse. */}
-                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-surface-strong text-muted ring-1 ring-line transition-all group-hover:bg-accent group-hover:text-[var(--accent-contrast)] group-hover:ring-transparent">
-                          <Gauge size={14} aria-hidden />
-                          <span className="sr-only">{t('bits.analyse')}</span>
-                        </span>
-                      </button>
-                    </li>
-                  )
-                })}
-              </ul>
-            )}
-          </Card>
-
-          {analyses && analyses.length > 0 ? (
-            <Card className="overflow-hidden">
+        {(parties === null || parties.length > 0 || (analyses?.length ?? 0) > 0) && (
+          <>
+            <Card className="h-full overflow-hidden lg:col-span-6">
+              {/* La teinte d'« Analyse » : c'est là que mène chaque ligne. */}
               <EnTeteDeCarte
-                titre={t('homeIn.yourAnalyses')}
-                icone={<Gauge size={14} aria-hidden />}
+                titre={t('homeIn.lastGames')}
+                icone={<History size={14} aria-hidden />}
+                teinte="var(--rub-analyser)"
                 fin={
-                  <Link href="/analyse" className="text-accent hover:underline">
+                  <Link
+                    href={`/profil/${encodeURIComponent(pseudo)}`}
+                    className="text-accent hover:underline"
+                  >
                     tout voir
                   </Link>
                 }
               />
-              <ul>
-                {analyses.map((analyse) => (
-                  <li
-                    key={analyse.id}
-                    className="flex items-center gap-3.5 border-b border-line/40 px-4 py-3 text-[15px] last:border-0"
+
+              {parties === null ? (
+                <div className="p-4">
+                  <Skeleton className="h-16 w-full" />
+                </div>
+              ) : parties.length === 0 ? (
+                <div className="px-4 py-5 text-center">
+                  <p className="text-[14px] text-muted">{t('homeIn.noGameSaved')}</p>
+                  <ButtonLink
+                    href="/jouer/ordinateur"
+                    variant="secondary"
+                    size="sm"
+                    className="mt-3"
                   >
-                    {/* Les deux camps, en deux pastilles : blanche et noire,
-                        comme les pièces. C'est ce qu'une analyse contient. */}
-                    <span className="flex shrink-0 -space-x-1.5" aria-hidden>
-                      <span className="h-5 w-5 rounded-full border border-line-strong bg-[var(--eval-white)]" />
-                      <span className="h-5 w-5 rounded-full border border-line-strong bg-[var(--eval-black)]" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate">
-                        {analyse.whiteName ?? 'Blancs'} — {analyse.blackName ?? 'Noirs'}
-                      </span>
-                      <span className="block truncate text-[12px] text-faint">
-                        {analyse.opening ?? t('homeIn.noOpeningListed')}
-                      </span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
+                    {t('homeIn.playAGame')}
+                  </ButtonLink>
+                </div>
+              ) : (
+                <ul>
+                  {parties.map((partie) => {
+                    const personnalite = personnaliteDe(partie.adversaire, t)
+                    return (
+                      <li key={partie.slug} className="border-b border-line/40 last:border-0">
+                        <button
+                          type="button"
+                          onClick={() => analyser(partie)}
+                          className="group flex w-full items-center gap-3 px-4 py-2 text-left transition-colors hover:bg-surface-hover"
+                        >
+                          {/* Le portrait de l'adversaire, quand c'est l'un des
+                          nôtres ; l'initiale du pseudo sinon. On reconnaît
+                          Rempart à sa tête avant de lire son nom. */}
+                          {personnalite ? (
+                            <PortraitAdversaire
+                              personality={personnalite}
+                              size={38}
+                              className="shrink-0 rounded-[9px]"
+                            />
+                          ) : (
+                            <span
+                              className="grid h-[38px] w-8 shrink-0 place-items-center rounded-[9px] bg-surface-strong font-display text-base font-bold text-muted"
+                              aria-hidden
+                            >
+                              {(partie.adversaire ?? '?').slice(0, 1).toUpperCase()}
+                            </span>
+                          )}
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[14px]">
+                              contre{' '}
+                              <strong className="font-semibold">
+                                {partie.adversaire ?? 'un adversaire'}
+                              </strong>
+                            </span>
+                            <span className="block truncate text-[12px] text-faint">
+                              {partie.opening ?? t('homeIn.unlistedOpening')} ·{' '}
+                              {t('homeIn.halfMoves', { n: partie.coups })}
+                            </span>
+                          </span>
+                          {/* Le score en notation, dans la couleur de l'issue :
+                          « 1–0 » se lit plus vite que « Gagnée », et c'est
+                          la langue du jeu. */}
+                          <span
+                            className="chiffre-affiche shrink-0 text-[1.15rem]"
+                            style={{ color: TEINTE[partie.issue] }}
+                            title={t(ISSUE[partie.issue])}
+                          >
+                            {score(partie)}
+                          </span>
+                          {/* Le mot, et pas seulement l'icône : rien ne disait que
+                          cliquer une ligne ouvrait l'analyse. */}
+                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-surface-strong text-muted ring-1 ring-line transition-all group-hover:bg-accent group-hover:text-[var(--accent-contrast)] group-hover:ring-transparent">
+                            <Gauge size={14} aria-hidden />
+                            <span className="sr-only">{t('bits.analyse')}</span>
+                          </span>
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
             </Card>
-          ) : (
-            /* Pas d'analyse conservée : plutôt qu'une carte vide, on dit à quoi
+
+            {analyses && analyses.length > 0 ? (
+              <Card className="h-full overflow-hidden lg:col-span-6">
+                <EnTeteDeCarte
+                  titre={t('homeIn.yourAnalyses')}
+                  icone={<Gauge size={14} aria-hidden />}
+                  fin={
+                    <Link href="/analyse" className="text-accent hover:underline">
+                      tout voir
+                    </Link>
+                  }
+                />
+                <ul>
+                  {analyses.map((analyse) => (
+                    <li
+                      key={analyse.id}
+                      className="flex items-center gap-3 border-b border-line/40 px-4 py-2 text-[14px] last:border-0"
+                    >
+                      {/* Les deux camps, en deux pastilles : blanche et noire,
+                        comme les pièces. C'est ce qu'une analyse contient. */}
+                      <span className="flex shrink-0 -space-x-1.5" aria-hidden>
+                        <span className="h-5 w-5 rounded-full border border-line-strong bg-[var(--eval-white)]" />
+                        <span className="h-5 w-5 rounded-full border border-line-strong bg-[var(--eval-black)]" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate">
+                          {analyse.whiteName ?? 'Blancs'} — {analyse.blackName ?? 'Noirs'}
+                        </span>
+                        <span className="block truncate text-[12px] text-faint">
+                          {analyse.opening ?? t('homeIn.noOpeningListed')}
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            ) : (
+              /* Pas d'analyse conservée : plutôt qu'une carte vide, on dit à quoi
                sert la colonne. C'est la seule invitation de la page, et elle
                vise ce qu'on ne pense pas à faire tout seul. */
-            <Card className="flex flex-col overflow-hidden">
-              {/* Le même bandeau que ses voisines, alors que ce n'est pas une
+              <Card className="flex h-full flex-col overflow-hidden lg:col-span-6">
+                {/* Le même bandeau que ses voisines, alors que ce n'est pas une
                   carte d'état : les quatre blocs du bas s'ouvrent ainsi sur la
                   même ligne, et l'on sait de quoi parle chacun sans le lire en
                   entier. */}
-              <EnTeteDeCarte
-                titre={t('homeIn.getAnalysed')}
-                icone={<Sparkles size={14} aria-hidden />}
-              />
-              <div className="flex flex-1 flex-col justify-center p-4">
-                <p className="text-[12px] leading-relaxed text-muted">
-                  {t('homeIn.getAnalysedHint')}
-                </p>
-                <Link href="/analyse" className="mt-3">
-                  <Button variant="secondary" size="sm" fullWidth icon={<Gauge size={14} />}>
-                    {t('homeIn.analyseAGame')}
-                  </Button>
-                </Link>
-              </div>
-            </Card>
-          )}
-        </div>
-      )}
+                <EnTeteDeCarte
+                  titre={t('homeIn.getAnalysed')}
+                  icone={<Sparkles size={14} aria-hidden />}
+                />
+                <div className="flex flex-1 flex-col justify-center p-4">
+                  <p className="text-[12px] leading-relaxed text-muted">
+                    {t('homeIn.getAnalysedHint')}
+                  </p>
+                  <Link href="/analyse" className="mt-3">
+                    <Button variant="secondary" size="sm" fullWidth icon={<Gauge size={14} />}>
+                      {t('homeIn.analyseAGame')}
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            )}
+          </>
+        )}
+      </div>
     </div>
   )
 }

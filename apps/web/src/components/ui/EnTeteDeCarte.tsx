@@ -64,7 +64,7 @@ export function EnTeteDeCarte({
   className?: string
 }) {
   const classes = clsx(
-    'bandeau flex w-full items-center gap-2.5 px-5 pb-3 pt-4 text-left',
+    'bandeau flex w-full items-center gap-2.5 px-4 pb-2.5 pt-3 text-left',
     // Un pixel, dans la teinte : sans fond gris, le bandeau n'a plus à se
     // défendre contre les filets du contenu — c'est le titre qui le distingue.
     filet && 'border-b',
