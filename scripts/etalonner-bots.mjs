@@ -79,6 +79,22 @@ const AU = Number(args.au ?? 8)
  * graduée » et « la montée de version l'a déréglée ».
  */
 const MOTEUR = args.moteur ?? 'lite-single'
+/**
+ * Mesurer la perte par coup au lieu de faire jouer des parties.
+ *
+ * Deux niveaux s'affrontent en une centaine de coups chacun, et il en faut
+ * soixante parties pour ramener la marge à ±100 points : un quart d'heure par
+ * couple. La **perte moyenne en centipions** — l'écart entre le coup joué et
+ * le meilleur de sa propre liste — se lit sur quelques dizaines de coups, donc
+ * en quelques secondes, et suffit à repérer ce qui compte vraiment : une
+ * inversion (un échelon qui joue mieux que celui du dessus) ou un palier plat
+ * (deux échelons indiscernables).
+ *
+ * Ce n'est pas un Elo et ça ne s'y convertit pas proprement — le rapport entre
+ * les deux s'est révélé trop bruité pour qu'on s'y fie. C'est un **détecteur de
+ * monotonie**, à passer avant d'engager une vraie mesure par parties.
+ */
+const PERTES = args.pertes !== undefined
 /** Au-delà, on déclare nulle : une partie qui s'éternise ne départage rien. */
 const COUPS_MAX = 180
 
@@ -234,10 +250,126 @@ function ecartDepuisScore(score) {
 
 console.log('\n♟  Étalonnage des adversaires artificiels')
 console.log(`   moteur : ${MOTEUR}`)
-console.log(`   ${PARTIES} parties par couple · niveaux ${DU} à ${AU}\n`)
 
 const moteur = ouvrirMoteur()
 await moteur.demarrer()
+
+// ── Passage rapide : la perte par coup, échelon par échelon ─────────────────
+
+if (PERTES) {
+  console.log(`   perte (75e centile) sur positions fixes · niveaux ${DU} à ${AU}
+`)
+
+  /*
+    ── Les mêmes positions pour tout le monde ─────────────────────────────────
+
+    Première version : on laissait chaque échelon jouer ses propres parties et
+    l'on moyennait sa perte. Inexploitable — les bots jouant au hasard, chaque
+    passage visitait d'autres positions, et le même échelon rendait 32 puis 59
+    centipions. Passer à la médiane n'y a rien changé : la variance ne venait
+    pas des coups mais du terrain.
+
+    On fixe donc le terrain. Les positions sont tirées une fois, par une marche
+    aléatoire à graine constante depuis la position initiale, et **tous** les
+    échelons répondent aux mêmes. Ce qui reste d'écart entre deux échelons
+    vient alors d'eux, ce qui est la question posée.
+  */
+  let graine = 20260921
+  const alea = () => {
+    graine = (graine * 1103515245 + 12345) & 0x7fffffff
+    return graine / 0x7fffffff
+  }
+
+  const POSITIONS = []
+  while (POSITIONS.length < 40) {
+    const jeu = new Chess()
+    const plis = 8 + Math.floor(alea() * 40)
+    for (let i = 0; i < plis && !jeu.isGameOver(); i++) {
+      const legaux = jeu.moves()
+      jeu.move(legaux[Math.floor(alea() * legaux.length)])
+    }
+    if (!jeu.isGameOver()) POSITIONS.push(jeu.fen())
+  }
+
+  console.log(`   ${POSITIONS.length} positions communes · 8 tirages par position
+`)
+  console.log('   niv | Elo  | d | T    | mPv | perte 75e cent. (cp)')
+
+  const releves = []
+  for (let niveau = DU; niveau <= AU; niveau++) {
+    const bot = BOT_LEVELS[niveau - 1]
+    if (!bot) break
+    const config = bot.engine
+    await moteur.reglages(config)
+    const couts = []
+
+    for (const fen of POSITIONS) {
+      const lignes = await moteur.chercher(fen, [], config)
+      if (lignes.length === 0) continue
+      // Plusieurs tirages : le choix est stochastique, la recherche ne l'est pas.
+      for (let t = 0; t < 8; t++) {
+        const choix = pickBotMove(fen, lignes, config, alea)
+        if (choix) couts.push(choix.cost)
+      }
+    }
+
+    /*
+      Le 75e centile, et non la médiane. Au-dessus du niveau 6 le bot joue le
+      meilleur coup plus d'une fois sur deux : la médiane y vaut zéro pour tout
+      le monde, et les échelons du haut deviennent indiscernables — le contrôle
+      signalait alors des « paliers plats » qui n'étaient que sa propre
+      saturation. Le quart supérieur des coups décrit ce que le bot lâche quand
+      il lâche, et reste bavard jusqu'en haut de l'échelle.
+    */
+    couts.sort((a, b) => a - b)
+    const perte = couts.length === 0 ? 0 : couts[Math.floor(couts.length * 0.75)]
+    releves.push({ bot, perte })
+    console.log(
+      `   ${String(niveau).padStart(3)} | ${String(bot.elo).padStart(4)} | ${config.depth} |` +
+        ` ${String(config.temperature).padEnd(4)} | ${String(config.multiPv).padStart(3)} |` +
+        ` ${String(perte).padStart(18)}`,
+    )
+  }
+
+  /*
+    On ne compare qu'à profondeur égale. La perte se mesure contre la propre
+    liste du bot : un échelon qui cherche à un demi-coup juge avec une
+    référence médiocre, et sa perte paraît faible pour une mauvaise raison.
+    Les marches qui changent de profondeur restent du ressort de la mesure par
+    parties.
+  */
+  const suspectes = []
+  for (let i = 1; i < releves.length; i++) {
+    const avant = releves[i - 1]
+    const apres = releves[i]
+    if (avant.bot.engine.depth !== apres.bot.engine.depth) continue
+    if (apres.perte < avant.perte) continue
+    suspectes.push({ avant, apres })
+  }
+
+  console.log('')
+  for (const { avant, apres } of suspectes) {
+    console.log(
+      `   ⚠  ${avant.bot.elo} → ${apres.bot.elo} (profondeur ${apres.bot.engine.depth}) :` +
+        ` ${avant.perte} cp puis ${apres.perte} cp` +
+        ` — ${apres.perte === avant.perte ? 'palier plat' : 'inversion'}`,
+    )
+  }
+
+  const comparables = releves.filter(
+    (r, i) => i > 0 && releves[i - 1].bot.engine.depth === r.bot.engine.depth,
+  ).length
+  console.log(
+    `
+   ${releves.length} échelons · ${comparables} marches à profondeur constante` +
+      ` · ${suspectes.length} anomalie(s)
+`,
+  )
+  moteur.fermer()
+  process.exit(suspectes.length > 0 ? 1 : 0)
+}
+
+console.log(`   ${PARTIES} parties par couple · niveaux ${DU} à ${AU}\n`)
 
 const couples = []
 

@@ -442,11 +442,26 @@ const LEVEL_TABLE: LevelSpec[] = [
     multiPv: 6,
     nodes: 40000,
   },
+  /*
+    Profondeur 6, comme le niveau suivant, et non 5 comme le précédent.
+
+    Mesuré sur positions fixes — `scripts/etalonner-bots.mjs --pertes` —, cet
+    échelon relâchait *plus* que celui du dessous à profondeur égale : 73
+    centipions contre 66 au quart supérieur de ses coups. Une inversion, que la
+    mesure en parties confirmait de son côté avec cinquante-trois points
+    d'écart là où l'étiquette en promet cent cinq.
+
+    Le même changement répare la marche suivante, qui souffrait de l'excès
+    inverse : 1215 → 1320 valait deux cent cinquante points mesurés pour cent
+    cinq annoncés, parce qu'on y franchissait d'un coup la profondeur **et** la
+    bascule vers `UCI_LimitStrength`. Les deux sont désormais séparés : la
+    profondeur monte ici, le bridage prend la main là.
+  */
   {
     elo: 1215,
     personality: 'prudent',
     skill: 5,
-    depth: 5,
+    depth: 6,
     movetimeMs: 380,
     temperature: 0.41,
     multiPv: 5,
