@@ -634,6 +634,10 @@ export function pickBotMove(
   /*
     Ce qu'un bot s'autorise à perdre sur un coup.
 
+    ⚠ Comme le bloc suivant, les rangs cités ici datent de l'échelle à
+    vingt-cinq échelons partant de 250 — les Elo donnés en regard permettent de
+    s'y retrouver sans table de correspondance.
+
     Le plafond grandit avec la température, donc avec la faiblesse du bot. Il
     grandissait trop lentement en bas de l'échelle : entre le niveau 1 et le
     niveau 3, il passait de 500 à 426 centipions — trois quarts de pion d'écart
@@ -665,11 +669,13 @@ export function pickBotMove(
     Softmax : plus la température est haute, plus les coups moyens ont leur
     chance.
 
-    ⚠ Les rangs cités ci-dessous datent de l'échelle à vingt-sept échelons,
-    celle d'avant la réduction à quinze : « niveau 25 » y désignait le palier à
-    3050 Elo, « niveau 18 » celui à 2150. On ne les renumérote pas — ce sont des
-    mesures prises à une date, et les maquiller aux rangs d'aujourd'hui
-    donnerait un compte rendu faux d'une expérience qui a eu lieu.
+    ⚠ Les rangs cités ici datent de l'échelle d'alors : **vingt-cinq échelons
+    partant de 250**, avant les deux paliers insérés par `0010_shifted_ladder`
+    et avant la réduction à quinze. « Niveau 1 » y valait 250, « niveau 8 »
+    1320, « niveau 18 » 2400 et « niveau 25 » le sommet à 3200. On ne les
+    renumérote pas — ce sont des mesures prises à une date, et les maquiller aux
+    rangs d'aujourd'hui donnerait un compte rendu faux d'une expérience qui a
+    bien eu lieu.
 
     L'échelle était divisée par la température au lieu d'être multipliée, et
     cela renversait tout le barème. Une grande échelle aplatit la distribution
