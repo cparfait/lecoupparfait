@@ -64,11 +64,10 @@ export function EnTeteDeCarte({
   className?: string
 }) {
   const classes = clsx(
-    'bandeau flex w-full items-center gap-2 px-4 py-3 text-left',
-    // Deux pixels, dans la teinte : à un seul, le filet du bas se confondait
-    // avec ceux qui séparent les lignes du contenu, et le bandeau n'était plus
-    // qu'une ligne parmi d'autres.
-    filet && 'border-b-2',
+    'bandeau flex w-full items-center gap-2.5 px-5 pb-3 pt-4 text-left',
+    // Un pixel, dans la teinte : sans fond gris, le bandeau n'a plus à se
+    // défendre contre les filets du contenu — c'est le titre qui le distingue.
+    filet && 'border-b',
     className,
   )
   const style = teinte ? ({ '--teinte': teinte } as CSSProperties) : undefined
@@ -83,12 +82,13 @@ export function EnTeteDeCarte({
           teinte : du ton sur ton, que le rapport de contraste ne rattrape pas.
           C'est la règle des cartes de destination, appliquée ici — voir
           `.bandeau` dans `globals.css`. */}
-      <span className="flex min-w-0 flex-1 items-center gap-2.5 text-[14px] font-bold tracking-[0.01em] text-ink">
+      <span className="flex min-w-0 flex-1 items-center gap-2.5 font-display text-[15px] font-bold tracking-[-0.01em] text-ink">
         {icone && (
           <span
-            className="grid h-7 w-7 shrink-0 place-items-center rounded-[var(--radius-sm)]"
+            className="grid h-7 w-7 shrink-0 place-items-center rounded-[9px]"
             style={{
-              background: 'color-mix(in oklab, var(--bandeau-teinte) 16%, transparent)',
+              background:
+                'linear-gradient(135deg, color-mix(in oklab, var(--bandeau-teinte) 30%, transparent), color-mix(in oklab, var(--bandeau-teinte) 10%, transparent))',
               boxShadow:
                 'inset 0 0 0 1px color-mix(in oklab, var(--bandeau-teinte) 30%, transparent)',
               color: 'var(--bandeau-icone)',

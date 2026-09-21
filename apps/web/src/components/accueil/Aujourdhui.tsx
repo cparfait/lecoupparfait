@@ -184,7 +184,12 @@ export function Aujourdhui({
       <EnTeteDeCarte
         titre={titre}
         icone={<Icone size={14} strokeWidth={toutFait ? 3 : 2.5} aria-hidden />}
-        fin={`${xp} / ${XP_TOTAL} points du jour`}
+        fin={
+          <span className="flex items-baseline gap-1">
+            <span className="chiffre-affiche text-[1.5rem] text-ink">{xp}</span>
+            <span className="text-[12px] text-faint">/ {XP_TOTAL} points du jour</span>
+          </span>
+        }
         filet={!replie}
         onClick={defiFait ? () => setChoix(!deplie) : undefined}
         ouvert={deplie}

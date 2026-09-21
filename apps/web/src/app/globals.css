@@ -833,10 +833,17 @@ button.glass:hover {
   */
   --teinte-texte: var(--text);
   --bandeau-icone: color-mix(in oklab, var(--bandeau-teinte) 78%, var(--text));
-  background-image: linear-gradient(0deg, var(--surface-strong), var(--surface-strong));
-  /* Le filet reprend un souffle de teinte : il sépare l'en-tête du contenu
-     sans rien avoir à faire lire par-dessus. */
-  border-color: color-mix(in oklab, var(--bandeau-teinte) 30%, var(--border));
+  /*
+    Et plus de fond du tout.
+
+    La bande grise en tête de chaque carte est le trait le plus daté de
+    l'interface : c'est l'en-tête de fenêtre des tableaux de bord de 2010, et
+    six cartes à bande grise font un panneau de widgets. Le titre se pose
+    directement sur la carte, la pastille d'icône porte la teinte, et un filet
+    fin sépare l'en-tête du contenu — un filet, pas un couvercle.
+  */
+  background-image: none;
+  border-color: color-mix(in oklab, var(--bandeau-teinte) 22%, var(--border));
 }
 
 /*

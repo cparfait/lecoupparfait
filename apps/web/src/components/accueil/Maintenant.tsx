@@ -23,6 +23,7 @@ import Link from 'next/link'
 import { ArrowRight, Map, Play, Sun, Swords, Target } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import clsx from 'clsx'
+import { Board2D } from '@/components/board/Board2D.tsx'
 import { Button, Card, Skeleton } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import type { ProchaineChose, ProchaineChoseId } from './prochainesChoses.ts'
@@ -51,10 +52,21 @@ const ICONES: Record<ProchaineChoseId, LucideIcon> = {
 export function Maintenant({
   choses,
   chargement,
+  positionDuJour,
 }: {
   choses: ProchaineChose[]
   /** Vrai tant qu'on ignore ce qui attend : on ne propose rien au hasard. */
   chargement: boolean
+  /**
+   * La position du défi du jour, en FEN, quand on la connaît.
+   *
+   * Elle se montre à côté de la proposition quand c'est le défi qui est mis
+   * en avant : une carte qui parle d'une position sans la montrer demande
+   * de la croire sur parole. L'échiquier n'est pas jouable ici — on ne
+   * résout pas le défi sur l'accueil, on y va —, il dit seulement ce qui
+   * attend, et de quel côté.
+   */
+  positionDuJour?: string | null
 }) {
   const t = useT()
   if (chargement) return <Skeleton className="h-36 w-full" />
@@ -63,6 +75,10 @@ export function Maintenant({
   if (!principale) return null
 
   const Icone = ICONES[principale.id]
+  const plateau = principale.id === 'defi' && positionDuJour ? positionDuJour : null
+  // Le camp au trait, deuxième champ du FEN : on montre la position du côté
+  // de qui doit jouer, comme on la verra en l'ouvrant.
+  const auTrait = plateau?.split(' ')[1] === 'b' ? 'b' : 'w'
 
   return (
     <Card
@@ -85,21 +101,52 @@ export function Maintenant({
           défi, qui la porte déjà (`teinte-defi`). */}
       <EnTeteDeCarte titre={principale.categorie} icone={<Icone size={14} aria-hidden />} />
 
-      <div className="p-5">
-        {/* La phrase, en grand. C'est elle qu'on lit en arrivant, et elle doit
-            se suffire : on doit savoir quoi faire sans lire la ligne d'après. */}
-        <h2 className="font-display text-xl font-bold leading-tight sm:text-2xl">
-          {principale.titre}
-        </h2>
-        <p className="mt-1.5 max-w-prose text-[14px] leading-relaxed text-muted">
-          {principale.detail}
-        </p>
+      <div
+        className={clsx(
+          'p-5 sm:p-6',
+          plateau && 'grid gap-6 md:grid-cols-[1fr_auto] md:items-center',
+        )}
+      >
+        <div>
+          {/* La phrase, en grand. C'est elle qu'on lit en arrivant, et elle
+              doit se suffire : on doit savoir quoi faire sans lire la ligne
+              d'après. */}
+          <h2 className="titre-affiche text-[1.6rem] sm:text-[2rem]">{principale.titre}</h2>
+          <p className="mt-3 max-w-prose text-[15px] leading-relaxed text-muted">
+            {principale.detail}
+          </p>
 
-        <Link href={principale.lien} className="mt-4 block sm:inline-block">
-          <Button variant="primary" size="lg" icon={<ArrowRight size={16} />} fullWidth>
-            {principale.action}
-          </Button>
-        </Link>
+          <Link href={principale.lien} className="mt-6 block sm:inline-block">
+            <Button variant="primary" size="lg" icon={<ArrowRight size={16} />} fullWidth>
+              {principale.action}
+            </Button>
+          </Link>
+        </div>
+
+        {plateau && (
+          <Link
+            href={principale.lien}
+            aria-label={principale.action}
+            className="group mx-auto block w-full max-w-[280px] md:w-[260px] lg:w-[300px]"
+          >
+            {/* Une monture étroite, la même que sur l'accueil public : la
+                position est un objet posé sur la carte, pas un motif imprimé
+                dedans. */}
+            <div className="rounded-[var(--radius)] border border-line-strong/70 bg-bg-deep p-1.5 shadow-[var(--shadow)] transition-transform duration-300 group-hover:scale-[1.015]">
+              <div className="overflow-hidden rounded-[calc(var(--radius)-6px)]">
+                <Board2D
+                  fen={plateau}
+                  orientation={auTrait}
+                  playable={null}
+                  allowAnnotations={false}
+                />
+              </div>
+            </div>
+            <p className="mt-2 text-center text-[12px] text-faint">
+              {auTrait === 'w' ? t('puzzles.whiteToPlay') : t('puzzles.blackToPlay')}
+            </p>
+          </Link>
+        )}
       </div>
 
       {suite.length > 0 && (

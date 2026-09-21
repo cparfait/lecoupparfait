@@ -49,14 +49,18 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Flame, Gauge, History, Map, Sparkles } from 'lucide-react'
 import {
+  BOT_PERSONALITIES,
   CHAPITRES,
   CARRIERE_TERMINEE,
   chapitre as chapitreNumero,
   etapesDe,
   prochaineEtape,
 } from '@coupparfait/core'
+import type { BotPersonality } from '@coupparfait/core'
+import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
 import clsx from 'clsx'
 import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 import { Button, ButtonLink, Card, Chip, Skeleton } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { useCarriere } from '@/lib/carriere/useCarriere.ts'
@@ -109,6 +113,35 @@ const TEINTE: Record<PartieJouee['issue'], string> = {
   nulle: 'var(--q-forced)',
 }
 
+/**
+ * Le score, écrit comme sur une feuille de partie.
+ *
+ * « 1–0 », « 0–1 », « ½–½ » : c'est la notation que tout joueur lit d'un coup
+ * d'œil, et elle dit *comment* la partie s'est finie là où un trait de couleur
+ * ne disait que « bien » ou « mal ». Depuis le camp du joueur, pour qu'un
+ * « 1 » à gauche soit toujours *sa* victoire.
+ */
+function score(partie: PartieJouee): string {
+  if (partie.issue === 'nulle') return '½–½'
+  return partie.issue === 'gagnee' ? '1–0' : '0–1'
+}
+
+/**
+ * L'adversaire artificiel derrière un nom, s'il y en a un.
+ *
+ * La partie ne garde que le nom affiché — « Pion », « Rempart » —, qui est
+ * celui d'une personnalité traduite. On le retrouve en comparant aux noms
+ * traduits ; un pseudo humain ne correspond à rien, et c'est alors une
+ * initiale qui tient lieu de portrait.
+ */
+function personnaliteDe(nom: string | null, t: ReturnType<typeof useT>): BotPersonality | null {
+  if (!nom) return null
+  for (const personnalite of Object.values(BOT_PERSONALITIES)) {
+    if (tCoeur(t, personnalite.name) === nom) return personnalite
+  }
+  return null
+}
+
 const ISSUE: Record<PartieJouee['issue'], TranslationKey> = {
   gagnee: 'homeIn.won',
   perdue: 'homeIn.lost',
@@ -148,9 +181,14 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
   const [parties, setParties] = useState<PartieJouee[] | null>(null)
   const [analyses, setAnalyses] = useState<AnalyseEnregistree[] | null>(null)
   const [correspondances, setCorrespondances] = useState<number | null>(null)
-  const [defi, setDefi] = useState<{ tranche: TrancheDefi | null; niveau: number | null }>({
+  const [defi, setDefi] = useState<{
+    tranche: TrancheDefi | null
+    niveau: number | null
+    fen: string | null
+  }>({
     tranche: null,
     niveau: null,
+    fen: null,
   })
 
   useEffect(() => {
@@ -181,8 +219,13 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
     // qu'il est résolu, et les paliers au-dessus.
     void fetch(`/api/defi-du-jour?jour=${jourLocal()}`, { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d: { tranche?: TrancheDefi; puzzle?: { rating: number } } | null) => {
-        if (vivant) setDefi({ tranche: d?.tranche ?? null, niveau: d?.puzzle?.rating ?? null })
+      .then((d: { tranche?: TrancheDefi; puzzle?: { rating: number; fen?: string } } | null) => {
+        if (vivant)
+          setDefi({
+            tranche: d?.tranche ?? null,
+            niveau: d?.puzzle?.rating ?? null,
+            fen: d?.puzzle?.fen ?? null,
+          })
       })
       .catch(() => undefined)
 
@@ -242,14 +285,14 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
   }, [enDirect, correspondances, reprise, defiFait, journee, carriereEnCours, chapitre, suite, t])
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:py-8">
+    <div className="entree mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:py-10">
       {/* ── L'en-tête : qui je suis, où j'en suis ──────────────────────
           Les deux compteurs sont nommés. « 2560 points » seul, à côté d'un
           « 45 / 80 points » plus bas, laissait deviner un rapport entre les
           deux — il n'y en a aucun. */}
-      <header className="mb-5 flex flex-wrap items-center justify-between gap-2">
-        <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
-          Bonjour {pseudo}
+      <header className="mb-8 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+        <h1 className="titre-affiche text-[2.3rem] sm:text-[3rem] lg:text-[3.6rem]">
+          Bonjour <span className="text-muted">{pseudo}</span>
         </h1>
         <div className="flex flex-wrap items-center gap-2">
           {/* La série ne s'affiche qu'à partir de `sm`.
@@ -283,13 +326,13 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
       <DemandesDAmi className="mb-4" />
 
       {/* ── 1. Maintenant ─────────────────────────────────────────────── */}
-      <Maintenant choses={choses} chargement={chargement} />
+      <Maintenant choses={choses} chargement={chargement} positionDuJour={defi.fen} />
 
       {/* ── 2. Les deux états : la journée, et le chemin ────────────────
           Côte à côte et de poids égal, parce qu'ils répondent à la même
           question à deux échelles — « où j'en suis ? ». Ils s'empilent sous
           `md`, la journée d'abord : c'est elle qui expire. */}
-      <div className="mt-4 grid gap-4 md:grid-cols-2">
+      <div className="mt-5 grid gap-5 md:grid-cols-2">
         <Aujourdhui defiFait={defiFait === true} tranche={defi.tranche} niveauDefi={defi.niveau} />
 
         {progression === undefined ? (
@@ -305,18 +348,57 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
               teinte="var(--rub-jouer)"
               fin={`chapitre ${chapitre.numero} / ${CHAPITRES.length}`}
             />
-            <div className="p-4">
-              <p className="font-display text-base font-bold leading-tight">{chapitre.titre}</p>
-              <p className="mt-1 text-[12px] leading-snug text-muted">{chapitre.objectif}</p>
+            <div className="p-5">
+              {/* Le numéro du chapitre, en grand, à côté de son titre : c'est
+                  la seule chose qu'on retient d'un chemin en douze étapes —
+                  où l'on en est. La jauge en dessous compte les chapitres, un
+                  segment chacun, comme les cases d'une colonne. */}
+              <div className="flex items-start gap-4">
+                <span
+                  className="chiffre-affiche shrink-0 text-[3rem] leading-none text-[var(--rub-jouer)]"
+                  aria-hidden
+                >
+                  {String(chapitre.numero).padStart(2, '0')}
+                </span>
+                <div className="min-w-0 pt-1">
+                  <p className="font-display text-[1.15rem] font-bold leading-tight">
+                    {chapitre.titre}
+                  </p>
+                  <p className="mt-1 text-[13px] leading-snug text-muted">{chapitre.objectif}</p>
+                </div>
+              </div>
+              <div
+                className="mt-4 grid gap-1"
+                style={{ gridTemplateColumns: `repeat(${CHAPITRES.length}, minmax(0, 1fr))` }}
+                role="progressbar"
+                aria-valuenow={chapitre.numero}
+                aria-valuemin={1}
+                aria-valuemax={CHAPITRES.length}
+                aria-label={t('homeIn.yourPath')}
+              >
+                {CHAPITRES.map((c, i) => (
+                  <span
+                    key={c.numero}
+                    className={clsx(
+                      'h-1.5 rounded-full',
+                      i + 1 < chapitre.numero
+                        ? 'bg-[var(--rub-jouer)]'
+                        : i + 1 === chapitre.numero
+                          ? 'bg-[var(--rub-jouer)] opacity-60'
+                          : 'bg-surface-strong',
+                    )}
+                  />
+                ))}
+              </div>
 
               {/* Les trois temps du chapitre, en une ligne chacun : c'est ce
                   qui manquait pour savoir combien il reste avant le suivant. */}
-              <ul className="mt-3 space-y-1">
+              <ul className="mt-4 space-y-1.5">
                 {etapesDe(chapitre, progression).map((etape) => (
                   <li
                     key={etape.cle}
                     className={clsx(
-                      'flex items-center gap-2 text-[12px]',
+                      'flex items-center gap-2 text-[13px]',
                       etape.termine ? 'text-faint line-through' : 'text-muted',
                     )}
                   >
@@ -344,7 +426,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
               {/* Bouton secondaire, et c'est délibéré : si l'étape de carrière
                   est *la* chose à faire, elle est déjà en haut avec le bouton
                   primaire. Ici on ouvre la carte, on ne relance pas. */}
-              <ButtonLink href="/carriere" variant="secondary" size="sm" fullWidth className="mt-3">
+              <ButtonLink href="/carriere" variant="secondary" size="sm" fullWidth className="mt-4">
                 {t('homeIn.seeTheMap')}
               </ButtonLink>
             </div>
@@ -375,7 +457,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
           relire ce qu'on a joué hier. Mais les lignes mènent à l'analyse, et
           le disent maintenant — un chevron gris ne l'annonçait pas. */}
       {(parties === null || parties.length > 0 || (analyses?.length ?? 0) > 0) && (
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <div className="mt-5 grid gap-5 md:grid-cols-2">
           <Card className="overflow-hidden">
             {/* La teinte d'« Analyse » : c'est là que mène chaque ligne. */}
             <EnTeteDeCarte
@@ -405,39 +487,64 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
               </div>
             ) : (
               <ul>
-                {parties.map((partie) => (
-                  <li key={partie.slug} className="border-b border-line/40 last:border-0">
-                    <button
-                      type="button"
-                      onClick={() => analyser(partie)}
-                      className="group flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-surface-hover"
-                    >
-                      <span
-                        className="w-1 shrink-0 self-stretch rounded-full"
-                        style={{ background: TEINTE[partie.issue] }}
-                        aria-hidden
-                      />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm">
-                          contre{' '}
-                          <strong className="font-semibold">
-                            {partie.adversaire ?? 'un adversaire'}
-                          </strong>
+                {parties.map((partie) => {
+                  const personnalite = personnaliteDe(partie.adversaire, t)
+                  return (
+                    <li key={partie.slug} className="border-b border-line/40 last:border-0">
+                      <button
+                        type="button"
+                        onClick={() => analyser(partie)}
+                        className="group flex w-full items-center gap-3.5 px-4 py-3 text-left transition-colors hover:bg-surface-hover"
+                      >
+                        {/* Le portrait de l'adversaire, quand c'est l'un des
+                          nôtres ; l'initiale du pseudo sinon. On reconnaît
+                          Rempart à sa tête avant de lire son nom. */}
+                        {personnalite ? (
+                          <PortraitAdversaire
+                            personality={personnalite}
+                            size={44}
+                            className="shrink-0 rounded-[10px]"
+                          />
+                        ) : (
+                          <span
+                            className="grid h-11 w-9 shrink-0 place-items-center rounded-[10px] bg-surface-strong font-display text-lg font-bold text-muted"
+                            aria-hidden
+                          >
+                            {(partie.adversaire ?? '?').slice(0, 1).toUpperCase()}
+                          </span>
+                        )}
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[15px]">
+                            contre{' '}
+                            <strong className="font-semibold">
+                              {partie.adversaire ?? 'un adversaire'}
+                            </strong>
+                          </span>
+                          <span className="block truncate text-[12px] text-faint">
+                            {partie.opening ?? t('homeIn.unlistedOpening')} ·{' '}
+                            {t('homeIn.halfMoves', { n: partie.coups })}
+                          </span>
                         </span>
-                        <span className="block truncate text-[12px] text-faint">
-                          {t(ISSUE[partie.issue])} · {partie.opening ?? t('homeIn.unlistedOpening')}{' '}
-                          · {t('homeIn.halfMoves', { n: partie.coups })}
+                        {/* Le score en notation, dans la couleur de l'issue :
+                          « 1–0 » se lit plus vite que « Gagnée », et c'est
+                          la langue du jeu. */}
+                        <span
+                          className="chiffre-affiche shrink-0 text-[1.15rem]"
+                          style={{ color: TEINTE[partie.issue] }}
+                          title={t(ISSUE[partie.issue])}
+                        >
+                          {score(partie)}
                         </span>
-                      </span>
-                      {/* Le mot, et pas seulement l'icône : rien ne disait que
+                        {/* Le mot, et pas seulement l'icône : rien ne disait que
                           cliquer une ligne ouvrait l'analyse. */}
-                      <span className="flex shrink-0 items-center gap-1 text-[12px] font-semibold text-faint transition-colors group-hover:text-accent">
-                        <Gauge size={13} aria-hidden />
-                        {t('bits.analyse')}
-                      </span>
-                    </button>
-                  </li>
-                ))}
+                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-surface-strong text-muted ring-1 ring-line transition-all group-hover:bg-accent group-hover:text-[var(--accent-contrast)] group-hover:ring-transparent">
+                          <Gauge size={14} aria-hidden />
+                          <span className="sr-only">{t('bits.analyse')}</span>
+                        </span>
+                      </button>
+                    </li>
+                  )
+                })}
               </ul>
             )}
           </Card>
@@ -457,13 +564,21 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                 {analyses.map((analyse) => (
                   <li
                     key={analyse.id}
-                    className="border-b border-line/40 px-4 py-2 text-[14px] last:border-0"
+                    className="flex items-center gap-3.5 border-b border-line/40 px-4 py-3 text-[15px] last:border-0"
                   >
-                    <span className="block truncate">
-                      {analyse.whiteName ?? 'Blancs'} — {analyse.blackName ?? 'Noirs'}
+                    {/* Les deux camps, en deux pastilles : blanche et noire,
+                        comme les pièces. C'est ce qu'une analyse contient. */}
+                    <span className="flex shrink-0 -space-x-1.5" aria-hidden>
+                      <span className="h-5 w-5 rounded-full border border-line-strong bg-[var(--eval-white)]" />
+                      <span className="h-5 w-5 rounded-full border border-line-strong bg-[var(--eval-black)]" />
                     </span>
-                    <span className="block truncate text-[12px] text-faint">
-                      {analyse.opening ?? t('homeIn.noOpeningListed')}
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate">
+                        {analyse.whiteName ?? 'Blancs'} — {analyse.blackName ?? 'Noirs'}
+                      </span>
+                      <span className="block truncate text-[12px] text-faint">
+                        {analyse.opening ?? t('homeIn.noOpeningListed')}
+                      </span>
                     </span>
                   </li>
                 ))}
