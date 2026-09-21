@@ -113,6 +113,11 @@ export async function GET(requete: Request) {
         espaces: entree.espaces,
       })),
     orphelins: inventaire.orphelins.map((credit) => ({ nom: credit.nom, paquet: credit.paquet })),
+    /** Crédits qu'un espace de travail manquant empêche de trancher. */
+    indetermines: inventaire.indetermines.map((credit) => ({
+      nom: credit.nom,
+      paquet: credit.paquet,
+    })),
     versionsDivergentes: inventaire.versionsDivergentes,
     depot: {
       lu: inventaire.racine !== null,

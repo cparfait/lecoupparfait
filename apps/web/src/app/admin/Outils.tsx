@@ -54,6 +54,7 @@ interface Reponse {
     espaces: string[]
   }>
   orphelins: Array<{ nom: string; paquet?: string }>
+  indetermines: Array<{ nom: string; paquet?: string }>
   versionsDivergentes: Array<{
     nom: string
     version: string
@@ -214,7 +215,11 @@ export function Outils() {
               ? 'admin.workspacesUnreadablePlural'
               : 'admin.workspacesUnreadable',
             { espaces: donnees.depot.espacesIllisibles.join(', ') },
-          )}
+          )}{' '}
+          {donnees.indetermines.length > 0 &&
+            t('admin.undecidable', {
+              credits: donnees.indetermines.map((entree) => entree.nom).join(', '),
+            })}
         </p>
       )}
 

@@ -7022,6 +7022,8 @@ export const fr = {
       '{espaces} n’a pas pu être lu depuis ce serveur — l’image de production n’embarque pas tous les manifestes. Le contrôle des tests, lui, voit le dépôt entier.',
     workspacesUnreadablePlural:
       '{espaces} n’ont pas pu être lus depuis ce serveur — l’image de production n’embarque pas tous les manifestes. Le contrôle des tests, lui, voit le dépôt entier.',
+    undecidable:
+      'Faute de ce manifeste, {credits} n’a pas pu être rattaché à un espace de travail : le catalogue n’est pas en cause, et le contrôle des tests tranchera.',
     seekUpdates: 'Chercher les mises à jour',
     outboundNote:
       'Interroge le registre npm et GitHub depuis le serveur. Rien d’autre que des noms de paquets publics ne sort d’ici.',

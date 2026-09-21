@@ -6984,6 +6984,8 @@ export const en: Dictionary = {
       '{espaces} could not be read from this server — the production image does not carry every manifest. The test check, for its part, sees the whole repository.',
     workspacesUnreadablePlural:
       '{espaces} could not be read from this server — the production image does not carry every manifest. The test check, for its part, sees the whole repository.',
+    undecidable:
+      'Without that manifest, {credits} could not be traced to a workspace: the catalogue is not at fault, and the test check will settle it.',
     seekUpdates: 'Look for updates',
     outboundNote:
       'Queries the npm registry and GitHub from the server. Nothing other than public package names leaves this machine.',

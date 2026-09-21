@@ -68,6 +68,16 @@ export interface Inventaire {
   paquets: PaquetInventorie[]
   /** Crédits qui citent un paquet npm que plus personne ne déclare. */
   orphelins: Credit[]
+  /**
+   * Crédits dont on ne peut rien dire, faute d'avoir lu tous les manifestes.
+   *
+   * `socket.io` n'est déclaré que par `apps/server`, absent de l'image de
+   * production : l'y compter comme orphelin accuserait le catalogue d'une
+   * faute qui n'est pas la sienne. Tant qu'un espace manque, l'absence n'est
+   * pas une preuve, et ces entrées attendent le contrôle des tests plutôt que
+   * de réclamer une correction.
+   */
+  indetermines: Credit[]
   versionsDivergentes: VersionDivergente[]
 }
 
@@ -106,6 +116,7 @@ export function inventorier(racine = racineDuDepot()): Inventaire {
       espacesIllisibles: [...ESPACES],
       paquets: [],
       orphelins: [],
+      indetermines: CREDITS.filter((credit) => credit.paquet),
       versionsDivergentes: [],
     }
   }
@@ -145,7 +156,16 @@ export function inventorier(racine = racineDuDepot()): Inventaire {
     })
     .sort((a, b) => a.paquet.localeCompare(b.paquet))
 
-  const orphelins = CREDITS.filter((credit) => credit.paquet && !declares.has(credit.paquet))
+  /*
+    Un crédit qu'aucun manifeste lu ne réclame est orphelin — mais seulement
+    si on les a tous lus. Sinon c'est un aveu d'ignorance, pas un écart, et
+    les deux ne se rangent pas au même endroit : l'écran d'administration
+    corrige les premiers et se contente de mentionner les seconds.
+  */
+  const sansDeclarant = CREDITS.filter((credit) => credit.paquet && !declares.has(credit.paquet))
+  const toutLu = espacesIllisibles.length === 0
+  const orphelins = toutLu ? sansDeclarant : []
+  const indetermines = toutLu ? [] : sansDeclarant
 
   /*
     La version affichée est-elle encore celle qu'on installe ?
@@ -176,5 +196,13 @@ export function inventorier(racine = racineDuDepot()): Inventaire {
     }
   }
 
-  return { racine, espacesLus, espacesIllisibles, paquets, orphelins, versionsDivergentes }
+  return {
+    racine,
+    espacesLus,
+    espacesIllisibles,
+    paquets,
+    orphelins,
+    indetermines,
+    versionsDivergentes,
+  }
 }
