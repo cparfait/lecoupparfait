@@ -13,7 +13,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import {
-  ArrowLeft,
   ArrowRight,
   Eye,
   Flag,
@@ -91,6 +90,7 @@ import {
   Chip,
   SegmentedControl,
   SectionTitle,
+  TitreDePage,
   Toggle,
 } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
@@ -801,24 +801,18 @@ function SetupScreen({
        quelles conditions, avec quelles aides. Le bouton, lui, ne se cherche
        plus : il est collé au bas de la fenêtre avec le résumé de ce qu'on a
        choisi, et il y reste quelle que soit la hauteur de l'écran. */
-    <div className="mx-auto w-full max-w-3xl px-4 pb-4 pt-6 sm:px-6 lg:pt-8">
-      <Link
-        href="/jouer"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
-      >
-        <ArrowLeft size={15} aria-hidden />
-        {t('computer.back')}
-      </Link>
-
-      <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
-        {t('nav.vsComputer')}
-      </h1>
-      <p className="mt-1.5 text-muted">
-        {t('computer.intro', {
+    <div className="mx-auto w-full max-w-[76rem] px-4 pb-4 pt-6 sm:px-6">
+      {/* Le bandeau de la rubrique, comme sur la page « Jouer » : la couleur
+          dit où l'on est, et le retour y est rangé. */}
+      <TitreDePage
+        retour={{ href: '/jouer', label: t('computer.back') }}
+        intro={t('computer.intro', {
           n: BOT_LEVELS.length,
           p: Object.keys(BOT_PERSONALITIES).length,
         })}
-      </p>
+      >
+        {t('nav.vsComputer')}
+      </TitreDePage>
 
       {/* ── Reprendre ──────────────────────────────────────────────────
           En tête, avant les réglages : quelqu'un qui a une partie en cours
@@ -876,64 +870,71 @@ function SetupScreen({
         </Card>
       )}
 
-      {/* ── 1. L'adversaire ────────────────────────────────────────────── */}
-      <Etape numero={1} titre={t('computer.step1')}>
-        {/* Les personnalités défilent sur une rangée : sept vignettes, une
+      {/* ── Deux colonnes sur grand écran ───────────────────────────────
+          Trois pas empilés dans une colonne de sept cents pixels faisaient
+          défiler un écran de 1 900 : l'adversaire à gauche, les conditions
+          et les aides à droite, et tout se voit d'un coup — le bouton reste
+          collé en bas. Sous `lg`, les pas s'empilent dans l'ordre. */}
+      <div className="lg:grid lg:grid-cols-12 lg:gap-x-10">
+        <div className="lg:col-span-7">
+          {/* ── 1. L'adversaire ────────────────────────────────────────────── */}
+          <Etape numero={1} titre={t('computer.step1')}>
+            {/* Les personnalités défilent sur une rangée : sept vignettes, une
             par adversaire, et l'on voit d'un coup d'œil l'échelle entière.
             Choisir une vignette pose le curseur sur le niveau le plus proche
             de sa tranche — le curseur, en dessous, sert au réglage fin. */}
-        <Defilement
-          ref={rangeePersonnalites}
-          className="-mx-4 sm:-mx-6"
-          /* De l'air au-dessus et en dessous : les cartes se soulèvent et
+            <Defilement
+              ref={rangeePersonnalites}
+              className="-mx-4 sm:-mx-6"
+              /* De l'air au-dessus et en dessous : les cartes se soulèvent et
              s'inclinent au survol, et la rangée, qui défile, couperait ce
              qui dépasse. */
-          classeRangee="gap-3 px-4 py-3 sm:px-6"
-          role="radiogroup"
-          label={t('computer.opponentGroup')}
-        >
-          {personnalites.map((entree) => {
-            const actif = entree.id === bot.personality
-            /* Le niveau que le clic poserait, et son Elo : c'est ce que la
+              classeRangee="gap-3 px-4 py-3 sm:px-6"
+              role="radiogroup"
+              label={t('computer.opponentGroup')}
+            >
+              {personnalites.map((entree) => {
+                const actif = entree.id === bot.personality
+                /* Le niveau que le clic poserait, et son Elo : c'est ce que la
                vignette promet, et c'est ce qu'elle tient. */
-            const cible = actif ? level : niveauProche(entree.id, level)
-            return (
-              <CarteAdversaire
-                key={entree.id}
-                personnalite={entree.personnalite}
-                teinte={TEINTES_ADVERSAIRES[entree.id]}
-                actif={actif}
-                elo={botLevel(cible).elo}
-                niveau={cible}
-                onClick={() => choisirNiveau(cible)}
-              />
-            )
-          })}
-        </Defilement>
+                const cible = actif ? level : niveauProche(entree.id, level)
+                return (
+                  <CarteAdversaire
+                    key={entree.id}
+                    personnalite={entree.personnalite}
+                    teinte={TEINTES_ADVERSAIRES[entree.id]}
+                    actif={actif}
+                    elo={botLevel(cible).elo}
+                    niveau={cible}
+                    onClick={() => choisirNiveau(cible)}
+                  />
+                )
+              })}
+            </Defilement>
 
-        {/* L'adversaire retenu, en une ligne : le portrait en grand, le nom,
+            {/* L'adversaire retenu, en une ligne : le portrait en grand, le nom,
             l'Elo, et sa phrase. C'est ce que le curseur fait changer, et
             c'est juste au-dessus de lui. */}
-        <div className="mt-4 flex items-center gap-4">
-          {/* Le portrait retenu, sous le même projecteur que sa carte. */}
-          <span
-            className="relative grid h-[4.5rem] w-[4.5rem] shrink-0 place-items-center overflow-hidden rounded-[var(--radius)] border"
-            style={{
-              background: `radial-gradient(70% 55% at 50% 20%, color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 55%, transparent), transparent 70%), linear-gradient(180deg, color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 26%, var(--surface)), color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 6%, var(--bg-elev)) 70%)`,
-              borderColor: `color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 50%, var(--border))`,
-              boxShadow: `inset 0 1px 0 rgb(255 255 255 / 0.18), 0 12px 28px -14px color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 70%, black)`,
-            }}
-            aria-hidden
-          >
-            <span
-              style={{
-                filter: `drop-shadow(0 10px 12px color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 65%, transparent))`,
-              }}
-            >
-              <PortraitAdversaire personality={personality} size={60} />
-            </span>
-          </span>
-          {/* Tout ce bloc change avec le curseur, et le curseur est juste en
+            <div className="mt-4 flex items-center gap-4">
+              {/* Le portrait retenu, sous le même projecteur que sa carte. */}
+              <span
+                className="relative grid h-[4.5rem] w-[4.5rem] shrink-0 place-items-center overflow-hidden rounded-[var(--radius)] border"
+                style={{
+                  background: `radial-gradient(70% 55% at 50% 20%, color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 55%, transparent), transparent 70%), linear-gradient(180deg, color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 26%, var(--surface)), color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 6%, var(--bg-elev)) 70%)`,
+                  borderColor: `color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 50%, var(--border))`,
+                  boxShadow: `inset 0 1px 0 rgb(255 255 255 / 0.18), 0 12px 28px -14px color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 70%, black)`,
+                }}
+                aria-hidden
+              >
+                <span
+                  style={{
+                    filter: `drop-shadow(0 10px 12px color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 65%, transparent))`,
+                  }}
+                >
+                  <PortraitAdversaire personality={personality} size={60} />
+                </span>
+              </span>
+              {/* Tout ce bloc change avec le curseur, et le curseur est juste en
               dessous : sa hauteur ne doit pas dépendre de l'adversaire, sinon
               la page saute d'un cran à l'autre et le pouce perd sa cible.
               Deux précautions donc. Le nom et les puces ne partagent une
@@ -942,262 +943,270 @@ function SetupScreen({
               · Niveau 2 » non. Et la phrase réserve ses lignes en unités de
               ligne : trois sur téléphone, deux au-delà, ce que demande la
               plus longue des sept. */}
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-2">
-              <h3 className="font-display text-xl font-semibold leading-tight">
-                {tCoeur(t, personality.name)}
-              </h3>
-              <span className="flex flex-wrap gap-2">
-                <Chip tone="accent">≈ {bot.elo} Elo</Chip>
-                <Chip>Niveau {bot.level}</Chip>
-              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-2">
+                  <h3 className="font-display text-xl font-semibold leading-tight">
+                    {tCoeur(t, personality.name)}
+                  </h3>
+                  <span className="flex flex-wrap gap-2">
+                    <Chip tone="accent">≈ {bot.elo} Elo</Chip>
+                    <Chip>Niveau {bot.level}</Chip>
+                  </span>
+                </div>
+                <p className="mt-1 min-h-[3lh] text-sm leading-relaxed text-muted sm:min-h-[2lh]">
+                  {tCoeur(t, personality.blurb)}
+                </p>
+              </div>
             </div>
-            <p className="mt-1 min-h-[3lh] text-sm leading-relaxed text-muted sm:min-h-[2lh]">
-              {tCoeur(t, personality.blurb)}
-            </p>
-          </div>
-        </div>
 
-        {/* ── Le curseur, et le repère qui suit le pouce ──────────────────
+            {/* ── Le curseur, et le repère qui suit le pouce ──────────────────
             Vingt-cinq crans, un par niveau, plus haut tous les cinq. Le
             repère se cale sur la position du pouce : un pouce mesure 22 px,
             son centre ne parcourt pas toute la largeur mais celle-ci moins
             sa propre taille, d'où la correction de onze pixels sur chaque
             bord. Le même décalage borne la graduation en dessous. */}
-        <div className="mt-4">
-          <label htmlFor="level" className="block text-sm font-medium">
-            {t('bits.fineLevel')}
-          </label>
-          {/* Le repère prend la teinte de l'adversaire, éclaircie pour que
+            <div className="mt-4">
+              <label htmlFor="level" className="block text-sm font-medium">
+                {t('bits.fineLevel')}
+              </label>
+              {/* Le repère prend la teinte de l'adversaire, éclaircie pour que
               l'encre reste lisible sur toutes les matières. */}
-          <div className="relative mt-1 h-5">
-            <span
-              className="absolute -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[12px] font-bold tabular-nums text-[#101018] transition-[left,background-color] duration-150"
-              style={{
-                left: `calc(${pourcentNiveau}% + ${14 - pourcentNiveau * 0.28}px)`,
-                background: `color-mix(in oklab, ${teinteCourante} 80%, white)`,
-                boxShadow: `0 0 14px -2px ${teinteCourante}`,
-              }}
-              aria-hidden
-            >
-              {bot.level} · {tCoeur(t, personality.name)}
-            </span>
-          </div>
-          {/* ── Le rail, peint adversaire par adversaire ───────────────────
+              <div className="relative mt-1 h-5">
+                <span
+                  className="absolute -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[12px] font-bold tabular-nums text-[#101018] transition-[left,background-color] duration-150"
+                  style={{
+                    left: `calc(${pourcentNiveau}% + ${14 - pourcentNiveau * 0.28}px)`,
+                    background: `color-mix(in oklab, ${teinteCourante} 80%, white)`,
+                    boxShadow: `0 0 14px -2px ${teinteCourante}`,
+                  }}
+                  aria-hidden
+                >
+                  {bot.level} · {tCoeur(t, personality.name)}
+                </span>
+              </div>
+              {/* ── Le rail, peint adversaire par adversaire ───────────────────
               Un segment par niveau dans la teinte de la sculpture qui le joue :
               on voit d'un coup d'œil où Pion cède la place à Brasier, et où
               Oracle commence. La portion parcourue garde ses couleurs
               franches ; le reste s'éteint, sans disparaître. Le pouce porte le
               portrait de l'adversaire courant — voir `.curseur-adversaires`. */}
-          <input
-            id="level"
-            type="range"
-            min={1}
-            max={BOT_LEVELS.length}
-            step={1}
-            value={level}
-            onChange={(event) => choisirNiveau(Number(event.target.value))}
-            /* La barre reste fine, la zone touchable ne l'est plus : le champ
+              <input
+                id="level"
+                type="range"
+                min={1}
+                max={BOT_LEVELS.length}
+                step={1}
+                value={level}
+                onChange={(event) => choisirNiveau(Number(event.target.value))}
+                /* La barre reste fine, la zone touchable ne l'est plus : le champ
                fait trente-deux points de haut et le rail est repeint au
                centre, sur huit. */
-            className="curseur-adversaires h-8 w-full cursor-pointer appearance-none bg-transparent"
-            style={
-              {
-                '--pouce-image': `url('${personality.portrait}')`,
-                '--pouce-teinte': teinteCourante,
-                backgroundImage: `linear-gradient(180deg, rgb(255 255 255 / 0.18), transparent 55%), linear-gradient(to right, ${rail})`,
-                backgroundSize: '100% 8px',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                borderRadius: '9999px',
-              } as React.CSSProperties
-            }
-          />
-          <div className="mx-[14px] flex items-end justify-between" aria-hidden>
-            {BOT_LEVELS.map((niveau) => {
-              const jalon = niveau.level === 1 || niveau.level % 5 === 0
-              return (
-                <span
-                  key={niveau.level}
-                  className={clsx('w-px rounded-full', jalon ? 'h-2' : 'h-1')}
-                  style={{
-                    background:
-                      niveau.level <= level
-                        ? TEINTES_ADVERSAIRES[niveau.personality]
-                        : `color-mix(in oklab, ${TEINTES_ADVERSAIRES[niveau.personality]} 35%, var(--border-strong))`,
-                  }}
-                />
-              )
-            })}
-          </div>
-          {/* Les nombres sont posés à leur position réelle, et non répartis :
+                className="curseur-adversaires h-8 w-full cursor-pointer appearance-none bg-transparent"
+                style={
+                  {
+                    '--pouce-image': `url('${personality.portrait}')`,
+                    '--pouce-teinte': teinteCourante,
+                    backgroundImage: `linear-gradient(180deg, rgb(255 255 255 / 0.18), transparent 55%), linear-gradient(to right, ${rail})`,
+                    backgroundSize: '100% 8px',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    borderRadius: '9999px',
+                  } as React.CSSProperties
+                }
+              />
+              <div className="mx-[14px] flex items-end justify-between" aria-hidden>
+                {BOT_LEVELS.map((niveau) => {
+                  const jalon = niveau.level === 1 || niveau.level % 5 === 0
+                  return (
+                    <span
+                      key={niveau.level}
+                      className={clsx('w-px rounded-full', jalon ? 'h-2' : 'h-1')}
+                      style={{
+                        background:
+                          niveau.level <= level
+                            ? TEINTES_ADVERSAIRES[niveau.personality]
+                            : `color-mix(in oklab, ${TEINTES_ADVERSAIRES[niveau.personality]} 35%, var(--border-strong))`,
+                      }}
+                    />
+                  )
+                })}
+              </div>
+              {/* Les nombres sont posés à leur position réelle, et non répartis :
               quatre crans séparent 1 de 5, cinq les suivants. */}
-          <div className="relative mx-[14px] mt-0.5 h-3.5" aria-hidden>
-            {[1, 5, 10, 15, 20, 25].map((jalon) => (
-              <span
-                key={jalon}
-                className="absolute -translate-x-1/2 text-[12px] tabular-nums text-faint"
-                style={{ left: `${((jalon - 1) / (BOT_LEVELS.length - 1)) * 100}%` }}
-              >
-                {jalon}
-              </span>
-            ))}
-          </div>
-          <div className="mt-1.5 flex justify-between text-[12px] text-faint">
-            {/* Les bornes se lisent dans la table, elles ne s'y recopient pas :
+              <div className="relative mx-[14px] mt-0.5 h-3.5" aria-hidden>
+                {/* Bornés à l'échelle : « 20 » et « 25 » débordaient de la piste
+                depuis que les niveaux sont quinze. */}
+                {[1, 5, 10, 15, 20, 25]
+                  .filter((jalon) => jalon <= BOT_LEVELS.length)
+                  .map((jalon) => (
+                    <span
+                      key={jalon}
+                      className="absolute -translate-x-1/2 text-[12px] tabular-nums text-faint"
+                      style={{ left: `${((jalon - 1) / (BOT_LEVELS.length - 1)) * 100}%` }}
+                    >
+                      {jalon}
+                    </span>
+                  ))}
+              </div>
+              <div className="mt-1.5 flex justify-between text-[12px] text-faint">
+                {/* Les bornes se lisent dans la table, elles ne s'y recopient pas :
                 elles annonçaient « 1 · débutant complet (100) » et « 25 ·
                 surhumain (3200) » alors que l'échelle était passée à quinze
                 échelons partant de 320. */}
-            <span>
-              {t('computer.scaleLow', {
-                n: BOT_LEVELS[0]?.level ?? 1,
-                elo: BOT_LEVELS[0]?.elo ?? 0,
-              })}
-            </span>
-            <span>
-              {t('computer.scaleHigh', {
-                n: BOT_LEVELS.at(-1)?.level ?? BOT_LEVELS.length,
-                elo: BOT_LEVELS.at(-1)?.elo ?? 0,
-              })}
-            </span>
-          </div>
+                <span>
+                  {t('computer.scaleLow', {
+                    n: BOT_LEVELS[0]?.level ?? 1,
+                    elo: BOT_LEVELS[0]?.elo ?? 0,
+                  })}
+                </span>
+                <span>
+                  {t('computer.scaleHigh', {
+                    n: BOT_LEVELS.at(-1)?.level ?? BOT_LEVELS.length,
+                    elo: BOT_LEVELS.at(-1)?.elo ?? 0,
+                  })}
+                </span>
+              </div>
 
-          {/* Cinq raccourcis nommés d'après le joueur. « Je débute » vaut 1 :
+              {/* Cinq raccourcis nommés d'après le joueur. « Je débute » vaut 1 :
               un préréglage nommé d'après le joueur doit désigner le bout de
               l'échelle qui lui correspond, pas deux crans au-dessus. */}
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {[
-              { label: t('computer.presetBeginner'), level: 1 },
-              { label: t('computer.presetCasual'), level: 7 },
-              { label: t('computer.presetClub'), level: 12 },
-              { label: t('computer.presetStrong'), level: 18 },
-              { label: t('computer.presetRuthless'), level: 25 },
-            ].map((preset) => {
-              /* Chaque raccourci porte la teinte de l'adversaire qu'il
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {[
+                  { label: t('computer.presetBeginner'), level: 1 },
+                  { label: t('computer.presetCasual'), level: 7 },
+                  { label: t('computer.presetClub'), level: 12 },
+                  { label: t('computer.presetStrong'), level: 18 },
+                  { label: t('computer.presetRuthless'), level: 25 },
+                ].map((preset) => {
+                  /* Chaque raccourci porte la teinte de l'adversaire qu'il
                  désigne : le chip « Fort » est du bronze parce que c'est
                  Brasier qui attend au niveau 18. */
-              const teinte = TEINTES_ADVERSAIRES[botLevel(preset.level).personality]
-              const choisi = level === preset.level
-              return (
-                <button
-                  key={preset.label}
-                  type="button"
-                  onClick={() => choisirNiveau(preset.level)}
-                  className={clsx(
-                    'rounded-full border px-3 py-1.5 text-[13px] font-medium transition-[background-color,box-shadow,color]',
-                    choisi ? 'text-ink' : 'text-muted hover:text-ink',
-                  )}
-                  style={{
-                    background: `color-mix(in oklab, ${teinte} ${choisi ? 30 : 10}%, var(--surface))`,
-                    borderColor: choisi
-                      ? 'var(--accent)'
-                      : `color-mix(in oklab, ${teinte} 40%, var(--border))`,
-                    boxShadow: choisi ? `0 0 16px -4px ${teinte}` : undefined,
-                  }}
-                >
-                  {preset.label}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {progress && progress.tracked && (
-          <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-muted">
-            <Trophy size={15} className="shrink-0 text-accent" aria-hidden />
-            {progress.defeated === 0 ? (
-              <span>{t('computer.noneBeaten')}</span>
-            ) : (
-              <span>
-                {t('computer.bestBeaten')}{' '}
-                <strong className="font-semibold text-ink">{progress.defeated}</strong> (
-                {botLevel(progress.defeated).elo} Elo) ·{' '}
-                {t(progress.wins > 1 ? 'computer.winsOf' : 'computer.oneWinOf', {
-                  victoires: progress.wins,
-                  parties: progress.attempts,
+                  const teinte = TEINTES_ADVERSAIRES[botLevel(preset.level).personality]
+                  const choisi = level === preset.level
+                  return (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => choisirNiveau(preset.level)}
+                      className={clsx(
+                        'rounded-full border px-3 py-1.5 text-[13px] font-medium transition-[background-color,box-shadow,color]',
+                        choisi ? 'text-ink' : 'text-muted hover:text-ink',
+                      )}
+                      style={{
+                        background: `color-mix(in oklab, ${teinte} ${choisi ? 30 : 10}%, var(--surface))`,
+                        borderColor: choisi
+                          ? 'var(--accent)'
+                          : `color-mix(in oklab, ${teinte} 40%, var(--border))`,
+                        boxShadow: choisi ? `0 0 16px -4px ${teinte}` : undefined,
+                      }}
+                    >
+                      {preset.label}
+                    </button>
+                  )
                 })}
-              </span>
-            )}
-            {progress.defeated < BOT_LEVELS.length && (
-              <button
-                type="button"
-                onClick={() => choisirNiveau(Math.min(BOT_LEVELS.length, progress.defeated + 1))}
-                className="font-semibold text-accent hover:underline"
-              >
-                {t('computer.nextToBeat', {
-                  niveau: Math.min(BOT_LEVELS.length, progress.defeated + 1),
-                })}
-              </button>
-            )}
-          </p>
-        )}
+              </div>
+            </div>
 
-        {/* ── Le style de jeu, en second ──────────────────────────────────
+            {progress && progress.tracked && (
+              <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-muted">
+                <Trophy size={15} className="shrink-0 text-accent" aria-hidden />
+                {progress.defeated === 0 ? (
+                  <span>{t('computer.noneBeaten')}</span>
+                ) : (
+                  <span>
+                    {t('computer.bestBeaten')}{' '}
+                    <strong className="font-semibold text-ink">{progress.defeated}</strong> (
+                    {botLevel(progress.defeated).elo} Elo) ·{' '}
+                    {t(progress.wins > 1 ? 'computer.winsOf' : 'computer.oneWinOf', {
+                      victoires: progress.wins,
+                      parties: progress.attempts,
+                    })}
+                  </span>
+                )}
+                {progress.defeated < BOT_LEVELS.length && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      choisirNiveau(Math.min(BOT_LEVELS.length, progress.defeated + 1))
+                    }
+                    className="font-semibold text-accent hover:underline"
+                  >
+                    {t('computer.nextToBeat', {
+                      niveau: Math.min(BOT_LEVELS.length, progress.defeated + 1),
+                    })}
+                  </button>
+                )}
+              </p>
+            )}
+
+            {/* ── Le style de jeu, en second ──────────────────────────────────
             Maia et Stockfish étaient deux cartes qui se disputaient la place
             au-dessus du curseur, et Maia, grisée hors de sa tranche, avait
             l'air en panne. Ce n'est pas un second adversaire, c'est une façon
             de jouer le niveau qu'on vient de choisir : une ligne, deux
             options, et l'explication quand l'une ne s'applique pas. N'existe
             que si le serveur a Maia. */}
-        {maiaReady && (
-          <div className="mt-5 border-t border-line/60 pt-4">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <span className="text-sm font-medium">{t('computer.playStyle')}</span>
-              <SegmentedControl
-                size="sm"
-                value={humainRetenu ? 'humain' : 'moteur'}
-                onChange={(valeur) => setHuman(valeur === 'humain')}
-                label={t('computer.playStyle')}
-                options={[
-                  {
-                    value: 'humain' as const,
-                    label: t('computer.styleHuman'),
-                    title: t('computer.styleHumanHint'),
-                  },
-                  {
-                    value: 'moteur' as const,
-                    label: t('computer.styleEngine'),
-                    title: t('computer.styleEngineHint'),
-                  },
-                ]}
-              />
-            </div>
-            <p className="mt-2 text-xs leading-relaxed text-muted">
-              {maiaPossible
-                ? humainRetenu
-                  ? t('computer.styleHumanNote')
-                  : t('computer.styleEngineNote')
-                : t('computer.styleOutOfRange', {
-                    min: MAIA_MIN_ELO,
-                    max: MAIA_MAX_ELO,
-                    niveau: bot.level,
-                    premier: premierNiveauMaia,
-                    dernier: dernierNiveauMaia,
-                  })}
-            </p>
-          </div>
-        )}
-      </Etape>
+            {maiaReady && (
+              <div className="mt-5 border-t border-line/60 pt-4">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <span className="text-sm font-medium">{t('computer.playStyle')}</span>
+                  <SegmentedControl
+                    size="sm"
+                    value={humainRetenu ? 'humain' : 'moteur'}
+                    onChange={(valeur) => setHuman(valeur === 'humain')}
+                    label={t('computer.playStyle')}
+                    options={[
+                      {
+                        value: 'humain' as const,
+                        label: t('computer.styleHuman'),
+                        title: t('computer.styleHumanHint'),
+                      },
+                      {
+                        value: 'moteur' as const,
+                        label: t('computer.styleEngine'),
+                        title: t('computer.styleEngineHint'),
+                      },
+                    ]}
+                  />
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-muted">
+                  {maiaPossible
+                    ? humainRetenu
+                      ? t('computer.styleHumanNote')
+                      : t('computer.styleEngineNote')
+                    : t('computer.styleOutOfRange', {
+                        min: MAIA_MIN_ELO,
+                        max: MAIA_MAX_ELO,
+                        niveau: bot.level,
+                        premier: premierNiveauMaia,
+                        dernier: dernierNiveauMaia,
+                      })}
+                </p>
+              </div>
+            )}
+          </Etape>
+        </div>
 
-      {/* ── 2. Les conditions ──────────────────────────────────────────── */}
-      <Etape numero={2} titre={t('computer.step2')}>
-        <div className="flex flex-wrap gap-x-10 gap-y-5">
-          <div>
-            <SectionTitle>{t('computer.yourColour')}</SectionTitle>
-            <SegmentedControl
-              value={color}
-              onChange={setColor}
-              label={t('computer.colour')}
-              options={[
-                { value: 'w' as const, label: t('friendGame.colourWhite') },
-                { value: 'b' as const, label: t('friendGame.colourBlack') },
-                { value: 'random' as const, label: t('friendGame.colourRandom') },
-              ]}
-            />
-            <p className="mt-2 text-xs text-faint">{t('computer.whiteStarts')}</p>
-          </div>
+        <div className="lg:col-span-5">
+          {/* ── 2. Les conditions ──────────────────────────────────────────── */}
+          <Etape numero={2} titre={t('computer.step2')}>
+            <div className="flex flex-wrap gap-x-10 gap-y-5">
+              <div>
+                <SectionTitle>{t('computer.yourColour')}</SectionTitle>
+                <SegmentedControl
+                  value={color}
+                  onChange={setColor}
+                  label={t('computer.colour')}
+                  options={[
+                    { value: 'w' as const, label: t('friendGame.colourWhite') },
+                    { value: 'b' as const, label: t('friendGame.colourBlack') },
+                    { value: 'random' as const, label: t('friendGame.colourRandom') },
+                  ]}
+                />
+                <p className="mt-2 text-xs text-faint">{t('computer.whiteStarts')}</p>
+              </div>
 
-          {/* `min-w-[19rem]` et non `min-w-0` : une colonne qui s'autorise à
+              {/* `min-w-[19rem]` et non `min-w-0` : une colonne qui s'autorise à
               descendre à zéro ne passe jamais à la ligne, elle se laisse
               écraser. Sur un téléphone un peu large — 400 px et plus, ce qui
               fait la moitié des modèles récents — la couleur tenait sur la
@@ -1207,77 +1216,86 @@ function SetupScreen({
               rallonge repoussait la rubrique 3 hors de vue. Le plancher dit
               la vraie condition : à côté de la couleur seulement s'il reste
               de quoi poser trois pastilles, sinon en pleine largeur dessous. */}
-          <div className="min-w-[19rem] flex-1">
-            <SectionTitle>{t('friendGame.timeControl')}</SectionTitle>
-            <div className="flex flex-wrap gap-1.5">
-              {TIME_CONTROLS.filter((tc) =>
-                ['180+0', '300+0', '300+3', '600+0', '600+5', '900+10', '1800+0', '0+0'].includes(
-                  tc.id,
-                ),
-              ).map((tc) => (
-                <button
-                  key={tc.id}
-                  type="button"
-                  onClick={() => setTimeControlId(tc.id)}
-                  className={clsx(
-                    'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors',
-                    timeControlId === tc.id
-                      ? 'border-accent bg-accent/15 text-ink'
-                      : 'border-line text-muted hover:bg-surface-hover',
-                  )}
-                >
-                  <span aria-hidden>{SPEED_LABELS[tc.category].icon}</span>
-                  {tc.label}
-                </button>
-              ))}
-            </div>
-            {/* Ramenée à un exemple : la règle générale se déduit de
+              <div className="min-w-[19rem] flex-1">
+                <SectionTitle>{t('friendGame.timeControl')}</SectionTitle>
+                <div className="flex flex-wrap gap-1.5">
+                  {TIME_CONTROLS.filter((tc) =>
+                    [
+                      '180+0',
+                      '300+0',
+                      '300+3',
+                      '600+0',
+                      '600+5',
+                      '900+10',
+                      '1800+0',
+                      '0+0',
+                    ].includes(tc.id),
+                  ).map((tc) => (
+                    <button
+                      key={tc.id}
+                      type="button"
+                      onClick={() => setTimeControlId(tc.id)}
+                      className={clsx(
+                        'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors',
+                        timeControlId === tc.id
+                          ? 'border-accent bg-accent/15 text-ink'
+                          : 'border-line text-muted hover:bg-surface-hover',
+                      )}
+                    >
+                      <span aria-hidden>{SPEED_LABELS[tc.category].icon}</span>
+                      {tc.label}
+                    </button>
+                  ))}
+                </div>
+                {/* Ramenée à un exemple : la règle générale se déduit de
                 l'exemple, et prenait trois lignes pour le dire. */}
-            <p className="mt-2 text-xs leading-relaxed text-faint">
-              {t('computer.timeControlExample')}
-            </p>
-          </div>
-        </div>
-      </Etape>
+                <p className="mt-2 text-xs leading-relaxed text-faint">
+                  {t('computer.timeControlExample')}
+                </p>
+              </div>
+            </div>
+          </Etape>
 
-      {/* ── 3. Les aides ───────────────────────────────────────────────── */}
-      <Etape numero={3} titre={t('computer.step3')}>
-        {/* La partie classée en tête, parce qu'elle commande les autres :
+          {/* ── 3. Les aides ───────────────────────────────────────────────── */}
+          <Etape numero={3} titre={t('computer.step3')}>
+            {/* La partie classée en tête, parce qu'elle commande les autres :
             cochée, elle retire le mode commenté, l'indice et l'annulation.
             Ce n'est pas une punition, c'est ce qui rend le résultat
             interprétable. Éteinte par défaut : on vient d'abord s'entraîner. */}
-        <Toggle
-          label={t('friendGame.ratedLabel')}
-          description={
-            connecte === false ? t('computer.ratedNeedsAccount') : t('computer.ratedHint')
-          }
-          checked={classee && connecte !== false}
-          disabled={connecte === false}
-          onChange={setClassee}
-        />
+            <Toggle
+              label={t('friendGame.ratedLabel')}
+              description={
+                connecte === false ? t('computer.ratedNeedsAccount') : t('computer.ratedHint')
+              }
+              checked={classee && connecte !== false}
+              disabled={connecte === false}
+              onChange={setClassee}
+            />
 
-        <div className="mt-3 border-t border-line/60 pt-3">
-          <Toggle
-            label={t('computer.commentaryEach')}
-            description={classee ? t('computer.commentaryRated') : t('computer.commentaryHint')}
-            checked={commentaryMode && !classee}
-            disabled={classee}
-            onChange={(valeur) => setPreference('commentaryMode', valeur)}
-          />
-
-          {/* Subordonné : il n'apparaît qu'une fois le mode commenté actif. */}
-          {commentaryMode && !classee && (
             <div className="mt-3 border-t border-line/60 pt-3">
               <Toggle
-                label={t('computer.commentaryOpponent')}
-                description={t('computer.commentaryOpponentHint')}
-                checked={commentaryOpponent}
-                onChange={(valeur) => setPreference('commentaryOpponent', valeur)}
+                label={t('computer.commentaryEach')}
+                description={classee ? t('computer.commentaryRated') : t('computer.commentaryHint')}
+                checked={commentaryMode && !classee}
+                disabled={classee}
+                onChange={(valeur) => setPreference('commentaryMode', valeur)}
               />
+
+              {/* Subordonné : il n'apparaît qu'une fois le mode commenté actif. */}
+              {commentaryMode && !classee && (
+                <div className="mt-3 border-t border-line/60 pt-3">
+                  <Toggle
+                    label={t('computer.commentaryOpponent')}
+                    description={t('computer.commentaryOpponentHint')}
+                    checked={commentaryOpponent}
+                    onChange={(valeur) => setPreference('commentaryOpponent', valeur)}
+                  />
+                </div>
+              )}
             </div>
-          )}
+          </Etape>
         </div>
-      </Etape>
+      </div>
 
       {/* ── Le résumé, et le bouton ────────────────────────────────────────
           Collés au bas de la fenêtre : quelle que soit la hauteur de l'écran,
@@ -1334,7 +1352,7 @@ function Etape({
   children: ReactNode
 }) {
   return (
-    <section className="mt-7 border-t border-line/60 pt-6 first-of-type:border-t-0">
+    <section className="mt-7 border-t border-line/60 pt-6 first-of-type:mt-0 first-of-type:border-t-0 first-of-type:pt-0">
       <div className="mb-4 flex items-center gap-3">
         <span
           className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-accent/20 text-[13px] font-bold text-accent"
