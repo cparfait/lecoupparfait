@@ -119,7 +119,7 @@ export const pt: Traduction = {
         'O Stockfish 19 roda no servidor com toda a força. Cada erro é classificado, o melhor lance é mostrado e, acima de tudo, a razão está escrita por extenso.',
       levelsTitle: '25 níveis, 7 personalidades',
       levelsBody:
-        'De 100 a 3200 de Elo. Adversários com estilo próprio: um ataca, outro sufoca, um terceiro sacrifica tudo. Escolha seu parceiro de treino.',
+        'De 320 a 3200 de Elo. Adversários com estilo próprio: um ataca, outro sufoca, um terceiro sacrifica tudo. Escolha seu parceiro de treino.',
       dataTitle: 'Milhões de posições',
       dataBody:
         '3810 aberturas nomeadas, seis milhões de problemas avaliados e etiquetados, finais perfeitos até sete peças. Tudo livre de direitos.',

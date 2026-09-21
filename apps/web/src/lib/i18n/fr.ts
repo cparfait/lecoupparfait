@@ -83,7 +83,7 @@ export const fr = {
     arbiter: 'Aide-mémoire d’arbitrage',
 
     // Repères affichés sous les entrées, dans les panneaux déroulants.
-    vsComputerHint: '25 niveaux, 7 personnalités',
+    vsComputerHint: '15 niveaux, 7 personnalités',
     vsFriendHint: 'un lien, ou plusieurs jours par coup',
     localGameHint: 'à deux, sur le même appareil',
     clockHint: 'la pendule de ta partie sur échiquier réel',
@@ -126,9 +126,9 @@ export const fr = {
       analysisTitle: 'Analyse expliquée',
       analysisBody:
         'Stockfish 19 tourne sur le serveur en pleine puissance. Chaque erreur est classée, le meilleur coup est montré, et surtout : la raison est écrite en toutes lettres.',
-      levelsTitle: '25 niveaux, 7 caractères',
+      levelsTitle: '15 niveaux, 7 caractères',
       levelsBody:
-        'De 100 à 3200 Elo. Des adversaires qui ont un style — l’un fonce, l’autre étouffe, un troisième sacrifie tout. Choisis ton sparring-partner.',
+        'De 320 à 3200 Elo. Des adversaires qui ont un style — l’un fonce, l’autre étouffe, un troisième sacrifie tout. Choisis ton sparring-partner.',
       dataTitle: 'Des millions de positions',
       dataBody:
         '3 810 ouvertures nommées, six millions de puzzles notés et étiquetés, les finales parfaites jusqu’à sept pièces. Tout est libre de droits.',
@@ -217,7 +217,7 @@ export const fr = {
       'Un tournoi où l’on arrive et repart quand on veut, réapparié à chaque fin de partie.',
     lobbyIntro:
       'Contre la machine pour t’entraîner à ton rythme, contre un ami pour le plaisir, ou à deux sur le même écran.',
-    vsComputerDetail: '25 niveaux · 7 personnalités · de 100 à 3200 Elo',
+    vsComputerDetail: '15 niveaux · 7 personnalités · de 320 à 3200 Elo',
     seanceDetail: '10 thèmes · adversaire calibré sur ton palier · mode commenté',
     vsFriendDetail: 'De 15 secondes à 14 jours par coup · un lien, ou un ami',
     correspondenceDetail: 'Un coup quand tu peux · de 1 à 14 jours par coup',
@@ -6403,7 +6403,7 @@ export const fr = {
   meta: {
     rootTitle: 'Le Coup Parfait — apprendre, jouer, progresser aux échecs',
     rootDesc:
-      'Plateforme d’échecs libre et gratuite : leçons guidées à la voix, analyse expliquée coup par coup, 25 niveaux d’adversaires et parties entre amis. Sans publicité, sans compte obligatoire.',
+      'Plateforme d’échecs libre et gratuite : leçons guidées à la voix, analyse expliquée coup par coup, 15 niveaux d’adversaires et parties entre amis. Sans publicité, sans compte obligatoire.',
     ogTitle: 'Le Coup Parfait — les échecs, enfin expliqués',
     ogDesc:
       'Un moteur qui explique pourquoi, une voix qui accompagne, et zéro euro. Libre et auto-hébergeable.',

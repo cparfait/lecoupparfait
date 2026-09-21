@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Sparkles, Volume2 } from 'lucide-react'
 import { Chess } from 'chess.js'
+import { BOT_LEVELS } from '@coupparfait/core'
 import { Board2D } from '@/components/board/Board2D.tsx'
 import { CavalePortrait } from '@/components/brand/CavalePortrait.tsx'
 import { DefiDuJour } from '@/components/daily/DefiDuJour.tsx'
@@ -385,7 +386,12 @@ function Essentiel() {
   const stats = [
     { value: '3 810', label: t('home.statsOpenings') },
     { value: '6 057 356', label: t('home.statsPuzzles') },
-    { value: '25', label: 'niveaux d’adversaires, de 100 à 3200 Elo' },
+    {
+      // Lu dans la table, jamais recopié : l'échelle est passée de vingt-sept à
+      // quinze échelons et six endroits annonçaient encore « 25 ».
+      value: String(BOT_LEVELS.length),
+      label: `niveaux d’adversaires, de ${BOT_LEVELS[0]?.elo} à ${BOT_LEVELS.at(-1)?.elo} Elo`,
+    },
     { value: '7', label: 'pièces : finales résolues à la perfection' },
   ]
 

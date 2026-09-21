@@ -114,7 +114,7 @@ export const cs: Traduction = {
         'Stockfish 19 běží na serveru naplno. Každá chyba je zařazena, nejlepší tah ukázán — a hlavně: důvod je napsaný slovy.',
       levelsTitle: '25 úrovní, 7 povah',
       levelsBody:
-        'Od 100 do 3200 Elo. Soupeři se stylem: jeden útočí, druhý dusí, třetí obětuje všechno. Vyber si sparingpartnera.',
+        'Od 320 do 3200 Elo. Soupeři se stylem: jeden útočí, druhý dusí, třetí obětuje všechno. Vyber si sparingpartnera.',
       dataTitle: 'Miliony pozic',
       dataBody:
         '3810 pojmenovaných zahájení, šest milionů ohodnocených a označených úloh, dokonalé koncovky do sedmi kamenů. Vše volné.',

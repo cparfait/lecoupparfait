@@ -1,5 +1,5 @@
 /**
- * Adversaires artificiels : 25 niveaux, sept personnalités.
+ * Adversaires artificiels : 15 niveaux, sept personnalités.
  *
  * Brider un moteur est plus subtil qu'il n'y paraît. Se contenter de réduire la
  * profondeur produit un adversaire qui joue parfaitement puis s'effondre au
@@ -229,7 +229,7 @@ export function penchants(bias: StyleBias): Penchant[] {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  Barème des 25 niveaux
+//  Barème des 15 niveaux
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Elo minimum accepté par `UCI_Elo` de Stockfish. */
@@ -299,90 +299,45 @@ interface LevelSpec {
   demi-coups. Vingt lignes est le plafond du client de moteur, relevé pour
   l'occasion — dix ne suffisaient pas à contenir une vraie faute de débutant.
 */
+/*
+  ── Quinze échelons, et pourquoi l'échelle ne commence plus à 100 ───────────
+
+  Elle en portait vingt-sept, de 320 à 3200. Deux mesures ont défait ce
+  découpage, et la seconde est la plus dérangeante.
+
+  **Le haut était du décor.** Dix-huit échelons entre 1320 et 3200, espacés de
+  cent dix points : personne ne distingue un adversaire à 2400 d'un à 2510.
+
+  **Le bas n'était pas étiquetable.** Les écarts entre échelons voisins ont été
+  mesurés en parties — `scripts/etalonner-bots.mjs` —, et l'intervalle entre le
+  premier échelon et le brideur `UCI_Elo` vaut mille sept cent soixante points,
+  non les mille deux cent vingt que l'échelle annonçait. Ancrées sur 1320, seul
+  point calibré de l'extérieur, les étiquettes honnêtes des quatre premiers
+  échelons tombent à −444, −150 et 47. Un bot qui tire presque au hasard parmi
+  vingt coups ne se décrit pas en Elo : il est sous le plancher de l'échelle.
+
+  On a donc retiré ce qu'on ne savait pas nommer. Le premier échelon vaut
+  maintenant 320, et les étiquettes en dessous de 1320 sont les écarts mesurés
+  reportés depuis l'ancre — non plus une suite régulière décidée à l'avance.
+  Au-dessus, l'étiquette **est** la valeur passée à `UCI_Elo` : c'est Stockfish
+  qui la tient, elle ne se discute pas. C'est là qu'on a remis de la finesse,
+  puisque c'est là qu'elle veut dire quelque chose.
+
+  ── Ce que ça coûte, et qui doit le savoir ──────────────────────────────────
+
+  Le débutant absolu perd sa rampe. Son adversaire le plus faible jouait
+  au-dessous de tout classement ; il vaut désormais 320, et un vrai débutant
+  perdra contre lui. C'est le prix d'une étiquette qui ne ment pas, et c'est un
+  arbitrage de produit, pas une conséquence technique : rien n'empêche de
+  rajouter un ou deux échelons d'entraînement sous 320, à condition de ne pas
+  leur coller un nombre qui ressemble à un Elo.
+
+  Les réglages moteur des survivants n'ont pas bougé : ce sont ceux que la
+  mesure a trouvés monotones.
+*/
 const LEVEL_TABLE: LevelSpec[] = [
-  /*
-    ── Les deux premiers échelons, et pourquoi la température n'y sert plus ───
-
-    Mesurés l'un contre l'autre sur soixante parties — `scripts/etalonner-bots.mjs`
-    —, ils ne se départageaient plus : le niveau 1 marquait 0,53 contre le
-    niveau 2, soit un écart légèrement **négatif** là où l'étiquette en promet
-    cent cinquante. Deux paliers pour une seule force.
-
-    La cause est une saturation, et elle se lit dans la formule de tolérance
-    quelques dizaines de lignes plus bas. À température 1,00 elle vaut mille
-    centipions, à 0,92 huit cent cinquante : dans les deux cas la fenêtre admet
-    déjà presque tout ce que le moteur propose. Les deux bots tirent donc
-    quasi uniformément dans leur vivier, et les huit centièmes de température
-    qui les séparent ne changent plus rien — le curseur est à son plafond
-    d'effet, pas à mi-course.
-
-    Ce qui sépare encore deux tirages presque uniformes, c'est **la taille du
-    vivier**. Et c'est là qu'était le défaut, mesuré et non deviné : les deux
-    échelons *demandaient* dix-huit et seize lignes, mais n'en recevaient que
-    onze et seize en milieu de jeu. Cinq cents nœuds ne suffisent pas à classer
-    dix-huit coups ; le moteur en rend ce qu'il peut, et le vivier du premier
-    échelon se refermait tout seul — plus étroit que celui du second, donc
-    meilleur. L'échelle était inversée à son propre insu.
-
-    D'où le réglage contre-intuitif qui suit : on **augmente** les nœuds du
-    niveau le plus faible. Ils ne servent pas à le rendre fort — le tirage reste
-    presque uniforme — mais à ce que les vingt mauvais coups existent vraiment.
-    En bas de cette échelle, `nodes` ne règle pas la force : il règle combien de
-    fautes sont disponibles. Une première tentative dans l'autre sens — trois
-    cents nœuds pour vingt lignes — a rendu sept lignes et un bot qui gagnait
-    quatre parties sur cinq contre son successeur.
-
-    Vingt est le plafond du client de moteur, et c'est voulu qu'on l'y colle :
-    le premier échelon doit pouvoir jouer un coup que le moteur classe
-    dix-neuvième.
-
-    Une mesure sous Stockfish 18 donne le même diagnostic ailleurs sur
-    l'échelle — les marches entre 550 et 1000 font le double de ce qu'elles
-    annoncent — mais ce cas-ci est le seul que la montée en version a aggravé :
-    l'écart y tombait de cent vingt-sept points à moins vingt-trois.
-  */
   {
-    elo: 100,
-    personality: 'novice',
-    skill: 0,
-    depth: 1,
-    movetimeMs: 120,
-    temperature: 1.0,
-    multiPv: 20,
-    nodes: 1200,
-  },
-  {
-    elo: 250,
-    personality: 'novice',
-    skill: 0,
-    depth: 1,
-    movetimeMs: 150,
-    temperature: 0.92,
-    multiPv: 16,
-    nodes: 1200,
-  },
-  {
-    elo: 400,
-    personality: 'novice',
-    skill: 1,
-    depth: 2,
-    movetimeMs: 180,
-    temperature: 0.84,
-    multiPv: 14,
-    nodes: 1800,
-  },
-  {
-    elo: 550,
-    personality: 'fonceur',
-    skill: 1,
-    depth: 2,
-    movetimeMs: 220,
-    temperature: 0.74,
-    multiPv: 12,
-    nodes: 3500,
-  },
-  {
-    elo: 700,
+    elo: 320,
     personality: 'prudent',
     skill: 2,
     depth: 3,
@@ -392,7 +347,7 @@ const LEVEL_TABLE: LevelSpec[] = [
     nodes: 7000,
   },
   {
-    elo: 850,
+    elo: 630,
     personality: 'novice',
     skill: 3,
     depth: 4,
@@ -402,38 +357,7 @@ const LEVEL_TABLE: LevelSpec[] = [
     nodes: 14000,
   },
   {
-    elo: 1000,
-    personality: 'fonceur',
-    skill: 4,
-    depth: 5,
-    movetimeMs: 350,
-    temperature: 0.46,
-    multiPv: 6,
-    nodes: 28000,
-  },
-  /*
-    Les deux marches qui manquaient, entre 1 000 et 1 320.
-
-    L'échelle sautait 320 points là où les autres écarts en font 130 à 150, et
-    ce n'était pas une négligence : 1 320 est le minimum de `UCI_LimitStrength`,
-    donc la frontière entre les deux régimes de ce fichier — le bridage à la
-    main en dessous, Stockfish qui se limite lui-même au-dessus. Le trou tombait
-    simplement au mauvais endroit : c'est la bande la plus peuplée, celle où
-    arrive la majorité de ceux qui se mesurent, et personne n'y avait
-    d'adversaire à sa taille. Un joueur mesuré à 1 150 affrontait 1 000 ou
-    1 320, soit 150 points d'écart dans un sens ou dans l'autre.
-
-    Ces deux-là prolongent donc le régime bridé, avec la même mécanique que les
-    sept premiers : moins de tolérance, plus de nœuds, une liste de coups qui se
-    resserre.
-
-    **Leur cote est interpolée, pas mesurée.** Elle vaut ce que vaut une
-    interpolation entre deux points calibrés — à vérifier sur de vrais
-    résultats, ce que `games` permet désormais puisque la cote de l'adversaire
-    y est écrite.
-  */
-  {
-    elo: 1110,
+    elo: 980,
     personality: 'fonceur',
     skill: 4,
     depth: 5,
@@ -442,23 +366,8 @@ const LEVEL_TABLE: LevelSpec[] = [
     multiPv: 6,
     nodes: 40000,
   },
-  /*
-    Profondeur 6, comme le niveau suivant, et non 5 comme le précédent.
-
-    Mesuré sur positions fixes — `scripts/etalonner-bots.mjs --pertes` —, cet
-    échelon relâchait *plus* que celui du dessous à profondeur égale : 73
-    centipions contre 66 au quart supérieur de ses coups. Une inversion, que la
-    mesure en parties confirmait de son côté avec cinquante-trois points
-    d'écart là où l'étiquette en promet cent cinq.
-
-    Le même changement répare la marche suivante, qui souffrait de l'excès
-    inverse : 1215 → 1320 valait deux cent cinquante points mesurés pour cent
-    cinq annoncés, parce qu'on y franchissait d'un coup la profondeur **et** la
-    bascule vers `UCI_LimitStrength`. Les deux sont désormais séparés : la
-    profondeur monte ici, le bridage prend la main là.
-  */
   {
-    elo: 1215,
+    elo: 1120,
     personality: 'prudent',
     skill: 5,
     depth: 6,
@@ -486,30 +395,12 @@ const LEVEL_TABLE: LevelSpec[] = [
     multiPv: 4,
   },
   {
-    elo: 1550,
-    personality: 'positionnel',
-    skill: 7,
-    depth: 8,
-    movetimeMs: 500,
-    temperature: 0.28,
-    multiPv: 3,
-  },
-  {
     elo: 1650,
     personality: 'gambiteur',
     skill: 8,
     depth: 8,
     movetimeMs: 550,
     temperature: 0.25,
-    multiPv: 3,
-  },
-  {
-    elo: 1750,
-    personality: 'tacticien',
-    skill: 9,
-    depth: 9,
-    movetimeMs: 600,
-    temperature: 0.22,
     multiPv: 3,
   },
   {
@@ -522,30 +413,12 @@ const LEVEL_TABLE: LevelSpec[] = [
     multiPv: 3,
   },
   {
-    elo: 1950,
-    personality: 'fonceur',
-    skill: 11,
-    depth: 11,
-    movetimeMs: 700,
-    temperature: 0.18,
-    multiPv: 3,
-  },
-  {
     elo: 2050,
     personality: 'positionnel',
     skill: 12,
     depth: 12,
     movetimeMs: 800,
     temperature: 0.16,
-    multiPv: 3,
-  },
-  {
-    elo: 2150,
-    personality: 'tacticien',
-    skill: 13,
-    depth: 13,
-    movetimeMs: 900,
-    temperature: 0.14,
     multiPv: 3,
   },
   {
@@ -567,15 +440,6 @@ const LEVEL_TABLE: LevelSpec[] = [
     multiPv: 2,
   },
   {
-    elo: 2550,
-    personality: 'tacticien',
-    skill: 17,
-    depth: 18,
-    movetimeMs: 1400,
-    temperature: 0.08,
-    multiPv: 2,
-  },
-  {
     elo: 2700,
     personality: 'prudent',
     skill: 18,
@@ -594,29 +458,11 @@ const LEVEL_TABLE: LevelSpec[] = [
     multiPv: 2,
   },
   {
-    elo: 2950,
-    personality: 'machine',
-    skill: 20,
-    depth: 18,
-    movetimeMs: 1800,
-    temperature: 0.02,
-    multiPv: 1,
-  },
-  {
     elo: 3050,
     personality: 'machine',
     skill: 20,
     depth: 22,
     movetimeMs: 2500,
-    temperature: 0,
-    multiPv: 1,
-  },
-  {
-    elo: 3150,
-    personality: 'machine',
-    skill: 20,
-    depth: 26,
-    movetimeMs: 4000,
     temperature: 0,
     multiPv: 1,
   },
@@ -631,7 +477,7 @@ const LEVEL_TABLE: LevelSpec[] = [
   },
 ]
 
-/** Les 25 niveaux jouables, prêts à l'emploi. */
+/** Les 15 niveaux jouables, prêts à l'emploi. */
 export const BOT_LEVELS: BotLevel[] = LEVEL_TABLE.map((spec, index) => {
   const level = index + 1
   const personality = BOT_PERSONALITIES[spec.personality]
