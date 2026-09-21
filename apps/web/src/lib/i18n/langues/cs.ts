@@ -69,7 +69,7 @@ export const cs: Traduction = {
     draw: 'Losování',
     arbiter: 'Rozhodcovský tahák',
 
-    vsComputerHint: '25 úrovní, 7 povah',
+    vsComputerHint: '15 úrovní, 7 povah',
     vsFriendHint: 'odkaz, nebo několik dní na tah',
     localGameHint: 've dvou, na jednom zařízení',
     clockHint: 'hodiny pro partii na skutečné šachovnici',
@@ -112,7 +112,7 @@ export const cs: Traduction = {
       analysisTitle: 'Vysvětlená analýza',
       analysisBody:
         'Stockfish 19 běží na serveru naplno. Každá chyba je zařazena, nejlepší tah ukázán — a hlavně: důvod je napsaný slovy.',
-      levelsTitle: '25 úrovní, 7 povah',
+      levelsTitle: '15 úrovní, 7 povah',
       levelsBody:
         'Od 320 do 3200 Elo. Soupeři se stylem: jeden útočí, druhý dusí, třetí obětuje všechno. Vyber si sparingpartnera.',
       dataTitle: 'Miliony pozic',

@@ -1044,8 +1044,22 @@ function SetupScreen({
             ))}
           </div>
           <div className="mt-1.5 flex justify-between text-[12px] text-faint">
-            <span>{t('computer.scaleLow')}</span>
-            <span>{t('computer.scaleHigh')}</span>
+            {/* Les bornes se lisent dans la table, elles ne s'y recopient pas :
+                elles annonçaient « 1 · débutant complet (100) » et « 25 ·
+                surhumain (3200) » alors que l'échelle était passée à quinze
+                échelons partant de 320. */}
+            <span>
+              {t('computer.scaleLow', {
+                n: BOT_LEVELS[0]?.level ?? 1,
+                elo: BOT_LEVELS[0]?.elo ?? 0,
+              })}
+            </span>
+            <span>
+              {t('computer.scaleHigh', {
+                n: BOT_LEVELS.at(-1)?.level ?? BOT_LEVELS.length,
+                elo: BOT_LEVELS.at(-1)?.elo ?? 0,
+              })}
+            </span>
           </div>
 
           {/* Cinq raccourcis nommés d'après le joueur. « Je débute » vaut 1 :

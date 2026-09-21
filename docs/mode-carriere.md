@@ -53,7 +53,7 @@ assemble, il n'invente pas.
 
 | Brique                                          | Où                                     | État |
 | ----------------------------------------------- | -------------------------------------- | ---- |
-| 25 niveaux d'adversaires, 250 → 3200 Elo        | `packages/core/src/bots.ts`            | fait |
+| 15 niveaux d'adversaires, 320 → 3200 Elo        | `packages/core/src/bots.ts`            | fait |
 | 7 personnalités avec biais de style et portrait | `BOT_PERSONALITIES`                    | fait |
 | Adversaire à erreurs humaines (Maia)            | `apps/web/src/lib/engine`              | fait |
 | Plus haut niveau battu, tentatives, victoires   | table `bot_progress`                   | fait |

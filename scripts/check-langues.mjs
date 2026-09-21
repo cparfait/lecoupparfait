@@ -139,6 +139,50 @@ console.log(
   `\n  ${completes} complètes · ${entamees} en cours · ${vides} en anglais faute de traduction`,
 )
 
+/*
+  ── Les dictionnaires annoncent-ils le bon nombre d'adversaires ? ────────────
+
+  L'échelle est passée de vingt-sept échelons à quinze. Six chaînes d'interface,
+  le README, la documentation et un chiffre écrit en dur sur l'accueil
+  annonçaient encore « 25 niveaux » — et ce « 25 » était déjà faux **avant** la
+  réduction, puisqu'il y en avait vingt-sept. Personne ne l'avait vu, et rien ne
+  pouvait le voir : un nombre recopié dans une phrase ne se compare à rien.
+
+  On le compare maintenant. Le contrôle lit `BOT_LEVELS` et refuse toute chaîne
+  qui annonce un autre compte, dans n'importe laquelle des langues. C'est
+  d'autant plus utile que l'erreur est multilingue : on corrige le français, on
+  oublie les vingt autres, et la faute ne se voit que depuis une langue qu'on ne
+  lit pas.
+
+  Les clés surveillées sont celles qui annoncent un barème. Les autres nombres
+  des dictionnaires — vingt-cinq ouvertures, douze positions — ne regardent pas
+  les adversaires et ne sont pas touchés.
+*/
+const { BOT_LEVELS } = await import('../packages/core/src/bots.ts')
+const attendu = String(BOT_LEVELS.length)
+/** Les chemins dont la phrase commence par un compte d'échelons. */
+const cheminsBareme = reference.filter((chemin) =>
+  /(^|\.)(vsComputerHint|levelsTitle|vsComputerDetail)$/.test(chemin),
+)
+
+for (const langue of LANGUES) {
+  const dictionnaire =
+    langue.code === 'fr' ? fr : langue.code === 'en' ? en : (TRADUCTIONS[langue.code] ?? {})
+
+  for (const chemin of cheminsBareme) {
+    const valeur = lire(dictionnaire, chemin)
+    if (valeur === undefined) continue
+    // Le premier nombre de ces phrases est le compte d'échelons ; le suivant,
+    // quand il existe, est le nombre de personnalités.
+    const premier = valeur.match(/(?<![0-9])\d{1,3}(?![0-9])/)
+    if (!premier || premier[0] === attendu) continue
+    erreurs++
+    console.error(
+      `  ✗ ${langue.code} — ${chemin} annonce « ${premier[0]} » adversaires, il y en a ${attendu}`,
+    )
+  }
+}
+
 if (erreurs > 0) {
   console.error(`\n❌  ${erreurs} problème${erreurs > 1 ? 's' : ''} dans les dictionnaires.\n`)
   process.exit(1)

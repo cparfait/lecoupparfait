@@ -665,6 +665,12 @@ export function pickBotMove(
     Softmax : plus la température est haute, plus les coups moyens ont leur
     chance.
 
+    ⚠ Les rangs cités ci-dessous datent de l'échelle à vingt-sept échelons,
+    celle d'avant la réduction à quinze : « niveau 25 » y désignait le palier à
+    3050 Elo, « niveau 18 » celui à 2150. On ne les renumérote pas — ce sont des
+    mesures prises à une date, et les maquiller aux rangs d'aujourd'hui
+    donnerait un compte rendu faux d'une expérience qui a eu lieu.
+
     L'échelle était divisée par la température au lieu d'être multipliée, et
     cela renversait tout le barème. Une grande échelle aplatit la distribution
     — tous les coups deviennent également probables ; une petite la resserre

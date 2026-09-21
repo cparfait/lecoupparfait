@@ -69,7 +69,7 @@ export const sv: Traduction = {
     draw: 'Lottning',
     arbiter: 'Domarlathund',
 
-    vsComputerHint: '25 nivåer, 7 personligheter',
+    vsComputerHint: '15 nivåer, 7 personligheter',
     vsFriendHint: 'en länk, eller flera dagar per drag',
     localGameHint: 'två personer, en enhet',
     clockHint: 'klockan till ditt parti på riktigt bräde',
@@ -112,9 +112,9 @@ export const sv: Traduction = {
       analysisTitle: 'Förklarad analys',
       analysisBody:
         'Stockfish 19 kör för fullt på servern. Varje misstag klassas, bästa draget visas — och framför allt står skälet utskrivet.',
-      levelsTitle: '25 nivåer, 7 temperament',
+      levelsTitle: '15 nivåer, 7 temperament',
       levelsBody:
-        'Från 100 till 3200 i Elo. Motståndare med stil: en stormar fram, en annan kväver, en tredje offrar allt. Välj din sparringpartner.',
+        'Från 320 till 3200 i Elo. Motståndare med stil: en stormar fram, en annan kväver, en tredje offrar allt. Välj din sparringpartner.',
       dataTitle: 'Miljontals ställningar',
       dataBody:
         '3810 namngivna öppningar, sex miljoner betygsatta och märkta problem, perfekta slutspel upp till sju pjäser. Allt fritt.',

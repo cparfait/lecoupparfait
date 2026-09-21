@@ -70,7 +70,7 @@ export const nl: Traduction = {
     draw: 'Loting',
     arbiter: 'Arbitragehulp',
 
-    vsComputerHint: '25 niveaus, 7 persoonlijkheden',
+    vsComputerHint: '15 niveaus, 7 persoonlijkheden',
     vsFriendHint: 'een link, of meerdere dagen per zet',
     localGameHint: 'met z’n tweeën, op één apparaat',
     clockHint: 'de klok voor je partij op een echt bord',
@@ -113,9 +113,9 @@ export const nl: Traduction = {
       analysisTitle: 'Uitgelegde analyse',
       analysisBody:
         'Stockfish 19 draait op volle kracht op de server. Elke fout wordt ingedeeld, de beste zet getoond — en vooral: de reden staat er voluit.',
-      levelsTitle: '25 niveaus, 7 karakters',
+      levelsTitle: '15 niveaus, 7 karakters',
       levelsBody:
-        'Van 100 tot 3200 Elo. Tegenstanders met een eigen stijl: de een stormt, de ander verstikt, een derde offert alles. Kies je sparringpartner.',
+        'Van 320 tot 3200 Elo. Tegenstanders met een eigen stijl: de een stormt, de ander verstikt, een derde offert alles. Kies je sparringpartner.',
       dataTitle: 'Miljoenen stellingen',
       dataBody:
         '3810 benoemde openingen, zes miljoen beoordeelde en gelabelde puzzels, perfecte eindspelen tot zeven stukken. Alles rechtenvrij.',

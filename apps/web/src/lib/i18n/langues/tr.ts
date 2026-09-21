@@ -70,7 +70,7 @@ export const tr: Traduction = {
     draw: 'Kura',
     arbiter: 'Hakemlik notları',
 
-    vsComputerHint: '25 seviye, 7 karakter',
+    vsComputerHint: '15 seviye, 7 karakter',
     vsFriendHint: 'bir bağlantı ya da hamle başına günler',
     localGameHint: 'iki kişi, tek cihaz',
     clockHint: 'gerçek tahtadaki oyunun için saat',
@@ -113,9 +113,9 @@ export const tr: Traduction = {
       analysisTitle: 'Açıklamalı analiz',
       analysisBody:
         'Stockfish 19 sunucuda tam güçle çalışır. Her hata sınıflandırılır, en iyi hamle gösterilir — ve en önemlisi, gerekçesi açıkça yazılır.',
-      levelsTitle: '25 seviye, 7 karakter',
+      levelsTitle: '15 seviye, 7 karakter',
       levelsBody:
-        '100’den 3200 Elo’ya. Üslubu olan rakipler: biri saldırır, biri boğar, üçüncüsü her şeyi feda eder. Antrenman rakibini seç.',
+        '320’den 3200 Elo’ya. Üslubu olan rakipler: biri saldırır, biri boğar, üçüncüsü her şeyi feda eder. Antrenman rakibini seç.',
       dataTitle: 'Milyonlarca konum',
       dataBody:
         '3810 adlandırılmış açılış, altı milyon puanlanmış ve etiketlenmiş problem, yedi taşa kadar kusursuz oyun sonları. Hepsi telifsiz.',

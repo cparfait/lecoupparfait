@@ -73,7 +73,7 @@ export const ja: Traduction = {
     draw: '抽選',
     arbiter: '審判メモ',
 
-    vsComputerHint: '25段階、7つの個性',
+    vsComputerHint: '15段階、7つの個性',
     vsFriendHint: 'リンク1本、または1手に数日',
     localGameHint: '二人で、1台の端末で',
     clockHint: '実際の盤で指す対局用の時計',
@@ -116,9 +116,9 @@ export const ja: Traduction = {
       analysisTitle: '説明つきの解析',
       analysisBody:
         'Stockfish 19 がサーバー上でフル稼働します。ミスは分類され、最善手が示され、なにより理由がことばで書かれています。',
-      levelsTitle: '25段階、7つの性格',
+      levelsTitle: '15段階、7つの性格',
       levelsBody:
-        'レーティング100から3200まで。相手には棋風があります。攻める者、締めつける者、なんでも捨てる者。練習相手を選んでください。',
+        'レーティング320から3200まで。相手には棋風があります。攻める者、締めつける者、なんでも捨てる者。練習相手を選んでください。',
       dataTitle: '数百万の局面',
       dataBody:
         '名前のついたオープニング3810、採点とタグづけをされた戦術問題600万、7駒までの完全なエンドゲーム。すべて権利フリーです。',

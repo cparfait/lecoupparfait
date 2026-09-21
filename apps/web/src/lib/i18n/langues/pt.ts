@@ -74,7 +74,7 @@ export const pt: Traduction = {
     draw: 'Sorteio',
     arbiter: 'Guia de arbitragem',
 
-    vsComputerHint: '25 níveis, 7 personalidades',
+    vsComputerHint: '15 níveis, 7 personalidades',
     vsFriendHint: 'um link, ou vários dias por lance',
     localGameHint: 'dois jogadores, um só aparelho',
     clockHint: 'o relógio da sua partida em tabuleiro real',
@@ -117,7 +117,7 @@ export const pt: Traduction = {
       analysisTitle: 'Análise explicada',
       analysisBody:
         'O Stockfish 19 roda no servidor com toda a força. Cada erro é classificado, o melhor lance é mostrado e, acima de tudo, a razão está escrita por extenso.',
-      levelsTitle: '25 níveis, 7 personalidades',
+      levelsTitle: '15 níveis, 7 personalidades',
       levelsBody:
         'De 320 a 3200 de Elo. Adversários com estilo próprio: um ataca, outro sufoca, um terceiro sacrifica tudo. Escolha seu parceiro de treino.',
       dataTitle: 'Milhões de posições',
