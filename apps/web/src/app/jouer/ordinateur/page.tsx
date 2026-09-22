@@ -1062,7 +1062,7 @@ function SetupScreen({
               quatre crans séparent 1 de 5, cinq les suivants. */}
               <div className="relative mx-[14px] mt-0.5 h-3.5" aria-hidden>
                 {/* Bornés à l'échelle : « 20 » et « 25 » débordaient de la piste
-                depuis que les niveaux sont quinze. */}
+                depuis que les niveaux sont moins de vingt. */}
                 {[1, 5, 10, 15, 20, 25]
                   .filter((jalon) => jalon <= BOT_LEVELS.length)
                   .map((jalon) => (
@@ -1078,8 +1078,8 @@ function SetupScreen({
               <div className="mt-1.5 flex justify-between text-[12px] text-faint">
                 {/* Les bornes se lisent dans la table, elles ne s'y recopient pas :
                 elles annonçaient « 1 · débutant complet (100) » et « 25 ·
-                surhumain (3200) » alors que l'échelle était passée à quinze
-                échelons partant de 320. */}
+                surhumain (3200) » alors que l'échelle était passée à dix-huit
+                échelons partant de 100. */}
                 <span>
                   {t('computer.scaleLow', {
                     n: BOT_LEVELS[0]?.level ?? 1,
@@ -1096,18 +1096,23 @@ function SetupScreen({
 
               {/* Cinq raccourcis nommés d'après le joueur. « Je débute » vaut 1 :
               un préréglage nommé d'après le joueur doit désigner le bout de
-              l'échelle qui lui correspond, pas deux crans au-dessus. */}
+              l'échelle qui lui correspond, pas deux crans au-dessus.
+
+              Les rangs datent de l'échelle à dix-huit échelons — 100, 980,
+              1650, 2250 et 3200 Elo. Ils avaient gardé ceux de l'échelle à
+              vingt-cinq, et « Fort » comme « Sans pitié » désignaient des
+              rangs qui n'existaient plus. */}
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {[
                   { label: t('computer.presetBeginner'), level: 1 },
-                  { label: t('computer.presetCasual'), level: 7 },
-                  { label: t('computer.presetClub'), level: 12 },
-                  { label: t('computer.presetStrong'), level: 18 },
-                  { label: t('computer.presetRuthless'), level: 25 },
+                  { label: t('computer.presetCasual'), level: 6 },
+                  { label: t('computer.presetClub'), level: 10 },
+                  { label: t('computer.presetStrong'), level: 13 },
+                  { label: t('computer.presetRuthless'), level: BOT_LEVELS.length },
                 ].map((preset) => {
                   /* Chaque raccourci porte la teinte de l'adversaire qu'il
-                 désigne : le chip « Fort » est du bronze parce que c'est
-                 Brasier qui attend au niveau 18. */
+                 désigne : le chip « Fort » a la couleur de la personnalité
+                 qui attend à ce rang. */
                   const teinte = TEINTES_ADVERSAIRES[botLevel(preset.level).personality]
                   const choisi = level === preset.level
                   return (

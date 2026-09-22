@@ -73,7 +73,7 @@ export const es: Traduction = {
     draw: 'Sorteo',
     arbiter: 'Guía de arbitraje',
 
-    vsComputerHint: '15 niveles, 7 personalidades',
+    vsComputerHint: '18 niveles, 7 personalidades',
     vsFriendHint: 'un enlace, o varios días por jugada',
     localGameHint: 'dos personas, un solo dispositivo',
     clockHint: 'el reloj de tu partida en tablero real',
@@ -116,9 +116,9 @@ export const es: Traduction = {
       analysisTitle: 'Análisis explicado',
       analysisBody:
         'Stockfish 19 funciona en el servidor a plena potencia. Cada error se clasifica, se muestra la mejor jugada y, sobre todo, la razón está escrita con todas las letras.',
-      levelsTitle: '15 niveles, 7 caracteres',
+      levelsTitle: '18 niveles, 7 caracteres',
       levelsBody:
-        'De 320 a 3200 Elo. Rivales con estilo propio: uno ataca, otro asfixia, un tercero lo sacrifica todo. Elige tu sparring.',
+        'De 100 a 3200 Elo. Rivales con estilo propio: uno ataca, otro asfixia, un tercero lo sacrifica todo. Elige tu sparring.',
       dataTitle: 'Millones de posiciones',
       dataBody:
         '3810 aperturas con nombre, seis millones de problemas puntuados y etiquetados, finales perfectos hasta siete piezas. Todo libre de derechos.',

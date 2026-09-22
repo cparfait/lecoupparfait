@@ -72,7 +72,7 @@ export const pl: Traduction = {
     draw: 'Losowanie',
     arbiter: 'Ściąga sędziowska',
 
-    vsComputerHint: '15 poziomów, 7 osobowości',
+    vsComputerHint: '18 poziomów, 7 osobowości',
     vsFriendHint: 'link albo kilka dni na ruch',
     localGameHint: 'we dwoje, na jednym urządzeniu',
     clockHint: 'zegar do partii na prawdziwej szachownicy',
@@ -115,9 +115,9 @@ export const pl: Traduction = {
       analysisTitle: 'Analiza z wyjaśnieniem',
       analysisBody:
         'Stockfish 19 działa na serwerze z pełną mocą. Każdy błąd zostaje sklasyfikowany, najlepszy ruch pokazany — a przede wszystkim powód jest napisany słowami.',
-      levelsTitle: '15 poziomów, 7 charakterów',
+      levelsTitle: '18 poziomów, 7 charakterów',
       levelsBody:
-        'Od 320 do 3200 Elo. Przeciwnicy mają styl: jeden szarżuje, drugi dusi, trzeci poświęca wszystko. Wybierz swojego sparingpartnera.',
+        'Od 100 do 3200 Elo. Przeciwnicy mają styl: jeden szarżuje, drugi dusi, trzeci poświęca wszystko. Wybierz swojego sparingpartnera.',
       dataTitle: 'Miliony pozycji',
       dataBody:
         '3810 nazwanych debiutów, sześć milionów ocenionych i opisanych zadań, doskonałe końcówki do siedmiu bierek. Wszystko wolne od praw.',

@@ -99,7 +99,7 @@ export const PALIERS: Palier[] = [
     max: 649,
     nom: 'paliers.regles.nom',
     promesse: 'paliers.regles.promesse',
-    niveauBot: 2,
+    niveauBot: 3,
     leviers: [
       {
         id: 'les-trois-regles',
@@ -183,7 +183,7 @@ export const PALIERS: Palier[] = [
     max: 1299,
     nom: 'paliers.voir-ladversaire.nom',
     promesse: 'paliers.voir-ladversaire.promesse',
-    niveauBot: 7,
+    niveauBot: 6,
     leviers: [
       {
         id: 'le-clouage',
@@ -223,7 +223,7 @@ export const PALIERS: Palier[] = [
     max: 1599,
     nom: 'paliers.un-plan.nom',
     promesse: 'paliers.un-plan.promesse',
-    niveauBot: 11,
+    niveauBot: 9,
     leviers: [
       {
         id: 'les-colonnes-ouvertes',
@@ -263,7 +263,7 @@ export const PALIERS: Palier[] = [
     max: 1899,
     nom: 'paliers.technique.nom',
     promesse: 'paliers.technique.promesse',
-    niveauBot: 14,
+    niveauBot: 11,
     leviers: [
       {
         id: 'l-opposition',
@@ -303,7 +303,7 @@ export const PALIERS: Palier[] = [
     max: Number.POSITIVE_INFINITY,
     nom: 'paliers.prophylaxie.nom',
     promesse: 'paliers.prophylaxie.promesse',
-    niveauBot: 16,
+    niveauBot: 12,
     leviers: [
       {
         id: 'les-enfilades-et',

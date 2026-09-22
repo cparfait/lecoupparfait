@@ -42,6 +42,7 @@ import {
 } from '@/lib/game/useEndgames.ts'
 import { useChessGame } from '@/lib/game/useChessGame.ts'
 import { useBotPlayer } from '@/lib/game/useBotPlayer.ts'
+import { BOT_LEVELS } from '@coupparfait/core'
 import { playResultSound, playSound } from '@/lib/sound.ts'
 import { speak } from '@/lib/speech.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
@@ -431,7 +432,7 @@ function EndgameTrainer({
   useBotPlayer({
     fen: state.currentFen,
     botColor,
-    level: 22,
+    level: BOT_LEVELS.length,
     turn: state.turn,
     active: outcome === 'playing' && !state.isGameOver,
     onMove: (from, to, promotion) => play(from, to, promotion),

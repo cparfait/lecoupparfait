@@ -1,5 +1,5 @@
 /**
- * Adversaires artificiels : 15 niveaux, sept personnalités.
+ * Adversaires artificiels : 18 niveaux, sept personnalités.
  *
  * Brider un moteur est plus subtil qu'il n'y paraît. Se contenter de réduire la
  * profondeur produit un adversaire qui joue parfaitement puis s'effondre au
@@ -229,7 +229,7 @@ export function penchants(bias: StyleBias): Penchant[] {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  Barème des 15 niveaux
+//  Barème des 18 niveaux
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Elo minimum accepté par `UCI_Elo` de Stockfish. */
@@ -280,10 +280,10 @@ interface LevelSpec {
  * quelqu'un qui connaît le déplacement des pièces et rien d'autre, et il faut
  * bien que ce joueur-là ait un adversaire.
  *
- * Sous 1150 Elo, `UCI_Elo` n'existe pas : on brise volontairement le moteur
+ * Sous 1320 Elo, `UCI_Elo` n'existe pas : on brise volontairement le moteur
  * avec un `Skill Level` bas, une profondeur d'une poignée de coups et une forte
  * température. Au-dessus, on laisse Stockfish faire son travail de simulation.
- * Les cinq derniers niveaux retirent tout bridage et augmentent la profondeur.
+ * Les derniers niveaux retirent tout bridage et augmentent la profondeur.
  */
 /*
   Les niveaux faibles regardent **plus** de coups, pas moins.
@@ -334,8 +334,82 @@ interface LevelSpec {
 
   Les réglages moteur des survivants n'ont pas bougé : ce sont ceux que la
   mesure a trouvés monotones.
+
+  ── Trois échelons d'entraînement, revenus sous 320 ─────────────────────────
+
+  L'arbitrage ci-dessus a été rendu, puis contredit par l'usage : depuis la
+  montée en Stockfish 19, les premiers niveaux sont trop forts pour un
+  débutant. Les deux causes se cumulent. Le nouveau réseau a rendu les bots du
+  bas plus forts — mesuré en montant de version, la dérive du plus faible
+  passait de −627 à −256 par rapport à son étiquette, soit près de quatre
+  cents points gagnés. Puis l'échelle a coupé ses quatre premiers échelons.
+  Le plus faible adversaire disponible était donc, en deux temps, monté
+  d'environ six cents points mesurés.
+
+  Les trois échelons qui reviennent sont les anciens « 250 », « 400 » et
+  « 550 », réglages inchangés : un ou deux demi-coups, `Skill Level` 0 ou 1,
+  une liste de douze à seize coups et une tolérance qui va jusqu'à laisser
+  une pièce en prise — c'est ce que fait un joueur qui débute, et c'est
+  l'adversaire qu'il lui faut. L'ancien « 100 », qui ne se distinguait du
+  « 250 » qu'à la marge, ne revient pas.
+
+  Leurs étiquettes — 100, 180, 250 — ne sont **pas** des mesures. La chaîne de
+  mesures les place sous l'ancre, à des valeurs négatives qui ne décrivent
+  rien ; on les pose donc par convention sur le plancher des plateformes en
+  ligne, où un joueur qui vient d'apprendre les déplacements est classé 100.
+  Le « ≈ » de l'écran fait tout le travail : sous 320, il faut le lire comme
+  « au-dessous de l'échelle », et l'écart réel entre deux de ces échelons est
+  plus grand que celui qu'affichent leurs nombres. Mesuré sous Stockfish 19,
+  trente parties par couple — `scripts/etalonner-bots.mjs --du=1 --au=4` :
+
+      couple          affiché   mesuré
+      100 →  180           80      223
+      180 →  250           70      176
+      250 →  320           70      352
+
+  L'échelle est monotone, et le premier échelon se tient environ sept cent
+  cinquante points mesurés sous le 320 : c'est la rampe que le débutant avait
+  perdue. Le contrôle signale la dernière marche comme trop haute pour son
+  étiquette ; c'est attendu, et c'est le prix de ne pas afficher de nombres
+  négatifs.
+
+  Les rangs sont stockés en base : la migration `0013_training_rungs` décale
+  de trois tout ce qui était écrit, et les rangs en dur — carrière, paliers,
+  raccourcis — ont été reportés sur la nouvelle échelle par l'Elo qu'ils
+  visaient, non par décalage, parce qu'ils dataient encore de l'échelle à
+  vingt-sept et n'avaient pas suivi la précédente réduction.
 */
 const LEVEL_TABLE: LevelSpec[] = [
+  {
+    elo: 100,
+    personality: 'novice',
+    skill: 0,
+    depth: 1,
+    movetimeMs: 150,
+    temperature: 0.92,
+    multiPv: 16,
+    nodes: 1200,
+  },
+  {
+    elo: 180,
+    personality: 'novice',
+    skill: 1,
+    depth: 2,
+    movetimeMs: 180,
+    temperature: 0.84,
+    multiPv: 14,
+    nodes: 1800,
+  },
+  {
+    elo: 250,
+    personality: 'fonceur',
+    skill: 1,
+    depth: 2,
+    movetimeMs: 220,
+    temperature: 0.74,
+    multiPv: 12,
+    nodes: 3500,
+  },
   {
     elo: 320,
     personality: 'prudent',
