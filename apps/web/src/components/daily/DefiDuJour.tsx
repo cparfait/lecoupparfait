@@ -111,6 +111,16 @@ export function DefiDuJour({ className }: { className?: string }) {
         // clic. Elle est le seul élément de la carte qui mène ailleurs.
         action={<FlammeSerie habillage="carte" className="relative z-10" />}
       >
+        {/* « Aujourd'hui », et non « Le défi du jour ».
+
+            La carte porte un défi **et** trois quêtes, une barre de points
+            pour l'ensemble, et les tranches plus dures. Le titre au singulier
+            annonçait donc un quart de son contenu, et l'on ne savait plus si
+            « Les autres quêtes du jour », trois lignes plus bas, parlaient de
+            la même chose ou d'autre chose. Il nomme désormais le contenant —
+            la journée —, comme sur l'accueil connecté où le même bloc porte
+            déjà ce nom. Le défi garde le sien là où il est seul en cause : la
+            ligne qu'on ouvre, et le bilan une fois relevé. */}
         <span className="flex items-center gap-2">
           <Swords size={16} className="text-accent" aria-hidden />
           {t('daily.title')}

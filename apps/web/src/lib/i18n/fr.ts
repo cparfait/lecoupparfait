@@ -1985,7 +1985,7 @@ export const fr = {
   },
 
   daily: {
-    title: 'Le défi du jour',
+    title: 'Aujourd’hui',
     questsDone:
       '{faites} quêtes sur {total} · {xp} / {max} points · la prochaine position arrive à minuit',
     oneQuestDone:
@@ -1993,7 +1993,7 @@ export const fr = {
     drawing: 'Tirage du jour…',
     unavailable:
       'Le défi du jour n’est pas disponible — la base de puzzles n’est peut-être pas encore importée.',
-    hint: 'La même position pour tout le monde de ton niveau, jusqu’à minuit.',
+    hint: 'Un défi commun à ton niveau, trois quêtes, et tout expire à minuit.',
     doneToday: 'Défi du jour relevé',
     harder: 'Plus dur :',
     otherQuests: 'Les autres quêtes du jour',

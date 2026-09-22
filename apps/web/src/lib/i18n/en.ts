@@ -1964,7 +1964,7 @@ export const en: Dictionary = {
   },
 
   daily: {
-    title: 'The daily challenge',
+    title: 'Today',
     questsDone:
       '{faites} quests of {total} · {xp} / {max} points · the next position arrives at midnight',
     oneQuestDone:
@@ -1972,7 +1972,7 @@ export const en: Dictionary = {
     drawing: 'Drawing today’s position…',
     unavailable:
       'The daily challenge is unavailable — the puzzle database may not have been imported yet.',
-    hint: 'The same position for everybody at your level, until midnight.',
+    hint: 'One shared challenge at your level, three quests, all expiring at midnight.',
     doneToday: 'Daily challenge done',
     harder: 'Harder:',
     otherQuests: 'The other daily quests',

@@ -15,6 +15,7 @@
  * page se lit d'un coup d'œil.
  */
 
+import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import {
   Cpu,
@@ -28,6 +29,7 @@ import {
 } from 'lucide-react'
 import { BOT_PERSONALITIES } from '@coupparfait/core'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
+import { cadreDuPortrait, TEINTES_ADVERSAIRES } from '@/lib/adversaires.ts'
 import { CarteDestination } from '@/components/ui/CarteDestination.tsx'
 import { TitreDePage, TitreDeSection } from '@/components/ui/index.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
@@ -138,26 +140,50 @@ export default function PlayLobbyPage() {
           {t('play.opponentsTitle')}
         </TitreDeSection>
 
-        {/* Sans carte : ces sept-là ne sont pas des boutons, on fait leur
-            connaissance. Un portrait, un nom, une phrase. */}
-        <div className="mt-5 grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
-          {Object.values(BOT_PERSONALITIES).map((personality) => (
-            <Link
-              key={personality.id}
-              href={`/jouer/adversaires/${personality.id}`}
-              className="group flex gap-3"
-            >
-              <PortraitAdversaire personality={personality} size={44} />
-              <div className="min-w-0">
-                <p className="text-sm font-semibold group-hover:underline">
-                  {tCoeur(t, personality.name)}
-                </p>
-                <p className="mt-1 text-xs leading-relaxed text-muted">
-                  {tCoeur(t, personality.blurb)}
-                </p>
-              </div>
-            </Link>
-          ))}
+        {/* Des cartes, comme tout le reste de la page.
+
+            Elles n'en avaient pas — « ces sept-là ne sont pas des boutons, on
+            fait leur connaissance », disait le commentaire. Sauf qu'ils en
+            sont : chacun est un lien vers sa fiche. Et posés en texte nu sous
+            huit cartes de verre, ils se lisaient comme une note de bas de
+            page, alors que c'est la galerie des adversaires — ce que
+            l'application a de plus reconnaissable.
+
+            Elles reprennent donc la grammaire des cartes de destination : le
+            portrait dans un cadre à la teinte de sa sculpture, le nom en
+            police d'affichage, la phrase en dessous, et le halo de cette même
+            teinte qui s'allume au survol (`carte-porte`). La teinte vient de
+            `lib/adversaires`, partagée avec l'écran de configuration. */}
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {Object.values(BOT_PERSONALITIES).map((personality, index) => {
+            const teinte = TEINTES_ADVERSAIRES[personality.id]
+            return (
+              <Link
+                key={personality.id}
+                href={`/jouer/adversaires/${personality.id}`}
+                className="group glass carte-porte animate-slide-up relative flex items-start gap-3.5 overflow-hidden p-4"
+                style={
+                  { '--teinte-porte': teinte, animationDelay: `${index * 50}ms` } as CSSProperties
+                }
+              >
+                <span
+                  className="grid h-[60px] w-[52px] shrink-0 place-items-center rounded-[14px] transition-transform duration-300 group-hover:scale-105"
+                  style={cadreDuPortrait(teinte)}
+                  aria-hidden
+                >
+                  <PortraitAdversaire personality={personality} size={46} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-display text-[16px] font-bold tracking-[-0.015em]">
+                    {tCoeur(t, personality.name)}
+                  </span>
+                  <span className="mt-1 block text-[13px] leading-relaxed text-muted">
+                    {tCoeur(t, personality.blurb)}
+                  </span>
+                </span>
+              </Link>
+            )
+          })}
         </div>
       </section>
     </div>
