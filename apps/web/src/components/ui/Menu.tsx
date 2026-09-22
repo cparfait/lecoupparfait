@@ -167,10 +167,28 @@ export function Menu({
   /** Ce qui est effectivement appliqué au panneau, pour repartir de l'ancrage. */
   const decalageApplique = useRef(0)
 
+  /**
+   * Le sens réellement appliqué — celui demandé, ou l'autre s'il ne tient pas.
+   *
+   * `sens` reste une préférence : elle dit de quel côté le panneau **devrait**
+   * s'ouvrir, sachant où vit le bouton. Mais un bouton se déplace avec le
+   * contenu qui l'entoure, et la préférence finit par se tromper : la barre
+   * d'actions d'une partie, calée en bas de fenêtre sur téléphone, se retrouve
+   * au milieu d'une colonne sur grand écran dès que la liste des coups se règle
+   * sur son contenu.
+   *
+   * On mesure donc, comme pour le décalage horizontal juste à côté. Le calcul
+   * part de la position du **bouton** et de la hauteur du panneau, jamais de la
+   * position du panneau lui-même : celle-ci dépend du sens appliqué, et l'on
+   * retomberait dans une bascule sans fin d'un rendu à l'autre.
+   */
+  const [sensEffectif, setSensEffectif] = useState(sens)
+
   useEffect(() => {
     if (!ouvert) {
       decalageApplique.current = 0
       setDecalage(0)
+      setSensEffectif(sens)
       return
     }
     const recadrer = () => {
@@ -178,6 +196,19 @@ export function Menu({
       if (!panneau) return
 
       const marge = 8
+
+      const bouton = boutonRef.current?.getBoundingClientRect()
+      if (bouton) {
+        const espaceBas = window.innerHeight - bouton.bottom - marge
+        const espaceHaut = bouton.top - marge
+        const hauteur = panneau.offsetHeight
+        const manqueEnBas = hauteur > espaceBas && espaceHaut > espaceBas
+        const manqueEnHaut = hauteur > espaceHaut && espaceBas > espaceHaut
+        setSensEffectif(
+          sens === 'bas' && manqueEnBas ? 'haut' : sens === 'haut' && manqueEnHaut ? 'bas' : sens,
+        )
+      }
+
       const cadre = panneau.getBoundingClientRect()
       // Le cadre mesuré inclut le décalage déjà appliqué : on repart de la
       // position ancrée pour ne pas empiler deux corrections.
@@ -197,7 +228,7 @@ export function Menu({
     // change de largeur, le panneau doit resuivre.
     window.addEventListener('resize', recadrer)
     return () => window.removeEventListener('resize', recadrer)
-  }, [ouvert])
+  }, [ouvert, sens])
 
   /**
    * Le focus entre dans le panneau à l'ouverture.
@@ -313,7 +344,7 @@ export function Menu({
             'max-w-[calc(100vw-1rem)]',
             largeur,
             align === 'right' ? 'right-0' : 'left-0',
-            sens === 'haut' ? 'bottom-11' : 'top-11',
+            sensEffectif === 'haut' ? 'bottom-11' : 'top-11',
           )}
         >
           {children}

@@ -118,31 +118,50 @@ export const PlayerBar = memo(function PlayerBar({
       `--cote-plateau`), mais reprend un fond et un liseré : assez pour qu'on
       lise « voici un joueur », pas assez pour redevenir une carte autonome.
 
-      Celui qui a le trait se voit deux fois : par le fond, teinté d'accent,
-      et par les détails — anneau sur l'avatar, nom en gras, étiquette d'état
-      (« à toi de jouer », « réfléchit… ») dans la couleur d'accent. Le fond
-      seul ne suffisait pas — dix pour cent d'accent, c'est discret de loin —
-      et les détails seuls ne suffisaient pas non plus, puisqu'il faut
-      d'abord repérer le bandeau avant d'en lire les détails.
+      Celui qui a le trait ne repeint plus son bandeau.
+
+      Le fond passait à l'accent, le liseré aussi, et une lueur s'allumait
+      dessous — sur les deux bandeaux, à chaque coup. Dans une partie rapide,
+      c'est un clignotement toutes les deux secondes de part et d'autre de
+      l'échiquier, en plein champ de vision périphérique, pendant qu'on
+      calcule. Une information qui ne change jamais de valeur — il y a
+      toujours exactement un joueur au trait — n'a pas besoin de faire bouger
+      la moitié de l'écran pour se dire.
+
+      Le bandeau garde donc sa couleur, et le trait se marque à côté : un
+      filet d'accent sur le bord intérieur, du côté du plateau. Il apparaît
+      et disparaît au même endroit, sans rien repeindre, et se repère du coin
+      de l'œil — c'est ce qu'on demandait au fond teinté, en cent fois moins
+      de surface. Les détails déjà en place le confirment une fois le regard
+      posé : l'étiquette d'état dans la couleur d'accent, la pendule
+      soulignée.
     */
     <div
       className={clsx(
         'relative flex max-w-full items-center gap-2.5 px-2.5 py-2 transition-colors',
         'w-[var(--cote-plateau,100%)] justify-self-center',
-        'rounded-[var(--radius-sm)] ring-1',
-        active
-          ? 'bg-accent/10 ring-accent/40 shadow-[0_0_24px_-14px_var(--accent)]'
-          : 'bg-surface ring-line',
+        'rounded-[var(--radius-sm)] bg-surface ring-1 ring-line',
         className,
       )}
     >
+      {/* Le filet du trait : deux points de large, sur toute la hauteur utile
+          du bandeau, du côté intérieur. `opacity` plutôt qu'un montage et
+          démontage, pour qu'il se fonde au lieu d'apparaître d'un coup. */}
+      <span
+        aria-hidden
+        className={clsx(
+          'absolute inset-y-1.5 left-0 w-[3px] rounded-full bg-accent transition-opacity duration-300',
+          active ? 'opacity-100' : 'opacity-0',
+        )}
+      />
       {/* Avatar + pastille de couleur du camp */}
       <div className="relative shrink-0">
         <div
           className={clsx(
-            'grid h-10 w-10 place-items-center rounded-[var(--radius-sm)] text-lg transition-shadow',
+            // L'anneau de l'avatar ne s'allume plus non plus : c'était le
+            // même clignotement, en plus petit. Le filet du bord suffit.
+            'grid h-10 w-10 place-items-center rounded-[var(--radius-sm)] text-lg',
             'bg-surface-strong ring-1 ring-line',
-            active && 'ring-2 ring-accent shadow-[0_0_18px_-4px_var(--accent)]',
           )}
         >
           {/* Le test portait sur `http` seul, ce qui suffisait tant que les

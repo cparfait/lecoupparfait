@@ -421,9 +421,10 @@ export default function LocalGamePage() {
             </Card>
           )}
 
-          {/* Même règle qu'en partie contre l'ordinateur : la liste prend la
-              hauteur de ses coups sur téléphone, la place restante au-delà. */}
-          <Card className="flex max-h-[45vh] flex-col overflow-hidden lg:max-h-none lg:min-h-[220px] lg:flex-1">
+          {/* Même règle qu'en partie contre l'ordinateur : douze rangées, la
+              carte se règle sur ce qu'elle contient, et le reste de la colonne
+              n'est pas un cadre vide. */}
+          <Card className="flex max-h-[45vh] flex-col overflow-hidden lg:max-h-none">
             {grandEcran && (
               <div className="flex items-center gap-2 border-b border-line/60 px-3 py-2">
                 <span className="text-[12px] font-semibold text-faint">{t('game.moves')}</span>
@@ -438,6 +439,7 @@ export default function LocalGamePage() {
               cursor={state.cursor}
               onSeek={goTo}
               qualities={qualites}
+              maxRows={12}
               className="min-h-0 flex-1"
             />
             {grandEcran && (

@@ -56,6 +56,7 @@ import {
   type TimeControl,
 } from '@coupparfait/core'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
+import { TEINTES_ADVERSAIRES } from '@/lib/adversaires.ts'
 import { CarteAdversaire } from '@/components/brand/CarteAdversaire.tsx'
 import { ChessBoard, ViewToggle } from '@/components/board/ChessBoard.tsx'
 import { PhysicalBoardPanel } from '@/components/board/PhysicalBoardPanel.tsx'
@@ -540,22 +541,45 @@ export default function PlayComputerPage() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * La teinte de chaque adversaire, prise sur la matière de sa sculpture.
+ * L'échelle de force — et pourquoi elle ne peut pas être celle des portraits.
  *
- * Ivoire pour le bois pâle de Pion, feu pour le bronze fendu de Brasier,
- * ardoise pour le granit de Rempart, glace pour le cristal d'Éclair, laiton
- * pour Boussole, eau pour le verre de Mirage, nuit pour l'obsidienne
- * d'Oracle. Des valeurs littérales, et c'est voulu : ces couleurs viennent
- * des portraits, qui ne changent pas avec le thème.
+ * La piste du curseur peignait chaque segment avec la teinte de la
+ * personnalité qui tient ce niveau. Or une personnalité revient à plusieurs
+ * échelons, et jamais dans l'ordre : Pion ivoire, Brasier orange, Rempart
+ * ardoise, Éclair glace, Boussole laiton… La piste affichait donc une suite
+ * de couleurs sans rapport avec ce qu'elle mesure, et l'œil y cherchait en
+ * vain une progression. Une couleur qui varie sans rien dire est pire qu'une
+ * couleur unie : elle promet une information qu'elle n'a pas.
+ *
+ * Les deux rôles se séparent. La teinte de personnalité reste là où elle dit
+ * *qui* — la vignette, le portrait, le pouce du curseur, la carte de
+ * l'adversaire choisi. La piste, elle, dit *combien*, et elle le dit par un
+ * dégradé qui monte en température : ardoise froide au tout premier coup,
+ * laiton au milieu de l'échelle, braise au sommet. Trois ancres et une
+ * interpolation en oklab — donc un dégradé régulier à l'œil, sans la bande
+ * terne que produit un mélange en sRVB.
+ *
+ * Les valeurs sont littérales, comme celles des portraits et pour la même
+ * raison : elles ne changent pas avec le thème. Les deux extrêmes citent
+ * d'ailleurs deux matières de la galerie — le laiton de Boussole, le feu de
+ * Brasier —, ce qui raccorde l'échelle aux sculptures sans les copier.
  */
-const TEINTES_ADVERSAIRES: Record<BotPersonalityId, string> = {
-  novice: '#e9d9b6',
-  fonceur: '#ff7a3c',
-  prudent: '#8aa0b8',
-  tacticien: '#8fd8ff',
-  positionnel: '#e2b84a',
-  gambiteur: '#2fd1c8',
-  machine: '#7c5cff',
+const ECHELLE_FORCE = ['#7f93b8', '#d9a441', '#ff6a3d'] as const
+
+/**
+ * La couleur d'un niveau sur l'échelle, de 0 (le plus faible) à 1.
+ *
+ * Deux segments plutôt qu'un seul mélange à trois : `color-mix` ne prend que
+ * deux couleurs. On choisit la paire selon la moitié où l'on tombe, et l'on
+ * y remet la position à l'échelle.
+ */
+function teinteDeForce(part: number): string {
+  const [froid, tiede, chaud] = ECHELLE_FORCE
+  const premiere = part <= 0.5
+  const depart = premiere ? froid : tiede
+  const arrivee = premiere ? tiede : chaud
+  const avancement = (premiere ? part * 2 : (part - 0.5) * 2) * 100
+  return `color-mix(in oklab, ${arrivee} ${avancement.toFixed(1)}%, ${depart})`
 }
 
 function SetupScreen({
@@ -765,13 +789,13 @@ function SetupScreen({
   const teinteCourante = TEINTES_ADVERSAIRES[bot.personality]
 
   /**
-   * Le rail du curseur : vingt-cinq segments, un par niveau, dans la teinte
-   * de l'adversaire qui le joue. Ceux déjà parcourus gardent leur couleur ;
-   * les autres s'éteignent à trente pour cent, assez pour lire l'échelle,
-   * pas assez pour disputer l'attention au pouce.
+   * Le rail du curseur : un segment par niveau, sur l'échelle de force — de
+   * l'ardoise froide à la braise. Ceux déjà parcourus gardent leur couleur ;
+   * les autres s'éteignent à trente pour cent, assez pour lire la suite de
+   * l'échelle, pas assez pour disputer l'attention au pouce.
    */
   const rail = BOT_LEVELS.map((niveau, index) => {
-    const teinte = TEINTES_ADVERSAIRES[niveau.personality]
+    const teinte = teinteDeForce(index / Math.max(1, BOT_LEVELS.length - 1))
     const couleur =
       niveau.level <= level ? teinte : `color-mix(in oklab, ${teinte} 30%, var(--surface-strong))`
     const debut = ((index / BOT_LEVELS.length) * 100).toFixed(2)
@@ -1015,8 +1039,11 @@ function SetupScreen({
                 }
               />
               <div className="mx-[14px] flex items-end justify-between" aria-hidden>
-                {BOT_LEVELS.map((niveau) => {
+                {BOT_LEVELS.map((niveau, index) => {
                   const jalon = niveau.level === 1 || niveau.level % 5 === 0
+                  // Même échelle que la piste, sinon les crans la
+                  // contrediraient un pixel plus bas.
+                  const teinte = teinteDeForce(index / Math.max(1, BOT_LEVELS.length - 1))
                   return (
                     <span
                       key={niveau.level}
@@ -1024,8 +1051,8 @@ function SetupScreen({
                       style={{
                         background:
                           niveau.level <= level
-                            ? TEINTES_ADVERSAIRES[niveau.personality]
-                            : `color-mix(in oklab, ${TEINTES_ADVERSAIRES[niveau.personality]} 35%, var(--border-strong))`,
+                            ? teinte
+                            : `color-mix(in oklab, ${teinte} 35%, var(--border-strong))`,
                       }}
                     />
                   )
@@ -2466,11 +2493,17 @@ function GameScreen({
       )}
 
       {/* Ne restent au menu que les gestes rares ou définitifs.
-          Il s'ouvre vers le haut : la barre est en bas de fenêtre, un
-          panneau déroulé vers le bas y sortirait du cadre. */}
+
+          Le sens dépend d'où vit la barre. Sur téléphone elle est collée en
+          bas de fenêtre : le panneau monte, sinon il sortirait du cadre. Sur
+          grand écran elle est au pied de la carte des coups, qui se règle
+          désormais sur son contenu et s'arrête au milieu de la colonne : un
+          panneau qui monterait recouvrirait la liste qu'on vient de lire,
+          alors qu'il y a tout l'espace voulu en dessous. `Menu` corrige de
+          lui-même si la place manque du côté demandé. */}
       <Menu
         align="right"
-        sens="haut"
+        sens={grandEcran ? 'bas' : 'haut'}
         largeur="w-60"
         label={t('computer.gameOptions')}
         declencheur={() => <MoreHorizontal size={16} aria-hidden />}
@@ -2924,17 +2957,24 @@ function GameScreen({
 
           <PhysicalBoardPanel state={physicalBoard} />
 
-          {/* Sur téléphone, la liste se règle sur ce qu'elle contient, sans
-              descendre plus bas que 45 % de la fenêtre. Elle réservait 220 px
-              dès le premier coup : sous l'échiquier, cela faisait un cadre
-              presque vide qui repoussait tout le reste hors de l'écran. Sur
-              grand écran, la colonne est calée sur la fenêtre et c'est elle qui
-              occupe la place restante — d'où le `flex-1` à partir de `lg`. */}
-          {/* Sur grand écran, la carte des coups a trois zones à hauteur
-              fixe : en tête la bascule de vue, au milieu la liste — la seule
-              qui défile —, au pied la navigation et les actions. Le pouce et
-              la souris savent toujours où retrouver « Indice ». */}
-          <Card className="flex max-h-[45vh] flex-col overflow-hidden lg:max-h-none lg:min-h-[220px] lg:flex-1">
+          {/* ── La liste garde les derniers coups, pas tous ───────────────
+              Elle prenait toute la hauteur restante de la colonne
+              (`lg:flex-1`). Sur un grand écran, cela veut dire neuf cents
+              pixels de cadre pour quatorze coups : la liste occupait le tiers
+              haut, et les deux autres tiers étaient un rectangle vide que les
+              commandes attendaient tout en bas.
+
+              Douze rangées suffisent — c'est ce qu'on relit en jouant, et la
+              partie en ligne applique déjà la même règle pour rendre la place
+              au tchat. Au-delà, la liste défile et se cale d'elle-même sur le
+              coup courant ; les coups d'avant sont à un cran de molette. La
+              carte se règle donc sur ce qu'elle contient, ici comme sur
+              téléphone, et cesse de réserver une place qu'elle n'utilise
+              pas. */}
+          {/* La carte garde ses trois zones : en tête la bascule de vue, au
+              milieu la liste — la seule qui défile —, au pied la navigation
+              et les actions. */}
+          <Card className="flex max-h-[45vh] flex-col overflow-hidden lg:max-h-none">
             {grandEcran && (
               <div className="flex items-center gap-2 border-b border-line/60 px-3 py-2">
                 <span className="text-[12px] font-semibold text-faint">{t('game.moves')}</span>
@@ -2947,6 +2987,7 @@ function GameScreen({
               cursor={state.cursor}
               onSeek={goTo}
               qualities={qualites}
+              maxRows={12}
               className="min-h-0 flex-1"
               controls={!grandEcran}
             />
