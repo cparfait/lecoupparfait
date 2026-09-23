@@ -440,7 +440,7 @@ export default function RushPage() {
 
       <p className="mt-2 flex items-center justify-center gap-1.5 text-[14px] text-muted">
         <Check size={14} className="text-accent" aria-hidden />
-        Les {turn === 'w' ? 'Blancs' : 'Noirs'} jouent — trouve le coup, vite.
+        {t(turn === 'w' ? 'rush.whiteToPlay' : 'rush.blackToPlay')}
       </p>
     </div>
   )

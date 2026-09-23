@@ -38,7 +38,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Headphones, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react'
 import clsx from 'clsx'
-import { useT } from '@/lib/i18n/index.tsx'
+import { avecElements, useT } from '@/lib/i18n/index.tsx'
 import type { TranslationKey } from '@/lib/i18n/index.tsx'
 import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
@@ -415,11 +415,13 @@ export default function EcoutePage() {
 
             <Card className="p-3">
               <p className="text-[13px] leading-relaxed text-muted">
-                Cette leçon t’intéresse ? Fais-la pour de vrai —{' '}
-                <Link href={`/apprendre/${piste.lesson.id}`} className="lien">
-                  {t(piste.lesson.title)}
-                </Link>
-                {t('listen.playedNotHeard')}
+                {avecElements(t('listen.doItForReal'), {
+                  lecon: (
+                    <Link href={`/apprendre/${piste.lesson.id}`} className="lien">
+                      {t(piste.lesson.title)}
+                    </Link>
+                  ),
+                })}
               </p>
             </Card>
           </div>

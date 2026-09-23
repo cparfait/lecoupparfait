@@ -28,7 +28,7 @@ import { POSITIONS_DU_GLOSSAIRE } from '@/lib/glossaire-positions.ts'
 import { BoiteTerme } from '@/components/glossaire/BoiteTerme.tsx'
 import { BoutonEcouter } from '@/components/ui/BoutonEcouter.tsx'
 import { renderBold } from '@/lib/gras.tsx'
-import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
+import { avecElements, langue, useI18n, useT } from '@/lib/i18n/index.tsx'
 import type { TranslationKey } from '@/lib/i18n/index.tsx'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
@@ -286,20 +286,27 @@ export default function GlossaryPage() {
           « épingle » et on repart en sachant qu'on dit « clouage ». */}
       {!litteral && parLexique.length > 0 && (
         <p className="mt-3 text-[13px] leading-relaxed text-muted">
-          Le mot « {query.trim()} » n’est pas celui qu’on emploie ici. Ce que tu cherches s’appelle{' '}
-          {parLexique.map((terme, rang) => (
-            <span key={terme}>
-              {rang > 0 && (rang === parLexique.length - 1 ? ' ou ' : ', ')}
-              <strong className="text-ink">{terme}</strong>
-            </span>
-          ))}
-          .
+          {/* « a, b ou c » : la liste suit la langue, conjonction comprise —
+              Intl la construit, et chaque terme y reste en gras. */}
+          {avecElements(t('misc.glossaryNotOurWord', { mot: query.trim() }), {
+            termes: new Intl.ListFormat(bcp47, { type: 'disjunction' })
+              .formatToParts(parLexique)
+              .map((part, rang) =>
+                part.type === 'element' ? (
+                  <strong key={rang} className="text-ink">
+                    {part.value}
+                  </strong>
+                ) : (
+                  <span key={rang}>{part.value}</span>
+                ),
+              ),
+          })}
         </p>
       )}
 
       {groups.length === 0 && (
         <p className="mt-8 text-center text-sm text-muted">
-          Aucun terme ne correspond à « {query} ».
+          {t('misc.glossaryNoMatch', { mot: query })}
         </p>
       )}
 

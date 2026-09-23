@@ -47,7 +47,7 @@ import { playResultSound, playSound } from '@/lib/sound.ts'
 import { speak } from '@/lib/speech.ts'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { VoiceQuickToggle } from '@/components/layout/VoiceQuickToggle.tsx'
-import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
+import { avecElements, langue, useI18n, useT } from '@/lib/i18n/index.tsx'
 
 type Screen =
   | { kind: 'families' }
@@ -221,16 +221,18 @@ function FamilyList({
       </div>
 
       <p className="mt-8 text-center text-[12px] text-faint">
-        Positions issues de{' '}
-        <a
-          href="https://github.com/supertorpe/chessendgametraining"
-          target="_blank"
-          rel="noreferrer noopener"
-          className="underline hover:text-ink"
-        >
-          supertorpe/chessendgametraining
-        </a>
-        , sous licence GPL-3.0.
+        {avecElements(t('endgames.source'), {
+          depot: (
+            <a
+              href="https://github.com/supertorpe/chessendgametraining"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="underline hover:text-ink"
+            >
+              supertorpe/chessendgametraining
+            </a>
+          ),
+        })}
       </p>
     </div>
   )

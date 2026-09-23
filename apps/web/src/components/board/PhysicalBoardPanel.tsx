@@ -15,13 +15,13 @@ import { Button, Card, Chip, SectionTitle } from '@/components/ui/index.tsx'
 import { availableDrivers } from '@/lib/board/registry.ts'
 import type { BoardDriver } from '@/lib/board/types.ts'
 import type { PhysicalBoardState } from '@/lib/board/usePhysicalBoard.ts'
-import { useT } from '@/lib/i18n/index.tsx'
+import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 
-const PROMOTION_LABELS: ReadonlyArray<{ piece: PieceSymbol; label: string }> = [
-  { piece: 'q', label: 'Dame' },
-  { piece: 'r', label: 'Tour' },
-  { piece: 'b', label: 'Fou' },
-  { piece: 'n', label: 'Cavalier' },
+const PROMOTION_LABELS: ReadonlyArray<{ piece: PieceSymbol; label: TranslationKey }> = [
+  { piece: 'q', label: 'board.pieceQueen' },
+  { piece: 'r', label: 'board.pieceRook' },
+  { piece: 'b', label: 'board.pieceBishop' },
+  { piece: 'n', label: 'board.pieceKnight' },
 ]
 
 export function PhysicalBoardPanel({
@@ -136,7 +136,7 @@ export function PhysicalBoardPanel({
           {state.pendingPromotion && (
             <div>
               <p className="mb-1.5 text-xs">
-                Promotion en {state.pendingPromotion.to} — quelle pièce&nbsp;?
+                {t('board.promotionOn', { case: state.pendingPromotion.to })}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {PROMOTION_LABELS.map(({ piece, label }) => (
@@ -146,7 +146,7 @@ export function PhysicalBoardPanel({
                     variant={piece === 'q' ? 'primary' : 'ghost'}
                     onClick={() => state.choosePromotion(piece)}
                   >
-                    {label}
+                    {t(label)}
                   </Button>
                 ))}
               </div>

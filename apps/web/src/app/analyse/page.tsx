@@ -1631,13 +1631,17 @@ export function ReviewScreen({
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold leading-snug">{explanation.headline}</p>
                       <p className="mt-0.5 text-xs tabular-nums text-faint">
-                        Coup {move.moveNumber} · {move.color === 'w' ? 'Blancs' : 'Noirs'} ·{' '}
-                        {formatScore(move.scoreBefore)} → {formatScore(move.scoreAfter)}
+                        {t('analysis.moveLine', {
+                          n: move.moveNumber,
+                          camp: t(move.color === 'w' ? 'settings.white' : 'settings.black'),
+                          avant: formatScore(move.scoreBefore),
+                          apres: formatScore(move.scoreAfter),
+                        })}
                         {/* Même seuil que la flèche et que le texte : sous
                           `SEUIL_MEILLEUR_COUP`, on ne présente pas les
                           préférences du moteur comme une perte. */}
                         {meriteUnMeilleurCoup(move.quality, move.winLoss) &&
-                          ` · −${move.winLoss.toFixed(0)} pts de victoire`}
+                          t('analysis.winLoss', { n: move.winLoss.toFixed(0) })}
                       </p>
                     </div>
                   </div>

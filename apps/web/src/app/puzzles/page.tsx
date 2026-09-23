@@ -815,7 +815,7 @@ export default function PuzzlesPage() {
           {streak > 1 && (
             <Chip tone="warning">
               <Flame size={11} aria-hidden />
-              série de {streak}
+              {t('puzzles.streakChip', { n: streak })}
             </Chip>
           )}
 

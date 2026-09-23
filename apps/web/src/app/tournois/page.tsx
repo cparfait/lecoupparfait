@@ -16,7 +16,7 @@ import clsx from 'clsx'
 import { Button, Card, EmptyState, Input, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
-import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
+import { langue, useI18n, useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 
 interface Tournament {
   slug: string
@@ -37,6 +37,7 @@ const STATUS: Record<string, { label: TranslationKey; tone: string }> = {
 
 export default function TournamentsPage() {
   const t = useT()
+  const bcp47 = langue(useI18n().locale).bcp47
   const [list, setList] = useState<Tournament[] | null>(null)
   const [signedIn, setSignedIn] = useState(false)
   const [name, setName] = useState('')
@@ -173,13 +174,17 @@ export default function TournamentsPage() {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-medium">{entry.name}</span>
                       <span className="mt-0.5 block text-[12px] text-faint">
-                        {Math.round(entry.initialTime / 60)} min
-                        {entry.increment > 0 ? ` + ${entry.increment} s` : ''} ·{' '}
-                        {entry.durationMinutes} min d’arène ·{' '}
-                        {new Date(entry.startsAt).toLocaleString('fr-FR', {
-                          weekday: 'short',
-                          hour: '2-digit',
-                          minute: '2-digit',
+                        {t('tournament.arenaLine', {
+                          cadence:
+                            entry.increment > 0
+                              ? `${Math.round(entry.initialTime / 60)} min + ${entry.increment} s`
+                              : `${Math.round(entry.initialTime / 60)} min`,
+                          duree: entry.durationMinutes,
+                          debut: new Date(entry.startsAt).toLocaleString(bcp47, {
+                            weekday: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          }),
                         })}
                       </span>
                     </span>

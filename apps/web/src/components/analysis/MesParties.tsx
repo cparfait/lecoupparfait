@@ -133,9 +133,14 @@ export function MesParties({
 
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[14px] font-medium">
-                    contre {partie.adversaire ?? 'un adversaire'}
+                    {t('myGames.versus', {
+                      nom: partie.adversaire ?? t('myGames.someOpponent'),
+                    })}
                     {partie.botLevel !== null && (
-                      <span className="font-normal text-faint"> · niveau {partie.botLevel}</span>
+                      <span className="font-normal text-faint">
+                        {' '}
+                        {t('myGames.level', { n: partie.botLevel })}
+                      </span>
                     )}
                   </span>
                   <span className="block truncate text-[12px] text-faint">
@@ -176,7 +181,7 @@ export function MesParties({
           ) : (
             <>
               <ChevronDown size={13} aria-hidden />
-              Voir les {parties.length - PARTIES_VISIBLES} autres parties
+              {t('myGames.showOthers', { n: parties.length - PARTIES_VISIBLES })}
             </>
           )}
         </button>

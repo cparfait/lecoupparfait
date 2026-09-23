@@ -162,7 +162,7 @@ export default function SeancePage() {
                       <span className="text-[14px] font-semibold">{t(entree.nom)}</span>
                       {deja > 0 && (
                         <Chip tone="success">
-                          {deja} séance{deja > 1 ? 's' : ''}
+                          {t(deja > 1 ? 'session.countMany' : 'session.countOne', { n: deja })}
                         </Chip>
                       )}
                     </span>

@@ -218,10 +218,19 @@ export default function CorrespondencePage() {
           {game && board ? (
             <>
               <div className="mb-2 flex flex-wrap items-center gap-2 text-[14px]">
-                <span className="font-medium">contre {game.opponent}</span>
+                <span className="font-medium">
+                  {t('correspondence.versus', { nom: game.opponent })}
+                </span>
                 <span className="text-faint">
-                  · tu joues les {game.colour === 'w' ? 'Blancs' : 'Noirs'} · {game.daysPerMove}{' '}
-                  jour{game.daysPerMove > 1 ? 's' : ''} par coup
+                  {t(
+                    game.daysPerMove > 1
+                      ? 'correspondence.youPlayDays'
+                      : 'correspondence.youPlayDay',
+                    {
+                      couleur: t(game.colour === 'w' ? 'play.white' : 'play.black'),
+                      n: game.daysPerMove,
+                    },
+                  )}
                 </span>
                 {game.result === '*' && (
                   <span
@@ -250,7 +259,7 @@ export default function CorrespondencePage() {
 
               {game.result !== '*' ? (
                 <p className="mt-2 text-center text-[14px] text-muted">
-                  Partie terminée — {game.result}.
+                  {t('correspondence.gameOver', { resultat: game.result })}
                 </p>
               ) : (
                 <div className="mt-2 flex justify-end">

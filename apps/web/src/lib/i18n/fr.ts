@@ -390,6 +390,9 @@ export const fr = {
 
   friendGame: {
     title: 'Jouer contre quelqu’un',
+    spectating: 'Tu regardes cette partie. Tu peux écrire dans le tchat, mais pas jouer.',
+    spectatingWithOthers:
+      'Tu regardes cette partie. Vous êtes {n} à la suivre. Tu peux écrire dans le tchat, mais pas jouer.',
     introLive: 'Choisis une cadence, puis envoie un lien ou défie quelqu’un de ton carnet.',
     introDays:
       'Un coup tous les {jours} jours. Il faut un compte des deux côtés — la partie doit pouvoir t’attendre.',
@@ -472,6 +475,7 @@ export const fr = {
   vision: {
     intro:
       'Une case est annoncée, tu cliques dessus. Trente secondes. Tant qu’il faut réfléchir pour trouver « f6 », ce temps-là est pris sur le calcul — c’est le réflexe le plus rentable à installer quand on débute.',
+    foundAndAccuracy: 'cases trouvées · {taux} % de réussite',
     over: 'Manche terminée.',
     ready: 'Prêt ? La première case s’affichera ici.',
     time: 'Temps',
@@ -550,6 +554,10 @@ export const fr = {
     title: 'Tes parties',
     hint: 'Celles que tu as jouées ici. Un clic la charge ; il ne reste qu’à lancer l’analyse.',
     collapse: 'Réduire la liste',
+    versus: 'contre {nom}',
+    someOpponent: 'un adversaire',
+    level: '· niveau {n}',
+    showOthers: 'Voir les {n} autres parties',
   },
 
   moveReport: {
@@ -574,6 +582,8 @@ export const fr = {
     andMistakes: ' et {n} fautes sérieuses.',
     andOneMistake: ' et {n} faute sérieuse.',
     noSeriousMistake: ' sans faute grave mais sans précision.',
+    // {phase} reçoit le nom de la phase en gras ; {suite}, l'une des trois clés ci-dessus.
+    phaseLine: '{phase} — {taux} % de précision sur {coups} coups,{suite}',
     costliestPhase: 'C’est la phase qui t’a coûté le plus cher.',
     whereItRecurs: 'Les positions où ce motif revient',
     whatProgresses: 'Ce qui te fait progresser à ton niveau',
@@ -638,6 +648,9 @@ export const fr = {
     unavailableHint:
       'La base de données n’est pas joignable. Le reste de la plateforme fonctionne normalement.',
     empty: 'Personne au classement pour l’instant',
+    intro:
+      'Classement Glicko-2, comme sur les grandes plateformes. Il faut au moins {n} parties pour y figurer.',
+    gamesAndWinRate: '{n} parties · {taux} % de victoires',
     emptyHint:
       'Joue {n} parties classées dans cette cadence pour y apparaître. Il faut être deux comptes inscrits pour qu’une partie compte.',
     conservativeBefore: 'Le tri ne se fait pas sur le classement brut mais sur un classement',
@@ -760,6 +773,8 @@ export const fr = {
     title: 'Analyse',
     pageTitle: 'Analyse expliquée',
     tagShort: 'Coup par coup, ce qui a basculé et le meilleur coup, expliqué.',
+    moveLine: 'Coup {n} · {camp} · {avant} → {apres}',
+    winLoss: ' · −{n} pts de victoire',
     tagLong:
       'Colle une partie et découvre, coup par coup, ce qui a basculé — avec le meilleur coup montré sur l’échiquier et la raison écrite en toutes lettres.',
     noMove: 'Aucun coup reconnu.',
@@ -1013,6 +1028,11 @@ export const fr = {
     chaptersCount: '{n} chapitres',
     expandAll: 'Tout déplier',
     collapseAll: 'Tout replier',
+    chapterHeading: 'Chapitre {n}',
+    doneOf: '{faites} / {total} terminées',
+    resumable: 'reprise possible',
+    totalHours:
+      'Environ {n} heures de contenu au total. Aucune leçon n’est verrouillée : va où tu veux, dans l’ordre que tu veux.',
     palierTitle: 'Ton palier',
     palierBlurb:
       'Le programme rangé par ce qui coûte le plus de points à ton niveau, et les motifs que tu rates vraiment.',
@@ -1247,11 +1267,14 @@ export const fr = {
     listen: 'Écouter',
     previousLesson: 'Leçon précédente',
     nextLesson: 'Leçon suivante',
-    playedNotHeard: '. On retient ce qu’on a joué, pas ce qu’on a entendu.',
+    // {lecon} reçoit le lien vers la leçon : voir `avecElements`.
+    doItForReal:
+      'Cette leçon t’intéresse ? Fais-la pour de vrai — {lecon}. On retient ce qu’on a joué, pas ce qu’on a entendu.',
   },
 
   puzzles: {
     title: 'Puzzles',
+    streakChip: 'série de {n}',
     subtitle: 'Six millions de positions tactiques, triées par thème et par niveau.',
     yourRating: 'Ton classement puzzles',
     findTheMove: 'Trouve le meilleur coup',
@@ -1326,6 +1349,8 @@ export const fr = {
 
   session: {
     title: 'Séance pédagogique',
+    countOne: '{n} séance',
+    countMany: '{n} séances',
     intro:
       'Une partie contre l’ordinateur, avec un adversaire calibré sur ton niveau, un thème annoncé avant de commencer, et un bilan qui dit où ce thème est apparu dans ta partie.',
     whichLevel: 'À quel niveau',
@@ -1348,6 +1373,8 @@ export const fr = {
 
   rush: {
     title: 'Manche chronométrée',
+    whiteToPlay: 'Les Blancs jouent — trouve le coup, vite.',
+    blackToPlay: 'Les Noirs jouent — trouve le coup, vite.',
     hint: 'Enchaîne les puzzles, de plus en plus durs. Trois erreurs et la manche s’arrête.',
     threeMinutes: '3 minutes',
     threeMinutesHint: 'La plus tendue. On ne réfléchit plus, on reconnaît.',
@@ -1391,10 +1418,15 @@ export const fr = {
     hoursLeft: '{n} h restantes',
     resignConfirm: 'Abandonner cette partie ?',
     pickAGame: 'Choisis une partie à gauche, ou lance-en une avec quelqu’un de ton carnet.',
+    versus: 'contre {nom}',
+    youPlayDay: '· tu joues {couleur} · {n} jour par coup',
+    youPlayDays: '· tu joues {couleur} · {n} jours par coup',
+    gameOver: 'Partie terminée — {resultat}.',
   },
 
   endgames: {
     missingBase: 'Base de finales absente',
+    source: 'Positions issues de {depot}, sous licence GPL-3.0.',
     missingBaseHint:
       'Le fichier des positions n’a pas été trouvé. Lance la compilation depuis le dépôt.',
     title: 'Entraînement aux finales',
@@ -1469,6 +1501,11 @@ export const fr = {
     atStake: ' Ta série est en jeu.',
     dailyAlreadyDone: 'Défi du jour déjà relevé',
     takeDaily: 'Relever le défi du jour',
+    ofOneDay: 'série de {n} jour',
+    ofDays: 'série de {n} jours',
+    dayCounts:
+      'Un jour compte dès qu’une seule des {n} quêtes est terminée — et le défi du jour en est une.',
+    otherQuests: 'Voir les {n} autres quêtes',
   },
 
   stakes: {
@@ -1675,6 +1712,10 @@ export const fr = {
   profile: {
     title: 'Profil',
     rating: 'Classement',
+    eloAndPeak: 'Elo {elo} · record {record}',
+    winsShort: '{n} V',
+    drawsShort: '{n} N',
+    lossesShort: '{n} D',
     provisional: 'provisoire',
     gamesPlayed: 'parties',
     winRate: 'Victoires',
@@ -1949,6 +1990,11 @@ export const fr = {
     title: 'Échiquier électronique',
     hint: 'Jouez sur votre plateau, la partie suit.',
     connect: 'Brancher un échiquier électronique',
+    promotionOn: 'Promotion en {case} — quelle pièce ?',
+    pieceQueen: 'Dame',
+    pieceRook: 'Tour',
+    pieceBishop: 'Fou',
+    pieceKnight: 'Cavalier',
     disconnect: 'Débrancher',
     upsideDown: 'Plateau posé à l’envers — c’est pris en compte, rien à changer.',
     noLeds:
@@ -1983,6 +2029,9 @@ export const fr = {
     won: 'Gagnée',
     lost: 'Perdue',
     seeTheMap: 'Voir la carte',
+    // {pseudo} et {xp} reçoivent un élément mis en forme : voir `avecElements`.
+    hello: 'Bonjour {pseudo}',
+    dayPoints: '{xp} / {total} points du jour',
     streakTitle: 'Jours d’affilée avec au moins une quête faite',
     yourPath: 'Ton parcours',
     careerDone: 'Carrière terminée 👑',
@@ -2378,6 +2427,7 @@ export const fr = {
 
   tournament: {
     notFound: 'Arène introuvable',
+    arenaLine: '{cadence} · {duree} min d’arène · {debut}',
     notFoundHint: 'Elle n’existe pas, ou son adresse est incomplète.',
     allArenas: 'Toutes les arènes',
     nobodyRegistered: 'Personne d’inscrit pour l’instant.',
@@ -2398,6 +2448,12 @@ export const fr = {
   watch: {
     intro:
       'Les parties en cours, celles qui cherchent un adversaire, et ce que tes amis jouent contre l’ordinateur.',
+    backToLiveOne: 'Revenir au direct — {n} coup de retard',
+    backToLiveMany: 'Revenir au direct — {n} coups de retard',
+    // {raison} reçoit `noEvalReason`, mis en valeur : voir `avecElements`.
+    noEval:
+      'Aucune évaluation n’est affichée pendant qu’il joue : {raison} Le bilan viendra à la fin, à sa place.',
+    noEvalReason: 'ce serait le moyen de lui souffler le coup depuis le tchat.',
     serverDown: 'Serveur de parties injoignable',
     serverDownHint:
       'Impossible de savoir qui joue en ce moment. Vérifie que le serveur temps réel tourne.',
@@ -2451,6 +2507,11 @@ export const fr = {
     readMore: 'Lire la suite',
     searchGlossary: 'Chercher un mot, ou une idée dans les définitions…',
     searchGlossaryAria: 'Chercher dans le glossaire',
+    alsoIn: 'Aussi dans {rubrique}',
+    // {termes} reçoit la liste des termes en gras : voir `avecElements`.
+    glossaryNotOurWord:
+      'Le mot « {mot} » n’est pas celui qu’on emploie ici. Ce que tu cherches s’appelle {termes}.',
+    glossaryNoMatch: 'Aucun terme ne correspond à « {mot} ».',
     loading3d: 'Chargement de la 3D…',
     exitFullscreen: 'Quitter le plein écran',
     fullscreen: 'Plein écran',
@@ -2505,6 +2566,8 @@ export const fr = {
 
   last: {
     hide: 'Réduire',
+    lastMoveSecondsAgo: 'dernier coup il y a {n} s',
+    lastMoveMinutesAgo: 'dernier coup il y a {n} min',
     readMore: 'Lire la suite',
     wholeSection: 'toute la rubrique, présentée en grand',
     installTitle: 'Installe Le Coup Parfait',

@@ -1030,9 +1030,9 @@ export default function LiveGamePage() {
               <p className="flex items-center gap-2 text-[14px] leading-relaxed text-muted">
                 <Eye size={15} className="shrink-0 text-accent" aria-hidden />
                 <span>
-                  Tu regardes cette partie.{' '}
-                  {snapshot.spectators > 1 && `Vous êtes ${snapshot.spectators} à la suivre. `}
-                  Tu peux écrire dans le tchat, mais pas jouer.
+                  {snapshot.spectators > 1
+                    ? t('friendGame.spectatingWithOthers', { n: snapshot.spectators })
+                    : t('friendGame.spectating')}
                 </span>
               </p>
             </Card>

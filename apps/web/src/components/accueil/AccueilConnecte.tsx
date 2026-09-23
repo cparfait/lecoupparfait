@@ -59,7 +59,7 @@ import {
 import type { BotPersonality } from '@coupparfait/core'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
 import clsx from 'clsx'
-import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
+import { avecElements, useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
 import { Button, ButtonLink, Card, Chip, Skeleton } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
@@ -298,7 +298,9 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
           deux — il n'y en a aucun. */}
       <header className="mb-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
         <h1 className="titre-affiche text-[2rem] sm:text-[2.4rem] lg:text-[2.75rem]">
-          Bonjour <span className="text-muted">{pseudo}</span>
+          {avecElements(t('homeIn.hello'), {
+            pseudo: <span className="text-muted">{pseudo}</span>,
+          })}
         </h1>
         <div className="flex flex-wrap items-center gap-2">
           {/* La série ne s'affiche qu'à partir de `sm`.

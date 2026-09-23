@@ -356,12 +356,16 @@ export default function ProfilePage() {
                 {rating.provisional && <span className="text-faint">?</span>}
               </p>
               <p className="mt-0.5 text-[12px] text-muted">
-                Elo {rating.elo} · record {rating.peak}
+                {t('profile.eloAndPeak', { elo: rating.elo, record: rating.peak })}
               </p>
               <div className="mt-2 flex gap-1 text-[12px] font-medium">
-                <span className="text-[var(--q-best)]">{rating.wins} V</span>
-                <span className="text-faint">{rating.draws} N</span>
-                <span className="text-[var(--q-blunder)]">{rating.losses} D</span>
+                <span className="text-[var(--q-best)]">
+                  {t('profile.winsShort', { n: rating.wins })}
+                </span>
+                <span className="text-faint">{t('profile.drawsShort', { n: rating.draws })}</span>
+                <span className="text-[var(--q-blunder)]">
+                  {t('profile.lossesShort', { n: rating.losses })}
+                </span>
               </div>
               {/* Barre de répartition victoires / nulles / défaites */}
               <div className="mt-2 flex h-1.5 overflow-hidden rounded-full bg-surface-strong">

@@ -70,7 +70,7 @@ export function AutresDeLaSection({
       <div className="mb-2.5 flex items-center gap-2">
         <section.icon size={14} style={{ color: section.teinte }} aria-hidden />
         <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-faint">
-          Aussi dans {t(section.labelKey)}
+          {t('misc.alsoIn', { rubrique: t(section.labelKey) })}
         </p>
       </div>
 

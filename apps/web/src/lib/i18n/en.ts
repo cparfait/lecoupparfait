@@ -384,6 +384,9 @@ export const en: Dictionary = {
 
   friendGame: {
     title: 'Play someone',
+    spectating: 'You are watching this game. You can write in the chat, but not play.',
+    spectatingWithOthers:
+      'You are watching this game, along with {n} people in all. You can write in the chat, but not play.',
     introLive: 'Pick a time control, then send a link or challenge someone from your book.',
     introDays:
       'One move every {jours} days. Both sides need an account — the game has to be able to wait for you.',
@@ -463,6 +466,7 @@ export const en: Dictionary = {
   vision: {
     intro:
       'A square is announced, you click it. Thirty seconds. As long as you have to think to find “f6”, that time is taken from calculating — it is the most profitable reflex to build when starting out.',
+    foundAndAccuracy: 'squares found · {taux}% accuracy',
     over: 'Run finished.',
     ready: 'Ready? The first square will appear here.',
     time: 'Time',
@@ -542,6 +546,10 @@ export const en: Dictionary = {
     title: 'Your games',
     hint: 'The ones you played here. One click loads it; all that is left is to start the analysis.',
     collapse: 'Collapse the list',
+    versus: 'against {nom}',
+    someOpponent: 'an opponent',
+    level: '· level {n}',
+    showOthers: 'Show the {n} other games',
   },
 
   moveReport: {
@@ -566,6 +574,7 @@ export const en: Dictionary = {
     andMistakes: ' and {n} serious mistakes.',
     andOneMistake: ' and {n} serious mistake.',
     noSeriousMistake: ' with no serious mistake but no accuracy either.',
+    phaseLine: '{phase} — {taux}% accuracy over {coups} moves,{suite}',
     costliestPhase: 'That is the phase that cost you the most.',
     whereItRecurs: 'The positions where this pattern comes back',
     whatProgresses: 'What makes you progress at your level',
@@ -628,6 +637,8 @@ export const en: Dictionary = {
     unavailable: 'Leaderboard unavailable',
     unavailableHint: 'The database is unreachable. The rest of the platform works normally.',
     empty: 'Nobody on the leaderboard yet',
+    intro: 'Glicko-2 rating, as on the big platforms. You need at least {n} games to appear on it.',
+    gamesAndWinRate: '{n} games · {taux}% wins',
     emptyHint:
       'Play {n} rated games in this time control to appear here. It takes two registered accounts for a game to count.',
     conservativeBefore: 'The order is not by raw rating but by a',
@@ -750,6 +761,8 @@ export const en: Dictionary = {
     title: 'Analysis',
     pageTitle: 'Analysis, explained',
     tagShort: 'Move by move, what turned and the best move, explained.',
+    moveLine: 'Move {n} · {camp} · {avant} → {apres}',
+    winLoss: ' · −{n} win points',
     tagLong:
       'Paste a game and find out, move by move, what turned — with the best move shown on the board and the reason written out in full.',
     noMove: 'No move recognised.',
@@ -998,6 +1011,11 @@ export const en: Dictionary = {
     chaptersCount: '{n} chapters',
     expandAll: 'Expand all',
     collapseAll: 'Collapse all',
+    chapterHeading: 'Chapter {n}',
+    doneOf: '{faites} / {total} done',
+    resumable: 'can be resumed',
+    totalHours:
+      'About {n} hours of content in all. No lesson is locked: go wherever you like, in whatever order you like.',
     palierTitle: 'Your tier',
     palierBlurb:
       'The curriculum ordered by what costs you the most points at your level, and the patterns you really do miss.',
@@ -1232,11 +1250,13 @@ export const en: Dictionary = {
     listen: 'Listen',
     previousLesson: 'Previous lesson',
     nextLesson: 'Next lesson',
-    playedNotHeard: '. What sticks is what you played, not what you heard.',
+    doItForReal:
+      'Interested in this lesson? Do it for real — {lecon}. What sticks is what you played, not what you heard.',
   },
 
   puzzles: {
     title: 'Puzzles',
+    streakChip: 'streak of {n}',
     subtitle: 'Six million tactical positions, sorted by theme and rating.',
     yourRating: 'Your puzzle rating',
     findTheMove: 'Find the best move',
@@ -1311,6 +1331,8 @@ export const en: Dictionary = {
 
   session: {
     title: 'Coaching session',
+    countOne: '{n} session',
+    countMany: '{n} sessions',
     intro:
       'A game against the computer, with an opponent matched to your level, a theme announced before you start, and a debrief telling you where that theme showed up in your game.',
     whichLevel: 'At what level',
@@ -1333,6 +1355,8 @@ export const en: Dictionary = {
 
   rush: {
     title: 'Timed run',
+    whiteToPlay: 'White to play — find the move, fast.',
+    blackToPlay: 'Black to play — find the move, fast.',
     hint: 'One puzzle after another, harder and harder. Three mistakes and the run ends.',
     threeMinutes: '3 minutes',
     threeMinutesHint: 'The tensest. You stop calculating and start recognising.',
@@ -1376,10 +1400,15 @@ export const en: Dictionary = {
     hoursLeft: '{n} h left',
     resignConfirm: 'Resign this game?',
     pickAGame: 'Pick a game on the left, or start one with someone from your book.',
+    versus: 'against {nom}',
+    youPlayDay: '· you play {couleur} · {n} day per move',
+    youPlayDays: '· you play {couleur} · {n} days per move',
+    gameOver: 'Game over — {resultat}.',
   },
 
   endgames: {
     missingBase: 'Endgame database missing',
+    source: 'Positions taken from {depot}, under the GPL-3.0 licence.',
     missingBaseHint: 'The position file was not found. Run the build from the repository.',
     title: 'Endgame training',
     intro:
@@ -1453,6 +1482,11 @@ export const en: Dictionary = {
     atStake: ' Your streak is at stake.',
     dailyAlreadyDone: 'Daily challenge already done',
     takeDaily: 'Take the daily challenge',
+    ofOneDay: '{n}-day streak',
+    ofDays: '{n}-day streak',
+    dayCounts:
+      'A day counts as soon as any one of the {n} quests is done — and the daily challenge is one of them.',
+    otherQuests: 'See the {n} other quests',
   },
 
   stakes: {
@@ -1658,6 +1692,10 @@ export const en: Dictionary = {
   profile: {
     title: 'Profile',
     rating: 'Rating',
+    eloAndPeak: 'Elo {elo} · peak {record}',
+    winsShort: '{n} W',
+    drawsShort: '{n} D',
+    lossesShort: '{n} L',
     provisional: 'provisional',
     gamesPlayed: 'games',
     winRate: 'Win rate',
@@ -1928,6 +1966,11 @@ export const en: Dictionary = {
     title: 'Electronic board',
     hint: 'Play on your own board, the game follows.',
     connect: 'Connect an electronic board',
+    promotionOn: 'Promotion on {case} — which piece?',
+    pieceQueen: 'Queen',
+    pieceRook: 'Rook',
+    pieceBishop: 'Bishop',
+    pieceKnight: 'Knight',
     disconnect: 'Disconnect',
     upsideDown: 'Board set up the other way round — that is taken into account, nothing to change.',
     noLeds:
@@ -1960,6 +2003,8 @@ export const en: Dictionary = {
     won: 'Won',
     lost: 'Lost',
     seeTheMap: 'See the map',
+    hello: 'Hello {pseudo}',
+    dayPoints: '{xp} / {total} points today',
     streakTitle: 'Days in a row with at least one quest done',
     yourPath: 'Your path',
     careerDone: 'Career finished 👑',
@@ -2351,6 +2396,7 @@ export const en: Dictionary = {
 
   tournament: {
     notFound: 'Arena not found',
+    arenaLine: '{cadence} · {duree}-min arena · {debut}',
     notFoundHint: 'It does not exist, or its address is incomplete.',
     allArenas: 'All the arenas',
     nobodyRegistered: 'Nobody registered yet.',
@@ -2371,6 +2417,11 @@ export const en: Dictionary = {
   watch: {
     intro:
       'Games in progress, those looking for an opponent, and what your friends are playing against the computer.',
+    backToLiveOne: 'Back to live — {n} move behind',
+    backToLiveMany: 'Back to live — {n} moves behind',
+    noEval:
+      'No evaluation is shown while they play: {raison} The review will come at the end, in its place.',
+    noEvalReason: 'it would be a way to whisper the move to them through the chat.',
     serverDown: 'Game server unreachable',
     serverDownHint: 'No way to know who is playing. Check that the realtime server is running.',
     noFriendPlaying: 'None of your friends is playing right now',
@@ -2422,6 +2473,10 @@ export const en: Dictionary = {
     readMore: 'Read more',
     searchGlossary: 'Search a word, or an idea in the definitions…',
     searchGlossaryAria: 'Search the glossary',
+    alsoIn: 'Also in {rubrique}',
+    glossaryNotOurWord:
+      'The word “{mot}” is not the one used here. What you are looking for is called {termes}.',
+    glossaryNoMatch: 'No term matches “{mot}”.',
     loading3d: 'Loading 3D…',
     exitFullscreen: 'Leave full screen',
     fullscreen: 'Full screen',
@@ -2476,6 +2531,8 @@ export const en: Dictionary = {
 
   last: {
     hide: 'Collapse',
+    lastMoveSecondsAgo: 'last move {n} s ago',
+    lastMoveMinutesAgo: 'last move {n} min ago',
     readMore: 'Read more',
     wholeSection: 'the whole section, shown large',
     installTitle: 'Install Le Coup Parfait',

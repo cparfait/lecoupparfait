@@ -208,8 +208,8 @@ function PanneauSerie({ etat, serie }: { etat: EtatQuotidien | null; serie: numb
           ensemble. La quête « analyser une partie » citée ici avait par
           ailleurs disparu du catalogue il y a longtemps. */}
       <p className="mt-3 px-1 text-[12px] leading-relaxed text-muted">
-        Un jour compte dès qu’une seule des {QUETES.length} quêtes est terminée — et le défi du jour
-        en est une. <strong className="font-semibold text-ink">{t('streak.resetsToZero')}</strong>
+        {t('streak.dayCounts', { n: QUETES.length })}{' '}
+        <strong className="font-semibold text-ink">{t('streak.resetsToZero')}</strong>
       </p>
 
       <p className="mt-2 px-1 text-[12px] text-muted">
@@ -246,7 +246,7 @@ function PanneauSerie({ etat, serie }: { etat: EtatQuotidien | null; serie: numb
               href="/#aujourdhui"
               className="mt-1 flex items-center justify-between rounded-[var(--radius-sm)] px-1 py-1.5 text-[14px] font-medium transition-colors hover:bg-surface-hover"
             >
-              Voir les {QUETES.length - 1} autres quêtes
+              {t('streak.otherQuests', { n: QUETES.length - 1 })}
               <ArrowRight size={14} aria-hidden />
             </a>
           </>

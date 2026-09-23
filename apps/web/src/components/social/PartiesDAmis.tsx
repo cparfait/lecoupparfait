@@ -145,7 +145,7 @@ function PartieDUnAmi({ partie, habillage }: { partie: PartieDAmi; habillage: st
         {/* Le moment du dernier coup, et non « en direct » : la partie peut
             très bien être en pause devant un café, et l'annoncer comme un
             direct serait mentir sur ce qu'on regarde. */}
-        dernier coup {ilYA(partie.dernierCoupLe)}
+        {dernierCoup(t, partie.dernierCoupLe)}
         <span className="ml-auto text-accent">{t('last.followGame')}</span>
       </p>
     </Link>
@@ -153,9 +153,9 @@ function PartieDUnAmi({ partie, habillage }: { partie: PartieDAmi; habillage: st
 }
 
 /** « il y a 12 s », « il y a 3 min ». Assez pour juger si la partie est vivante. */
-function ilYA(iso: string): string {
+/** Depuis quand le dernier coup a été joué, dans la langue choisie. */
+function dernierCoup(t: ReturnType<typeof useT>, iso: string): string {
   const secondes = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000))
-  if (secondes < 60) return `il y a ${secondes} s`
-  const minutes = Math.round(secondes / 60)
-  return `il y a ${minutes} min`
+  if (secondes < 60) return t('last.lastMoveSecondsAgo', { n: secondes })
+  return t('last.lastMoveMinutesAgo', { n: Math.round(secondes / 60) })
 }

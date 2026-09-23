@@ -229,7 +229,7 @@ export default function VisionPage() {
                         {found}
                       </p>
                       <p className="mt-1 text-sm text-muted">
-                        cases trouvées · {accuracy} % de réussite
+                        {t('vision.foundAndAccuracy', { taux: accuracy })}
                       </p>
                       {found > 0 && found >= best && (
                         <p className="mt-2 text-sm font-semibold text-accent">

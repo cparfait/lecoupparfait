@@ -81,10 +81,7 @@ export default function LeaderboardPage() {
         <Trophy size={26} className="text-accent" aria-hidden />
         {t('nav.leaderboard')}
       </h1>
-      <p className="mt-2 text-sm text-muted">
-        Classement Glicko-2, comme sur les grandes plateformes. Il faut au moins {minGames} parties
-        pour y figurer.
-      </p>
+      <p className="mt-2 text-sm text-muted">{t('leaderboard.intro', { n: minGames })}</p>
 
       {/*
         Le classement écarte qui n'a pas joué cinq parties classées : chercher
@@ -165,7 +162,10 @@ export default function LeaderboardPage() {
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold">{player.username}</span>
                     <span className="block text-[12px] text-faint">
-                      {player.games} parties · {player.winRate} % de victoires
+                      {t('leaderboard.gamesAndWinRate', {
+                        n: player.games,
+                        taux: player.winRate,
+                      })}
                     </span>
                   </span>
 

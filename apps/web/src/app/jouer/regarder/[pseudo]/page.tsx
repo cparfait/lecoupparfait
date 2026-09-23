@@ -44,7 +44,7 @@ import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { toPlayedMove, type PlayedMove } from '@/lib/game/useChessGame.ts'
 import { useGrandEcran } from '@/lib/useMediaQuery.ts'
 import { playMoveForSan } from '@/lib/sound.ts'
-import { useT } from '@/lib/i18n/index.tsx'
+import { avecElements, useT } from '@/lib/i18n/index.tsx'
 
 /**
  * Rythme d'interrogation.
@@ -276,18 +276,20 @@ export default function RegarderUnAmiPage() {
               onClick={() => setCurseur(null)}
               fullWidth
             >
-              Revenir au direct — {dernierRang - (curseur ?? 0)} coup
-              {dernierRang - (curseur ?? 0) > 1 ? 's' : ''} de retard
+              {t(
+                dernierRang - (curseur ?? 0) > 1 ? 'watch.backToLiveMany' : 'watch.backToLiveOne',
+                {
+                  n: dernierRang - (curseur ?? 0),
+                },
+              )}
             </Button>
           )}
 
           <Card className="p-3">
             <p className="text-[13px] leading-relaxed text-muted">
-              Aucune évaluation n’est affichée pendant qu’il joue :{' '}
-              <span className="text-ink">
-                ce serait le moyen de lui souffler le coup depuis le tchat.
-              </span>{' '}
-              Le bilan viendra à la fin, à sa place.
+              {avecElements(t('watch.noEval'), {
+                raison: <span className="text-ink">{t('watch.noEvalReason')}</span>,
+              })}
             </p>
           </Card>
         </div>

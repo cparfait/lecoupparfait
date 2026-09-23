@@ -41,7 +41,7 @@ import {
 import { Card, Chip } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { themesDePuzzles } from '@/lib/analysis/versLesPuzzles.ts'
-import { useT } from '@/lib/i18n/index.tsx'
+import { avecElements, useT } from '@/lib/i18n/index.tsx'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 /**
@@ -106,13 +106,25 @@ export function EtMaintenant({
               {phaseANommer.grade}
             </span>
             <span className="min-w-0 text-[13px] leading-snug">
-              <strong>{PHASE_LABELS[phaseANommer.phase][locale === 'en' ? 'en' : 'fr']}</strong> —{' '}
-              {phaseANommer.accuracy.toFixed(0)} % de précision sur {phaseANommer.moves} coups,
-              {phaseANommer.mistakes > 0
-                ? t(phaseANommer.mistakes > 1 ? 'next2.andMistakes' : 'next2.andOneMistake', {
-                    n: phaseANommer.mistakes,
-                  })
-                : t('next2.noSeriousMistake')}{' '}
+              {avecElements(
+                t('next2.phaseLine', {
+                  taux: phaseANommer.accuracy.toFixed(0),
+                  coups: phaseANommer.moves,
+                  suite:
+                    phaseANommer.mistakes > 0
+                      ? t(phaseANommer.mistakes > 1 ? 'next2.andMistakes' : 'next2.andOneMistake', {
+                          n: phaseANommer.mistakes,
+                        })
+                      : t('next2.noSeriousMistake'),
+                }),
+                {
+                  phase: (
+                    <strong>
+                      {PHASE_LABELS[phaseANommer.phase][locale === 'en' ? 'en' : 'fr']}
+                    </strong>
+                  ),
+                },
+              )}{' '}
               <span className="text-muted">{t('next2.costliestPhase')}</span>
             </span>
           </div>

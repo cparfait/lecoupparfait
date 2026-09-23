@@ -90,7 +90,7 @@ export function QueteTerminee({
           {serie != null && serie > 0 && (
             <span className="ml-2 inline-flex items-center gap-1 text-[var(--q-inaccuracy)]">
               <Flame size={13} aria-hidden />
-              série de {serie} jour{serie > 1 ? 's' : ''}
+              {t(serie > 1 ? 'streak.ofDays' : 'streak.ofOneDay', { n: serie })}
             </span>
           )}
         </p>

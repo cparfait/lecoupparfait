@@ -33,7 +33,7 @@ import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { ListeDesQuetes } from '@/components/daily/ListeDesQuetes.tsx'
 import { XP_TOTAL } from '@/lib/daily/quetes.ts'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
-import { useT } from '@/lib/i18n/index.tsx'
+import { avecElements, useT } from '@/lib/i18n/index.tsx'
 import type { ProchaineChose } from './prochainesChoses.ts'
 
 /** L'ancre de la carte, visée depuis le panneau de la série. */
@@ -123,9 +123,10 @@ export function Aujourdhui({
           )
         }
         fin={
-          <span className="flex items-baseline gap-1">
-            <span className="chiffre-affiche text-[1.5rem] text-ink">{xp}</span>
-            <span className="text-[12px] text-faint">/ {XP_TOTAL} points du jour</span>
+          <span className="flex items-baseline gap-1 text-[12px] text-faint">
+            {avecElements(t('homeIn.dayPoints', { total: XP_TOTAL }), {
+              xp: <span className="chiffre-affiche text-[1.5rem] text-ink">{xp}</span>,
+            })}
           </span>
         }
       />

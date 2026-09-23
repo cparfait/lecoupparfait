@@ -389,10 +389,10 @@ export default function LearnPage() {
                     {/* Le numéro de chapitre situe la progression dans le
                         programme, et fait respirer le titre au-dessus. */}
                     <p className="text-[12px] font-semibold text-muted">
-                      Chapitre {chapterIndex + 1}
+                      {t('learn.chapterHeading', { n: chapterIndex + 1 })}
                       {done > 0 && (
                         <span className="ml-2 font-normal normal-case tracking-normal text-muted">
-                          {done} / {chapter.lessons.length} terminées
+                          {t('learn.doneOf', { faites: done, total: chapter.lessons.length })}
                         </span>
                       )}
                     </p>
@@ -466,11 +466,11 @@ export default function LearnPage() {
                           <Clock size={11} aria-hidden />
                           {lesson.minutes} min
                           <span aria-hidden>·</span>
-                          {lesson.steps.length} étapes
+                          {t('learn.stepsCount', { n: lesson.steps.length })}
                           {started && !completed && (
                             <>
                               <span aria-hidden>·</span>
-                              <span className="text-accent">reprise possible</span>
+                              <span className="text-accent">{t('learn.resumable')}</span>
                             </>
                           )}
                         </p>
@@ -497,8 +497,7 @@ export default function LearnPage() {
       </div>
 
       <p className="mt-10 text-center text-xs text-faint">
-        Environ {Math.round(CURRICULUM_STATS.minutes / 60)} heures de contenu au total. Aucune leçon
-        n’est verrouillée : va où tu veux, dans l’ordre que tu veux.
+        {t('learn.totalHours', { n: Math.round(CURRICULUM_STATS.minutes / 60) })}
       </p>
 
       <AutresDeLaSection section="apprendre" />
