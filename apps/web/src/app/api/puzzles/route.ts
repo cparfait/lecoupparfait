@@ -23,12 +23,16 @@ import {
   puzzles,
   sql,
 } from '@coupparfait/db'
+import { DEFI_TENTE } from '@coupparfait/db/push'
 import { applyPuzzleResult, getRating } from '@coupparfait/db/ratings'
 import { getCurrentUser } from '@/lib/server/session.ts'
+import { fusionnerJournee } from '@/lib/server/journee.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+
+const JOUR_VALIDE = /^\d{4}-\d{2}-\d{2}$/
 
 /** Fenêtre de difficulté autour du niveau visé. */
 const WINDOW = 120
@@ -190,7 +194,14 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const t = tDeLaRequete(request)
-  let body: { puzzleId?: string; solved?: boolean; correctMoves?: number; timeMs?: number }
+  let body: {
+    puzzleId?: string
+    solved?: boolean
+    correctMoves?: number
+    timeMs?: number
+    /** Le jour local du défi, quand la position jouée est le défi du jour. */
+    defiDuJour?: unknown
+  }
   try {
     body = await request.json()
   } catch {
@@ -205,6 +216,30 @@ export async function POST(request: Request) {
   // Sans compte, on ne conserve rien — mais on ne bloque pas pour autant : le
   // joueur peut enchaîner les puzzles, ils ne seront simplement pas mémorisés.
   if (!user) return NextResponse.json({ rating: null, anonymous: true })
+
+  /*
+    Le défi du jour est noté ici, au moment où il est joué.
+
+    Le navigateur le note aussi dans sa journée, qu'il envoie à
+    `/api/quotidien` — mais sans attendre la réponse, et un téléphone qu'on
+    verrouille juste après la dernière case annulait l'envoi. Le rappel de fin
+    de journée partait alors vers quelqu'un qui avait fini. Cette route-ci est
+    attendue par la page, et l'écriture ne dépend pas du classement : on la
+    fait avant lui, et une panne ne bloque pas le reste.
+
+    Un défi abandonné compte comme tenté : il n'y en a pas d'autre avant minuit.
+  */
+  if (typeof body.defiDuJour === 'string' && JOUR_VALIDE.test(body.defiDuJour)) {
+    try {
+      await fusionnerJournee({
+        userId: user.userId,
+        jour: body.defiDuJour,
+        avancement: body.solved ? { defi: 1, [DEFI_TENTE]: 1 } : { [DEFI_TENTE]: 1 },
+      })
+    } catch (error) {
+      console.error('[puzzles] défi du jour', error)
+    }
+  }
 
   try {
     const database = getDb()

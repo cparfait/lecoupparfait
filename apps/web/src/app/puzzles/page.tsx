@@ -451,8 +451,19 @@ export default function PuzzlesPage() {
   }, [load, modeDefi])
 
   // ── Enregistrement du résultat ──────────────────────────────────────────
+  /*
+    `solved` est le verdict du classement : juste du premier coup, sans avoir
+    regardé la solution. `resolu` dit seulement que la position a été menée à
+    son terme.
+
+    Le défi du jour se contentait du premier. Résolu après une erreur, il
+    affichait « Défi du jour relevé ! » mais ne cochait pas la quête : l'accueil
+    le proposait encore, et le rappel de dix-huit heures partait vers quelqu'un
+    qui venait de le finir. La quête `puzzles` garde l'exigence du premier coup ;
+    le défi, lui, est relevé quand il est fini.
+  */
   const report = useCallback(
-    async (solved: boolean) => {
+    async (solved: boolean, resolu: boolean = solved) => {
       if (!puzzle) return
       // Une position ne se compte qu'une fois : voir `comptes`.
       if (comptes.current.has(puzzle.id)) return
@@ -460,10 +471,8 @@ export default function PuzzlesPage() {
 
       // La journée se met à jour avant l'appel réseau : elle vit dans le
       // navigateur et ne dépend ni du compte ni de la connexion.
-      if (solved) {
-        marquer('puzzles')
-        if (modeDefi) marquer('defi')
-      }
+      if (solved) marquer('puzzles')
+      if (resolu && modeDefi) marquer('defi')
 
       /*
         Un puzzle de carrière fait avancer le chapitre.
@@ -500,7 +509,11 @@ export default function PuzzlesPage() {
             solved,
             correctMoves: Math.floor((moveIndex - 1) / 2),
             timeMs: Date.now() - startedAt.current,
+            // Le serveur note le défi de son côté : voir `/api/puzzles`.
+            ...(modeDefi ? { defiDuJour: jourLocal() } : {}),
           }),
+          // Qu'il parte même si l'on ferme l'application sur la dernière case.
+          keepalive: true,
         })
         const data = await response.json()
         if (typeof data.rating === 'number') {
@@ -593,7 +606,7 @@ export default function PuzzlesPage() {
         setStatus('solved')
         if (!dejaCompte) setStreak((value) => value + 1)
         playSound('victory')
-        void report(wrongAttempts === 0 && !revealed)
+        void report(wrongAttempts === 0 && !revealed, true)
         return
       }
 

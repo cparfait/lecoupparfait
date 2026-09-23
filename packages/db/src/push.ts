@@ -126,17 +126,29 @@ export async function abonnementsDefiEnAttente(): Promise<PushSubscriptionRow[]>
 }
 
 /**
- * Qui a déjà résolu le défi du jour, parmi ceux qu'on s'apprêtait à relancer.
+ * La marque d'un défi du jour tenté sans être résolu, dans `daily_progress.quests`.
  *
- * Rend les paires `userId|jour` déjà faites. La quête `defi` est la même que
- * celle affichée sur l'accueil : on ne réinvente pas un compteur, on lit celui
- * qui existe — sans quoi les deux finiraient par ne plus dire la même chose.
+ * Ce n'est pas une quête : elle ne rapporte rien et l'accueil ne l'affiche
+ * pas. Elle ne sert qu'au rappel. Qui a regardé la solution a fait le défi du
+ * jour — il n'y en a pas d'autre avant minuit — et lui écrire à dix-huit
+ * heures que « le défi t'attend » serait faux.
+ */
+export const DEFI_TENTE = 'defitente'
+
+/**
+ * Qui a déjà fait le défi du jour, parmi ceux qu'on s'apprêtait à relancer.
  *
- * Le navigateur reste la source de vérité de la progression quotidienne, et il
- * ne la synchronise qu'à l'ouverture de l'application. Un joueur qui a résolu
- * le défi hors ligne et n'est pas revenu recevra donc son rappel pour rien.
- * C'est le bon sens du compromis : mieux vaut un rappel de trop qu'un rappel
- * manqué, et le cas est rare.
+ * Rend les paires `userId|jour` déjà faites : défi résolu (la quête `defi`,
+ * celle de l'accueil — on ne réinvente pas un compteur) ou tenté
+ * (`DEFI_TENTE`).
+ *
+ * Deux chemins l'écrivent : la synchronisation de la journée depuis le
+ * navigateur, et la route des puzzles au moment où le défi est joué. Le
+ * second existe parce que le premier, envoyé sans être attendu, se perdait
+ * quand on fermait l'application juste après la dernière case — et le rappel
+ * partait vers quelqu'un qui venait de résoudre le défi. Reste le cas d'un
+ * défi fait hors ligne sans retour depuis : un rappel de trop, que l'on
+ * préfère à un rappel manqué.
  */
 export async function defisDejaFaits(userIds: string[], jours: string[]): Promise<Set<string>> {
   if (userIds.length === 0 || jours.length === 0) return new Set()
@@ -158,7 +170,10 @@ export async function defisDejaFaits(userIds: string[], jours: string[]): Promis
 
   const faits = new Set<string>()
   for (const ligne of lignes) {
-    if ((ligne.quests?.defi ?? 0) >= 1) faits.add(`${ligne.userId}|${ligne.day}`)
+    const quetes = ligne.quests ?? {}
+    if ((quetes.defi ?? 0) >= 1 || (quetes[DEFI_TENTE] ?? 0) >= 1) {
+      faits.add(`${ligne.userId}|${ligne.day}`)
+    }
   }
   return faits
 }

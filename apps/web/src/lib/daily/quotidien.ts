@@ -272,6 +272,9 @@ async function synchroniser(etat: EtatQuotidien): Promise<void> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(etat),
+      // Sans quoi fermer l'application juste après une quête annule l'envoi,
+      // et le serveur — donc le rappel du soir — ignore qu'elle est faite.
+      keepalive: true,
     })
   } catch {
     // Hors ligne : l'état local fait foi, il repartira au prochain passage.

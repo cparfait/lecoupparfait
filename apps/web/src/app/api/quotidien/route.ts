@@ -18,19 +18,15 @@
  */
 
 import { NextResponse } from 'next/server'
-import { and, dailyProgress, desc, eq, getDb } from '@coupparfait/db'
+import { dailyProgress, desc, eq, getDb } from '@coupparfait/db'
 import { getCurrentUser } from '@/lib/server/session.ts'
-import { xpPour } from '@/lib/daily/quetes.ts'
+import { borner, fusionnerJournee, SERIE_MAX } from '@/lib/server/journee.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const JOUR_VALIDE = /^\d{4}-\d{2}-\d{2}$/
-
-/** Plafonds de bon sens : cette route accepte des chiffres venus du client. */
-const XP_MAX = 1000
-const SERIE_MAX = 100_000
 
 export async function GET() {
   const user = await getCurrentUser()
@@ -88,45 +84,9 @@ export async function POST(request: Request) {
 
   const avancement = nettoyerAvancement(corps.avancement)
   const serie = borner(corps.serie, SERIE_MAX)
-  const meilleureSerie = Math.max(serie, borner(corps.meilleureSerie, SERIE_MAX))
+  const meilleureSerie = borner(corps.meilleureSerie, SERIE_MAX)
   try {
-    const database = getDb()
-    const existantes = await database
-      .select()
-      .from(dailyProgress)
-      .where(and(eq(dailyProgress.userId, user.userId), eq(dailyProgress.day, jour)))
-      .limit(1)
-
-    const existant = existantes[0]
-    const quests = existant ? fusionner(existant.quests, avancement) : avancement
-
-    // Les points sont **recalculés** à partir du barème commun et de
-    // l'avancement fusionné, jamais repris du client — sans quoi une journée
-    // faite sur deux appareils compterait deux fois, ou pas du tout.
-    const xp = borner(xpPour(quests), XP_MAX)
-
-    if (existant) {
-      await database
-        .update(dailyProgress)
-        .set({
-          quests,
-          xp,
-          streak: Math.max(existant.streak, serie),
-          bestStreak: Math.max(existant.bestStreak, meilleureSerie),
-          updatedAt: new Date(),
-        })
-        .where(and(eq(dailyProgress.userId, user.userId), eq(dailyProgress.day, jour)))
-    } else {
-      await database.insert(dailyProgress).values({
-        userId: user.userId,
-        day: jour,
-        quests,
-        xp,
-        streak: serie,
-        bestStreak: meilleureSerie,
-      })
-    }
-
+    await fusionnerJournee({ userId: user.userId, jour, avancement, serie, meilleureSerie })
     return NextResponse.json({ ok: true })
   } catch (error) {
     console.error('[quotidien]', error)
@@ -145,21 +105,4 @@ function nettoyerAvancement(brut: unknown): Record<string, number> {
     propre[cle] = Math.min(999, Math.floor(nombre))
   }
   return propre
-}
-
-function fusionner(
-  serveur: Record<string, number>,
-  client: Record<string, number>,
-): Record<string, number> {
-  const resultat = { ...serveur }
-  for (const [cle, valeur] of Object.entries(client)) {
-    resultat[cle] = Math.max(resultat[cle] ?? 0, valeur)
-  }
-  return resultat
-}
-
-function borner(valeur: unknown, plafond: number): number {
-  const nombre = Number(valeur)
-  if (!Number.isFinite(nombre) || nombre < 0) return 0
-  return Math.min(plafond, Math.floor(nombre))
 }
