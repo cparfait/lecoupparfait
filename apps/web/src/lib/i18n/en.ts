@@ -580,6 +580,8 @@ export const en: Dictionary = {
 
   career2: {
     pointsSuffix: 'career pts',
+    pointsAria: 'Career points: {n}',
+    pointsBefore: '{n} pts to {rang}',
     rankProgress: 'Progress within the rank',
     lastRank: 'Last rank: there is nothing above it.',
     oldScale:
@@ -587,6 +589,9 @@ export const en: Dictionary = {
     dayPointsNote:
       'The “points for today” on the Today card are a different counter: they count your quests for the day, out of {total}, and reset to zero at midnight.',
     seeCareerMap: 'See the career map',
+    scale:
+      'A lesson is worth {lecon}, a career puzzle {puzzle}, a duel win {victoire}. A finished chapter brings {chapitre}, plus {etoile} per star — and stars are earned by succeeding {sansAide}.',
+    noHelp: 'without help',
   },
 
   moves: {

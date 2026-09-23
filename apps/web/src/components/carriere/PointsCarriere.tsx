@@ -31,7 +31,7 @@ import { XP, detailXp, rangPour, type Progression } from '@coupparfait/core'
 import { Menu } from '@/components/ui/Menu.tsx'
 import { classesChip } from '@/components/ui/index.tsx'
 import { XP_TOTAL } from '@/lib/daily/quetes.ts'
-import { useT } from '@/lib/i18n/index.tsx'
+import { avecElements, useT } from '@/lib/i18n/index.tsx'
 
 export function PointsCarriere({ progression }: { progression: Progression }) {
   const t = useT()
@@ -41,7 +41,7 @@ export function PointsCarriere({ progression }: { progression: Progression }) {
     <Menu
       align="right"
       largeur="w-[21rem]"
-      label={`Points de carrière : ${progression.xp}`}
+      label={t('career2.pointsAria', { n: progression.xp })}
       className="shrink-0"
       // La pastille garde exactement la forme qu'elle avait quand elle n'était
       // qu'une étiquette : elle vit à côté de celle de la série, et deux
@@ -91,7 +91,10 @@ function PanneauPoints({ progression }: { progression: Progression }) {
           </span>
           {rang.suivant && (
             <span className="tabular-nums text-faint">
-              {rang.suivant.seuil - progression.xp} pts avant {rang.suivant.nom}
+              {t('career2.pointsBefore', {
+                n: rang.suivant.seuil - progression.xp,
+                rang: rang.suivant.nom,
+              })}
             </span>
           )}
         </div>
@@ -146,10 +149,16 @@ function PanneauPoints({ progression }: { progression: Progression }) {
           Il tient en une phrase, et c'est exprès : quelqu'un doit pouvoir
           prévoir ce que va lui rapporter sa soirée. */}
       <p className="mt-3 border-t border-line/60 px-1 pt-2 text-[12px] leading-relaxed text-muted">
-        Une leçon vaut {XP.lecon}, un puzzle de carrière {XP.puzzle}, une victoire en duel{' '}
-        {XP.victoire}. Un chapitre terminé rapporte {XP.chapitre}, plus {XP.etoile} par étoile — et
-        les étoiles se gagnent en réussissant{' '}
-        <strong className="font-semibold text-ink">sans aide</strong>.
+        {avecElements(
+          t('career2.scale', {
+            lecon: XP.lecon,
+            puzzle: XP.puzzle,
+            victoire: XP.victoire,
+            chapitre: XP.chapitre,
+            etoile: XP.etoile,
+          }),
+          { sansAide: <strong className="font-semibold text-ink">{t('career2.noHelp')}</strong> },
+        )}
       </p>
       <p className="mt-2 px-1 text-[12px] leading-relaxed text-faint">
         {t('career2.dayPointsNote', { total: XP_TOTAL })}

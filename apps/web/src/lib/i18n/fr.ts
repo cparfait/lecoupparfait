@@ -588,6 +588,8 @@ export const fr = {
 
   career2: {
     pointsSuffix: 'pts de carrière',
+    pointsAria: 'Points de carrière : {n}',
+    pointsBefore: '{n} pts avant {rang}',
     rankProgress: 'Avancement dans le rang',
     lastRank: 'Dernier rang : il n’y a plus rien au-dessus.',
     oldScale:
@@ -595,6 +597,10 @@ export const fr = {
     dayPointsNote:
       'Les « points du jour » de la carte Aujourd’hui sont un autre compteur : ils comptent tes quêtes de la journée, sur {total}, et repartent de zéro à minuit.',
     seeCareerMap: 'Voir la carte de carrière',
+    // {sansAide} reçoit `noHelp` en gras : voir `avecElements`.
+    scale:
+      'Une leçon vaut {lecon}, un puzzle de carrière {puzzle}, une victoire en duel {victoire}. Un chapitre terminé rapporte {chapitre}, plus {etoile} par étoile — et les étoiles se gagnent en réussissant {sansAide}.',
+    noHelp: 'sans aide',
   },
 
   moves: {
