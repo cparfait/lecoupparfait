@@ -44,6 +44,7 @@ import { pruneEvaluations } from '@coupparfait/db/menage'
 import { verifySessionToken } from './auth.ts'
 import { adresseDe, creerLimiteur, creerSeau } from './limites.ts'
 import { rappelDuDefi, rappelsPossibles } from './rappels.ts'
+import { classementAccorde, creerRegistre } from './salons.ts'
 import {
   enregistrerSalon,
   oublierSalon,
@@ -108,6 +109,9 @@ function trop(
 // ─────────────────────────────────────────────────────────────────────────────
 
 const rooms = new Map<string, GameRoom>()
+
+/** Qui a ouvert quel salon, pour le plafond par adresse. Voir `salons.ts`. */
+const registreSalons = creerRegistre((slug) => rooms.has(slug))
 
 /**
  * Les écritures en base qu'on n'attend pas… sauf à l'arrêt.
@@ -758,7 +762,32 @@ io.on('connection', (socket) => {
         void socket.leave(currentSlug)
       }
 
-      const room = roomFor(slug, { timeControl, rated: payload.rated ?? false })
+      /*
+        Ouvrir un salon a un prix : plafond global et par adresse, voir
+        `salons.ts`. Ne concerne que la création — rejoindre un salon qui
+        existe reste toujours possible, sans quoi un plafond atteint
+        empêcherait l'invité d'entrer dans la partie qui l'attend.
+      */
+      const nouveau = !rooms.has(slug)
+      if (nouveau) {
+        const admission = registreSalons.admettre(adresseDe(socket.request), rooms.size)
+        if (admission !== 'ok') {
+          socket.emit('error', {
+            message:
+              admission === 'plein'
+                ? 'Le serveur accueille déjà autant de parties qu’il peut. Réessaie dans un moment.'
+                : 'Tu as déjà trop de parties ouvertes. Termine-en une avant d’en créer une autre.',
+          })
+          return
+        }
+      }
+
+      // `rated` n'est retenu que d'un hôte connecté : voir `classementAccorde`.
+      const room = roomFor(slug, {
+        timeControl,
+        rated: classementAccorde(payload.rated, identity !== null),
+      })
+      if (nouveau) registreSalons.noter(slug, adresseDe(socket.request))
       currentSlug = slug
 
       void socket.join(slug)
