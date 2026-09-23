@@ -111,6 +111,8 @@ export const en: Dictionary = {
     analyseGameHint: 'move by move, with reasons',
     studiesHint: 'your annotated positions',
     editorHint: 'compose a position',
+    levelTest: 'Level test',
+    levelTestHint: 'six minutes to find out where you stand',
   },
 
   home: {

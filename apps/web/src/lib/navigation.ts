@@ -187,6 +187,14 @@ export const SECTIONS: SectionNav[] = [
         icon: Target,
         hintKey: 'nav.palierHint',
       },
+      // Le test juste après le palier : c'est lui qui dit dans quel palier on
+      // est. Il n'était atteignable que depuis trois pages, et d'aucun menu.
+      {
+        href: '/apprendre/niveau',
+        labelKey: 'nav.levelTest',
+        icon: Gauge,
+        hintKey: 'nav.levelTestHint',
+      },
       {
         href: '/apprendre/principes',
         labelKey: 'nav.principes',

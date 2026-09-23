@@ -110,6 +110,8 @@ export const fr = {
     analyseGameHint: 'coup par coup, avec les raisons',
     studiesHint: 'tes positions annotées',
     editorHint: 'composer une position',
+    levelTest: 'Test de niveau',
+    levelTestHint: 'six minutes pour savoir où tu en es',
   },
 
   home: {
