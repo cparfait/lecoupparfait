@@ -26,6 +26,7 @@ import {
 } from '@/lib/ia/relais.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 import { creerLimiteur } from '@/lib/server/limiteur.ts'
+import { ipClient } from '@/lib/server/ip.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -48,10 +49,7 @@ const appels = creerLimiteur(60_000, 30)
 
 export async function POST(request: Request) {
   const t = tDeLaRequete(request)
-  const ip =
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    request.headers.get('x-real-ip') ??
-    'inconnu'
+  const ip = ipClient(request)
   if (appels.depasse(ip)) {
     return NextResponse.json(
       { error: t('api.tooManyRequests') },

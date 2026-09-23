@@ -26,6 +26,7 @@ import { avatarAuHasard, isKnownAvatar } from '@/lib/avatars.ts'
 import { courrielDisponible, resetMail, sendMail, verificationMail } from '@/lib/server/mailer.ts'
 import { estAdministrateur } from '@/lib/server/admin.ts'
 import { creerLimiteur } from '@/lib/server/limiteur.ts'
+import { ipClient } from '@/lib/server/ip.ts'
 import { endSession, getCurrentUser, startSession } from '@/lib/server/session.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 import { LOCALES } from '@/lib/i18n/dictionary.ts'
@@ -40,6 +41,19 @@ export const dynamic = 'force-dynamic'
  * Le mécanisme lui-même vit dans `lib/server/limiteur.ts`, avec ses raisons.
  */
 const tentatives = creerLimiteur(10 * 60 * 1000, 12)
+
+/**
+ * Quarante connexions par dix minutes sur un même pseudo, toutes adresses
+ * confondues.
+ *
+ * Le quota adresse + pseudo ne voit pas l'attaque répartie : cent adresses à
+ * douze essais chacune font douze cents mots de passe essayés sur le même
+ * compte. Celui-ci la plafonne. Le prix, assumé : quelqu'un qui s'acharne sur
+ * un pseudo peut en retarder le titulaire de dix minutes. Quarante et non
+ * douze pour que ce blocage demande un effort visible, et une connexion
+ * réussie remet le compteur à zéro.
+ */
+const parPseudo = creerLimiteur(10 * 60 * 1000, 40)
 
 /**
  * La langue enregistrée sur le compte, quand elle en a une.
@@ -153,10 +167,7 @@ export async function POST(request: Request) {
   // l'adresse existe, qu'elle soit inconnue ou non confirmée : autrement, ce
   // formulaire devient un moyen de savoir qui est inscrit.
   if (body.action === 'forgotPassword') {
-    const ip =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-      request.headers.get('x-real-ip') ??
-      'inconnu'
+    const ip = ipClient(request)
     if (tentatives.depasse(`oubli:${ip}`)) {
       return NextResponse.json({ error: t('api.tooManyRequests') }, { status: 429 })
     }
@@ -207,10 +218,7 @@ export async function POST(request: Request) {
 
     // Même limitation que les tentatives de connexion : un bouton « renvoyer »
     // sans garde-fou est une machine à expédier du courrier chez autrui.
-    const address =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-      request.headers.get('x-real-ip') ??
-      'inconnu'
+    const address = ipClient(request)
     if (tentatives.depasse(`renvoi:${address}:${me.username.toLowerCase()}`)) {
       return NextResponse.json({ error: t('api.tooManyResends') }, { status: 429 })
     }
@@ -273,10 +281,7 @@ export async function POST(request: Request) {
 
   // La clé de limitation mêle l'adresse et le pseudo : bloquer sur la seule
   // adresse pénaliserait tout un foyer derrière la même connexion.
-  const ip =
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    request.headers.get('x-real-ip') ??
-    'inconnu'
+  const ip = ipClient(request)
 
   if (tentatives.depasse(`${ip}:${username.toLowerCase()}`)) {
     return NextResponse.json({ error: t('api.tooManyAttempts') }, { status: 429 })
@@ -339,13 +344,18 @@ export async function POST(request: Request) {
     }
 
     if (body.action === 'signin') {
+      // Le quota par pseudo seul, en plus du précédent : voir `parPseudo`.
+      if (parPseudo.depasse(username.toLowerCase())) {
+        return NextResponse.json({ error: t('api.tooManyAttempts') }, { status: 429 })
+      }
       const result = await authenticate(username, password)
       if (!result.ok) {
         return NextResponse.json({ error: t(CLES_DE_REFUS[result.error]) }, { status: 401 })
       }
       await startSession(result.user.id)
-      // Une connexion réussie remet le compteur à zéro.
+      // Une connexion réussie remet les compteurs à zéro.
       tentatives.oublie(`${ip}:${username.toLowerCase()}`)
+      parPseudo.oublie(username.toLowerCase())
       return NextResponse.json({
         user: {
           userId: result.user.id,

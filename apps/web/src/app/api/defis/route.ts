@@ -24,6 +24,7 @@ import {
   respondToChallenge,
 } from '@coupparfait/db/friends'
 import { creerLimiteur } from '@/lib/server/limiteur.ts'
+import { ipClient } from '@/lib/server/ip.ts'
 import { getCurrentUser } from '@/lib/server/session.ts'
 import { prevenir } from '@/lib/server/push.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
@@ -129,10 +130,7 @@ export async function POST(request: Request) {
 
   // Seule action ouverte aux visiteurs : c'est le bout du lien d'invitation.
   if (body.action === 'guest') {
-    const ip =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-      request.headers.get('x-real-ip') ??
-      'inconnu'
+    const ip = ipClient(request)
 
     if (invitesVisiteurs.depasse(ip)) {
       return NextResponse.json({ error: t('api.tooManyInvites') }, { status: 429 })

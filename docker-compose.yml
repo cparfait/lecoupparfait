@@ -293,6 +293,11 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-coupparfait}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-coupparfait}
       AUTH_SESSION_DAYS: ${AUTH_SESSION_DAYS:-30}
+      # Nombre de proxys devant l'application — voir `.env.example`. Tous ses
+      # limiteurs en dépendent : il désigne le maillon de `X-Forwarded-For`
+      # qu'on croit. Transmis ici pour qu'un `TRUST_PROXY=2` posé dans `.env`
+      # (un CDN devant NPM) atteigne aussi ce conteneur, pas seulement `server`.
+      TRUST_PROXY: ${TRUST_PROXY:-1}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
       # Ici, elle ne sert plus qu'au rendu serveur : dernier recours des routes
       # `/api/*` quand `INTERNAL_SERVER_URL` manque. Ce que voit le navigateur
