@@ -84,7 +84,8 @@ clair n'est demandé que pour l'accueil et l'écran de partie.
 1. **Accueil visiteur.** Un seul appel principal, « Par où commencer ? »,
    qui mène soit à la première leçon, soit au test de niveau (six minutes,
    douze positions). En second : jouer tout de suite. Le défi du jour reste
-   visible et doit se jouer sans compte.
+   visible ; il demande un compte (une série se compte dans le temps), et la
+   carte doit le dire avant le clic, pas après.
 2. **Accueil connecté : « Ton chemin ».** Un seul fil conducteur qui fusionne
    palier et carrière. On y voit où j'en suis (mon palier parmi six :
    0-600, 600-1000, 1000-1300, 1300-1600, 1600-1800, 1800+), la prochaine
@@ -99,7 +100,9 @@ clair n'est demandé que pour l'accueil et l'écran de partie.
    l'ancienne entrée séparée. Le tout doit tenir sans défilement, ou presque,
    sur 390×844, avec un bouton « Commencer » fixe en bas.
 4. **Écran de partie.** L'échiquier est maximal. Les deux barres joueur
-   portent pendule, portrait du personnage et son nom, **sans** « Stockfish ».
+   portent pendule, portrait du personnage et son nom. Le moteur qui joue
+   (Maia ou Stockfish) reste lisible, car il change la façon de jouer, mais
+   en second plan.
    Viennent ensuite un ruban des coups et une barre d'actions : Options,
    Indice, Annuler, et Abandonner discret avec confirmation. Montre aussi
    l'état « mode commenté » : trois meilleures options, flèche sur
