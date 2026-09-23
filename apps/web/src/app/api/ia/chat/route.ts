@@ -17,8 +17,15 @@
  */
 
 import { NextResponse } from 'next/server'
-import { nettoyerEntetes, verifierCible } from '@/lib/ia/relais.ts'
+import {
+  CibleRefusee,
+  estRedirection,
+  nettoyerEntetes,
+  relayer,
+  verifierCible,
+} from '@/lib/ia/relais.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
+import { creerLimiteur } from '@/lib/server/limiteur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -29,8 +36,29 @@ const TAILLE_MAX = 256 * 1024
 /** Un fournisseur qui n'a pas répondu en deux minutes ne répondra pas. */
 const DELAI_MS = 120_000
 
+/**
+ * Trente questions par minute et par adresse.
+ *
+ * Par adresse et non par compte : l'assistant se branche sans compte (voir le
+ * README, « L'assistant IA — facultatif, avec ta clé »), et exiger une session
+ * ici l'aurait retiré aux visiteurs. Trente, c'est bien plus qu'une
+ * conversation, et bien moins qu'un relais détourné en proxy.
+ */
+const appels = creerLimiteur(60_000, 30)
+
 export async function POST(request: Request) {
   const t = tDeLaRequete(request)
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    request.headers.get('x-real-ip') ??
+    'inconnu'
+  if (appels.depasse(ip)) {
+    return NextResponse.json(
+      { error: t('api.tooManyRequests') },
+      { status: 429, headers: { 'Retry-After': String(appels.attente(ip)) } },
+    )
+  }
+
   const brut = await request.text()
   if (brut.length > TAILLE_MAX) {
     return NextResponse.json({ error: t('api.requestTooLarge') }, { status: 413 })
@@ -52,12 +80,21 @@ export async function POST(request: Request) {
   const minuterie = setTimeout(() => controleur.abort(), DELAI_MS)
 
   try {
-    const amont = await fetch(charge.url as string, {
+    const amont = await relayer(charge.url as string, {
       method: 'POST',
-      headers: Object.fromEntries(nettoyerEntetes(charge.headers)),
-      body: JSON.stringify(charge.body ?? {}),
+      entetes: nettoyerEntetes(charge.headers),
+      corps: JSON.stringify(charge.body ?? {}),
       signal: controleur.signal,
     })
+
+    // Une redirection n'est jamais suivie : sa cible n'a pas été contrôlée, et
+    // c'est par là qu'un serveur public renvoyait le relais vers le réseau
+    // interne. On la refuse sans en relayer le corps.
+    if (estRedirection(amont.status)) {
+      clearTimeout(minuterie)
+      await amont.body?.cancel()
+      return NextResponse.json({ error: t('prompt.relayRedirect') }, { status: 502 })
+    }
 
     if (!amont.ok) {
       // On relaie le texte du fournisseur tel quel : c'est lui qui sait dire si
@@ -96,6 +133,11 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     clearTimeout(minuterie)
+    // Le nom résolvait vers une adresse publique au contrôle, puis vers une
+    // privée à la connexion : c'est le rebinding DNS, arrêté par `relayer`.
+    if (error instanceof CibleRefusee) {
+      return NextResponse.json({ error: t('prompt.relayPrivateNetwork') }, { status: 400 })
+    }
     const interrompu = error instanceof Error && error.name === 'AbortError'
     return NextResponse.json(
       {

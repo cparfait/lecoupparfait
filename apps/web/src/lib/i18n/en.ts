@@ -6377,6 +6377,7 @@ export const en: Dictionary = {
     relayWrongProvider: 'This address does not match this provider.',
     relayUnknownHost: 'Host name not found.',
     relayPrivateNetwork: 'This address points to a private network.',
+    relayRedirect: 'The provider answered with a redirect, which the relay does not follow.',
   },
   meta: {
     rootTitle: 'Le Coup Parfait — learn, play, improve at chess',

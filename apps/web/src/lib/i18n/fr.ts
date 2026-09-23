@@ -6400,6 +6400,7 @@ export const fr = {
     relayWrongProvider: 'Cette adresse ne correspond pas à ce fournisseur.',
     relayUnknownHost: 'Nom d’hôte introuvable.',
     relayPrivateNetwork: 'Cette adresse pointe vers un réseau privé.',
+    relayRedirect: 'Le fournisseur a répondu par une redirection, que le relais ne suit pas.',
   },
   meta: {
     rootTitle: 'Le Coup Parfait — apprendre, jouer, progresser aux échecs',
