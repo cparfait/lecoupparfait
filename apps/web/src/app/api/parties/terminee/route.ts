@@ -31,10 +31,19 @@
 
 import { NextResponse } from 'next/server'
 import { Chess } from 'chess.js'
-import { botLevel, resultatImpose, START_FEN } from '@coupparfait/core'
+import {
+  botLevel,
+  categorieDeClassement,
+  resultatImpose,
+  speedCategory,
+  START_FEN,
+} from '@coupparfait/core'
 import { and, desc, eq, games, getDb, ratedIntents, sql, type RatedIntent } from '@coupparfait/db'
-import { applyGameResult, type RatingCategory } from '@coupparfait/db/ratings'
+import { applyGameResult } from '@coupparfait/db/ratings'
 import { creerLimiteur } from '@/lib/server/limiteur.ts'
+// Importées, et non écrites ici : `scripts/check-partie-terminee.mjs` teste
+// ces deux fonctions-là, et une copie locale pourrait s'en écarter en silence.
+import { memePosition, resultatVerifiable } from '@/lib/server/regle-partie-terminee.ts'
 import { getCurrentUser } from '@/lib/server/session.ts'
 
 export const runtime = 'nodejs'
@@ -211,8 +220,7 @@ export async function POST(request: Request) {
     La partie, elle, s'archive quand même, avec son vrai résultat : c'est son
     historique. Seul le drapeau `rated` tombe.
   */
-  const gagneeParLeJoueur = result !== '1/2-1/2' && (result === '1-0') === (camp === 'w')
-  const verifiable = impose !== null || !gagneeParLeJoueur
+  const verifiable = resultatVerifiable(impose, result, camp)
 
   /*
     Une partie classée part de la position initiale.
@@ -337,7 +345,14 @@ export async function POST(request: Request) {
       .values({
         slug: slug(),
         mode: String(body.mode),
-        speed: cadence(initialTime),
+        /*
+          La cadence selon la règle du cœur, `speedCategory` : temps initial
+          + 40 × incrément. Il y avait ici un barème à part, sur le seul temps
+          initial, si bien qu'un 2+3 était rangé bullet quand le serveur
+          temps réel le rangeait blitz — et classé dans l'un ou l'autre selon
+          l'adversaire. Ne pas en réécrire une copie locale.
+        */
+        speed: speedCategory({ initial: initialTime, increment }),
         rated: classee,
         whiteId: camp === 'w' ? user.userId : null,
         blackId: camp === 'b' ? user.userId : null,
@@ -405,7 +420,11 @@ export async function POST(request: Request) {
         // La catégorie vient de la cadence **annoncée**, qui a été comparée à
         // celle de la partie juste au-dessus : choisir sa catégorie une fois le
         // résultat connu n'est plus possible.
-        category: cadence(annonce!.initialTime) as RatingCategory,
+        // L'ultra-bullet n'a pas de classement à lui : il compte en bullet,
+        // comme au serveur temps réel.
+        category: categorieDeClassement(
+          speedCategory({ initial: annonce!.initialTime, increment: annonce!.increment }),
+        ),
         opponentRating: bareme!.elo,
         opponentDeviation: 100,
         score,
@@ -650,32 +669,4 @@ async function consommerAnnonce(userId: string): Promise<RatedIntent | null> {
     console.error('[parties/terminee] annonce illisible', error)
     return null
   }
-}
-
-/**
- * Deux FEN décrivent-elles la même position ?
- *
- * Les quatre premiers champs — pièces, trait, roques, prise en passant — et pas
- * les deux derniers : le compteur des cinquante coups et le numéro du coup
- * varient d'un moteur à l'autre pour une position identique, et les faire
- * entrer dans la comparaison reviendrait à refuser une position initiale
- * légitime parce qu'elle est écrite `0 1` d'un côté et `0 0` de l'autre.
- */
-function memePosition(a: string, b: string): boolean {
-  const champs = (fen: string) => fen.trim().split(/\s+/).slice(0, 4).join(' ')
-  return champs(a) === champs(b)
-}
-
-/**
- * Catégorie de cadence, pour la colonne `speed`.
- *
- * Mêmes seuils que le serveur temps réel. Elle ne sert ici qu'à l'affichage,
- * puisque rien de ce qu'on écrit n'est classé.
- */
-function cadence(initialTime: number): string {
-  if (initialTime === 0) return 'correspondence'
-  if (initialTime < 180) return 'bullet'
-  if (initialTime < 600) return 'blitz'
-  if (initialTime < 1800) return 'rapid'
-  return 'classical'
 }
