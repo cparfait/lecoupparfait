@@ -79,3 +79,7 @@ zzsccreens/
 # WebP par `npm run brand:images`. Ils pesaient 12 Mo dans le dépôt et dans
 # chaque image Docker, pour être affichés à quarante-huit pixels.
 data/brand-sources/
+
+# Copies de travail des agents Claude Code
+.claude/worktrees/
+.claude/settings.local.json
