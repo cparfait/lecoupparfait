@@ -31,16 +31,34 @@
 
 import { NextResponse } from 'next/server'
 import { Chess } from 'chess.js'
-import { botLevel, resultatImpose, START_FEN } from '@coupparfait/core'
+import {
+  botLevel,
+  categorieDeClassement,
+  resultatImpose,
+  speedCategory,
+  START_FEN,
+} from '@coupparfait/core'
 import { and, desc, eq, games, getDb, ratedIntents, sql, type RatedIntent } from '@coupparfait/db'
-import { applyGameResult, type RatingCategory } from '@coupparfait/db/ratings'
+import { applyGameResult } from '@coupparfait/db/ratings'
 import { creerLimiteur } from '@/lib/server/limiteur.ts'
+// Importées, et non écrites ici : `scripts/check-partie-terminee.mjs` teste
+// ces deux fonctions-là, et une copie locale pourrait s'en écarter en silence.
+import { memePosition, resultatVerifiable } from '@/lib/server/regle-partie-terminee.ts'
 import { getCurrentUser } from '@/lib/server/session.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const MAX_COUPS = 400
+
+/**
+ * Bornes du corps et du PGN. Quatre cents demi-coups en SAN, horloges
+ * comprises, tiennent dans une vingtaine de kilo-octets : les plafonds
+ * laissent une marge large, et ferment la porte à la colonne remplie de
+ * mégaoctets.
+ */
+const TAILLE_MAX_PGN = 64 * 1024
+const TAILLE_MAX_CORPS = 128 * 1024
 
 /**
  * Une partie classée compte au moins dix demi-coups, et une par minute.
@@ -92,10 +110,43 @@ export async function POST(request: Request) {
     /** Le joueur a demandé une partie classée avant de commencer. */
     classee?: boolean
   }
+  // Le corps est lu en texte pour être mesuré avant d'être analysé : une
+  // partie de quatre cents coups tient en quelques kilo-octets, et rien ne
+  // justifie d'en accepter des mégas.
+  const tailleAnnoncee = Number(request.headers.get('content-length') ?? 0)
+  if (tailleAnnoncee > TAILLE_MAX_CORPS) {
+    return NextResponse.json({ ok: false, raison: 'corps trop grand' }, { status: 413 })
+  }
   try {
-    body = await request.json()
+    const brut = await request.text()
+    if (brut.length > TAILLE_MAX_CORPS) {
+      return NextResponse.json({ ok: false, raison: 'corps trop grand' }, { status: 413 })
+    }
+    body = JSON.parse(brut) as typeof body
   } catch {
     return NextResponse.json({ ok: false, raison: 'corps illisible' }, { status: 400 })
+  }
+  if (!body || typeof body !== 'object') {
+    return NextResponse.json({ ok: false, raison: 'corps illisible' }, { status: 400 })
+  }
+
+  /*
+    Les champs texte, vérifiés avant usage.
+
+    Le type annoncé plus haut n'est qu'une promesse du client. `eco: 42`
+    atteignait `body.eco?.slice(0, 3)` et levait une exception, rendue en
+    500 ; un `pgn` de plusieurs mégaoctets s'écrivait tel quel en base. Un
+    champ du mauvais type devient `null` — ce sont des informations
+    d'affichage, la partie reste valable sans elles —, un PGN trop long est
+    refusé.
+  */
+  const texte = (valeur: unknown, max: number) =>
+    typeof valeur === 'string' ? valeur.slice(0, max) : null
+  if (typeof body.pgn === 'string' && body.pgn.length > TAILLE_MAX_PGN) {
+    return NextResponse.json({ ok: false, raison: 'pgn trop long' }, { status: 400 })
+  }
+  if (body.startFen != null && typeof body.startFen !== 'string') {
+    return NextResponse.json({ ok: false, raison: 'position de départ invalide' }, { status: 400 })
   }
 
   const moves = Array.isArray(body.moves) ? body.moves.filter((m) => typeof m === 'string') : []
@@ -116,7 +167,15 @@ export async function POST(request: Request) {
   // envers le joueur mais envers le code : une liste tronquée ou décalée
   // produirait un PGN qui ne se rejoue pas, et l'on ne s'en apercevrait qu'en
   // essayant de l'analyser, des semaines plus tard.
-  const echiquier = new Chess(body.startFen || undefined)
+  //
+  // La FEN de départ se lit dans le même esprit : `new Chess` lève sur une
+  // FEN malformée, et cette ligne, hors de tout `try`, rendait un 500.
+  let echiquier: Chess
+  try {
+    echiquier = new Chess(body.startFen || undefined)
+  } catch {
+    return NextResponse.json({ ok: false, raison: 'position de départ invalide' }, { status: 400 })
+  }
   for (const san of moves) {
     try {
       echiquier.move(san)
@@ -126,7 +185,7 @@ export async function POST(request: Request) {
   }
 
   const camp = body.playerColor === 'b' ? 'b' : 'w'
-  const adversaire = (body.opponentName ?? 'Ordinateur').slice(0, 40)
+  const adversaire = texte(body.opponentName, 40) ?? 'Ordinateur'
   // Une date illisible vaut « maintenant » : la colonne est `notNull`, et une
   // partie sans début connu reste une partie.
   const annonceeLe = body.startedAt ? new Date(body.startedAt) : new Date()
@@ -161,8 +220,7 @@ export async function POST(request: Request) {
     La partie, elle, s'archive quand même, avec son vrai résultat : c'est son
     historique. Seul le drapeau `rated` tombe.
   */
-  const gagneeParLeJoueur = result !== '1/2-1/2' && (result === '1-0') === (camp === 'w')
-  const verifiable = impose !== null || !gagneeParLeJoueur
+  const verifiable = resultatVerifiable(impose, result, camp)
 
   /*
     Une partie classée part de la position initiale.
@@ -194,8 +252,11 @@ export async function POST(request: Request) {
   // cote annoncée de l'adversaire, qui doivent parler du même palier.
   const bareme = niveau === null ? null : botLevel(niveau)
   const niveauRetenu = bareme?.level ?? null
-  const initialTime = Math.max(0, Math.round(body.initialTime ?? 0))
-  const increment = Math.max(0, Math.round(body.increment ?? 0))
+  // Un nombre, ou zéro : `"abc"` donnait `NaN`, que la colonne entière refusait.
+  const duree = (valeur: unknown) =>
+    typeof valeur === 'number' && Number.isFinite(valeur) ? Math.max(0, Math.round(valeur)) : 0
+  const initialTime = duree(body.initialTime)
+  const increment = duree(body.increment)
 
   /*
     L'annonce faite avant la partie, et consommée ici.
@@ -284,7 +345,14 @@ export async function POST(request: Request) {
       .values({
         slug: slug(),
         mode: String(body.mode),
-        speed: cadence(initialTime),
+        /*
+          La cadence selon la règle du cœur, `speedCategory` : temps initial
+          + 40 × incrément. Il y avait ici un barème à part, sur le seul temps
+          initial, si bien qu'un 2+3 était rangé bullet quand le serveur
+          temps réel le rangeait blitz — et classé dans l'un ou l'autre selon
+          l'adversaire. Ne pas en réécrire une copie locale.
+        */
+        speed: speedCategory({ initial: initialTime, increment }),
         rated: classee,
         whiteId: camp === 'w' ? user.userId : null,
         blackId: camp === 'b' ? user.userId : null,
@@ -302,12 +370,12 @@ export async function POST(request: Request) {
         increment,
         startFen: body.startFen || null,
         moves: moves.join(' '),
-        pgn: typeof body.pgn === 'string' ? body.pgn : null,
-        status: (body.status ?? 'finished').slice(0, 24),
+        pgn: texte(body.pgn, TAILLE_MAX_PGN),
+        status: texte(body.status, 24) ?? 'finished',
         result,
         winner: result === '1-0' ? 'w' : result === '0-1' ? 'b' : null,
-        eco: body.eco?.slice(0, 3) ?? null,
-        opening: body.opening?.slice(0, 120) ?? null,
+        eco: texte(body.eco, 3),
+        opening: texte(body.opening, 120),
         // L'heure de l'annonce prime sur celle du client quand il y en a une :
         // c'est la seule des deux qu'on ait vue passer.
         startedAt: classee && annonce ? annonce.openedAt : debut,
@@ -352,7 +420,11 @@ export async function POST(request: Request) {
         // La catégorie vient de la cadence **annoncée**, qui a été comparée à
         // celle de la partie juste au-dessus : choisir sa catégorie une fois le
         // résultat connu n'est plus possible.
-        category: cadence(annonce!.initialTime) as RatingCategory,
+        // L'ultra-bullet n'a pas de classement à lui : il compte en bullet,
+        // comme au serveur temps réel.
+        category: categorieDeClassement(
+          speedCategory({ initial: annonce!.initialTime, increment: annonce!.increment }),
+        ),
         opponentRating: bareme!.elo,
         opponentDeviation: 100,
         score,
@@ -597,32 +669,4 @@ async function consommerAnnonce(userId: string): Promise<RatedIntent | null> {
     console.error('[parties/terminee] annonce illisible', error)
     return null
   }
-}
-
-/**
- * Deux FEN décrivent-elles la même position ?
- *
- * Les quatre premiers champs — pièces, trait, roques, prise en passant — et pas
- * les deux derniers : le compteur des cinquante coups et le numéro du coup
- * varient d'un moteur à l'autre pour une position identique, et les faire
- * entrer dans la comparaison reviendrait à refuser une position initiale
- * légitime parce qu'elle est écrite `0 1` d'un côté et `0 0` de l'autre.
- */
-function memePosition(a: string, b: string): boolean {
-  const champs = (fen: string) => fen.trim().split(/\s+/).slice(0, 4).join(' ')
-  return champs(a) === champs(b)
-}
-
-/**
- * Catégorie de cadence, pour la colonne `speed`.
- *
- * Mêmes seuils que le serveur temps réel. Elle ne sert ici qu'à l'affichage,
- * puisque rien de ce qu'on écrit n'est classé.
- */
-function cadence(initialTime: number): string {
-  if (initialTime === 0) return 'correspondence'
-  if (initialTime < 180) return 'bullet'
-  if (initialTime < 600) return 'blitz'
-  if (initialTime < 1800) return 'rapid'
-  return 'classical'
 }

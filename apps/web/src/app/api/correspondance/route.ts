@@ -33,6 +33,7 @@ const REASONS: Record<string, string> = {
   illegal: 'Coup illégal.',
   finished: 'Cette partie est terminée.',
   corrompue: 'Cette partie ne se relit plus : ses coups enregistrés sont illisibles.',
+  conflict: 'La partie a changé entre-temps. Recharge-la avant de rejouer.',
 }
 
 export async function GET(request: Request) {
@@ -105,7 +106,12 @@ export async function POST(request: Request) {
         promotion: body.promotion,
       })
       if (!result.ok) {
-        return NextResponse.json({ error: REASONS[result.reason] }, { status: 400 })
+        // 409 pour le conflit : la requête n'était pas fausse, elle est
+        // arrivée après une autre. Le client doit relire, pas corriger.
+        return NextResponse.json(
+          { error: REASONS[result.reason] },
+          { status: result.reason === 'conflict' ? 409 : 400 },
+        )
       }
 
       /*
@@ -134,8 +140,13 @@ export async function POST(request: Request) {
     }
 
     case 'resign': {
-      const done = await resignCorrespondence(me.userId, String(body.slug ?? ''))
-      if (!done) return NextResponse.json({ error: t('api.gameNotFound') }, { status: 404 })
+      const issue = await resignCorrespondence(me.userId, String(body.slug ?? ''))
+      if (issue === 'unknown') {
+        return NextResponse.json({ error: t('api.gameNotFound') }, { status: 404 })
+      }
+      if (issue === 'conflict') {
+        return NextResponse.json({ error: REASONS.conflict }, { status: 409 })
+      }
       return NextResponse.json({ ok: true })
     }
 

@@ -195,9 +195,16 @@ export type PlayResult =
   | { ok: true; game: CorrespondenceGame }
   | {
       ok: false
-      /** `corrompue` : les coups enregistrés ne se rejouent plus. Voir `playCorrespondence`. */
-      reason: 'unknown' | 'notYourTurn' | 'illegal' | 'finished' | 'corrompue'
+      /**
+       * `corrompue` : les coups enregistrés ne se rejouent plus. `conflict` :
+       * la partie a changé entre la lecture et l'écriture — un abandon ou un
+       * autre coup est passé entre-temps. Voir `playCorrespondence`.
+       */
+      reason: 'unknown' | 'notYourTurn' | 'illegal' | 'finished' | 'corrompue' | 'conflict'
     }
+
+/** Issue d'un abandon. `conflict` : la partie a changé sous nos pieds. */
+export type ResignResult = 'ok' | 'unknown' | 'conflict'
 
 /**
  * Joue un coup.
@@ -275,7 +282,7 @@ export async function playCorrespondence(
               : 'draw'
 
   const now = new Date()
-  await db
+  const ecrites = await db
     .update(games)
     .set({
       moves: next.join(' '),
@@ -288,17 +295,28 @@ export async function playCorrespondence(
       endedAt: over ? now : null,
       pgn: over ? board.pgn() : null,
     })
-    .where(eq(games.id, row.id))
+    /*
+      Écriture optimiste : on ne remplace que la partie **telle qu'on l'a lue**.
+
+      Le filtre ne portait que sur `id`. Un abandon arrivé entre notre lecture
+      et cette ligne était alors écrasé — `result` repassait à `*`, la partie
+      ressuscitait — et deux coups envoyés ensemble s'écrivaient l'un sur
+      l'autre. Avec `result = '*'` et `moves` inchangés, le second arrivé ne
+      modifie aucune ligne, et on le lui dit.
+    */
+    .where(and(eq(games.id, row.id), eq(games.result, '*'), eq(games.moves, row.moves)))
+    .returning({ id: games.id })
+  if (ecrites.length === 0) return { ok: false, reason: 'conflict' }
 
   const updated = await getCorrespondence(userId, slug)
   return updated ? { ok: true, game: updated } : { ok: false, reason: 'unknown' }
 }
 
 /** Abandonner : le seul moyen de sortir d'une partie qui traîne. */
-export async function resignCorrespondence(userId: string, slug: string): Promise<boolean> {
+export async function resignCorrespondence(userId: string, slug: string): Promise<ResignResult> {
   const db = getDb()
   const [row] = await db
-    .select({ id: games.id, whiteId: games.whiteId, result: games.result })
+    .select({ id: games.id, whiteId: games.whiteId, result: games.result, moves: games.moves })
     .from(games)
     .where(
       and(
@@ -309,10 +327,13 @@ export async function resignCorrespondence(userId: string, slug: string): Promis
     )
     .limit(1)
 
-  if (!row || row.result !== '*') return false
+  if (!row || row.result !== '*') return 'unknown'
   const iAmWhite = row.whiteId === userId
 
-  await db
+  // Même garde que pour un coup : l'abandon ne vaut que pour la position qu'on
+  // a lue. Un mat joué entre-temps par l'adversaire ne se change pas en
+  // abandon, et le joueur l'apprend au lieu de croire avoir abandonné.
+  const ecrites = await db
     .update(games)
     .set({
       status: 'resigned',
@@ -320,6 +341,7 @@ export async function resignCorrespondence(userId: string, slug: string): Promis
       winner: iAmWhite ? 'b' : 'w',
       endedAt: new Date(),
     })
-    .where(eq(games.id, row.id))
-  return true
+    .where(and(eq(games.id, row.id), eq(games.result, '*'), eq(games.moves, row.moves)))
+    .returning({ id: games.id })
+  return ecrites.length === 0 ? 'conflict' : 'ok'
 }

@@ -281,6 +281,21 @@ que le fichier manque et que `try_files` est retombé sur son `=503` de secours.
 
 ---
 
+## L'adresse des joueurs derrière le proxy
+
+Les limites de rythme (connexion, invitations, assistant IA, analyse) comptent
+par adresse. Cette adresse est lue dans `X-Forwarded-For` **depuis la droite** :
+`TRUST_PROXY` dit combien de proxys de confiance la requête a traversés, et le
+maillon retenu est celui qu'a posé le plus lointain d'entre eux. Le premier
+maillon, que le client écrit lui-même, n'est jamais cru.
+
+Avec Nginx Proxy Manager seul, `1` — la valeur par défaut des deux
+conteneurs. **Si l'on ajoute un CDN ou un répartiteur devant NPM**, il faut
+passer à `TRUST_PROXY=2` dans `.env` : sans quoi tous les joueurs apparaissent
+avec l'adresse du CDN et se partagent un seul quota.
+
+---
+
 ## Ce qui n'est pas résolu
 
 **`server` coupe les parties en cours.** Les salons vivent en mémoire. Le

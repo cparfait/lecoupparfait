@@ -17,8 +17,10 @@
  *     joueur est accepté au classement.
  *
  * Ce fichier ne teste pas la route, il teste `resultatImpose()`, la fonction
- * du cœur sur laquelle elle repose, plus la règle du point 2 reproduite ici à
- * l'identique. La route elle-même se vérifie par un `curl` — voir le journal
+ * du cœur sur laquelle elle repose, plus la règle du point 2 et le barème de
+ * cadence, importés des mêmes modules qu'elle (`lib/server/
+ * regle-partie-terminee.ts`, `speedCategory` du cœur). La route elle-même se
+ * vérifie par un `curl` — voir le journal
  * de `docs/CHANTIER-AUDIT.md`.
  *
  * Usage :  node --experimental-strip-types scripts/check-partie-terminee.mjs
@@ -26,7 +28,10 @@
 
 const { Chess } = await import('chess.js')
 const { resultatImpose } = await import('../packages/core/src/pgn.ts')
-const { START_FEN } = await import('../packages/core/src/index.ts')
+const { START_FEN, speedCategory, categorieDeClassement } =
+  await import('../packages/core/src/index.ts')
+const { memePosition, resultatVerifiable } =
+  await import('../apps/web/src/lib/server/regle-partie-terminee.ts')
 
 let checks = 0
 let failures = 0
@@ -49,7 +54,12 @@ function apres(coups, fen) {
 }
 
 /**
- * La décision de la route, reproduite ligne pour ligne.
+ * La décision de la route, assemblée à partir de **ses** règles.
+ *
+ * `resultatVerifiable` et `memePosition` sont importées du module que la
+ * route importe elle-même : elles étaient autrefois recopiées ici, et la
+ * copie pouvait s'écarter de l'original sans que ce contrôle le voie. Seul
+ * l'enchaînement — refus, puis classée ou archivée — reste écrit ici.
  *
  * Rend `'refusé'`, `'classée'` ou `'archivée'` — ce troisième cas étant la
  * partie qu'on garde dans l'historique mais qu'on ne compte pas au classement.
@@ -57,16 +67,9 @@ function apres(coups, fen) {
 function decision(echiquier, declare, camp, startFen = null) {
   const impose = resultatImpose(echiquier)
   if (impose && impose !== declare) return 'refusé'
-  const gagneeParLeJoueur = declare !== '1/2-1/2' && (declare === '1-0') === (camp === 'w')
-  const verifiable = impose !== null || !gagneeParLeJoueur
+  const verifiable = resultatVerifiable(impose, declare, camp)
   const depuisLeDebut = startFen ? memePosition(startFen, START_FEN) : true
   return verifiable && depuisLeDebut ? 'classée' : 'archivée'
-}
-
-/** `memePosition` de la route : les quatre premiers champs, pas les compteurs. */
-function memePosition(a, b) {
-  const champs = (fen) => fen.trim().split(/\s+/).slice(0, 4).join(' ')
-  return champs(a) === champs(b)
 }
 
 console.log('\n♟  Ce que la position impose\n')
@@ -152,6 +155,24 @@ check(
     'classée',
 )
 check('pas de startFen du tout → classée', decision(matDesNoirs, '1-0', 'w', null) === 'classée')
+
+console.log('\n♟  La cadence d’une partie contre l’ordinateur\n')
+
+/*
+  La route rangeait la partie selon le seul temps initial. Un 2+3 dure en
+  moyenne 2 min + 40 × 3 s = 4 min : du blitz pour le serveur temps réel, du
+  bullet pour elle. La même cadence comptait ainsi dans deux classements.
+*/
+check('2+3 est du blitz, pas du bullet', speedCategory({ initial: 120, increment: 3 }) === 'blitz')
+check(
+  '5+10 est du rapide, pas du blitz',
+  speedCategory({ initial: 300, increment: 10 }) === 'rapid',
+)
+check('10+0 reste du rapide', speedCategory({ initial: 600, increment: 0 }) === 'rapid')
+check(
+  'l’ultra-bullet compte au classement bullet',
+  categorieDeClassement(speedCategory({ initial: 15, increment: 0 })) === 'bullet',
+)
 
 console.log(
   failures === 0

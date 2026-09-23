@@ -53,7 +53,8 @@ export function creerLimiteur(fenetreMs: number, maximum: number): Limiteur {
 }
 
 /**
- * `TRUST_PROXY=1` : lire l'adresse du client dans `X-Forwarded-For`.
+ * `TRUST_PROXY=<n>` : lire l'adresse du client dans `X-Forwarded-For`, en
+ * comptant `n` proxys de confiance devant ce serveur (`1` le plus souvent).
  *
  * Sans cette variable, l'en-tête est **ignoré**, et c'est le bon défaut : un
  * en-tête s'écrit à la main, et le croire sur parole rendrait le limiteur
@@ -67,26 +68,52 @@ export function creerLimiteur(fenetreMs: number, maximum: number): Limiteur {
  * une seule adresse, celle du conteneur web, et trente par minute se partagent
  * entre tous les joueurs. Voir l'avertissement au démarrage.
  */
-const CONFIANCE_PROXY = process.env.TRUST_PROXY === '1'
+const RELAIS_DE_CONFIANCE = relaisDeConfiance(process.env.TRUST_PROXY)
+
+/** `TRUST_PROXY` lu comme un nombre de proxys ; absent ou illisible, zéro. */
+export function relaisDeConfiance(valeur: string | undefined): number {
+  const lu = Number.parseInt(valeur ?? '', 10)
+  return Number.isFinite(lu) && lu > 0 ? lu : 0
+}
 
 let proxySignale = false
 
 /**
- * L'adresse de l'appelant, telle qu'on accepte de la croire.
+ * Le maillon de `X-Forwarded-For` qu'on accepte de croire, ou `null`.
  *
- * Le premier maillon de `X-Forwarded-For` est le client d'origine ; les
- * suivants sont les relais traversés.
+ * **Pas le premier.** Le premier est celui que le client écrit lui-même :
+ * un proxy n'efface pas l'en-tête reçu, il *ajoute* à droite l'adresse qu'il
+ * voit. Lire le premier, c'était laisser `curl -H 'X-Forwarded-For: …'`
+ * choisir son compteur, et le limiteur ne limitait plus rien. On compte donc
+ * depuis la droite : avec `relais` proxys de confiance, l'adresse du client
+ * est le maillon `longueur − relais`. Une chaîne trop courte donne le plus à
+ * gauche, qui reste une adresse vue par l'un d'eux.
+ *
+ * Jumeau de `ipClient` dans `apps/web/src/lib/server/ip.ts`.
  */
+export function maillonDeConfiance(
+  transmise: string | string[] | undefined,
+  relais: number,
+): string | null {
+  if (relais <= 0 || transmise === undefined) return null
+  const maillons = (Array.isArray(transmise) ? transmise.join(',') : transmise)
+    .split(',')
+    .map((maillon) => maillon.trim())
+    .filter(Boolean)
+  if (maillons.length === 0) return null
+  return maillons[Math.max(0, maillons.length - relais)] ?? null
+}
+
+/** L'adresse de l'appelant, telle qu'on accepte de la croire. */
 export function adresseDe(request: IncomingMessage): string {
   const transmise = request.headers['x-forwarded-for']
-  const premiere = (Array.isArray(transmise) ? transmise[0] : transmise)?.split(',')[0]?.trim()
+  const maillon = maillonDeConfiance(transmise, RELAIS_DE_CONFIANCE)
+  if (maillon) return maillon
 
-  if (CONFIANCE_PROXY && premiere) return premiere
-
-  if (premiere && !proxySignale) {
+  if (transmise && !proxySignale) {
     proxySignale = true
     console.warn(
-      '[limites] X-Forwarded-For reçu mais TRUST_PROXY n’est pas à 1 : toutes ces requêtes ' +
+      '[limites] X-Forwarded-For reçu mais TRUST_PROXY n’est pas posé : toutes ces requêtes ' +
         'comptent pour une seule adresse. Pose TRUST_PROXY=1 s’il y a un relais devant ce serveur.',
     )
   }
