@@ -264,3 +264,69 @@ contournable par L2, D3, partiel, et le « reste 1 » (L5).
     partie, aides).
 20. Charger les langues à la demande et généraliser `useFetchJson`.
 21. Tests de routes web (`terminee`, `auth`, `ia/chat`) avec `node:test`.
+
+---
+
+## 6. Suivi — branche `audit/corrections-2026-09`
+
+Tout ce qui suit est commité sur la branche, un commit par symptôme. Après
+chaque fusion, typecheck, tests, prettier et eslint passent.
+
+### Fait
+
+| Point            | Correction                                                                                                                                                  |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| L1               | Relais IA : redirections refusées, IP épinglée, IPv6 normalisée, limiteur (`scripts/check-relais-ia.mjs`)                                                   |
+| L2               | `ipClient` / `adresseDe` unique selon `TRUST_PROXY`, quota de connexion par pseudo seul                                                                     |
+| L4               | Correspondance : écriture conditionnelle, plus de résurrection                                                                                              |
+| L5               | Un seul barème de cadence ; `check-partie-terminee` importe la vraie règle                                                                                  |
+| L6               | `terminee` : 400 sur FEN invalide, types et tailles bornés                                                                                                  |
+| L7               | Salons plafonnés (`MAX_ROOMS`, `MAX_ROOMS_PER_IP`), `rated` réservé à un hôte connecté                                                                      |
+| L9               | `/api/import` limité                                                                                                                                        |
+| N1               | `botLevelAvecStyle` : le style imposé est celui qui joue                                                                                                    |
+| N2               | Carrière de 100 à 1 850 ; le ch. 12 garde la force du 11 (voir « À trancher »)                                                                              |
+| N3, N11, N13     | « Vingt-cinq » purgé, nombres interpolés, `check-lessons` compare README et menu au réel                                                                    |
+| N5               | Une seule fonction d'adversaire conseillé (`suggestedLevel`)                                                                                                |
+| N6               | `ratingTitle` aligné sur les tranches du défi, par clés i18n                                                                                                |
+| N8, N9, N10      | Coup de main d'un cran, plancher de performance à 100, thèmes de puzzle des chapitres 5, 7 et 11                                                            |
+| F1               | README : deux langues complètes, dix-huit partielles                                                                                                        |
+| F2               | README corrigé : le défi du jour demande un compte, par choix (4cadff0)                                                                                     |
+| F5               | Test de niveau dans la rubrique Apprendre                                                                                                                   |
+| F7               | `check-textes-durs` corrigé sous Windows (84 textes vus au lieu de 29), tous traités                                                                        |
+| F8               | État mort retiré de l'analyse                                                                                                                               |
+| D5, D6           | Paliers en grille sans orphelin ; abandon contre l'ordinateur confirmé                                                                                      |
+| Signalé en cours | Rappel du défi du jour envoyé à qui l'avait fait : défi résolu après une erreur non compté, envoi perdu à la fermeture, défi abandonné non noté comme tenté |
+
+### Laissé volontairement
+
+- **D3** (six onglets) et **D7** (« Stockfish · niveau N ») : choix
+  documentés dans le code (`navigation.ts`, `jouer/ordinateur/page.tsx`).
+- **D1, D2, D4, F3, F4, F6** : ce sont des changements de parcours ou de
+  langage visuel. Ils attendent les maquettes de Claude Design
+  (`PROMPT-CLAUDE-DESIGN.md`).
+
+### Ouvert
+
+- **L3** : les coups du bot ne sont pas vérifiés côté serveur ; limite
+  structurelle.
+- **L8, L10 à L12** : dette (dictionnaires chargés à la demande, tests de
+  routes, découpage de `jouer/ordinateur/page.tsx`, `useFetchJson`).
+- **N4** : échelons supplémentaires vers 450 et 800 ; il faut Stockfish pour
+  étalonner.
+- **N12** : leçons de calcul, de défense et de finales de tours ; c'est un
+  travail de rédaction.
+- **Lot 5** : « Mes erreurs à revoir », appariement rapide.
+- Textes que le contrôle ne voit pas encore : `FlammeSerie`, les onglets
+  « Rapide » et « Classique » du classement, « j restants » en correspondance,
+  les noms de rangs de carrière. Les messages d'erreur de la correspondance et
+  des salons sont en français, comme leurs voisins.
+
+### À trancher
+
+- **Chapitre 12** à 1 850 comme le 11 (distinct par l'absence d'aide) ou à
+  2 050 ?
+- **Profil** : « Maître », « Maître International » et « Grand Maître » ont
+  disparu, et 2 100 et plus s'appelle « Expert ». Faut-il garder une tranche
+  au-dessus ?
+- **Chapitre 5** ne relie que la leçon « mat dame et roi », pas « tour et
+  roi ».
