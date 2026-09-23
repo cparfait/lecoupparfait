@@ -59,7 +59,7 @@ export default function PlusPage() {
                 icon={entree.icon}
                 teinte={section.teinte}
                 titre={t(entree.labelKey)}
-                phrase={entree.hintKey ? t(entree.hintKey) : undefined}
+                phrase={entree.hintKey ? t(entree.hintKey, entree.hintVars) : undefined}
                 compacte
               />
             ))}

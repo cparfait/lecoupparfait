@@ -83,7 +83,7 @@ export const tr: Traduction = {
     leaderboardHint: 'burada kim oynuyor ve ne seviyede',
     friendsHint: 'listen ve gelen meydan okumalar',
     statsHint: 'oyunlarının oyununa dair söyledikleri',
-    lessonsHint: '48 ders, sıfırdan repertuvara',
+    lessonsHint: '{n} ders, sıfırdan repertuvara',
     palierHint: 'senin seviyende sana puan kaybettiren şeyler',
     principesHint: 'her hamleden önceki hatırlatma ve ilkeler',
     seanceHint: 'duyurulmuş bir tema, seviyene uygun bir rakip',

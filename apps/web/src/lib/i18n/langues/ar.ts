@@ -89,7 +89,7 @@ export const ar: Traduction = {
     leaderboardHint: 'من يلعب هنا، وبأي مستوى',
     friendsHint: 'قائمتك والتحديات الواردة',
     statsHint: 'ما تقوله مبارياتك عن لعبك',
-    lessonsHint: '48 درسًا، من الصفر إلى ذخيرة افتتاحية',
+    lessonsHint: '{n} درسًا، من الصفر إلى ذخيرة افتتاحية',
     palierHint: 'ما يكلّفك نقاطًا في مستواك',
     principesHint: 'تذكِرة ما قبل كل نقلة، والمبادئ',
     seanceHint: 'موضوع معلَن، وخصم في مستواك',

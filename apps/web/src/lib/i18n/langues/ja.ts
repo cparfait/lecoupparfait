@@ -86,7 +86,7 @@ export const ja: Traduction = {
     leaderboardHint: '誰がどのくらいの強さで指しているか',
     friendsHint: 'フレンド一覧と届いた挑戦',
     statsHint: 'あなたの対局が語ること',
-    lessonsHint: '48レッスン、ゼロからレパートリーまで',
+    lessonsHint: '{n}レッスン、ゼロからレパートリーまで',
     palierHint: 'いまのレベルで点を落としている原因',
     principesHint: '一手ごとのチェックリストと原則',
     seanceHint: '事前に告げられたテーマ、同じくらいの相手',

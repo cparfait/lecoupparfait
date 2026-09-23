@@ -436,7 +436,7 @@ function MenuSection({
               <span className="block text-sm font-medium">{t(entree.labelKey)}</span>
               {entree.hintKey && (
                 <span className="block text-[12px] leading-snug text-faint">
-                  {t(entree.hintKey)}
+                  {t(entree.hintKey, entree.hintVars)}
                 </span>
               )}
             </span>

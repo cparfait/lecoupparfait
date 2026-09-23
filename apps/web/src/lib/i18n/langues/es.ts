@@ -86,7 +86,7 @@ export const es: Traduction = {
     leaderboardHint: 'quién juega aquí, y a qué nivel',
     friendsHint: 'tu agenda y los retos recibidos',
     statsHint: 'lo que tus partidas dicen de tu juego',
-    lessonsHint: '48 lecciones, de cero al repertorio',
+    lessonsHint: '{n} lecciones, de cero al repertorio',
     palierHint: 'lo que te cuesta puntos a tu nivel',
     principesHint: 'el recordatorio de antes de cada jugada, y los principios',
     seanceHint: 'un tema anunciado, un rival a tu nivel',

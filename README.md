@@ -16,12 +16,12 @@ eux — fourchette, clouage, mat du couloir — et il te le dit à voix haute.
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Jouer**          | 18 niveaux d'ordinateur (100 → 3200 Elo) avec 7 personnalités distinctes · parties entre amis en temps réel via un simple lien · partie locale à deux sur un écran                                                                      |
 | **Mode commenté**  | après **chaque** coup, les trois meilleures options avec leur évaluation et la raison de chacune, le coup proposé fléché sur l'échiquier, et l'explication lue à voix haute — réécoutable                                               |
-| **Apprendre**      | 48 leçons guidées en 9 chapitres, de « voici un échiquier » aux pièges d'ouverture tendus et déjoués, avec un coach qui parle et un échiquier interactif                                                                                |
+| **Apprendre**      | 57 leçons guidées en 9 chapitres, de « voici un échiquier » aux pièges d'ouverture tendus et déjoués, avec un coach qui parle et un échiquier interactif                                                                                |
 | **Ton palier**     | le programme rangé non plus par chapitres mais par **ce qui coûte des points à ton niveau** : six paliers, quatre ou cinq leviers chacun, et les motifs que tu rates vraiment — mesurés sur tes puzzles                                 |
 | **Test de niveau** | douze positions notées, en escalier adaptatif : un niveau estimé en six minutes, sans toucher à aucun classement                                                                                                                        |
 | **Séances**        | une partie contre un adversaire calibré sur ton palier, avec un **thème annoncé avant de commencer** et un bilan qui compte où ce thème est apparu dans ta partie                                                                       |
 | **Principes**      | 38 principes de conduite pour les trois phases, **chacun avec son exception**, et un mémo de quatre questions à se poser avant chaque coup — affichable pendant la partie                                                               |
-| **Écouter**        | les 328 étapes du programme lues à voix haute et enchaînées tout seul, l'échiquier qui suit : pour réviser sans les mains                                                                                                               |
+| **Écouter**        | les 457 étapes du programme lues à voix haute et enchaînées tout seul, l'échiquier qui suit : pour réviser sans les mains                                                                                                               |
 | **S'entraîner**    | jusqu'à 6 057 356 puzzles tactiques notés et étiquetés, avec classement Glicko-2 dédié                                                                                                                                                  |
 | **Finales**        | 3 568 positions classées en 8 familles : on donne l'objectif — gagner ou tenir la nulle — et l'ordinateur défend au mieux                                                                                                               |
 | **Analyser**       | Stockfish 19 natif côté serveur · chaque coup classé (brillant → gaffe), meilleur coup fléché, **explication rédigée**, puis « et maintenant ? » : la phase la plus faible et trois puzzles sur le motif exact qui a coûté la partie    |
@@ -49,7 +49,7 @@ tout le reste est en flux normal, et le seul attribut `dir` suffit à retourner
 la mise en page.
 
 Une distinction compte, et l'application la tient partout : l'**interface** se
-traduit, le **contenu** se rédige. Les 48 leçons, les explications de coups, les
+traduit, le **contenu** se rédige. Les 57 leçons, les explications de coups, les
 définitions de motifs et les fiches d'ouverture n'existent qu'en français et en
 anglais ; toute autre langue les lit en anglais. Mélanger les deux donnerait un
 écran en polonais où le coach commenterait des phrases qui n'existent pas.
@@ -180,7 +180,7 @@ npm run setup
 Elle crée le fichier `.env` **avec des secrets engendrés aléatoirement**, puis
 télécharge les jeux de pièces et bruitages, le moteur Stockfish WebAssembly,
 l'index des 3 810 ouvertures, les 3 568 finales, et engendre les icônes. Elle
-finit par valider les 328 étapes de leçons. Chaque étape est facultative :
+finit par valider les 457 étapes de leçons. Chaque étape est facultative :
 si l'une échoue, l'application démarre quand même, avec cette ressource en
 moins.
 
@@ -441,7 +441,7 @@ positions de contrôle, y compris les attaques en rayon X.
 | `npm run dev:web` / `npm run dev:server` | n'en démarrer qu'un seul                                                |
 | `npm run build`                          | construction de production                                              |
 | `npm run typecheck`                      | vérification des types sur tout le dépôt                                |
-| `npm run check:lessons`                  | **valide les 149 étapes de leçons** : positions légales, coups jouables |
+| `npm run check:lessons`                  | **valide les 457 étapes de leçons** : positions légales, coups jouables |
 | `npm run test:realtime`                  | test de bout en bout du serveur de parties                              |
 | `npm run db:push`                        | applique le schéma à PostgreSQL, en développement                       |
 | `npm run db:generate`                    | fabrique un fichier de migration à partir du schéma                     |

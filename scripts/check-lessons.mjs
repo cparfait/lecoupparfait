@@ -218,6 +218,40 @@ for (const chapter of CHAPTERS) {
   }
 }
 
+/*
+  Les nombres annoncés doivent être les vrais.
+
+  Le README a annoncé 48 leçons et 328 étapes (et 149 un peu plus bas) quand
+  le programme en comptait 57 et 457, et l'interface disait « 48 leçons » sous
+  le menu. Personne ne recompte un programme à la main : c'est à ce contrôle
+  de le faire, puisqu'il est le seul à tout parcourir.
+*/
+const { readFileSync } = await import('node:fs')
+const { NOMBRE_DE_LECONS } = await import('../apps/web/src/lib/lessons/compte.ts')
+const lecons = CHAPTERS.reduce((total, chapter) => total + chapter.lessons.length, 0)
+
+if (NOMBRE_DE_LECONS !== lecons) {
+  errors++
+  console.error(
+    `  ✗ lessons/compte.ts annonce ${NOMBRE_DE_LECONS} leçons, le programme en compte ${lecons}`,
+  )
+}
+
+const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8')
+const annonces = [
+  { motif: /(\d+) leçons/g, attendu: lecons, quoi: 'leçons' },
+  { motif: /(\d+) étapes/g, attendu: steps, quoi: 'étapes' },
+  { motif: /(\d+) chapitres/g, attendu: CHAPTERS.length, quoi: 'chapitres de leçons' },
+]
+for (const { motif, attendu, quoi } of annonces) {
+  for (const trouve of readme.matchAll(motif)) {
+    if (Number(trouve[1]) !== attendu) {
+      errors++
+      console.error(`  ✗ README : « ${trouve[0]} », le programme compte ${attendu} ${quoi}`)
+    }
+  }
+}
+
 console.log(
   `\n${errors === 0 ? '✓' : '✗'} ${steps} étapes vérifiées · ${errors} erreurs · ${warnings} avertissements`,
 )

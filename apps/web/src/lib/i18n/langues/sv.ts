@@ -82,7 +82,7 @@ export const sv: Traduction = {
     leaderboardHint: 'vilka som spelar här, och hur starkt',
     friendsHint: 'din lista och mottagna utmaningar',
     statsHint: 'vad dina partier säger om ditt spel',
-    lessonsHint: '48 lektioner, från noll till repertoar',
+    lessonsHint: '{n} lektioner, från noll till repertoar',
     palierHint: 'vad som kostar dig poäng på din nivå',
     principesHint: 'minneslistan före varje drag, och principerna',
     seanceHint: 'ett utlyst tema, en motståndare på din nivå',

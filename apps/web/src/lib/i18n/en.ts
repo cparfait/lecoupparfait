@@ -97,7 +97,7 @@ export const en: Dictionary = {
     friendsHint: 'your contacts, and the challenges you received',
     statsHint: 'what your games say about you',
     watchHint: 'games in progress',
-    lessonsHint: '48 lessons, from zero to a repertoire',
+    lessonsHint: '{n} lessons, from zero to a repertoire',
     palierHint: 'what costs you points at your level',
     principesHint: 'the before-every-move checklist, and the principles',
     seanceHint: 'an announced theme, an opponent at your level',

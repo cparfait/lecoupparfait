@@ -82,7 +82,7 @@ export const hu: Traduction = {
     leaderboardHint: 'ki játszik itt, és milyen erősen',
     friendsHint: 'a listád és a kapott kihívások',
     statsHint: 'amit a játszmáid a játékodról mondanak',
-    lessonsHint: '48 lecke, a nulláról a repertoárig',
+    lessonsHint: '{n} lecke, a nulláról a repertoárig',
     palierHint: 'ami a te szinteden pontokba kerül',
     principesHint: 'a minden lépés előtti emlékeztető és az alapelvek',
     seanceHint: 'bejelentett téma, hozzád illő ellenfél',

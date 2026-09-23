@@ -83,7 +83,7 @@ export const nl: Traduction = {
     leaderboardHint: 'wie hier speelt, en hoe sterk',
     friendsHint: 'je adresboek en de ontvangen uitdagingen',
     statsHint: 'wat je partijen over je spel zeggen',
-    lessonsHint: '48 lessen, van nul tot een repertoire',
+    lessonsHint: '{n} lessen, van nul tot een repertoire',
     palierHint: 'wat je op jouw niveau punten kost',
     principesHint: 'de geheugensteun vóór elke zet, en de principes',
     seanceHint: 'een aangekondigd thema, een tegenstander op jouw niveau',

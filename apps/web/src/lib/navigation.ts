@@ -43,6 +43,7 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { TranslationKey } from './i18n/index.tsx'
+import { NOMBRE_DE_LECONS } from './lessons/compte.ts'
 
 export interface EntreeNav {
   href: string
@@ -50,6 +51,8 @@ export interface EntreeNav {
   icon: LucideIcon
   /** Une demi-phrase affichée sous le libellé, dans les panneaux déroulants. */
   hintKey?: TranslationKey
+  /** Valeurs interpolées dans `hintKey` — un nombre calculé, jamais recopié. */
+  hintVars?: Record<string, string | number>
   /**
    * Autres chemins que cette entrée éclaire dans la barre inférieure.
    *
@@ -175,6 +178,7 @@ export const SECTIONS: SectionNav[] = [
         labelKey: 'nav.lessons',
         icon: GraduationCap,
         hintKey: 'nav.lessonsHint',
+        hintVars: { n: NOMBRE_DE_LECONS },
       },
       // « Ton palier » juste après les leçons, et devant tout le reste : c'est
       // la réponse à la question qu'on se pose en arrivant — « je suis à 900,

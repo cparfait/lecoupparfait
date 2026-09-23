@@ -86,7 +86,7 @@ export const ro: Traduction = {
     leaderboardHint: 'cine joacă aici și la ce nivel',
     friendsHint: 'lista ta și provocările primite',
     statsHint: 'ce spun partidele tale despre jocul tău',
-    lessonsHint: '48 de lecții, de la zero la repertoriu',
+    lessonsHint: '{n} de lecții, de la zero la repertoriu',
     palierHint: 'ce te costă puncte la nivelul tău',
     principesHint: 'mementoul dinaintea fiecărei mutări și principiile',
     seanceHint: 'o temă anunțată, un adversar pe măsura ta',

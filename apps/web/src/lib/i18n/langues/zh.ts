@@ -87,7 +87,7 @@ export const zh: Traduction = {
     leaderboardHint: '谁在这里下棋，水平如何',
     friendsHint: '你的好友与收到的挑战',
     statsHint: '你的对局透露了什么',
-    lessonsHint: '48 节课，从零到开局体系',
+    lessonsHint: '{n} 节课，从零到开局体系',
     palierHint: '在你这个水平上最耗分的地方',
     principesHint: '每步棋前的备忘，以及各项原则',
     seanceHint: '预先公布的主题，与你水平相当的对手',

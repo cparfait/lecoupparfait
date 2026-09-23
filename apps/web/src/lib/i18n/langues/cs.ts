@@ -82,7 +82,7 @@ export const cs: Traduction = {
     leaderboardHint: 'kdo tu hraje a jak silně',
     friendsHint: 'tvůj seznam a přijaté výzvy',
     statsHint: 'co tvoje partie říkají o tvé hře',
-    lessonsHint: '48 lekcí, od nuly k repertoáru',
+    lessonsHint: '{n} lekcí, od nuly k repertoáru',
     palierHint: 'co tě na tvé úrovni stojí body',
     principesHint: 'tahák před každým tahem a zásady',
     seanceHint: 'ohlášené téma, soupeř na tvé úrovni',

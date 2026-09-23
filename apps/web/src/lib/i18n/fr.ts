@@ -96,7 +96,7 @@ export const fr = {
     leaderboardHint: 'qui joue ici, et à quel niveau',
     friendsHint: 'ton carnet, les défis reçus',
     statsHint: 'ce que tes parties disent de ton jeu',
-    lessonsHint: '48 leçons, de zéro au répertoire',
+    lessonsHint: '{n} leçons, de zéro au répertoire',
     palierHint: 'ce qui te coûte des points à ton niveau',
     principesHint: 'le mémo d’avant chaque coup, et les principes',
     seanceHint: 'un thème annoncé, un adversaire à ton niveau',

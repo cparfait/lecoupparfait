@@ -108,7 +108,7 @@ export function AutresDeLaSection({
                 <span className="block truncate text-sm font-semibold">{t(entree.labelKey)}</span>
                 {entree.hintKey && (
                   <span className="block truncate text-[12px] leading-snug text-faint">
-                    {t(entree.hintKey)}
+                    {t(entree.hintKey, entree.hintVars)}
                   </span>
                 )}
               </span>
