@@ -1977,6 +1977,10 @@ function GameScreen({
   }, [undo, state.moves.length, state.isGameOver, outcome, oublierPositionDuBot, noterAide])
 
   const handleResign = useCallback(() => {
+    // Une confirmation, comme en ligne et en correspondance. Le bouton vit
+    // dans la barre du pouce, à un doigt d'« Indice » : un seul appui perdait
+    // la partie, et en partie classée la défaite s'enregistrait.
+    if (!window.confirm(t('live.resignConfirm'))) return
     setClock((current) => stopClock(current, Date.now()))
     setOutcome({ status: 'resign', result: playerColor === 'w' ? '0-1' : '1-0' })
     // Un abandon compte comme une tentative, jamais comme une victoire — sauf
@@ -1989,7 +1993,7 @@ function GameScreen({
     // Une partie abandonnée n'est plus à reprendre : sans cet oubli, l'écran
     // de départ la proposait comme si on l'avait quittée en cours.
     oublierPartieEnCours()
-  }, [playerColor, level, startFen])
+  }, [playerColor, level, startFen, t])
 
   /**
    * Sens de lecture de l'échiquier.
