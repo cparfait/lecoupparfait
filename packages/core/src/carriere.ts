@@ -81,8 +81,22 @@ export interface Chapitre {
  *
  * Douze et non vingt-cinq comme le barème des bots : un chapitre doit durer
  * plusieurs séances pour qu'on sente la progression, et vingt-cinq paliers
- * donneraient l'impression de piétiner. Au-delà de 1900, un joueur sait ce
+ * donneraient l'impression de piétiner. Au-delà de 1850, un joueur sait ce
  * qu'il doit travailler et n'a plus besoin qu'on le lui dise.
+ *
+ * ── Les échelons, un par chapitre, sauf le dernier ──
+ *
+ * Les chapitres 1 à 11 prennent les onze premiers échelons du barème, sans en
+ * sauter : 100 à 1850. Il n'y en a que onze sous 1850, et monter d'un cran de
+ * plus au chapitre 12 ferait finir la carrière à 2050, ce qu'on a déjà connu —
+ * reportés à la main lors d'un changement d'échelle, les trois derniers
+ * chapitres avaient glissé jusqu'à 2250. Le chapitre 12 garde donc la force
+ * du 11 : ce qu'il ajoute, c'est l'absence de filet (son objectif), Oracle, qui
+ * n'a aucun penchant à exploiter, et des puzzles plus difficiles.
+ * `check-carriere` n'autorise cette égalité qu'au dernier chapitre.
+ *
+ * Aucune migration : la progression enregistrée (`career_progress`) retient un
+ * numéro de chapitre, jamais un échelon. L'échelon se relit ici à chaque duel.
  */
 export const CHAPITRES: readonly Chapitre[] = [
   {
@@ -107,7 +121,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'hangingPiece',
     puzzles: 5,
     adversaire: 'novice',
-    niveau: 3,
+    niveau: 2,
     cotePuzzles: 600,
     victoires: 2,
     teinte: '#22b8cf',
@@ -121,7 +135,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'hangingPiece',
     puzzles: 5,
     adversaire: 'prudent',
-    niveau: 4,
+    niveau: 3,
     cotePuzzles: 700,
     victoires: 2,
     teinte: '#51cf66',
@@ -135,7 +149,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'fork',
     puzzles: 5,
     adversaire: 'tacticien',
-    niveau: 5,
+    niveau: 4,
     cotePuzzles: 800,
     victoires: 2,
     teinte: '#fcc419',
@@ -149,7 +163,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'mateIn2',
     puzzles: 5,
     adversaire: 'prudent',
-    niveau: 6,
+    niveau: 5,
     cotePuzzles: 900,
     victoires: 2,
     teinte: '#ff922b',
@@ -163,7 +177,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'backRankMate',
     puzzles: 5,
     adversaire: 'fonceur',
-    niveau: 7,
+    niveau: 6,
     cotePuzzles: 1000,
     victoires: 2,
     teinte: '#ff6b6b',
@@ -177,7 +191,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'skewer',
     puzzles: 5,
     adversaire: 'tacticien',
-    niveau: 8,
+    niveau: 7,
     cotePuzzles: 1100,
     victoires: 2,
     teinte: '#845ef7',
@@ -191,7 +205,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'discoveredAttack',
     puzzles: 5,
     adversaire: 'positionnel',
-    niveau: 9,
+    niveau: 8,
     cotePuzzles: 1250,
     victoires: 2,
     teinte: '#20c997',
@@ -205,7 +219,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'sacrifice',
     puzzles: 5,
     adversaire: 'gambiteur',
-    niveau: 10,
+    niveau: 9,
     cotePuzzles: 1400,
     victoires: 2,
     teinte: '#e64980',
@@ -219,7 +233,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'promotion',
     puzzles: 5,
     adversaire: 'positionnel',
-    niveau: 11,
+    niveau: 10,
     cotePuzzles: 1550,
     victoires: 2,
     teinte: '#4dabf7',
@@ -233,7 +247,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'zugzwang',
     puzzles: 5,
     adversaire: 'positionnel',
-    niveau: 12,
+    niveau: 11,
     cotePuzzles: 1700,
     victoires: 2,
     teinte: '#00b894',
@@ -247,7 +261,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'mateIn2',
     puzzles: 5,
     adversaire: 'machine',
-    niveau: 13,
+    niveau: 11,
     cotePuzzles: 1850,
     victoires: 1,
     teinte: '#f03e3e',

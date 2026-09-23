@@ -118,12 +118,29 @@ for (const c of CHAPITRES) {
 }
 
 // La difficulté doit monter. Un chapitre plus facile que le précédent casserait
-// la seule promesse du mode : que le chemin mène quelque part.
+// la seule promesse du mode : que le chemin mène quelque part. Seul le dernier
+// peut garder la force de l'avant-dernier : il n'y a que onze échelons sous
+// 1850, et ce qu'il ajoute est l'absence de filet — voir `CHAPITRES`. Ses
+// puzzles, eux, doivent rester plus difficiles.
 let croissant = true
 for (let i = 1; i < CHAPITRES.length; i++) {
-  if (CHAPITRES[i].niveau <= CHAPITRES[i - 1].niveau) croissant = false
+  const dernier = i === CHAPITRES.length - 1
+  const avant = CHAPITRES[i - 1]
+  const ici = CHAPITRES[i]
+  if (dernier ? ici.niveau < avant.niveau : ici.niveau <= avant.niveau) croissant = false
+  if (ici.cotePuzzles <= avant.cotePuzzles) croissant = false
 }
 check('la difficulté monte à chaque chapitre', croissant)
+
+// La carrière finit à 1850 : c'est ce qu'annoncent son commentaire et
+// `docs/mode-carriere.md`. Les rangs reportés à la main lors d'un changement
+// d'échelle l'avaient emmenée jusqu'à 2250 sans que rien ne le signale.
+const plafond = Math.max(...CHAPITRES.map((c) => BOT_LEVELS[c.niveau - 1]?.elo ?? Infinity))
+check('la carrière finit à 1850 Elo', plafond === 1850, `${plafond} Elo au dernier chapitre`)
+check(
+  'le dernier chapitre a des puzzles au niveau de son adversaire',
+  CHAPITRES.at(-1).cotePuzzles === plafond,
+)
 
 /*
   Le style annoncé doit être celui qui joue.

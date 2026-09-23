@@ -92,7 +92,7 @@ Trois règles de conception, et elles priment sur le reste :
 
 ### La saison
 
-Une carrière complète = **12 chapitres**, de 250 à 1600 Elo environ. C'est le
+Une carrière complète = **12 chapitres**, de 100 à 1850 Elo. C'est le
 segment où l'aide change tout ; au-delà, un joueur sait ce qu'il doit
 travailler et n'a plus besoin qu'on le lui dise.
 
@@ -114,22 +114,27 @@ délibérée : on doit savoir à quoi s'attendre sans relire les règles.
 ④ Le bilan      analyse automatique de la dernière partie + verdict
 ```
 
-### Découpage proposé
+### Découpage
 
 | #   | Titre                         | Adversaire  | Elo  | Ce qu'on y apprend                     |
 | --- | ----------------------------- | ----------- | ---- | -------------------------------------- |
-| 1   | Les pièces et leur route      | Pion 🐣     | 250  | déplacements, échec et mat élémentaire |
-| 2   | Ne rien laisser en prise      | Pion 🐣     | 400  | pièces défendues, prises gratuites     |
-| 3   | Sortir ses pièces             | Rempart 🛡️  | 550  | développement, roque, centre           |
-| 4   | La fourchette et le clouage   | Éclair ⚡   | 700  | motifs tactiques de base               |
-| 5   | Mater avec la dame et la tour | Rempart 🛡️  | 850  | mats élémentaires, opposition          |
-| 6   | Tenir face à une attaque      | Brasier 🔥  | 1000 | défense, contre-attaque au centre      |
-| 7   | Compter le matériel           | Éclair ⚡   | 1150 | échanges, valeur des pièces            |
-| 8   | Une ouverture à soi           | Boussole 🧭 | 1300 | un répertoire minimal, blancs et noirs |
+| 1   | Les pièces et leur route      | Pion 🐣     | 100  | déplacements, échec et mat élémentaire |
+| 2   | Ne rien laisser en prise      | Pion 🐣     | 180  | pièces défendues, prises gratuites     |
+| 3   | Sortir ses pièces             | Rempart 🛡️  | 250  | développement, roque, centre           |
+| 4   | La fourchette et le clouage   | Éclair ⚡   | 320  | motifs tactiques de base               |
+| 5   | Mater avec la dame et la tour | Rempart 🛡️  | 630  | mats élémentaires, opposition          |
+| 6   | Tenir face à une attaque      | Brasier 🔥  | 980  | défense, contre-attaque au centre      |
+| 7   | Compter le matériel           | Éclair ⚡   | 1120 | échanges, valeur des pièces            |
+| 8   | Une ouverture à soi           | Boussole 🧭 | 1320 | un répertoire minimal, blancs et noirs |
 | 9   | Accepter ou refuser un gambit | Mirage 🎭   | 1450 | initiative contre matériel             |
-| 10  | Les finales de pions          | Boussole 🧭 | 1600 | opposition, pion passé, carré          |
-| 11  | Le plan, pas le coup          | Boussole 🧭 | 1750 | jeu positionnel, faiblesses            |
-| 12  | Sans filet                    | Oracle 🜛    | 1900 | sans indice, sans commentaire          |
+| 10  | Les finales de pions          | Boussole 🧭 | 1650 | opposition, pion passé, carré          |
+| 11  | Le plan, pas le coup          | Boussole 🧭 | 1850 | jeu positionnel, faiblesses            |
+| 12  | Sans filet                    | Oracle 🜛    | 1850 | sans indice, sans commentaire          |
+
+Les chapitres 1 à 11 prennent les onze premiers échelons du barème, sans en
+sauter ; il n'y en a pas d'autre sous 1850. Le chapitre 12 garde donc la force
+du 11 : ce qu'il ajoute tient à son objectif — sans indice, sans commentaire —,
+à un adversaire sans penchant à exploiter et à des puzzles plus difficiles.
 
 Les adversaires ne suivent pas l'ordre du barème : le style sert la leçon.
 On affronte **Brasier** au chapitre « tenir face à une attaque » parce qu'il
@@ -242,7 +247,7 @@ déjà la légalité des coups.
 
 À écrire une fois, pour ne pas y revenir :
 
-- **Pas de deuxième saison** au-delà de 1900 Elo dans cette version.
+- **Pas de deuxième saison** au-delà de 1850 Elo dans cette version.
 - **Pas de carrière personnalisée** par les faiblesses mesurées. Séduisant,
   mais un parcours différent pour chacun est impossible à tester et impossible
   à expliquer. On garde un chemin unique, et l'adaptation se limite au filet de
@@ -277,7 +282,7 @@ correctement, ce qui suppose que le reste tourne.
 
 ## 10. Décisions à trancher avant de commencer
 
-1. **Douze chapitres ou moins ?** Douze couvre 250 → 1900 Elo. Six chapitres
+1. **Douze chapitres ou moins ?** Douze couvre 100 → 1850 Elo. Six chapitres
    jusqu'à 1000 sortiraient trois fois plus vite et toucheraient le public le
    plus nombreux.
 2. ~~**La carrière remplace-t-elle « Jouer contre l'ordinateur » ?**~~
