@@ -6,7 +6,7 @@
  * points de calibration — 110 cp ≈ 1000 Elo, 10 cp ≈ 2700 — et n'en atteignait
  * aucun. Elle rendait 450 là où elle annonçait 1000, et son terme ACPL passait
  * sous zéro pour un débutant. Rien ne le signalait : le mélange avec la
- * précision et le plancher à 400 ramenaient toujours le résultat dans une
+ * précision et le plancher (alors à 400) ramenaient toujours le résultat dans une
  * fourchette crédible.
  *
  * D'où la règle appliquée ici : un commentaire qui annonce des chiffres doit
@@ -15,7 +15,8 @@
  * Usage :  node scripts/check-elo.mjs
  */
 
-const { ELO_ANCHORS, estimateElo } = await import('../packages/core/src/eval.ts')
+const { ELO_ANCHORS, ELO_PLANCHER, estimateElo } = await import('../packages/core/src/eval.ts')
+const { BOT_LEVELS } = await import('../packages/core/src/bots.ts')
 
 let checks = 0
 let failures = 0
@@ -82,7 +83,19 @@ check(
 check('une partie de 4 coups ne conclut rien', estimateElo(10, 95, 4) === 1200)
 
 // Les bornes tiennent.
-check('plancher à 400', estimateElo(2000, 0, 200) >= 400)
+// Le plancher est celui de l'échelle : à 400, un débutant qui battait le
+// niveau 1 (100) lisait « 400 » après son analyse.
+check(
+  'le plancher est celui du premier adversaire',
+  ELO_PLANCHER === BOT_LEVELS[0].elo,
+  `${ELO_PLANCHER} contre ${BOT_LEVELS[0].elo}`,
+)
+check('plancher tenu', estimateElo(2000, 0, 200) === ELO_PLANCHER)
+check(
+  'une partie très faible descend sous 400',
+  estimateElo(300, 20, 40) < 400,
+  `obtenu ${estimateElo(300, 20, 40)}`,
+)
 check('plafond à 3000', estimateElo(0, 100, 200) <= 3000)
 
 console.log(

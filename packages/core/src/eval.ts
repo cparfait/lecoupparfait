@@ -224,6 +224,9 @@ export function averageCentipawnLoss(losses: number[]): number {
  * **négative** pour le terme ACPL d'un débutant. Personne ne l'avait vu parce
  * que le mélange et le plancher ramenaient le résultat dans le plausible.
  */
+/** Le plancher de l'estimation, aligné sur le premier échelon de `BOT_LEVELS`. */
+export const ELO_PLANCHER = 100
+
 export const ELO_ANCHORS: ReadonlyArray<{ acpl: number; accuracy: number; elo: number }> = [
   { acpl: 110, accuracy: 55, elo: 1000 },
   { acpl: 60, accuracy: 72, elo: 1500 },
@@ -258,7 +261,12 @@ export function estimateElo(acpl: number, accuracy: number, moveCount: number): 
   // Une partie de 10 coups ne prouve pas grand-chose : on ramène vers 1200.
   const confidence = Math.min(1, moveCount / 40)
   const estimate = 1200 + (blended - 1200) * confidence
-  return Math.round(Math.max(400, Math.min(3000, estimate)) / 25) * 25
+  // Le plancher est celui de l'échelle des adversaires, 100 : c'est là que les
+  // plateformes classent qui vient d'apprendre les déplacements. À 400, un
+  // débutant qui battait le niveau 1 (100) lisait « 400 » après son analyse,
+  // une performance de trois cents points au-dessus de ce qu'il venait de
+  // jouer, et toutes les parties faibles se confondaient sur ce nombre.
+  return Math.round(Math.max(ELO_PLANCHER, Math.min(3000, estimate)) / 25) * 25
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
