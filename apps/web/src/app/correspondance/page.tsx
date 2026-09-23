@@ -96,6 +96,9 @@ export default function CorrespondencePage() {
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
         toast.error(data.error ?? t('correspondence.moveRefused'))
+        // 409 : la partie a bougé entre-temps (abandon, autre coup). On la
+        // relit, sans quoi l'échiquier resterait sur la position périmée.
+        if (response.status === 409) await refresh()
         return
       }
       await refresh()
