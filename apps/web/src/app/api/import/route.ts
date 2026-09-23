@@ -15,6 +15,8 @@
 import { NextResponse } from 'next/server'
 import type { PartieImportee } from '@/lib/import/enligne.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
+import { ipClient } from '@/lib/server/ip.ts'
+import { creerLimiteur } from '@/lib/server/limiteur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -41,8 +43,28 @@ const MAX_ARCHIVES = 6
 /** Un pseudo, pas un chemin : on refuse tout ce qui pourrait sortir de l'URL. */
 const PSEUDO_VALIDE = /^[A-Za-z0-9_-]{1,30}$/
 
+/**
+ * Dix imports par dix minutes et par adresse.
+ *
+ * La route est anonyme, et chaque appel en déclenche jusqu'à sept vers
+ * Chess.com (la liste des archives, puis six mois). Sans limite, n'importe qui
+ * pouvait s'en servir pour marteler leurs serveurs sous notre `User-Agent` —
+ * celui-là même qui porte notre contact, et qu'ils bloqueraient pour tout le
+ * monde. Dix, c'est dix comptes différents à explorer : bien plus qu'une
+ * séance d'analyse.
+ */
+const imports = creerLimiteur(10 * 60 * 1000, 10)
+
 export async function POST(request: Request) {
   const t = tDeLaRequete(request)
+  const ip = ipClient(request)
+  if (imports.depasse(ip)) {
+    return NextResponse.json(
+      { error: t('api.tooManyRequests') },
+      { status: 429, headers: { 'Retry-After': String(imports.attente(ip)) } },
+    )
+  }
+
   let corps: { source?: unknown; pseudo?: unknown; max?: unknown }
   try {
     corps = (await request.json()) as typeof corps
