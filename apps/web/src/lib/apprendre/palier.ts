@@ -28,7 +28,7 @@
  * test au lieu de deviner.
  */
 
-import type { MotifId } from '@coupparfait/core'
+import { suggestedLevel, type MotifId } from '@coupparfait/core'
 import type { TranslationKey } from '@/lib/i18n/index.tsx'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -76,8 +76,6 @@ export interface Palier {
   nom: TranslationKey
   /** Une phrase : ce qu'on sait déjà faire, et ce qui bloque maintenant. */
   promesse: TranslationKey
-  /** Niveau d'ordinateur à peu près équivalent, pour les séances. */
-  niveauBot: number
   leviers: Levier[]
 }
 
@@ -99,7 +97,6 @@ export const PALIERS: Palier[] = [
     max: 649,
     nom: 'paliers.regles.nom',
     promesse: 'paliers.regles.promesse',
-    niveauBot: 3,
     leviers: [
       {
         id: 'les-trois-regles',
@@ -139,7 +136,6 @@ export const PALIERS: Palier[] = [
     max: 999,
     nom: 'paliers.pieces-en-prise.nom',
     promesse: 'paliers.pieces-en-prise.promesse',
-    niveauBot: 5,
     leviers: [
       {
         id: 'voir-ce-qui',
@@ -183,7 +179,6 @@ export const PALIERS: Palier[] = [
     max: 1299,
     nom: 'paliers.voir-ladversaire.nom',
     promesse: 'paliers.voir-ladversaire.promesse',
-    niveauBot: 6,
     leviers: [
       {
         id: 'le-clouage',
@@ -223,7 +218,6 @@ export const PALIERS: Palier[] = [
     max: 1599,
     nom: 'paliers.un-plan.nom',
     promesse: 'paliers.un-plan.promesse',
-    niveauBot: 9,
     leviers: [
       {
         id: 'les-colonnes-ouvertes',
@@ -263,7 +257,6 @@ export const PALIERS: Palier[] = [
     max: 1899,
     nom: 'paliers.technique.nom',
     promesse: 'paliers.technique.promesse',
-    niveauBot: 11,
     leviers: [
       {
         id: 'l-opposition',
@@ -303,7 +296,6 @@ export const PALIERS: Palier[] = [
     max: Number.POSITIVE_INFINITY,
     nom: 'paliers.prophylaxie.nom',
     promesse: 'paliers.prophylaxie.promesse',
-    niveauBot: 12,
     leviers: [
       {
         id: 'les-enfilades-et',
@@ -338,6 +330,33 @@ export function palierPour(elo: number): Palier {
   return (
     PALIERS.find((palier) => elo >= palier.min && elo <= palier.max) ?? PALIERS[PALIERS.length - 1]!
   )
+}
+
+/**
+ * L'Elo qui représente un palier quand on ne connaît pas le joueur : son
+ * milieu. Le dernier palier n'a pas de borne haute ; on le représente par sa
+ * borne basse plus cent cinquante, la demi-largeur des autres.
+ */
+export function eloRepere(palier: Palier): number {
+  if (!Number.isFinite(palier.max)) return palier.min + 150
+  return Math.round((palier.min + palier.max) / 2)
+}
+
+/**
+ * L'adversaire d'une séance à ce palier.
+ *
+ * Il y avait ici un niveau écrit à la main par palier, pendant que le test de
+ * niveau, l'accueil et le bienvenue passaient par `suggestedLevel`. Les deux
+ * s'étaient écartés de 150 à 400 Elo pour un même joueur — une séance à « un
+ * plan » envoyait 1 450 à qui le test venait de conseiller 1 120. Il n'y a plus
+ * qu'une règle, celle du cœur : on l'applique au niveau estimé du joueur
+ * quand il tombe dans ce palier, sinon au milieu du palier. Un joueur qui
+ * choisit un autre palier que le sien veut l'adversaire *de ce palier-là*, pas
+ * le sien.
+ */
+export function niveauBotPour(palier: Palier, eloJoueur?: number | null): number {
+  const dedans = eloJoueur != null && eloJoueur >= palier.min && eloJoueur <= palier.max
+  return suggestedLevel(dedans ? eloJoueur : eloRepere(palier))
 }
 
 /** Le palier suivant, ou `null` quand on est au dernier. */

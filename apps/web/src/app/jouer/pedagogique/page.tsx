@@ -21,7 +21,7 @@ import { botLevel } from '@coupparfait/core'
 import { AutresDeLaSection } from '@/components/layout/AutresDeLaSection.tsx'
 import { Button, ButtonLink, Card, Chip, TitreDePage, Toggle } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
-import { PALIERS, lireNiveauEstime } from '@/lib/apprendre/palier.ts'
+import { PALIERS, lireNiveauEstime, niveauBotPour } from '@/lib/apprendre/palier.ts'
 import {
   lienDeSeance,
   lireSeances,
@@ -38,6 +38,9 @@ export default function SeancePage() {
   const [themeId, setThemeId] = useState<string | null>(null)
   const [commente, setCommente] = useState(true)
   const [faites, setFaites] = useState<SeancesFaites>({})
+  // Le niveau estimé, lu dans l'effet et non au rendu : il vit dans le
+  // navigateur, et le lire pendant le rendu ferait diverger l'hydratation.
+  const [eloEstime, setEloEstime] = useState<number | null>(null)
 
   /*
     Le palier de départ.
@@ -50,13 +53,15 @@ export default function SeancePage() {
   */
   useEffect(() => {
     setFaites(lireSeances())
+    const estime = lireNiveauEstime()?.elo ?? null
+    setEloEstime(estime)
 
     const demande = new URLSearchParams(window.location.search).get('palier')
     if (demande && PALIERS.some((palier) => palier.id === demande)) {
       setPalierId(demande)
       return
     }
-    setPalierId(palierParDefaut(lireNiveauEstime()?.elo ?? null).id)
+    setPalierId(palierParDefaut(estime).id)
   }, [])
 
   const palier = PALIERS.find((entree) => entree.id === palierId) ?? null
@@ -69,7 +74,9 @@ export default function SeancePage() {
   }, [themes, themeId])
 
   const theme = themes.find((entree) => entree.id === themeId) ?? null
-  const adversaire = palier ? botLevel(palier.niveauBot) : null
+  // La même règle que l'écran de partie, qui recalcule ce niveau au lancement :
+  // l'adversaire annoncé ici est celui qu'on affronte.
+  const adversaire = palier ? botLevel(niveauBotPour(palier, eloEstime)) : null
 
   return (
     <div className="page">

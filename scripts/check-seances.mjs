@@ -181,17 +181,11 @@ for (const theme of THEMES_SEANCE) {
 }
 
 // Les paliers cités doivent exister, sinon le thème n'est proposé nulle part.
-// La liste est recopiée plutôt qu'importée : `palier.ts` passe par l'alias `@/`,
-// que Node ne résout pas. Elle tient sur une ligne et le contrôle échoue bruyamment
-// si elle dérive.
-const PALIERS_CONNUS = new Set([
-  'regles',
-  'pieces-en-prise',
-  'voir-ladversaire',
-  'un-plan',
-  'technique',
-  'prophylaxie',
-])
+// `palier.ts` n'emprunte l'alias `@/` que pour des types, que Node efface : on
+// lit donc la vraie liste plutôt qu'une copie qui pourrait dériver.
+const { PALIERS, palierPour, niveauBotPour, eloRepere } =
+  await import('../apps/web/src/lib/apprendre/palier.ts')
+const PALIERS_CONNUS = new Set(PALIERS.map((palier) => palier.id))
 for (const theme of THEMES_SEANCE) {
   for (const palier of theme.paliers) {
     if (!PALIERS_CONNUS.has(palier)) {
@@ -205,6 +199,32 @@ for (const palier of PALIERS_CONNUS) {
     erreurs++
     console.error(`  ✗ le palier « ${palier} » n'a aucun thème de séance`)
   }
+}
+
+/*
+  L'adversaire d'une séance est celui que conseille `suggestedLevel`.
+
+  Chaque palier portait son niveau d'ordinateur écrit à la main, pendant que le
+  test de niveau, l'accueil et le bienvenue passaient par `suggestedLevel`. Pour
+  un même joueur, les deux s'écartaient de 150 à 400 Elo. On vérifie, sur toute
+  l'échelle, que la séance conseille le même adversaire que le test pour un
+  joueur de ce palier, et que sans mesure elle prend celui du milieu du palier.
+*/
+const { suggestedLevel, botLevel } = await import('../packages/core/src/bots.ts')
+console.log('')
+for (let elo = 0; elo <= 3000; elo += 10) {
+  if (niveauBotPour(palierPour(elo), elo) !== suggestedLevel(elo)) {
+    erreurs++
+    console.error(`  ✗ à ${elo} Elo, la séance et le test ne conseillent pas le même adversaire`)
+  }
+}
+for (const palier of PALIERS) {
+  const niveau = niveauBotPour(palier)
+  if (niveau !== suggestedLevel(eloRepere(palier))) {
+    erreurs++
+    console.error(`  ✗ ${palier.id} — sans mesure, l'adversaire n'est pas celui du milieu`)
+  }
+  console.log(`  ✓ palier ${palier.id.padEnd(17)} → adversaire à ${botLevel(niveau).elo} Elo`)
 }
 
 if (erreurs > 0) {

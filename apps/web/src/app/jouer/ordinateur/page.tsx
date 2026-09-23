@@ -82,6 +82,7 @@ import { PourquoiPanel } from '@/components/game/PourquoiPanel.tsx'
 import { AideMemoire } from '@/components/game/AideMemoire.tsx'
 import { RappelDeSeance } from '@/components/game/RappelDeSeance.tsx'
 import { noterSeance, releverLeTheme, seanceDeLUrl, type Seance } from '@/lib/game/seance.ts'
+import { lireNiveauEstime, niveauBotPour } from '@/lib/apprendre/palier.ts'
 import { LEGEND, legendFor, type LegendItem } from '@/components/board/ArrowLegend.tsx'
 import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
 import {
@@ -365,7 +366,9 @@ export default function PlayComputerPage() {
     setSeanceCommentee(new URLSearchParams(window.location.search).get('commente') === '1')
 
     setSetup({
-      level: demandee.palier.niveauBot,
+      // Même règle que l'écran de préparation, qui a annoncé cet adversaire :
+      // `suggestedLevel`, appliqué au niveau estimé s'il tombe dans le palier.
+      level: niveauBotPour(demandee.palier, lireNiveauEstime()?.elo),
       color: 'random',
       timeControlId: '600+5',
       // Stockfish et non Maia : la séance annonce une force en Elo, et c'est le
