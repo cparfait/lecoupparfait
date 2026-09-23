@@ -8,7 +8,7 @@
  * découvert en production.
  */
 
-import { createContext, useContext, useMemo } from 'react'
+import { Fragment, createContext, useContext, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { dictionaries, fr, type Dictionary, type Locale, type Traduction } from './dictionary.ts'
 import { fabriquerT } from './resoudre.ts'
@@ -86,6 +86,27 @@ export function renderEmphasis(text: string): ReactNode[] {
       <span key={index}>{chunk}</span>
     ),
   )
+}
+
+/**
+ * Une phrase du dictionnaire dont certains trous reçoivent un élément.
+ *
+ * `t()` rend une chaîne, et laisse intact un `{trou}` qu'on ne lui a pas
+ * rempli. Quand un mot de la phrase doit être mis en valeur — le coup conseillé
+ * en couleur, le pseudo en gris —, on remplit ici ces trous-là par des
+ * éléments. La phrase reste donc **une** clé : la découper en morceaux autour
+ * du `<strong>` figerait l'ordre des mots du français, que l'anglais, l'arabe
+ * ou le japonais ne suivent pas.
+ */
+export function avecElements(texte: string, elements: Record<string, ReactNode>): ReactNode[] {
+  return texte.split(/(\{\w+\})/g).map((morceau, index) => {
+    const nom = /^\{(\w+)\}$/.exec(morceau)?.[1]
+    return (
+      <Fragment key={index}>
+        {nom !== undefined && nom in elements ? elements[nom] : morceau}
+      </Fragment>
+    )
+  })
 }
 
 export { DEFAULT_LOCALE, LOCALES, LOCALE_LABELS, localeDuContenu } from './dictionary.ts'

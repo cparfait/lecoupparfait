@@ -371,8 +371,8 @@ function Tableau({ tournoi, onAbandonner }: { tournoi: TournoiSolo; onAbandonner
                     {ligne.concurrent.nom ?? tCoeur(t, ligne.concurrent.nomKey ?? '')}
                   </span>
                   <span className="block text-[12px] text-faint">
-                    {ligne.concurrent.elo} Elo ·{' '}
-                    {t(ligne.joues > 1 ? 'arena.gamesPlayed' : 'arena.oneGamePlayed', {
+                    {t(ligne.joues > 1 ? 'arena.eloGamesPlayed' : 'arena.eloOneGamePlayed', {
+                      elo: ligne.concurrent.elo,
                       n: ligne.joues,
                     })}
                   </span>

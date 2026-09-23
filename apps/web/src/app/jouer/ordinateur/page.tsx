@@ -128,7 +128,7 @@ import {
 import { useCurrentOpening, useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { playMoveSound, playResultSound, playSound } from '@/lib/sound.ts'
 import { localeDuContenu } from '@/lib/i18n/dictionary.ts'
-import { langue, useI18n } from '@/lib/i18n/index.tsx'
+import { avecElements, langue, useI18n } from '@/lib/i18n/index.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
 import { usePreferences, usePreferencesDe } from '@/lib/store/preferences.ts'
 import { speak } from '@/lib/speech.ts'
@@ -977,7 +977,7 @@ function SetupScreen({
                   </h3>
                   <span className="flex flex-wrap gap-2">
                     <Chip tone="accent">≈ {bot.elo} Elo</Chip>
-                    <Chip>Niveau {bot.level}</Chip>
+                    <Chip>{t('computer.levelChip', { n: bot.level })}</Chip>
                   </span>
                 </div>
                 <p className="mt-1 min-h-[3lh] text-sm leading-relaxed text-muted sm:min-h-[2lh]">
@@ -1340,13 +1340,24 @@ function SetupScreen({
       <div className="sticky bottom-0 z-20 -mx-4 mt-6 border-t border-line-strong bg-[var(--flottant)]/95 px-4 py-3 backdrop-blur-xl safe-bottom sm:-mx-6 sm:px-6">
         <div className="flex items-center gap-4">
           <p className="hidden min-w-0 flex-1 truncate text-sm text-muted sm:block">
-            <strong className="font-semibold text-ink">{tCoeur(t, personality.name)}</strong> · ≈{' '}
-            {bot.elo} Elo · {couleurChoisie} · {cadence?.label ?? timeControlId} ·{' '}
-            {classee && connecte === true
-              ? t('computer.summaryRated')
-              : commentaryMode
-                ? t('computer.summaryCoach')
-                : t('computer.summaryPlain')}
+            {avecElements(
+              t('computer.summaryLine', {
+                elo: bot.elo,
+                couleur: couleurChoisie,
+                cadence: cadence?.label ?? timeControlId,
+                mode:
+                  classee && connecte === true
+                    ? t('computer.summaryRated')
+                    : commentaryMode
+                      ? t('computer.summaryCoach')
+                      : t('computer.summaryPlain'),
+              }),
+              {
+                adversaire: (
+                  <strong className="font-semibold text-ink">{tCoeur(t, personality.name)}</strong>
+                ),
+              },
+            )}
           </p>
           <Button
             variant="primary"
@@ -2683,17 +2694,15 @@ function GameScreen({
               <div className="mb-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2 text-[14px]">
                 <Eye size={15} className="shrink-0 text-accent" aria-hidden />
                 <span className="min-w-0 flex-1 leading-snug text-muted">
-                  Tu revois la partie
-                  {reviewedMove ? (
-                    <>
-                      {' '}
-                      — coup{' '}
-                      <strong className="font-semibold text-ink">
-                        {formatMove(reviewedMove.san)}
-                      </strong>
-                    </>
-                  ) : null}
-                  . Rien n’est effacé.
+                  {reviewedMove
+                    ? avecElements(t('computer.reviewingMove'), {
+                        coup: (
+                          <strong className="font-semibold text-ink">
+                            {formatMove(reviewedMove.san)}
+                          </strong>
+                        ),
+                      })
+                    : t('computer.reviewingGame')}
                 </span>
                 <button
                   type="button"
@@ -3204,10 +3213,10 @@ function LegendeDuVerdict({
           l'écran est petit. */}
       {conseil && (
         <p className="mt-0.5 text-[14px] leading-snug text-muted">
-          Il fallait jouer{' '}
-          <strong className="font-semibold text-accent">{conseil.conseille}</strong> au lieu de{' '}
-          <strong className="font-semibold text-ink">{conseil.joue}</strong> — la flèche bleue
-          montre ce coup-là dans la position d’avant, pas un coup à jouer maintenant.
+          {avecElements(t('computer.shouldHavePlayed'), {
+            conseille: <strong className="font-semibold text-accent">{conseil.conseille}</strong>,
+            joue: <strong className="font-semibold text-ink">{conseil.joue}</strong>,
+          })}
           {/* Et ce qu'il faisait. Sans cette phrase, on regarde un coup dont on
               ne comprend pas l'intérêt, et l'on n'apprend rien — la
               justification vaut mieux que le verdict. */}
