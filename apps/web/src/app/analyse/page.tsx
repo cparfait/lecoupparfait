@@ -446,21 +446,14 @@ function ImportScreen({
   // Les réglages mémorisés n'arrivent qu'après le premier rendu : avant, les
   // pseudos sont vides et l'on croirait n'en connaître aucun.
   const prefsHydratees = usePreferences((state) => state.hydrated)
-  // La valeur n'est lue nulle part — seul l'ouvrir a un effet, sur le volet
-  // qui se déplie tout seul quand un pseudo est déjà enregistré.
-  const [, setImportOuvert] = useState(false)
+  // Le service à présélectionner quand on arrive depuis la fiche d'un compte
+  // (`?compte=lichess`). La carte d'import est toujours dépliée : il n'y a
+  // plus de volet à ouvrir, seulement le bon onglet à choisir.
   const [serviceDemande, setServiceDemande] = useState<'chesscom' | 'lichess' | null>(null)
   useEffect(() => {
     if (!prefsHydratees) return
     const compte = new URLSearchParams(window.location.search).get('compte')
-    if (compte === 'chesscom' || compte === 'lichess') {
-      setServiceDemande(compte)
-      setImportOuvert(true)
-      return
-    }
-    if (chesscomUsername.trim() || lichessUsername.trim()) setImportOuvert(true)
-    // À l'arrivée seulement : ce qu'on tape ensuite ne doit pas rouvrir la section.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (compte === 'chesscom' || compte === 'lichess') setServiceDemande(compte)
   }, [prefsHydratees])
 
   const paste = useCallback(async () => {
