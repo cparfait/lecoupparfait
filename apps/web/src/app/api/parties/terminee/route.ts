@@ -43,6 +43,15 @@ export const dynamic = 'force-dynamic'
 const MAX_COUPS = 400
 
 /**
+ * Bornes du corps et du PGN. Quatre cents demi-coups en SAN, horloges
+ * comprises, tiennent dans une vingtaine de kilo-octets : les plafonds
+ * laissent une marge large, et ferment la porte à la colonne remplie de
+ * mégaoctets.
+ */
+const TAILLE_MAX_PGN = 64 * 1024
+const TAILLE_MAX_CORPS = 128 * 1024
+
+/**
  * Une partie classée compte au moins dix demi-coups, et une par minute.
  *
  * Deux bornes, deux abus différents. Les dix demi-coups ferment la partie
@@ -92,10 +101,43 @@ export async function POST(request: Request) {
     /** Le joueur a demandé une partie classée avant de commencer. */
     classee?: boolean
   }
+  // Le corps est lu en texte pour être mesuré avant d'être analysé : une
+  // partie de quatre cents coups tient en quelques kilo-octets, et rien ne
+  // justifie d'en accepter des mégas.
+  const tailleAnnoncee = Number(request.headers.get('content-length') ?? 0)
+  if (tailleAnnoncee > TAILLE_MAX_CORPS) {
+    return NextResponse.json({ ok: false, raison: 'corps trop grand' }, { status: 413 })
+  }
   try {
-    body = await request.json()
+    const brut = await request.text()
+    if (brut.length > TAILLE_MAX_CORPS) {
+      return NextResponse.json({ ok: false, raison: 'corps trop grand' }, { status: 413 })
+    }
+    body = JSON.parse(brut) as typeof body
   } catch {
     return NextResponse.json({ ok: false, raison: 'corps illisible' }, { status: 400 })
+  }
+  if (!body || typeof body !== 'object') {
+    return NextResponse.json({ ok: false, raison: 'corps illisible' }, { status: 400 })
+  }
+
+  /*
+    Les champs texte, vérifiés avant usage.
+
+    Le type annoncé plus haut n'est qu'une promesse du client. `eco: 42`
+    atteignait `body.eco?.slice(0, 3)` et levait une exception, rendue en
+    500 ; un `pgn` de plusieurs mégaoctets s'écrivait tel quel en base. Un
+    champ du mauvais type devient `null` — ce sont des informations
+    d'affichage, la partie reste valable sans elles —, un PGN trop long est
+    refusé.
+  */
+  const texte = (valeur: unknown, max: number) =>
+    typeof valeur === 'string' ? valeur.slice(0, max) : null
+  if (typeof body.pgn === 'string' && body.pgn.length > TAILLE_MAX_PGN) {
+    return NextResponse.json({ ok: false, raison: 'pgn trop long' }, { status: 400 })
+  }
+  if (body.startFen != null && typeof body.startFen !== 'string') {
+    return NextResponse.json({ ok: false, raison: 'position de départ invalide' }, { status: 400 })
   }
 
   const moves = Array.isArray(body.moves) ? body.moves.filter((m) => typeof m === 'string') : []
@@ -116,7 +158,15 @@ export async function POST(request: Request) {
   // envers le joueur mais envers le code : une liste tronquée ou décalée
   // produirait un PGN qui ne se rejoue pas, et l'on ne s'en apercevrait qu'en
   // essayant de l'analyser, des semaines plus tard.
-  const echiquier = new Chess(body.startFen || undefined)
+  //
+  // La FEN de départ se lit dans le même esprit : `new Chess` lève sur une
+  // FEN malformée, et cette ligne, hors de tout `try`, rendait un 500.
+  let echiquier: Chess
+  try {
+    echiquier = new Chess(body.startFen || undefined)
+  } catch {
+    return NextResponse.json({ ok: false, raison: 'position de départ invalide' }, { status: 400 })
+  }
   for (const san of moves) {
     try {
       echiquier.move(san)
@@ -126,7 +176,7 @@ export async function POST(request: Request) {
   }
 
   const camp = body.playerColor === 'b' ? 'b' : 'w'
-  const adversaire = (body.opponentName ?? 'Ordinateur').slice(0, 40)
+  const adversaire = texte(body.opponentName, 40) ?? 'Ordinateur'
   // Une date illisible vaut « maintenant » : la colonne est `notNull`, et une
   // partie sans début connu reste une partie.
   const annonceeLe = body.startedAt ? new Date(body.startedAt) : new Date()
@@ -194,8 +244,11 @@ export async function POST(request: Request) {
   // cote annoncée de l'adversaire, qui doivent parler du même palier.
   const bareme = niveau === null ? null : botLevel(niveau)
   const niveauRetenu = bareme?.level ?? null
-  const initialTime = Math.max(0, Math.round(body.initialTime ?? 0))
-  const increment = Math.max(0, Math.round(body.increment ?? 0))
+  // Un nombre, ou zéro : `"abc"` donnait `NaN`, que la colonne entière refusait.
+  const duree = (valeur: unknown) =>
+    typeof valeur === 'number' && Number.isFinite(valeur) ? Math.max(0, Math.round(valeur)) : 0
+  const initialTime = duree(body.initialTime)
+  const increment = duree(body.increment)
 
   /*
     L'annonce faite avant la partie, et consommée ici.
@@ -302,12 +355,12 @@ export async function POST(request: Request) {
         increment,
         startFen: body.startFen || null,
         moves: moves.join(' '),
-        pgn: typeof body.pgn === 'string' ? body.pgn : null,
-        status: (body.status ?? 'finished').slice(0, 24),
+        pgn: texte(body.pgn, TAILLE_MAX_PGN),
+        status: texte(body.status, 24) ?? 'finished',
         result,
         winner: result === '1-0' ? 'w' : result === '0-1' ? 'b' : null,
-        eco: body.eco?.slice(0, 3) ?? null,
-        opening: body.opening?.slice(0, 120) ?? null,
+        eco: texte(body.eco, 3),
+        opening: texte(body.opening, 120),
         // L'heure de l'annonce prime sur celle du client quand il y en a une :
         // c'est la seule des deux qu'on ait vue passer.
         startedAt: classee && annonce ? annonce.openedAt : debut,
