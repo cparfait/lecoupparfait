@@ -422,7 +422,10 @@ export default function PalierPage() {
         <h2 className="mb-3 font-display text-lg font-semibold tracking-tight">
           {t('tier.sixTiers')}
         </h2>
-        <div className="flex flex-wrap gap-1.5">
+        {/* Une grille et non un retour à la ligne : six paliers de largeurs
+            inégales laissaient le dernier seul sur sa rangée. Deux, trois ou
+            six colonnes, toutes des diviseurs de six. */}
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 xl:grid-cols-6">
           {PALIERS.map((entree) => (
             <button
               key={entree.id}
