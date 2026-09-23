@@ -19,8 +19,8 @@
  * `placeholder`, `label`, ou le texte nu entre deux balises — et laisse le tri à
  * la lecture. Il ne fait pas échouer la construction : la frontière entre un
  * intitulé à traduire et un nom propre (« Stockfish », « Groq », « CC BY-NC-SA »)
- * ne se décide pas par une règle. Il sert à ne plus jamais découvrir cent textes
- * oubliés.
+ * ne se décide pas par une règle, mais à la main, dans `NOMS_PROPRES`. Il sert à
+ * ne plus jamais découvrir cent textes oubliés.
  *
  * Ce qui est volontairement hors du périmètre :
  *
@@ -91,8 +91,37 @@ const TEXTE_SEUL = /^[ \t]*([A-ZÀ-ÿ][^<>{}\n,:;=]*[^\s<>{},:;=])[ \t]*$/
  * Réservé aux `.tsx` : dans un `.ts`, la même forme décrit une annotation de
  * type — `): Promise<void>` — et rien d'autre. La classe exclut par ailleurs la
  * ponctuation du code, pour la même raison.
+ *
+ * Le chevron n'ouvre un texte que s'il ferme une balise : celui d'une flèche
+ * `=>` ou d'un `->` précède du code, et `(actuel) =>` suivi à la ligne de
+ * `actuel ? { …` se lisait « actuel ? ».
  */
-const TEXTE_COLLE = /[>}][ \t\n]*([^<>{}\n=:;()|$"'`]*[A-Za-zÀ-ÿ]{2,}[^<>{}\n=:;()|$"'`]*)[<{]/g
+const TEXTE_COLLE =
+  /(?:\}|(?<![=-])>)[ \t\n]*([^<>{}\n=:;()|$"'`]*[A-Za-zÀ-ÿ]{2,}[^<>{}\n=:;()|$"'`]*)[<{]/g
+
+/**
+ * Une déclaration TypeScript et non une phrase.
+ *
+ * `TEXTE_COLLE` part de l'accolade qui ferme un bloc et s'arrête à celle, ou au
+ * chevron, qui ouvre le suivant : entre les deux, dans un `.tsx`, il y a
+ * souvent `interface Partie {`, `export function Liste<`, `satisfies Record<`
+ * ou `& Omit<`. Aucun texte d'interface ne commence par ces mots-clés — et un
+ * texte qui commencerait par « Interface » garde sa majuscule, que le motif
+ * laisse passer.
+ */
+const DECLARATION =
+  /^(?:(?:export|default|declare|async)\s+)*(?:interface|type|function|const|let|class|enum|satisfies|extends|implements|as|keyof|typeof)\b|^[&|]/
+
+/**
+ * Les noms propres, qu'on ne traduit pas.
+ *
+ * Le contrôle ne tranche pas entre un intitulé et un nom propre ; cette liste
+ * le fait une fois pour toutes, à la main, pour ceux qui reviennent à chaque
+ * passage. On n'y met qu'un nom — la marque, un moteur, un fournisseur, une
+ * licence —, jamais un mot qu'une autre langue écrirait autrement : ce qui se
+ * traduit passe par le dictionnaire, même d'un seul mot.
+ */
+const NOMS_PROPRES = new Set(['Le Coup Parfait', 'Stockfish 19', 'Groq', 'CC BY-NC-SA'])
 
 function textesNus(src) {
   const lignes = src.split('\n')
@@ -152,7 +181,14 @@ for (const chemin of fichiers(RACINE)) {
 
   // Les commentaires n'intéressent personne : le projet les écrit en français
   // par convention de maison, et ils ne s'affichent jamais.
+  //
+  // Les fins de ligne sont ramenées à `\n` d'abord. Sous Windows, git extrait
+  // les sources en `\r\n`, et le `\r` restait collé à chaque ligne : ni
+  // `TEXTE_SEUL` ni `TEXTE_COLLE` ne le tolèrent, si bien qu'une même copie
+  // de travail montrait vingt-neuf textes quand il y en avait plus de
+  // quatre-vingts.
   const src = readFileSync(chemin, 'utf8')
+    .replace(/\r\n?/g, '\n')
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/^\s*\/\/.*$/gm, '')
 
@@ -180,6 +216,8 @@ for (const chemin of fichiers(RACINE)) {
     if (/\(|&&|\|\||=>|\.[a-zA-Z]/.test(valeur)) continue
     if (/^[A-Z][A-Z_0-9]+$/.test(valeur)) continue
     if (TYPES.has(valeur)) continue
+    if (DECLARATION.test(valeur)) continue
+    if (NOMS_PROPRES.has(valeur)) continue
     trouves.add(valeur)
   }
 
@@ -200,6 +238,6 @@ console.log(
   total === 0
     ? '\n✅  Aucun texte en dur dans l’interface.'
     : `\nℹ️   ${total} littéral(aux) à relire dans ${parFichier.length} fichier(s).` +
-        '\n    Tous ne sont pas à traduire : un nom propre — « Stockfish », « Groq »,' +
-        '\n    « CC BY-NC-SA » — reste écrit tel quel. Le contrôle ne tranche pas, il montre.',
+        '\n    Tous ne sont pas à traduire : un nom propre reste écrit tel quel. S’il revient,' +
+        '\n    ajoute-le à `NOMS_PROPRES` ; sinon, passe le texte par le dictionnaire.',
 )
