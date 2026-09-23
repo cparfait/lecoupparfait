@@ -2959,6 +2959,14 @@ export const en: Dictionary = {
       blurb: 'No style, no mercy. The best move, every time. Good luck.',
     },
   },
+  niveaux: {
+    debutant: 'Beginner',
+    apprenti: 'Apprentice',
+    club: 'Club',
+    confirme: 'Advanced',
+    fort: 'Strong',
+    expert: 'Expert',
+  },
   axes: {
     capture: {
       attire: 'taking material',

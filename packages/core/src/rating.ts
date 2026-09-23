@@ -160,6 +160,11 @@ export const CLASSEMENT_PLANCHER = 100
  */
 export interface TrancheDefi {
   id: string
+  /**
+   * Le nom en français, gardé pour la réponse de `/api/defi-du-jour` qui le
+   * transmet. L'écran ne l'affiche plus : il lit `cleDeTranche(id)` dans le
+   * dictionnaire, comme le titre du profil.
+   */
   nom: string
   min: number
   max: number
@@ -173,6 +178,16 @@ export const TRANCHES_DEFI: readonly TrancheDefi[] = [
   { id: 'fort', nom: 'Fort', min: 1700, max: 2100 },
   { id: 'expert', nom: 'Expert', min: 2100, max: 3000 },
 ]
+
+/**
+ * La clé de dictionnaire du nom d'une tranche (`niveaux.club`…).
+ *
+ * Le cœur n'a pas de dictionnaire : il rend la clé, l'interface la résout.
+ * `scripts/check-cles-coeur.mjs` vérifie que chaque tranche a la sienne.
+ */
+export function cleDeTranche(id: string): string {
+  return `niveaux.${id}`
+}
 
 /**
  * La tranche d'un joueur, d'après son classement de puzzles.
@@ -445,22 +460,21 @@ export function leaderboardRating(rating: GlickoRating): number {
 //  Aides d'affichage
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Titre honorifique associé à une tranche de classement. */
-export function ratingTitle(rating: number): { fr: string; en: string; tier: number } {
-  const tiers: Array<{ min: number; fr: string; en: string }> = [
-    { min: 2500, fr: 'Grand Maître', en: 'Grandmaster' },
-    { min: 2300, fr: 'Maître International', en: 'International Master' },
-    { min: 2100, fr: 'Maître', en: 'Master' },
-    { min: 1900, fr: 'Expert', en: 'Expert' },
-    { min: 1700, fr: 'Confirmé', en: 'Advanced' },
-    { min: 1500, fr: 'Intermédiaire', en: 'Intermediate' },
-    { min: 1300, fr: 'Amateur', en: 'Casual' },
-    { min: 1100, fr: 'Apprenti', en: 'Apprentice' },
-    { min: 0, fr: 'Débutant', en: 'Beginner' },
-  ]
-  const index = tiers.findIndex((t) => rating >= t.min)
-  const tier = tiers[index] ?? tiers[tiers.length - 1]!
-  return { fr: tier.fr, en: tier.en, tier: tiers.length - index }
+/**
+ * Le nom de niveau associé à un classement, pour le profil.
+ *
+ * Les mêmes tranches que le défi du jour, et non une table à part. Il y en
+ * avait deux : « Apprenti » valait 800–1100 au défi et 1100–1300 au profil,
+ * « Expert » 2100 et plus d'un côté, 1900–2100 de l'autre, et le profil
+ * écrivait son titre en français ou en anglais en dur. Un même mot doit
+ * désigner le même niveau partout ; le libellé passe par le dictionnaire.
+ *
+ * `tier` va de 1 (la tranche la plus basse) au nombre de tranches.
+ */
+export function ratingTitle(rating: number): { id: string; cle: string; tier: number } {
+  const tranche = trancheDefiPour(rating)
+  const index = TRANCHES_DEFI.findIndex((autre) => autre.id === tranche.id)
+  return { id: tranche.id, cle: cleDeTranche(tranche.id), tier: index + 1 }
 }
 
 /**

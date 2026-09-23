@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import clsx from 'clsx'
 import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 import { SPEED_LABELS, ratingTitle } from '@coupparfait/core'
 import { Button, Card, Chip, EmptyState, Skeleton } from '@/components/ui/index.tsx'
 import { AvatarPicker } from '@/components/profile/AvatarPicker.tsx'
@@ -297,7 +298,7 @@ export default function ProfilePage() {
               <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
                 {profile.user.username}
               </h1>
-              {title && <Chip tone="accent">{title.fr}</Chip>}
+              {title && <Chip tone="accent">{tCoeur(t, title.cle)}</Chip>}
             </div>
             {profile.user.bio && (
               <p className="mt-1.5 text-sm leading-relaxed text-muted">{profile.user.bio}</p>

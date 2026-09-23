@@ -23,6 +23,7 @@ import { useRouter } from 'next/navigation'
 import { Check, ChevronDown, ChevronUp, Sun, Swords } from 'lucide-react'
 import clsx from 'clsx'
 import { useT } from '@/lib/i18n/index.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 import { Card, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import { QUETES, queteFaite, jourLocal } from '@/lib/daily/quotidien.ts'
@@ -31,7 +32,7 @@ import { ListeDesQuetes } from './ListeDesQuetes.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { toast } from '@/components/ui/Toast.tsx'
 import { XP_TOTAL } from '@/lib/daily/quetes.ts'
-import { tranchesAuDessus } from '@coupparfait/core'
+import { cleDeTranche, tranchesAuDessus } from '@coupparfait/core'
 
 interface DefiPuzzle {
   id: string
@@ -294,7 +295,10 @@ function DefiCliquable({
         </span>
         <span className="block text-xs text-muted">
           {tranche
-            ? t('daily.tierLevel', { tranche: tranche.nom, cote: defi.rating })
+            ? t('daily.tierLevel', {
+                tranche: tCoeur(t, cleDeTranche(tranche.id)),
+                cote: defi.rating,
+              })
             : t('daily.levelOnly', { cote: defi.rating })}
           {t(defiFait ? 'daily.comeBackTomorrow' : 'daily.onePosition')}
         </span>
@@ -361,7 +365,7 @@ function PlusDur({ tranche }: { tranche: Tranche }) {
           href={`/puzzles?defi=1&tranche=${autre.id}`}
           className="rounded-full border border-line px-2 py-0.5 font-medium text-muted transition-colors hover:border-accent hover:text-accent"
         >
-          {autre.nom}
+          {tCoeur(t, cleDeTranche(autre.id))}
         </Link>
       ))}
     </p>

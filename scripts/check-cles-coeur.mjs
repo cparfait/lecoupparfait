@@ -23,7 +23,7 @@ const { fr } = await import('../apps/web/src/lib/i18n/fr.ts')
 const coeur = await import('../packages/core/src/index.ts')
 
 /** Les racines du dictionnaire que le cœur alimente. */
-const RACINES = ['motifs', 'qualites', 'bots', 'axes']
+const RACINES = ['motifs', 'qualites', 'bots', 'axes', 'niveaux']
 
 function resoudre(chemin) {
   let courant = fr
@@ -77,6 +77,8 @@ for (const motif of coeur.motifGlossary('fr')) {
   recolter(motif.name)
   recolter(motif.definition)
 }
+// Les noms de niveau se composent depuis l'identifiant de chaque tranche.
+for (const tranche of coeur.TRANCHES_DEFI) recolter(coeur.cleDeTranche(tranche.id))
 // Les axes de style ne sortent que par `penchants`, qui les compose.
 for (const racine of ['axes']) {
   for (const chemin of chemins(fr[racine], racine)) reclamees.add(chemin)

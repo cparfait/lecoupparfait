@@ -2986,6 +2986,16 @@ export const fr = {
       blurb: 'Aucun style, aucune pitié. Le meilleur coup, à chaque fois. Bonne chance.',
     },
   },
+  // Les noms de niveau, un par tranche de `TRANCHES_DEFI` : défi du jour et
+  // titre du profil lisent les mêmes.
+  niveaux: {
+    debutant: 'Débutant',
+    apprenti: 'Apprenti',
+    club: 'Club',
+    confirme: 'Confirmé',
+    fort: 'Fort',
+    expert: 'Expert',
+  },
   axes: {
     capture: {
       attire: 'prendre du matériel',
