@@ -30,16 +30,18 @@ eux — fourchette, clouage, mat du couloir — et il te le dit à voix haute.
 | **Les enjeux**     | 25 fiches d'ouverture expliquées par ce qu'elles **cherchent** et non par leurs variantes : l'idée, la structure de pions, le plan de chaque camp, le piège des dix premiers coups. Elles apparaissent d'elles-mêmes dans l'explorateur |
 | **Regarder**       | les parties en cours, **celles de tes amis en tête** et signalées comme telles, avec un filtre pour ne voir qu'elles — et un bouton « Regarder » sur la fiche de chaque ami qui joue                                                    |
 | **Progresser**     | comptes, classement Glicko-2 par cadence, Elo classique affiché en parallèle, courbe de progression                                                                                                                                     |
-| **Revenir**        | un défi du jour, **le même pour tout le monde**, cinq quêtes courtes et une série de jours consécutifs — sans compte, si l'on veut                                                                                                      |
+| **Revenir**        | un défi du jour, **le même pour tout le monde**, cinq quêtes courtes et une série de jours consécutifs ; le défi demande un compte, les quêtes non                                                                                      |
 | **Être prévenu**   | une notification quand un ami t'invite — un défi expire en cinq minutes — et un rappel du défi du jour, à ton heure. Rien d'autre, et les deux se coupent séparément. Voir [`docs/notifications.md`](docs/notifications.md)             |
 
 ### Les langues
 
 L'interface est proposée en **41 langues** — celles où l'on joue : les grandes
 langues européennes, le Caucase (arménien, azerbaïdjanais, géorgien), l'Asie et
-les écritures de droite à gauche. Vingt sont complètes ; les autres sont
-proposées, fonctionnent, et affichent en anglais ce qui n'est pas encore
-traduit — **phrase par phrase**, pas écran par écran. `npm run check:langues`
+les écritures de droite à gauche. Deux sont complètes, le français et
+l'anglais ; dix-huit ont leurs premiers écrans traduits, et les vingt et une
+autres sont proposées sans traduction encore. Toutes fonctionnent, et
+affichent en anglais ce qui n'est pas encore traduit — **phrase par phrase**,
+pas écran par écran. Les préférences le disent aussi. `npm run check:langues`
 affiche la couverture de chacune.
 
 L'arabe, l'hébreu et le persan basculent l'interface **de droite à gauche** :
