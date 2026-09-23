@@ -6,7 +6,7 @@
  * condition de passage.
  *
  * **Pourquoi ce mode existe.** L'application sait déjà presque tout faire :
- * jouer contre vingt-cinq niveaux, expliquer chaque coup, enseigner des
+ * jouer contre toute une échelle d'adversaires, expliquer chaque coup, enseigner des
  * ouvertures, entraîner la tactique. Ce qu'elle ne savait pas faire, c'est
  * dire *par quoi commencer et quoi faire ensuite*. Six entrées de menu et
  * aucune raison de préférer l'une à l'autre : la carrière est un **ordre**
@@ -79,9 +79,9 @@ export interface Chapitre {
 /**
  * Douze chapitres, de 100 à 1850 Elo.
  *
- * Douze et non vingt-cinq comme le barème des bots : un chapitre doit durer
- * plusieurs séances pour qu'on sente la progression, et vingt-cinq paliers
- * donneraient l'impression de piétiner. Au-delà de 1850, un joueur sait ce
+ * Douze, et non un chapitre par échelon du barème des bots : un chapitre doit
+ * durer plusieurs séances pour qu'on sente la progression, et autant de
+ * chapitres que d'échelons donneraient l'impression de piétiner. Au-delà de 1850, un joueur sait ce
  * qu'il doit travailler et n'a plus besoin qu'on le lui dise.
  *
  * ── Les échelons, un par chapitre, sauf le dernier ──

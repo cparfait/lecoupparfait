@@ -163,11 +163,11 @@ export const en: Dictionary = {
     metaTitle: '{nom} — artificial opponent',
     all: 'All the opponents',
     galleryIntro:
-      'Seven characters, spread over the twenty-five levels. Their style is not decoration: each evaluates moves with a preference of its own, and its page shows the numbers that produce it — along with what to do to beat it.',
+      'Seven characters, spread over the {total} levels. Their style is not decoration: each evaluates moves with a preference of its own, and its page shows the numbers that produce it — along with what to do to beat it.',
     whereYouMeet: 'Where you meet them',
     atLevel: 'At level',
     atLevels: 'At levels',
-    ofTwentyFive: 'of the twenty-five, that is from',
+    ofTotal: 'of the {total}, that is from',
     to: 'to',
     playAgainst: 'Play against {nom}',
     character: 'Their character',

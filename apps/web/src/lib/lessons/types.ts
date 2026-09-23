@@ -78,7 +78,7 @@ export interface LessonStep {
   /** Objectif pour les étapes libres. */
   goal?: 'checkmate' | 'winMaterial' | 'promote' | 'draw'
 
-  /** Niveau du moteur pour les étapes libres (1 à 25). */
+  /** Niveau du moteur pour les étapes libres (1 à `BOT_LEVELS.length`). */
   botLevel?: number
 }
 

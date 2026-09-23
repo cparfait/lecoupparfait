@@ -300,9 +300,12 @@ interface LevelSpec {
   l'occasion — dix ne suffisaient pas à contenir une vraie faute de débutant.
 */
 /*
-  ── Quinze échelons, et pourquoi l'échelle ne commence plus à 100 ───────────
+  ── Historique : la réduction à quinze échelons, partant de 320 ───────────
 
-  Elle en portait vingt-sept, de 320 à 3200. Deux mesures ont défait ce
+  Ce bloc raconte une étape passée ; l'échelle actuelle, avec ses trois
+  échelons d'entraînement revenus sous 320, est décrite au bloc suivant.
+
+  L'échelle portait alors vingt-sept échelons. Deux mesures ont défait ce
   découpage, et la seconde est la plus dérangeante.
 
   **Le haut était du décor.** Dix-huit échelons entre 1320 et 3200, espacés de
@@ -551,7 +554,7 @@ const LEVEL_TABLE: LevelSpec[] = [
   },
 ]
 
-/** Les 15 niveaux jouables, prêts à l'emploi. */
+/** Les niveaux jouables, prêts à l'emploi. Leur nombre ne s'écrit nulle part : `BOT_LEVELS.length`. */
 export const BOT_LEVELS: BotLevel[] = LEVEL_TABLE.map((spec, index) => {
   const level = index + 1
   const personality = BOT_PERSONALITIES[spec.personality]
@@ -611,7 +614,8 @@ export function botLevelAvecStyle(level: number, personality?: BotPersonalityId 
  * Les niveaux tenus par une personnalité, du plus faible au plus fort.
  *
  * Une personnalité revient à plusieurs paliers de l'échelle — Rempart en tient
- * quatre, Oracle les cinq derniers. Sa fiche l'annonce, et l'écran de réglages
+ * plusieurs, Oracle les derniers ; le compte se lit ici et nulle part
+ * ailleurs. Sa fiche l'annonce, et l'écran de réglages
  * s'en sert pour honorer « Jouer contre Mirage ».
  */
 export function niveauxDe(id: BotPersonalityId): BotLevel[] {
@@ -624,8 +628,8 @@ export function niveauxDe(id: BotPersonalityId): BotLevel[] {
  * Arriver depuis la fiche d'un adversaire pose une contrainte — *lui* — et une
  * préférence — la force qu'on a l'habitude d'affronter. On garde la contrainte
  * et l'on approche la préférence, plutôt que de servir systématiquement le
- * palier le plus faible : demander Oracle ne doit pas donner le niveau 21 à
- * quelqu'un qui joue au 25, ni l'inverse.
+ * palier le plus faible : demander Oracle ne doit pas donner son échelon le
+ * plus faible à quelqu'un qui joue au plus fort, ni l'inverse.
  *
  * Rend `souhaite` inchangé si la personnalité est inconnue : l'appelant n'a
  * alors rien demandé de particulier.

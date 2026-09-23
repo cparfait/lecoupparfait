@@ -5,7 +5,7 @@
  *
  * Deux questions, et pas douze : à quel palier, et sur quel thème. Le niveau de
  * l'adversaire, la cadence et le mode commenté en découlent — c'est tout
- * l'intérêt, puisque régler soi-même un curseur de 1 à 25 avant de jouer est
+ * l'intérêt, puisque régler soi-même un curseur de niveau avant de jouer est
  * exactement ce qui empêche de commencer.
  *
  * Le palier arrive prérempli : depuis la page « Ton palier » il est dans

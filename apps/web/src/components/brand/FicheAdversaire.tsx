@@ -31,8 +31,8 @@ const IDS = Object.keys(BOT_PERSONALITIES) as BotPersonalityId[]
 /**
  * À quels niveaux le rencontre-t-on ?
  *
- * Déduit de `BOT_LEVELS`, jamais écrit à la main : la table des vingt-cinq
- * niveaux change, et une fiche qui annoncerait « niveaux 4 à 7 » de mémoire
+ * Déduit de `BOT_LEVELS`, jamais écrit à la main : la table des niveaux
+ * change, et une fiche qui annoncerait « niveaux 4 à 7 » de mémoire
  * mentirait au premier remaniement.
  */
 function niveauxDe(id: BotPersonalityId) {
@@ -93,8 +93,9 @@ export function FicheAdversaire({ id }: { id: BotPersonalityId }) {
         <p className="mt-1.5 text-[14px] leading-relaxed">
           {t(niveaux.nombre === 1 ? 'opponent.atLevel' : 'opponent.atLevels')}{' '}
           <strong className="tabular-nums">{niveaux.numeros.join(', ')}</strong>{' '}
-          {t('opponent.ofTwentyFive')} <strong className="tabular-nums">{niveaux.eloMin}</strong>{' '}
-          {t('opponent.to')} <strong className="tabular-nums">{niveaux.eloMax}</strong> Elo.
+          {t('opponent.ofTotal', { total: BOT_LEVELS.length })}{' '}
+          <strong className="tabular-nums">{niveaux.eloMin}</strong> {t('opponent.to')}{' '}
+          <strong className="tabular-nums">{niveaux.eloMax}</strong> Elo.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {/* `?perso=` seul : l'écran de l'ordinateur lit ce paramètre et

@@ -162,11 +162,11 @@ export const fr = {
     metaTitle: '{nom} — adversaire artificiel',
     all: 'Tous les adversaires',
     galleryIntro:
-      'Sept caractères, répartis sur les vingt-cinq niveaux. Leur style n’est pas un habillage : chacun évalue les coups avec une préférence propre, et sa fiche montre les nombres qui la produisent — avec ce qu’il faut faire pour le battre.',
+      'Sept caractères, répartis sur les {total} niveaux. Leur style n’est pas un habillage : chacun évalue les coups avec une préférence propre, et sa fiche montre les nombres qui la produisent — avec ce qu’il faut faire pour le battre.',
     whereYouMeet: 'Où tu le rencontres',
     atLevel: 'Au niveau',
     atLevels: 'Aux niveaux',
-    ofTwentyFive: 'des vingt-cinq, soit de',
+    ofTotal: 'des {total}, soit de',
     to: 'à',
     playAgainst: 'Jouer contre {nom}',
     character: 'Son caractère',

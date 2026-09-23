@@ -340,7 +340,7 @@ export interface OpeningEntry {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface BotLevel {
-  /** 1 à 25. */
+  /** De 1 à `BOT_LEVELS.length`. */
   level: number
   /** Elo approximatif visé. */
   elo: number

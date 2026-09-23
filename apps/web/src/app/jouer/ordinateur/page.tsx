@@ -230,7 +230,7 @@ export default function PlayComputerPage() {
    *
    * L'écran de préparation a déjà répondu aux deux seules questions qui
    * comptent — à quel palier, sur quel thème — et il en a déduit le niveau de
-   * l'adversaire. Repasser par le curseur de 1 à 25 annulerait exactement ce
+   * l'adversaire. Repasser par le curseur des niveaux annulerait exactement ce
    * que la séance venait d'épargner.
    *
    * `commente` voyage à part plutôt que d'écrire dans les préférences : allumer
@@ -984,7 +984,7 @@ function SetupScreen({
             </div>
 
             {/* ── Le curseur, et le repère qui suit le pouce ──────────────────
-            Vingt-cinq crans, un par niveau, plus haut tous les cinq. Le
+            Un cran par niveau de `BOT_LEVELS`, plus haut tous les cinq. Le
             repère se cale sur la position du pouce : un pouce mesure 22 px,
             son centre ne parcourt pas toute la largeur mais celle-ci moins
             sa propre taille, d'où la correction de onze pixels sur chaque

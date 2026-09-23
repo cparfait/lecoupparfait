@@ -19,7 +19,7 @@
 
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { BOT_PERSONALITIES } from '@coupparfait/core'
+import { BOT_LEVELS, BOT_PERSONALITIES } from '@coupparfait/core'
 import { Card } from '@/components/ui/index.tsx'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
@@ -36,7 +36,7 @@ export default function GalerieAdversaires() {
         {t('play.opponentsTitle')}
       </h1>
       <p className="mt-3 max-w-2xl leading-relaxed text-muted max-lg:text-[14px]">
-        {t('opponent.galleryIntro')}
+        {t('opponent.galleryIntro', { total: BOT_LEVELS.length })}
       </p>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

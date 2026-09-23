@@ -17,7 +17,7 @@
  *
  * Le joueur peut donc cocher « partie classée » **avant** de commencer, et
  * l'écran de jeu lui retire alors les trois aides. L'adversaire a un
- * classement annoncé — c'est tout l'objet du barème des vingt-cinq niveaux —,
+ * classement annoncé — c'est tout l'objet du barème des niveaux —,
  * il fait donc un adversaire valable, avec un écart-type large : ce barème
  * reste une approximation, et l'incertitude doit se voir dans le calcul plutôt
  * que d'être passée sous silence.

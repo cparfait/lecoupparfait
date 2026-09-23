@@ -40,7 +40,7 @@ export interface Concurrent {
   nom: string | null
   /** La clé du nom, pour un adversaire artificiel. */
   nomKey?: CleDeTexte
-  /** Niveau du barème, 1 à 25. `null` pour l'humain. */
+  /** Niveau du barème, 1 à `BOT_LEVELS.length`. `null` pour l'humain. */
   niveau: number | null
   elo: number
   personnalite: BotPersonalityId | null

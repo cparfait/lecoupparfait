@@ -25,7 +25,7 @@ export interface UseBotPlayerOptions {
   fen: string
   /** Couleur jouée par l'ordinateur. */
   botColor: Color
-  /** Niveau 1 à 25. */
+  /** Niveau, de 1 à `BOT_LEVELS.length`. */
   level: number
   /**
    * Style imposé, en dépit de celui que le barème associe à ce niveau.
@@ -184,7 +184,7 @@ export function useBotPlayer(options: UseBotPlayerOptions): BotPlayerState {
         setLastCost(choice.cost)
 
         // Réflexion simulée, dont on retranche le temps de calcul réel : un bot
-        // de niveau 25 réfléchit déjà longtemps, inutile d'en rajouter.
+        // du haut de l'échelle réfléchit déjà longtemps, inutile d'en rajouter.
         const legalCount = analysis.lines.length * 6
         const wanted = instant ? 0 : botThinkDelayMs(bot.level, legalCount)
         const elapsed = Date.now() - startedAt

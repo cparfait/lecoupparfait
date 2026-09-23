@@ -8,7 +8,7 @@ et signale en fin de page ce qui a été tranché autrement que prévu.
 
 ## 1. Le problème
 
-L'application sait déjà à peu près tout faire : jouer contre vingt-cinq niveaux
+L'application sait déjà à peu près tout faire : jouer contre toute une échelle
 d'adversaires, expliquer chaque coup, analyser une partie, enseigner des
 ouvertures, entraîner la tactique, résoudre des finales. Ce qu'elle ne sait pas
 faire, c'est **dire quoi faire ensuite**.
@@ -96,9 +96,9 @@ Une carrière complète = **12 chapitres**, de 100 à 1850 Elo. C'est le
 segment où l'aide change tout ; au-delà, un joueur sait ce qu'il doit
 travailler et n'a plus besoin qu'on le lui dise.
 
-Douze, et pas vingt-cinq comme le barème des bots : un chapitre doit durer
-plusieurs séances pour qu'on sente la progression, et vingt-cinq paliers
-donneraient l'impression de piétiner.
+Douze, et pas un chapitre par échelon du barème des bots : un
+chapitre doit durer plusieurs séances pour qu'on sente la progression, et
+autant de chapitres que d'échelons donneraient l'impression de piétiner.
 
 ---
 
