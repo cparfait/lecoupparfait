@@ -15,7 +15,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Color, PieceSymbol, Square } from 'chess.js'
-import { botLevel, botThinkDelayMs, pickBotMove, uciOptionsFor } from '@coupparfait/core'
+import { botLevelAvecStyle, botThinkDelayMs, pickBotMove, uciOptionsFor } from '@coupparfait/core'
 import type { BotLevel, BotPersonalityId } from '@coupparfait/core'
 import { getEngine, messageMoteur } from '@/lib/engine/client.ts'
 import { useT } from '@/lib/i18n/index.tsx'
@@ -92,10 +92,10 @@ export function useBotPlayer(options: UseBotPlayerOptions): BotPlayerState {
    * et seulement là où un style est imposé : carrière et tournoi.
    */
   const personality = options.personality
-  const bot = useMemo(() => {
-    const bareme = botLevel(level)
-    return personality ? { ...bareme, personality } : bareme
-  }, [level, personality])
+  // `botLevelAvecStyle` et non un simple `{ ...bareme, personality }` : le
+  // biais que lit `pickBotMove` vient de la personnalité, et le remplacer à
+  // moitié laissait jouer le style du niveau sous le nom du style imposé.
+  const bot = useMemo(() => botLevelAvecStyle(level, personality), [level, personality])
   const [thinking, setThinking] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

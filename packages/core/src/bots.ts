@@ -584,6 +584,30 @@ export function botLevel(level: number): BotLevel {
 }
 
 /**
+ * Un échelon du barème, joué dans le style d'une personnalité imposée.
+ *
+ * La carrière et le tournoi (`?perso=`) choisissent un style parce que c'est
+ * lui l'exercice, et gardent le niveau pour la force. Remplacer le seul champ
+ * `personality` ne suffit pas : le choix du coup lit `engine.bias`, et le nom
+ * affiché lit `nomKey`, tous deux calculés depuis la personnalité *du niveau*.
+ * On annonçait donc Brasier au chapitre 6 et c'était Rempart qui jouait. Tout
+ * ce qui découle de la personnalité se reconstruit ici, en un seul endroit ;
+ * la force (Elo, réglages moteur) reste celle de l'échelon.
+ */
+export function botLevelAvecStyle(level: number, personality?: BotPersonalityId | null): BotLevel {
+  const bareme = botLevel(level)
+  const style = personality ? BOT_PERSONALITIES[personality] : undefined
+  if (!style || style.id === bareme.personality) return bareme
+  return {
+    ...bareme,
+    personality: style.id,
+    nomKey: style.name,
+    blurb: style.blurb,
+    engine: { ...bareme.engine, bias: style.bias },
+  }
+}
+
+/**
  * Les niveaux tenus par une personnalité, du plus faible au plus fort.
  *
  * Une personnalité revient à plusieurs paliers de l'échelle — Rempart en tient

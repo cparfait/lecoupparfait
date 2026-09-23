@@ -27,7 +27,9 @@ const {
   detailXp,
   PROGRESSION_INITIALE,
 } = await import('../packages/core/src/carriere.ts')
-const { BOT_LEVELS, BOT_PERSONALITIES } = await import('../packages/core/src/bots.ts')
+const { BOT_LEVELS, BOT_PERSONALITIES, botLevelAvecStyle } =
+  await import('../packages/core/src/bots.ts')
+const { readFileSync } = await import('node:fs')
 const { ALL_LESSONS } = await import('../apps/web/src/lib/lessons/index.ts')
 const { fr } = await import('../apps/web/src/lib/i18n/fr.ts')
 
@@ -122,6 +124,41 @@ for (let i = 1; i < CHAPITRES.length; i++) {
   if (CHAPITRES[i].niveau <= CHAPITRES[i - 1].niveau) croissant = false
 }
 check('la difficulté monte à chaque chapitre', croissant)
+
+/*
+  Le style annoncé doit être celui qui joue.
+
+  Le chapitre impose une personnalité à un échelon qui en a une autre. Le choix
+  du coup lit `engine.bias` : ne remplacer que le champ `personality` laissait
+  jouer le style du niveau sous le nom du style imposé — on annonçait Brasier
+  au chapitre 6 et c'était Rempart qui jouait. On vérifie donc le biais et le
+  nom effectivement servis, et que le crochet du navigateur passe bien par la
+  fonction qui les reconstruit.
+*/
+for (const c of CHAPITRES) {
+  const joue = botLevelAvecStyle(c.niveau, c.adversaire)
+  const attendu = BOT_PERSONALITIES[c.adversaire]
+  check(
+    `chapitre ${String(c.numero).padStart(2)} — le biais joué est celui de ${c.adversaire}`,
+    JSON.stringify(joue.engine.bias) === JSON.stringify(attendu.bias) &&
+      joue.nomKey === attendu.name &&
+      joue.personality === c.adversaire,
+    `${joue.personality} joue`,
+  )
+  check(
+    `chapitre ${String(c.numero).padStart(2)} — la force reste celle de l’échelon`,
+    joue.elo === BOT_LEVELS[c.niveau - 1].elo &&
+      joue.engine.temperature === BOT_LEVELS[c.niveau - 1].engine.temperature,
+  )
+}
+const crochet = readFileSync(
+  new URL('../apps/web/src/lib/game/useBotPlayer.ts', import.meta.url),
+  'utf8',
+)
+check(
+  'useBotPlayer reconstruit le style imposé par botLevelAvecStyle',
+  crochet.includes('botLevelAvecStyle(level, personality)'),
+)
 
 console.log('\n♟  Rangs et expérience\n')
 
