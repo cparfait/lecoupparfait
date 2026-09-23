@@ -1304,6 +1304,8 @@ export const fr = {
       sacrifice: 'Sacrifice',
       promotion: 'Promotion',
       zugzwang: 'Zugzwang',
+      trappedPiece: 'Pièce enfermée',
+      quietMove: 'Coup calme',
     },
 
     dailyPuzzle: 'Puzzle du jour',

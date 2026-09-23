@@ -82,6 +82,8 @@ const THEMES = new Set([
   'sacrifice',
   'promotion',
   'zugzwang',
+  'trappedPiece',
+  'quietMove',
 ])
 
 const lecons = new Set(ALL_LESSONS.map((l) => l.id))

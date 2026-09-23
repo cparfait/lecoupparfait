@@ -1291,6 +1291,8 @@ export const en: Dictionary = {
       sacrifice: 'Sacrifice',
       promotion: 'Promotion',
       zugzwang: 'Zugzwang',
+      trappedPiece: 'Trapped piece',
+      quietMove: 'Quiet move',
     },
 
     dailyPuzzle: 'Daily puzzle',

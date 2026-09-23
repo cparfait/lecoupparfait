@@ -159,7 +159,10 @@ export const CHAPITRES: readonly Chapitre[] = [
     numero: 5,
     titre: 'Conclure une partie gagnée',
     objectif: 'Mater avec une dame, puis avec une tour. Sans hésiter.',
-    lecon: 'mat-escalier',
+    // Les deux mats élémentaires ont chacun leur leçon ; le chapitre n'en porte
+    // qu'une, et c'est la dame, par laquelle l'objectif commence. `mat-escalier`
+    // y figurait : un mat à deux tours, qui n'est aucun des deux annoncés.
+    lecon: 'mat-dame-roi',
     theme: 'mateIn2',
     puzzles: 5,
     adversaire: 'prudent',
@@ -188,7 +191,9 @@ export const CHAPITRES: readonly Chapitre[] = [
     titre: 'Compter le matériel',
     objectif: 'Savoir si un échange est bon avant de le faire.',
     lecon: 'valeurs',
-    theme: 'skewer',
+    // Gagner du matériel sur une pièce qui ne peut plus fuir : c'est compter,
+    // et non une enfilade, motif géométrique sans rapport avec la leçon.
+    theme: 'trappedPiece',
     puzzles: 5,
     adversaire: 'tacticien',
     niveau: 7,
@@ -244,7 +249,10 @@ export const CHAPITRES: readonly Chapitre[] = [
     titre: 'Le plan, pas le coup',
     objectif: 'Choisir une faiblesse adverse, et jouer trois coups vers elle.',
     lecon: 'avant-poste',
-    theme: 'zugzwang',
+    // Un coup calme qui prépare plutôt qu'il ne prend : le plus proche d'un
+    // plan que la base de puzzles, toute tactique, sache offrir. Le zugzwang,
+    // affaire de finale, n'avait rien à voir avec la leçon d'avant-poste.
+    theme: 'quietMove',
     puzzles: 5,
     adversaire: 'positionnel',
     niveau: 11,

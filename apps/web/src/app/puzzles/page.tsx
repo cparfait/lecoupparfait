@@ -96,6 +96,12 @@ const THEMES = [
   'sacrifice',
   'promotion',
   'zugzwang',
+  // Ces deux-là servent d'abord la carrière : « Compter le matériel » et « Le
+  // plan, pas le coup » n'avaient aucun thème à eux dans la liste, et
+  // empruntaient enfilades et zugzwangs, sans rapport avec leur leçon. Ils
+  // existent tels quels dans la base Lichess importée.
+  'trappedPiece',
+  'quietMove',
 ] as const
 
 /**
