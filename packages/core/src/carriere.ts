@@ -668,9 +668,24 @@ export function coupDeMainPropose(progression: Progression): boolean {
   return progression.losingStreak >= SEUIL_COUP_DE_MAIN
 }
 
+/**
+ * L'échelon auquel le coup de main ramène l'adversaire, ou `null` s'il n'y a
+ * rien en dessous.
+ *
+ * Un seul cran, comme l'annonce le cahier des charges. Il en retirait deux :
+ * au chapitre 6, cela faisait près de cinq cents points d'un coup, un autre
+ * adversaire plutôt qu'un répit. Et au chapitre 1, `Math.max(1, …)` rendait
+ * le même adversaire en annonçant qu'on l'allégeait. `null` oblige l'écran à
+ * dire la vérité : il n'y a pas plus faible.
+ */
+export function niveauAllege(chapitre: Chapitre): number | null {
+  return chapitre.niveau > 1 ? chapitre.niveau - 1 : null
+}
+
 /** Niveau effectif de l'adversaire, allégé quand le coup de main est actif. */
 export function niveauEffectif(chapitre: Chapitre, progression: Progression): number {
-  return coupDeMainPropose(progression) ? Math.max(1, chapitre.niveau - 2) : chapitre.niveau
+  if (!coupDeMainPropose(progression)) return chapitre.niveau
+  return niveauAllege(chapitre) ?? chapitre.niveau
 }
 
 /** Nombre total d'étoiles décrochées. */

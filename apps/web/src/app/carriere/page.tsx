@@ -30,6 +30,7 @@ import {
   chapitre as chapitreNumero,
   coupDeMainPropose,
   etapesDe,
+  niveauAllege,
   niveauEffectif,
   prochaineEtape,
   rangPour,
@@ -306,8 +307,10 @@ function CoupDeMain({ chapitre, progression }: { chapitre: Chapitre; progression
   const t = useT()
   if (!coupDeMainPropose(progression)) return null
 
-  const allege = niveauEffectif(chapitre, progression)
-  const elo = BOT_LEVELS[allege - 1]?.elo ?? 0
+  // `null` au premier échelon : on n'annonce pas un allègement qui rendrait le
+  // même adversaire, on dit qu'il n'y a pas plus faible et l'on garde la leçon.
+  const allege = niveauAllege(chapitre)
+  const elo = allege === null ? null : (BOT_LEVELS[allege - 1]?.elo ?? 0)
 
   return (
     <Card className="mb-4 border-[var(--q-inaccuracy)]/50 p-4">
@@ -316,8 +319,14 @@ function CoupDeMain({ chapitre, progression }: { chapitre: Chapitre; progression
         {t('career.losingStreak', { n: progression.losingStreak })}
       </p>
       <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
-        {t('career.easedBefore')} <strong className="font-semibold text-ink">{elo} Elo</strong>{' '}
-        {t('career.easedAfter')}
+        {elo === null ? (
+          t('career.easedNone')
+        ) : (
+          <>
+            {t('career.easedBefore')} <strong className="font-semibold text-ink">{elo} Elo</strong>{' '}
+            {t('career.easedAfter')}
+          </>
+        )}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         <ButtonLink

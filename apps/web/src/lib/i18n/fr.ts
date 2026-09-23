@@ -1575,6 +1575,8 @@ export const fr = {
     easedBefore: 'L’adversaire passe à',
     easedAfter:
       'pour cette tentative, le temps de reprendre pied. Revoir la leçon aide souvent plus qu’une partie de plus : c’est là qu’est expliqué ce qui te coûte des points.',
+    easedNone:
+      'Ton adversaire est déjà le plus faible de l’échelle : il n’y a pas plus doux. Revoir la leçon aide souvent plus qu’une partie de plus : c’est là qu’est expliqué ce qui te coûte des points.',
     reviewLesson: 'Revoir la leçon',
     playAnyway: 'Rejouer quand même',
     comingUp: 'à venir',

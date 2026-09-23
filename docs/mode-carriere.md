@@ -309,7 +309,10 @@ Implémenté :
 
 1. **Gamification complète** plutôt qu'aucune. Voir l'encadré du § 1.
 2. **Coup de main à trois défaites** et non cinq : à cinq, l'onglet est déjà
-   refermé.
+   refermé. Il baisse l'adversaire d'**un seul** échelon, comme prévu (il en a
+   retiré deux un temps, ce qui changeait d'adversaire plutôt que de donner un
+   répit). Au chapitre 1, il n'y a pas d'échelon plus bas : l'écran le dit et
+   renvoie à la leçon, sans prétendre alléger quoi que ce soit.
 3. **Le style de l'adversaire est imposé**, en dépit de celui que le barème
    associe au niveau. Sans cela le chapitre 6, « tenir face à une attaque »,
    aurait envoyé un adversaire prudent — le contraire de l'exercice.

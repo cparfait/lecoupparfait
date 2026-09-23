@@ -1560,6 +1560,8 @@ export const en: Dictionary = {
     easedBefore: 'The opponent drops to',
     easedAfter:
       'for this attempt, long enough to find your feet. Going back over the lesson often helps more than one more game: that is where what costs you points is explained.',
+    easedNone:
+      'Your opponent is already the weakest on the ladder: there is no gentler one. Going back over the lesson often helps more than one more game: that is where what costs you points is explained.',
     reviewLesson: 'Go back over the lesson',
     playAnyway: 'Play anyway',
     comingUp: 'coming up',

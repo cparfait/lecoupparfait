@@ -26,6 +26,9 @@ const {
   prochaineEtape,
   detailXp,
   PROGRESSION_INITIALE,
+  niveauAllege,
+  niveauEffectif,
+  SEUIL_COUP_DE_MAIN,
 } = await import('../packages/core/src/carriere.ts')
 const { BOT_LEVELS, BOT_PERSONALITIES, botLevelAvecStyle } =
   await import('../packages/core/src/bots.ts')
@@ -176,6 +179,28 @@ check(
   'useBotPlayer reconstruit le style imposé par botLevelAvecStyle',
   crochet.includes('botLevelAvecStyle(level, personality)'),
 )
+
+/*
+  Le coup de main retire un cran, un seul, et jamais zéro en le prétendant.
+
+  Il en retirait deux — près de cinq cents points au chapitre 6, un autre
+  adversaire plutôt qu'un répit — et, au chapitre 1, `Math.max(1, …)` rendait
+  le même adversaire en annonçant l'avoir allégé.
+*/
+const enDifficulte = { ...PROGRESSION_INITIALE, losingStreak: SEUIL_COUP_DE_MAIN }
+for (const c of CHAPITRES) {
+  const allege = niveauAllege(c)
+  const effectif = niveauEffectif(c, enDifficulte)
+  const juste =
+    c.niveau === 1
+      ? allege === null && effectif === c.niveau
+      : allege === c.niveau - 1 && effectif === allege
+  check(
+    `chapitre ${String(c.numero).padStart(2)} — coup de main d’un seul cran`,
+    juste,
+    `niveau ${c.niveau} → ${allege}`,
+  )
+}
 
 console.log('\n♟  Rangs et expérience\n')
 
