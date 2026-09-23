@@ -164,10 +164,8 @@ export const fr = {
     galleryIntro:
       'Sept caractères, répartis sur les {total} niveaux. Leur style n’est pas un habillage : chacun évalue les coups avec une préférence propre, et sa fiche montre les nombres qui la produisent — avec ce qu’il faut faire pour le battre.',
     whereYouMeet: 'Où tu le rencontres',
-    atLevel: 'Au niveau',
-    atLevels: 'Aux niveaux',
-    ofTotal: 'des {total}, soit de',
-    to: 'à',
+    atLevel: 'Au niveau {numeros} des {total}, soit {min} Elo.',
+    atLevels: 'Aux niveaux {numeros} des {total}, soit de {min} à {max} Elo.',
     playAgainst: 'Jouer contre {nom}',
     character: 'Son caractère',
     characterHint:
@@ -1611,7 +1609,7 @@ export const fr = {
       'De « savoir bouger les pièces » à « une partie entière sans filet ». Chaque chapitre a une leçon, cinq puzzles et un adversaire choisi pour ce qu’il t’oblige à travailler.',
     needsAccount: 'La carrière garde ta place.',
     needsAccountHint:
-      'C’est la seule rubrique qui demande un compte, et pour une raison simple : une progression sur douze chapitres n’a aucun sens si elle disparaît en fermant l’onglet. Le compte est gratuit — un pseudo, un mot de passe, et rien d’autre.',
+      'Elle demande un compte, pour une raison simple : une progression sur douze chapitres n’a aucun sens si elle disparaît en fermant l’onglet. Le compte est gratuit — un pseudo, un mot de passe, et rien d’autre.',
     restartConfirm: 'Recommencer la carrière depuis le premier chapitre ?',
     restarted: 'Carrière remise à zéro.',
     restartFailed: 'Impossible de recommencer.',

@@ -23,7 +23,7 @@ import { ArrowLeft, ArrowRight, Swords, Target } from 'lucide-react'
 import { BOT_LEVELS, BOT_PERSONALITIES, penchants, type BotPersonalityId } from '@coupparfait/core'
 import { ButtonLink, Card } from '@/components/ui/index.tsx'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
-import { useT } from '@/lib/i18n/index.tsx'
+import { avecElements, useT } from '@/lib/i18n/index.tsx'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 const IDS = Object.keys(BOT_PERSONALITIES) as BotPersonalityId[]
@@ -91,11 +91,19 @@ export function FicheAdversaire({ id }: { id: BotPersonalityId }) {
       <Card className="mt-7 p-4">
         <p className="text-[12px] font-semibold text-faint">{t('opponent.whereYouMeet')}</p>
         <p className="mt-1.5 text-[14px] leading-relaxed">
-          {t(niveaux.nombre === 1 ? 'opponent.atLevel' : 'opponent.atLevels')}{' '}
-          <strong className="tabular-nums">{niveaux.numeros.join(', ')}</strong>{' '}
-          {t('opponent.ofTotal', { total: BOT_LEVELS.length })}{' '}
-          <strong className="tabular-nums">{niveaux.eloMin}</strong> {t('opponent.to')}{' '}
-          <strong className="tabular-nums">{niveaux.eloMax}</strong> Elo.
+          {/* Une seule phrase, et non quatre morceaux cousus autour des
+              nombres : l'ordre « niveaux, total, bornes » est celui du
+              français, pas celui de toutes les langues. */}
+          {avecElements(
+            t(niveaux.nombre === 1 ? 'opponent.atLevel' : 'opponent.atLevels', {
+              total: BOT_LEVELS.length,
+            }),
+            {
+              numeros: <strong className="tabular-nums">{niveaux.numeros.join(', ')}</strong>,
+              min: <strong className="tabular-nums">{niveaux.eloMin}</strong>,
+              max: <strong className="tabular-nums">{niveaux.eloMax}</strong>,
+            },
+          )}
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {/* `?perso=` seul : l'écran de l'ordinateur lit ce paramètre et

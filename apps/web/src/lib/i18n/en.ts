@@ -165,10 +165,8 @@ export const en: Dictionary = {
     galleryIntro:
       'Seven characters, spread over the {total} levels. Their style is not decoration: each evaluates moves with a preference of its own, and its page shows the numbers that produce it — along with what to do to beat it.',
     whereYouMeet: 'Where you meet them',
-    atLevel: 'At level',
-    atLevels: 'At levels',
-    ofTotal: 'of the {total}, that is from',
-    to: 'to',
+    atLevel: 'At level {numeros} of the {total}, that is {min} Elo.',
+    atLevels: 'At levels {numeros} of the {total}, that is from {min} to {max} Elo.',
     playAgainst: 'Play against {nom}',
     character: 'Their character',
     characterHint:
@@ -1591,7 +1589,7 @@ export const en: Dictionary = {
       'From “knowing how the pieces move” to “a whole game without a safety net”. Each chapter has a lesson, five puzzles and an opponent chosen for what they force you to work on.',
     needsAccount: 'The career keeps your place.',
     needsAccountHint:
-      'It is the only section that requires an account, for a simple reason: progress across twelve chapters makes no sense if it vanishes when you close the tab. The account is free — a username, a password, and nothing else.',
+      'It requires an account, for a simple reason: progress across twelve chapters makes no sense if it vanishes when you close the tab. The account is free — a username, a password, and nothing else.',
     restartConfirm: 'Restart the career from the first chapter?',
     restarted: 'Career reset.',
     restartFailed: 'Could not restart.',
