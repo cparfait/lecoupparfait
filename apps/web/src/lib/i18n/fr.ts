@@ -276,14 +276,6 @@ export const fr = {
     forget: 'Oublier',
     step1: 'Qui affrontes-tu ?',
     opponentGroup: 'Adversaire',
-    scaleLow: '{n} · débutant complet ({elo})',
-    scaleHigh: '{n} · surhumain ({elo})',
-    presetBeginner: 'Je débute',
-    presetCasual: 'Occasionnel',
-    presetClub: 'Club',
-    presetStrong: 'Fort',
-    presetRuthless: 'Sans pitié',
-    levelChip: 'Niveau {n}',
     noneBeaten:
       'Aucun niveau battu pour l’instant. Commence par le premier — il apprend en même temps que toi.',
     bestBeaten: 'Plus haut niveau battu :',
@@ -382,6 +374,13 @@ export const fr = {
     tcHelp15i10: 'Quinze minutes, dix secondes par coup : le temps de calculer.',
     tcHelp30: 'Trente minutes chacun, pour une vraie partie longue.',
     tcHelpNone: 'Pas de pendule. Tu prends le temps qu’il faut.',
+
+    // ── L'échelle des adversaires ────────────────────────────────────────
+    opponentStrength: '≈ {elo} Elo · niveau {n} sur {total}',
+    ladderLabel: 'Choisir le niveau de l’adversaire, de 1 à {n}',
+    ladderCard: 'Niveau {n}, {nom}, environ {elo} Elo',
+    ladderTier: 'Palier « {palier} ». Pas sûr de ton niveau ?',
+    ladderTest: 'Le test de niveau te le dit',
   },
 
   live: {
@@ -6946,7 +6945,6 @@ export const fr = {
     giveUp: 'Laisser tomber',
     reset: 'Remettre',
     analyse: 'Analyser',
-    fineLevel: 'Niveau fin',
     goPlay: 'Aller jouer',
     deadLinkShort: 'Lien inutilisable',
     newRecord: 'Nouveau record !',

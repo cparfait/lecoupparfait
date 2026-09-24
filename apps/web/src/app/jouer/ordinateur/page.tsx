@@ -4,7 +4,7 @@
  * Partie contre l'ordinateur.
  *
  * Deux écrans successifs : le choix de l'adversaire, puis la partie elle-même.
- * Le choix reste volontairement court — un curseur de niveau, une couleur, une
+ * Le choix reste volontairement court — une échelle d'adversaires, une couleur, une
  * cadence — parce qu'un formulaire de douze champs est le meilleur moyen de
  * décourager quelqu'un qui voulait juste jouer.
  */
@@ -322,11 +322,11 @@ export default function PlayComputerPage() {
   }, [t])
 
   /**
-   * Le curseur a-t-il déjà été arbitré par le joueur ?
+   * Le niveau a-t-il déjà été arbitré par le joueur ?
    *
    * Tant que non, l'écran de réglages le pose sur le dernier niveau battu :
    * c'est la seule valeur de départ qui veuille dire quelque chose, et elle
-   * évite de faire redescendre le curseur à chaque visite. Dès qu'une partie a
+   * évite de faire redescendre l'échelle à chaque visite. Dès qu'une partie a
    * été lancée ou reprise, le niveau retenu est un choix : on le garde tel
    * quel, et la suggestion ne repasse plus derrière.
    */

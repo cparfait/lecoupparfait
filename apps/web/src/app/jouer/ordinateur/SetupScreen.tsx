@@ -5,7 +5,7 @@
  * conditions, les aides. Voir la page pour le parcours complet.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { ArrowRight, Circle, Play, Shuffle, Trophy } from 'lucide-react'
 import clsx from 'clsx'
@@ -22,13 +22,9 @@ import {
   type BotPersonalityId,
 } from '@coupparfait/core'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
-import { TEINTES_ADVERSAIRES } from '@/lib/adversaires.ts'
-import { CarteAdversaire } from '@/components/brand/CarteAdversaire.tsx'
-import { Defilement } from '@/components/ui/Defilement.tsx'
 import {
   Button,
   Card,
-  Chip,
   SegmentedControl,
   SectionTitle,
   TitreDePage,
@@ -42,6 +38,7 @@ import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { useFetchJson } from '@/lib/useFetchJson.ts'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
 import type { Progression } from './progression.ts'
+import { AdversaireChoisi, EchelleDesAdversaires } from './EchelleDesAdversaires.tsx'
 
 export interface Setup {
   level: number
@@ -59,48 +56,6 @@ export interface Setup {
    * lieu d'essayer de les comptabiliser après coup.
    */
   classee: boolean
-}
-
-/**
- * L'échelle de force — et pourquoi elle ne peut pas être celle des portraits.
- *
- * La piste du curseur peignait chaque segment avec la teinte de la
- * personnalité qui tient ce niveau. Or une personnalité revient à plusieurs
- * échelons, et jamais dans l'ordre : Pion ivoire, Brasier orange, Rempart
- * ardoise, Éclair glace, Boussole laiton… La piste affichait donc une suite
- * de couleurs sans rapport avec ce qu'elle mesure, et l'œil y cherchait en
- * vain une progression. Une couleur qui varie sans rien dire est pire qu'une
- * couleur unie : elle promet une information qu'elle n'a pas.
- *
- * Les deux rôles se séparent. La teinte de personnalité reste là où elle dit
- * *qui* — la vignette, le portrait, le pouce du curseur, la carte de
- * l'adversaire choisi. La piste, elle, dit *combien*, et elle le dit par un
- * dégradé qui monte en température : ardoise froide au tout premier coup,
- * laiton au milieu de l'échelle, braise au sommet. Trois ancres et une
- * interpolation en oklab — donc un dégradé régulier à l'œil, sans la bande
- * terne que produit un mélange en sRVB.
- *
- * Les valeurs sont littérales, comme celles des portraits et pour la même
- * raison : elles ne changent pas avec le thème. Les deux extrêmes citent
- * d'ailleurs deux matières de la galerie — le laiton de Boussole, le feu de
- * Brasier —, ce qui raccorde l'échelle aux sculptures sans les copier.
- */
-const ECHELLE_FORCE = ['#7f93b8', '#d9a441', '#ff6a3d'] as const
-
-/**
- * La couleur d'un niveau sur l'échelle, de 0 (le plus faible) à 1.
- *
- * Deux segments plutôt qu'un seul mélange à trois : `color-mix` ne prend que
- * deux couleurs. On choisit la paire selon la moitié où l'on tombe, et l'on
- * y remet la position à l'échelle.
- */
-function teinteDeForce(part: number): string {
-  const [froid, tiede, chaud] = ECHELLE_FORCE
-  const premiere = part <= 0.5
-  const depart = premiere ? froid : tiede
-  const arrivee = premiere ? tiede : chaud
-  const avancement = (premiere ? part * 2 : (part - 0.5) * 2) * 100
-  return `color-mix(in oklab, ${arrivee} ${avancement.toFixed(1)}%, ${depart})`
 }
 
 /**
@@ -149,7 +104,7 @@ export function SetupScreen({
   reprise: PartieEnCours | null
   onReprendre: (partie: PartieEnCours) => void
   /**
-   * Poser le curseur sur le dernier niveau battu dès que la progression arrive.
+   * Poser l’échelle sur le dernier niveau battu dès que la progression arrive.
    *
    * Faux dès qu'une partie a été lancée dans la session : le niveau affiché est
    * alors celui qu'on vient de choisir, et le remplacer serait défaire un choix.
@@ -158,7 +113,7 @@ export function SetupScreen({
   /**
    * L'adversaire demandé depuis sa fiche, s'il y en a un.
    *
-   * Il contraint le niveau de départ — et lui seul : le curseur reste libre,
+   * Il contraint le niveau de départ — et lui seul : l'échelle reste libre,
    * et le déplacer change d'adversaire comme d'habitude. Une barre qui
    * refuserait de sortir des paliers de Mirage serait une barre cassée.
    */
@@ -231,7 +186,7 @@ export function SetupScreen({
   const { data: progress } = useFetchJson<Progression>('/api/progression')
 
   /**
-   * Le curseur part du dernier niveau battu.
+   * L'échelle part du dernier niveau battu.
    *
    * Il partait de six, c'est-à-dire d'un nombre choisi une fois pour tous : pour
    * qui a déjà battu le niveau onze, c'est cinq crans à remonter à la main avant
@@ -239,12 +194,12 @@ export function SetupScreen({
    * trop fort. La progression est justement la seule chose que l'application
    * sache de la force du joueur — autant s'en servir comme point de départ.
    *
-   * Le *dernier battu* et non le suivant : le curseur propose ce qu'on sait
+   * Le *dernier battu* et non le suivant : l'échelle propose ce qu'on sait
    * faire, et le bouton juste au-dessus propose de monter d'un cran. Deux
    * choses différentes, laissées toutes deux à un clic.
    *
    * `toucheRef` protège la course : la progression arrive du réseau, et il ne
-   * faut pas qu'elle vienne écraser un curseur déjà déplacé entre-temps.
+   * faut pas qu'elle vienne écraser un choix déjà fait entre-temps.
    */
   const toucheRef = useRef(false)
   const choisirNiveau = useCallback((valeur: number) => {
@@ -256,9 +211,9 @@ export function SetupScreen({
    * L'adversaire demandé arrive après le premier rendu.
    *
    * Il est lu dans l'adresse, donc dans un effet du composant parent : au
-   * moment où l'état initial du curseur est calculé, il vaut encore `null`.
+   * moment où l'état initial du niveau est calculé, il vaut encore `null`.
    * L'initialisateur de `useState` ne se rejoue pas — d'où cet effet, qui pose
-   * le niveau une fois et une seule, et jamais par-dessus un curseur déjà
+   * le niveau une fois et une seule, et jamais par-dessus un niveau déjà
    * déplacé à la main.
    */
   const persoApplique = useRef(false)
@@ -279,8 +234,6 @@ export function SetupScreen({
 
   const bot = botLevel(level)
   const personality = BOT_PERSONALITIES[bot.personality]
-  /** Position du curseur sur la barre, de 0 à 100. */
-  const pourcentNiveau = ((level - 1) / (BOT_LEVELS.length - 1)) * 100
 
   /**
    * Maia peut-elle jouer *ce* niveau-là ?
@@ -298,63 +251,6 @@ export function SetupScreen({
   const dernierNiveauMaia = niveauxMaia[niveauxMaia.length - 1]?.level ?? BOT_LEVELS.length
   /** L'adversaire réellement retenu, une fois Maia écartée si elle ne peut pas. */
   const humainRetenu = human && maiaPossible
-
-  /**
-   * Les sept personnalités, dans l'ordre où l'échelle les fait apparaître.
-   *
-   * C'est par elles qu'on choisit d'abord : « Pion », « Boussole », « Mirage »
-   * disent un adversaire, là où « niveau 12 » ne dit qu'un rang. Elles ne
-   * couvrent pas chacune une tranche : les niveaux les entremêlent — Pion aux
-   * niveaux 1, 2, 3 et 6, Brasier aux 4, 7 et 14. Une fourchette d'Elo par
-   * vignette mentait donc deux fois, en se chevauchant avec la voisine et en
-   * laissant croire qu'on choisirait dans cette fourchette. Chaque vignette
-   * annonce à la place le niveau qu'elle donnerait *maintenant* : le plus
-   * proche du curseur, celui que le clic pose réellement.
-   */
-  const personnalites = useMemo(() => {
-    const vues: BotPersonalityId[] = []
-    for (const niveau of BOT_LEVELS) {
-      if (!vues.includes(niveau.personality)) vues.push(niveau.personality)
-    }
-    return vues.map((id) => ({ id, personnalite: BOT_PERSONALITIES[id] }))
-  }, [])
-
-  /**
-   * La vignette de l'adversaire en cours reste sous les yeux.
-   *
-   * La rangée défile : venu d'une fiche — « Jouer contre Mirage » — ou revenu
-   * sur un niveau élevé, l'adversaire choisi était hors champ, et la rangée
-   * montrait Pion et Brasier avec l'air de n'avoir rien sélectionné. On fait
-   * défiler la rangée seule, jamais la page : centrer par `scrollIntoView`
-   * aurait aussi déplacé le document.
-   */
-  const rangeePersonnalites = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const rangee = rangeePersonnalites.current
-    const actif = rangee?.querySelector<HTMLElement>('[aria-checked="true"]')
-    if (!rangee || !actif) return
-    // D'un coup, sans animation : un défilement animé lancé pendant que la
-    // page finit de se construire est interrompu à mi-course par le premier
-    // rendu suivant, et la vignette restait à moitié hors champ.
-    rangee.scrollLeft = actif.offsetLeft - (rangee.clientWidth - actif.offsetWidth) / 2
-  }, [bot.personality])
-
-  const teinteCourante = TEINTES_ADVERSAIRES[bot.personality]
-
-  /**
-   * Le rail du curseur : un segment par niveau, sur l'échelle de force — de
-   * l'ardoise froide à la braise. Ceux déjà parcourus gardent leur couleur ;
-   * les autres s'éteignent à trente pour cent, assez pour lire la suite de
-   * l'échelle, pas assez pour disputer l'attention au pouce.
-   */
-  const rail = BOT_LEVELS.map((niveau, index) => {
-    const teinte = teinteDeForce(index / Math.max(1, BOT_LEVELS.length - 1))
-    const couleur =
-      niveau.level <= level ? teinte : `color-mix(in oklab, ${teinte} 30%, var(--surface-strong))`
-    const debut = ((index / BOT_LEVELS.length) * 100).toFixed(2)
-    const fin = (((index + 1) / BOT_LEVELS.length) * 100).toFixed(2)
-    return `${couleur} ${debut}% ${fin}%`
-  }).join(', ')
 
   const couleurChoisie =
     color === 'w'
@@ -455,241 +351,10 @@ export function SetupScreen({
         <div className="lg:col-span-7">
           {/* ── 1. L'adversaire ────────────────────────────────────────────── */}
           <Etape numero={1} titre={t('computer.step1')}>
-            {/* Les personnalités défilent sur une rangée : sept vignettes, une
-            par adversaire, et l'on voit d'un coup d'œil l'échelle entière.
-            Choisir une vignette pose le curseur sur le niveau le plus proche
-            de sa tranche — le curseur, en dessous, sert au réglage fin. */}
-            <Defilement
-              ref={rangeePersonnalites}
-              className="-mx-4 sm:-mx-6"
-              /* De l'air au-dessus et en dessous : les cartes se soulèvent et
-             s'inclinent au survol, et la rangée, qui défile, couperait ce
-             qui dépasse. */
-              classeRangee="gap-3 px-4 py-3 sm:px-6"
-              role="radiogroup"
-              label={t('computer.opponentGroup')}
-            >
-              {personnalites.map((entree) => {
-                const actif = entree.id === bot.personality
-                /* Le niveau que le clic poserait, et son Elo : c'est ce que la
-               vignette promet, et c'est ce qu'elle tient. */
-                const cible = actif ? level : niveauProche(entree.id, level)
-                return (
-                  <CarteAdversaire
-                    key={entree.id}
-                    personnalite={entree.personnalite}
-                    teinte={TEINTES_ADVERSAIRES[entree.id]}
-                    actif={actif}
-                    elo={botLevel(cible).elo}
-                    niveau={cible}
-                    onClick={() => choisirNiveau(cible)}
-                  />
-                )
-              })}
-            </Defilement>
-
-            {/* L'adversaire retenu, en une ligne : le portrait en grand, le nom,
-            l'Elo, et sa phrase. C'est ce que le curseur fait changer, et
-            c'est juste au-dessus de lui. */}
-            <div className="mt-4 flex items-center gap-4">
-              {/* Le portrait retenu, sous le même projecteur que sa carte. */}
-              <span
-                className="relative grid h-[4.5rem] w-[4.5rem] shrink-0 place-items-center overflow-hidden rounded-[var(--radius)] border"
-                style={{
-                  background: `radial-gradient(70% 55% at 50% 20%, color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 55%, transparent), transparent 70%), linear-gradient(180deg, color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 26%, var(--surface)), color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 6%, var(--bg-elev)) 70%)`,
-                  borderColor: `color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 50%, var(--border))`,
-                  boxShadow: `inset 0 1px 0 rgb(255 255 255 / 0.18), 0 12px 28px -14px color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 70%, black)`,
-                }}
-                aria-hidden
-              >
-                <span
-                  style={{
-                    filter: `drop-shadow(0 10px 12px color-mix(in oklab, ${TEINTES_ADVERSAIRES[bot.personality]} 65%, transparent))`,
-                  }}
-                >
-                  <PortraitAdversaire personality={personality} size={60} />
-                </span>
-              </span>
-              {/* Tout ce bloc change avec le curseur, et le curseur est juste en
-              dessous : sa hauteur ne doit pas dépendre de l'adversaire, sinon
-              la page saute d'un cran à l'autre et le pouce perd sa cible.
-              Deux précautions donc. Le nom et les puces ne partagent une
-              ligne qu'à partir de `sm` — sur téléphone, « Boussole · 1550 Elo
-              · Niveau 10 » débordait et passait sur deux lignes, « Pion · 250
-              · Niveau 2 » non. Et la phrase réserve ses lignes en unités de
-              ligne : trois sur téléphone, deux au-delà, ce que demande la
-              plus longue des sept. */}
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-2">
-                  <h3 className="font-display text-xl font-semibold leading-tight">
-                    {tCoeur(t, personality.name)}
-                  </h3>
-                  <span className="flex flex-wrap gap-2">
-                    <Chip tone="accent">≈ {bot.elo} Elo</Chip>
-                    <Chip>{t('computer.levelChip', { n: bot.level })}</Chip>
-                  </span>
-                </div>
-                <p className="mt-1 min-h-[3lh] text-sm leading-relaxed text-muted sm:min-h-[2lh]">
-                  {tCoeur(t, personality.blurb)}
-                </p>
-              </div>
-            </div>
-
-            {/* ── Le curseur, et le repère qui suit le pouce ──────────────────
-            Un cran par niveau de `BOT_LEVELS`, plus haut tous les cinq. Le
-            repère se cale sur la position du pouce : un pouce mesure 22 px,
-            son centre ne parcourt pas toute la largeur mais celle-ci moins
-            sa propre taille, d'où la correction de onze pixels sur chaque
-            bord. Le même décalage borne la graduation en dessous. */}
-            <div className="mt-4">
-              <label htmlFor="level" className="block text-sm font-medium">
-                {t('bits.fineLevel')}
-              </label>
-              {/* Le repère prend la teinte de l'adversaire, éclaircie pour que
-              l'encre reste lisible sur toutes les matières. */}
-              <div className="relative mt-1 h-5">
-                <span
-                  className="absolute -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[12px] font-bold tabular-nums text-[#101018] transition-[left,background-color] duration-150"
-                  style={{
-                    left: `calc(${pourcentNiveau}% + ${14 - pourcentNiveau * 0.28}px)`,
-                    background: `color-mix(in oklab, ${teinteCourante} 80%, white)`,
-                    boxShadow: `0 0 14px -2px ${teinteCourante}`,
-                  }}
-                  aria-hidden
-                >
-                  {bot.level} · {tCoeur(t, personality.name)}
-                </span>
-              </div>
-              {/* ── Le rail, peint adversaire par adversaire ───────────────────
-              Un segment par niveau dans la teinte de la sculpture qui le joue :
-              on voit d'un coup d'œil où Pion cède la place à Brasier, et où
-              Oracle commence. La portion parcourue garde ses couleurs
-              franches ; le reste s'éteint, sans disparaître. Le pouce porte le
-              portrait de l'adversaire courant — voir `.curseur-adversaires`. */}
-              <input
-                id="level"
-                type="range"
-                min={1}
-                max={BOT_LEVELS.length}
-                step={1}
-                value={level}
-                onChange={(event) => choisirNiveau(Number(event.target.value))}
-                /* La barre reste fine, la zone touchable ne l'est plus : le champ
-               fait trente-deux points de haut et le rail est repeint au
-               centre, sur huit. */
-                className="curseur-adversaires h-8 w-full cursor-pointer appearance-none bg-transparent"
-                style={
-                  {
-                    '--pouce-image': `url('${personality.portrait}')`,
-                    '--pouce-teinte': teinteCourante,
-                    backgroundImage: `linear-gradient(180deg, rgb(255 255 255 / 0.18), transparent 55%), linear-gradient(to right, ${rail})`,
-                    backgroundSize: '100% 8px',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                    borderRadius: '9999px',
-                  } as React.CSSProperties
-                }
-              />
-              <div className="mx-[14px] flex items-end justify-between" aria-hidden>
-                {BOT_LEVELS.map((niveau, index) => {
-                  const jalon = niveau.level === 1 || niveau.level % 5 === 0
-                  // Même échelle que la piste, sinon les crans la
-                  // contrediraient un pixel plus bas.
-                  const teinte = teinteDeForce(index / Math.max(1, BOT_LEVELS.length - 1))
-                  return (
-                    <span
-                      key={niveau.level}
-                      className={clsx('w-px rounded-full', jalon ? 'h-2' : 'h-1')}
-                      style={{
-                        background:
-                          niveau.level <= level
-                            ? teinte
-                            : `color-mix(in oklab, ${teinte} 35%, var(--border-strong))`,
-                      }}
-                    />
-                  )
-                })}
-              </div>
-              {/* Les nombres sont posés à leur position réelle, et non répartis :
-              quatre crans séparent 1 de 5, cinq les suivants. */}
-              <div className="relative mx-[14px] mt-0.5 h-3.5" aria-hidden>
-                {/* Bornés à l'échelle : « 20 » et « 25 » débordaient de la piste
-                depuis que les niveaux sont moins de vingt. */}
-                {[1, 5, 10, 15, 20, 25]
-                  .filter((jalon) => jalon <= BOT_LEVELS.length)
-                  .map((jalon) => (
-                    <span
-                      key={jalon}
-                      className="absolute -translate-x-1/2 text-[12px] tabular-nums text-faint"
-                      style={{ left: `${((jalon - 1) / (BOT_LEVELS.length - 1)) * 100}%` }}
-                    >
-                      {jalon}
-                    </span>
-                  ))}
-              </div>
-              <div className="mt-1.5 flex justify-between text-[12px] text-faint">
-                {/* Les bornes se lisent dans la table, elles ne s'y recopient pas :
-                elles annonçaient « 1 · débutant complet (100) » et « 25 ·
-                surhumain (3200) » alors que l'échelle était passée à dix-huit
-                échelons partant de 100. */}
-                <span>
-                  {t('computer.scaleLow', {
-                    n: BOT_LEVELS[0]?.level ?? 1,
-                    elo: BOT_LEVELS[0]?.elo ?? 0,
-                  })}
-                </span>
-                <span>
-                  {t('computer.scaleHigh', {
-                    n: BOT_LEVELS.at(-1)?.level ?? BOT_LEVELS.length,
-                    elo: BOT_LEVELS.at(-1)?.elo ?? 0,
-                  })}
-                </span>
-              </div>
-
-              {/* Cinq raccourcis nommés d'après le joueur. « Je débute » vaut 1 :
-              un préréglage nommé d'après le joueur doit désigner le bout de
-              l'échelle qui lui correspond, pas deux crans au-dessus.
-
-              Les rangs datent de l'échelle à dix-huit échelons — 100, 980,
-              1650, 2250 et 3200 Elo. Ils avaient gardé ceux de l'échelle à
-              vingt-cinq, et « Fort » comme « Sans pitié » désignaient des
-              rangs qui n'existaient plus. */}
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {[
-                  { label: t('computer.presetBeginner'), level: 1 },
-                  { label: t('computer.presetCasual'), level: 6 },
-                  { label: t('computer.presetClub'), level: 10 },
-                  { label: t('computer.presetStrong'), level: 13 },
-                  { label: t('computer.presetRuthless'), level: BOT_LEVELS.length },
-                ].map((preset) => {
-                  /* Chaque raccourci porte la teinte de l'adversaire qu'il
-                 désigne : le chip « Fort » a la couleur de la personnalité
-                 qui attend à ce rang. */
-                  const teinte = TEINTES_ADVERSAIRES[botLevel(preset.level).personality]
-                  const choisi = level === preset.level
-                  return (
-                    <button
-                      key={preset.label}
-                      type="button"
-                      onClick={() => choisirNiveau(preset.level)}
-                      className={clsx(
-                        'rounded-full border px-3 py-1.5 text-[13px] font-medium transition-[background-color,box-shadow,color]',
-                        choisi ? 'text-ink' : 'text-muted hover:text-ink',
-                      )}
-                      style={{
-                        background: `color-mix(in oklab, ${teinte} ${choisi ? 30 : 10}%, var(--surface))`,
-                        borderColor: choisi
-                          ? 'var(--accent)'
-                          : `color-mix(in oklab, ${teinte} 40%, var(--border))`,
-                        boxShadow: choisi ? `0 0 16px -4px ${teinte}` : undefined,
-                      }}
-                    >
-                      {preset.label}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
+            {/* Un seul contrôle : l'adversaire choisi en grand, puis l'échelle
+                de ses échelons qui défile. Voir `EchelleDesAdversaires`. */}
+            <AdversaireChoisi level={level} />
+            <EchelleDesAdversaires level={level} onChoisir={choisirNiveau} />
 
             {progress && progress.tracked && (
               <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-muted">
