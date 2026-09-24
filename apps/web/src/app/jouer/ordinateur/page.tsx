@@ -11,7 +11,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import Link from 'next/link'
 import {
   ArrowRight,
   Eye,
@@ -118,12 +117,10 @@ import {
 } from '@/lib/carriere/useCarriere.ts'
 import { deposerResultat } from '@/lib/game/tournoiSolo.ts'
 import {
-  QUALITY_STYLES,
   chapitre as chapitreCarriere,
   niveauEffectif,
   type BotPersonalityId,
   type Chapitre,
-  type MoveQuality,
 } from '@coupparfait/core'
 import { useCurrentOpening, useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { playMoveSound, playResultSound, playSound } from '@/lib/sound.ts'
@@ -137,6 +134,10 @@ import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { useFetchJson } from '@/lib/useFetchJson.ts'
 import { useGrandEcran } from '@/lib/useMediaQuery.ts'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
+import { ActionDuPouce } from './ActionDuPouce.tsx'
+import { LegendeDuVerdict } from './LegendeDuVerdict.tsx'
+import { motifDeRefus } from './motifDeRefus.ts'
+import { recordBotGame, type Progression } from './progression.ts'
 
 type Phase = 'setup' | 'playing'
 
@@ -3096,167 +3097,4 @@ function GameScreen({
       )}
     </div>
   )
-}
-
-/** Ce que l'API de progression renvoie. */
-interface Progression {
-  defeated: number
-  unlocked: number
-  attempts: number
-  wins: number
-  tracked: boolean
-}
-
-/**
- * Enregistre une partie terminée contre l'ordinateur.
- *
- * Appelé au moment où la partie s'achève, et jamais bloquant : une progression
- * qu'on n'a pas pu écrire ne doit pas empêcher de voir son résultat.
- */
-export function recordBotGame(level: number, won: boolean): void {
-  void fetch('/api/progression', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ level, won }),
-  }).catch(() => {
-    // Hors ligne ou sans compte : la partie reste jouée, simplement pas comptée.
-  })
-}
-
-/**
- * Une case de la barre du pouce.
- *
- * Icône au-dessus, mot en dessous, largeur égale : c'est ce qui permet de
- * viser sans regarder. Un bouton de texte, même bien espacé, demande de lire
- * avant de toucher — et pendant une partie on regarde l'échiquier.
- *
- * Elle rend un lien quand on lui donne une adresse, un bouton sinon : les deux
- * se ressemblent à l'écran et n'ont rien à voir pour le navigateur, qui doit
- * pouvoir ouvrir une destination dans un nouvel onglet.
- */
-function ActionDuPouce({
-  icone,
-  libelle,
-  onClick,
-  href,
-  disabled,
-  danger,
-}: {
-  icone: ReactNode
-  libelle: string
-  onClick?: () => void
-  href?: string
-  disabled?: boolean
-  /** Une action qu'on ne défait pas : l'abandon. */
-  danger?: boolean
-}) {
-  const classe = clsx(
-    // Quarante-quatre points de haut au minimum : la barre en faisait
-    // quarante-trois, juste sous la taille où le pouce rate une fois sur cinq.
-    'flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-[var(--radius-sm)] px-1 py-1.5',
-    'text-[12px] font-medium transition-colors',
-    disabled
-      ? 'pointer-events-none text-faint opacity-40'
-      : danger
-        ? 'text-[var(--q-blunder)] hover:bg-surface-hover'
-        : 'text-muted hover:bg-surface-hover hover:text-ink',
-  )
-
-  if (href) {
-    return (
-      <Link href={href} className={classe}>
-        {icone}
-        <span className="leading-none">{libelle}</span>
-      </Link>
-    )
-  }
-
-  return (
-    <button type="button" onClick={onClick} disabled={disabled} className={classe}>
-      {icone}
-      <span className="leading-none">{libelle}</span>
-    </button>
-  )
-}
-
-/**
- * Ce que dit la pastille posée sur la case d'arrivée, écrit.
- *
- * Le libellé suffit à la plupart — « Théorie », « Gaffe » — et la phrase qui
- * suit répond à la question d'après, « et alors ? ». Elle disparaît sous
- * 640 px, où la largeur ne permet pas les deux sans repousser l'échiquier.
- */
-function LegendeDuVerdict({
-  quality,
-  conseil,
-}: {
-  quality: MoveQuality
-  /** Le coup qu'il fallait jouer, celui qu'on a joué, et ce que le premier fait. */
-  conseil?: { conseille: string; joue: string; pourquoi?: string | null } | null
-}) {
-  const t = useT()
-  const style = QUALITY_STYLES[quality]
-  const teinte = `var(--q-${style.token})`
-
-  return (
-    <div className="mb-1.5">
-      <p className="flex items-baseline gap-1.5 text-[14px] leading-snug" style={{ color: teinte }}>
-        <span aria-hidden>{style.glyph}</span>
-        <span className="font-semibold">{tCoeur(t, style.label)}</span>
-        <span className="hidden min-w-0 flex-1 truncate font-normal text-muted sm:inline">
-          {tCoeur(t, style.description)}
-        </span>
-      </p>
-
-      {/* Visible à toutes les tailles, contrairement à la description : c'est
-          la clé de lecture de la flèche bleue, et elle manque surtout là où
-          l'écran est petit. */}
-      {conseil && (
-        <p className="mt-0.5 text-[14px] leading-snug text-muted">
-          {avecElements(t('computer.shouldHavePlayed'), {
-            conseille: <strong className="font-semibold text-accent">{conseil.conseille}</strong>,
-            joue: <strong className="font-semibold text-ink">{conseil.joue}</strong>,
-          })}
-          {/* Et ce qu'il faisait. Sans cette phrase, on regarde un coup dont on
-              ne comprend pas l'intérêt, et l'on n'apprend rien — la
-              justification vaut mieux que le verdict. */}
-          {conseil.pourquoi && <span className="text-ink"> {conseil.pourquoi}</span>}
-        </p>
-      )}
-    </div>
-  )
-}
-
-/**
- * Le refus du serveur, en une phrase que le joueur peut lire.
- *
- * La route rend un code — `trop-courte`, `non-annoncee`… — et non une phrase :
- * elle parlerait français à quelqu'un qui lit l'application en japonais. La
- * correspondance est ici, et le cas inconnu rend une phrase générique plutôt
- * que rien : un code qu'on aurait ajouté côté serveur sans passer par ici ne
- * doit pas redevenir un silence.
- */
-function motifDeRefus(t: ReturnType<typeof useT>, code: string): string {
-  switch (code) {
-    case 'adversaire-sans-classement':
-      return t('computer.unratedNoOpponent')
-    case 'resultat-non-verifiable':
-      return t('computer.unratedUnverifiable')
-    case 'position-imposee':
-      return t('computer.unratedSetupPosition')
-    case 'non-annoncee':
-      return t('computer.unratedNotAnnounced')
-    case 'annonce-differente':
-      return t('computer.unratedMismatch')
-    case 'trop-rapide':
-      return t('computer.unratedTooFast')
-    case 'trop-courte':
-      return t('computer.unratedTooShort')
-    case 'trop-frequente':
-      return t('computer.unratedTooSoon')
-    case 'classement-indisponible':
-      return t('computer.unratedUnavailable')
-    default:
-      return t('computer.unratedUnknown')
-  }
 }
