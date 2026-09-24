@@ -441,6 +441,29 @@ export const fr = {
     aboutMove: 'À propos de {coup} ·',
   },
 
+  appariement: {
+    row: 'Trouver un adversaire',
+    rowDetail: 'Quelqu’un qui cherche la même cadence, maintenant. Aucun lien à envoyer.',
+    rowImpossible: 'La recherche se fait en temps réel : choisis une cadence en minutes.',
+    title: 'Trouver un adversaire',
+    intro: 'Choisis une cadence : tu joueras contre la première personne qui cherche la même.',
+    timeControl: 'Cadence de la recherche',
+    categoryNote:
+      '{categorie}. Classée si vous êtes tous les deux connectés à un compte, amicale sinon.',
+    search: 'Chercher',
+    back: 'Retour',
+    searching: 'Recherche d’un adversaire…',
+    searchingHint: 'En {cadence}. Plus l’attente dure, plus l’écart de niveau accepté s’élargit.',
+    elapsed: 'Attente : {duree}',
+    cancel: 'Annuler',
+    found: 'Adversaire trouvé : {pseudo}',
+    errors: {
+      badTimeControl: 'Cette cadence ne se joue pas en recherche rapide.',
+      queueFull: 'Trop de monde cherche en ce moment. Réessaie dans un instant.',
+      replaced: 'Ta recherche a repris dans un autre onglet.',
+    },
+  },
+
   friendGame: {
     title: 'Jouer contre quelqu’un',
     spectating: 'Tu regardes cette partie. Tu peux écrire dans le tchat, mais pas jouer.',

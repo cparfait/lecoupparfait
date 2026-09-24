@@ -138,24 +138,7 @@ export function useLiveGame({
   // ── Connexion ───────────────────────────────────────────────────────────
   useEffect(() => {
     if (!enabled) return
-    /*
-      L'adresse du serveur de parties.
-
-      Elle est fixée à la construction : ce code tourne dans le navigateur, et
-      Next remplace `process.env.NEXT_PUBLIC_*` par sa valeur pendant le
-      `next build`. Une variable posée sur le conteneur n'y change rien — c'est
-      ce qui a mis les parties en direct en panne en production, avec un
-      serveur parfaitement sain en face. Voir `apps/web/Dockerfile`, qui refuse
-      désormais de construire sans elle.
-
-      Le repli ne vaut donc que pour le développement, où le serveur écoute sur
-      la même machine.
-    */
-    const url =
-      process.env.NEXT_PUBLIC_SERVER_URL ??
-      `${window.location.protocol}//${window.location.hostname}:3001`
-
-    const socket = io(url, {
+    const socket = io(adresseDuServeurDeParties(), {
       transports: ['websocket', 'polling'],
       reconnectionAttempts: 12,
       reconnectionDelay: 800,
@@ -294,6 +277,26 @@ export function useLiveGame({
     sendChat,
     annoncerIndice,
   }
+}
+
+/**
+ * L'adresse du serveur de parties. À n'appeler que dans le navigateur.
+ *
+ * Elle est fixée à la construction : ce code tourne dans le navigateur, et
+ * Next remplace `process.env.NEXT_PUBLIC_*` par sa valeur pendant le
+ * `next build`. Une variable posée sur le conteneur n'y change rien — c'est
+ * ce qui a mis les parties en direct en panne en production, avec un
+ * serveur parfaitement sain en face. Voir `apps/web/Dockerfile`, qui refuse
+ * désormais de construire sans elle.
+ *
+ * Le repli ne vaut donc que pour le développement, où le serveur écoute sur
+ * la même machine. Partagée avec `useAppariement`, qui parle au même serveur.
+ */
+export function adresseDuServeurDeParties(): string {
+  return (
+    process.env.NEXT_PUBLIC_SERVER_URL ??
+    `${window.location.protocol}//${window.location.hostname}:3001`
+  )
 }
 
 /**

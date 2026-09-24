@@ -427,6 +427,28 @@ export const en: Dictionary = {
     aboutMove: 'About {coup} ·',
   },
 
+  appariement: {
+    row: 'Find an opponent',
+    rowDetail: 'Someone looking for the same time control, right now. No link to send.',
+    rowImpossible: 'Searching happens in real time: pick a time control in minutes.',
+    title: 'Find an opponent',
+    intro: 'Pick a time control: you will play the first person looking for the same one.',
+    timeControl: 'Time control to search',
+    categoryNote: '{categorie}. Rated if you are both signed in, casual otherwise.',
+    search: 'Search',
+    back: 'Back',
+    searching: 'Looking for an opponent…',
+    searchingHint: 'At {cadence}. The longer you wait, the wider the accepted rating gap.',
+    elapsed: 'Waiting: {duree}',
+    cancel: 'Cancel',
+    found: 'Opponent found: {pseudo}',
+    errors: {
+      badTimeControl: 'This time control is not available for quick pairing.',
+      queueFull: 'Too many people are searching right now. Try again in a moment.',
+      replaced: 'Your search moved to another tab.',
+    },
+  },
+
   friendGame: {
     title: 'Play someone',
     spectating: 'You are watching this game. You can write in the chat, but not play.',

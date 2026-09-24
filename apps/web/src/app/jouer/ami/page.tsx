@@ -13,6 +13,8 @@
  *    trouve dans l'application.
  *  - **quelqu'un qui n'est pas encore là** : on lui envoie une invitation à
  *    s'inscrire, et l'amitié se noue toute seule à son arrivée.
+ *  - **un inconnu** : on choisit une cadence et le serveur apparie avec la
+ *    première personne qui cherche la même. Voir `RechercheAdversaire`.
  *
  * Ces trois chemins vivaient sur deux écrans — « Contre un ami » d'un côté, le
  * carnet de l'autre —, si bien qu'on choisissait le mécanisme avant de savoir
@@ -32,7 +34,18 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Check, Copy, Link2, Loader2, Mailbox, Share2, Swords, UserPlus, Users } from 'lucide-react'
+import {
+  Check,
+  Copy,
+  Link2,
+  Loader2,
+  Mailbox,
+  Search,
+  Share2,
+  Swords,
+  UserPlus,
+  Users,
+} from 'lucide-react'
 import clsx from 'clsx'
 import { SPEED_LABELS, TIME_CONTROLS } from '@coupparfait/core'
 import { Button, Card, Chip, Input, SectionTitle, Spinner } from '@/components/ui/index.tsx'
@@ -41,6 +54,7 @@ import { usePreferences } from '@/lib/store/preferences.ts'
 import { toast } from '@/components/ui/Toast.tsx'
 import { generateGameSlug, retenirSouhaitDeCouleur } from '@/lib/game/useLiveGame.ts'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { RechercheAdversaire } from './RechercheAdversaire.tsx'
 
 /** Ce que le carnet renvoie d'une personne. */
 interface Ami {
@@ -88,6 +102,8 @@ export default function CreateFriendGamePage() {
   const [slug, setSlug] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [inviteCopie, setInviteCopie] = useState(false)
+  /** Vrai pendant « Trouver un adversaire » : la carte prend la place de l'écran. */
+  const [recherche, setRecherche] = useState(false)
 
   /**
    * Qui est connecté ?
@@ -309,7 +325,9 @@ export default function CreateFriendGamePage() {
             : t('friendGame.introOneDay')}
       </p>
 
-      {slug ? (
+      {recherche ? (
+        <RechercheAdversaire cadenceInitiale={timeControlId} onRetour={() => setRecherche(false)} />
+      ) : slug ? (
         <PartiePrete
           url={url}
           copied={copied}
@@ -413,6 +431,18 @@ export default function CreateFriendGamePage() {
             le but de les réunir ici.
           */}
           <div className="mt-4 space-y-2">
+            {/* Un inconnu, tout de suite : le seul chemin qui ne suppose pas
+                d'avoir déjà quelqu'un en tête. En temps réel seulement — une
+                correspondance ne se joue pas avec le premier venu. */}
+            <RangeeAction
+              icone={<Search size={18} />}
+              titre={t('appariement.row')}
+              detail={t('appariement.rowDetail')}
+              onClick={() => setRecherche(true)}
+              desactive={jours !== null}
+              raison={jours !== null ? t('appariement.rowImpossible') : undefined}
+            />
+
             <RangeeAction
               icone={<Link2 size={18} />}
               titre={t('friendGame.sendLink')}
