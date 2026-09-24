@@ -3,7 +3,7 @@
 /**
  * « Plus » : ce que la barre du bas ne porte pas, en grand.
  *
- * La barre mobile a cinq onglets, et l'application six rubriques plus un
+ * La barre mobile a cinq onglets, et l'application cinq rubriques plus un
  * compte et des réglages. Ce qui ne tient pas dans la barre vit ici, sur une
  * page pleine et non dans un panneau : on voit d'un coup d'œil ce qui existe,
  * à taille de doigt, sans avoir à déplier quoi que ce soit.

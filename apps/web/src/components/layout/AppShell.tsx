@@ -5,17 +5,17 @@
  *
  * Deux navigations distinctes plutôt qu'une seule adaptative :
  *  - sur **grand écran**, une barre supérieure : le nom du site qui ramène à
- *    l'accueil, six menus déroulants — un par rubrique —, et à droite une seule
+ *    l'accueil, un menu déroulant par rubrique, et à droite une seule
  *    commande, le compte, qui porte aussi les préférences et les pages du site ;
- *  - sur **mobile**, une barre inférieure fixe à six onglets, à portée de
+ *  - sur **mobile**, une barre inférieure fixe à cinq onglets, à portée de
  *    pouce, qui reste visible pendant une partie. Le premier ramène à
  *    l'accueil — le nom du site, en haut, ne se signale pas sans survol — et
  *    le dernier, « Plus », est une page pleine qui montre ce que la barre ne
  *    porte pas.
  *
- * Le classement des rubriques est **par verbe** — jouer, apprendre,
- * s'entraîner, analyser — parce qu'on ouvre l'application en sachant ce qu'on
- * vient faire bien avant de savoir avec quel outil. La structure elle-même vit
+ * Le classement des rubriques est **par verbe** — jouer, progresser,
+ * analyser — parce qu'on ouvre l'application en sachant ce qu'on vient faire
+ * bien avant de savoir avec quel outil. La structure elle-même vit
  * dans `lib/navigation.ts` : ce fichier ne fait que la mettre en scène, et les
  * trois surfaces la lisent au même endroit.
  *
@@ -204,7 +204,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 *voir*, ce qui est exactement le geste qu'une navigation doit
                 éviter de demander.
 
-                Les six onglets de la barre du bas tiennent en icônes, à même
+                Les cinq onglets de la barre du bas tiennent en icônes, à même
                 la barre — accueil compris, car cette rangée remplace la barre
                 du bas et non l'en-tête : ce qui disparaît en bas doit
                 reparaître ici, sinon l'accueil n'a plus d'onglet du tout dans
@@ -459,15 +459,17 @@ function MenuSection({
 // ─────────────────────────────────────────────────────────────────────────────
 
 /*
-  Six onglets, et rien à déplier.
+  Cinq onglets, et rien à déplier.
 
-  Ils se touchaient, autrefois, sur un téléphone étroit — mais parce que le
-  libellé n'avait pas de largeur à respecter, pas parce qu'ils étaient six.
-  L'accueil ouvre la rangée, les quatre rubriques qu'on ouvre le plus gardent
-  leur place, et « Plus » est une page pleine — pas un panneau — qui montre la
-  communauté, les outils, le compte et les réglages en grand, à taille de
-  doigt. En paysage, où la barre s'efface pour rendre sa hauteur à
-  l'échiquier, les six onglets passent en icônes dans l'en-tête.
+  Ils ont été six, et se touchaient sur un téléphone étroit — d'abord parce
+  que le libellé n'avait pas de largeur à respecter, ensuite parce que
+  cinquante-trois points ne suffisaient pas à « S'entraîner ». Apprendre et
+  s'entraîner sont devenus « Progresser » : l'accueil ouvre la rangée, les
+  trois rubriques qu'on ouvre le plus gardent leur place, et « Plus » est une
+  page pleine — pas un panneau — qui montre la communauté, les outils, le
+  compte et les réglages en grand, à taille de doigt. En paysage, où la barre
+  s'efface pour rendre sa hauteur à l'échiquier, les onglets passent en icônes
+  dans l'en-tête.
 */
 
 function BottomBar({ pathname }: { pathname: string }) {
@@ -489,9 +491,10 @@ function BottomBar({ pathname }: { pathname: string }) {
       <div className="mx-auto flex max-w-md items-stretch justify-around px-1 pt-1.5">
         {RACCOURCIS_MOBILES.map((entree) => {
           const Icone = entree.icon
-          // Un onglet reste allumé sur les écrans qu'il propose : « S'entraîner »
-          // mène au sommaire `/entrainer`, dont les trois portes vivent sous
-          // `/puzzles`. Voir `actifSur` — et `estActif` pour le cas de
+          // Un onglet reste allumé sur les écrans qu'il propose : « Progresser »
+          // mène au sommaire `/progresser`, dont les portes vivent sous
+          // `/apprendre`, `/puzzles`, `/carriere`… Voir `actifSur` — et
+          // `estActif` pour le cas de
           // l'accueil, que la comparaison par préfixe allumerait partout.
           const active = estActif(entree, pathname)
           return (
@@ -536,15 +539,14 @@ function BottomBar({ pathname }: { pathname: string }) {
                 <Icone size={20} strokeWidth={active ? 2.5 : 2} aria-hidden />
               </span>
               {/* Onze pixels, pas dix : c'est du texte qu'on lit, et dix est
-                  sous le seuil où l'on distingue encore « Apprendre » de
-                  « Analyser » d'un coup d'œil. Sous 360 px, en revanche, les
-                  six onglets ne laissent plus que cinquante-deux points chacun
-                  — même sans marge intérieure — et il faut bien céder quelque
-                  chose : ce sera un pixel de corps, pas un onglet. Et un cran
-                  d'interlettrage avec, car à dix pixels « S'entraîner » mesure
-                  encore cinquante points et demi dans une case de
-                  cinquante-deux : il tient, mais il frôle son voisin — et
-                  frôler est ce qu'on cherchait à corriger.
+                  sous le seuil où l'on distingue encore « Progresser » de
+                  « Analyser » d'un coup d'œil. Sous 360 px, en revanche, un
+                  téléphone de trois cent vingt points ne laisse qu'une
+                  soixantaine de points à chacun des cinq onglets, et
+                  « Progresser », le plus long, s'en approche : on cède un
+                  pixel de corps et un cran d'interlettrage plutôt que de le
+                  laisser frôler son voisin — frôler est ce qu'on cherchait à
+                  corriger quand la barre en comptait six.
 
                   `w-full` n'est pas décoratif. Sans lui, le libellé se
                   dimensionne sur son contenu et déborde de l'onglet des deux

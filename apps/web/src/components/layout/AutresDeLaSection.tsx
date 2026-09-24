@@ -30,10 +30,20 @@ export function AutresDeLaSection({
   section: id,
   className,
   colonne = false,
+  parmi,
 }: {
   /** Identifiant de la rubrique dans `SECTIONS`. */
   section: string
   className?: string
+  /**
+   * Ne garder que les entrées dont le chemin commence par l'un de ceux-ci.
+   *
+   * « Progresser » compte treize destinations. Sous un puzzle, dans une
+   * colonne de trois cents pixels, les empiler toutes repoussait l'échiquier
+   * suivant hors de vue ; seules les voisines immédiates — la manche
+   * chronométrée, le défi du jour — y ont leur place.
+   */
+  parmi?: string[]
   /**
    * Une seule colonne, quel que soit l'écran.
    *
@@ -50,6 +60,7 @@ export function AutresDeLaSection({
 
   const autres = section.entrees.filter((entree) => {
     const chemin = entree.href.split(/[?#]/)[0] ?? entree.href
+    if (parmi && !parmi.some((prefixe) => chemin.startsWith(prefixe))) return false
     // Une entrée qui porte une requête — « Défi du jour » sur `/puzzles?defi=1`
     // — reste proposée depuis la page nue : ce n'est pas le même écran.
     return chemin !== pathname || entree.href.includes('?')

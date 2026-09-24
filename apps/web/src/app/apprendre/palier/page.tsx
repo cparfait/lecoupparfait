@@ -454,7 +454,7 @@ export default function PalierPage() {
         )}
       </section>
 
-      <AutresDeLaSection section="apprendre" />
+      <AutresDeLaSection section="progresser" />
     </div>
   )
 }

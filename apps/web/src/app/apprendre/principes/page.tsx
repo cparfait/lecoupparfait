@@ -249,7 +249,7 @@ export default function PrincipesPage() {
         {t('principles.readAloud')}
       </p>
 
-      <AutresDeLaSection section="apprendre" />
+      <AutresDeLaSection section="progresser" />
     </div>
   )
 }

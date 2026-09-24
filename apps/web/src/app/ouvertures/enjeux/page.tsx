@@ -150,7 +150,7 @@ export default function EnjeuxPage() {
         </ButtonLink>
       </Card>
 
-      <AutresDeLaSection section="apprendre" />
+      <AutresDeLaSection section="progresser" />
     </div>
   )
 }

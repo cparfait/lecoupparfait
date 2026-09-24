@@ -10,8 +10,11 @@
  * Lichess portent leur propre cote, établie sur des millions de tentatives, ce
  * qui en fait le seul instrument calibré dont l'application dispose.
  *
- * Quatre portes de la même forme, dans la teinte de la rubrique — sauf la
- * dernière, qui emprunte celle d'« Apprendre » parce qu'elle y conduit.
+ * Quatre portes de la même forme, dans la teinte de la rubrique.
+ *
+ * La page n'est plus la porte d'une rubrique : « S'entraîner » a rejoint
+ * « Progresser », dont `/progresser` est le sommaire. Elle reste ouverte pour
+ * les liens qui y mènent encore, et son lien de retour remonte à la rubrique.
  */
 
 import { Check, Gauge, Puzzle, Timer, Zap } from 'lucide-react'
@@ -22,7 +25,7 @@ import { queteFaite } from '@/lib/daily/quotidien.ts'
 import { useT } from '@/lib/i18n/index.tsx'
 import { SECTIONS } from '@/lib/navigation.ts'
 
-const TEINTE = SECTIONS.find((s) => s.id === 'entrainer')?.teinte
+const TEINTE = SECTIONS.find((s) => s.id === 'progresser')?.teinte
 
 const EXERCICES = [
   {
@@ -68,7 +71,12 @@ export default function EntrainementPage() {
 
   return (
     <div className="page">
-      <TitreDePage intro={t('train.intro')}>{t('train.title')}</TitreDePage>
+      <TitreDePage
+        retour={{ href: '/progresser', label: t('nav.progress') }}
+        intro={t('train.intro')}
+      >
+        {t('train.title')}
+      </TitreDePage>
 
       <div className="grille-cartes">
         {EXERCICES.map(({ href, icon, titreKey, phraseKey, detailKey }, index) => (
@@ -76,10 +84,10 @@ export default function EntrainementPage() {
             key={href}
             href={href}
             icon={icon}
-            // Le test de niveau porte la teinte d'« Apprendre » : il mène là-bas,
-            // et une pastille de la couleur de la rubrique aurait annoncé un
-            // quatrième exercice alors que c'est une mesure.
-            teinte={href.startsWith('/apprendre') ? 'var(--rub-apprendre)' : TEINTE}
+            // Une seule teinte : le test de niveau prenait celle d'« Apprendre »
+            // pour dire qu'il menait ailleurs, mais les deux rubriques n'en
+            // font plus qu'une.
+            teinte={TEINTE}
             titre={t(titreKey)}
             phrase={t(phraseKey)}
             detail={t(detailKey)}

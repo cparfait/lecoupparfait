@@ -500,7 +500,7 @@ export default function LearnPage() {
         {t('learn.totalHours', { n: Math.round(CURRICULUM_STATS.minutes / 60) })}
       </p>
 
-      <AutresDeLaSection section="apprendre" />
+      <AutresDeLaSection section="progresser" />
     </div>
   )
 }

@@ -33,7 +33,7 @@ export const en: Dictionary = {
     puzzles: 'Puzzles',
     openings: 'Openings',
     endgames: 'Endgames',
-    analysis: 'Analysis',
+    analysis: 'Analyse',
     vision: 'Vision',
     glossary: 'Glossary',
     glossaryIntro:
@@ -114,6 +114,10 @@ export const en: Dictionary = {
     editorHint: 'compose a position',
     levelTest: 'Level test',
     levelTestHint: 'six minutes to find out where you stand',
+
+    progress: 'Improve',
+    listen: 'Listen to the curriculum',
+    listenHint: 'the lessons read aloud',
   },
 
   home: {
@@ -1154,6 +1158,35 @@ export const en: Dictionary = {
     levelTestBlurb:
       'Twelve positions, harder or easier depending on your answers. At the end, an estimated level and what to work on.',
     levelTestDetail: 'Six minutes · touches neither your Elo nor your puzzle rating',
+  },
+
+  progress: {
+    title: 'Improve',
+    intro:
+      'Start by finding out where you stand: your tier shows what is costing you points, and everything else lines up behind it.',
+    metaDesc:
+      'Your tier, the level test, guided lessons, the career and puzzles, all in one place.',
+    palier: 'Your tier',
+    palierBlurb: 'What costs the most points at your level, and the patterns you actually miss.',
+    palierDetail: 'Based on your rating, or on the level test',
+    levelTest: 'Level test',
+    levelTestBlurb:
+      'Positions that get harder or easier depending on your answers. At the end, a tier and what to work on.',
+    levelTestDetail: 'Touches neither your Elo nor your puzzle rating',
+    lessons: 'Guided lessons',
+    lessonsBlurb: 'A board, a voice that explains every move, and nothing locked.',
+    lessonsDetail: '{n} lessons, from the rules to an opening repertoire',
+    career: 'Career',
+    careerBlurb: 'Chapters to get through, each with a lesson, puzzles and a duel.',
+    careerDetail: 'Needs an account, to keep your progress',
+    puzzles: 'Puzzles',
+    puzzlesBlurb: 'A position, one move to find. The level follows yours.',
+    puzzlesDetail: 'A mistake does not end the exercise',
+    daily: 'Daily challenge',
+    dailyBlurb: 'The same position for everyone at your level. The next one arrives at midnight.',
+    dailyDetail: 'Counts towards your streak',
+    dailyDone: 'done',
+    moreTitle: 'Going further',
   },
 
   level: {

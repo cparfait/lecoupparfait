@@ -7,6 +7,13 @@
  * par nature d'objet. Ranger « finales » dans une « bibliothèque » obligerait à
  * deviner dans quelle boîte on l'a mise.
  *
+ * Trois verbes, et non plus quatre : jouer, progresser, analyser. « Apprendre »
+ * et « S'entraîner » se disputaient la même intention — devenir meilleur — et
+ * obligeaient à choisir entre deux mots avant de trouver le palier, le test de
+ * niveau ou les finales, que chacun des deux aurait pu revendiquer. Le test de
+ * niveau figurait d'ailleurs dans les deux. Ils ne font plus qu'une rubrique,
+ * « Progresser », et la barre du téléphone y gagne un onglet d'air.
+ *
  * Ce fichier ne contient que des données. L'en-tête, le menu mobile et la barre
  * inférieure les lisent tous les trois : auparavant chacun tenait sa propre
  * liste, et elles divergeaient — sept pages n'étaient plus atteignables depuis
@@ -25,6 +32,7 @@ import {
   GraduationCap,
   Grid3x3,
   Handshake,
+  Headphones,
   Home,
   Info,
   LayoutGrid,
@@ -37,6 +45,7 @@ import {
   Swords,
   Target,
   Timer,
+  TrendingUp,
   Trophy,
   Users,
   Zap,
@@ -56,10 +65,10 @@ export interface EntreeNav {
   /**
    * Autres chemins que cette entrée éclaire dans la barre inférieure.
    *
-   * « S'entraîner » mène au sommaire `/entrainer`, mais les trois écrans qu'il
-   * propose vivent sous `/puzzles` : sans cela, l'onglet s'éteignait dès qu'on
-   * ouvrait ce qu'il venait de proposer — on ne savait plus dans quelle
-   * rubrique on se trouvait.
+   * « Progresser » mène au sommaire `/progresser`, mais ce qu'il propose vit
+   * sous `/apprendre`, `/puzzles`, `/finales`, `/carriere`… : sans cela,
+   * l'onglet s'éteignait dès qu'on ouvrait ce qu'il venait de proposer — on ne
+   * savait plus dans quelle rubrique on se trouvait.
    */
   actifSur?: string[]
 }
@@ -78,9 +87,18 @@ export interface SectionNav {
    */
   sommaire?: string
   /**
+   * Chemins qui relèvent de la rubrique sans figurer dans ses entrées.
+   *
+   * Les anciennes pages-sommaires `/entrainer` et `/apprendre` restent
+   * ouvertes — des liens y mènent encore — mais ne sont plus des entrées du
+   * menu. Sans cette liste, leur titre perdait la teinte de sa rubrique et
+   * l'en-tête n'allumait plus aucun onglet : on arrivait nulle part.
+   */
+  aussiSur?: string[]
+  /**
    * Teinte de la section.
    *
-   * Six rubriques, six teintes, et aucune n'est le violet de l'action. Elles
+   * Une teinte par rubrique, et aucune n'est le violet de l'action. Elles
    * étaient quatre pour six rubriques, deux servaient donc deux fois, et le
    * violet teintait « Jouer » et « Analyse » en plus des boutons : la couleur
    * ne disait plus rien. Chaque rubrique a la sienne (`--rub-*` dans
@@ -120,24 +138,14 @@ export const SECTIONS: SectionNav[] = [
         icon: Handshake,
         hintKey: 'nav.vsFriendHint',
       },
-      // Puis la carrière, et non plus en tête.
+      // Ni séance pédagogique ni carrière ici.
       //
-      // Elle y était au motif qu'elle répond à « par quoi je commence ? ». Ce
-      // motif tient toujours, mais il en oubliait un autre : c'est la première
-      // entrée de la rubrique qui demande un compte. Ouvrir « Jouer » et
-      // trouver un cadenas en première ligne donne le ton inverse de celui du
-      // projet, où l'essentiel s'utilise sans rien créer. Elle passe donc
-      // derrière les deux façons de jouer une partie tout de suite.
-      // La séance pédagogique avant la carrière : elle ne demande pas de compte,
-      // et c'est la façon la plus directe de jouer une partie qui apprend
-      // quelque chose — un thème annoncé, le commentaire allumé, un bilan.
-      {
-        href: '/jouer/pedagogique',
-        labelKey: 'nav.seance',
-        icon: GraduationCap,
-        hintKey: 'nav.seanceHint',
-      },
-      { href: '/carriere', labelKey: 'nav.career', icon: Trophy, hintKey: 'nav.careerHint' },
+      // La séance était une entrée à part alors que c'est la même partie contre
+      // l'ordinateur, avec un thème annoncé et un bilan : elle devient une
+      // option de ce réglage, et sa page `/jouer/pedagogique` reste ouverte aux
+      // liens qui y mènent. La carrière, elle, passe dans « Progresser » : on
+      // y joue, mais on y vient pour avancer d'un chapitre, pas pour faire une
+      // partie — c'est la même question que le palier.
       {
         href: '/jouer/local',
         labelKey: 'nav.localGame',
@@ -166,33 +174,40 @@ export const SECTIONS: SectionNav[] = [
       { href: '/jouer/regarder', labelKey: 'nav.watch', icon: Eye, hintKey: 'nav.watchHint' },
     ],
   },
+  /**
+   * Progresser : tout ce qui sert à devenir meilleur, en une rubrique.
+   *
+   * Elle réunit ce qui vivait dans « Apprendre » et « S'entraîner », plus la
+   * carrière. L'ordre suit la question qu'on se pose en arrivant : d'abord
+   * « où j'en suis ? » (le palier, le test qui le mesure), puis « qu'est-ce que
+   * je fais maintenant ? » (une leçon, un chapitre, des positions), enfin les
+   * références qu'on consulte plus qu'on ne les pratique.
+   *
+   * Une seule teinte, celle d'« Apprendre » : deux couleurs dans une même
+   * rubrique auraient redessiné la frontière qu'on vient de retirer.
+   */
   {
-    id: 'apprendre',
+    id: 'progresser',
     teinte: 'var(--rub-apprendre)',
-    labelKey: 'nav.learn',
-    icon: GraduationCap,
-    sommaire: '/apprendre',
+    labelKey: 'nav.progress',
+    icon: TrendingUp,
+    sommaire: '/progresser',
+    // L'ancienne page-sommaire de l'entraînement reste ouverte aux liens, mais
+    // n'est plus l'entrée d'aucun menu. `/apprendre`, lui, est l'entrée
+    // « Leçons ».
+    aussiSur: ['/entrainer'],
     entrees: [
-      {
-        href: '/apprendre',
-        labelKey: 'nav.lessons',
-        icon: GraduationCap,
-        hintKey: 'nav.lessonsHint',
-        hintVars: { n: NOMBRE_DE_LECONS },
-      },
-      // « Ton palier » juste après les leçons, et devant tout le reste : c'est
-      // la réponse à la question qu'on se pose en arrivant — « je suis à 900,
-      // qu'est-ce qui me coûte des points ? » — là où le sommaire des leçons
-      // répond à « qu'est-ce qu'il y a à apprendre ? ». Les deux sont utiles,
-      // mais ce n'est pas la même question, et la seconde vient après.
+      // Le palier en tête : c'est la réponse à « je suis à 900, qu'est-ce qui
+      // me coûte des points ? », la question qu'on se pose en arrivant — là où
+      // le sommaire des leçons répond à « qu'est-ce qu'il y a à apprendre ? ».
       {
         href: '/apprendre/palier',
         labelKey: 'nav.palier',
         icon: Target,
         hintKey: 'nav.palierHint',
       },
-      // Le test juste après le palier : c'est lui qui dit dans quel palier on
-      // est. Il n'était atteignable que depuis trois pages, et d'aucun menu.
+      // Le test juste après : c'est lui qui dit dans quel palier on est. Il
+      // figurait dans les deux anciennes rubriques, faute d'en avoir une.
       {
         href: '/apprendre/niveau',
         labelKey: 'nav.levelTest',
@@ -200,10 +215,39 @@ export const SECTIONS: SectionNav[] = [
         hintKey: 'nav.levelTestHint',
       },
       {
+        href: '/apprendre',
+        labelKey: 'nav.lessons',
+        icon: GraduationCap,
+        hintKey: 'nav.lessonsHint',
+        hintVars: { n: NOMBRE_DE_LECONS },
+      },
+      { href: '/carriere', labelKey: 'nav.career', icon: Trophy, hintKey: 'nav.careerHint' },
+      { href: '/puzzles', labelKey: 'nav.puzzles', icon: Puzzle, hintKey: 'nav.puzzlesHint' },
+      {
+        href: '/puzzles?defi=1',
+        labelKey: 'nav.dailyChallenge',
+        icon: Zap,
+        hintKey: 'nav.dailyChallengeHint',
+      },
+      {
+        href: '/puzzles/rush',
+        labelKey: 'nav.puzzleRush',
+        icon: Timer,
+        hintKey: 'nav.puzzleRushHint',
+      },
+      { href: '/finales', labelKey: 'nav.endgames', icon: Crown, hintKey: 'nav.endgamesHint' },
+      // Puis les références, qu'on consulte plus qu'on ne les pratique.
+      {
         href: '/apprendre/principes',
         labelKey: 'nav.principes',
         icon: ListChecks,
         hintKey: 'nav.principesHint',
+      },
+      {
+        href: '/apprendre/ecoute',
+        labelKey: 'nav.listen',
+        icon: Headphones,
+        hintKey: 'nav.listenHint',
       },
       {
         href: '/ouvertures',
@@ -211,41 +255,12 @@ export const SECTIONS: SectionNav[] = [
         icon: BookOpen,
         hintKey: 'nav.openingsHint',
       },
-      { href: '/finales', labelKey: 'nav.endgames', icon: Crown, hintKey: 'nav.endgamesHint' },
       { href: '/vision', labelKey: 'nav.vision', icon: Eye, hintKey: 'nav.visionHint' },
       {
         href: '/glossaire',
         labelKey: 'nav.glossary',
         icon: BookMarked,
         hintKey: 'nav.glossaryHint',
-      },
-    ],
-  },
-  {
-    id: 'entrainer',
-    teinte: 'var(--rub-entrainer)',
-    labelKey: 'nav.train',
-    icon: Target,
-    // La rubrique a maintenant sa page-sommaire, comme « Jouer » et
-    // « Apprendre ». Elle pointait sur `/puzzles`, c'est-à-dire sur l'un de ses
-    // trois écrans : ouvrir « S'entraîner » lançait aussitôt une position, sans
-    // jamais montrer qu'il existait aussi la manche chronométrée et le défi du
-    // jour. Sur téléphone, où l'onglet du bas s'appelait « Puzzles », les deux
-    // autres n'existaient tout simplement pas.
-    sommaire: '/entrainer',
-    entrees: [
-      { href: '/puzzles', labelKey: 'nav.puzzles', icon: Puzzle, hintKey: 'nav.puzzlesHint' },
-      {
-        href: '/puzzles/rush',
-        labelKey: 'nav.puzzleRush',
-        icon: Timer,
-        hintKey: 'nav.puzzleRushHint',
-      },
-      {
-        href: '/puzzles?defi=1',
-        labelKey: 'nav.dailyChallenge',
-        icon: Zap,
-        hintKey: 'nav.dailyChallengeHint',
       },
     ],
   },
@@ -295,7 +310,7 @@ export const SECTIONS: SectionNav[] = [
   /**
    * Outils.
    *
-   * La sixième rubrique, et la seule qui ne serve pas à jouer une partie sur
+   * La dernière rubrique, et la seule qui ne serve pas à jouer une partie sur
    * l'écran : ce qu'on y trouve accompagne une partie qui se joue ailleurs —
    * sur un vrai plateau, en face de quelqu'un. La pendule l'a inaugurée ; le
    * calculateur Elo, le tirage au sort et l'aide-mémoire d'arbitrage suivent
@@ -349,17 +364,23 @@ export const PAGES_APPLICATION: EntreeNav[] = [
 export const SECTIONS_DANS_PLUS = ['communaute', 'outils'] as const
 
 /**
- * Barre inférieure sur téléphone : l'accueil, quatre rubriques, et « Plus ».
+ * Barre inférieure sur téléphone : l'accueil, trois rubriques, et « Plus ».
  *
- * Six onglets se disputaient autrefois trois cent soixante-quinze pixels :
- * « Communauté » et « S'entraîner » se touchaient, et l'on était redescendu à
- * cinq. « Communauté » est donc passée dans « Plus » — et la place ainsi
- * gagnée revient ici à l'accueil, qui n'était plus atteignable que par le nom
- * du site, en haut à gauche : un lien que rien ne signale sur un écran tactile,
- * faute de survol. Personne ne le trouvait.
+ * Cinq onglets, et non plus six. La barre en a porté six — accueil, jouer,
+ * apprendre, s'entraîner, analyser, plus — et chacun n'y disposait que de
+ * cinquante-trois points : « S'entraîner » y frôlait son voisin, et deux
+ * onglets sur six disaient à peu près la même chose. Apprendre et s'entraîner
+ * ne font plus qu'un, « Progresser », et chaque onglet regagne un cinquième
+ * de largeur.
  *
- * « Accueil » tient là où « Communauté » débordait — sept lettres contre dix,
- * et c'est le plus court des six.
+ * L'accueil garde sa place en tête : sans lui, il n'est atteignable que par le
+ * nom du site, en haut à gauche — un lien que rien ne signale sur un écran
+ * tactile, faute de survol. Personne ne le trouvait. « Communauté » et
+ * « Outils » vivent dans « Plus ».
+ *
+ * `actifSur` doit couvrir toutes les adresses de la rubrique, anciennes
+ * pages-sommaires comprises : un lien profond vers `/apprendre` ou
+ * `/entrainer` doit allumer « Progresser », sinon on ne sait plus où l'on est.
  *
  * `href: '/'` demande un soin particulier : tous les chemins commencent par
  * une barre oblique, donc la comparaison par préfixe qui allume les autres
@@ -371,15 +392,23 @@ export const RACCOURCIS_MOBILES: EntreeNav[] = [
     href: '/jouer',
     labelKey: 'nav.play',
     icon: Swords,
-    actifSur: ['/correspondance', '/tournois', '/carriere'],
+    actifSur: ['/correspondance', '/tournois'],
   },
   {
-    href: '/apprendre',
-    labelKey: 'nav.learn',
-    icon: GraduationCap,
-    actifSur: ['/ouvertures', '/finales', '/vision', '/glossaire'],
+    href: '/progresser',
+    labelKey: 'nav.progress',
+    icon: TrendingUp,
+    actifSur: [
+      '/apprendre',
+      '/entrainer',
+      '/carriere',
+      '/puzzles',
+      '/finales',
+      '/ouvertures',
+      '/vision',
+      '/glossaire',
+    ],
   },
-  { href: '/entrainer', labelKey: 'nav.train', icon: Target, actifSur: ['/puzzles'] },
   { href: '/analyse', labelKey: 'nav.analysis', icon: Gauge, actifSur: ['/etudes', '/editeur'] },
   {
     href: '/plus',
@@ -410,9 +439,11 @@ export const RACCOURCIS_MOBILES: EntreeNav[] = [
  */
 export function sectionActive(section: SectionNav, pathname: string): boolean {
   // La page-sommaire compte, même quand elle ne figure pas dans les entrées :
-  // `/entrainer` n'est aucun des trois écrans qu'elle propose, et la rubrique
-  // s'éteignait donc sur sa propre page d'accueil.
+  // `/progresser` n'est aucun des écrans qu'elle propose, et la rubrique
+  // s'éteindrait donc sur sa propre page d'accueil. Même chose pour les
+  // anciennes pages-sommaires qu'elle a absorbées (`aussiSur`).
   if (section.sommaire && pathname.startsWith(section.sommaire)) return true
+  if (section.aussiSur?.some((chemin) => pathname.startsWith(chemin))) return true
   return section.entrees.some((entree) => {
     const chemin = entree.href.split(/[?#]/)[0] ?? entree.href
     return chemin === '/' ? pathname === '/' : pathname.startsWith(chemin)

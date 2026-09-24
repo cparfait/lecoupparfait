@@ -1245,7 +1245,12 @@ export default function PuzzlesPage() {
 
           {/* En paysage, la colonne défile déjà et l'écran est plein : on ne
               lui ajoute pas une liste de liens. */}
-          <AutresDeLaSection section="entrainer" colonne className="paysage:hidden" />
+          <AutresDeLaSection
+            section="progresser"
+            parmi={['/puzzles']}
+            colonne
+            className="paysage:hidden"
+          />
         </div>
       </div>
 

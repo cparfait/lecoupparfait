@@ -431,7 +431,7 @@ export default function EcoutePage() {
         </div>
       )}
 
-      <AutresDeLaSection section="apprendre" />
+      <AutresDeLaSection section="progresser" />
     </div>
   )
 }

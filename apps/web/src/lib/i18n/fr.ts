@@ -28,7 +28,7 @@ export const fr = {
     puzzles: 'Puzzles',
     openings: 'Ouvertures',
     endgames: 'Finales',
-    analysis: 'Analyse',
+    analysis: 'Analyser',
     vision: 'Vision',
     glossary: 'Glossaire',
     glossaryIntro:
@@ -113,6 +113,11 @@ export const fr = {
     editorHint: 'composer une position',
     levelTest: 'Test de niveau',
     levelTestHint: 'six minutes pour savoir où tu en es',
+
+    // La rubrique qui réunit « Apprendre » et « S’entraîner ».
+    progress: 'Progresser',
+    listen: 'Écouter le programme',
+    listenHint: 'les leçons lues à voix haute',
   },
 
   home: {
@@ -1177,6 +1182,38 @@ export const fr = {
     levelTestBlurb:
       'Douze positions, plus dures ou plus simples selon tes réponses. À la fin, un niveau estimé et ce qu’il faut travailler.',
     levelTestDetail: 'Six minutes · ne touche ni à ton Elo ni à ta cote de puzzles',
+  },
+
+  // La page-sommaire de « Progresser », qui réunit les leçons, l’entraînement
+  // et la carrière.
+  progress: {
+    title: 'Progresser',
+    intro:
+      'Commence par savoir où tu en es : ton palier dit ce qui te coûte des points, et tout le reste s’y range derrière.',
+    metaDesc:
+      'Ton palier, le test de niveau, les leçons guidées, la carrière et les puzzles, au même endroit.',
+    palier: 'Ton palier',
+    palierBlurb:
+      'Ce qui coûte le plus de points à ton niveau, et les motifs que tu rates vraiment.',
+    palierDetail: 'D’après ton classement, ou le test de niveau',
+    levelTest: 'Test de niveau',
+    levelTestBlurb:
+      'Des positions plus dures ou plus simples selon tes réponses. À la fin, un palier et ce qu’il faut travailler.',
+    levelTestDetail: 'Ne touche ni à ton Elo ni à ta cote de puzzles',
+    lessons: 'Leçons guidées',
+    lessonsBlurb: 'Un échiquier, une voix qui explique chaque coup, et rien de verrouillé.',
+    lessonsDetail: '{n} leçons, de la règle du jeu au répertoire',
+    career: 'Carrière',
+    careerBlurb: 'Des chapitres à franchir, chacun avec une leçon, des puzzles et un duel.',
+    careerDetail: 'Demande un compte, pour garder ta progression',
+    puzzles: 'Puzzles',
+    puzzlesBlurb: 'Une position, un coup à trouver. Le niveau suit le tien.',
+    puzzlesDetail: 'Une erreur ne ferme pas l’exercice',
+    daily: 'Défi du jour',
+    dailyBlurb: 'La même position pour tout le monde de ton niveau. La suivante arrive à minuit.',
+    dailyDetail: 'Compte pour ta série',
+    dailyDone: 'relevé',
+    moreTitle: 'Pour aller plus loin',
   },
 
   level: {
