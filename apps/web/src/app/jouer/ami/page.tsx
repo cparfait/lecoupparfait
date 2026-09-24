@@ -423,7 +423,8 @@ export default function CreateFriendGamePage() {
                   )}
                 >
                   <span className="block text-[12px] font-normal leading-tight text-faint">
-                    <span aria-hidden>📬</span> {t('friendGame.daysShort')}
+                    <IconeCadence categorie="correspondence" className="-mt-px me-1 inline" />
+                    {t('friendGame.daysShort')}
                   </span>
                   <span className="mt-0.5 block text-sm">{t('friendGame.dayUnit', { n })}</span>
                 </button>
