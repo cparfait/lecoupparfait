@@ -6642,6 +6642,63 @@ export const fr = {
           say: "Et la règle de Tarrasch, à retenir absolument : les tours se placent **derrière** les pions passés. Derrière le tien pour le pousser, derrière celui de l'adversaire pour le retenir.",
         },
       },
+      'finales-de-tours': {
+        title: 'Les finales de tours',
+        summary:
+          'Philidor pour sauver la nulle, Lucena pour gagner. Les deux positions à savoir par cœur.',
+        e1: {
+          say: "Près de la moitié des finales sont des finales de tours, et deux positions en donnent l'essentiel. Voici la première, celle de Philidor. Tu défends avec les Noirs, un pion de moins. Ton roi est devant le pion. Ta tour tient ta troisième rangée, ici la sixième : le roi blanc ne peut pas avancer.",
+        },
+        e2: {
+          say: "Les Blancs n'avaient qu'une façon de progresser : pousser le pion. Mais maintenant, leur roi n'a plus d'abri devant lui. C'est le signal : ta tour quitte la sixième rangée et descend tout au fond, pour donner des échecs par derrière.",
+          instruction: 'Descends ta tour au fond',
+          hint: 'La tour descend la colonne b, le plus loin possible du roi blanc : en b1.',
+        },
+        e3: {
+          say: "Le roi blanc s'approche, et il menace le mat en a8. Pas de panique : échec par derrière.",
+          instruction: 'Donne échec sur la colonne f',
+          hint: 'La tour glisse sur la première rangée, de b1 en f1 : échec au roi blanc.',
+        },
+        e4: {
+          say: "Et tu continues : échec, échec, échec. Le roi blanc ne peut se cacher nulle part, son pion est devant lui et plus derrière. S'il s'éloigne pour fuir les échecs, le pion tombe. C'est nulle. Retiens : ta tour sur la sixième rangée tant que le pion n'y est pas, au fond dès qu'il y arrive.",
+        },
+        e5: {
+          say: "Deuxième position, celle de Lucena. Cette fois tu attaques, avec les Blancs. Ton pion est à une case de la promotion, ton roi devant lui. Ta tour empêche le roi noir de franchir la colonne f. Le problème : ton roi est enfermé. S'il sort, la tour noire le harcèle d'échecs.",
+        },
+        e6: {
+          say: "La solution s'appelle construire le pont. Avant de sortir ton roi, monte ta tour sur la quatrième rangée. Elle servira d'abri tout à l'heure.",
+          instruction: 'Monte la tour en f4',
+          hint: 'La tour avance de f1 en f4, sans quitter la colonne f.',
+        },
+        e7: {
+          say: 'Maintenant, le roi sort.',
+          instruction: 'Sors le roi en e7',
+          hint: 'Le roi va en e7, à côté de son pion, qui reste protégé.',
+        },
+        e8: {
+          say: 'Échec. Ton roi descend vers ta tour, en zigzag, sans jamais lâcher son pion.',
+          instruction: 'Joue le roi en d6',
+          hint: 'En d6, le roi garde toujours le pion d7.',
+        },
+        e9: {
+          say: 'Encore un échec. Le zigzag continue.',
+          instruction: 'Joue le roi en e6',
+          hint: 'En e6, le roi garde toujours le pion d7.',
+        },
+        e10: {
+          say: 'Encore un. Plus qu’un pas.',
+          instruction: 'Joue le roi en d5',
+          hint: 'Le roi va en d5. Juste derrière lui, la case d4 est sur la rangée de ta tour.',
+        },
+        e11: {
+          say: "Voilà pourquoi ta tour attendait sur la quatrième rangée. Interpose-la : c'est le pont. Protégée par ton roi, elle arrête les échecs pour de bon.",
+          instruction: 'Interpose la tour en d4',
+          hint: 'La tour glisse de f4 en d4, entre ton roi et la tour noire.',
+        },
+        e12: {
+          say: 'Plus aucun échec possible : le pion va à dame. Retiens les deux gestes. En défense, Philidor : la tour sur la sixième rangée, puis au fond dès que le pion avance. En attaque, Lucena : la tour sur la quatrième rangée, puis le roi sort, et la tour fait le pont.',
+        },
+      },
     },
     tactique: {
       title: 'La tactique',

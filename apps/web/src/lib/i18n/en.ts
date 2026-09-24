@@ -6583,6 +6583,62 @@ export const en: Dictionary = {
           say: 'And Tarrasch’s rule, absolutely one to remember: rooks belong **behind** passed pawns. Behind yours to push it, behind your opponent’s to hold it back.',
         },
       },
+      'finales-de-tours': {
+        title: 'Rook endgames',
+        summary: 'Philidor to save the draw, Lucena to win. The two positions to know by heart.',
+        e1: {
+          say: 'Nearly half of all endgames are rook endgames, and two positions give you the heart of them. Here is the first, the Philidor position. You defend with Black, a pawn down. Your king stands in front of the pawn. Your rook holds your third rank, here the sixth: the white king cannot come forward.',
+        },
+        e2: {
+          say: 'White had only one way to make progress: push the pawn. But now their king has no shelter in front of it. That is the signal: your rook leaves the sixth rank and drops all the way back, to give checks from behind.',
+          instruction: 'Drop your rook all the way back',
+          hint: 'The rook goes down the b-file, as far from the white king as possible: to b1.',
+        },
+        e3: {
+          say: 'The white king comes closer, and threatens mate on a8. No panic: check from behind.',
+          instruction: 'Give check on the f-file',
+          hint: 'The rook slides along the first rank, from b1 to f1: check to the white king.',
+        },
+        e4: {
+          say: 'And you keep going: check, check, check. The white king has nowhere to hide, its pawn is in front of it now, not behind. If it walks away to escape the checks, the pawn falls. It is a draw. Remember: your rook on the sixth rank while the pawn has not reached it, all the way back as soon as it does.',
+        },
+        e5: {
+          say: 'Second position, the Lucena. This time you attack, with White. Your pawn is one step from queening, your king in front of it. Your rook stops the black king from crossing the f-file. The problem: your king is shut in. If it steps out, the black rook hounds it with checks.',
+        },
+        e6: {
+          say: 'The answer is called building the bridge. Before your king steps out, bring your rook up to the fourth rank. It will be a shelter later on.',
+          instruction: 'Bring the rook up to f4',
+          hint: 'The rook moves from f1 to f4, staying on the f-file.',
+        },
+        e7: {
+          say: 'Now the king steps out.',
+          instruction: 'Bring the king out to e7',
+          hint: 'The king goes to e7, next to its pawn, which stays protected.',
+        },
+        e8: {
+          say: 'Check. Your king walks down towards your rook, zigzagging, never letting go of its pawn.',
+          instruction: 'Play the king to d6',
+          hint: 'On d6, the king still guards the d7 pawn.',
+        },
+        e9: {
+          say: 'Another check. The zigzag goes on.',
+          instruction: 'Play the king to e6',
+          hint: 'On e6, the king still guards the d7 pawn.',
+        },
+        e10: {
+          say: 'One more. Just one step left.',
+          instruction: 'Play the king to d5',
+          hint: 'The king goes to d5. Right behind it, the d4 square is on your rook’s rank.',
+        },
+        e11: {
+          say: 'That is why your rook was waiting on the fourth rank. Put it in the way: that is the bridge. Protected by your king, it stops the checks for good.',
+          instruction: 'Put the rook in the way on d4',
+          hint: 'The rook slides from f4 to d4, between your king and the black rook.',
+        },
+        e12: {
+          say: 'No more checks: the pawn queens. Remember the two moves. Defending, Philidor: rook on the sixth rank, then all the way back as soon as the pawn advances. Attacking, Lucena: rook to the fourth rank, then the king steps out, and the rook makes the bridge.',
+        },
+      },
     },
     tactique: {
       title: 'Tactics',

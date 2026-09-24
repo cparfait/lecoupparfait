@@ -354,5 +354,121 @@ export const endgameChapter: Chapter = {
         },
       ],
     },
+    {
+      /*
+        Les deux positions de tours qu'on doit connaître par cœur.
+
+        Près de la moitié des finales qu'on joue sont des finales de tours, et
+        celles où un camp a un pion de plus reviennent le plus souvent à l'une
+        de ces deux-là : Philidor quand on défend, Lucena quand on attaque.
+        Les coups sont ceux des manuels ; chacun a été confirmé au moteur
+        avant d'entrer ici — une erreur dans une position que l'apprenant va
+        retenir par cœur serait la pire possible.
+
+        Philidor se joue avec les Noirs : c'est le camp qui sauve la nulle, et
+        c'est lui qu'on apprend à tenir.
+      */
+      id: 'finales-de-tours',
+      title: 'lecons.finale.finales-de-tours.title',
+      summary: 'lecons.finale.finales-de-tours.summary',
+      level: 'advanced',
+      minutes: 10,
+      icon: '🌉',
+      steps: [
+        {
+          kind: 'show',
+          fen: '4k3/R7/1r6/4PK2/8/8/8/8 w - - 0 1',
+          say: 'lecons.finale.finales-de-tours.e1.say',
+          orientation: 'b',
+          highlight: ['a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6'],
+          // Les Blancs n'ont rien de mieux que pousser : leur roi ne peut pas
+          // franchir la sixième rangée.
+          reply: 'e6',
+        },
+        {
+          // b2, b3 et b4 annulent aussi, mais le principe est « le plus loin
+          // possible du roi », et l'échec de l'étape suivante part de b1.
+          kind: 'play',
+          say: 'lecons.finale.finales-de-tours.e2.say',
+          instruction: 'lecons.finale.finales-de-tours.e2.instruction',
+          answers: ['Rb1'],
+          hint: 'lecons.finale.finales-de-tours.e2.hint',
+          orientation: 'b',
+          reply: 'Kf6',
+        },
+        {
+          // Forcé : sans cet échec, la tour a7 mate en a8.
+          kind: 'play',
+          say: 'lecons.finale.finales-de-tours.e3.say',
+          instruction: 'lecons.finale.finales-de-tours.e3.instruction',
+          answers: ['Rf1+'],
+          hint: 'lecons.finale.finales-de-tours.e3.hint',
+          orientation: 'b',
+        },
+        {
+          kind: 'show',
+          say: 'lecons.finale.finales-de-tours.e4.say',
+          orientation: 'b',
+        },
+        {
+          kind: 'show',
+          fen: '3K4/3P2k1/8/8/8/8/2r5/5R2 w - - 0 1',
+          say: 'lecons.finale.finales-de-tours.e5.say',
+          arrows: [{ from: 'f1', to: 'f8', color: 'blue' }],
+        },
+        {
+          kind: 'play',
+          say: 'lecons.finale.finales-de-tours.e6.say',
+          instruction: 'lecons.finale.finales-de-tours.e6.instruction',
+          answers: ['Rf4'],
+          hint: 'lecons.finale.finales-de-tours.e6.hint',
+          reply: 'Rc1',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.finale.finales-de-tours.e7.say',
+          instruction: 'lecons.finale.finales-de-tours.e7.instruction',
+          answers: ['Ke7'],
+          hint: 'lecons.finale.finales-de-tours.e7.hint',
+          reply: 'Re1+',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.finale.finales-de-tours.e8.say',
+          instruction: 'lecons.finale.finales-de-tours.e8.instruction',
+          answers: ['Kd6'],
+          hint: 'lecons.finale.finales-de-tours.e8.hint',
+          reply: 'Rd1+',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.finale.finales-de-tours.e9.say',
+          instruction: 'lecons.finale.finales-de-tours.e9.instruction',
+          answers: ['Ke6'],
+          hint: 'lecons.finale.finales-de-tours.e9.hint',
+          reply: 'Re1+',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.finale.finales-de-tours.e10.say',
+          instruction: 'lecons.finale.finales-de-tours.e10.instruction',
+          answers: ['Kd5'],
+          hint: 'lecons.finale.finales-de-tours.e10.hint',
+          reply: 'Rd1+',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.finale.finales-de-tours.e11.say',
+          instruction: 'lecons.finale.finales-de-tours.e11.instruction',
+          answers: ['Rd4'],
+          hint: 'lecons.finale.finales-de-tours.e11.hint',
+          highlight: ['d4', 'd5'],
+        },
+        {
+          kind: 'show',
+          say: 'lecons.finale.finales-de-tours.e12.say',
+        },
+      ],
+    },
   ],
 }

@@ -11,4 +11,4 @@
  * `scripts/check-lessons.mjs`, qui échoue si elle diffère du vrai compte. Le
  * contrôle indique la valeur à écrire.
  */
-export const NOMBRE_DE_LECONS = 59
+export const NOMBRE_DE_LECONS = 60
