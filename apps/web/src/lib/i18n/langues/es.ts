@@ -24,7 +24,6 @@ export const es: Traduction = {
     play: 'Jugar',
     career: 'Carrera',
     careerHint: 'Doce capítulos, de la primera jugada a la primera victoria clara',
-    learn: 'Aprender',
     puzzles: 'Problemas',
     openings: 'Aperturas',
     endgames: 'Finales',
@@ -35,15 +34,12 @@ export const es: Traduction = {
     friends: 'Amigos',
     editor: 'Editor',
     studies: 'Estudios',
-    profile: 'Perfil',
     settings: 'Preferencias',
     signIn: 'Iniciar sesión',
     signUp: 'Crear una cuenta',
     signOut: 'Cerrar sesión',
     menu: 'Menú',
-    search: 'Buscar',
 
-    train: 'Entrenar',
     community: 'Comunidad',
     tools: 'Herramientas',
     more: 'Más',
@@ -62,7 +58,6 @@ export const es: Traduction = {
     lessons: 'Lecciones guiadas',
     palier: 'Tu nivel',
     principes: 'Principios y recordatorio',
-    seance: 'Sesión didáctica',
     puzzleRush: 'Puzzle rush',
     dailyChallenge: 'Reto del día',
     analyseGame: 'Analizar una partida',
@@ -89,7 +84,6 @@ export const es: Traduction = {
     lessonsHint: '{n} lecciones, de cero al repertorio',
     palierHint: 'lo que te cuesta puntos a tu nivel',
     principesHint: 'el recordatorio de antes de cada jugada, y los principios',
-    seanceHint: 'un tema anunciado, un rival a tu nivel',
     openingsHint: '3810 aperturas con nombre',
     endgamesHint: '3568 posiciones clasificadas',
     visionHint: 'reconocer las casillas de un vistazo',
@@ -106,8 +100,6 @@ export const es: Traduction = {
     heroTitle: 'El ajedrez, por fin explicado.',
     heroSubtitle:
       'Un motor que no se limita a decir qué jugada hacer, sino **por qué**. Una voz que te acompaña. Y cero euros, para siempre.',
-    ctaPlay: 'Jugar ahora',
-    ctaLearn: 'Empezar a aprender',
     ctaGuest: 'Sin registro',
     features: {
       coachTitle: 'Un entrenador que habla',
@@ -136,11 +128,6 @@ export const es: Traduction = {
 
   play: {
     title: 'Jugar',
-    career: 'El modo carrera',
-    careerBlurb: 'Doce capítulos, de la primera jugada a la primera victoria clara.',
-    seance: 'Sesión didáctica',
-    seanceBlurb:
-      'Un tema anunciado antes de empezar, un rival a tu nivel y un balance que dice dónde ha aparecido ese tema.',
     vsComputer: 'Contra el ordenador',
     vsComputerBlurb: 'Veinticinco niveles, desde la primera jugada hasta el gran maestro.',
     vsFriend: 'Contra alguien',
@@ -155,21 +142,10 @@ export const es: Traduction = {
     arena: 'Arena',
     arenaBlurb:
       'Un torneo donde se entra y se sale cuando se quiere, con nuevo emparejamiento al acabar cada partida.',
-    quickPairing: 'Partida rápida',
-    level: 'Nivel',
-    difficulty: 'Dificultad',
-    playAs: 'Jugar con',
     white: 'las blancas',
     black: 'las negras',
-    random: 'al azar',
     timeControl: 'Ritmo',
-    rated: 'Partida puntuable',
-    casual: 'Partida amistosa',
     start: 'Empezar la partida',
-    createLink: 'Crear el enlace de partida',
-    linkCopied: 'Enlace copiado',
-    waitingOpponent: 'Esperando a tu rival…',
-    shareThisLink: 'Envía este enlace a tu amigo:',
   },
 
   game: {

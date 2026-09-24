@@ -23,7 +23,6 @@ export const pl: Traduction = {
     play: 'Graj',
     career: 'Kariera',
     careerHint: 'Dwanaście rozdziałów, od pierwszego ruchu do pierwszej czystej wygranej',
-    learn: 'Ucz się',
     puzzles: 'Zadania',
     openings: 'Debiuty',
     endgames: 'Końcówki',
@@ -34,15 +33,12 @@ export const pl: Traduction = {
     friends: 'Znajomi',
     editor: 'Edytor',
     studies: 'Studia',
-    profile: 'Profil',
     settings: 'Ustawienia',
     signIn: 'Zaloguj się',
     signUp: 'Załóż konto',
     signOut: 'Wyloguj się',
     menu: 'Menu',
-    search: 'Szukaj',
 
-    train: 'Trenuj',
     community: 'Społeczność',
     tools: 'Narzędzia',
     more: 'Więcej',
@@ -61,7 +57,6 @@ export const pl: Traduction = {
     lessons: 'Lekcje prowadzone',
     palier: 'Twój poziom',
     principes: 'Zasady i ściąga',
-    seance: 'Partia szkoleniowa',
     puzzleRush: 'Puzzle rush',
     dailyChallenge: 'Wyzwanie dnia',
     analyseGame: 'Przeanalizuj partię',
@@ -88,7 +83,6 @@ export const pl: Traduction = {
     lessonsHint: '{n} lekcji, od zera do repertuaru',
     palierHint: 'co kosztuje cię punkty na twoim poziomie',
     principesHint: 'ściąga przed każdym ruchem i zasady',
-    seanceHint: 'zapowiedziany temat, przeciwnik na twoim poziomie',
     openingsHint: '3810 nazwanych debiutów',
     endgamesHint: '3568 uporządkowanych pozycji',
     visionHint: 'rozpoznawać pola od razu',
@@ -105,8 +99,6 @@ export const pl: Traduction = {
     heroTitle: 'Szachy, wreszcie wyjaśnione.',
     heroSubtitle:
       'Silnik, który nie tylko mówi, jaki ruch zagrać, ale **dlaczego**. Głos, który ci towarzyszy. I zero złotych, na zawsze.',
-    ctaPlay: 'Zagraj teraz',
-    ctaLearn: 'Zacznij się uczyć',
     ctaGuest: 'Bez rejestracji',
     features: {
       coachTitle: 'Trener, który mówi',
@@ -135,11 +127,6 @@ export const pl: Traduction = {
 
   play: {
     title: 'Graj',
-    career: 'Tryb kariery',
-    careerBlurb: 'Dwanaście rozdziałów, od pierwszego ruchu do pierwszej czystej wygranej.',
-    seance: 'Partia szkoleniowa',
-    seanceBlurb:
-      'Temat zapowiedziany przed startem, przeciwnik na twoim poziomie i podsumowanie, które mówi, gdzie ten temat się pojawił.',
     vsComputer: 'Z komputerem',
     vsComputerBlurb: 'Dwadzieścia pięć poziomów, od pierwszego ruchu po arcymistrza.',
     vsFriend: 'Z kimś',
@@ -153,21 +140,10 @@ export const pl: Traduction = {
     arena: 'Arena',
     arenaBlurb:
       'Turniej, do którego wchodzi się i z którego wychodzi, kiedy się chce, z nową parą po każdej partii.',
-    quickPairing: 'Szybka partia',
-    level: 'Poziom',
-    difficulty: 'Trudność',
-    playAs: 'Grasz',
     white: 'białymi',
     black: 'czarnymi',
-    random: 'losowo',
     timeControl: 'Tempo gry',
-    rated: 'Partia rankingowa',
-    casual: 'Partia towarzyska',
     start: 'Rozpocznij partię',
-    createLink: 'Utwórz link do partii',
-    linkCopied: 'Link skopiowany',
-    waitingOpponent: 'Czekamy na przeciwnika…',
-    shareThisLink: 'Wyślij ten link znajomemu:',
   },
 
   game: {

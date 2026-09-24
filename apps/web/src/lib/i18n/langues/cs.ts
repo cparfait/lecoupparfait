@@ -20,7 +20,6 @@ export const cs: Traduction = {
     play: 'Hrát',
     career: 'Kariéra',
     careerHint: 'Dvanáct kapitol, od prvního tahu k první čisté výhře',
-    learn: 'Učit se',
     puzzles: 'Úlohy',
     openings: 'Zahájení',
     endgames: 'Koncovky',
@@ -31,15 +30,12 @@ export const cs: Traduction = {
     friends: 'Přátelé',
     editor: 'Editor',
     studies: 'Studie',
-    profile: 'Profil',
     settings: 'Nastavení',
     signIn: 'Přihlásit se',
     signUp: 'Vytvořit účet',
     signOut: 'Odhlásit se',
     menu: 'Nabídka',
-    search: 'Hledat',
 
-    train: 'Trénovat',
     community: 'Komunita',
     tools: 'Nástroje',
     more: 'Více',
@@ -58,7 +54,6 @@ export const cs: Traduction = {
     lessons: 'Vedené lekce',
     palier: 'Tvoje úroveň',
     principes: 'Zásady a tahák',
-    seance: 'Výuková partie',
     puzzleRush: 'Puzzle rush',
     dailyChallenge: 'Výzva dne',
     analyseGame: 'Analyzovat partii',
@@ -85,7 +80,6 @@ export const cs: Traduction = {
     lessonsHint: '{n} lekcí, od nuly k repertoáru',
     palierHint: 'co tě na tvé úrovni stojí body',
     principesHint: 'tahák před každým tahem a zásady',
-    seanceHint: 'ohlášené téma, soupeř na tvé úrovni',
     openingsHint: '3810 pojmenovaných zahájení',
     endgamesHint: '3568 roztříděných pozic',
     visionHint: 'rozpoznat pole na první pohled',
@@ -102,8 +96,6 @@ export const cs: Traduction = {
     heroTitle: 'Šachy, konečně vysvětlené.',
     heroSubtitle:
       'Engine, který neříká jen jaký tah zahrát, ale i **proč**. Hlas, který tě provází. A nula korun, navždy.',
-    ctaPlay: 'Hrát hned',
-    ctaLearn: 'Začít se učit',
     ctaGuest: 'Bez registrace',
     features: {
       coachTitle: 'Trenér, který mluví',
@@ -132,11 +124,6 @@ export const cs: Traduction = {
 
   play: {
     title: 'Hrát',
-    career: 'Režim kariéry',
-    careerBlurb: 'Dvanáct kapitol, od prvního tahu k první čisté výhře.',
-    seance: 'Výuková partie',
-    seanceBlurb:
-      'Téma ohlášené před začátkem, soupeř na tvé úrovni a shrnutí, které říká, kde se to téma objevilo.',
     vsComputer: 'Proti počítači',
     vsComputerBlurb: 'Dvacet pět úrovní, od úplně prvního tahu po velmistra.',
     vsFriend: 'Proti někomu',
@@ -150,21 +137,10 @@ export const cs: Traduction = {
     arena: 'Aréna',
     arenaBlurb:
       'Turnaj, kam se přichází a odkud se odchází, kdy kdo chce, s novou dvojicí po každé partii.',
-    quickPairing: 'Rychlá partie',
-    level: 'Úroveň',
-    difficulty: 'Obtížnost',
-    playAs: 'Hraješ',
     white: 'bílými',
     black: 'černými',
-    random: 'náhodně',
     timeControl: 'Tempo hry',
-    rated: 'Hodnocená partie',
-    casual: 'Přátelská partie',
     start: 'Začít partii',
-    createLink: 'Vytvořit odkaz na partii',
-    linkCopied: 'Odkaz zkopírován',
-    waitingOpponent: 'Čekáme na soupeře…',
-    shareThisLink: 'Pošli tento odkaz příteli:',
   },
 
   game: {

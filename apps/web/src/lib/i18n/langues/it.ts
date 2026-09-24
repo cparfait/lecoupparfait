@@ -21,7 +21,6 @@ export const it: Traduction = {
     play: 'Gioca',
     career: 'Carriera',
     careerHint: 'Dodici capitoli, dalla prima mossa alla prima vittoria netta',
-    learn: 'Impara',
     puzzles: 'Tattica',
     openings: 'Aperture',
     endgames: 'Finali',
@@ -32,15 +31,12 @@ export const it: Traduction = {
     friends: 'Amici',
     editor: 'Editor',
     studies: 'Studi',
-    profile: 'Profilo',
     settings: 'Preferenze',
     signIn: 'Accedi',
     signUp: 'Crea un account',
     signOut: 'Esci',
     menu: 'Menu',
-    search: 'Cerca',
 
-    train: 'Allenati',
     community: 'Comunità',
     tools: 'Strumenti',
     more: 'Altro',
@@ -59,7 +55,6 @@ export const it: Traduction = {
     lessons: 'Lezioni guidate',
     palier: 'Il tuo livello',
     principes: 'Principi e promemoria',
-    seance: 'Partita didattica',
     puzzleRush: 'Puzzle rush',
     dailyChallenge: 'Sfida del giorno',
     analyseGame: 'Analizza una partita',
@@ -86,7 +81,6 @@ export const it: Traduction = {
     lessonsHint: '{n} lezioni, da zero al repertorio',
     palierHint: 'quello che ti costa punti al tuo livello',
     principesHint: 'il promemoria prima di ogni mossa, e i principi',
-    seanceHint: 'un tema annunciato, un avversario al tuo livello',
     openingsHint: '3810 aperture con nome',
     endgamesHint: '3568 posizioni classificate',
     visionHint: 'riconoscere le case a colpo d’occhio',
@@ -103,8 +97,6 @@ export const it: Traduction = {
     heroTitle: 'Gli scacchi, finalmente spiegati.',
     heroSubtitle:
       'Un motore che non si limita a dire quale mossa giocare, ma **perché**. Una voce che ti accompagna. E zero euro, per sempre.',
-    ctaPlay: 'Gioca ora',
-    ctaLearn: 'Comincia a imparare',
     ctaGuest: 'Senza registrazione',
     features: {
       coachTitle: 'Un allenatore che parla',
@@ -133,11 +125,6 @@ export const it: Traduction = {
 
   play: {
     title: 'Gioca',
-    career: 'La modalità carriera',
-    careerBlurb: 'Dodici capitoli, dalla prima mossa alla prima vittoria netta.',
-    seance: 'Partita didattica',
-    seanceBlurb:
-      'Un tema annunciato prima di cominciare, un avversario al tuo livello e un resoconto che dice dove quel tema è comparso.',
     vsComputer: 'Contro il computer',
     vsComputerBlurb: 'Venticinque livelli, dalla primissima mossa al grande maestro.',
     vsFriend: 'Contro qualcuno',
@@ -152,21 +139,10 @@ export const it: Traduction = {
     arena: 'Arena',
     arenaBlurb:
       'Un torneo in cui si entra e si esce quando si vuole, con nuovo abbinamento a ogni fine partita.',
-    quickPairing: 'Partita rapida',
-    level: 'Livello',
-    difficulty: 'Difficoltà',
-    playAs: 'Gioca con',
     white: 'il Bianco',
     black: 'il Nero',
-    random: 'a caso',
     timeControl: 'Cadenza',
-    rated: 'Partita valida',
-    casual: 'Partita amichevole',
     start: 'Comincia la partita',
-    createLink: 'Crea il link della partita',
-    linkCopied: 'Link copiato',
-    waitingOpponent: 'In attesa del tuo avversario…',
-    shareThisLink: 'Manda questo link al tuo amico:',
   },
 
   game: {

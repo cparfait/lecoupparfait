@@ -24,7 +24,6 @@ export const ro: Traduction = {
     play: 'Joacă',
     career: 'Carieră',
     careerHint: 'Douăsprezece capitole, de la prima mutare la prima victorie clară',
-    learn: 'Învață',
     puzzles: 'Probleme',
     openings: 'Deschideri',
     endgames: 'Finaluri',
@@ -35,15 +34,12 @@ export const ro: Traduction = {
     friends: 'Prieteni',
     editor: 'Editor',
     studies: 'Studii',
-    profile: 'Profil',
     settings: 'Preferințe',
     signIn: 'Autentificare',
     signUp: 'Creează un cont',
     signOut: 'Deconectare',
     menu: 'Meniu',
-    search: 'Caută',
 
-    train: 'Antrenament',
     community: 'Comunitate',
     tools: 'Unelte',
     more: 'Mai mult',
@@ -62,7 +58,6 @@ export const ro: Traduction = {
     lessons: 'Lecții ghidate',
     palier: 'Nivelul tău',
     principes: 'Principii și memento',
-    seance: 'Partidă didactică',
     puzzleRush: 'Puzzle rush',
     dailyChallenge: 'Provocarea zilei',
     analyseGame: 'Analizează o partidă',
@@ -89,7 +84,6 @@ export const ro: Traduction = {
     lessonsHint: '{n} de lecții, de la zero la repertoriu',
     palierHint: 'ce te costă puncte la nivelul tău',
     principesHint: 'mementoul dinaintea fiecărei mutări și principiile',
-    seanceHint: 'o temă anunțată, un adversar pe măsura ta',
     openingsHint: '3810 deschideri denumite',
     endgamesHint: '3568 de poziții clasificate',
     visionHint: 'să recunoști câmpurile dintr-o privire',
@@ -106,8 +100,6 @@ export const ro: Traduction = {
     heroTitle: 'Șahul, în sfârșit explicat.',
     heroSubtitle:
       'Un motor care nu spune doar ce mutare să joci, ci și **de ce**. O voce care te însoțește. Și zero lei, pentru totdeauna.',
-    ctaPlay: 'Joacă acum',
-    ctaLearn: 'Începe să înveți',
     ctaGuest: 'Fără înregistrare',
     features: {
       coachTitle: 'Un antrenor care vorbește',
@@ -136,11 +128,6 @@ export const ro: Traduction = {
 
   play: {
     title: 'Joacă',
-    career: 'Modul carieră',
-    careerBlurb: 'Douăsprezece capitole, de la prima mutare la prima victorie clară.',
-    seance: 'Partidă didactică',
-    seanceBlurb:
-      'O temă anunțată înainte de start, un adversar pe măsura ta și un bilanț care spune unde a apărut acea temă.',
     vsComputer: 'Împotriva calculatorului',
     vsComputerBlurb: 'Douăzeci și cinci de niveluri, de la prima mutare până la mare maestru.',
     vsFriend: 'Împotriva cuiva',
@@ -156,21 +143,10 @@ export const ro: Traduction = {
     arena: 'Arenă',
     arenaBlurb:
       'Un turneu în care intri și din care ieși când vrei, cu o nouă împerechere după fiecare partidă.',
-    quickPairing: 'Partidă rapidă',
-    level: 'Nivel',
-    difficulty: 'Dificultate',
-    playAs: 'Joci cu',
     white: 'albul',
     black: 'negrul',
-    random: 'la întâmplare',
     timeControl: 'Ritm',
-    rated: 'Partidă cotată',
-    casual: 'Partidă amicală',
     start: 'Începe partida',
-    createLink: 'Creează linkul partidei',
-    linkCopied: 'Link copiat',
-    waitingOpponent: 'Așteptăm adversarul…',
-    shareThisLink: 'Trimite acest link prietenului tău:',
   },
 
   game: {

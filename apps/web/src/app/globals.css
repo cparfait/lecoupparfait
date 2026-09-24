@@ -19,9 +19,13 @@
    ── Une couleur, un rôle ──────────────────────────────────────────────────
    `--accent` (le violet) est la couleur de l'action : bouton primaire, lien,
    onglet ouvert, curseur. Elle ne teinte aucune rubrique et aucune carte.
-   Les six rubriques ont chacune leur teinte (`--rub-*`), posée à un seul
+   Les cinq rubriques — Jouer, Progresser, Analyser, et Communauté et Outils
+   sous « Plus » — ont chacune leur teinte (`--rub-*`), posée à un seul
    endroit : la pastille d'icône d'une carte de destination et le trait de
    l'onglet actif. À l'intérieur d'une page, on est monochrome.
+   « Progresser » porte `--rub-apprendre`. `--rub-entrainer`, la teinte de
+   l'ancienne rubrique « S'entraîner », ne teinte plus aucune rubrique : il
+   reste la couleur de la série du jour et des quêtes sur l'accueil.
    Les couleurs de qualité des coups (`--q-*`) restent réservées à l'analyse
    et aux états — succès, alerte, erreur.
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -131,7 +135,8 @@
      l'assombrit. */
   --q-inaccuracy-text: #f7c631;
 
-  /* Teintes des six rubriques. Aucune n'est le violet de l'action. */
+  /* Teintes des rubriques (voir l'en-tête). Aucune n'est le violet de
+     l'action. */
   --rub-jouer: #5b8def;
   --rub-apprendre: #00e5a8;
   --rub-entrainer: #ff7a59;

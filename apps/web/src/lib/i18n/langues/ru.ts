@@ -25,7 +25,6 @@ export const ru: Traduction = {
     play: 'Играть',
     career: 'Карьера',
     careerHint: 'Двенадцать глав: от первого хода до первой чистой победы',
-    learn: 'Учиться',
     puzzles: 'Задачи',
     openings: 'Дебюты',
     endgames: 'Эндшпили',
@@ -36,15 +35,12 @@ export const ru: Traduction = {
     friends: 'Друзья',
     editor: 'Редактор',
     studies: 'Этюды',
-    profile: 'Профиль',
     settings: 'Настройки',
     signIn: 'Войти',
     signUp: 'Создать аккаунт',
     signOut: 'Выйти',
     menu: 'Меню',
-    search: 'Поиск',
 
-    train: 'Тренироваться',
     community: 'Сообщество',
     tools: 'Инструменты',
     more: 'Ещё',
@@ -63,7 +59,6 @@ export const ru: Traduction = {
     lessons: 'Уроки с сопровождением',
     palier: 'Твой уровень',
     principes: 'Принципы и памятка',
-    seance: 'Учебная партия',
     puzzleRush: 'Puzzle rush',
     dailyChallenge: 'Задача дня',
     analyseGame: 'Разобрать партию',
@@ -90,7 +85,6 @@ export const ru: Traduction = {
     lessonsHint: '{n} уроков, от нуля до репертуара',
     palierHint: 'что стоит тебе очков на твоём уровне',
     principesHint: 'памятка перед каждым ходом и принципы',
-    seanceHint: 'объявленная тема, соперник твоего уровня',
     openingsHint: '3810 названных дебютов',
     endgamesHint: '3568 разобранных позиций',
     visionHint: 'узнавать поля с одного взгляда',
@@ -107,8 +101,6 @@ export const ru: Traduction = {
     heroTitle: 'Шахматы — наконец с объяснениями.',
     heroSubtitle:
       'Движок, который говорит не только какой ход сделать, но и **почему**. Голос, который ведёт тебя. И ноль рублей — навсегда.',
-    ctaPlay: 'Играть сейчас',
-    ctaLearn: 'Начать учиться',
     ctaGuest: 'Без регистрации',
     features: {
       coachTitle: 'Тренер, который говорит',
@@ -137,11 +129,6 @@ export const ru: Traduction = {
 
   play: {
     title: 'Играть',
-    career: 'Режим карьеры',
-    careerBlurb: 'Двенадцать глав: от первого хода до первой чистой победы.',
-    seance: 'Учебная партия',
-    seanceBlurb:
-      'Тема, объявленная до начала, соперник твоего уровня и итог, который говорит, где эта тема встретилась.',
     vsComputer: 'Против компьютера',
     vsComputerBlurb: 'Двадцать пять уровней: от самого первого хода до гроссмейстера.',
     vsFriend: 'Против человека',
@@ -155,21 +142,10 @@ export const ru: Traduction = {
     arena: 'Арена',
     arenaBlurb:
       'Турнир, куда приходят и откуда уходят когда хотят, с новой парой после каждой партии.',
-    quickPairing: 'Быстрая партия',
-    level: 'Уровень',
-    difficulty: 'Сложность',
-    playAs: 'Играть',
     white: 'белыми',
     black: 'чёрными',
-    random: 'наугад',
     timeControl: 'Контроль времени',
-    rated: 'Рейтинговая партия',
-    casual: 'Товарищеская партия',
     start: 'Начать партию',
-    createLink: 'Создать ссылку на партию',
-    linkCopied: 'Ссылка скопирована',
-    waitingOpponent: 'Ждём соперника…',
-    shareThisLink: 'Отправь эту ссылку другу:',
   },
 
   game: {

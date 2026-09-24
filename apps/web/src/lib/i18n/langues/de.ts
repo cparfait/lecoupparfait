@@ -25,7 +25,6 @@ export const de: Traduction = {
     play: 'Spielen',
     career: 'Karriere',
     careerHint: 'Zwölf Kapitel, vom ersten Zug bis zum ersten klaren Sieg',
-    learn: 'Lernen',
     puzzles: 'Taktikaufgaben',
     openings: 'Eröffnungen',
     endgames: 'Endspiele',
@@ -36,15 +35,12 @@ export const de: Traduction = {
     friends: 'Freunde',
     editor: 'Editor',
     studies: 'Studien',
-    profile: 'Profil',
     settings: 'Einstellungen',
     signIn: 'Anmelden',
     signUp: 'Konto erstellen',
     signOut: 'Abmelden',
     menu: 'Menü',
-    search: 'Suchen',
 
-    train: 'Trainieren',
     community: 'Gemeinschaft',
     tools: 'Werkzeuge',
     more: 'Mehr',
@@ -63,7 +59,6 @@ export const de: Traduction = {
     lessons: 'Geführte Lektionen',
     palier: 'Deine Stufe',
     principes: 'Grundsätze und Merkzettel',
-    seance: 'Lehrpartie',
     puzzleRush: 'Puzzle Rush',
     dailyChallenge: 'Tagesaufgabe',
     analyseGame: 'Eine Partie analysieren',
@@ -90,7 +85,6 @@ export const de: Traduction = {
     lessonsHint: '{n} Lektionen, von null bis zum Repertoire',
     palierHint: 'was dich auf deiner Stufe Punkte kostet',
     principesHint: 'der Merkzettel vor jedem Zug, und die Grundsätze',
-    seanceHint: 'ein angekündigtes Thema, ein Gegner auf deiner Stufe',
     openingsHint: '3810 benannte Eröffnungen',
     endgamesHint: '3568 sortierte Stellungen',
     visionHint: 'Felder auf einen Blick erkennen',
@@ -107,8 +101,6 @@ export const de: Traduction = {
     heroTitle: 'Schach, endlich erklärt.',
     heroSubtitle:
       'Eine Engine, die nicht nur sagt, welcher Zug der beste ist, sondern **warum**. Eine Stimme, die dich begleitet. Und null Euro, für immer.',
-    ctaPlay: 'Jetzt spielen',
-    ctaLearn: 'Mit dem Lernen anfangen',
     ctaGuest: 'Ohne Registrierung',
     features: {
       coachTitle: 'Ein Trainer, der spricht',
@@ -137,11 +129,6 @@ export const de: Traduction = {
 
   play: {
     title: 'Spielen',
-    career: 'Der Karrieremodus',
-    careerBlurb: 'Zwölf Kapitel, vom ersten Zug bis zum ersten klaren Sieg.',
-    seance: 'Lehrpartie',
-    seanceBlurb:
-      'Ein Thema, das vor dem Anpfiff angekündigt wird, ein Gegner auf deiner Stufe, und ein Bericht, der sagt, wo dieses Thema aufgetaucht ist.',
     vsComputer: 'Gegen den Computer',
     vsComputerBlurb: 'Fünfundzwanzig Stufen, vom allerersten Zug bis zum Großmeister.',
     vsFriend: 'Gegen jemanden',
@@ -155,21 +142,10 @@ export const de: Traduction = {
     arena: 'Arena',
     arenaBlurb:
       'Ein Turnier, bei dem man kommt und geht, wann man will, und nach jeder Partie neu gepaart wird.',
-    quickPairing: 'Schnelle Partie',
-    level: 'Stufe',
-    difficulty: 'Schwierigkeit',
-    playAs: 'Spielen mit',
     white: 'Weiß',
     black: 'Schwarz',
-    random: 'zufällig',
     timeControl: 'Bedenkzeit',
-    rated: 'Gewertete Partie',
-    casual: 'Freundschaftspartie',
     start: 'Partie beginnen',
-    createLink: 'Partie-Link erstellen',
-    linkCopied: 'Link kopiert',
-    waitingOpponent: 'Warte auf deinen Gegner…',
-    shareThisLink: 'Schick diesen Link an deinen Freund:',
   },
 
   game: {

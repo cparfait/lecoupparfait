@@ -21,7 +21,6 @@ export const nl: Traduction = {
     play: 'Spelen',
     career: 'Carrière',
     careerHint: 'Twaalf hoofdstukken, van de eerste zet tot de eerste duidelijke winst',
-    learn: 'Leren',
     puzzles: 'Puzzels',
     openings: 'Openingen',
     endgames: 'Eindspelen',
@@ -32,15 +31,12 @@ export const nl: Traduction = {
     friends: 'Vrienden',
     editor: 'Editor',
     studies: 'Studies',
-    profile: 'Profiel',
     settings: 'Voorkeuren',
     signIn: 'Inloggen',
     signUp: 'Account aanmaken',
     signOut: 'Uitloggen',
     menu: 'Menu',
-    search: 'Zoeken',
 
-    train: 'Trainen',
     community: 'Gemeenschap',
     tools: 'Hulpmiddelen',
     more: 'Meer',
@@ -59,7 +55,6 @@ export const nl: Traduction = {
     lessons: 'Begeleide lessen',
     palier: 'Jouw niveau',
     principes: 'Principes en geheugensteun',
-    seance: 'Leerpartij',
     puzzleRush: 'Puzzle rush',
     dailyChallenge: 'Dagelijkse uitdaging',
     analyseGame: 'Een partij analyseren',
@@ -86,7 +81,6 @@ export const nl: Traduction = {
     lessonsHint: '{n} lessen, van nul tot een repertoire',
     palierHint: 'wat je op jouw niveau punten kost',
     principesHint: 'de geheugensteun vóór elke zet, en de principes',
-    seanceHint: 'een aangekondigd thema, een tegenstander op jouw niveau',
     openingsHint: '3810 benoemde openingen',
     endgamesHint: '3568 gesorteerde stellingen',
     visionHint: 'velden in één oogopslag herkennen',
@@ -103,8 +97,6 @@ export const nl: Traduction = {
     heroTitle: 'Schaken, eindelijk uitgelegd.',
     heroSubtitle:
       'Een engine die niet alleen zegt welke zet je moet spelen, maar **waarom**. Een stem die je begeleidt. En nul euro, voor altijd.',
-    ctaPlay: 'Nu spelen',
-    ctaLearn: 'Beginnen met leren',
     ctaGuest: 'Zonder registratie',
     features: {
       coachTitle: 'Een coach die praat',
@@ -133,11 +125,6 @@ export const nl: Traduction = {
 
   play: {
     title: 'Spelen',
-    career: 'De carrièremodus',
-    careerBlurb: 'Twaalf hoofdstukken, van de eerste zet tot de eerste duidelijke winst.',
-    seance: 'Leerpartij',
-    seanceBlurb:
-      'Een thema dat vooraf wordt aangekondigd, een tegenstander op jouw niveau, en een verslag dat zegt waar dat thema opdook.',
     vsComputer: 'Tegen de computer',
     vsComputerBlurb: 'Vijfentwintig niveaus, van de allereerste zet tot grootmeester.',
     vsFriend: 'Tegen iemand',
@@ -151,21 +138,10 @@ export const nl: Traduction = {
     arena: 'Arena',
     arenaBlurb:
       'Een toernooi waar je komt en gaat wanneer je wilt, met een nieuwe paring na elke partij.',
-    quickPairing: 'Snelle partij',
-    level: 'Niveau',
-    difficulty: 'Moeilijkheid',
-    playAs: 'Spelen met',
     white: 'wit',
     black: 'zwart',
-    random: 'willekeurig',
     timeControl: 'Speeltempo',
-    rated: 'Gewaardeerde partij',
-    casual: 'Vriendschappelijke partij',
     start: 'De partij beginnen',
-    createLink: 'Partijlink maken',
-    linkCopied: 'Link gekopieerd',
-    waitingOpponent: 'Wachten op je tegenstander…',
-    shareThisLink: 'Stuur deze link naar je vriend:',
   },
 
   game: {

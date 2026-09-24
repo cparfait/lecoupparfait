@@ -21,7 +21,6 @@ export const uk: Traduction = {
     play: 'Грати',
     career: 'Кар’єра',
     careerHint: 'Дванадцять розділів: від першого ходу до першої чистої перемоги',
-    learn: 'Навчання',
     puzzles: 'Задачі',
     openings: 'Дебюти',
     endgames: 'Ендшпілі',
@@ -32,15 +31,12 @@ export const uk: Traduction = {
     friends: 'Друзі',
     editor: 'Редактор',
     studies: 'Етюди',
-    profile: 'Профіль',
     settings: 'Налаштування',
     signIn: 'Увійти',
     signUp: 'Створити акаунт',
     signOut: 'Вийти',
     menu: 'Меню',
-    search: 'Пошук',
 
-    train: 'Тренування',
     community: 'Спільнота',
     tools: 'Інструменти',
     more: 'Ще',
@@ -59,7 +55,6 @@ export const uk: Traduction = {
     lessons: 'Уроки із супроводом',
     palier: 'Твій рівень',
     principes: 'Принципи та пам’ятка',
-    seance: 'Навчальна партія',
     puzzleRush: 'Puzzle rush',
     dailyChallenge: 'Задача дня',
     analyseGame: 'Розібрати партію',
@@ -86,7 +81,6 @@ export const uk: Traduction = {
     lessonsHint: '{n} уроків, від нуля до репертуару',
     palierHint: 'що коштує тобі очок на твоєму рівні',
     principesHint: 'пам’ятка перед кожним ходом і принципи',
-    seanceHint: 'оголошена тема, суперник твого рівня',
     openingsHint: '3810 названих дебютів',
     endgamesHint: '3568 впорядкованих позицій',
     visionHint: 'упізнавати поля з одного погляду',
@@ -103,8 +97,6 @@ export const uk: Traduction = {
     heroTitle: 'Шахи — нарешті з поясненнями.',
     heroSubtitle:
       'Рушій, який каже не лише який хід зробити, а й **чому**. Голос, який веде тебе. І нуль гривень — назавжди.',
-    ctaPlay: 'Грати зараз',
-    ctaLearn: 'Почати навчання',
     ctaGuest: 'Без реєстрації',
     features: {
       coachTitle: 'Тренер, який говорить',
@@ -133,11 +125,6 @@ export const uk: Traduction = {
 
   play: {
     title: 'Грати',
-    career: 'Режим кар’єри',
-    careerBlurb: 'Дванадцять розділів: від першого ходу до першої чистої перемоги.',
-    seance: 'Навчальна партія',
-    seanceBlurb:
-      'Тема, оголошена до початку, суперник твого рівня та підсумок, який каже, де ця тема трапилася.',
     vsComputer: 'Проти комп’ютера',
     vsComputerBlurb: 'Двадцять п’ять рівнів: від найпершого ходу до гросмейстера.',
     vsFriend: 'Проти людини',
@@ -151,21 +138,10 @@ export const uk: Traduction = {
     arena: 'Арена',
     arenaBlurb:
       'Турнір, куди приходять і звідки йдуть коли хочуть, із новою парою після кожної партії.',
-    quickPairing: 'Швидка партія',
-    level: 'Рівень',
-    difficulty: 'Складність',
-    playAs: 'Грати',
     white: 'білими',
     black: 'чорними',
-    random: 'навмання',
     timeControl: 'Контроль часу',
-    rated: 'Рейтингова партія',
-    casual: 'Товариська партія',
     start: 'Почати партію',
-    createLink: 'Створити посилання на партію',
-    linkCopied: 'Посилання скопійовано',
-    waitingOpponent: 'Чекаємо суперника…',
-    shareThisLink: 'Надішли це посилання другові:',
   },
 
   game: {

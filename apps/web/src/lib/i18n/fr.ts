@@ -24,7 +24,6 @@ export const fr = {
     play: 'Jouer',
     career: 'Carrière',
     careerHint: 'Douze chapitres, du premier coup à la première victoire nette',
-    learn: 'Apprendre',
     puzzles: 'Puzzles',
     openings: 'Ouvertures',
     endgames: 'Finales',
@@ -42,17 +41,14 @@ export const fr = {
     friends: 'Amis',
     editor: 'Éditeur',
     studies: 'Études',
-    profile: 'Profil',
     settings: 'Préférences',
     signIn: 'Se connecter',
     signUp: 'Créer un compte',
     signOut: 'Se déconnecter',
     menu: 'Menu',
-    search: 'Rechercher',
 
     // Sections du menu principal. « Jouer », « Apprendre » et « Analyse »
     // servent à la fois de titre de section et d'entrée, d'où leur absence ici.
-    train: 'S’entraîner',
     community: 'Communauté',
     tools: 'Outils',
     more: 'Plus',
@@ -72,7 +68,6 @@ export const fr = {
     lessons: 'Leçons guidées',
     palier: 'Ton palier',
     principes: 'Principes et mémo',
-    seance: 'Séance pédagogique',
     puzzleRush: 'Puzzle rush',
     dailyChallenge: 'Défi du jour',
     analyseGame: 'Analyser une partie',
@@ -100,7 +95,6 @@ export const fr = {
     lessonsHint: '{n} leçons, de zéro au répertoire',
     palierHint: 'ce qui te coûte des points à ton niveau',
     principesHint: 'le mémo d’avant chaque coup, et les principes',
-    seanceHint: 'un thème annoncé, un adversaire à ton niveau',
     openingsHint: '3 810 ouvertures nommées',
     endgamesHint: '3 568 positions classées',
     visionHint: 'reconnaître les cases à vue',
@@ -126,8 +120,6 @@ export const fr = {
     heroTitle: 'Les échecs, enfin expliqués.',
     heroSubtitle:
       'Un moteur qui ne se contente pas de dire quel coup jouer, mais **pourquoi**. Une voix qui t’accompagne. Et zéro euro, pour toujours.',
-    ctaPlay: 'Jouer maintenant',
-    ctaLearn: 'Commencer à apprendre',
     ctaGuest: 'Sans inscription',
     features: {
       coachTitle: 'Un coach qui parle',
@@ -213,11 +205,6 @@ export const fr = {
 
   play: {
     title: 'Jouer',
-    career: 'Le mode carrière',
-    careerBlurb: 'Douze chapitres, du premier coup à la première victoire nette.',
-    seance: 'Séance pédagogique',
-    seanceBlurb:
-      'Un thème annoncé avant de commencer, un adversaire à ton niveau, et un bilan qui dit où ce thème est apparu.',
     vsComputer: 'Contre l’ordinateur',
     vsComputerBlurb: 'Des adversaires calibrés, du tout premier coup au grand maître.',
     vsFriend: 'Contre quelqu’un',
@@ -235,33 +222,20 @@ export const fr = {
     lobbyIntro:
       'Contre la machine pour t’entraîner à ton rythme, contre un ami pour le plaisir, ou à deux sur le même écran.',
     vsComputerDetail: '18 niveaux · 7 personnalités · de 100 à 3200 Elo',
-    seanceDetail: '10 thèmes · adversaire calibré sur ton palier · mode commenté',
     vsFriendDetail: 'De 15 secondes à 14 jours par coup · un lien, ou un ami',
     correspondenceDetail: 'Un coup quand tu peux · de 1 à 14 jours par coup',
     localDetail: 'L’échiquier se retourne à chaque coup si tu le souhaites',
     arenaDetail: 'On arrive quand on veut, on repart quand on veut',
     watchDetail: 'Les parties commencées, suivies coup par coup',
-    careerDetail: '12 chapitres · une leçon, des puzzles et un duel par chapitre',
     opponentsTitle: 'Tes adversaires artificiels',
     opponentsHint:
       'Chacun a un style de jeu réellement différent : leur façon de choisir un coup est biaisée en faveur de ce qu’ils aiment.',
     allPortraits: 'Tous les portraits',
 
-    quickPairing: 'Partie rapide',
-    level: 'Niveau',
-    difficulty: 'Difficulté',
-    playAs: 'Jouer avec',
     white: 'les Blancs',
     black: 'les Noirs',
-    random: 'au hasard',
     timeControl: 'Cadence',
-    rated: 'Partie classée',
-    casual: 'Partie amicale',
     start: 'Commencer la partie',
-    createLink: 'Créer le lien de partie',
-    linkCopied: 'Lien copié',
-    waitingOpponent: 'En attente de ton adversaire…',
-    shareThisLink: 'Envoie ce lien à ton ami :',
   },
 
   computer: {
@@ -2287,33 +2261,12 @@ export const fr = {
   },
 
   homeIn: {
-    chapterOf: 'chapitre {n} / {total}',
-    seeAll: 'tout voir',
-    anOpponent: 'un adversaire',
-    whiteVsBlack: '{blancs} — {noirs}',
-    won: 'Gagnée',
-    lost: 'Perdue',
     seeTheMap: 'Voir la carte',
     // {pseudo} et {xp} reçoivent un élément mis en forme : voir `avecElements`.
     hello: 'Bonjour {pseudo}',
-    dayPoints: '{xp} / {total} points du jour',
-    streakTitle: 'Jours d’affilée avec au moins une quête faite',
-    yourPath: 'Ton parcours',
-    careerDone: 'Carrière terminée 👑',
     startCareer: 'Commence ta carrière',
-    careerBlurb: 'Douze chapitres, du premier coup à la première victoire nette.',
     reviewPath: 'Revoir le parcours',
     start: 'Commencer',
-    lastGames: 'Tes dernières parties',
-    noGameSaved: 'Aucune partie enregistrée.',
-    playAGame: 'Jouer une partie',
-    unlistedOpening: 'ouverture non répertoriée',
-    halfMoves: '{n} demi-coups',
-    yourAnalyses: 'Tes analyses',
-    noOpeningListed: 'sans ouverture répertoriée',
-    getAnalysed: 'Fais analyser une partie',
-    getAnalysedHint:
-      'Coup par coup, ce qui a basculé et pourquoi — avec le meilleur coup montré sur l’échiquier. Tes analyses restent ici.',
     analyseAGame: 'Analyser une partie',
   },
 

@@ -20,7 +20,6 @@ export const hu: Traduction = {
     play: 'Játék',
     career: 'Karrier',
     careerHint: 'Tizenkét fejezet, az első lépéstől az első tiszta győzelemig',
-    learn: 'Tanulás',
     puzzles: 'Feladványok',
     openings: 'Megnyitások',
     endgames: 'Végjátékok',
@@ -31,15 +30,12 @@ export const hu: Traduction = {
     friends: 'Barátok',
     editor: 'Szerkesztő',
     studies: 'Tanulmányok',
-    profile: 'Profil',
     settings: 'Beállítások',
     signIn: 'Bejelentkezés',
     signUp: 'Fiók létrehozása',
     signOut: 'Kijelentkezés',
     menu: 'Menü',
-    search: 'Keresés',
 
-    train: 'Edzés',
     community: 'Közösség',
     tools: 'Eszközök',
     more: 'Több',
@@ -58,7 +54,6 @@ export const hu: Traduction = {
     lessons: 'Vezetett leckék',
     palier: 'A te szinted',
     principes: 'Alapelvek és emlékeztető',
-    seance: 'Tanuló játszma',
     puzzleRush: 'Puzzle rush',
     dailyChallenge: 'A nap kihívása',
     analyseGame: 'Játszma elemzése',
@@ -85,7 +80,6 @@ export const hu: Traduction = {
     lessonsHint: '{n} lecke, a nulláról a repertoárig',
     palierHint: 'ami a te szinteden pontokba kerül',
     principesHint: 'a minden lépés előtti emlékeztető és az alapelvek',
-    seanceHint: 'bejelentett téma, hozzád illő ellenfél',
     openingsHint: '3810 megnevezett megnyitás',
     endgamesHint: '3568 besorolt állás',
     visionHint: 'a mezőket egy pillantásra felismerni',
@@ -102,8 +96,6 @@ export const hu: Traduction = {
     heroTitle: 'A sakk, végre elmagyarázva.',
     heroSubtitle:
       'Egy motor, amely nemcsak azt mondja meg, melyik lépést játszd, hanem azt is, **miért**. Egy hang, amely elkísér. És nulla forint, örökre.',
-    ctaPlay: 'Játék most',
-    ctaLearn: 'Kezdj el tanulni',
     ctaGuest: 'Regisztráció nélkül',
     features: {
       coachTitle: 'Egy edző, aki beszél',
@@ -132,11 +124,6 @@ export const hu: Traduction = {
 
   play: {
     title: 'Játék',
-    career: 'Karriermód',
-    careerBlurb: 'Tizenkét fejezet, az első lépéstől az első tiszta győzelemig.',
-    seance: 'Tanuló játszma',
-    seanceBlurb:
-      'Kezdés előtt bejelentett téma, hozzád illő ellenfél, és egy összegzés, amely megmondja, hol bukkant fel ez a téma.',
     vsComputer: 'A gép ellen',
     vsComputerBlurb: 'Huszonöt szint, a legelső lépéstől a nagymesterig.',
     vsFriend: 'Valaki ellen',
@@ -150,21 +137,10 @@ export const hu: Traduction = {
     arena: 'Aréna',
     arenaBlurb:
       'Verseny, ahová bármikor be lehet lépni és ahonnan bármikor ki lehet lépni, minden játszma után új párosítással.',
-    quickPairing: 'Gyors játszma',
-    level: 'Szint',
-    difficulty: 'Nehézség',
-    playAs: 'Játék',
     white: 'világossal',
     black: 'sötéttel',
-    random: 'véletlenszerűen',
     timeControl: 'Időbeosztás',
-    rated: 'Értékelt játszma',
-    casual: 'Baráti játszma',
     start: 'Játszma indítása',
-    createLink: 'Játszmalink létrehozása',
-    linkCopied: 'Link másolva',
-    waitingOpponent: 'Várunk az ellenfeledre…',
-    shareThisLink: 'Küldd el ezt a linket a barátodnak:',
   },
 
   game: {

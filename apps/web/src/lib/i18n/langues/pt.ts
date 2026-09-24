@@ -25,7 +25,6 @@ export const pt: Traduction = {
     play: 'Jogar',
     career: 'Carreira',
     careerHint: 'Doze capítulos, do primeiro lance à primeira vitória clara',
-    learn: 'Aprender',
     puzzles: 'Táticas',
     openings: 'Aberturas',
     endgames: 'Finais',
@@ -36,15 +35,12 @@ export const pt: Traduction = {
     friends: 'Amigos',
     editor: 'Editor',
     studies: 'Estudos',
-    profile: 'Perfil',
     settings: 'Preferências',
     signIn: 'Entrar',
     signUp: 'Criar uma conta',
     signOut: 'Sair',
     menu: 'Menu',
-    search: 'Pesquisar',
 
-    train: 'Treinar',
     community: 'Comunidade',
     tools: 'Ferramentas',
     more: 'Mais',
@@ -63,7 +59,6 @@ export const pt: Traduction = {
     lessons: 'Lições guiadas',
     palier: 'O seu nível',
     principes: 'Princípios e lembrete',
-    seance: 'Partida didática',
     puzzleRush: 'Puzzle rush',
     dailyChallenge: 'Desafio do dia',
     analyseGame: 'Analisar uma partida',
@@ -90,7 +85,6 @@ export const pt: Traduction = {
     lessonsHint: '{n} lições, do zero ao repertório',
     palierHint: 'o que lhe custa pontos no seu nível',
     principesHint: 'o lembrete de antes de cada lance, e os princípios',
-    seanceHint: 'um tema anunciado, um adversário no seu nível',
     openingsHint: '3810 aberturas nomeadas',
     endgamesHint: '3568 posições classificadas',
     visionHint: 'reconhecer as casas de imediato',
@@ -107,8 +101,6 @@ export const pt: Traduction = {
     heroTitle: 'O xadrez, enfim explicado.',
     heroSubtitle:
       'Um motor que não se limita a dizer qual lance jogar, mas **por quê**. Uma voz que acompanha você. E zero reais, para sempre.',
-    ctaPlay: 'Jogar agora',
-    ctaLearn: 'Começar a aprender',
     ctaGuest: 'Sem cadastro',
     features: {
       coachTitle: 'Um treinador que fala',
@@ -137,11 +129,6 @@ export const pt: Traduction = {
 
   play: {
     title: 'Jogar',
-    career: 'O modo carreira',
-    careerBlurb: 'Doze capítulos, do primeiro lance à primeira vitória clara.',
-    seance: 'Partida didática',
-    seanceBlurb:
-      'Um tema anunciado antes de começar, um adversário no seu nível e um balanço que diz onde esse tema apareceu.',
     vsComputer: 'Contra o computador',
     vsComputerBlurb: 'Vinte e cinco níveis, do primeiro lance ao grande mestre.',
     vsFriend: 'Contra alguém',
@@ -156,21 +143,10 @@ export const pt: Traduction = {
     arena: 'Arena',
     arenaBlurb:
       'Um torneio em que se entra e se sai quando se quer, com novo emparceiramento ao fim de cada partida.',
-    quickPairing: 'Partida rápida',
-    level: 'Nível',
-    difficulty: 'Dificuldade',
-    playAs: 'Jogar de',
     white: 'brancas',
     black: 'pretas',
-    random: 'ao acaso',
     timeControl: 'Ritmo',
-    rated: 'Partida valendo pontos',
-    casual: 'Partida amistosa',
     start: 'Começar a partida',
-    createLink: 'Criar o link da partida',
-    linkCopied: 'Link copiado',
-    waitingOpponent: 'Aguardando seu adversário…',
-    shareThisLink: 'Envie este link ao seu amigo:',
   },
 
   game: {

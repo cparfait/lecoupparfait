@@ -21,7 +21,6 @@ export const tr: Traduction = {
     play: 'Oyna',
     career: 'Kariyer',
     careerHint: 'On iki bölüm: ilk hamleden ilk net galibiyete',
-    learn: 'Öğren',
     puzzles: 'Problemler',
     openings: 'Açılışlar',
     endgames: 'Oyun sonları',
@@ -32,15 +31,12 @@ export const tr: Traduction = {
     friends: 'Arkadaşlar',
     editor: 'Düzenleyici',
     studies: 'Etütler',
-    profile: 'Profil',
     settings: 'Tercihler',
     signIn: 'Giriş yap',
     signUp: 'Hesap oluştur',
     signOut: 'Çıkış yap',
     menu: 'Menü',
-    search: 'Ara',
 
-    train: 'Antrenman',
     community: 'Topluluk',
     tools: 'Araçlar',
     more: 'Daha fazla',
@@ -59,7 +55,6 @@ export const tr: Traduction = {
     lessons: 'Rehberli dersler',
     palier: 'Senin seviyen',
     principes: 'İlkeler ve hatırlatma',
-    seance: 'Öğretici oyun',
     puzzleRush: 'Puzzle rush',
     dailyChallenge: 'Günün meydan okuması',
     analyseGame: 'Bir oyunu analiz et',
@@ -86,7 +81,6 @@ export const tr: Traduction = {
     lessonsHint: '{n} ders, sıfırdan repertuvara',
     palierHint: 'senin seviyende sana puan kaybettiren şeyler',
     principesHint: 'her hamleden önceki hatırlatma ve ilkeler',
-    seanceHint: 'duyurulmuş bir tema, seviyene uygun bir rakip',
     openingsHint: '3810 adlandırılmış açılış',
     endgamesHint: '3568 sınıflandırılmış konum',
     visionHint: 'kareleri bir bakışta tanımak',
@@ -103,8 +97,6 @@ export const tr: Traduction = {
     heroTitle: 'Satranç, nihayet açıklanmış hâliyle.',
     heroSubtitle:
       'Sadece hangi hamlenin oynanacağını değil, **neden** oynanacağını da söyleyen bir motor. Sana eşlik eden bir ses. Ve sonsuza dek sıfır ücret.',
-    ctaPlay: 'Hemen oyna',
-    ctaLearn: 'Öğrenmeye başla',
     ctaGuest: 'Kayıt olmadan',
     features: {
       coachTitle: 'Konuşan bir antrenör',
@@ -133,11 +125,6 @@ export const tr: Traduction = {
 
   play: {
     title: 'Oyna',
-    career: 'Kariyer modu',
-    careerBlurb: 'On iki bölüm: ilk hamleden ilk net galibiyete.',
-    seance: 'Öğretici oyun',
-    seanceBlurb:
-      'Başlamadan önce duyurulan bir tema, seviyene uygun bir rakip ve bu temanın nerede ortaya çıktığını söyleyen bir değerlendirme.',
     vsComputer: 'Bilgisayara karşı',
     vsComputerBlurb: 'Yirmi beş seviye: ilk hamleden büyükustaya.',
     vsFriend: 'Birine karşı',
@@ -152,21 +139,10 @@ export const tr: Traduction = {
     arena: 'Arena',
     arenaBlurb:
       'İstediğin zaman girip çıktığın, her oyun bitiminde yeniden eşleştirildiğin bir turnuva.',
-    quickPairing: 'Hızlı oyun',
-    level: 'Seviye',
-    difficulty: 'Zorluk',
-    playAs: 'Şununla oyna',
     white: 'beyaz',
     black: 'siyah',
-    random: 'rastgele',
     timeControl: 'Süre',
-    rated: 'Dereceli oyun',
-    casual: 'Dostluk oyunu',
     start: 'Oyuna başla',
-    createLink: 'Oyun bağlantısı oluştur',
-    linkCopied: 'Bağlantı kopyalandı',
-    waitingOpponent: 'Rakibin bekleniyor…',
-    shareThisLink: 'Bu bağlantıyı arkadaşına gönder:',
   },
 
   game: {

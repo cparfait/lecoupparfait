@@ -20,7 +20,6 @@ export const sv: Traduction = {
     play: 'Spela',
     career: 'Karriär',
     careerHint: 'Tolv kapitel, från första draget till första rena vinsten',
-    learn: 'Lär dig',
     puzzles: 'Problem',
     openings: 'Öppningar',
     endgames: 'Slutspel',
@@ -31,15 +30,12 @@ export const sv: Traduction = {
     friends: 'Vänner',
     editor: 'Redigerare',
     studies: 'Studier',
-    profile: 'Profil',
     settings: 'Inställningar',
     signIn: 'Logga in',
     signUp: 'Skapa konto',
     signOut: 'Logga ut',
     menu: 'Meny',
-    search: 'Sök',
 
-    train: 'Träna',
     community: 'Gemenskap',
     tools: 'Verktyg',
     more: 'Mer',
@@ -58,7 +54,6 @@ export const sv: Traduction = {
     lessons: 'Guidade lektioner',
     palier: 'Din nivå',
     principes: 'Principer och minneslista',
-    seance: 'Lärparti',
     puzzleRush: 'Puzzle rush',
     dailyChallenge: 'Dagens utmaning',
     analyseGame: 'Analysera ett parti',
@@ -85,7 +80,6 @@ export const sv: Traduction = {
     lessonsHint: '{n} lektioner, från noll till repertoar',
     palierHint: 'vad som kostar dig poäng på din nivå',
     principesHint: 'minneslistan före varje drag, och principerna',
-    seanceHint: 'ett utlyst tema, en motståndare på din nivå',
     openingsHint: '3810 namngivna öppningar',
     endgamesHint: '3568 sorterade ställningar',
     visionHint: 'känna igen rutorna på ett ögonblick',
@@ -102,8 +96,6 @@ export const sv: Traduction = {
     heroTitle: 'Schack, äntligen förklarat.',
     heroSubtitle:
       'En motor som inte bara säger vilket drag du ska spela, utan **varför**. En röst som följer dig. Och noll kronor, för alltid.',
-    ctaPlay: 'Spela nu',
-    ctaLearn: 'Börja lära dig',
     ctaGuest: 'Utan registrering',
     features: {
       coachTitle: 'En tränare som pratar',
@@ -132,11 +124,6 @@ export const sv: Traduction = {
 
   play: {
     title: 'Spela',
-    career: 'Karriärläget',
-    careerBlurb: 'Tolv kapitel, från första draget till första rena vinsten.',
-    seance: 'Lärparti',
-    seanceBlurb:
-      'Ett tema som utlyses innan start, en motståndare på din nivå, och en sammanfattning som säger var temat dök upp.',
     vsComputer: 'Mot datorn',
     vsComputerBlurb: 'Tjugofem nivåer, från allra första draget till stormästare.',
     vsFriend: 'Mot någon',
@@ -150,21 +137,10 @@ export const sv: Traduction = {
     arena: 'Arena',
     arenaBlurb:
       'En turnering där man kommer och går när man vill, med ny lottning efter varje parti.',
-    quickPairing: 'Snabbparti',
-    level: 'Nivå',
-    difficulty: 'Svårighet',
-    playAs: 'Spela med',
     white: 'vit',
     black: 'svart',
-    random: 'slumpmässigt',
     timeControl: 'Betänketid',
-    rated: 'Rankat parti',
-    casual: 'Vänskapsparti',
     start: 'Starta partiet',
-    createLink: 'Skapa partilänk',
-    linkCopied: 'Länk kopierad',
-    waitingOpponent: 'Väntar på din motståndare…',
-    shareThisLink: 'Skicka den här länken till din vän:',
   },
 
   game: {
