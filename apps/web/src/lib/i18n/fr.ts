@@ -1528,6 +1528,56 @@ export const fr = {
     pickTheme: 'Choisis un thème',
   },
 
+  revoir: {
+    nav: 'Mes erreurs à revoir',
+    navHint: 'Tes propres fautes, reposées au bon moment',
+    metaTitle: 'Mes erreurs à revoir',
+    metaDesc:
+      'Les gaffes et les erreurs relevées dans tes analyses, reposées à intervalles croissants jusqu’à ce que tu les joues juste.',
+    title: 'Mes erreurs à revoir',
+    intro:
+      'Les gaffes et les erreurs relevées dans tes analyses reviennent ici. Retrouvée, une position revient plus tard ; manquée, elle revient demain.',
+    dueToday: '{n} à revoir aujourd’hui',
+    box: 'Boîte {n} sur {max}',
+    findBetter: 'Trouve mieux que {coup}',
+    findBetterHint: 'C’est ce que tu as joué dans cette position. Il y avait mieux.',
+    dontKnow: 'Je ne vois pas',
+    notThis: 'Ce n’est pas celui-là.',
+    foundTitle: 'Retrouvé',
+    foundHint: 'Elle reviendra le {date}.',
+    missedTitle: 'Pas cette fois',
+    missedHint: 'Elle reviendra demain.',
+    bestWas: 'Le meilleur coup :',
+    youPlayed: 'Dans ta partie :',
+    why: 'Pourquoi',
+    next: 'Position suivante',
+    finish: 'Terminer',
+    doneTitle: 'Révision terminée',
+    doneScore: '{ok} sur {n} retrouvées aujourd’hui.',
+    doneHint: 'Celles que tu as manquées reviendront demain, les autres plus tard.',
+    backToProgress: 'Revenir à Progresser',
+    nothingDue: 'Rien à revoir aujourd’hui',
+    nothingDueHint: 'Ta prochaine révision est prévue le {date}.',
+    noAnalysis: 'Aucune analyse pour l’instant',
+    noAnalysisHint:
+      'Analyse une de tes parties avec ton compte : ses gaffes et ses erreurs viendront ici, pour que tu les revoies jusqu’à les jouer juste.',
+    analyse: 'Analyser une partie',
+    noMistake: 'Aucune faute relevée',
+    noMistakeHint:
+      'Tes analyses enregistrées ne contiennent ni gaffe ni erreur de ta part — ou ton camp n’y était pas connu.',
+    catchingUp: 'On relève les fautes de tes analyses…',
+    loadFailed: 'Impossible de charger tes erreurs à revoir.',
+    needsAccount: 'Revoir ses erreurs demande un compte',
+    needsAccountHint:
+      'Tes erreurs viennent de tes analyses enregistrées, et une révision espacée doit te retrouver le lendemain : il faut savoir à qui elles appartiennent.',
+    gateTitle: 'Revoir ses erreurs demande un compte',
+    gateWhy:
+      'Les positions viennent de tes analyses enregistrées, et le calendrier doit se souvenir de toi d’un jour à l’autre.',
+    gain1: 'Tes gaffes et tes erreurs, relevées dans chaque partie que tu analyses',
+    gain2: 'Reposées à 1, 2, 4, 8 puis 16 jours tant que tu les retrouves',
+    gain3: 'L’explication de chaque faute, une fois la position jouée',
+  },
+
   rush: {
     errorsOf: '{n} erreurs sur {max}',
     errorsOfOne: '{n} erreur sur {max}',

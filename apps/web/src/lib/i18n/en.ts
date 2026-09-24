@@ -1494,6 +1494,56 @@ export const en: Dictionary = {
     pickTheme: 'Pick a theme',
   },
 
+  revoir: {
+    nav: 'My mistakes to review',
+    navHint: 'Your own mistakes, brought back at the right time',
+    metaTitle: 'My mistakes to review',
+    metaDesc:
+      'The blunders and mistakes found in your analyses, brought back at growing intervals until you play them right.',
+    title: 'My mistakes to review',
+    intro:
+      'The blunders and mistakes found in your analyses come back here. Find the move and the position returns later; miss it and it returns tomorrow.',
+    dueToday: '{n} to review today',
+    box: 'Box {n} of {max}',
+    findBetter: 'Find better than {coup}',
+    findBetterHint: 'That is what you played in this position. There was better.',
+    dontKnow: 'I don’t see it',
+    notThis: 'Not that one.',
+    foundTitle: 'Found it',
+    foundHint: 'It will come back on {date}.',
+    missedTitle: 'Not this time',
+    missedHint: 'It will come back tomorrow.',
+    bestWas: 'Best move:',
+    youPlayed: 'In your game:',
+    why: 'Why',
+    next: 'Next position',
+    finish: 'Finish',
+    doneTitle: 'Review done',
+    doneScore: '{ok} of {n} found today.',
+    doneHint: 'The ones you missed come back tomorrow, the others later.',
+    backToProgress: 'Back to Progress',
+    nothingDue: 'Nothing to review today',
+    nothingDueHint: 'Your next review is due on {date}.',
+    noAnalysis: 'No analysis yet',
+    noAnalysisHint:
+      'Analyse one of your games while signed in: its blunders and mistakes will come here, so you can review them until you play them right.',
+    analyse: 'Analyse a game',
+    noMistake: 'No mistake found',
+    noMistakeHint:
+      'Your saved analyses contain no blunder or mistake of yours — or your side was not known.',
+    catchingUp: 'Finding the mistakes in your analyses…',
+    loadFailed: 'Could not load your mistakes to review.',
+    needsAccount: 'Reviewing your mistakes needs an account',
+    needsAccountHint:
+      'Your mistakes come from your saved analyses, and spaced review has to find you again the next day: we need to know whose they are.',
+    gateTitle: 'Reviewing your mistakes needs an account',
+    gateWhy:
+      'The positions come from your saved analyses, and the schedule has to remember you from one day to the next.',
+    gain1: 'Your blunders and mistakes, picked out of every game you analyse',
+    gain2: 'Brought back after 1, 2, 4, 8 then 16 days as long as you find them',
+    gain3: 'The explanation of each mistake, once you have played the position',
+  },
+
   rush: {
     errorsOf: '{n} mistakes out of {max}',
     errorsOfOne: '{n} mistake out of {max}',
