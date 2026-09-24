@@ -163,6 +163,14 @@ export const fr = {
     statsGames: 'parties jouées',
     statsPuzzles: 'puzzles disponibles',
     statsOpenings: 'ouvertures répertoriées',
+    startTitle: 'Par où commencer ?',
+    discoverTitle: 'Je découvre les échecs',
+    discoverHint: 'Première leçon · {lecon} · {minutes} min',
+    knowTitle: 'Je sais déjà jouer',
+    knowHint: 'Test de niveau · {n} positions',
+    playNowLink: 'Ou joue tout de suite contre l’ordinateur',
+    demoTitle: 'Un coach qui commente chaque coup',
+    dailyNeedsAccount: 'Demande un compte gratuit — il tient ta série de jours',
   },
 
   opponent: {

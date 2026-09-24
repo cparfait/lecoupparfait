@@ -163,6 +163,14 @@ export const en: Dictionary = {
     statsGames: 'games played',
     statsPuzzles: 'puzzles available',
     statsOpenings: 'openings catalogued',
+    startTitle: 'Where to start?',
+    discoverTitle: 'I’m new to chess',
+    discoverHint: 'First lesson · {lecon} · {minutes} min',
+    knowTitle: 'I already know how to play',
+    knowHint: 'Level test · {n} positions',
+    playNowLink: 'Or play the computer right away',
+    demoTitle: 'A coach who comments on every move',
+    dailyNeedsAccount: 'Needs a free account — it keeps your day streak',
   },
 
   opponent: {

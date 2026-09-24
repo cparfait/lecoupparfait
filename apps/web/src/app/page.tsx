@@ -3,23 +3,25 @@
 /**
  * Page d'accueil.
  *
- * Un principe : montrer plutôt que promettre. L'échiquier de la bannière rejoue
- * en boucle une combinaison célèbre — l'Immortelle d'Anderssen — pendant que le
- * commentaire s'écrit à côté. C'est exactement ce que fait le produit, en
- * démonstration, sans avoir à cliquer.
+ * Deux temps pour un visiteur. D'abord une question — « par où commencer ? » —
+ * et ses deux réponses : c'est tout le premier écran. Ensuite seulement, la
+ * preuve : l'échiquier rejoue en boucle une combinaison célèbre — l'Immortelle
+ * d'Anderssen — pendant que le commentaire s'écrit à côté. C'est exactement ce
+ * que fait le produit, en démonstration, sans avoir à cliquer.
  */
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Sparkles, Volume2 } from 'lucide-react'
+import { ArrowRight, ChevronRight, GraduationCap, Target, Volume2 } from 'lucide-react'
 import { Chess } from 'chess.js'
-import { BOT_LEVELS } from '@coupparfait/core'
+import { BOT_LEVELS, PAS_DU_TEST } from '@coupparfait/core'
 import { Board2D } from '@/components/board/Board2D.tsx'
 import { CavalePortrait } from '@/components/brand/CavalePortrait.tsx'
 import { DefiDuJour } from '@/components/daily/DefiDuJour.tsx'
-import { ButtonLink, Card, Chip, Skeleton } from '@/components/ui/index.tsx'
+import { Card, Skeleton } from '@/components/ui/index.tsx'
 import { AccueilConnecte } from '@/components/accueil/AccueilConnecte.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { basicsChapter } from '@/lib/lessons/basics.ts'
 import { renderEmphasis, useI18n } from '@/lib/i18n/index.tsx'
 import type { TranslationKey } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
@@ -83,7 +85,7 @@ const IMMORTAL = [
 ]
 
 /**
- * Le damier de la bannière suit le thème, pas la préférence du joueur.
+ * Le damier de la démonstration suit le thème, pas la préférence du joueur.
  *
  * Ailleurs dans l'application c'est l'inverse : le damier obéit au réglage
  * choisi, et c'est bien ainsi. Mais la bannière est une vitrine — un damier
@@ -120,6 +122,9 @@ const PORTES = [
   { href: '/jouer/ordinateur', labelKey: 'rest.doorComputer' },
 ] as const satisfies ReadonlyArray<{ href: string; labelKey: TranslationKey }>
 
+/** La première leçon du programme : celle qu'on propose à qui n'a jamais joué. */
+const PREMIERE_LECON = basicsChapter.lessons[0]!
+
 /**
  * Deux accueils, selon qu'on a un compte ou non.
  *
@@ -147,8 +152,8 @@ export default function HomePage() {
 
   return (
     <>
-      <Hero />
-      <Essentiel />
+      <PremierEcran />
+      <Demonstration />
     </>
   )
 }
@@ -163,23 +168,169 @@ function SqueletteAccueil() {
           <Skeleton className="mt-6 h-12 w-3/4" />
           <Skeleton className="mt-3 h-12 w-1/2" />
           <Skeleton className="mt-6 h-5 w-full max-w-xl" />
-          <Skeleton className="mt-2 h-5 w-2/3 max-w-xl" />
-          <div className="mt-8 flex gap-3">
-            <Skeleton className="h-12 w-44 rounded-[var(--radius)]" />
-            <Skeleton className="h-12 w-52 rounded-[var(--radius)]" />
-          </div>
+          <Skeleton className="mt-8 h-[76px] w-full max-w-xl rounded-[var(--radius)]" />
+          <Skeleton className="mt-2.5 h-[76px] w-full max-w-xl rounded-[var(--radius)]" />
         </div>
-        <Skeleton className="mx-auto aspect-square w-full max-w-[440px] rounded-[var(--radius)]" />
+        <Skeleton className="mx-auto h-72 w-full max-w-[440px] rounded-[var(--radius)]" />
       </div>
     </div>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  Bannière
+//  Premier écran
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Hero() {
+/**
+ * Une question, deux réponses, une seule action violette.
+ *
+ * Le premier écran proposait « Jouer maintenant » et « Commencer à apprendre »
+ * côte à côte, puis, plus bas, la carte du défi en fond violet avec son propre
+ * « Jouer → » : trois portes de même poids, et aucune ne disait à qui elle
+ * s'adressait. Or la première question de quelqu'un qui arrive n'est pas
+ * « jouer ou apprendre ? », c'est « est-ce pour moi, à mon niveau ? ».
+ *
+ * On la pose donc telle quelle — « Par où commencer ? » — et l'on y répond par
+ * ce que le visiteur sait de lui-même :
+ *
+ *  - il découvre : la première leçon, et c'est le seul bouton plein de
+ *    l'écran, parce que c'est le seul chemin qui ne demande rien ;
+ *  - il sait déjà jouer : le test de niveau, en carte secondaire — il le
+ *    placera sur l'échelle des paliers avant de lui proposer quoi que ce soit ;
+ *  - il veut juste jouer : un lien, pas un bouton. C'est toujours possible,
+ *    mais ce n'est plus ce que la page pousse en premier.
+ *
+ * La durée de la leçon et le nombre de positions du test sont lus dans les
+ * données, jamais recopiés : ils changeront.
+ */
+function PremierEcran() {
+  const { t } = useI18n()
+
+  return (
+    <section className="relative overflow-hidden">
+      {/* Halo de fond, sous tous les calques : un coin de lumière, pas un décor. */}
+      <div
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background: 'radial-gradient(80% 55% at 0% 0%, var(--aurora-1), transparent 70%)',
+        }}
+        aria-hidden
+      />
+
+      <div className="relative mx-auto grid w-full max-w-[1400px] gap-8 px-4 pb-8 pt-6 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:gap-16 lg:pb-12 lg:pt-16">
+        <div className="animate-slide-up">
+          {/* Une mention, pas une pastille : un badge violet en haut de page
+              était une deuxième tache d'accent avant même le titre. */}
+          <p className="text-[12px] font-semibold text-faint">{t('home.badge')}</p>
+
+          {/* Deux lignes, deux encres : la première en pleine encre, la
+              seconde en retrait. Pas de dégradé de couleur sur le titre. */}
+          <h1 className="titre-affiche mt-3 text-[clamp(2.5rem,6vw,4.6rem)]">
+            {t('home.heroTitleTop')}
+            <br />
+            <span className="text-muted">{t('home.heroTitleBottom')}</span>
+          </h1>
+
+          <p className="mt-4 max-w-xl text-[16px] leading-relaxed text-muted lg:text-[18px]">
+            {renderEmphasis(t('home.heroSubtitle'))}
+          </p>
+
+          <section aria-labelledby="par-ou-commencer" className="mt-8 max-w-xl">
+            <h2
+              id="par-ou-commencer"
+              className="font-display text-[1.3rem] font-bold tracking-tight"
+            >
+              {t('home.startTitle')}
+            </h2>
+
+            <div className="mt-3 flex flex-col gap-2.5">
+              <Link
+                href={`/apprendre/${PREMIERE_LECON.id}`}
+                className="bouton-lumineux flex min-h-[76px] items-center gap-3.5 rounded-[var(--radius)] px-4 py-3.5"
+              >
+                <span
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-[13px] bg-[color-mix(in_oklab,var(--accent-contrast)_16%,transparent)]"
+                  aria-hidden
+                >
+                  <GraduationCap size={22} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[16px] font-semibold">{t('home.discoverTitle')}</span>
+                  <span className="block text-[13px] opacity-90">
+                    {t('home.discoverHint', {
+                      lecon: t(PREMIERE_LECON.title),
+                      minutes: PREMIERE_LECON.minutes,
+                    })}
+                  </span>
+                </span>
+                <ArrowRight size={20} className="shrink-0 rtl:-scale-x-100" aria-hidden />
+              </Link>
+
+              <Link
+                href="/apprendre/niveau"
+                className="glass flex min-h-[76px] items-center gap-3.5 rounded-[var(--radius)] px-4 py-3.5 transition-colors hover:bg-surface-hover"
+              >
+                <span
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-[13px]"
+                  style={{
+                    background: 'color-mix(in oklab, var(--rub-apprendre) 16%, transparent)',
+                    color: 'var(--rub-apprendre)',
+                  }}
+                  aria-hidden
+                >
+                  <Target size={22} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[16px] font-semibold">{t('home.knowTitle')}</span>
+                  <span className="block text-[13px] text-muted">
+                    {t('home.knowHint', { n: PAS_DU_TEST.length })}
+                  </span>
+                </span>
+                <ArrowRight
+                  size={20}
+                  className="shrink-0 text-[var(--accent-text)] rtl:-scale-x-100"
+                  aria-hidden
+                />
+              </Link>
+
+              <Link
+                href="/jouer/ordinateur"
+                className="inline-flex min-h-11 items-center gap-1.5 self-start text-[15px] font-semibold text-[var(--accent-text)] hover:underline"
+              >
+                {t('home.playNowLink')}
+                <ChevronRight size={16} className="rtl:-scale-x-100" aria-hidden />
+              </Link>
+            </div>
+          </section>
+        </div>
+
+        {/* Le défi du jour à côté, et non plus sous la démonstration : c'est
+            la seule chose de la page qui change chaque jour. Il dit lui-même,
+            avant le clic, qu'il demande un compte — voir `DefiDuJour`. */}
+        <div className="w-full animate-slide-up [animation-delay:120ms] lg:max-w-[440px] lg:justify-self-end">
+          <DefiDuJour />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Démonstration
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Sous le premier écran : le produit en démonstration, puis les chiffres.
+ *
+ * L'échiquier de l'Immortelle ouvrait la page ; il la suit désormais. Il reste
+ * la meilleure preuve de ce qu'on promet — un coach qui commente —, mais il
+ * n'est pas une réponse à « par où commencer ? », et le premier écran ne doit
+ * en poser qu'une.
+ *
+ * Les chiffres perdent leur carte et leurs cloisons : un nombre n'a pas besoin
+ * d'un cadre pour se faire remarquer.
+ */
+function Demonstration() {
   const { t } = useI18n()
   // Comme pour le portrait : avant hydratation, `layout.tsx` pose `aurora`.
   const themeChoisi = usePreferences((state) => state.theme)
@@ -214,182 +365,6 @@ function Hero() {
     return () => clearTimeout(timer)
   }, [ply])
 
-  return (
-    <section className="relative overflow-hidden">
-      {/* Halo de fond, sous tous les calques : il éclaire le coin haut-droit
-          d'où vient la lumière du portrait, pour que la photo et la page
-          semblent partager la même source. */}
-      <div
-        className="pointer-events-none absolute inset-0 -z-20"
-        style={{
-          background:
-            'radial-gradient(70% 55% at 62% 8%, var(--aurora-1), transparent 70%),' +
-            'radial-gradient(50% 50% at 20% 90%, var(--aurora-2), transparent 70%)',
-        }}
-        aria-hidden
-      />
-      {/* Un damier en filigrane, qui s'efface vers les bords : la seule
-          décoration de la bannière, et elle dit le sujet sans le dessiner. */}
-      <div className="fond-damier pointer-events-none absolute inset-0 -z-10" aria-hidden />
-
-      <CavalePortrait />
-
-      {/* Marge basse réduite de moitié, et pas par goût du serrage.
-          Additionnée aux 48 px de la section suivante, elle ouvrait un vide de
-          151 px sous la carte du commentaire — une bande vide plus haute que la
-          carte elle-même, où il n'y avait rien à voir et rien à lire. Le haut
-          garde ses 80 px : c'est ce qui pose la bannière. */}
-      <div className="relative mx-auto grid w-full max-w-[1400px] items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:gap-16 lg:pb-8 lg:pt-20">
-        {/* ── Texte ─────────────────────────────────────────────────── */}
-        <div className="animate-slide-up">
-          <Chip tone="accent" className="mb-5">
-            <Sparkles size={11} aria-hidden />
-            {t('home.badge')}
-          </Chip>
-
-          {/* Deux lignes, deux encres : la première en pleine encre, la
-              seconde en retrait. Pas de dégradé de couleur sur le titre —
-              c'est devenu la signature de toutes les pages faites à la chaîne,
-              et un titre n'a pas besoin d'être coloré pour être grand. */}
-          <h1 className="titre-affiche text-[clamp(2.7rem,6.6vw,5.2rem)]">
-            {t('home.heroTitleTop')}
-            <br />
-            <span className="text-muted">{t('home.heroTitleBottom')}</span>
-          </h1>
-
-          <p className="mt-6 max-w-xl text-[18px] leading-relaxed text-muted lg:text-[19px]">
-            {renderEmphasis(t('home.heroSubtitle'))}
-          </p>
-
-          <div className="mt-9 flex flex-wrap gap-3">
-            <ButtonLink href="/jouer" variant="primary" size="lg" icon={<ArrowRight size={17} />}>
-              {t('home.ctaPlay')}
-            </ButtonLink>
-            <ButtonLink href="/apprendre" variant="outline" size="lg">
-              {t('home.ctaLearn')}
-            </ButtonLink>
-          </div>
-
-          {/* Ce que le compte ajoute, juste sous ce qu'il n'exige pas.
-          
-              « Aucune inscription nécessaire » est vrai et rassurant, et se
-              suffisait à lui-même tant que le compte ne servait à rien de
-              visible. Il sert maintenant à quatre choses qu'on refuse
-              explicitement à un visiteur — le défi du jour, la série, le
-              classement, l'historique — et laisser cette promesse seule
-              reviendrait à faire découvrir ces refus un par un, chacun comme
-              une mauvaise surprise.
-          
-              Les deux phrases doivent donc se suivre : la première dit qu'on
-              n'a rien à donner pour commencer, la seconde ce qu'on gagne à
-              revenir. Dans cet ordre, et pas l'inverse. */}
-          <p className="mt-4 text-xs leading-relaxed text-faint">
-            {t('home.noSignup')}
-            <br />
-            {t('home.accountBefore')}{' '}
-            <Link
-              href="/connexion"
-              className="font-semibold text-muted hover:text-ink hover:underline"
-            >
-              {t('home.accountLink')}
-            </Link>{' '}
-            {t('home.accountAfter')}
-          </p>
-        </div>
-
-        {/* ── Démonstration ─────────────────────────────────────────── */}
-        <div className="animate-slide-up [animation-delay:120ms]">
-          <div className="relative">
-            {/* L'échiquier passe devant le portrait : il lui faut une ombre
-                portée, pas un halo. Un halo derrière une photo se lit comme une
-                auréole ; une ombre creuse la profondeur qu'on cherche. */}
-            {/* L'échiquier a une monture : une carte de verre à marge étroite,
-                comme un plateau posé dans son cadre. Ni inclinaison ni halo
-                coloré — un échiquier se regarde de face. */}
-            <div className="glass mx-auto w-full max-w-[460px] rounded-[var(--radius-lg)] p-2.5 shadow-[var(--shadow-lg)]">
-              <div className="overflow-hidden rounded-[calc(var(--radius-lg)-10px)]">
-                <Board2D
-                  fen={fen}
-                  orientation="w"
-                  playable={null}
-                  lastMove={lastMove as never}
-                  allowAnnotations={false}
-                  skinId={DAMIER_PAR_THEME[theme]}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Le commentaire est d'aplomb sous l'échiquier, et il a longtemps
-              débordé de 96 px vers la gauche — l'idée étant que ce décalage
-              rattache la voix à la sculpture posée derrière.
-
-              Il la rattachait surtout en se posant dessus. La carte fait 708 px
-              de large contre 438 au plateau : les 183 px d'écart tombaient
-              pile sur la tête de Cavale, et son fond translucide laissait
-              remonter le bois et la crinière derrière le texte, qui devenait
-              illisible. Un débordement qui cache le sujet qu'il devait
-              désigner n'est plus une composition, c'est une collision.
-
-              Recalé sur l'échiquier, il libère la sculpture et gagne un fond
-              propre.
-
-              `mx-auto max-w-[520px]`, et non la largeur de la colonne : celle-ci
-              fait 612 px contre 438 au plateau, et la carte y était décalée à
-              gauche, en travers de la sculpture. Centrée sur le plateau et
-              élargie de 80 px, elle déborde de 40 px de chaque côté — assez
-              pour qu'on lise un bloc posé par-dessus plutôt qu'un panneau
-              rapporté sous l'échiquier, et dix fois moins que les 183 px du
-              premier jet, qui recouvraient la tête de Cavale. */}
-          <Card className="glass-lisible mx-auto mt-4 flex w-full max-w-[520px] items-start gap-3 p-4 backdrop-blur-md">
-            <span
-              className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full"
-              style={{ background: 'color-mix(in oklab, var(--accent) 20%, transparent)' }}
-            >
-              <Volume2 size={14} className="text-accent" aria-hidden />
-            </span>
-            <div className="min-w-0">
-              <p className="text-[12px] font-semibold text-faint">{t('home.demoCaption')}</p>
-              <p className="mt-1 text-sm leading-relaxed">{t(comment)}</p>
-            </div>
-          </Card>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  Fonctionnalités
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Ce qui reste sous la bannière : le défi du jour, et quatre chiffres.
- *
- * Il y avait ici trois sections et cinq cartes — le défi, trois « promesses »
- * encadrées d'un liseré lumineux, puis un pavé de quatre chiffres cloisonnés.
- * La page se lisait comme un tableau de bord alors qu'elle doit se lire comme
- * une porte d'entrée.
- *
- * Ce qui a été retiré l'a été pour redite, pas pour faire court :
- *
- *  - « Un coach qui parle » et « Analyse expliquée » reformulaient le
- *    sous-titre de la bannière — « un moteur qui explique pourquoi, une voix
- *    qui t'accompagne » — deux cents pixels plus bas. Dire deux fois la même
- *    chose ne la rend pas deux fois plus vraie ; ça donne l'impression qu'on
- *    n'a pas grand-chose à dire.
- *  - « 25 niveaux, 7 caractères » redisait le « 25 » de la ligne de chiffres
- *    juste en dessous, avec un encadré de plus.
- *  - La mention de licence en bas de section est déjà dans le pied de page,
- *    avec le lien « Crédits & licences ».
- *
- * Les chiffres, eux, restent : ils disent quelque chose que rien d'autre ne
- * dit. Mais ils perdent leur carte et leurs cloisons. Un nombre n'a pas besoin
- * d'un cadre pour se faire remarquer — c'est un nombre.
- */
-function Essentiel() {
-  const { t } = useI18n()
-
   const stats = [
     { value: '3 810', label: t('home.statsOpenings') },
     { value: '6 057 356', label: t('home.statsPuzzles') },
@@ -406,60 +381,105 @@ function Essentiel() {
   ]
 
   return (
-    <section className="mx-auto w-full max-w-[1400px] px-4 pb-10 pt-6 sm:px-6 lg:pb-16 lg:pt-4">
-      {/* Le défi garde sa carte : c'est le seul bloc de la page sur lequel on
-          agit, et le seul dont le contenu change d'un jour à l'autre. Les
-          chiffres l'accompagnent sans en réclamer une — c'est ce déséquilibre
-          assumé qui dit lequel des deux appelle un geste. */}
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] lg:items-center lg:gap-14">
-        <DefiDuJour />
+    <section className="relative overflow-hidden border-t border-line/60">
+      {/* Un damier en filigrane, qui s'efface vers les bords : la seule
+          décoration de la section, et elle dit le sujet sans le dessiner. */}
+      <div className="fond-damier pointer-events-none absolute inset-0 -z-10" aria-hidden />
 
-        {/* Deux colonnes, deux rangées, et jamais quatre : « 6 057 356 » ne
-            tient pas dans un quart de colonne sans se casser sur deux lignes,
-            et un chiffre cassé décale tous les libellés. Chaque nombre reste
-            sur sa ligne (`chiffre-affiche`), les libellés s'alignent. */}
-        <div className="grid grid-cols-2 gap-x-10 gap-y-10 sm:gap-x-14 lg:pl-4">
-          {stats.map(({ value, label }) => (
-            <div key={label}>
-              <p className="chiffre-affiche text-[clamp(2.2rem,4.6vw,3.6rem)]">{value}</p>
-              <p className="mt-3 max-w-[22ch] text-[14px] leading-snug text-muted">{label}</p>
+      <CavalePortrait />
+
+      <div className="relative mx-auto grid w-full max-w-[1400px] items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:gap-16 lg:py-16">
+        <div>
+          <h2 className="titre-affiche text-[clamp(1.8rem,3.6vw,2.6rem)]">{t('home.demoTitle')}</h2>
+          {/* Deux colonnes, deux rangées, et jamais quatre : « 6 057 356 » ne
+              tient pas dans un quart de colonne sans se casser sur deux
+              lignes. Chaque nombre reste sur sa ligne (`chiffre-affiche`). */}
+          <div className="mt-8 grid grid-cols-2 gap-x-10 gap-y-10 sm:gap-x-14">
+            {stats.map(({ value, label }) => (
+              <div key={label}>
+                <p className="chiffre-affiche text-[clamp(2.2rem,4.6vw,3.6rem)]">{value}</p>
+                <p className="mt-3 max-w-[22ch] text-[14px] leading-snug text-muted">{label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          {/* L'échiquier a une monture : une carte de verre à marge étroite,
+              comme un plateau posé dans son cadre. Ni inclinaison ni halo
+              coloré — un échiquier se regarde de face. */}
+          <div className="glass mx-auto w-full max-w-[460px] rounded-[var(--radius-lg)] p-2.5 shadow-[var(--shadow-lg)]">
+            <div className="overflow-hidden rounded-[calc(var(--radius-lg)-10px)]">
+              <Board2D
+                fen={fen}
+                orientation="w"
+                playable={null}
+                lastMove={lastMove as never}
+                allowAnnotations={false}
+                skinId={DAMIER_PAR_THEME[theme]}
+              />
             </div>
-          ))}
+          </div>
+
+          {/* Le commentaire, d'aplomb sous l'échiquier et centré sur lui : décalé
+              vers la gauche, il se posait sur la tête de Cavale, la sculpture
+              derrière, et son fond translucide rendait le texte illisible. */}
+          <Card className="glass-lisible mx-auto mt-4 flex w-full max-w-[520px] items-start gap-3 p-4 backdrop-blur-md">
+            <span
+              className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full"
+              style={{ background: 'color-mix(in oklab, var(--accent) 20%, transparent)' }}
+            >
+              <Volume2 size={14} className="text-accent" aria-hidden />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[12px] font-semibold text-faint">{t('home.demoCaption')}</p>
+              <p className="mt-1 text-sm leading-relaxed">{t(comment)}</p>
+            </div>
+          </Card>
         </div>
       </div>
 
-      {/* Trois portes, en toutes lettres.
-          
-          L'allègement avait supprimé les trois cartes qui menaient à Apprendre,
-          Analyse et l'ordinateur — à raison : elles reformulaient le sous-titre
-          de la bannière. Mais elles emportaient avec elles les seuls liens
-          directs de la page, et il ne restait que le menu déroulant. Une page
-          d'accueil qui ne mène nulle part sans passer par un menu a été
-          simplifiée un cran trop loin.
-          
-          On garde donc les destinations et on jette l'emballage : trois liens
-          sur une ligne, sans carte, sans icône, sans liseré. Ce qui encombrait
-          n'était pas l'existence de ces chemins, c'était le mobilier autour. */}
-      <nav
-        aria-label={t('home.goFurther')}
-        className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line/60 pt-5 text-sm"
-      >
-        <span className="text-[12px] font-semibold text-faint">{t('home.goFurther')}</span>
-        {PORTES.map(({ href, labelKey }) => (
+      <div className="relative mx-auto w-full max-w-[1400px] px-4 pb-10 sm:px-6 lg:pb-16">
+        {/* Ce que le compte ajoute, juste sous ce qu'il n'exige pas. Les deux
+            phrases se suivent : la première dit qu'on n'a rien à donner pour
+            commencer, la seconde ce qu'on gagne à revenir. */}
+        <p className="text-xs leading-relaxed text-faint">
+          {t('home.noSignup')}
+          <br />
+          {t('home.accountBefore')}{' '}
           <Link
-            key={href}
-            href={href}
-            className="group flex items-center gap-1.5 font-medium text-muted transition-colors hover:text-ink"
+            href="/connexion"
+            className="font-semibold text-muted hover:text-ink hover:underline"
           >
-            {t(labelKey)}
-            <ArrowRight
-              size={14}
-              aria-hidden
-              className="text-faint transition-transform duration-150 group-hover:translate-x-0.5"
-            />
-          </Link>
-        ))}
-      </nav>
+            {t('home.accountLink')}
+          </Link>{' '}
+          {t('home.accountAfter')}
+        </p>
+
+        {/* Trois portes, en toutes lettres : sans carte, sans icône, sans
+            liseré. Ce qui encombrait n'était pas l'existence de ces chemins,
+            c'était le mobilier autour. */}
+        <nav
+          aria-label={t('home.goFurther')}
+          className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line/60 pt-5 text-sm"
+        >
+          <span className="text-[12px] font-semibold text-faint">{t('home.goFurther')}</span>
+          {PORTES.map(({ href, labelKey }) => (
+            <Link
+              key={href}
+              href={href}
+              className="group flex min-h-11 items-center gap-1.5 font-medium text-muted transition-colors hover:text-ink"
+            >
+              {t(labelKey)}
+              <ArrowRight
+                size={14}
+                aria-hidden
+                className="text-faint transition-transform duration-150 group-hover:translate-x-0.5 rtl:-scale-x-100"
+              />
+            </Link>
+          ))}
+        </nav>
+      </div>
     </section>
   )
 }

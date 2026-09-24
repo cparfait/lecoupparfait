@@ -20,7 +20,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Check, ChevronDown, ChevronUp, Sun, Swords } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Lock, Sun, Swords } from 'lucide-react'
 import clsx from 'clsx'
 import { useT } from '@/lib/i18n/index.tsx'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
@@ -97,11 +97,12 @@ export function DefiDuJour({ className }: { className?: string }) {
   return (
     // `relative` : le recouvrement de `DefiCliquable` s'étend sur cette carte,
     // et un `absolute inset-0` cherche le premier ancêtre positionné.
-    // Le fond de l'accent tant que le défi attend, le vert quand il est
-    // relevé — voir `teinte-defi` et `teinte-reussi` dans `globals.css`. La
-    // carte publique est là pour montrer ce qu'un compte apporte : elle doit
-    // se voir avant de se lire.
-    <Card className={clsx('relative p-5', defiFait ? 'teinte-reussi' : 'teinte-defi', className)}>
+    // Le vert quand il est relevé — voir `teinte-reussi` dans `globals.css`.
+    // Tant qu'il attend, plus de fond violet : la carte partage le premier
+    // écran de l'accueil avec « Je découvre les échecs », qui est la seule
+    // action pleine de l'écran. Deux blocs violets côte à côte, c'étaient deux
+    // appels de même poids, et le visiteur ne savait plus lequel était le sien.
+    <Card className={clsx('relative p-5', defiFait && 'teinte-reussi', className)}>
       <SectionTitle
         hint={t('daily.hint')}
         // La même flamme que dans la barre du haut, et volontairement le même
@@ -284,7 +285,7 @@ function DefiCliquable({
     "after:absolute after:inset-0 after:z-[1] after:content-['']",
     defiFait
       ? 'border-[color-mix(in_oklab,var(--q-best)_35%,transparent)] bg-[color-mix(in_oklab,var(--q-best)_10%,transparent)]'
-      : 'border-accent bg-[color-mix(in_oklab,var(--accent)_12%,transparent)] hover:brightness-110',
+      : 'border-line-strong bg-surface-strong hover:bg-surface-hover',
   )
 
   const contenu = (
@@ -306,7 +307,9 @@ function DefiCliquable({
       {defiFait ? (
         <Check size={18} className="shrink-0 text-[var(--q-best)]" aria-hidden />
       ) : (
-        <span className="shrink-0 text-sm font-semibold text-accent">{t('bits.playArrow')}</span>
+        <span className="shrink-0 text-sm font-semibold text-[var(--accent-text)]">
+          {t('bits.playArrow')}
+        </span>
       )}
     </>
   )
@@ -314,18 +317,35 @@ function DefiCliquable({
   // `undefined` — on ne sait pas encore — se comporte comme « connecté » : le
   // lien vers le défi est le plus inoffensif des deux, là où un renvoi vers la
   // connexion imposé à tort à quelqu'un de connecté serait une faute.
+  //
+  // Pour un visiteur, la ligne au cadenas le dit **avant** le clic. Le message
+  // qui part au clic restait la seule annonce : on découvrait la règle en
+  // atterrissant sur la connexion, ce qui ressemble à un piège même quand le
+  // message l'explique. La règle ne change pas — le défi compte pour une série,
+  // il lui faut quelqu'un à qui l'attribuer —, elle se lit seulement plus tôt.
+  // `relative z-10` : au-dessus du recouvrement, pour rester du texte.
   if (identite === null) {
     return (
-      <button
-        type="button"
-        className={apparence}
-        onClick={() => {
-          toast.info(t('daily.needsAccount'), t('daily.needsAccountHint'))
-          router.push('/connexion')
-        }}
-      >
-        {contenu}
-      </button>
+      <>
+        <button
+          type="button"
+          className={apparence}
+          aria-describedby="defi-demande-un-compte"
+          onClick={() => {
+            toast.info(t('daily.needsAccount'), t('daily.needsAccountHint'))
+            router.push('/connexion')
+          }}
+        >
+          {contenu}
+        </button>
+        <p
+          id="defi-demande-un-compte"
+          className="relative z-10 mt-2 flex items-center gap-1.5 text-[12px] font-medium text-faint"
+        >
+          <Lock size={13} className="shrink-0" aria-hidden />
+          {t('home.dailyNeedsAccount')}
+        </p>
+      </>
     )
   }
 
