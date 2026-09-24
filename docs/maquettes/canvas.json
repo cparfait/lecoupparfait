@@ -1,0 +1,45 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-09-24T09:30:00Z" },
+  "title": "Le Coup Parfait — refonte",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Direction.dc.html": { "x": 0, "y": 0, "w": 1280, "h": 860, "title": "Direction — L'échiquier calme" },
+    "Composants.dc.html": { "x": 1360, "y": 0, "w": 1280, "h": 1180, "title": "Composants et états" },
+    "AccueilVisiteur.dc.html": { "x": 0, "y": 1540, "w": 390, "h": 844, "title": "Accueil visiteur" },
+    "TonChemin.dc.html": { "x": 470, "y": 1540, "w": 390, "h": 844, "title": "Ton chemin (connecté)" },
+    "ContreOrdinateur.dc.html": { "x": 940, "y": 1540, "w": 390, "h": 844, "title": "Contre l'ordinateur — réglage", "is_interactive": true },
+    "Partie.dc.html": { "x": 1410, "y": 1540, "w": 390, "h": 844, "title": "Partie" },
+    "PartieCommentee.dc.html": { "x": 1880, "y": 1540, "w": 390, "h": 844, "title": "Partie — mode commenté" },
+    "AccueilVisiteurClair.dc.html": { "x": 0, "y": 2744, "w": 390, "h": 844, "title": "Accueil visiteur — clair" },
+    "PartieClair.dc.html": { "x": 470, "y": 2744, "w": 390, "h": 844, "title": "Partie commentée — clair" },
+    "TonCheminBureau.dc.html": { "x": 0, "y": 3948, "w": 1440, "h": 900, "title": "Ton chemin — bureau" },
+    "PartieBureau.dc.html": { "x": 1520, "y": 3948, "w": 1440, "h": 900, "title": "Partie — bureau" },
+    "BarreOnglets.dc.html": { "x": 0, "y": 5208, "w": 390, "h": 84, "title": "Barre d'onglets (5)" },
+    "Echiquier.dc.html": { "x": 470, "y": 5208, "w": 360, "h": 360, "title": "Échiquier (composant)" }
+  },
+  "order": [
+    "Direction.dc.html",
+    "Composants.dc.html",
+    "AccueilVisiteur.dc.html",
+    "TonChemin.dc.html",
+    "ContreOrdinateur.dc.html",
+    "Partie.dc.html",
+    "PartieCommentee.dc.html",
+    "AccueilVisiteurClair.dc.html",
+    "PartieClair.dc.html",
+    "TonCheminBureau.dc.html",
+    "PartieBureau.dc.html",
+    "BarreOnglets.dc.html",
+    "Echiquier.dc.html"
+  ],
+  "notes": {
+    "rang1": { "x": 0, "y": -300, "text": "Direction et composants", "kind": "title1", "maxW": 2640 },
+    "rang2": { "x": 0, "y": 1240, "text": "Téléphone — thème sombre", "kind": "title1", "maxW": 2270 },
+    "rang3": { "x": 0, "y": 2444, "text": "Thème clair", "kind": "title1", "maxW": 860 },
+    "rang4": { "x": 0, "y": 3648, "text": "Bureau — 1440 px", "kind": "title1", "maxW": 2960 },
+    "rang5": { "x": 0, "y": 4908, "text": "Pièces réutilisées", "kind": "title1", "maxW": 830 }
+  },
+  "designSystems": []
+}

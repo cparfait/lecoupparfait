@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Partie contre l'ordinateur</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@500;600&amp;family=Noto+Sans+Symbols+2&amp;display=swap">
+<style>
+body{margin:0;font-family:'Geist',system-ui,sans-serif}
+button{font:inherit}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; display: flex; flex-direction: column; background: {{p.fond}}; color: {{p.texte}}; font-family: 'Geist', system-ui, sans-serif;">
+<header style="display: flex; align-items: center; justify-content: space-between; height: 52px; padding: 0 8px; flex-shrink: 0;">
+<a href="ContreOrdinateur.dc.html" aria-label="Quitter la partie" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; color: {{p.doux}};">
+<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+</a>
+<span style="font-size: 13px; font-weight: 600; color: {{p.discret}};">10 min · Italienne</span>
+<button type="button" aria-pressed="{{commenteTexte}}" aria-label="Commenter chaque coup" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: none; border-radius: 12px; background: {{boutonCoach.fond}}; color: {{boutonCoach.couleur}}; cursor: pointer;">
+<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+</button>
+</header>
+<div style="display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 16px; flex-shrink: 0;">
+<img src="/_blob/50873c08e31c992d49e48f904459ce1e" alt="" style="width: 40px; height: 40px; border-radius: 12px; object-fit: cover; background: {{p.surface2}};">
+<div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0;">
+<span style="font-size: 15px; font-weight: 600;">Brasier <span style="font-weight: 500; color: {{p.discret}};">≈ 980</span></span>
+<span style="font-size: 11px; color: {{p.discret}};">Stockfish · niveau 6</span>
+</div>
+<span style="padding: 6px 10px; border-radius: 10px; background: {{p.surface}}; border: 1px solid {{p.bord}}; font-family: 'Geist Mono', monospace; font-size: 18px; font-weight: 600; color: {{p.doux}};">9:12</span>
+</div>
+<div style="display: flex; justify-content: center; padding: 6px 0; flex-shrink: 0;">
+<dc-import name="Echiquier" taille="{{358}}" theme="{{theme}}" fen="r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4" dernier="f8c5" fleche="{{fleche}}" coordonnees="{{true}}" hint-size="358px,358px"></dc-import>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 16px; flex-shrink: 0;">
+<span style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: {{p.surface2}}; color: {{p.doux}};">
+<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+</span>
+<div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1;">
+<span style="font-size: 15px; font-weight: 600;">Toi</span>
+<span style="font-size: 12px; font-weight: 600; color: {{p.lien}};">À toi de jouer</span>
+</div>
+<span style="padding: 6px 10px; border-radius: 10px; background: {{p.accent}}; font-family: 'Geist Mono', monospace; font-size: 18px; font-weight: 600; color: #ffffff;">9:34</span>
+</div>
+<ol aria-label="Coups joués" style="display: flex; align-items: center; gap: 12px; height: 40px; margin: 0; padding: 0 16px; list-style: none; overflow: hidden; flex-shrink: 0; font-size: 14px; color: {{p.doux}}; border-top: 1px solid {{p.bord}}; border-bottom: 1px solid {{p.bord}};">
+<li style="white-space: nowrap;"><span style="color: {{p.discret}};">1.</span> e4 e5</li>
+<li style="white-space: nowrap;"><span style="color: {{p.discret}};">2.</span> Cf3 Cc6</li>
+<li style="white-space: nowrap;"><span style="color: {{p.discret}};">3.</span> Fc4 <span style="padding: 2px 6px; border-radius: 6px; background: {{p.accentDoux}}; color: {{p.texte}}; font-weight: 600;">Fc5</span></li>
+</ol>
+<sc-if value="{{commente}}" hint-placeholder-val="{{ true }}">
+<section aria-label="Le coach" style="display: flex; flex-direction: column; gap: 8px; margin: 10px 12px 0; padding: 12px; border-radius: 16px; background: {{p.surface}}; border: 1px solid {{p.bord}}; flex-shrink: 0;">
+<div style="display: flex; align-items: flex-start; gap: 10px;">
+<span style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 28px; height: 28px; border-radius: 9px; background: {{p.pastilleApprendre}}; color: {{p.apprendre}};">
+<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+</span>
+<p style="margin: 0; flex-grow: 1; font-size: 14px; line-height: 1.4;">Brasier a joué <strong>Fc5</strong> : son fou vise f2, la case que seul ton roi défend.</p>
+<button type="button" aria-label="Réécouter" style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 44px; height: 44px; margin: -8px -6px -8px 0; border: none; border-radius: 12px; background: transparent; color: {{p.doux}}; cursor: pointer;">
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+</button>
+</div>
+<ol style="display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none;">
+<li style="display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 10px; background: {{p.pastilleApprendre}};">
+<span style="width: 38px; font-weight: 700; font-size: 14px;">O-O</span>
+<span style="flex-grow: 1; font-size: 13px; color: {{p.doux}};">met le roi à l'abri avant d'ouvrir</span>
+<span style="font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 600; color: {{p.apprendreTexte}};">+0,4</span>
+</li>
+<li style="display: flex; align-items: center; gap: 10px; padding: 6px 8px;">
+<span style="width: 38px; font-weight: 600; font-size: 14px;">c3</span>
+<span style="flex-grow: 1; font-size: 13px; color: {{p.doux}};">prépare d4 et chasse le fou</span>
+<span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: {{p.discret}};">+0,3</span>
+</li>
+<li style="display: flex; align-items: center; gap: 10px; padding: 6px 8px;">
+<span style="width: 38px; font-weight: 600; font-size: 14px;">d3</span>
+<span style="flex-grow: 1; font-size: 13px; color: {{p.doux}};">solide, soutient e4</span>
+<span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: {{p.discret}};">+0,2</span>
+</li>
+</ol>
+</section>
+</sc-if>
+<nav aria-label="Actions de la partie" style="margin-top: auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 8px 8px 22px; border-top: 1px solid {{p.bord}}; background: {{p.barre}};">
+<button type="button" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 48px; border: none; border-radius: 12px; background: transparent; color: {{p.doux}}; font-size: 12px; font-weight: 500; cursor: pointer;">
+<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+Options
+</button>
+<button type="button" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 48px; border: none; border-radius: 12px; background: transparent; color: {{p.doux}}; font-size: 12px; font-weight: 500; cursor: pointer;">
+<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg>
+Indice
+</button>
+<button type="button" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 48px; border: none; border-radius: 12px; background: transparent; color: {{p.doux}}; font-size: 12px; font-weight: 500; cursor: pointer;">
+<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"></path></svg>
+Annuler
+</button>
+<button type="button" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 48px; border: none; border-radius: 12px; background: transparent; color: {{p.discret}}; font-size: 12px; font-weight: 500; cursor: pointer;">
+<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" x2="4" y1="22" y2="15"></line></svg>
+Abandonner
+</button>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["sombre","clair"],"default":"sombre"},"commente":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const theme = this.props.theme ?? 'sombre';
+    const commente = this.props.commente ?? false;
+    const clair = theme === 'clair';
+    const p = clair
+      ? { fond: '#f3f2f8', surface: '#ffffff', surface2: '#ebe9f4', bord: '#e4e2ee', barre: '#ffffff', texte: '#14141c', doux: '#4f4e63', discret: '#63627a', accent: '#5b3ce0', lien: '#5b3ce0', accentDoux: '#ece8fd', apprendre: '#00926e', apprendreTexte: '#00795c', pastilleApprendre: '#dcf3ec' }
+      : { fond: '#0e0f1f', surface: '#1c1e33', surface2: '#242742', bord: '#2a2d48', barre: '#14152a', texte: '#f2f1f8', doux: '#b9b8d0', discret: '#9594b0', accent: '#7c5cff', lien: '#c4b6ff', accentDoux: '#2d2658', apprendre: '#00e5a8', apprendreTexte: '#4ff0c4', pastilleApprendre: 'rgba(0,229,168,0.12)' };
+    return {
+      p, theme, commente,
+      commenteTexte: commente ? 'true' : 'false',
+      fleche: commente ? 'e1g1' : '',
+      boutonCoach: commente ? { fond: p.pastilleApprendre, couleur: p.apprendre } : { fond: 'transparent', couleur: p.doux },
+    };
+  }
+}
+</script>
+</body>
+</html>

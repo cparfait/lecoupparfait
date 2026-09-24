@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Échiquier</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2&amp;family=Geist:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;font-family:'Geist',system-ui,sans-serif}
+</style>
+</helmet>
+<div style="position: relative; width: {{px}}; height: {{px}}; border-radius: {{rayon}}; overflow: hidden; box-shadow: 0 10px 30px -12px rgba(8, 6, 30, 0.55);">
+<div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); width: 100%; height: 100%;">
+<sc-for list="{{cases}}" as="c" hint-placeholder-count="64">
+<div style="position: relative; background: {{c.fond}}; display: flex; align-items: center; justify-content: center;">
+<sc-if value="{{c.marque}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; inset: 0; background: rgba(255, 206, 84, 0.42);"></div>
+</sc-if>
+<span style="position: relative; font-family: 'Noto Sans Symbols 2', 'Segoe UI Symbol', serif; font-variant-emoji: text; font-size: {{c.taillePiece}}; line-height: 1; color: {{c.couleur}}; text-shadow: {{c.ombre}};">{{c.glyphe}}</span>
+<sc-if value="{{c.rang}}" hint-placeholder-val="{{ false }}">
+<span style="position: absolute; top: 2px; left: 3px; font-size: 9px; font-weight: 600; color: {{c.couleurCoord}};">{{c.rang}}</span>
+</sc-if>
+<sc-if value="{{c.colonne}}" hint-placeholder-val="{{ false }}">
+<span style="position: absolute; bottom: 1px; right: 3px; font-size: 9px; font-weight: 600; color: {{c.couleurCoord}};">{{c.colonne}}</span>
+</sc-if>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{fleche}}" hint-placeholder-val="{{ false }}">
+<svg width="{{taille}}" height="{{taille}}" viewBox="{{vue}}" style="position: absolute; top: 0; left: 0; pointer-events: none;" aria-hidden="true">
+<line x1="{{fleche.x1}}" y1="{{fleche.y1}}" x2="{{fleche.x2}}" y2="{{fleche.y2}}" style="stroke: {{couleurFleche}}; stroke-width: {{fleche.epaisseur}}; stroke-linecap: round; opacity: 0.9;"></line>
+<polygon points="{{fleche.pointe}}" style="fill: {{couleurFleche}}; opacity: 0.9;"></polygon>
+</svg>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"taille":{"editor":"int","default":360,"min":80,"max":900},"theme":{"editor":"enum","options":["sombre","clair"],"default":"sombre"},"fen":{"editor":"text","default":"r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4"},"fleche":{"editor":"text","default":""},"dernier":{"editor":"text","default":"f8c5"},"coordonnees":{"editor":"boolean","default":true},"$preview":{"width":360,"height":360}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const taille = this.props.taille ?? 360;
+    const theme = this.props.theme ?? 'sombre';
+    const fen = this.props.fen ?? 'r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4';
+    const fleche = this.props.fleche ?? '';
+    const dernier = this.props.dernier ?? 'f8c5';
+    const coordonnees = this.props.coordonnees ?? true;
+    const s = taille / 8;
+    const clair = theme === 'clair';
+    const caseClaire = clair ? '#ece8f8' : '#d8d2ef';
+    const caseSombre = clair ? '#9486c9' : '#7867b3';
+    const glyphes = { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' };
+    const colonnes = 'abcdefgh';
+    const grille = {};
+    const lignes = fen.split(' ')[0].split('/');
+    lignes.forEach((ligne, i) => {
+      const rang = 8 - i;
+      let f = 0;
+      for (const ch of ligne) {
+        if (/[1-8]/.test(ch)) { f += Number(ch); continue; }
+        grille[colonnes[f] + rang] = ch;
+        f += 1;
+      }
+    });
+    const marquees = dernier.length === 4 ? [dernier.slice(0, 2), dernier.slice(2, 4)] : [];
+    const cases = [];
+    for (let rang = 8; rang >= 1; rang--) {
+      for (let fi = 0; fi < 8; fi++) {
+        const nom = colonnes[fi] + rang;
+        const estClaire = (fi + rang) % 2 === 0;
+        const piece = grille[nom];
+        const blanche = piece && piece === piece.toUpperCase();
+        cases.push({
+          fond: estClaire ? caseClaire : caseSombre,
+          couleurCoord: estClaire ? caseSombre : caseClaire,
+          marque: marquees.includes(nom),
+          glyphe: piece ? glyphes[piece.toLowerCase()] : '',
+          taillePiece: Math.round(s * 0.8) + 'px',
+          couleur: blanche ? '#fbfaf7' : '#1b1a24',
+          ombre: blanche
+            ? '0 0 1px #16151f, 0 0 1px #16151f, 0 0 1px #16151f, 0 2px 3px rgba(0,0,0,0.35)'
+            : '0 1px 1px rgba(255,255,255,0.18)',
+          rang: coordonnees && fi === 0 && s >= 30 ? String(rang) : '',
+          colonne: coordonnees && rang === 1 && s >= 30 ? colonnes[fi] : '',
+        });
+      }
+    }
+    let f = null;
+    if (fleche.length === 4) {
+      const centre = (sq) => ({ x: (colonnes.indexOf(sq[0]) + 0.5) * s, y: (8 - Number(sq[1]) + 0.5) * s });
+      const a = centre(fleche.slice(0, 2));
+      const b = centre(fleche.slice(2, 4));
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const long = Math.hypot(dx, dy) || 1;
+      const ux = dx / long;
+      const uy = dy / long;
+      const tete = s * 0.42;
+      const larg = s * 0.3;
+      const bx = b.x - ux * tete;
+      const by = b.y - uy * tete;
+      f = {
+        x1: a.x.toFixed(1), y1: a.y.toFixed(1), x2: bx.toFixed(1), y2: by.toFixed(1),
+        epaisseur: (s * 0.18).toFixed(1),
+        pointe: [
+          [b.x, b.y],
+          [bx - uy * larg, by + ux * larg],
+          [bx + uy * larg, by - ux * larg],
+        ].map((p) => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' '),
+      };
+    }
+    return {
+      px: taille + 'px',
+      taille,
+      vue: '0 0 ' + taille + ' ' + taille,
+      rayon: Math.max(6, Math.round(taille / 40)) + 'px',
+      cases,
+      fleche: f,
+      couleurFleche: clair ? '#00926e' : '#00e5a8',
+    };
+  }
+}
+</script>
+</body>
+</html>

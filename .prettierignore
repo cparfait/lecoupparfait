@@ -14,3 +14,6 @@ package-lock.json
 # lancé, après quoi l'étape « Mise en forme » virait au rouge sans que personne
 # n'ait touché à quoi que ce soit.
 apps/web/next-env.d.ts
+# Planches exportées du canevas de design : le format .dc.html a ses propres règles.
+docs/maquettes/*.dc.html
+docs/maquettes/canvas.json

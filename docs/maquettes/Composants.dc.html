@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Composants</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@500;600&amp;display=swap">
+<style>
+body{margin:0;font-family:'Geist',system-ui,sans-serif}
+button{font:inherit}
+</style>
+</helmet>
+<div style="width: 1280px; height: 1180px; box-sizing: border-box; padding: 48px 56px; display: flex; flex-direction: column; gap: 36px; background: #0e0f1f; color: #f2f1f8; font-family: 'Geist', system-ui, sans-serif;">
+<header style="display: flex; flex-direction: column; gap: 6px;">
+<h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 36px; letter-spacing: -0.02em;">Composants</h1>
+<p style="margin: 0; font-size: 15px; color: #b9b8d0;">Ceux des maquettes, avec leurs états. Thème sombre ; le clair reprend les mêmes formes avec ses jetons.</p>
+</header>
+<section aria-labelledby="boutons" style="display: flex; flex-direction: column; gap: 14px;">
+<h2 id="boutons" style="margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #9594b0;">Boutons</h2>
+<div style="display: grid; grid-template-columns: 130px repeat(5, minmax(0, 1fr)); gap: 12px; align-items: center;">
+<span></span>
+<span style="font-size: 12px; color: #9594b0;">repos</span>
+<span style="font-size: 12px; color: #9594b0;">survol</span>
+<span style="font-size: 12px; color: #9594b0;">focus clavier</span>
+<span style="font-size: 12px; color: #9594b0;">pressé</span>
+<span style="font-size: 12px; color: #9594b0;">désactivé</span>
+<span style="font-size: 14px; font-weight: 600;">Principal</span>
+<button type="button" style="min-height: 48px; border: none; border-radius: 14px; background: #7c5cff; color: #ffffff; font-size: 15px; font-weight: 600;">Commencer</button>
+<button type="button" style="min-height: 48px; border: none; border-radius: 14px; background: #8c70ff; color: #ffffff; font-size: 15px; font-weight: 600;">Commencer</button>
+<button type="button" style="min-height: 48px; border: none; border-radius: 14px; background: #7c5cff; color: #ffffff; font-size: 15px; font-weight: 600; box-shadow: 0 0 0 3px #0e0f1f, 0 0 0 5px #c4b6ff;">Commencer</button>
+<button type="button" style="min-height: 48px; border: none; border-radius: 14px; background: #6a4be8; color: #ffffff; font-size: 15px; font-weight: 600; transform: scale(0.98);">Commencer</button>
+<button type="button" disabled style="min-height: 48px; border: none; border-radius: 14px; background: #2c2f4d; color: #8a89a6; font-size: 15px; font-weight: 600;">Commencer</button>
+<span style="font-size: 14px; font-weight: 600;">Secondaire</span>
+<button type="button" style="min-height: 48px; border: 1px solid #3a3d5c; border-radius: 14px; background: transparent; color: #f2f1f8; font-size: 15px; font-weight: 600;">Jouer le défi</button>
+<button type="button" style="min-height: 48px; border: 1px solid #4a4d70; border-radius: 14px; background: #1c1e33; color: #f2f1f8; font-size: 15px; font-weight: 600;">Jouer le défi</button>
+<button type="button" style="min-height: 48px; border: 1px solid #3a3d5c; border-radius: 14px; background: transparent; color: #f2f1f8; font-size: 15px; font-weight: 600; box-shadow: 0 0 0 3px #0e0f1f, 0 0 0 5px #c4b6ff;">Jouer le défi</button>
+<button type="button" style="min-height: 48px; border: 1px solid #4a4d70; border-radius: 14px; background: #242742; color: #f2f1f8; font-size: 15px; font-weight: 600;">Jouer le défi</button>
+<button type="button" disabled style="min-height: 48px; border: 1px solid #2a2d48; border-radius: 14px; background: transparent; color: #7d7c99; font-size: 15px; font-weight: 600;">Jouer le défi</button>
+<span style="font-size: 14px; font-weight: 600;">Discret</span>
+<button type="button" style="min-height: 44px; border: none; border-radius: 12px; background: transparent; color: #c4b6ff; font-size: 15px; font-weight: 600;">Se connecter</button>
+<button type="button" style="min-height: 44px; border: none; border-radius: 12px; background: #1c1e33; color: #d6ccff; font-size: 15px; font-weight: 600;">Se connecter</button>
+<button type="button" style="min-height: 44px; border: none; border-radius: 12px; background: transparent; color: #c4b6ff; font-size: 15px; font-weight: 600; box-shadow: 0 0 0 2px #c4b6ff;">Se connecter</button>
+<button type="button" style="min-height: 44px; border: none; border-radius: 12px; background: #242742; color: #d6ccff; font-size: 15px; font-weight: 600;">Se connecter</button>
+<button type="button" disabled style="min-height: 44px; border: none; border-radius: 12px; background: transparent; color: #7d7c99; font-size: 15px; font-weight: 600;">Se connecter</button>
+</div>
+</section>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px;">
+<section aria-labelledby="destination" style="display: flex; flex-direction: column; gap: 14px;">
+<h2 id="destination" style="margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #9594b0;">Carte de destination</h2>
+<a href="#" style="display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 0 16px; border-radius: 18px; background: #1c1e33; border: 1px solid #2a2d48; color: #f2f1f8; text-decoration: none;">
+<span style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 12px; background: rgba(255,122,89,0.14); color: #ff7a59;"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></span>
+<span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1;"><span style="font-size: 15px; font-weight: 600;">Puzzle rush</span><span style="font-size: 13px; color: #b9b8d0;">Le plus de positions avant la fin du temps</span></span>
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #9594b0; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="m9 18 6-6-6-6"></path></svg>
+</a>
+<a href="#" style="display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 0 16px; border-radius: 18px; background: #242742; border: 1px solid #4a4d70; color: #f2f1f8; text-decoration: none;">
+<span style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 12px; background: rgba(34,196,216,0.14); color: #22c4d8;"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="m12 14 4-4"></path><path d="M3.34 19a10 10 0 1 1 17.32 0"></path></svg></span>
+<span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1;"><span style="font-size: 15px; font-weight: 600;">Analyser une partie · survol</span><span style="font-size: 13px; color: #b9b8d0;">Coup par coup, avec les raisons</span></span>
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #c4b6ff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="m9 18 6-6-6-6"></path></svg>
+</a>
+<p style="margin: 0; font-size: 13px; color: #9594b0;">La teinte de rubrique ne touche que la pastille. Une ligne de texte, jamais deux.</p>
+</section>
+<section aria-labelledby="entete" style="display: flex; flex-direction: column; gap: 14px;">
+<h2 id="entete" style="margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #9594b0;">En-tête de page — un seul gabarit</h2>
+<div style="display: flex; flex-direction: column; gap: 10px; padding: 20px; border-radius: 18px; border: 1px dashed #3a3d5c;">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #9594b0;">
+<span style="display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 7px; background: rgba(0,229,168,0.14); color: #00e5a8;"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg></span>
+Progresser
+</span>
+<span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 32px; letter-spacing: -0.02em;">Finales</span>
+<span style="font-size: 15px; line-height: 1.5; color: #b9b8d0;">3 568 positions en huit familles. On donne l'objectif, l'ordinateur défend au mieux.</span>
+</div>
+<p style="margin: 0; font-size: 13px; color: #9594b0;">Rubrique (pastille teintée), titre, une phrase. Pas d'illustration de fond, pas de carte autour.</p>
+</section>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px;">
+<section aria-labelledby="petits" style="display: flex; flex-direction: column; gap: 16px;">
+<h2 id="petits" style="margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #9594b0;">Puce, segment, interrupteur</h2>
+<div style="display: flex; gap: 8px; flex-wrap: wrap;">
+<span style="display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; border-radius: 16px; background: #242742; font-size: 13px; font-weight: 500; color: #b9b8d0;">Blitz</span>
+<span style="display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; border-radius: 16px; background: #2d2658; font-size: 13px; font-weight: 600; color: #d6ccff;">Classée</span>
+<span style="display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; border-radius: 16px; background: rgba(0,229,168,0.14); font-size: 13px; font-weight: 600; color: #4ff0c4;">Relevé</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: #1c1e33; border: 1px solid #2a2d48;">
+<span style="display: flex; align-items: center; justify-content: center; min-height: 40px; border-radius: 10px; background: #2d2658; font-size: 14px; font-weight: 600;">Blancs</span>
+<span style="display: flex; align-items: center; justify-content: center; min-height: 40px; border-radius: 10px; font-size: 14px; font-weight: 600; color: #b9b8d0;">Noirs</span>
+<span style="display: flex; align-items: center; justify-content: center; min-height: 40px; border-radius: 10px; font-size: 14px; font-weight: 600; color: #b9b8d0;">Au hasard</span>
+</div>
+<div style="display: flex; gap: 20px; align-items: center;">
+<span style="position: relative; display: block; width: 48px; height: 28px; border-radius: 14px; background: #7c5cff;"><span style="position: absolute; top: 3px; left: 23px; width: 22px; height: 22px; border-radius: 11px; background: #ffffff;"></span></span>
+<span style="position: relative; display: block; width: 48px; height: 28px; border-radius: 14px; background: #3a3d5c;"><span style="position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 11px; background: #ffffff;"></span></span>
+<span style="position: relative; display: block; width: 48px; height: 28px; border-radius: 14px; background: #3a3d5c; box-shadow: 0 0 0 3px #0e0f1f, 0 0 0 5px #c4b6ff;"><span style="position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 11px; background: #ffffff;"></span></span>
+<span style="font-size: 12px; color: #9594b0;">oui · non · focus</span>
+</div>
+</section>
+<section aria-labelledby="barres" style="display: flex; flex-direction: column; gap: 12px;">
+<h2 id="barres" style="margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #9594b0;">Barre joueur</h2>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: #1c1e33; border: 1px solid #2a2d48;">
+<img src="/_blob/50873c08e31c992d49e48f904459ce1e" alt="" style="width: 38px; height: 38px; border-radius: 11px; object-fit: cover;">
+<span style="display: flex; flex-direction: column; flex-grow: 1;"><span style="font-size: 14px; font-weight: 600;">Brasier ≈ 980</span><span style="font-size: 11px; color: #9594b0;">réfléchit…</span></span>
+<span style="padding: 5px 9px; border-radius: 9px; background: #242742; font-family: 'Geist Mono', monospace; font-size: 17px; font-weight: 600; color: #b9b8d0;">9:12</span>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: #1c1e33; border: 1px solid #2a2d48; box-shadow: inset 3px 0 0 #7c5cff;">
+<span style="display: block; width: 38px; height: 38px; border-radius: 11px; background: #242742;"></span>
+<span style="display: flex; flex-direction: column; flex-grow: 1;"><span style="font-size: 14px; font-weight: 600;">Toi</span><span style="font-size: 11px; font-weight: 600; color: #c4b6ff;">À toi de jouer</span></span>
+<span style="padding: 5px 9px; border-radius: 9px; background: #7c5cff; font-family: 'Geist Mono', monospace; font-size: 17px; font-weight: 600; color: #ffffff;">9:34</span>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: #1c1e33; border: 1px solid #2a2d48; box-shadow: inset 3px 0 0 #ff7a59;">
+<span style="display: block; width: 38px; height: 38px; border-radius: 11px; background: #242742;"></span>
+<span style="display: flex; flex-direction: column; flex-grow: 1;"><span style="font-size: 14px; font-weight: 600;">Toi</span><span style="font-size: 11px; font-weight: 600; color: #ff9a80;">Moins de 20 secondes</span></span>
+<span style="padding: 5px 9px; border-radius: 9px; background: #c2410c; font-family: 'Geist Mono', monospace; font-size: 17px; font-weight: 600; color: #ffffff;">0:18</span>
+</div>
+</section>
+<section aria-labelledby="abandon" style="display: flex; flex-direction: column; gap: 12px;">
+<h2 id="abandon" style="margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #9594b0;">Confirmer l'abandon</h2>
+<div role="dialog" aria-labelledby="abandon-titre" style="display: flex; flex-direction: column; gap: 14px; padding: 20px; border-radius: 20px; background: #1c1e33; border: 1px solid #3a3d5c; box-shadow: 0 24px 50px -20px rgba(0,0,0,0.6);">
+<span id="abandon-titre" style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px;">Abandonner la partie ?</span>
+<span style="font-size: 14px; line-height: 1.45; color: #b9b8d0;">Elle comptera comme perdue. Tu pourras la revoir dans l'analyse.</span>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+<button type="button" style="min-height: 46px; border: 1px solid #3a3d5c; border-radius: 12px; background: transparent; color: #f2f1f8; font-size: 15px; font-weight: 600;">Continuer</button>
+<button type="button" style="min-height: 46px; border: none; border-radius: 12px; background: #b42318; color: #ffffff; font-size: 15px; font-weight: 600;">Abandonner</button>
+</div>
+</div>
+<p style="margin: 0; font-size: 13px; color: #9594b0;">Le rouge n'apparaît qu'ici, au moment de confirmer — pas sur le bouton de la barre.</p>
+</section>
+</div>
+<section aria-labelledby="adv" style="display: flex; flex-direction: column; gap: 14px;">
+<h2 id="adv" style="margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #9594b0;">Carte d'adversaire — un échelon de l'échelle</h2>
+<div style="display: flex; gap: 10px; align-items: flex-start;">
+<span style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 62px; padding: 8px 0 7px; border-radius: 14px; background: #1c1e33; border: 1px solid #2a2d48;"><img src="/_blob/461fcafb9a9366562c40ac8d17bcf9b8" alt="" style="width: 36px; height: 36px; border-radius: 10px; object-fit: cover;"><span style="font-size: 12px; font-weight: 700;">1</span><span style="font-size: 11px; color: #9594b0;">100</span></span>
+<span style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 62px; padding: 8px 0 7px; border-radius: 14px; background: #2d2658; border: 2px solid #7c5cff;"><img src="/_blob/50873c08e31c992d49e48f904459ce1e" alt="" style="width: 36px; height: 36px; border-radius: 10px; object-fit: cover;"><span style="font-size: 12px; font-weight: 700;">3</span><span style="font-size: 11px; color: #9594b0;">250</span></span>
+<span style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 62px; padding: 8px 0 7px; border-radius: 14px; background: #1c1e33; border: 1px solid #2a2d48; box-shadow: 0 0 0 3px #0e0f1f, 0 0 0 5px #c4b6ff;"><img src="/_blob/94ab981dec01a6228cdcd35b9d2f965d" alt="" style="width: 36px; height: 36px; border-radius: 10px; object-fit: cover;"><span style="font-size: 12px; font-weight: 700;">4</span><span style="font-size: 11px; color: #9594b0;">320</span></span>
+<span style="align-self: center; font-size: 13px; color: #9594b0;">repos · choisi · focus clavier. Les dix-huit échelons défilent ; les flèches du clavier passent de l'un à l'autre.</span>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
