@@ -71,7 +71,6 @@ import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
 import { useEcranAllume } from '@/lib/ecranAllume.ts'
 import { useChessGame } from '@/lib/game/useChessGame.ts'
 import {
-  annoncerPartieClassee,
   archiverPartie,
   enregistrerPartieEnCours,
   oublierPartieEnCours,
@@ -94,6 +93,8 @@ import { tCoeur } from '@/lib/i18n/resoudre.ts'
 import { ActionDuPouce } from './ActionDuPouce.tsx'
 import { LegendeDuVerdict } from './LegendeDuVerdict.tsx'
 import { motifDeRefus } from './motifDeRefus.ts'
+import { useAideUtilisee } from './useAideUtilisee.ts'
+import { useAnnonceClassee } from './useAnnonceClassee.ts'
 import { recordBotGame } from './progression.ts'
 
 export function GameScreen({
@@ -169,81 +170,17 @@ export function GameScreen({
   }, [timeControlId])
   const timed = timeControl.initial > 0
 
-  /*
-    L'annonce de la partie classée, faite au moment où l'écran de jeu s'ouvre.
-
-    C'est le seul instant où elle a un sens : le résultat est encore inconnu de
-    tout le monde, y compris de celui qui va jouer. Le serveur y fige le niveau,
-    la cadence et le camp, et refusera de classer une partie qui reviendrait
-    avec d'autres — voir `POST /api/parties/classee`.
-
-    Une seule fois, sans dépendances : ni le niveau ni la cadence ne changent en
-    cours de partie, et une partie reprise n'est jamais classée.
-  */
-  useEffect(() => {
-    if (!classee) return
-    void annoncerPartieClassee({
-      botLevel: level,
-      playerColor,
-      initialTime: timeControl.initial,
-      increment: timeControl.increment,
-    }).then((faite) => {
-      if (faite) return
-      /*
-        L'annonce n'est pas passée : cette partie ne sera pas classée, et il
-        faut le dire **maintenant**. Découvrir à la fin qu'une partie de vingt
-        minutes ne compte pas, sans avoir rien fait de mal, est le genre de
-        silence qui passe pour une panne — et c'en est une.
-      */
-      setAnnonceManquee(true)
-      toast.error(t('computer.ratedAnnounceFailed'), t('computer.ratedAnnounceFailedHint'))
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // L'annonce de la partie classée, à l'ouverture de l'écran : voir
+  // `useAnnonceClassee`.
+  const annonceManquee = useAnnonceClassee({ classee, level, playerColor, timeControl })
 
   const [outcome, setOutcome] = useState<{
     status: GameStatus
     result: GameResult
   } | null>(null)
   const [hintArrow, setHintArrow] = useState<Arrow | null>(null)
-  /**
-   * Une aide du moteur a-t-elle servi dans cette partie ?
-   *
-   * Si oui, la partie ne va au classement sous aucun prétexte — ni pour y
-   * gagner des points, ni pour en faire perdre à l'adversaire.
-   *
-   * ── Pourquoi un état, alors que les boutons sont déjà masqués ────────────
-   *
-   * L'interface cache « Indice » et « Annuler » dès qu'une partie est classée,
-   * et c'est très bien tant que l'interface est la seule porte. Ce n'en est pas
-   * une garantie : la règle n'existait nulle part ailleurs que dans deux
-   * conditions d'affichage, à deux endroits différents — la barre du pouce et
-   * celle du grand écran —, et il suffisait qu'un rendu en retard, un raccourci
-   * clavier ou une refonte en oublie une pour qu'une partie assistée arrive au
-   * classement sans que rien ne s'y oppose.
-   *
-   * La règle est donc écrite là où elle se décide : au moment d'archiver. Le
-   * serveur a d'ailleurs toujours décrit une partie classée comme une partie
-   * jouée « sans Annuler, sans Indice et sans le mode commenté » — c'est cette
-   * phrase-là qui devient exécutable.
-   *
-   * On retient **laquelle** des deux aides a servi : la boîte de fin le dit,
-   * et « ta partie n'est pas classée » sans raison passe pour une panne.
-   */
-  const [aideUtilisee, setAideUtilisee] = useState<'indice' | 'annulation' | null>(null)
-  /**
-   * La même chose, lisible depuis les rappels du moteur de jeu.
-   *
-   * `onGameOver` est passé à `useChessGame` et capture les valeurs du rendu où
-   * il a été créé : y lire l'état donnerait celui d'avant l'indice, c'est-à-dire
-   * exactement le contraire de la règle. Le renvoi, lui, dit toujours la vérité.
-   */
-  const aideRef = useRef<'indice' | 'annulation' | null>(null)
-  const noterAide = useCallback((quoi: 'indice' | 'annulation') => {
-    // La première suffit : on retient laquelle, pas combien.
-    aideRef.current ??= quoi
-    setAideUtilisee((deja) => deja ?? quoi)
-  }, [])
+  // L'aide du moteur qui a servi, s'il y en a une : voir `useAideUtilisee`.
+  const { aideUtilisee, aideRef, noterAide } = useAideUtilisee()
 
   /**
    * Les parties où le moteur ne souffle rien : ni indice, ni reprise de coup.
@@ -265,8 +202,6 @@ export function GameScreen({
   const sansAide = classee || tournoi
   /** Variation de classement d'une partie classée, une fois le serveur consulté. */
   const [variationClassement, setVariationClassement] = useState<number | null>(null)
-  /** L'annonce de partie classée n'est pas passée : la partie ne comptera pas. */
-  const [annonceManquee, setAnnonceManquee] = useState(false)
   /** Pourquoi le serveur n'a pas classé la partie, une fois qu'elle est finie. */
   const [refusClassement, setRefusClassement] = useState<string | null>(null)
   // Lue par les effets d'analyse, qui s'exécutent avant que `gameOver` ne soit
@@ -581,7 +516,18 @@ export function GameScreen({
     // sans que plus rien ne la surveille.
     const minuteur = setTimeout(tomber, Math.max(0, echeance) + 50)
     return () => clearTimeout(minuteur)
-  }, [clock, timed, state.isGameOver, outcome, playerColor, level, startFen, game.chess, marquer])
+  }, [
+    clock,
+    timed,
+    state.isGameOver,
+    outcome,
+    playerColor,
+    level,
+    startFen,
+    game.chess,
+    marquer,
+    aideRef,
+  ])
 
   // ── Actions ─────────────────────────────────────────────────────────────
   const handleMove = useCallback(
