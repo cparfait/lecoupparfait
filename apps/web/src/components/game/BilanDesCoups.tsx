@@ -115,7 +115,7 @@ export function BilanDesCoups({
         <h3 className="text-[12px] font-semibold text-faint">{t('moveReport.title')}</h3>
         {enCours && (
           <span className="shrink-0 text-[11px] tabular-nums text-faint">
-            analyse {bilan.juges}/{bilan.total}
+            {t('moveReport.analysingProgress', { n: bilan.juges, total: bilan.total })}
           </span>
         )}
       </div>
@@ -168,7 +168,7 @@ export function BilanDesCoups({
                   className="text-[11px] tabular-nums text-faint"
                   title={t('moveReport.acplTitle')}
                 >
-                  {côté.centipions} centipions perdus
+                  {t('moveReport.centipawnsLost', { n: côté.centipions })}
                 </p>
               )}
             </div>

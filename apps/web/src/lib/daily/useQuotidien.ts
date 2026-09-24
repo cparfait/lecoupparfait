@@ -87,8 +87,13 @@ export function useQuotidien(): JourneeCourante {
         toast.success(
           `${t(resultat.queteTerminee.label)} ✓`,
           resultat.serieAugmentee
-            ? `+${resultat.queteTerminee.xp} points · série de ${resultat.etat.serie} jour${resultat.etat.serie > 1 ? 's' : ''}`
-            : `+${resultat.queteTerminee.xp} points`,
+            ? t('quests.doneToastStreak', {
+                xp: resultat.queteTerminee.xp,
+                jours: t(resultat.etat.serie > 1 ? 'streak.days' : 'streak.dayOne', {
+                  n: resultat.etat.serie,
+                }),
+              })
+            : t('quests.doneToast', { xp: resultat.queteTerminee.xp }),
         )
       }
     },

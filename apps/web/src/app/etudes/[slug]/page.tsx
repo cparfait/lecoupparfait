@@ -171,7 +171,7 @@ export default function StudyPage() {
       body: JSON.stringify({
         action: 'addChapter',
         studyId: study.id,
-        title: `Chapitre ${study.chapters.length + 1}`,
+        title: t('studies.defaultChapterTitle', { n: study.chapters.length + 1 }),
       }),
     })
     const data = await response.json().catch(() => ({}))
@@ -184,7 +184,7 @@ export default function StudyPage() {
     )
     setChapterId(data.chapter.id)
     setCursor(-1)
-  }, [study])
+  }, [study, t])
 
   const share = useCallback(async () => {
     if (!study) return
@@ -241,7 +241,9 @@ export default function StudyPage() {
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <BookMarked size={18} className="text-accent" aria-hidden />
         <h1 className="font-display text-xl font-bold tracking-tight">{study.title}</h1>
-        <span className="text-[12px] text-faint">par {study.owner.username}</span>
+        <span className="text-[12px] text-faint">
+          {t('common.by', { nom: study.owner.username })}
+        </span>
         {own && (
           <Button
             size="sm"

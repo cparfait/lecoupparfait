@@ -13,7 +13,7 @@ import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import { useDialogue } from '@/lib/useDialogue.ts'
 import { pieceUrl, squarePosition } from './boardKit.ts'
-import { useT } from '@/lib/i18n/index.tsx'
+import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 
 /*
   Le voile flouté disparaît en mode « performance » : le flou d'arrière-plan
@@ -52,11 +52,11 @@ const DELAI_DE_GARDE_MS = 320
  */
 const CASE_MIN_AU_DOIGT_PX = 44
 
-const CHOICES: Array<{ type: PieceSymbol; labelFr: string }> = [
-  { type: 'q', labelFr: 'Dame' },
-  { type: 'r', labelFr: 'Tour' },
-  { type: 'b', labelFr: 'Fou' },
-  { type: 'n', labelFr: 'Cavalier' },
+const CHOICES: Array<{ type: PieceSymbol; label: TranslationKey }> = [
+  { type: 'q', label: 'board.pieceQueen' },
+  { type: 'r', label: 'board.pieceRook' },
+  { type: 'b', label: 'board.pieceBishop' },
+  { type: 'n', label: 'board.pieceKnight' },
 ]
 
 export function PromotionPicker({
@@ -172,12 +172,12 @@ export function PromotionPicker({
           className="popover relative flex gap-1 p-2 shadow-[var(--shadow-lg)]"
           onClick={(event) => event.stopPropagation()}
         >
-          {CHOICES.map(({ type, labelFr }, index) => (
+          {CHOICES.map(({ type, label }, index) => (
             <button
               key={type}
               type="button"
-              title={labelFr}
-              aria-label={labelFr}
+              title={t(label)}
+              aria-label={t(label)}
               onClick={() => choisir(type)}
               className="group grid h-16 w-16 place-items-center rounded-[var(--radius-sm)] border border-line-strong transition-transform hover:scale-105 hover:brightness-110 focus-visible:scale-105"
               /* Le fond prend la couleur de case opposée à la pièce : une
@@ -229,12 +229,12 @@ export function PromotionPicker({
         }}
         onClick={(event) => event.stopPropagation()}
       >
-        {CHOICES.map(({ type, labelFr }, index) => (
+        {CHOICES.map(({ type, label }, index) => (
           <button
             key={type}
             type="button"
-            title={labelFr}
-            aria-label={labelFr}
+            title={t(label)}
+            aria-label={t(label)}
             onClick={() => choisir(type)}
             className="group relative aspect-square w-full transition-transform hover:scale-105 focus-visible:scale-105"
             style={{

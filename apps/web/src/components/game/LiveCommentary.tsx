@@ -749,7 +749,7 @@ export function CommentaryPanel({
                   <p className="mt-0.5 text-[12px] tabular-nums text-faint">
                     {formatScore(commentary.scoreBefore)} → {formatScore(commentary.scoreAfter)}
                     {meriteUnMeilleurCoup(commentary.quality, commentary.winLoss) &&
-                      ` · −${commentary.winLoss.toFixed(0)} pts de chances de victoire`}
+                      t('commentary.winChancesLost', { n: commentary.winLoss.toFixed(0) })}
                   </p>
                 </>
               )
@@ -926,7 +926,7 @@ export function CommentaryPanel({
                   )}
                   {!alternative.played && alternative.rank === 1 && (
                     <Chip className="shrink-0 border-transparent" style={teinteDeRang(alternative)}>
-                      meilleur
+                      {t('commentary.best')}
                     </Chip>
                   )}
                 </button>
@@ -940,8 +940,8 @@ export function CommentaryPanel({
                   <button
                     type="button"
                     onClick={() => expliquerAlternative(alternative)}
-                    title={`Écouter pourquoi ${san(alternative.san)}`}
-                    aria-label={`Écouter l'explication de ${san(alternative.san)}`}
+                    title={t('commentary.listenWhy', { coup: san(alternative.san) })}
+                    aria-label={t('commentary.listenExplanationOf', { coup: san(alternative.san) })}
                     className={clsx(
                       'grid w-9 shrink-0 place-items-center transition-colors hover:bg-surface-hover',
                       'text-faint hover:text-accent',

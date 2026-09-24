@@ -67,7 +67,7 @@ export function PartiesDAmis({ parties }: { parties: PartieDAmi[] }) {
         titre={t('last.friendsVsComputer')}
         icone={<Cpu size={14} aria-hidden />}
         teinte="var(--rub-jouer)"
-        fin={`${parties.length} en cours`}
+        fin={t('last.inProgress', { n: parties.length })}
       />
       <div className="grid gap-3 p-4 sm:grid-cols-2">
         {parties.map((partie) => (
@@ -114,12 +114,12 @@ function PartieDUnAmi({ partie, habillage }: { partie: PartieDAmi; habillage: st
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[14px] font-semibold">{partie.pseudo}</span>
           <span className="mt-0.5 block truncate text-[12px] text-faint">
-            contre {partie.adversaire?.nom ?? t('rest.theComputer')}
+            {t('common.versus', { nom: partie.adversaire?.nom ?? t('rest.theComputer') })}
             {partie.adversaire && ` · ${partie.adversaire.elo} Elo`}
           </span>
         </span>
         <Chip tone="accent" className="shrink-0">
-          coup {coupsEntiers}
+          {t('common.moveNumberLower', { n: coupsEntiers })}
         </Chip>
       </div>
 

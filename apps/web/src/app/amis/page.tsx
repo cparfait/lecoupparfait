@@ -248,12 +248,12 @@ function FriendsBook() {
       setQuery('')
       setResults([])
       toast.success(
-        data.status === 'accepted'
-          ? `${username} vous demandait aussi — vous voilà amis.`
-          : `Demande envoyée à ${username}.`,
+        t(data.status === 'accepted' ? 'friends.nowFriends' : 'friends.requestSent', {
+          pseudo: username,
+        }),
       )
     },
-    [post],
+    [post, t],
   )
 
   const challenge = useCallback(
@@ -525,7 +525,10 @@ function FriendsBook() {
                       size="sm"
                       variant="secondary"
                       icon={<Eye size={14} />}
-                      title={`Regarder la partie de ${friend.username} contre ${enPartie.adversaire}`}
+                      title={t('friends.watchGameOf', {
+                        pseudo: friend.username,
+                        adversaire: enPartie.adversaire ?? '?',
+                      })}
                     >
                       {t('bits.watch')}
                     </ButtonLink>
@@ -598,8 +601,12 @@ function FriendsBook() {
                     {game.toName ?? t('friends.linkGame')}
                   </span>
                   <span className="block text-[12px] text-faint">
-                    {Math.round(game.initialTime / 60)} min
-                    {game.increment > 0 ? ` + ${game.increment} s` : ''}
+                    {game.increment > 0
+                      ? t('common.minutesPlusSeconds', {
+                          min: Math.round(game.initialTime / 60),
+                          s: game.increment,
+                        })
+                      : t('common.minutes', { n: Math.round(game.initialTime / 60) })}
                     {game.rated ? t('friends.ratedSuffix') : ''} ·{' '}
                     <Countdown until={game.expiresAt} />
                   </span>
@@ -671,10 +678,11 @@ function Countdown({ until }: { until: string }) {
  * existait déjà : il ne s'atteignait qu'en tapant l'adresse à la main.
  */
 function NomDuJoueur({ pseudo }: { pseudo: string }) {
+  const t = useT()
   return (
     <Link
       href={`/profil/${encodeURIComponent(pseudo)}`}
-      title={`Voir le profil de ${pseudo}`}
+      title={t('friends.seeProfileOf', { pseudo })}
       className="min-w-0 flex-1 truncate font-medium transition-colors hover:text-accent hover:underline"
     >
       {pseudo}

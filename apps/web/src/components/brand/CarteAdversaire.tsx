@@ -148,7 +148,7 @@ export function CarteAdversaire({
             : 'bg-[color-mix(in_oklab,var(--teinte)_22%,transparent)] text-ink/70',
         )}
       >
-        ≈ {elo} · n°{niveau}
+        {t('opponent.levelBadge', { elo, niveau })}
       </span>
     </button>
   )

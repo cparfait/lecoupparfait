@@ -116,7 +116,7 @@ export function DemandesDAmi({ className }: { className?: string }) {
         icone={<UserPlus size={14} aria-hidden />}
         fin={
           <Link href="/amis" className="text-accent hover:underline">
-            mon carnet
+            {t('friends.myBook')}
           </Link>
         }
       />
@@ -154,7 +154,7 @@ export function DemandesDAmi({ className }: { className?: string }) {
             <Button
               size="sm"
               variant="ghost"
-              aria-label={`Refuser la demande de ${demande.user.username}`}
+              aria-label={t('friends.declineRequestOf', { pseudo: demande.user.username })}
               disabled={enCours === demande.id}
               onClick={() => void repondre(demande, false)}
             >

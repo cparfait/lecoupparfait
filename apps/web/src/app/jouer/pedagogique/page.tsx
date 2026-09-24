@@ -90,7 +90,11 @@ export default function SeancePage() {
           titre={t('session.whichLevel')}
           icone={<Target size={14} aria-hidden />}
           teinte="var(--rub-jouer)"
-          fin={adversaire ? `${adversaire.elo} Elo · niveau ${adversaire.level}` : undefined}
+          fin={
+            adversaire
+              ? t('session.opponentLevel', { elo: adversaire.elo, niveau: adversaire.level })
+              : undefined
+          }
         />
         <div className="p-4">
           <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
@@ -135,7 +139,7 @@ export default function SeancePage() {
           titre={t('session.whichTheme')}
           icone={<GraduationCap size={14} aria-hidden />}
           teinte="var(--rub-apprendre)"
-          fin={`${themes.length} à ce palier`}
+          fin={t('session.atThisTier', { n: themes.length })}
         />
         <div className="p-4">
           <div className="grid gap-1.5 sm:grid-cols-2">

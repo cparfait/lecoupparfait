@@ -59,11 +59,29 @@ const HORS = [
   'app/outils/arbitrage',
   'app/global-error',
   'app/api',
+  // Côté serveur : journaux, courriels d'administration, fournisseurs d'IA et
+  // amorces envoyées au modèle. Rien de ce qui s'y écrit n'est lu à l'écran.
+  'lib/server',
+  'lib/ia/providers',
+  'lib/ia/coach',
+  'lib/ia/modeles',
+  // Le protocole UCI parlé au moteur : `setoption name … value …`.
+  'lib/engine/client',
+  // Des métadonnées de page, comme `layout.tsx` : produites côté serveur.
+  'app/not-found',
 ]
 
 /** Les attributs que quelqu'un lit, à l'œil ou à l'oreille. */
 const ATTRIBUTS =
   /\b(title|aria-label|placeholder|label|description|hint|intro|titre|phrase|detail|texte|alt|blurb|note|consigne|libelle)=["']([^"'\n]{2,})["']/g
+
+/**
+ * Les mêmes attributs, quand la chaîne passe par des accolades : Prettier y met
+ * un littéral trop long pour la ligne — `placeholder={\n '…'\n }` —, et il
+ * échappait au motif précédent.
+ */
+const ATTRIBUTS_ENTRE_ACCOLADES =
+  /\b(title|aria-label|placeholder|label|alt)=\{\s*["']([^"'\n]{2,})["']\s*\}/g
 
 /** Le texte nu entre deux balises, sur une seule ligne. */
 const TEXTE_EN_LIGNE = />\s*([A-ZÀ-ÿ][^<>{}\n]{1,})\s*</g
@@ -95,9 +113,18 @@ const TEXTE_SEUL = /^[ \t]*([A-ZÀ-ÿ][^<>{}\n,:;=]*[^\s<>{},:;=])[ \t]*$/
  * Le chevron n'ouvre un texte que s'il ferme une balise : celui d'une flèche
  * `=>` ou d'un `->` précède du code, et `(actuel) =>` suivi à la ligne de
  * `actuel ? { …` se lisait « actuel ? ».
+ *
+ * Le motif a longtemps affiché zéro sur des fautes bien réelles, pour trois
+ * raisons qu'il ne faut pas remettre : il exigeait une accolade ou un chevron
+ * *sur la même ligne* après le texte — or Prettier renvoie la balise suivante à
+ * la ligne, et « d’affilée » en tombait — ; il refusait le deux-points, que la
+ * typographie française détache (« record : ») ; et le filtre des identifiants
+ * écartait ensuite tout mot en minuscules, c'est-à-dire « jour », « contre »,
+ * « points ». Les mots-clés du langage sont désormais écartés nommément
+ * (`MOTS_CLES`), et les propriétés de type par leur deux-points collé.
  */
 const TEXTE_COLLE =
-  /(?:\}|(?<![=-])>)[ \t\n]*([^<>{}\n=:;()|$"'`]*[A-Za-zÀ-ÿ]{2,}[^<>{}\n=:;()|$"'`]*)[<{]/g
+  /(?:\}|(?<![=-])>)[ \t\n]*([^<>{}\n=;()|$"'`]*[A-Za-zÀ-ÿ][^<>{}\n=;()|$"'`]*)(?:[<{]|(?=\n[ \t]*<))/g
 
 /**
  * Une déclaration TypeScript et non une phrase.
@@ -121,7 +148,24 @@ const DECLARATION =
  * licence —, jamais un mot qu'une autre langue écrirait autrement : ce qui se
  * traduit passe par le dictionnaire, même d'un seul mot.
  */
-const NOMS_PROPRES = new Set(['Le Coup Parfait', 'Stockfish 19', 'Groq', 'CC BY-NC-SA'])
+const NOMS_PROPRES = new Set([
+  'Le Coup Parfait',
+  'Stockfish',
+  'Stockfish 19',
+  'Maia',
+  'Lichess',
+  'Groq',
+  'CC BY-NC-SA',
+  'Bluetooth',
+  // Les échiquiers électroniques, sous le nom de leur fabricant.
+  'Certabo',
+  'Chessnut',
+  'Smart Chess',
+  'DGT Pegasus',
+  'Millennium ChessLink',
+  // Le dépôt d'où viennent les finales, cité par son adresse.
+  'supertorpe/chessendgametraining',
+])
 
 function textesNus(src) {
   const lignes = src.split('\n')
@@ -156,9 +200,114 @@ const TYPES = new Set([
   'Error',
 ])
 
+/**
+ * Les mots-clés du langage.
+ *
+ * `TEXTE_COLLE` lit ce qui sépare deux accolades : `} else {`, `} catch {`,
+ * `} finally {` en sont, et ce sont des mots minuscules comme « jour ». Le
+ * filtre des identifiants les écartait tous, et avec eux tous les mots de
+ * phrase collés à un nombre — « jour », « contre », « points » : il fallait
+ * les séparer nommément.
+ */
+const MOTS_CLES = new Set(['else', 'catch', 'finally', 'try', 'return', 'do', 'while'])
+
+/** Les unités et propriétés du CSS, qui s'écrivent aussi en minuscules. */
+const MOTS_DU_CSS = new Set(['ms', 'transform'])
+
 /** Ce qui n'est pas une phrase : identifiants, nombres, sigles, symboles. */
 const TECHNIQUE =
-  /^(?:[a-z0-9_-]+|[\d .,:%+-]+|2D|3D|PGN|FEN|UCI|SAN|ELO|Elo|OK|SVG|USB|HID|CSS|JSON|GATT|npm|node|→|←|↑|↓|…)$/
+  /^(?:[a-z0-9_-]+|[\d .,:%+-]+|2D|3D|PGN|FEN|UCI|SAN|ELO|Elo|OK|SVG|USB|HID|CSS|JSON|GATT|npm|node|→|←|↑|↓|…|×|(?:npm|docker) [a-z :-]+)$/
+
+/**
+ * Les chaînes que le code fabrique, et que le balisage ne montre pas.
+ *
+ * Quatrième angle mort : un texte qui n'est jamais écrit entre deux balises,
+ * parce qu'il est calculé avant. `n > 1 ? 'Blancs' : 'Noirs'`, un gabarit
+ * `` `${n} j restants` ``, un intitulé d'onglet rangé dans une table —
+ * `{ id: 'rapid', label: 'Rapide' }` — et lu plus bas par `{entry.label}`.
+ * Aucun des motifs précédents ne pouvait les voir : ils n'ont pas de chevron.
+ *
+ * Ces chaînes-là sont surtout du code — des classes, des identifiants, des
+ * adresses. On ne garde que celles qui ressemblent à une phrase : voir
+ * `ressembleAUnePhrase`.
+ */
+const OPERANDE = /(?:\?\?|\|\||[?:])\s*(['"])([^'"\n]+)\1/g
+const GABARIT = /`([^`\n]*)`/g
+const INTERPOLATION = /\$\{(?:[^{}]|\{[^{}]*\})*\}/g
+
+/**
+ * Les appels qui parlent au développeur : un journal, une exception. Leur texte
+ * n'atteint pas l'écran — ou, s'il l'atteint, c'est par un `catch` qui doit
+ * l'envelopper d'une clé. On retire l'appel entier, parenthèses comprises : le
+ * message est souvent sur la ligne d'après.
+ */
+const POUR_LE_DEVELOPPEUR = /console\.\w+\(|new Error\(/g
+
+function sansAppelsAuDeveloppeur(src) {
+  let sortie = ''
+  let depuis = 0
+  POUR_LE_DEVELOPPEUR.lastIndex = 0
+  let m
+  while ((m = POUR_LE_DEVELOPPEUR.exec(src))) {
+    let profondeur = 1
+    let i = m.index + m[0].length
+    while (i < src.length && profondeur > 0) {
+      if (src[i] === '(') profondeur++
+      else if (src[i] === ')') profondeur--
+      i++
+    }
+    sortie += src.slice(depuis, m.index)
+    depuis = i
+    POUR_LE_DEVELOPPEUR.lastIndex = i
+  }
+  return sortie + src.slice(depuis)
+}
+
+/**
+ * Un chemin de clé composé, `` `career2.xpLines.${cle}One` `` : des identifiants
+ * et des points, sans une espace. Ce n'est pas du texte, c'est son adresse.
+ */
+const CHEMIN_DE_CLE = /^[\w.]*(?:\$\{[^}]*\}[\w.]*)+$/
+
+function chainesDeCode(src) {
+  const sortie = []
+  const code = sansAppelsAuDeveloppeur(src)
+  OPERANDE.lastIndex = 0
+  let m
+  while ((m = OPERANDE.exec(code))) sortie.push(m[2])
+  GABARIT.lastIndex = 0
+  while ((m = GABARIT.exec(code))) {
+    if (!m[1].includes('${')) continue
+    if (m[1].includes('.') && CHEMIN_DE_CLE.test(m[1])) continue
+    // Les morceaux gardent leurs espaces : « ${n} j » se distingue ainsi de
+    // « ${n}ms », une durée CSS collée à son nombre.
+    for (const morceau of m[1].split(INTERPOLATION)) sortie.push(morceau)
+  }
+  return sortie
+}
+
+/**
+ * Une phrase, et non une classe, un identifiant ou une adresse.
+ *
+ * Un accent ou une apostrophe typographique suffisent. Sinon il faut soit une
+ * majuscule initiale (« Blancs », « Rapide »), soit plusieurs mots en
+ * minuscules sans la ponctuation des classes et des adresses (« j restants »),
+ * soit un mot seul détaché d'une interpolation par une espace (« ${n} j »).
+ *
+ * Une capitale seule, ou suivie de nombres, est une commande de tracé SVG
+ * (`M 0,${y} L`) ou une lettre de pièce : pas une phrase.
+ */
+function ressembleAUnePhrase(brut) {
+  const valeur = brut.trim()
+  if (!/[A-Za-zÀ-ÿ]/.test(valeur)) return false
+  if (/^[A-Z](?:[\s\d,.-]*)$/.test(valeur)) return false
+  if (/^(?:ms|s|px|em|rem|deg|vh|vw|fr)\b/.test(brut)) return false
+  if (/[À-ÿ’]/.test(valeur)) return true
+  if (/[A-Z]/.test(valeur[0])) return !/[-_/:.[\]=#]|^[A-Z][a-z]+[A-Z]/.test(valeur)
+  const mots = valeur.split(/\s+/)
+  if (mots.some((mot) => !/^[A-Za-z]+[,.;!?]?$/.test(mot))) return false
+  return mots.length > 1 || /^\s|\s$/.test(brut)
+}
 
 function* fichiers(dossier) {
   for (const entree of readdirSync(dossier)) {
@@ -196,18 +345,26 @@ for (const chemin of fichiers(RACINE)) {
   // des identifiants : « jour » entre deux accolades est un mot de phrase, pas
   // un nom de variable — et c'est exactement la moitié qui manquait.
   const candidats = [...textesNus(src)].map((valeur) => [valeur, false])
-  const motifs = [ATTRIBUTS, TEXTE_EN_LIGNE]
+  const motifs = [ATTRIBUTS, ATTRIBUTS_ENTRE_ACCOLADES, TEXTE_EN_LIGNE]
   if (rel.endsWith('.tsx')) motifs.push(TEXTE_COLLE)
   for (const motif of motifs) {
     motif.lastIndex = 0
     let m
     while ((m = motif.exec(src))) candidats.push([m[2] ?? m[1], motif === TEXTE_COLLE])
   }
+  for (const valeur of chainesDeCode(src)) {
+    if (ressembleAUnePhrase(valeur)) candidats.push([valeur, true])
+  }
 
   const trouves = new Set()
   for (const [brut, colle] of candidats) {
     const valeur = brut.trim()
-    if (!valeur || TECHNIQUE.test(valeur)) continue
+    if (!valeur) continue
+    // Une propriété de type ou d'objet, `modes: Array<` ou `black:` : le deux-
+    // points collé au mot. La typographie française le détache — « record : ».
+    if (/^[A-Za-z_]\w*\??:/.test(valeur) || valeur.startsWith(',')) continue
+    if (MOTS_CLES.has(valeur) || MOTS_DU_CSS.has(valeur)) continue
+    if (TECHNIQUE.test(valeur) && !(colle && /^[a-zà-ÿ]+$/.test(valeur))) continue
     if (valeur.startsWith('http') || valeur.startsWith('/') || valeur.includes('--')) continue
     if (!colle && /^[a-z][a-zA-Z]*$/.test(valeur)) continue
     // Du code et non du texte : un appel, une conjonction logique, une constante

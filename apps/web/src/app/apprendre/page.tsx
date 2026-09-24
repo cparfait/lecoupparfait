@@ -231,7 +231,7 @@ export default function LearnPage() {
               </p>
               <p className="mt-1.5 flex items-center gap-2 text-[12px] text-faint">
                 <Clock size={11} aria-hidden />
-                {prochaine.lecon.minutes} min
+                {t('common.minutes', { n: prochaine.lecon.minutes })}
                 <span aria-hidden>·</span>
                 {prochaine.entamee
                   ? t('learn.stepOf', {
@@ -464,7 +464,7 @@ export default function LearnPage() {
                         </p>
                         <p className="mt-2 flex items-center gap-2 text-[12px] text-faint">
                           <Clock size={11} aria-hidden />
-                          {lesson.minutes} min
+                          {t('common.minutes', { n: lesson.minutes })}
                           <span aria-hidden>·</span>
                           {t('learn.stepsCount', { n: lesson.steps.length })}
                           {started && !completed && (

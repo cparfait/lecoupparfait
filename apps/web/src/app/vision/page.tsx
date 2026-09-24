@@ -288,7 +288,7 @@ export default function VisionPage() {
 
           {missed > 0 && (
             <Chip tone="danger" className="order-4 self-start lg:order-none">
-              {missed} erreur{missed > 1 ? 's' : ''}
+              {t(missed > 1 ? 'vision.mistakes' : 'vision.mistakesOne', { n: missed })}
             </Chip>
           )}
 

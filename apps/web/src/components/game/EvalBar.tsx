@@ -37,6 +37,7 @@ export const EvalBar = memo(function EvalBar({
   // Vue depuis les Noirs : la barre se retourne pour que « mon camp » reste en bas.
   const bottomShare = orientation === 'w' ? white : 100 - white
   const label = score ? formatScore(score) : '—'
+  const t = useT()
   const decisive = score?.type === 'mate'
 
   if (orientationAxis === 'horizontal') {
@@ -48,7 +49,7 @@ export const EvalBar = memo(function EvalBar({
         aria-valuenow={Math.round(white)}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label={`Évaluation : ${label}`}
+        aria-label={t('common.evaluation', { valeur: label })}
       >
         {/* La jauge est une mise à l'échelle, pas une largeur qui change :
             une transition sur `width` refait la mise en page à chaque image
@@ -83,7 +84,7 @@ export const EvalBar = memo(function EvalBar({
       aria-valuenow={Math.round(white)}
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-label={`Évaluation : ${label}`}
+      aria-label={t('common.evaluation', { valeur: label })}
     >
       {/* Même principe qu'en horizontal : `scaleY` depuis le bas, et non une
           hauteur animée. */}

@@ -190,7 +190,7 @@ export function DefiDuJour({ className }: { className?: string }) {
             {t('daily.otherQuests')}
           </span>
           <span className="text-xs tabular-nums text-muted">
-            {xp} / {XP_TOTAL} points
+            {t('daily.pointsOf', { n: xp, total: XP_TOTAL })}
           </span>
         </div>
 

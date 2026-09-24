@@ -222,7 +222,7 @@ export default function RegarderUnAmiPage() {
               Dans l'ordre de l'échiquier : l'adversaire en haut, l'ami en bas,
               comme il le voit lui-même. */}
           <Bandeau
-            nom={partie.adversaire?.nom ?? 'Ordinateur'}
+            nom={partie.adversaire?.nom ?? t('common.computer')}
             detail={partie.adversaire ? `${partie.adversaire.elo} Elo` : null}
             machine
           />
@@ -253,7 +253,7 @@ export default function RegarderUnAmiPage() {
         <div className="flex min-h-0 flex-col gap-3">
           <Card className="overflow-hidden">
             <EnTeteDeCarte
-              titre={`Coup ${coupsEntiers}`}
+              titre={t('common.moveNumber', { n: coupsEntiers })}
               icone={<Cpu size={14} aria-hidden />}
               teinte="var(--rub-jouer)"
               fin={<Fraicheur iso={partie.dernierCoupLe} />}
@@ -336,10 +336,13 @@ function Fraicheur({ iso }: { iso: string }) {
     return () => clearInterval(minuteur)
   }, [])
 
+  const t = useT()
   const secondes = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000))
   return (
     <span>
-      {secondes < 60 ? `il y a ${secondes} s` : `il y a ${Math.round(secondes / 60)} min`}
+      {secondes < 60
+        ? t('watch.secondsAgo', { n: secondes })
+        : t('watch.minutesAgo', { n: Math.round(secondes / 60) })}
     </span>
   )
 }

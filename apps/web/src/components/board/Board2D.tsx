@@ -1419,6 +1419,7 @@ const AnnotationLayer = memo(function AnnotationLayer({
   /** Rend les flèches cliquables — pour demander « pourquoi ce coup ? ». */
   onArrowClick?: (arrow: Arrow) => void
 }) {
+  const t = useT()
   const drafted: Arrow | null =
     draft?.to && draft.to !== draft.from
       ? { from: draft.from, to: draft.to, color: draft.color }
@@ -1505,7 +1506,7 @@ const AnnotationLayer = memo(function AnnotationLayer({
             }}
             role="button"
             tabIndex={-1}
-            aria-label={`Explication du coup ${arrow.from}${arrow.to}`}
+            aria-label={t('board.arrowExplanation', { coup: `${arrow.from}${arrow.to}` })}
           >
             <path
               d={path}

@@ -67,6 +67,7 @@ export const PlayerBar = memo(function PlayerBar({
   status,
   className,
 }: PlayerBarProps) {
+  const t = useT()
   const pieceSet = usePreferences((state) => state.pieceSet)
 
   /**
@@ -94,7 +95,7 @@ export const PlayerBar = memo(function PlayerBar({
           urgency === 'low' && active && 'text-[var(--q-inaccuracy)]',
         )}
         role="timer"
-        aria-label={`Temps restant de ${name}`}
+        aria-label={t('game.timeLeftOf', { nom: name })}
       >
         {texte}
       </div>
@@ -202,7 +203,7 @@ export const PlayerBar = memo(function PlayerBar({
             color === 'w' ? 'bg-[var(--eval-white)]' : 'bg-[var(--eval-black)]',
           )}
           role="img"
-          aria-label={color === 'w' ? 'Blancs' : 'Noirs'}
+          aria-label={t(color === 'w' ? 'common.white' : 'common.black')}
         />
       </div>
 

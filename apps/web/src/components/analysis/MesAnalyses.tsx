@@ -26,14 +26,14 @@ import {
 } from '@/lib/analysis/enregistrees.ts'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { MarqueService } from '@/components/brand/MarqueService.tsx'
-import { useT } from '@/lib/i18n/index.tsx'
+import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 
 /** Ce qu'on affiche à gauche de chaque ligne, selon la provenance. */
-const PROVENANCE: Record<AnalyseEnregistree['source'], { glyphe: string; nom: string }> = {
-  local: { glyphe: '♟', nom: 'Partie jouée ici' },
-  chesscom: { glyphe: '♜', nom: 'Importée de Chess.com' },
-  lichess: { glyphe: '♞', nom: 'Importée de Lichess' },
-  pgn: { glyphe: '📋', nom: 'PGN collé' },
+const PROVENANCE: Record<AnalyseEnregistree['source'], { glyphe: string; nom: TranslationKey }> = {
+  local: { glyphe: '♟', nom: 'savedAnalyses.sourceLocal' },
+  chesscom: { glyphe: '♜', nom: 'savedAnalyses.sourceChesscom' },
+  lichess: { glyphe: '♞', nom: 'savedAnalyses.sourceLichess' },
+  pgn: { glyphe: '📋', nom: 'savedAnalyses.sourcePgn' },
 }
 
 export function MesAnalyses({
@@ -150,7 +150,7 @@ export function MesAnalyses({
                 ) : (
                   <span
                     className="grid h-7 w-7 shrink-0 place-items-center rounded-[var(--radius-sm)] bg-surface-strong text-sm"
-                    title={marque.nom}
+                    title={t(marque.nom)}
                     aria-hidden
                   >
                     {marque.glyphe}
@@ -166,19 +166,19 @@ export function MesAnalyses({
                   className="min-w-0 flex-1 text-left"
                 >
                   <p className="truncate text-[14px] font-medium">
-                    {analyse.whiteName ?? 'Blancs'}
+                    {analyse.whiteName ?? t('common.white')}
                     <span className="mx-1 font-normal text-faint">
                       {resultatCourt(analyse.result)}
                     </span>
-                    {analyse.blackName ?? 'Noirs'}
+                    {analyse.blackName ?? t('common.black')}
                   </p>
                   <p className="truncate text-[12px] text-faint">
                     {[
                       analyse.opening,
-                      analyse.coups ? `${analyse.coups} demi-coups` : null,
-                      `profondeur ${analyse.depth}`,
+                      analyse.coups ? t('analysis.halfMoves', { n: analyse.coups }) : null,
+                      t('savedAnalyses.depth', { n: analyse.depth }),
                       precision !== null && precision !== undefined
-                        ? `${precision.toFixed(0)} % de précision`
+                        ? t('savedAnalyses.accuracy', { n: precision.toFixed(0) })
                         : null,
                     ]
                       .filter(Boolean)
@@ -196,11 +196,13 @@ export function MesAnalyses({
                       title={
                         analyse.partage ? t('savedAnalyses.unshare') : t('savedAnalyses.share')
                       }
-                      aria-label={
-                        analyse.partage
-                          ? `Retirer le partage de l'analyse ${analyse.whiteName ?? 'Blancs'} – ${analyse.blackName ?? 'Noirs'}`
-                          : `Partager l'analyse ${analyse.whiteName ?? 'Blancs'} – ${analyse.blackName ?? 'Noirs'}`
-                      }
+                      aria-label={t(
+                        analyse.partage ? 'savedAnalyses.unshareAria' : 'savedAnalyses.shareAria',
+                        {
+                          blancs: analyse.whiteName ?? t('common.white'),
+                          noirs: analyse.blackName ?? t('common.black'),
+                        },
+                      )}
                       aria-pressed={analyse.partage !== null}
                       className={clsx(
                         'shrink-0 rounded-[var(--radius-sm)] p-1 transition-colors hover:bg-surface-strong',

@@ -294,7 +294,7 @@ export default function LocalGamePage() {
       >
         <PlayerBar
           className="[grid-area:pion]"
-          name={orientation === 'w' ? 'Noirs' : 'Blancs'}
+          name={t(orientation === 'w' ? 'common.black' : 'common.white')}
           color={orientation === 'w' ? 'b' : 'w'}
           avatar={orientation === 'w' ? '♚' : '♔'}
           active={state.turn !== orientation && !state.isGameOver}
@@ -340,7 +340,7 @@ export default function LocalGamePage() {
 
         <PlayerBar
           className="[grid-area:moi]"
-          name={orientation === 'w' ? 'Blancs' : 'Noirs'}
+          name={t(orientation === 'w' ? 'common.white' : 'common.black')}
           color={orientation}
           avatar={orientation === 'w' ? '♔' : '♚'}
           active={state.turn === orientation && !state.isGameOver}

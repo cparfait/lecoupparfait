@@ -304,7 +304,9 @@ export default function PendulePage() {
 
           <div className="flex items-center justify-center gap-2 py-1">
             <Chip>{formatTimeControl(control)}</Chip>
-            <Chip tone="neutral">coup {Math.floor(state.moves.length / 2) + 1}</Chip>
+            <Chip tone="neutral">
+              {t('common.moveNumberLower', { n: Math.floor(state.moves.length / 2) + 1 })}
+            </Chip>
             {clock.running && !tombe && (
               <Button variant="ghost" size="sm" icon={<Pause size={14} />} onClick={basculerPause}>
                 {t('commentary.pauseShort')}
@@ -401,11 +403,15 @@ function CoteJoueur({
   retourne?: boolean
   onTaper: () => void
 }) {
+  const t = useT()
   return (
     <button
       type="button"
       onClick={onTaper}
-      aria-label={`${camp === 'w' ? 'Blancs' : 'Noirs'} — ${formatClock(ms)}`}
+      aria-label={t('clock.sideTime', {
+        camp: t(camp === 'w' ? 'common.white' : 'common.black'),
+        temps: formatClock(ms),
+      })}
       className={clsx(
         'grid min-h-[30dvh] w-full place-items-center rounded-[var(--radius)] border transition-colors',
         retourne && 'rotate-180',
@@ -418,7 +424,7 @@ function CoteJoueur({
     >
       <span className="flex flex-col items-center gap-1">
         <span className="text-[12px] font-semibold text-faint">
-          {camp === 'w' ? 'Blancs' : 'Noirs'}
+          {t(camp === 'w' ? 'common.white' : 'common.black')}
         </span>
         <span
           className={clsx(

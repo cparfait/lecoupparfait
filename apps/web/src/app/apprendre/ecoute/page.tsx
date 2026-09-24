@@ -326,7 +326,10 @@ export default function EcoutePage() {
                 titre={t(piste.lesson.title)}
                 icone={<Headphones size={14} aria-hidden />}
                 teinte={TEINTE}
-                fin={`étape ${piste.etape + 1} / ${piste.lesson.steps.length}`}
+                fin={t('listen.stepHeader', {
+                  n: piste.etape + 1,
+                  total: piste.lesson.steps.length,
+                })}
               />
               <div className="p-4">
                 <Chip>{t(piste.chapitre)}</Chip>
@@ -405,10 +408,10 @@ export default function EcoutePage() {
                   ) : (
                     <VolumeX size={12} aria-hidden />
                   )}
-                  {enLecture ? 'en lecture' : 'en pause'}
+                  {t(enLecture ? 'listen.playing' : 'listen.paused')}
                 </span>
                 <span className="tabular-nums">
-                  {position + 1} / {total} étapes
+                  {t('listen.stepOf', { n: position + 1, total })}
                 </span>
               </p>
             </Card>

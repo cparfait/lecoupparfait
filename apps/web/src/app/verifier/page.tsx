@@ -91,9 +91,9 @@ function VerifyResult() {
               {t(state.alreadyDone ? 'verify.alreadyDone' : 'verify.confirmed')}
             </h1>
             <p className="mt-1.5 text-sm leading-relaxed text-muted">
-              {state.alreadyDone
-                ? `L’adresse de ${state.username} était déjà confirmée. Rien à faire de plus.`
-                : `Merci ${state.username}. Ton adresse pourra servir à retrouver ton mot de passe si tu le perds — et à rien d’autre.`}
+              {t(state.alreadyDone ? 'verify.alreadyDoneText' : 'verify.thanksText', {
+                pseudo: state.username,
+              })}
             </p>
             <Link href="/jouer" className="mt-4 block">
               <Button variant="primary" fullWidth>

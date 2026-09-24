@@ -239,7 +239,7 @@ function detailBase(sante: Sante, t: ReturnType<typeof useT>): string {
   const { octets, octetsTables } = sante.base
   if (octets == null) return t('admin.sizeUnknown')
 
-  const go = (valeur: number) => `${(valeur / 1024 ** 3).toFixed(2)} Go`
+  const go = (valeur: number) => t('admin.gigabytes', { n: (valeur / 1024 ** 3).toFixed(2) })
   if (octetsTables == null) return t('admin.sizeTotal', { taille: go(octets) })
 
   const partTables = Math.round((octetsTables / octets) * 100)

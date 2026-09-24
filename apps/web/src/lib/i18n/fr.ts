@@ -19,6 +19,7 @@ export const fr = {
   },
 
   nav: {
+    restOfSection: 'Le reste de la rubrique {rubrique}',
     home: 'Accueil',
     play: 'Jouer',
     career: 'Carrière',
@@ -115,6 +116,8 @@ export const fr = {
   },
 
   home: {
+    statsLevels: 'niveaux d’adversaires, de {min} à {max} Elo',
+    statsTablebase: 'pièces : finales résolues à la perfection',
     heroTitle: 'Les échecs, enfin expliqués.',
     heroSubtitle:
       'Un moteur qui ne se contente pas de dire quel coup jouer, mais **pourquoi**. Une voix qui t’accompagne. Et zéro euro, pour toujours.',
@@ -158,6 +161,7 @@ export const fr = {
   },
 
   opponent: {
+    levelBadge: '≈ {elo} · n°{niveau}',
     notFound: 'Adversaire introuvable',
     metaTitle: '{nom} — adversaire artificiel',
     all: 'Tous les adversaires',
@@ -486,6 +490,8 @@ export const fr = {
   },
 
   vision: {
+    mistakes: '{n} erreurs',
+    mistakesOne: '{n} erreur',
     intro:
       'Une case est annoncée, tu cliques dessus. Trente secondes. Tant qu’il faut réfléchir pour trouver « f6 », ce temps-là est pris sur le calcul — c’est le réflexe le plus rentable à installer quand on débute.',
     foundAndAccuracy: 'cases trouvées · {taux} % de réussite',
@@ -502,6 +508,9 @@ export const fr = {
   },
 
   next: {
+    dailyWorth:
+      'La même pour tout le monde de ton niveau, et elle vaut {xp} des {total} points du jour. ',
+    careerChapter: 'Carrière · chapitre {n}',
     someoneWaits: 'Quelqu’un t’attend',
     yourTurnAgainst: 'C’est à toi de jouer contre {adversaire}',
     opponentOnline: 'Il est en ligne, devant l’échiquier.',
@@ -559,6 +568,8 @@ export const fr = {
   },
 
   myGames: {
+    yourUsernameOn: 'ton pseudo {service}',
+    usernameOn: 'Pseudo {service}',
     vsComputer: 'Contre l’ordinateur',
     local: 'À deux sur le même écran',
     vsSomeone: 'Contre quelqu’un',
@@ -574,6 +585,8 @@ export const fr = {
   },
 
   moveReport: {
+    analysingProgress: 'analyse {n}/{total}',
+    centipawnsLost: '{n} centipions perdus',
     title: 'Pertinence des coups',
     acplTitle: 'Perte moyenne par coup, en centipions : un pion en vaut cent.',
     hideDetail: 'Masquer le détail',
@@ -714,6 +727,9 @@ export const fr = {
   },
 
   verify: {
+    alreadyDoneText: 'L’adresse de {pseudo} était déjà confirmée. Rien à faire de plus.',
+    thanksText:
+      'Merci {pseudo}. Ton adresse pourra servir à retrouver ton mot de passe si tu le perds — et à rien d’autre.',
     incompleteLink: 'Ce lien est incomplet.',
     serverUnreachable: 'Le serveur est injoignable.',
     alreadyDone: 'C’était déjà fait',
@@ -742,6 +758,10 @@ export const fr = {
   },
 
   game: {
+    timeLeftOf: 'Temps restant de {nom}',
+    writesToYou: '{nom} t’écrit',
+    unreadMessages: '{n} messages non lus',
+    unreadMessagesOne: '{n} message non lu',
     yourTurn: 'À toi de jouer',
     opponentTurn: 'L’adversaire réfléchit…',
     thinking: 'Réflexion…',
@@ -822,6 +842,14 @@ export const fr = {
   },
 
   analysis: {
+    pgnPlaceholder: '1. e4 e5 2. Nf3 Nc6 3. Bb5 a6…\n\nou un PGN complet, ou une position FEN.',
+    doneServer: 'Analyse terminée (moteur serveur).',
+    doneBrowser: 'Analyse terminée (moteur navigateur).',
+    engineServer: 'Stockfish serveur',
+    engineBrowser: 'Stockfish navigateur',
+    hideWhy: 'Masquer',
+    why: 'Pourquoi ?',
+    winLossPoints: '−{n} pts',
     title: 'Analyse',
     pageTitle: 'Analyse expliquée',
     tagShort: 'Coup par coup, ce qui a basculé et le meilleur coup, expliqué.',
@@ -989,6 +1017,10 @@ export const fr = {
   },
 
   commentary: {
+    winChancesLost: ' · −{n} pts de chances de victoire',
+    best: 'meilleur',
+    listenWhy: 'Écouter pourquoi {coup}',
+    listenExplanationOf: 'Écouter l’explication de {coup}',
     playInstead: '{coup} — à jouer à la place',
     notReplayable: 'Ce coup ne se rejoue pas sur cette position.',
     notReplayableHint: 'Impossible de l’expliquer sans risquer d’inventer.',
@@ -1301,6 +1333,10 @@ export const fr = {
   },
 
   listen: {
+    stepHeader: 'étape {n} / {total}',
+    playing: 'en lecture',
+    paused: 'en pause',
+    stepOf: '{n} / {total} étapes',
     title: 'Écouter le programme',
     intro:
       'Le programme lu à voix haute, sans rien à toucher : le coach parle, l’échiquier suit, l’étape suivante arrive quand la phrase est finie. Pour réviser en faisant autre chose.',
@@ -1325,6 +1361,7 @@ export const fr = {
   },
 
   puzzles: {
+    solutionSpoken: 'La solution est {coup}',
     title: 'Puzzles',
     streakChip: 'série de {n}',
     subtitle: 'Six millions de positions tactiques, triées par thème et par niveau.',
@@ -1400,6 +1437,8 @@ export const fr = {
   },
 
   session: {
+    opponentLevel: '{elo} Elo · niveau {niveau}',
+    atThisTier: '{n} à ce palier',
     title: 'Séance pédagogique',
     countOne: '{n} séance',
     countMany: '{n} séances',
@@ -1424,6 +1463,8 @@ export const fr = {
   },
 
   rush: {
+    errorsOf: '{n} erreurs sur {max}',
+    errorsOfOne: '{n} erreur sur {max}',
     title: 'Manche chronométrée',
     whiteToPlay: 'Les Blancs jouent — trouve le coup, vite.',
     blackToPlay: 'Les Noirs jouent — trouve le coup, vite.',
@@ -1452,6 +1493,8 @@ export const fr = {
   },
 
   correspondence: {
+    daysLeft: '{n} j restants',
+    dayLeftOne: '{n} j restant',
     title: 'Correspondance',
     hint: 'Un coup quand tu peux. Personne n’attend devant son écran.',
     needsAccount: 'La correspondance demande un compte',
@@ -1477,6 +1520,9 @@ export const fr = {
   },
 
   endgames: {
+    configurations: '{n} configurations',
+    solvedOf: '{n} / {total} réussies',
+    drawHeld: 'Nulle tenue !',
     missingBase: 'Base de finales absente',
     source: 'Positions issues de {depot}, sous licence GPL-3.0.',
     missingBaseHint:
@@ -1515,6 +1561,7 @@ export const fr = {
   },
 
   clock: {
+    sideTime: '{camp} — {temps}',
     noMove: 'Aucun coup noté.',
     noMoveHint: 'Branche un échiquier électronique pour que la partie s’écrive.',
     intro:
@@ -1526,6 +1573,14 @@ export const fr = {
   },
 
   savedAnalyses: {
+    sourceLocal: 'Partie jouée ici',
+    sourceChesscom: 'Importée de Chess.com',
+    sourceLichess: 'Importée de Lichess',
+    sourcePgn: 'PGN collé',
+    depth: 'profondeur {n}',
+    accuracy: '{n} % de précision',
+    unshareAria: 'Retirer le partage de l’analyse {blancs} – {noirs}',
+    shareAria: 'Partager l’analyse {blancs} – {noirs}',
     title: 'Tes analyses',
     unshare: 'Retirer le partage : le lien cessera de fonctionner',
     share: 'Partager par un lien, sans compte requis',
@@ -1542,6 +1597,12 @@ export const fr = {
   },
 
   streak: {
+    days: '{n} jours',
+    dayOne: '{n} jour',
+    daysShort: '{n} j',
+    record: 'record : {n}',
+    inARow: '{n} jours d’affilée',
+    inARowOne: '{n} jour d’affilée',
     goToDaily: 'jours consécutifs — aller au défi du jour',
     seeStreak: 'jours consécutifs — voir ta série',
     streakOf: 'Série de {n}',
@@ -1610,6 +1671,11 @@ export const fr = {
   },
 
   openings: {
+    englishName: 'Nom anglais : {nom}',
+    movesCount: '{n} coups',
+    movesCountOne: '{n} coup',
+    gamesCount: '{n} parties',
+    moveGames: '{coup} — {n} parties',
     title: 'Ouvertures',
     subtitle: '3 810 ouvertures répertoriées, expliquées et jouables.',
     explorer: 'Explorateur',
@@ -1693,6 +1759,11 @@ export const fr = {
   },
 
   friends: {
+    declineRequestOf: 'Refuser la demande de {pseudo}',
+    nowFriends: '{pseudo} vous demandait aussi — vous voilà amis.',
+    requestSent: 'Demande envoyée à {pseudo}.',
+    watchGameOf: 'Regarder la partie de {pseudo} contre {adversaire}',
+    seeProfileOf: 'Voir le profil de {pseudo}',
     title: 'Mes amis',
     hint: 'Ajoute les gens avec qui tu joues, et lance une partie en un clic.',
     needsAccount: 'Le carnet demande un compte',
@@ -1762,6 +1833,8 @@ export const fr = {
   },
 
   profile: {
+    unavailable: 'Profil indisponible',
+    addressConfirmed: 'Adresse confirmée : {adresse}',
     title: 'Profil',
     rating: 'Classement',
     eloAndPeak: 'Elo {elo} · record {record}',
@@ -1827,6 +1900,8 @@ export const fr = {
   },
 
   stats: {
+    whatMeans: 'Ce que veut dire {mot}',
+    colourSplit: '{blancs} avec les Blancs, {noirs} avec les Noirs',
     title: 'Mes statistiques',
     hint: 'Sur tes {n} parties terminées.',
     needsAccount: 'Les statistiques demandent un compte',
@@ -2024,6 +2099,23 @@ export const fr = {
   },
 
   editor: {
+    // Le nom d'une pièce s'accorde à sa couleur : « Tour blanche », « Roi blanc ».
+    pieces: {
+      wp: 'Pion blanc',
+      wn: 'Cavalier blanc',
+      wb: 'Fou blanc',
+      wr: 'Tour blanche',
+      wq: 'Dame blanche',
+      wk: 'Roi blanc',
+      bp: 'Pion noir',
+      bn: 'Cavalier noir',
+      bb: 'Fou noir',
+      br: 'Tour noire',
+      bq: 'Dame noire',
+      bk: 'Roi noir',
+    },
+    legalMoves: '{n} coups légaux.',
+    legalMovesOne: '{n} coup légal.',
     title: 'Éditeur de position',
     hint: 'Reproduis une position vue ailleurs, puis analyse-la ou joue-la.',
     needAKing: 'Il faut un roi de chaque couleur.',
@@ -2039,6 +2131,7 @@ export const fr = {
   },
 
   board: {
+    arrowExplanation: 'Explication du coup {coup}',
     title: 'Échiquier électronique',
     hint: 'Jouez sur votre plateau, la partie suit.',
     connect: 'Brancher un échiquier électronique',
@@ -2057,6 +2150,7 @@ export const fr = {
   },
 
   explain: {
+    seeOnBoard: 'Voir « {terme} » sur l’échiquier',
     noExplanation:
       'Pas d’explication pour « {cle} » — c’est un cas que l’application ne sait pas encore nommer.',
     yourGamesBefore: 'Tes parties :',
@@ -2078,6 +2172,10 @@ export const fr = {
   },
 
   homeIn: {
+    chapterOf: 'chapitre {n} / {total}',
+    seeAll: 'tout voir',
+    anOpponent: 'un adversaire',
+    whiteVsBlack: '{blancs} — {noirs}',
     won: 'Gagnée',
     lost: 'Perdue',
     seeTheMap: 'Voir la carte',
@@ -2105,6 +2203,7 @@ export const fr = {
   },
 
   daily: {
+    pointsOf: '{n} / {total} points',
     title: 'Aujourd’hui',
     questsDone:
       '{faites} quêtes sur {total} · {xp} / {max} points · la prochaine position arrive à minuit',
@@ -2345,6 +2444,8 @@ export const fr = {
   },
 
   draw: {
+    // Des prénoms d'exemple : chaque langue prend les siens.
+    namesPlaceholder: 'Alice\nBernard\nChloé\nDavid',
     title: 'Tirage au sort',
     intro:
       'Les couleurs d’une partie, les paires d’une ronde, l’ordre de passage. Un tirage que tout le monde voit, et personne ne conteste.',
@@ -2419,6 +2520,8 @@ export const fr = {
   },
 
   studies: {
+    noChapterShort: 'Aucun chapitre',
+    defaultChapterTitle: 'Chapitre {n}',
     title: 'Mes études',
     hint: 'Range des positions commentées : tes ouvertures, une partie à comprendre, un thème de finale.',
     needsAccount: 'Les études demandent un compte',
@@ -2478,6 +2581,7 @@ export const fr = {
   },
 
   tournament: {
+    streakDoubled: '{n} victoires d’affilée — ses points sont doublés',
     notFound: 'Arène introuvable',
     arenaLine: '{cadence} · {duree} min d’arène · {debut}',
     notFoundHint: 'Elle n’existe pas, ou son adresse est incomplète.',
@@ -2498,6 +2602,14 @@ export const fr = {
   },
 
   watch: {
+    freeSeatName: 'place libre',
+    versusWord: 'contre',
+    yourFriend: 'ton ami',
+    join: 'rejoindre',
+    spectators: '{n} personnes regardent',
+    spectatorsOne: '{n} personne regarde',
+    secondsAgo: 'il y a {n} s',
+    minutesAgo: 'il y a {n} min',
     intro:
       'Les parties en cours, celles qui cherchent un adversaire, et ce que tes amis jouent contre l’ordinateur.',
     backToLiveOne: 'Revenir au direct — {n} coup de retard',
@@ -2607,6 +2719,10 @@ export const fr = {
   },
 
   quests: {
+    left: 'Il te reste {n} quêtes aujourd’hui.',
+    leftOne: 'Il te reste {n} quête aujourd’hui.',
+    doneToast: '+{xp} points',
+    doneToastStreak: '+{xp} points · série de {jours}',
     daily: 'Résoudre le défi du jour',
     dailyAction: 'Chercher le coup',
     play: 'Jouer une partie',
@@ -2617,6 +2733,7 @@ export const fr = {
   },
 
   last: {
+    inProgress: '{n} en cours',
     hide: 'Réduire',
     lastMoveSecondsAgo: 'dernier coup il y a {n} s',
     lastMoveMinutesAgo: 'dernier coup il y a {n} min',
@@ -6689,6 +6806,7 @@ export const fr = {
     reference: 'Référence de l’incident :',
   },
   bits: {
+    challengeFrom: '{pseudo} te propose une partie',
     unrecognisedFormat: 'Format non reconnu',
     paste: 'Coller',
     asImage: 'Image',
@@ -6738,6 +6856,7 @@ export const fr = {
     hide: 'Masquer',
   },
   rest: {
+    boardFixSquares: 'À corriger sur le plateau : {cases}.',
     immortal0:
       'Le gambit du roi : les Blancs offrent un pion pour ouvrir des lignes vers le roi adverse.',
     immortal1:
@@ -6957,6 +7076,8 @@ export const fr = {
   },
 
   admin: {
+    gigabytes: '{n} Go',
+    hourOfDay: '{n} h',
     title: 'Administration',
     blurb:
       'Ce que tu fais ici s’applique à de vraies personnes. Les actes irréversibles demandent d’écrire le pseudo, et tous sont consignés dans le journal.',
@@ -7303,6 +7424,27 @@ export const fr = {
     iaNoProvider: 'Aucun fournisseur configuré.',
   },
   common: {
+    moveNumber: 'Coup {n}',
+    moveNumberLower: 'coup {n}',
+    by: 'par {nom}',
+    to: 'à {adresse}',
+    assistant: 'Assistant',
+    evaluation: 'Évaluation : {valeur}',
+    ultraBullet: 'Ultra-bullet',
+    minutes: '{n} min',
+    minutesPlusSeconds: '{min} min + {s} s',
+    seconds: '{n} s',
+    gamesShort: '{n} p.',
+    white: 'Blancs',
+    black: 'Noirs',
+    // Les catégories de classement, par identifiant de `SpeedCategory`.
+    bullet: 'Bullet',
+    blitz: 'Blitz',
+    rapid: 'Rapide',
+    classical: 'Classique',
+    correspondence: 'Correspondance',
+    puzzle: 'Puzzles',
+    versus: 'contre {nom}',
     loading: 'Chargement…',
     error: 'Erreur',
     retry: 'Réessayer',

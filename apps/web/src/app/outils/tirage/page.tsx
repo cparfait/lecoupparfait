@@ -197,7 +197,7 @@ export default function TiragePage() {
               setPaires(null)
               setOrdre(null)
             }}
-            placeholder={'Alice\nBernard\nChloé\nDavid'}
+            placeholder={t('draw.namesPlaceholder')}
             className="w-full resize-y rounded-[var(--radius-sm)] border border-line bg-surface px-3.5 py-2.5 text-sm leading-relaxed placeholder:text-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--accent)_35%,transparent)]"
           />
           <p className="mt-1.5 text-xs text-faint">

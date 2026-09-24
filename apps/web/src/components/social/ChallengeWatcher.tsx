@@ -35,7 +35,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { Check, Swords, X } from 'lucide-react'
-import { SPEED_LABELS, speedCategory } from '@coupparfait/core'
+import { speedCategory } from '@coupparfait/core'
 import { playSound } from '@/lib/sound.ts'
 import { Alerte } from '@/components/ui/Alerte.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
@@ -226,11 +226,13 @@ export function ChallengeWatcher() {
         <div className="min-w-0 flex-1">
           <p className="text-[12px] font-bold text-accent">{t('bits.invitation')}</p>
           <p className="text-sm font-semibold leading-snug">
-            {challenge.from.username} te propose une partie
+            {t('bits.challengeFrom', { pseudo: challenge.from.username })}
           </p>
           <p className="mt-0.5 text-[12px] text-muted">
-            {minutes} min{challenge.increment > 0 ? ` + ${challenge.increment} s` : ''} ·{' '}
-            {SPEED_LABELS[speed]?.fr ?? speed}
+            {challenge.increment > 0
+              ? t('common.minutesPlusSeconds', { min: minutes, s: challenge.increment })
+              : t('common.minutes', { n: minutes })}{' '}
+            · {t(`common.${speed}`)}
             {challenge.rated ? t('last.ratedShort') : ''}
           </p>
           {/* Accepter quitte l'échiquier en cours — la pendule, elle, continue

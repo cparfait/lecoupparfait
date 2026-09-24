@@ -124,7 +124,9 @@ export default function MailboxPage() {
             <Card key={mail.id} className="overflow-hidden">
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-line/60 px-4 py-2.5">
                 <span className="font-semibold">{mail.subject}</span>
-                <span className="text-[14px] text-muted">à {mail.to}</span>
+                <span className="text-[14px] text-muted">
+                  {t('common.to', { adresse: mail.to })}
+                </span>
                 <span className="ml-auto text-[12px] tabular-nums text-faint">
                   {new Date(mail.sentAt).toLocaleString('fr-FR')}
                 </span>

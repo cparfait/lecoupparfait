@@ -98,7 +98,7 @@ export function QueteTerminee({
         <p className="mt-3 text-[14px] leading-relaxed text-muted">
           {restantes === 0
             ? t('misc.allQuestsDone')
-            : `Il te reste ${restantes} quête${restantes > 1 ? 's' : ''} aujourd’hui.`}
+            : t(restantes > 1 ? 'quests.left' : 'quests.leftOne', { n: restantes })}
         </p>
 
         <div className="mt-6 space-y-2">

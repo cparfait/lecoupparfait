@@ -56,7 +56,8 @@ function remaining(deadline: string | null, t: ReturnType<typeof useT>): string 
   if (ms <= 0) return t('correspondence.overdue')
   const hours = Math.round(ms / 3600_000)
   if (hours < 24) return t('correspondence.hoursLeft', { n: hours })
-  return `${Math.round(hours / 24)} j restants`
+  const jours = Math.round(hours / 24)
+  return t(jours > 1 ? 'correspondence.daysLeft' : 'correspondence.dayLeftOne', { n: jours })
 }
 
 export default function CorrespondencePage() {

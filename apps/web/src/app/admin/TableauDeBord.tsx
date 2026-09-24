@@ -72,12 +72,11 @@ const MODES: Record<string, TranslationKey> = {
   correspondence: 'admin.modeCorrespondence',
 }
 
-// Bullet, blitz et Elo ne se traduisent pas : ce sont les mots du jeu, repris
-// tels quels dans toutes les langues. Seuls « rapide » et « classique » sont des
-// adjectifs ordinaires, et seuls ceux-là ont une clé.
+// « Bullet » et « blitz » s'écrivent de même dans presque toutes les langues,
+// mais passent aussi par le dictionnaire : c'est lui qui en décide, pas l'écran.
 const CADENCES: Record<string, TranslationKey | string> = {
-  bullet: 'Bullet',
-  blitz: 'Blitz',
+  bullet: 'common.bullet',
+  blitz: 'common.blitz',
   rapid: 'admin.paceRapid',
   classical: 'admin.paceClassical',
   correspondence: 'admin.modeCorrespondence',
@@ -191,7 +190,7 @@ function Activite({ stats }: { stats: Statistiques }) {
           valeur={
             stats.puzzles.tempsMedian == null
               ? '—'
-              : `${(stats.puzzles.tempsMedian / 1000).toFixed(1)} s`
+              : t('common.seconds', { n: (stats.puzzles.tempsMedian / 1000).toFixed(1) })
           }
           note={t('admin.distinctPlayers', { n: nombre(stats.puzzles.joueurs) })}
         />
@@ -268,7 +267,7 @@ function Usage({ stats }: { stats: Statistiques }) {
         <SectionTitle hint={t('admin.hoursHint')}>{t('admin.hours')}</SectionTitle>
         <Histogramme
           valeurs={stats.heures}
-          etiquette={(heure) => `${String(heure).padStart(2, '0')} h`}
+          etiquette={(heure) => t('admin.hourOfDay', { n: String(heure).padStart(2, '0') })}
         />
       </Card>
     </div>

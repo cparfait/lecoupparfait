@@ -24,7 +24,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import clsx from 'clsx'
-import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
+import { avecElements, langue, useI18n, useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
 import { SPEED_LABELS, ratingTitle } from '@coupparfait/core'
 import { Button, Card, Chip, EmptyState, Skeleton } from '@/components/ui/index.tsx'
@@ -85,13 +85,19 @@ interface Profile {
  */
 const PARTIES_VISIBLES = 3
 
-const CATEGORY_LABELS: Record<string, string> = {
-  bullet: 'Bullet',
-  blitz: 'Blitz',
-  rapid: 'Rapide',
-  classical: 'Classique',
-  correspondence: 'Correspondance',
-  puzzle: 'Puzzles',
+/** Les catégories de classement, en clés : voir `common`. */
+const CATEGORY_LABELS: Record<string, TranslationKey> = {
+  bullet: 'common.bullet',
+  blitz: 'common.blitz',
+  rapid: 'common.rapid',
+  classical: 'common.classical',
+  correspondence: 'common.correspondence',
+  puzzle: 'common.puzzle',
+}
+
+function libelleDeCategorie(t: ReturnType<typeof useT>, categorie: string): string {
+  const cle = CATEGORY_LABELS[categorie]
+  return cle ? t(cle) : categorie
 }
 
 export default function ProfilePage() {
@@ -235,7 +241,7 @@ export default function ProfilePage() {
       <div className="mx-auto max-w-md px-4 py-20">
         <Card>
           <EmptyState
-            title={notFound ? 'Joueur introuvable' : 'Profil indisponible'}
+            title={t(notFound ? 'api.playerNotFound' : 'profile.unavailable')}
             description={
               notFound
                 ? t('profile.noSuchAccount', { pseudo: params.username })
@@ -349,7 +355,7 @@ export default function ProfilePage() {
                     {SPEED_LABELS[rating.category as keyof typeof SPEED_LABELS]?.icon}
                   </span>
                 )}
-                {CATEGORY_LABELS[rating.category] ?? rating.category}
+                {libelleDeCategorie(t, rating.category)}
               </p>
               <p className="mt-1 font-display text-2xl font-bold tabular-nums">
                 {rating.rating}
@@ -448,24 +454,25 @@ export default function ProfilePage() {
                         ? 'bg-[var(--eval-white)]'
                         : 'bg-[var(--eval-black)] ring-1 ring-line',
                     )}
-                    aria-label={game.colour === 'w' ? 'Blancs' : 'Noirs'}
+                    aria-label={t(game.colour === 'w' ? 'common.white' : 'common.black')}
                   />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm">
-                      contre{' '}
                       {/* Le nom mène au profil quand il y en a un. Une
                           personnalité de l'ordinateur n'en a pas : un lien
                           vers elle n'annoncerait qu'un « joueur introuvable ». */}
-                      {game.opponentIsMember ? (
-                        <Link
-                          href={`/profil/${encodeURIComponent(game.opponent)}`}
-                          className="font-semibold transition-colors hover:text-accent hover:underline"
-                        >
-                          {game.opponent}
-                        </Link>
-                      ) : (
-                        <strong className="font-semibold">{game.opponent}</strong>
-                      )}
+                      {avecElements(t('common.versus'), {
+                        nom: game.opponentIsMember ? (
+                          <Link
+                            href={`/profil/${encodeURIComponent(game.opponent)}`}
+                            className="font-semibold transition-colors hover:text-accent hover:underline"
+                          >
+                            {game.opponent}
+                          </Link>
+                        ) : (
+                          <strong className="font-semibold">{game.opponent}</strong>
+                        ),
+                      })}
                     </span>
                     <span className="block truncate text-[12px] text-faint">
                       {game.opening ?? t('profile.unlistedOpening')} ·{' '}
@@ -685,7 +692,7 @@ function RatingChart({ history }: { history: Profile['history'] }) {
                   : 'text-muted hover:bg-surface-hover',
               )}
             >
-              {CATEGORY_LABELS[entree.categorie] ?? entree.categorie}
+              {libelleDeCategorie(t, entree.categorie)}
             </button>
           ))}
         </div>
@@ -720,7 +727,7 @@ function RatingChart({ history }: { history: Profile['history'] }) {
         className="h-auto w-full"
         role="img"
         aria-label={t('rest.ratingCurveAria', {
-          categorie: CATEGORY_LABELS[serie.categorie] ?? serie.categorie,
+          categorie: libelleDeCategorie(t, serie.categorie),
           depart,
           arrivee,
           parties: valeurs.length,
@@ -862,7 +869,7 @@ function EmailStatus({ email }: { email: { email: string | null; verified: boole
     return (
       <p className="mt-4 flex items-center gap-1.5 border-t border-line/60 pt-4 text-xs text-faint">
         <MailCheck size={13} className="text-[var(--q-best)]" aria-hidden />
-        Adresse confirmée : {email.email}
+        {t('profile.addressConfirmed', { adresse: email.email ?? '' })}
       </p>
     )
   }

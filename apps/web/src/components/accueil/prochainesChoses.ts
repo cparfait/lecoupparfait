@@ -137,7 +137,7 @@ export function prochainesChoses(etat: EtatAccueil, t: ReturnType<typeof useT>):
   if (etat.correspondances > 0) {
     liste.push({
       id: 'correspondance',
-      categorie: 'Correspondance',
+      categorie: t('common.correspondence'),
       titre:
         etat.correspondances > 1
           ? t('next.gamesWaiting', { n: etat.correspondances })
@@ -194,8 +194,7 @@ export function prochainesChoses(etat: EtatAccueil, t: ReturnType<typeof useT>):
       categorie: t('next.dailyChallenge'),
       titre: t('next.onePositionOnly'),
       detail:
-        `La même pour tout le monde de ton niveau, et elle vaut ${quetePar('defi')?.xp ?? 0} des ` +
-        `${etat.quetes.total} points du jour. ` +
+        t('next.dailyWorth', { xp: quetePar('defi')?.xp ?? 0, total: etat.quetes.total }) +
         (restantes > 0
           ? t(restantes > 1 ? 'next.otherQuestsWait' : 'next.oneOtherQuestWaits', { n: restantes })
           : t('next.lastQuest')),
@@ -231,7 +230,7 @@ export function prochainesChoses(etat: EtatAccueil, t: ReturnType<typeof useT>):
   if (etat.carriere) {
     liste.push({
       id: 'carriere',
-      categorie: `Carrière · chapitre ${etat.carriere.numero}`,
+      categorie: t('next.careerChapter', { n: etat.carriere.numero }),
       titre: etat.carriere.chapitre,
       detail: t('next.careerResumes'),
       action: etat.carriere.libelle,

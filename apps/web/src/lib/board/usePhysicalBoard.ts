@@ -173,7 +173,7 @@ export function usePhysicalBoard(options: UsePhysicalBoardOptions): PhysicalBoar
         setMessage(
           match.squares.length > 6
             ? t('rest.boardMismatch')
-            : `À corriger sur le plateau : ${match.squares.join(', ')}.`,
+            : t('rest.boardFixSquares', { cases: match.squares.join(', ') }),
         )
         showLights(match.squares)
         return

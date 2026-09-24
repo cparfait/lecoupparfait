@@ -190,10 +190,10 @@ function FamilyList({
               <span className="min-w-0 flex-1">
                 <span className="flex flex-wrap items-baseline gap-2">
                   <span className="font-display text-base font-semibold">{family.nameFr}</span>
-                  <Chip>{family.groups.length} configurations</Chip>
+                  <Chip>{t('endgames.configurations', { n: family.groups.length })}</Chip>
                   {stats.solved > 0 && (
                     <span className="text-xs tabular-nums text-accent">
-                      {stats.solved} / {stats.total} réussies
+                      {t('endgames.solvedOf', { n: stats.solved, total: stats.total })}
                     </span>
                   )}
                 </span>
@@ -566,7 +566,7 @@ function EndgameTrainer({
                     {outcome === 'won'
                       ? t('endgames.won')
                       : outcome === 'drawn'
-                        ? 'Nulle tenue !'
+                        ? t('endgames.drawHeld')
                         : t(position.target === 'checkmate' ? 'endgames.missed' : 'endgames.lost')}
                   </p>
                   <p className="mt-1 text-[14px] leading-relaxed text-muted">

@@ -275,9 +275,7 @@ function ImportScreen({
       })
       onDone(result)
       marquer('analyse')
-      toast.success(
-        `Analyse terminée (${result.source === 'server' ? 'moteur serveur' : 'moteur navigateur'}).`,
-      )
+      toast.success(t(result.source === 'server' ? 'analysis.doneServer' : 'analysis.doneBrowser'))
 
       /*
         On range l'analyse sans le demander, et sans attendre.
@@ -567,9 +565,7 @@ function ImportScreen({
               onChange={(event) => setInput(event.target.value)}
               rows={8}
               spellCheck={false}
-              placeholder={
-                '1. e4 e5 2. Nf3 Nc6 3. Bb5 a6…\n\nou un PGN complet, ou une position FEN.'
-              }
+              placeholder={t('analysis.pgnPlaceholder')}
               className="w-full resize-y rounded-[var(--radius-sm)] border border-line bg-surface p-3 font-mono text-[14px] leading-relaxed placeholder:text-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--accent)_30%,transparent)]"
             />
 
@@ -1371,7 +1367,7 @@ export function ReviewScreen({
         >
           <Chip tone="accent">
             <Sparkles size={11} aria-hidden />
-            {source === 'server' ? 'Stockfish serveur' : 'Stockfish navigateur'}
+            {t(source === 'server' ? 'analysis.engineServer' : 'analysis.engineBrowser')}
           </Chip>
           {report.opening && (
             <Chip>
@@ -1684,7 +1680,7 @@ export function ReviewScreen({
                             aria-expanded={pourquoiOuvert}
                             className="text-[12px] font-semibold text-accent transition-colors hover:underline"
                           >
-                            {pourquoiOuvert ? 'Masquer' : 'Pourquoi ?'}
+                            {t(pourquoiOuvert ? 'analysis.hideWhy' : 'analysis.why')}
                           </button>
                           {/* Lire « Cf3 Cc6 d4 exd4 » suppose de déplacer les
                             pièces dans sa tête. On les déplace pour de vrai. */}
@@ -1966,7 +1962,9 @@ function AccuracySummary({
                     aria-hidden
                   />
                   {rang === 0 && (
-                    <span className="min-w-0 flex-1 truncate">{noms[colour] ?? 'Blancs'}</span>
+                    <span className="min-w-0 flex-1 truncate">
+                      {noms[colour] ?? t('common.white')}
+                    </span>
                   )}
                 </p>
                 <p className="mt-0.5 font-display text-2xl font-bold tabular-nums leading-none">
@@ -2085,7 +2083,7 @@ function KeyMoments({
               </span>
               {meriteUnMeilleurCoup(move.quality, move.winLoss) && (
                 <span className="w-14 shrink-0 text-right text-[12px] tabular-nums text-faint">
-                  −{move.winLoss.toFixed(0)} pts
+                  {t('analysis.winLossPoints', { n: move.winLoss.toFixed(0) })}
                 </span>
               )}
             </button>
@@ -2141,10 +2139,12 @@ function PlayerReport({
             )}
             aria-hidden
           />
-          <span className="truncate">{nom ?? (colour === 'w' ? 'Blancs' : 'Noirs')}</span>
+          <span className="truncate">
+            {nom ?? t(colour === 'w' ? 'common.white' : 'common.black')}
+          </span>
           {nom && (
             <span className="shrink-0 text-xs font-normal text-faint">
-              {colour === 'w' ? 'Blancs' : 'Noirs'}
+              {t(colour === 'w' ? 'common.white' : 'common.black')}
             </span>
           )}
           {/*

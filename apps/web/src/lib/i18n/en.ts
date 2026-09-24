@@ -24,6 +24,7 @@ export const en: Dictionary = {
   },
 
   nav: {
+    restOfSection: 'The rest of the {rubrique} section',
     home: 'Home',
     play: 'Play',
     career: 'Career',
@@ -116,6 +117,8 @@ export const en: Dictionary = {
   },
 
   home: {
+    statsLevels: 'opponent levels, from {min} to {max} Elo',
+    statsTablebase: 'pieces: endgames solved perfectly',
     heroTitle: 'Chess, finally explained.',
     heroSubtitle:
       'An engine that does not just tell you the move, but **why**. A voice that guides you. And zero euros, forever.',
@@ -159,6 +162,7 @@ export const en: Dictionary = {
   },
 
   opponent: {
+    levelBadge: '≈ {elo} · no. {niveau}',
     notFound: 'Opponent not found',
     metaTitle: '{nom} — artificial opponent',
     all: 'All the opponents',
@@ -475,6 +479,8 @@ export const en: Dictionary = {
   },
 
   vision: {
+    mistakes: '{n} mistakes',
+    mistakesOne: '{n} mistake',
     intro:
       'A square is announced, you click it. Thirty seconds. As long as you have to think to find “f6”, that time is taken from calculating — it is the most profitable reflex to build when starting out.',
     foundAndAccuracy: 'squares found · {taux}% accuracy',
@@ -491,6 +497,9 @@ export const en: Dictionary = {
   },
 
   next: {
+    dailyWorth:
+      'The same for everyone at your level, and it is worth {xp} of the day’s {total} points. ',
+    careerChapter: 'Career · chapter {n}',
     someoneWaits: 'Someone is waiting for you',
     yourTurnAgainst: 'It is your move against {adversaire}',
     opponentOnline: 'They are online, at the board.',
@@ -549,6 +558,8 @@ export const en: Dictionary = {
   },
 
   myGames: {
+    yourUsernameOn: 'your {service} username',
+    usernameOn: '{service} username',
     vsComputer: 'Against the computer',
     local: 'Two of you on one screen',
     vsSomeone: 'Against someone',
@@ -564,6 +575,8 @@ export const en: Dictionary = {
   },
 
   moveReport: {
+    analysingProgress: 'analysis {n}/{total}',
+    centipawnsLost: '{n} centipawns lost',
     title: 'Move quality',
     acplTitle: 'Average loss per move, in centipawns: a pawn is worth a hundred.',
     hideDetail: 'Hide the detail',
@@ -696,6 +709,9 @@ export const en: Dictionary = {
   },
 
   verify: {
+    alreadyDoneText: '{pseudo}’s address was already confirmed. Nothing more to do.',
+    thanksText:
+      'Thank you {pseudo}. Your address can be used to recover your password if you lose it — and for nothing else.',
     incompleteLink: 'This link is incomplete.',
     serverUnreachable: 'The server is unreachable.',
     alreadyDone: 'It was already done',
@@ -724,6 +740,10 @@ export const en: Dictionary = {
   },
 
   game: {
+    timeLeftOf: 'Time left for {nom}',
+    writesToYou: '{nom} writes to you',
+    unreadMessages: '{n} unread messages',
+    unreadMessagesOne: '{n} unread message',
     yourTurn: 'Your turn',
     opponentTurn: 'Opponent is thinking…',
     thinking: 'Thinking…',
@@ -804,6 +824,14 @@ export const en: Dictionary = {
   },
 
   analysis: {
+    pgnPlaceholder: '1. e4 e5 2. Nf3 Nc6 3. Bb5 a6…\n\nor a full PGN, or a FEN position.',
+    doneServer: 'Analysis finished (server engine).',
+    doneBrowser: 'Analysis finished (browser engine).',
+    engineServer: 'Stockfish on the server',
+    engineBrowser: 'Stockfish in the browser',
+    hideWhy: 'Hide',
+    why: 'Why?',
+    winLossPoints: '−{n} pts',
     title: 'Analysis',
     pageTitle: 'Analysis, explained',
     tagShort: 'Move by move, what turned and the best move, explained.',
@@ -966,6 +994,10 @@ export const en: Dictionary = {
   },
 
   commentary: {
+    winChancesLost: ' · −{n} pts of winning chances',
+    best: 'best',
+    listenWhy: 'Listen to why {coup}',
+    listenExplanationOf: 'Listen to the explanation of {coup}',
     playInstead: '{coup} — play this instead',
     notReplayable: 'That move cannot be replayed on this position.',
     notReplayableHint: 'Explaining it would risk making things up.',
@@ -1278,6 +1310,10 @@ export const en: Dictionary = {
   },
 
   listen: {
+    stepHeader: 'step {n} / {total}',
+    playing: 'playing',
+    paused: 'paused',
+    stepOf: 'step {n} / {total}',
     title: 'Listen to the curriculum',
     intro:
       'The curriculum read out loud, with nothing to touch: the coach speaks, the board follows, the next step comes when the sentence ends. For revising while doing something else.',
@@ -1301,6 +1337,7 @@ export const en: Dictionary = {
   },
 
   puzzles: {
+    solutionSpoken: 'The solution is {coup}',
     title: 'Puzzles',
     streakChip: 'streak of {n}',
     subtitle: 'Six million tactical positions, sorted by theme and rating.',
@@ -1376,6 +1413,8 @@ export const en: Dictionary = {
   },
 
   session: {
+    opponentLevel: '{elo} Elo · level {niveau}',
+    atThisTier: '{n} at this tier',
     title: 'Coaching session',
     countOne: '{n} session',
     countMany: '{n} sessions',
@@ -1400,6 +1439,8 @@ export const en: Dictionary = {
   },
 
   rush: {
+    errorsOf: '{n} mistakes out of {max}',
+    errorsOfOne: '{n} mistake out of {max}',
     title: 'Timed run',
     whiteToPlay: 'White to play — find the move, fast.',
     blackToPlay: 'Black to play — find the move, fast.',
@@ -1428,6 +1469,8 @@ export const en: Dictionary = {
   },
 
   correspondence: {
+    daysLeft: '{n} days left',
+    dayLeftOne: '{n} day left',
     title: 'Correspondence',
     hint: 'A move whenever you can. Nobody waits in front of a screen.',
     needsAccount: 'Correspondence requires an account',
@@ -1453,6 +1496,9 @@ export const en: Dictionary = {
   },
 
   endgames: {
+    configurations: '{n} configurations',
+    solvedOf: '{n} / {total} solved',
+    drawHeld: 'Draw held!',
     missingBase: 'Endgame database missing',
     source: 'Positions taken from {depot}, under the GPL-3.0 licence.',
     missingBaseHint: 'The position file was not found. Run the build from the repository.',
@@ -1490,6 +1536,7 @@ export const en: Dictionary = {
   },
 
   clock: {
+    sideTime: '{camp} — {temps}',
     noMove: 'No move recorded.',
     noMoveHint: 'Connect an electronic board so the game writes itself.',
     intro:
@@ -1501,6 +1548,14 @@ export const en: Dictionary = {
   },
 
   savedAnalyses: {
+    sourceLocal: 'Game played here',
+    sourceChesscom: 'Imported from Chess.com',
+    sourceLichess: 'Imported from Lichess',
+    sourcePgn: 'Pasted PGN',
+    depth: 'depth {n}',
+    accuracy: '{n}% accuracy',
+    unshareAria: 'Stop sharing the analysis {blancs} – {noirs}',
+    shareAria: 'Share the analysis {blancs} – {noirs}',
     title: 'Your analyses',
     unshare: 'Withdraw sharing: the link will stop working',
     share: 'Share by a link, no account required',
@@ -1517,6 +1572,12 @@ export const en: Dictionary = {
   },
 
   streak: {
+    days: '{n} days',
+    dayOne: '{n} day',
+    daysShort: '{n} d',
+    record: 'best: {n}',
+    inARow: '{n} days in a row',
+    inARowOne: '{n} day in a row',
     goToDaily: 'days in a row — go to the daily challenge',
     seeStreak: 'days in a row — see your streak',
     streakOf: 'Streak of {n}',
@@ -1585,6 +1646,11 @@ export const en: Dictionary = {
   },
 
   openings: {
+    englishName: 'English name: {nom}',
+    movesCount: '{n} moves',
+    movesCountOne: '{n} move',
+    gamesCount: '{n} games',
+    moveGames: '{coup} — {n} games',
     title: 'Openings',
     subtitle: '3,810 openings catalogued, explained and playable.',
     explorer: 'Explorer',
@@ -1667,6 +1733,11 @@ export const en: Dictionary = {
   },
 
   friends: {
+    declineRequestOf: 'Decline {pseudo}’s request',
+    nowFriends: '{pseudo} had asked you too — you are now friends.',
+    requestSent: 'Request sent to {pseudo}.',
+    watchGameOf: 'Watch {pseudo}’s game against {adversaire}',
+    seeProfileOf: 'See {pseudo}’s profile',
     title: 'My friends',
     hint: 'Add the people you play with, and start a game in one click.',
     needsAccount: 'The book requires an account',
@@ -1736,6 +1807,8 @@ export const en: Dictionary = {
   },
 
   profile: {
+    unavailable: 'Profile unavailable',
+    addressConfirmed: 'Address confirmed: {adresse}',
     title: 'Profile',
     rating: 'Rating',
     eloAndPeak: 'Elo {elo} · peak {record}',
@@ -1799,6 +1872,8 @@ export const en: Dictionary = {
   },
 
   stats: {
+    whatMeans: 'What {mot} means',
+    colourSplit: '{blancs} with White, {noirs} with Black',
     title: 'My statistics',
     hint: 'Over your {n} finished games.',
     needsAccount: 'Statistics require an account',
@@ -1994,6 +2069,22 @@ export const en: Dictionary = {
   },
 
   editor: {
+    pieces: {
+      wp: 'White pawn',
+      wn: 'White knight',
+      wb: 'White bishop',
+      wr: 'White rook',
+      wq: 'White queen',
+      wk: 'White king',
+      bp: 'Black pawn',
+      bn: 'Black knight',
+      bb: 'Black bishop',
+      br: 'Black rook',
+      bq: 'Black queen',
+      bk: 'Black king',
+    },
+    legalMoves: '{n} legal moves.',
+    legalMovesOne: '{n} legal move.',
     title: 'Position editor',
     hint: 'Reproduce a position you saw elsewhere, then analyse it or play it.',
     needAKing: 'There must be a king of each colour.',
@@ -2009,6 +2100,7 @@ export const en: Dictionary = {
   },
 
   board: {
+    arrowExplanation: 'Explanation of the move {coup}',
     title: 'Electronic board',
     hint: 'Play on your own board, the game follows.',
     connect: 'Connect an electronic board',
@@ -2027,6 +2119,7 @@ export const en: Dictionary = {
   },
 
   explain: {
+    seeOnBoard: 'See “{terme}” on the board',
     noExplanation: 'No explanation for “{cle}” — a case the app cannot name yet.',
     yourGamesBefore: 'Your games:',
     yourGamesAfter: ', for',
@@ -2046,6 +2139,10 @@ export const en: Dictionary = {
   },
 
   homeIn: {
+    chapterOf: 'chapter {n} / {total}',
+    seeAll: 'see all',
+    anOpponent: 'an opponent',
+    whiteVsBlack: '{blancs} — {noirs}',
     won: 'Won',
     lost: 'Lost',
     seeTheMap: 'See the map',
@@ -2072,6 +2169,7 @@ export const en: Dictionary = {
   },
 
   daily: {
+    pointsOf: '{n} / {total} points',
     title: 'Today',
     questsDone:
       '{faites} quests of {total} · {xp} / {max} points · the next position arrives at midnight',
@@ -2308,6 +2406,7 @@ export const en: Dictionary = {
   },
 
   draw: {
+    namesPlaceholder: 'Alice\nBob\nCarol\nDavid',
     title: 'Random draw',
     intro:
       'The colours of a game, the pairings of a round, the running order. A draw everyone can see, and nobody disputes.',
@@ -2382,6 +2481,8 @@ export const en: Dictionary = {
   },
 
   studies: {
+    noChapterShort: 'No chapter',
+    defaultChapterTitle: 'Chapter {n}',
     title: 'My studies',
     hint: 'Keep annotated positions: your openings, a game to understand, an endgame theme.',
     needsAccount: 'Studies require an account',
@@ -2441,6 +2542,7 @@ export const en: Dictionary = {
   },
 
   tournament: {
+    streakDoubled: '{n} wins in a row — their points are doubled',
     notFound: 'Arena not found',
     arenaLine: '{cadence} · {duree}-min arena · {debut}',
     notFoundHint: 'It does not exist, or its address is incomplete.',
@@ -2461,6 +2563,14 @@ export const en: Dictionary = {
   },
 
   watch: {
+    freeSeatName: 'open seat',
+    versusWord: 'vs',
+    yourFriend: 'your friend',
+    join: 'join',
+    spectators: '{n} people watching',
+    spectatorsOne: '{n} person watching',
+    secondsAgo: '{n} s ago',
+    minutesAgo: '{n} min ago',
     intro:
       'Games in progress, those looking for an opponent, and what your friends are playing against the computer.',
     backToLiveOne: 'Back to live — {n} move behind',
@@ -2566,6 +2676,10 @@ export const en: Dictionary = {
   },
 
   quests: {
+    left: 'You have {n} quests left today.',
+    leftOne: 'You have {n} quest left today.',
+    doneToast: '+{xp} points',
+    doneToastStreak: '+{xp} points · {jours} streak',
     daily: 'Solve the daily challenge',
     dailyAction: 'Find the move',
     play: 'Play a game',
@@ -2576,6 +2690,7 @@ export const en: Dictionary = {
   },
 
   last: {
+    inProgress: '{n} in progress',
     hide: 'Collapse',
     lastMoveSecondsAgo: 'last move {n} s ago',
     lastMoveMinutesAgo: 'last move {n} min ago',
@@ -6647,6 +6762,7 @@ export const en: Dictionary = {
     reference: 'Incident reference:',
   },
   bits: {
+    challengeFrom: '{pseudo} challenges you to a game',
     unrecognisedFormat: 'Format not recognised',
     paste: 'Paste',
     asImage: 'Image',
@@ -6696,6 +6812,7 @@ export const en: Dictionary = {
     hide: 'Hide',
   },
   rest: {
+    boardFixSquares: 'To fix on the board: {cases}.',
     immortal0: 'The King’s Gambit: White offers a pawn to open lines towards the enemy king.',
     immortal1: 'Black is collecting material while White develops. Two philosophies are clashing.',
     immortal2: 'A second pawn falls. The evaluation has Black winning easily — and yet.',
@@ -6903,6 +7020,8 @@ export const en: Dictionary = {
   },
 
   admin: {
+    gigabytes: '{n} GB',
+    hourOfDay: '{n}:00',
     title: 'Administration',
     blurb:
       'What you do here applies to real people. Irreversible acts require typing the username, and all of them are recorded in the log.',
@@ -7243,6 +7362,26 @@ export const en: Dictionary = {
     iaNoProvider: 'No provider configured.',
   },
   common: {
+    moveNumber: 'Move {n}',
+    moveNumberLower: 'move {n}',
+    by: 'by {nom}',
+    to: 'to {adresse}',
+    assistant: 'Assistant',
+    evaluation: 'Evaluation: {valeur}',
+    ultraBullet: 'UltraBullet',
+    minutes: '{n} min',
+    minutesPlusSeconds: '{min} min + {s} s',
+    seconds: '{n} s',
+    gamesShort: '{n} g.',
+    white: 'White',
+    black: 'Black',
+    bullet: 'Bullet',
+    blitz: 'Blitz',
+    rapid: 'Rapid',
+    classical: 'Classical',
+    correspondence: 'Correspondence',
+    puzzle: 'Puzzles',
+    versus: 'vs {nom}',
     loading: 'Loading…',
     error: 'Error',
     retry: 'Retry',

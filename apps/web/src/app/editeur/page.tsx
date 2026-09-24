@@ -58,13 +58,13 @@ function droitsDeRoque(fen: string): string {
 }
 
 /** Les pièces, dans l'ordre où on les pose : les plus fréquentes d'abord. */
-const PIECES: Array<{ type: PieceSymbol; white: string; black: string; nom: string }> = [
-  { type: 'p', white: '♙', black: '♟', nom: 'Pion' },
-  { type: 'n', white: '♘', black: '♞', nom: 'Cavalier' },
-  { type: 'b', white: '♗', black: '♝', nom: 'Fou' },
-  { type: 'r', white: '♖', black: '♜', nom: 'Tour' },
-  { type: 'q', white: '♕', black: '♛', nom: 'Dame' },
-  { type: 'k', white: '♔', black: '♚', nom: 'Roi' },
+const PIECES: Array<{ type: PieceSymbol; white: string; black: string }> = [
+  { type: 'p', white: '♙', black: '♟' },
+  { type: 'n', white: '♘', black: '♞' },
+  { type: 'b', white: '♗', black: '♝' },
+  { type: 'r', white: '♖', black: '♜' },
+  { type: 'q', white: '♕', black: '♛' },
+  { type: 'k', white: '♔', black: '♚' },
 ]
 
 export default function EditorPage() {
@@ -103,7 +103,11 @@ export default function EditorPage() {
     }
     try {
       board.load(fen)
-      return { ok: true, message: `${board.moves().length} coups légaux.` }
+      const coups = board.moves().length
+      return {
+        ok: true,
+        message: t(coups > 1 ? 'editor.legalMoves' : 'editor.legalMovesOne', { n: coups }),
+      }
     } catch {
       return { ok: false, message: t('editor.impossible') }
     }
@@ -194,7 +198,7 @@ export default function EditorPage() {
                       key={piece.type}
                       type="button"
                       onClick={() => setBrush({ type: piece.type, color: colour })}
-                      title={`${piece.nom} ${colour === 'w' ? 'blanc' : 'noir'}`}
+                      title={t(`editor.pieces.${colour}${piece.type}`)}
                       aria-pressed={active}
                       className={clsx(
                         'grid h-9 flex-1 place-items-center rounded-[var(--radius-sm)] text-2xl leading-none transition-colors',

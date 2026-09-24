@@ -130,10 +130,14 @@ export function ImportEnLigne({
         <input
           value={pseudo}
           onChange={(event) => set(clePseudo, event.target.value)}
-          placeholder={`ton pseudo ${source === 'chesscom' ? 'Chess.com' : 'Lichess'}`}
+          placeholder={t('myGames.yourUsernameOn', {
+            service: source === 'chesscom' ? 'Chess.com' : 'Lichess',
+          })}
           spellCheck={false}
           autoComplete="off"
-          aria-label={`Pseudo ${source === 'chesscom' ? 'Chess.com' : 'Lichess'}`}
+          aria-label={t('myGames.usernameOn', {
+            service: source === 'chesscom' ? 'Chess.com' : 'Lichess',
+          })}
           className="h-10 min-w-0 flex-1 rounded-[var(--radius-sm)] border border-line bg-surface px-3 text-sm placeholder:text-faint focus:border-accent focus:outline-none"
         />
         <Button
@@ -212,7 +216,7 @@ function LignePartie({
         className="min-w-0 flex-1 text-left"
       >
         <span className="block truncate text-sm font-medium">
-          contre {adversaire}
+          {t('common.versus', { nom: adversaire })}
           <span className="ml-1.5 font-normal text-faint">
             {t(
               issue === 'gagne'

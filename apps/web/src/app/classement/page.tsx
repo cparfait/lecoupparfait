@@ -35,11 +35,11 @@ interface LeaderboardPlayer {
 }
 
 const CATEGORIES = [
-  { id: 'bullet', label: 'Bullet' },
-  { id: 'blitz', label: 'Blitz' },
-  { id: 'rapid', label: 'Rapide' },
-  { id: 'classical', label: 'Classique' },
-  { id: 'puzzle', label: 'Puzzles' },
+  { id: 'bullet', label: 'common.bullet' },
+  { id: 'blitz', label: 'common.blitz' },
+  { id: 'rapid', label: 'common.rapid' },
+  { id: 'classical', label: 'common.classical' },
+  { id: 'puzzle', label: 'common.puzzle' },
 ] as const
 
 export default function LeaderboardPage() {
@@ -108,7 +108,7 @@ export default function LeaderboardPage() {
                 {SPEED_LABELS[entry.id as keyof typeof SPEED_LABELS]?.icon}
               </span>
             )}
-            {entry.label}
+            {t(entry.label)}
           </button>
         ))}
       </div>

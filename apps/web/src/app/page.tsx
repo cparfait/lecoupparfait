@@ -397,9 +397,12 @@ function Essentiel() {
       // Lu dans la table, jamais recopié : l'échelle est passée de vingt-sept à
       // quinze échelons et six endroits annonçaient encore « 25 ».
       value: String(BOT_LEVELS.length),
-      label: `niveaux d’adversaires, de ${BOT_LEVELS[0]?.elo} à ${BOT_LEVELS.at(-1)?.elo} Elo`,
+      label: t('home.statsLevels', {
+        min: BOT_LEVELS[0]?.elo ?? 0,
+        max: BOT_LEVELS.at(-1)?.elo ?? 0,
+      }),
     },
-    { value: '7', label: 'pièces : finales résolues à la perfection' },
+    { value: '7', label: t('home.statsTablebase') },
   ]
 
   return (

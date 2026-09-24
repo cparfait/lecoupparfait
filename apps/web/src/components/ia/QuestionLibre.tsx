@@ -112,7 +112,7 @@ export function QuestionLibre({
         <div className="rounded-[var(--radius-sm)] border border-line bg-surface p-3">
           <div className="mb-1.5 flex items-center gap-1.5 text-[12px] font-semibold text-faint">
             <Sparkles size={11} aria-hidden />
-            {assistant.nomFournisseur ?? 'Assistant'}
+            {assistant.nomFournisseur ?? t('common.assistant')}
             {encours && <Spinner size={11} />}
             {!encours && reponse && voiceEnabled && (
               <button

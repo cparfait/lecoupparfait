@@ -177,8 +177,11 @@ export default function TournamentsPage() {
                         {t('tournament.arenaLine', {
                           cadence:
                             entry.increment > 0
-                              ? `${Math.round(entry.initialTime / 60)} min + ${entry.increment} s`
-                              : `${Math.round(entry.initialTime / 60)} min`,
+                              ? t('common.minutesPlusSeconds', {
+                                  min: Math.round(entry.initialTime / 60),
+                                  s: entry.increment,
+                                })
+                              : t('common.minutes', { n: Math.round(entry.initialTime / 60) }),
                           duree: entry.durationMinutes,
                           debut: new Date(entry.startsAt).toLocaleString(bcp47, {
                             weekday: 'short',

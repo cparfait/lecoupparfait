@@ -120,12 +120,19 @@ function couperEnDeux(texte: string): { chapeau: string; suite: string | null } 
  * bien qu'on lisait « Règles » et « Motifs tactiques » au-dessus de définitions
  * anglaises.
  */
+/**
+ * L'identifiant de la famille des motifs, qu'aucun fichier du glossaire ne
+ * déclare : les motifs viennent du cœur. Un identifiant, pas un texte — ce qui
+ * s'affiche est `nav.famMotifs`.
+ */
+const FAMILLE_MOTIFS = 'Motifs tactiques'
+
 const CLE_FAMILLE: Record<string, TranslationKey> = {
   Règles: 'nav.famRegles',
   'Pièces et matériel': 'nav.famPieces',
   'Phases de la partie': 'nav.famPhases',
   'Évaluation et jeu': 'nav.famEvaluation',
-  'Motifs tactiques': 'nav.famMotifs',
+  [FAMILLE_MOTIFS]: 'nav.famMotifs',
 }
 
 export default function GlossaryPage() {
@@ -183,7 +190,7 @@ export default function GlossaryPage() {
         cle: motif.id as string,
         name: tCoeur(t, motif.name),
         definition: tCoeur(t, motif.definition),
-        family: 'Motifs tactiques' as const,
+        family: FAMILLE_MOTIFS,
       }))
       .filter((motif) => !connus.has(motif.name))
     return [...termes, ...motifs]
@@ -241,7 +248,7 @@ export default function GlossaryPage() {
   )
 
   const groups = useMemo(() => {
-    const order = [...FAMILIES, 'Motifs tactiques']
+    const order = [...FAMILIES, FAMILLE_MOTIFS]
     return order
       .map((family) => ({
         family,
@@ -349,7 +356,7 @@ export default function GlossaryPage() {
                               })
                             }
                             className="group inline-flex items-center gap-1.5 text-left transition-colors hover:text-accent"
-                            aria-label={`Voir « ${entry.name} » sur l’échiquier`}
+                            aria-label={t('explain.seeOnBoard', { terme: entry.name })}
                           >
                             <span className="group-hover:underline">{entry.name}</span>
                             <Grid3x3

@@ -153,9 +153,13 @@ export default function ArenaPage() {
         <Trophy size={18} className="text-accent" aria-hidden />
         <h1 className="font-display text-xl font-bold tracking-tight">{tournament.name}</h1>
         <span className="text-[12px] text-faint">
-          {Math.round(tournament.initialTime / 60)} min
-          {tournament.increment > 0 ? ` + ${tournament.increment} s` : ''} ·{' '}
-          {tournament.durationMinutes} min
+          {tournament.increment > 0
+            ? t('common.minutesPlusSeconds', {
+                min: Math.round(tournament.initialTime / 60),
+                s: tournament.increment,
+              })
+            : t('common.minutes', { n: Math.round(tournament.initialTime / 60) })}{' '}
+          · {t('common.minutes', { n: tournament.durationMinutes })}
         </span>
       </div>
 
@@ -247,7 +251,7 @@ export default function ArenaPage() {
                 {player.streak >= 2 && (
                   <span
                     className="flex shrink-0 items-center gap-0.5 text-[12px] font-semibold text-[var(--q-inaccuracy)]"
-                    title={`${player.streak} victoires d’affilée — ses points sont doublés`}
+                    title={t('tournament.streakDoubled', { n: player.streak })}
                   >
                     <Flame size={12} aria-hidden />
                     {player.streak}
@@ -260,7 +264,7 @@ export default function ArenaPage() {
                   <LogOut size={12} className="shrink-0 text-faint" aria-hidden />
                 )}
                 <span className="w-10 shrink-0 text-right text-[12px] tabular-nums text-faint">
-                  {player.games} p.
+                  {t('common.gamesShort', { n: player.games })}
                 </span>
                 <span className="w-8 shrink-0 text-right font-display text-sm font-bold tabular-nums">
                   {player.score}

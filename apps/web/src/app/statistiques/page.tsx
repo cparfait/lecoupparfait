@@ -95,11 +95,12 @@ function MotExplique({
   className?: string
   children: React.ReactNode
 }) {
+  const t = useT()
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={`Ce que veut dire ${aide}`}
+      aria-label={t('stats.whatMeans', { mot: aide })}
       className={clsx(
         'group inline-flex min-w-0 max-w-full items-center gap-1 rounded-[var(--radius-sm)] text-left transition-colors hover:text-accent',
         className,
@@ -323,9 +324,12 @@ export default function StatsPage() {
                 </span>
                 <span
                   className="w-16 shrink-0 text-right text-[12px] tabular-nums text-faint"
-                  title={`${opening.asWhite} avec les Blancs, ${opening.games - opening.asWhite} avec les Noirs`}
+                  title={t('stats.colourSplit', {
+                    blancs: opening.asWhite,
+                    noirs: opening.games - opening.asWhite,
+                  })}
                 >
-                  {opening.games} p.
+                  {t('common.gamesShort', { n: opening.games })}
                 </span>
               </div>
             ))}

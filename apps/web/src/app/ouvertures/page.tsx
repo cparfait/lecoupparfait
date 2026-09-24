@@ -388,7 +388,7 @@ export default function OpeningsPage() {
                     : t('openings.lastKnown', { n: Math.ceil((deepest?.atPly ?? 0) / 2) })}
                 </p>
                 <p className="mt-1 text-xs text-muted">
-                  Nom anglais : {(current ?? deepest)!.name}
+                  {t('openings.englishName', { nom: (current ?? deepest)!.name })}
                 </p>
               </>
             ) : history.length === 0 ? (
@@ -561,7 +561,9 @@ export default function OpeningsPage() {
                           </span>
                         </span>
                         <span className="shrink-0 text-[12px] tabular-nums text-faint">
-                          {Math.ceil(match.ply / 2)} coups
+                          {t(match.ply > 2 ? 'openings.movesCount' : 'openings.movesCountOne', {
+                            n: Math.ceil(match.ply / 2),
+                          })}
                         </span>
                       </button>
                     </li>
@@ -680,7 +682,10 @@ function PopularMoves({
                 <button
                   type="button"
                   onClick={() => onPlay(move.san)}
-                  title={`${dire(move.san)} — ${move.games.toLocaleString('fr-FR')} parties`}
+                  title={t('openings.moveGames', {
+                    coup: dire(move.san),
+                    n: move.games.toLocaleString(bcp47),
+                  })}
                   className="flex w-full items-center gap-2.5 px-4 py-2 text-left transition-colors hover:bg-surface-hover"
                 >
                   <span className="w-12 shrink-0 font-mono text-sm font-semibold">
@@ -693,7 +698,7 @@ function PopularMoves({
                   {/* Répartition des résultats, à l'échelle de la barre. */}
                   <span
                     className="flex h-3.5 min-w-0 flex-1 overflow-hidden rounded-[3px]"
-                    title={`${move.games.toLocaleString('fr-FR')} parties`}
+                    title={t('openings.gamesCount', { n: move.games.toLocaleString(bcp47) })}
                   >
                     <span
                       style={{ width: `${(move.white / move.games) * 100}%` }}

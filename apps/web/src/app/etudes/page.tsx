@@ -142,7 +142,7 @@ export default function StudiesPage() {
                     <span className="block truncate font-medium">{study.title}</span>
                     <span className="block text-[12px] text-faint">
                       {study.chapters === 0
-                        ? 'Aucun chapitre'
+                        ? t('studies.noChapterShort')
                         : t(study.chapters > 1 ? 'studies.chapters' : 'studies.oneChapter', {
                             n: study.chapters,
                           })}

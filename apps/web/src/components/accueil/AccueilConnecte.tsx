@@ -331,7 +331,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
             <div className="hidden sm:block">
               <Chip tone="warning" title={t('homeIn.streakTitle')}>
                 <Flame size={11} aria-hidden />
-                {journee.serie} jour{journee.serie > 1 ? 's' : ''} d’affilée
+                {t(journee.serie > 1 ? 'streak.inARow' : 'streak.inARowOne', { n: journee.serie })}
               </Chip>
             </div>
           )}
@@ -392,7 +392,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
               titre={t('homeIn.yourPath')}
               icone={<Map size={14} aria-hidden />}
               teinte="var(--rub-jouer)"
-              fin={`chapitre ${chapitre.numero} / ${CHAPITRES.length}`}
+              fin={t('homeIn.chapterOf', { n: chapitre.numero, total: CHAPITRES.length })}
             />
             <div className="p-4">
               {/* Le numéro du chapitre, en grand, à côté de son titre : c'est
@@ -529,7 +529,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                     href={`/profil/${encodeURIComponent(pseudo)}`}
                     className="text-accent hover:underline"
                   >
-                    tout voir
+                    {t('homeIn.seeAll')}
                   </Link>
                 }
               />
@@ -580,10 +580,13 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                           )}
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-[14px]">
-                              contre{' '}
-                              <strong className="font-semibold">
-                                {partie.adversaire ?? 'un adversaire'}
-                              </strong>
+                              {avecElements(t('common.versus'), {
+                                nom: (
+                                  <strong className="font-semibold">
+                                    {partie.adversaire ?? t('homeIn.anOpponent')}
+                                  </strong>
+                                ),
+                              })}
                             </span>
                             <span className="block truncate text-[12px] text-faint">
                               {partie.opening ?? t('homeIn.unlistedOpening')} ·{' '}
@@ -621,7 +624,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                   icone={<Gauge size={14} aria-hidden />}
                   fin={
                     <Link href="/analyse" className="text-accent hover:underline">
-                      tout voir
+                      {t('homeIn.seeAll')}
                     </Link>
                   }
                 />
@@ -639,7 +642,10 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate">
-                          {analyse.whiteName ?? 'Blancs'} — {analyse.blackName ?? 'Noirs'}
+                          {t('homeIn.whiteVsBlack', {
+                            blancs: analyse.whiteName ?? t('common.white'),
+                            noirs: analyse.blackName ?? t('common.black'),
+                          })}
                         </span>
                         <span className="block truncate text-[12px] text-faint">
                           {analyse.opening ?? t('homeIn.noOpeningListed')}

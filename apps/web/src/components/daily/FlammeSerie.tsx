@@ -90,8 +90,11 @@ export function FlammeSerie({
   if (!identite) return null
   if (serie <= 0) return null
 
-  const jours = `${serie} jour${serie > 1 ? 's' : ''}`
-  const record = etat && etat.meilleureSerie > serie ? ` · record : ${etat.meilleureSerie}` : ''
+  const jours = t(serie > 1 ? 'streak.days' : 'streak.dayOne', { n: serie })
+  const record =
+    etat && etat.meilleureSerie > serie
+      ? ` · ${t('streak.record', { n: etat.meilleureSerie })}`
+      : ''
   const classe = clsx(
     'flex shrink-0 items-center text-sm font-semibold text-[var(--q-inaccuracy)] transition-colors',
     HABILLAGES[habillage],
@@ -100,7 +103,9 @@ export function FlammeSerie({
   const contenu = (
     <>
       <Flame size={15} aria-hidden />
-      <span className="tabular-nums">{habillage === 'carte' ? `${serie} j` : serie}</span>
+      <span className="tabular-nums">
+        {habillage === 'carte' ? t('streak.daysShort', { n: serie }) : serie}
+      </span>
     </>
   )
 
@@ -165,10 +170,12 @@ function PanneauSerie({ etat, serie }: { etat: EtatQuotidien | null; serie: numb
     <div className="p-2">
       <div className="flex items-baseline gap-2 px-1">
         <p className="font-display text-lg font-bold tracking-tight">
-          {serie} jour{serie > 1 ? 's' : ''} d’affilée
+          {t(serie > 1 ? 'streak.inARow' : 'streak.inARowOne', { n: serie })}
         </p>
         {etat && etat.meilleureSerie > serie && (
-          <span className="text-[12px] text-faint">record : {etat.meilleureSerie}</span>
+          <span className="text-[12px] text-faint">
+            {t('streak.record', { n: etat.meilleureSerie })}
+          </span>
         )}
       </div>
 

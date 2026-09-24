@@ -395,7 +395,10 @@ export default function RushPage() {
 
         <span
           className="ml-auto flex items-center gap-1"
-          aria-label={`${errors} erreurs sur ${MAX_ERRORS}`}
+          aria-label={t(errors > 1 ? 'rush.errorsOf' : 'rush.errorsOfOne', {
+            n: errors,
+            max: MAX_ERRORS,
+          })}
         >
           {Array.from({ length: MAX_ERRORS }, (_, i) => (
             <X

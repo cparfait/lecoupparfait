@@ -270,14 +270,14 @@ export default function WatchPage() {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-medium">
                         <span className={clsx(ami === game.white && 'text-accent')}>
-                          {game.white === '?' ? 'place libre' : game.white}
+                          {game.white === '?' ? t('watch.freeSeatName') : game.white}
                         </span>
                         {game.whiteRating != null && (
                           <span className="text-faint"> {game.whiteRating}</span>
                         )}
-                        <span className="mx-1.5 text-faint">contre</span>
+                        <span className="mx-1.5 text-faint">{t('watch.versusWord')}</span>
                         <span className={clsx(ami === game.black && 'text-accent')}>
-                          {game.black === '?' ? 'place libre' : game.black}
+                          {game.black === '?' ? t('watch.freeSeatName') : game.black}
                         </span>
                         {game.blackRating != null && (
                           <span className="text-faint"> {game.blackRating}</span>
@@ -299,7 +299,7 @@ export default function WatchPage() {
 
                     {ami && (
                       <Chip tone="accent" className="shrink-0">
-                        ton ami
+                        {t('watch.yourFriend')}
                       </Chip>
                     )}
 
@@ -308,14 +308,16 @@ export default function WatchPage() {
                         sortes de lignes de cette liste. */}
                     {game.statut === 'waiting' && (
                       <Chip tone="success" className="shrink-0">
-                        rejoindre
+                        {t('watch.join')}
                       </Chip>
                     )}
 
                     {game.spectators > 0 && (
                       <span
                         className="flex shrink-0 items-center gap-1 text-[12px] text-faint"
-                        title={`${game.spectators} personne${game.spectators > 1 ? 's' : ''} regarde${game.spectators > 1 ? 'nt' : ''}`}
+                        title={t(game.spectators > 1 ? 'watch.spectators' : 'watch.spectatorsOne', {
+                          n: game.spectators,
+                        })}
                       >
                         <Users size={13} aria-hidden />
                         {game.spectators}

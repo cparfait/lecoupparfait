@@ -726,11 +726,11 @@ export default function PuzzlesPage() {
         to: expected.slice(2, 4) as Square,
         promotion: (expected[4] as PieceSymbol) ?? undefined,
       })
-      speak(`La solution est ${sanToSpeechSafe(move.san, locale)}`)
+      speak(t('puzzles.solutionSpoken', { coup: sanToSpeechSafe(move.san, locale) }))
     } catch {
       // Position inattendue : on ne montre rien plutôt que d'afficher un coup faux.
     }
-  }, [puzzle, moveIndex, fen, locale])
+  }, [puzzle, moveIndex, fen, locale, t])
 
   const legalMoves = useLegalMoves(fen, status === 'playing')
 

@@ -284,7 +284,7 @@ export default function LessonPage() {
       setFen(board.fen())
       setLastMove({ from: move.from, to: move.to })
       setSolved(true)
-      setFeedback({ kind: 'correct', text: 'Exact !' })
+      setFeedback({ kind: 'correct', text: t('learn.correct') })
 
       // Enchaînement automatique, sauf sur la dernière étape : terminer une
       // leçon et partir vers la suivante est une décision, pas une conséquence.

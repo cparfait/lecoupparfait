@@ -59,7 +59,7 @@ export function AutresDeLaSection({
   return (
     <nav
       className={clsx(colonne ? 'mt-6' : 'mt-10', className)}
-      aria-label={`Le reste de la rubrique ${t(section.labelKey)}`}
+      aria-label={t('nav.restOfSection', { rubrique: t(section.labelKey) })}
     >
       {/* ── Un vrai titre, et non plus une étiquette ────────────────────
           Le bloc était une liste de rangées grises sous un libellé en

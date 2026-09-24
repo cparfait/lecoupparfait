@@ -369,8 +369,8 @@ export default function LiveGamePage() {
 
     playSound('notify')
     if (!chatVisible) setNonLus((total) => total + arrives.length)
-    toast.info(`${dernier.from} t’écrit`, dernier.text)
-  }, [chat, monNom, chatVisible])
+    toast.info(t('game.writesToYou', { nom: dernier.from }), dernier.text)
+  }, [chat, monNom, chatVisible, t])
 
   // Le fil ne se déroule pas tout seul : sans cela le dernier message se
   // déposait sous le bord du cadre, et la pastille annonçait un message
@@ -994,7 +994,9 @@ export default function LiveGamePage() {
               {nonLus > 0 && (
                 <span
                   className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[12px] font-bold text-[var(--accent-contrast)]"
-                  aria-label={`${nonLus} message${nonLus > 1 ? 's' : ''} non lu${nonLus > 1 ? 's' : ''}`}
+                  aria-label={t(nonLus > 1 ? 'game.unreadMessages' : 'game.unreadMessagesOne', {
+                    n: nonLus,
+                  })}
                 >
                   {nonLus > 9 ? '9+' : nonLus}
                 </span>
@@ -1239,7 +1241,7 @@ export default function LiveGamePage() {
           status={snapshot.status}
           result={snapshot.result}
           playerColor={color}
-          opponentName={opponent?.name ?? 'Adversaire'}
+          opponentName={opponent?.name ?? t('computer.opponentGroup')}
           moves={playedMoves}
           bilan={bilan}
           // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- Rechargement complet : on quitte une partie en direct, dont le socket et l'état de salon doivent disparaître avec la page.
