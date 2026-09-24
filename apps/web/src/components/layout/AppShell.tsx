@@ -5,7 +5,8 @@
  *
  * Deux navigations distinctes plutôt qu'une seule adaptative :
  *  - sur **grand écran**, une barre supérieure : le nom du site qui ramène à
- *    l'accueil, un menu déroulant par rubrique, et à droite une seule
+ *    l'accueil, les mêmes onglets que la barre du bas — Jouer, Progresser,
+ *    Analyser, Plus — chacun en menu déroulant, et à droite une seule
  *    commande, le compte, qui porte aussi les préférences et les pages du site ;
  *  - sur **mobile**, une barre inférieure fixe à cinq onglets, à portée de
  *    pouce, qui reste visible pendant une partie. Le premier ramène à
@@ -26,7 +27,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronRight, Lock } from 'lucide-react'
+import { ChevronRight, LayoutGrid, Lock } from 'lucide-react'
 import clsx from 'clsx'
 import { AccountButton } from '@/components/layout/AccountButton.tsx'
 import { LogoMark } from '@/components/brand/LogoMark.tsx'
@@ -45,11 +46,18 @@ import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { avantagePour, type AvantageCompte } from '@/lib/compte/avantages.ts'
 import {
   estActif,
+  estDansPlus,
   PAGES_APPLICATION,
   RACCOURCIS_MOBILES,
   SECTIONS,
   sectionActive,
+  type EntreeNav,
+  type SectionNav,
 } from '@/lib/navigation.ts'
+
+/** Les rubriques qui ont leur onglet dans l'en-tête, et celles que « Plus » regroupe. */
+const SECTIONS_DE_LA_BARRE = SECTIONS.filter((section) => !estDansPlus(section))
+const SECTIONS_DE_PLUS = SECTIONS.filter(estDansPlus)
 
 /**
  * Ce qu'il y a à dire avant d'ouvrir cette rubrique, s'il y a quelque chose.
@@ -156,14 +164,19 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
 
           {/* La navigation à plat n'apparaît qu'à partir de `lg`, pas de `md` :
-              cinq rubriques, le nom du site et cinq commandes à droite font
-              plus de 800 px, et entre 768 et 900 px — tablette en portrait,
-              téléphone en paysage — l'en-tête débordait de l'écran, seule
-              source de défilement horizontal de tout le site. En dessous, la
-              barre du bas et le menu font le travail, et ils sont faits pour
-              le doigt. */}
+              entre 768 et 900 px — tablette en portrait, téléphone en paysage
+              — l'en-tête débordait de l'écran quand il portait cinq
+              rubriques, seule source de défilement horizontal de tout le
+              site. En dessous, la barre du bas fait le travail, et elle est
+              faite pour le doigt.
+
+              Quatre onglets et non plus cinq : les mêmes que la barre du bas,
+              accueil excepté — le nom du site en tient lieu. Communauté et
+              Outils, qui avaient chacun leur case ici et vivaient dans « Plus »
+              sur téléphone, rejoignent « Plus » partout : une seule façon de
+              ranger l'application, quelle que soit la largeur. */}
           <nav className="ml-2 hidden items-center gap-0.5 lg:flex" aria-label={t('bits.mainNav')}>
-            {SECTIONS.map((section) => (
+            {SECTIONS_DE_LA_BARRE.map((section) => (
               <MenuSection
                 key={section.id}
                 section={section}
@@ -172,6 +185,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 onPorte={ouvrirPorte}
               />
             ))}
+            <MenuPlus pathname={pathname} intercepter={intercepter} onPorte={ouvrirPorte} />
           </nav>
 
           <div className="ml-auto flex items-center gap-1.5 [@media(max-width:359px)]:gap-0.5">
@@ -324,7 +338,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 /**
  * Les menus de la barre ne portent pas de cadre.
  *
- * Six boîtes alignées ne se lisent plus comme six boutons : elles font une
+ * Des boîtes alignées ne se lisent plus comme des boutons : elles font une
  * rangée d'onglets grillagée. La rubrique ouverte porte son trait, et la
  * surface apparaît au survol.
  */
@@ -355,102 +369,246 @@ function MenuSection({
       label={t(section.labelKey)}
       boutonClassName={MENU_BARRE}
       declencheur={(ouvert) => (
-        <>
-          {/* Sans chevron : six chevrons côte à côte faisaient une dentelure
-              qui n'apprenait rien — tous les boutons de la barre s'ouvrent.
-              Le survol suffit à le dire, et la rubrique ouverte garde son
-              trait, dans la teinte de la section : c'est le même code de
-              couleur que les icônes de ses cartes. */}
-          <span className={clsx((active || ouvert) && 'text-ink')}>{t(section.labelKey)}</span>
-          {active && (
-            <span
-              className="absolute inset-x-2.5 -bottom-[11px] h-[3px] rounded-full"
-              style={{ background: section.teinte }}
-            />
-          )}
-        </>
+        <Onglet
+          libelle={t(section.labelKey)}
+          allume={active}
+          ouvert={ouvert}
+          teinte={section.teinte}
+        />
       )}
     >
-      {/* ── La page de la rubrique, en première entrée ──────────────────
-          Elle existait déjà, et personne ne la voyait : un titre en capitales
-          de onze pixels, gris clair, avec une flèche — c'est-à-dire la forme
-          exacte d'une étiquette de section, celle qu'on apprend justement à ne
-          pas lire. Les pages « Jouer », « Apprendre » et « S'entraîner »
-          n'étaient donc atteintes que depuis un téléphone, où la barre du bas y
-          mène, alors que ce sont elles qui présentent chaque rubrique en grand,
-          avec une phrase par destination.
-
-          Elle devient une entrée comme les autres — icône, libellé, sous-titre
-          — mais posée sur un fond léger et séparée du reste par un filet : la
-          première chose qu'on lit en ouvrant le menu, et la seule qui ne
-          demande pas de choisir tout de suite. */}
+      {/* La page de la rubrique, en première entrée : voir `PorteDeRubrique`. */}
       {section.sommaire && (
-        <>
-          <Link
-            href={section.sommaire}
-            role="menuitem"
-            className="flex items-center gap-2.5 rounded-[var(--radius-sm)] bg-surface/70 px-2.5 py-2 transition-colors hover:bg-surface-hover"
-          >
-            {/* La teinte de la rubrique, ici et nulle part ailleurs dans le
-                panneau : les entrées restent grises, et la première ligne se
-                détache d'elle-même. */}
-            <section.icon size={16} className="shrink-0" style={{ color: section.teinte }} />
-            <span className="min-w-0 flex-1">
-              {/* « Voir la page Jouer » et non « Jouer » : le mot seul répète
-                  le bouton qu'on vient d'ouvrir, et l'on croit avoir affaire à
-                  un titre. Le verbe dit que c'est une destination. */}
-              <span className="block text-sm font-semibold">
-                {t('last.seeThePage')} {t(section.labelKey)}
-              </span>
-              <span className="block text-[12px] leading-snug text-faint">
-                {t('last.wholeSection')}
-              </span>
-            </span>
-            <ChevronRight size={14} className="shrink-0 text-faint" aria-hidden />
-          </Link>
-          <span className="my-1 block h-px bg-line/60" aria-hidden />
-        </>
+        <PorteDeRubrique
+          href={section.sommaire}
+          icone={section.icon}
+          teinte={section.teinte}
+          titre={`${t('last.seeThePage')} ${t(section.labelKey)}`}
+          phrase={t('last.wholeSection')}
+        />
       )}
 
-      {section.entrees.map((entree) => {
-        const Icone = entree.icon
-        // Réservée, et seulement pour un visiteur anonyme : le cadenas
-        // disparaît dès qu'il n'a plus rien à annoncer.
-        const reservee = intercepter(entree.href)
-        return (
-          <Link
-            key={entree.href}
-            href={entree.href}
-            role="menuitem"
-            onClick={(event) => {
-              if (!reservee) return
-              // On explique avant d'emmener. La boîte propose « Voir quand
-              // même » : rien n'est interdit, seulement annoncé.
-              event.preventDefault()
-              onPorte({ avantage: reservee, href: entree.href })
-            }}
-            className="flex items-start gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 transition-colors hover:bg-surface-hover"
-          >
-            <Icone size={16} className="mt-0.5 shrink-0 text-muted" aria-hidden />
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-medium">{t(entree.labelKey)}</span>
-              {entree.hintKey && (
-                <span className="block text-[12px] leading-snug text-faint">
-                  {t(entree.hintKey, entree.hintVars)}
-                </span>
-              )}
-            </span>
-            {reservee && (
-              <Lock
-                size={12}
-                className="mt-1 shrink-0 text-faint"
-                aria-label={t('bits.needsAccount')}
-              />
-            )}
-          </Link>
-        )
-      })}
+      {section.entrees.map((entree) => (
+        <EntreeDeMenu
+          key={entree.href}
+          entree={entree}
+          intercepter={intercepter}
+          onPorte={onPorte}
+        />
+      ))}
     </Menu>
+  )
+}
+
+/**
+ * « Plus » : Communauté et Outils, dans le même menu.
+ *
+ * Les mêmes entrées que la page `/plus`, qu'il annonce en première ligne ; le
+ * compte et les réglages n'y figurent pas, puisque le bouton du compte, à
+ * droite, les porte déjà. Chaque rubrique garde son intitulé, qui mène à sa
+ * page, et sa teinte sur cette seule ligne.
+ *
+ * L'onglet s'allume sur `/plus` et sur toutes les pages des deux rubriques,
+ * dans la teinte de celle qui est ouverte : c'est le trait que portait sa case
+ * quand elle en avait une.
+ */
+function MenuPlus({
+  pathname,
+  intercepter,
+  onPorte,
+}: {
+  pathname: string
+  intercepter: Intercepteur
+  onPorte: (porte: { avantage: AvantageCompte; href: string }) => void
+}) {
+  const t = useT()
+  const ouverte = SECTIONS_DE_PLUS.find((section) => sectionActive(section, pathname))
+  const active = ouverte != null || pathname.startsWith('/plus')
+
+  return (
+    <Menu
+      largeur="w-72"
+      label={t('nav.more')}
+      boutonClassName={MENU_BARRE}
+      declencheur={(ouvert) => (
+        <Onglet
+          libelle={t('nav.more')}
+          allume={active}
+          ouvert={ouvert}
+          teinte={ouverte?.teinte ?? 'var(--accent)'}
+        />
+      )}
+    >
+      <PorteDeRubrique
+        href="/plus"
+        icone={LayoutGrid}
+        titre={`${t('last.seeThePage')} ${t('nav.more')}`}
+        phrase={t('nav.moreHint')}
+      />
+      {SECTIONS_DE_PLUS.map((section) => (
+        <div key={section.id} role="group" aria-label={t(section.labelKey)} className="mt-1">
+          {/* L'intitulé de la rubrique, et non une étiquette en capitales :
+              c'est un lien vers sa page, comme la première ligne des autres
+              menus, en plus discret puisqu'il y en a deux. */}
+          <Link
+            href={section.sommaire ?? section.entrees[0]?.href ?? '/plus'}
+            role="menuitem"
+            className="flex items-center gap-2 rounded-[var(--radius-sm)] px-2.5 py-1.5 text-[13px] font-semibold transition-colors hover:bg-surface-hover"
+          >
+            <section.icon
+              size={14}
+              className="shrink-0"
+              style={{ color: section.teinte }}
+              aria-hidden
+            />
+            <span className="min-w-0 flex-1">{t(section.labelKey)}</span>
+            <ChevronRight size={13} className="shrink-0 text-faint" aria-hidden />
+          </Link>
+          {section.entrees.map((entree) => (
+            <EntreeDeMenu
+              key={entree.href}
+              entree={entree}
+              intercepter={intercepter}
+              onPorte={onPorte}
+            />
+          ))}
+        </div>
+      ))}
+    </Menu>
+  )
+}
+
+/**
+ * Le déclencheur d'un menu de la barre : le libellé, et le trait de l'onglet
+ * ouvert.
+ *
+ * Sans chevron : des chevrons côte à côte faisaient une dentelure qui
+ * n'apprenait rien — tous les boutons de la barre s'ouvrent. Le survol suffit
+ * à le dire, et la rubrique ouverte garde son trait, dans la teinte de la
+ * section : c'est le même code de couleur que les icônes de ses cartes.
+ */
+function Onglet({
+  libelle,
+  allume,
+  ouvert,
+  teinte,
+}: {
+  libelle: string
+  allume: boolean
+  ouvert: boolean
+  teinte: string
+}) {
+  return (
+    <>
+      <span className={clsx((allume || ouvert) && 'text-ink')}>{libelle}</span>
+      {allume && (
+        <span
+          className="absolute inset-x-2.5 -bottom-[11px] h-[3px] rounded-full"
+          style={{ background: teinte }}
+        />
+      )}
+    </>
+  )
+}
+
+/**
+ * La page de la rubrique, en première entrée d'un menu.
+ *
+ * Elle existait déjà, et personne ne la voyait : un titre en capitales de onze
+ * pixels, gris clair, avec une flèche — c'est-à-dire la forme exacte d'une
+ * étiquette de section, celle qu'on apprend justement à ne pas lire. Les pages
+ * de rubrique n'étaient donc atteintes que depuis un téléphone, où la barre du
+ * bas y mène, alors que ce sont elles qui présentent chaque rubrique en grand,
+ * avec une phrase par destination.
+ *
+ * Elle devient une entrée comme les autres — icône, libellé, sous-titre — mais
+ * posée sur un fond léger et séparée du reste par un filet : la première chose
+ * qu'on lit en ouvrant le menu, et la seule qui ne demande pas de choisir tout
+ * de suite.
+ *
+ * « Voir la page Jouer » et non « Jouer » : le mot seul répète le bouton qu'on
+ * vient d'ouvrir, et l'on croit avoir affaire à un titre. Le verbe dit que
+ * c'est une destination.
+ */
+function PorteDeRubrique({
+  href,
+  icone: Icone,
+  teinte,
+  titre,
+  phrase,
+}: {
+  href: string
+  icone: SectionNav['icon']
+  /** La teinte de la rubrique, ici et nulle part ailleurs dans le panneau. */
+  teinte?: string
+  titre: string
+  phrase: string
+}) {
+  return (
+    <>
+      <Link
+        href={href}
+        role="menuitem"
+        className="flex items-center gap-2.5 rounded-[var(--radius-sm)] bg-surface/70 px-2.5 py-2 transition-colors hover:bg-surface-hover"
+      >
+        <Icone
+          size={16}
+          className={clsx('shrink-0', !teinte && 'text-muted')}
+          style={teinte ? { color: teinte } : undefined}
+          aria-hidden
+        />
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold">{titre}</span>
+          <span className="block text-[12px] leading-snug text-faint">{phrase}</span>
+        </span>
+        <ChevronRight size={14} className="shrink-0 text-faint" aria-hidden />
+      </Link>
+      <span className="my-1 block h-px bg-line/60" aria-hidden />
+    </>
+  )
+}
+
+/** Une destination d'un menu de la barre, avec son cadenas s'il y a lieu. */
+function EntreeDeMenu({
+  entree,
+  intercepter,
+  onPorte,
+}: {
+  entree: EntreeNav
+  intercepter: Intercepteur
+  onPorte: (porte: { avantage: AvantageCompte; href: string }) => void
+}) {
+  const t = useT()
+  const Icone = entree.icon
+  // Réservée, et seulement pour un visiteur anonyme : le cadenas disparaît dès
+  // qu'il n'a plus rien à annoncer.
+  const reservee = intercepter(entree.href)
+  return (
+    <Link
+      href={entree.href}
+      role="menuitem"
+      onClick={(event) => {
+        if (!reservee) return
+        // On explique avant d'emmener. La boîte propose « Voir quand même » :
+        // rien n'est interdit, seulement annoncé.
+        event.preventDefault()
+        onPorte({ avantage: reservee, href: entree.href })
+      }}
+      className="flex items-start gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 transition-colors hover:bg-surface-hover"
+    >
+      <Icone size={16} className="mt-0.5 shrink-0 text-muted" aria-hidden />
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-medium">{t(entree.labelKey)}</span>
+        {entree.hintKey && (
+          <span className="block text-[12px] leading-snug text-faint">
+            {t(entree.hintKey, entree.hintVars)}
+          </span>
+        )}
+      </span>
+      {reservee && (
+        <Lock size={12} className="mt-1 shrink-0 text-faint" aria-label={t('bits.needsAccount')} />
+      )}
+    </Link>
   )
 }
 

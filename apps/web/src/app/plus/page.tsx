@@ -11,8 +11,8 @@
  * La page lit `SECTIONS` et `PAGES_APPLICATION`, comme l'en-tête et le menu du
  * compte : un seul endroit de vérité, et rien ici qui ne soit ailleurs.
  *
- * Elle s'ouvre aussi sur grand écran — depuis un lien, ou l'historique — et y
- * reste lisible : c'est simplement un sommaire.
+ * Sur grand écran, l'onglet « Plus » de l'en-tête est un menu qui reprend les
+ * mêmes rubriques et mène ici en première ligne : c'est simplement un sommaire.
  */
 
 import Link from 'next/link'

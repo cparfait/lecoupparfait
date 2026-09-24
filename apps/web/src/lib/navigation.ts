@@ -288,8 +288,9 @@ export const SECTIONS: SectionNav[] = [
     icon: Users,
     // La seule rubrique qui n'avait pas de page à elle. Ses quatre écrans ne se
     // rejoignaient donc nulle part, et sur téléphone ils n'existaient que dans
-    // le panneau « Menu » — un bouton qui ne dit pas ce qu'il contient. La
-    // barre du bas y mène désormais directement, et le panneau a disparu.
+    // le panneau « Menu » — un bouton qui ne dit pas ce qu'il contient. Le
+    // panneau a disparu : la rubrique vit dans « Plus », la page sur téléphone
+    // et le menu de l'en-tête sur ordinateur (voir `SECTIONS_DANS_PLUS`).
     sommaire: '/communaute',
     entrees: [
       {
@@ -360,8 +361,21 @@ export const PAGES_APPLICATION: EntreeNav[] = [
   { href: '/credits', labelKey: 'nav.credits', icon: Scale },
 ]
 
-/** Les rubriques que la barre du bas ne porte pas, et que « Plus » regroupe. */
+/**
+ * Les rubriques que « Plus » regroupe, sur téléphone comme sur ordinateur.
+ *
+ * L'en-tête du bureau les alignait avec les trois autres, à plat : cinq
+ * rubriques en haut, quatre onglets en bas, et deux façons de ranger la même
+ * application selon la largeur de la fenêtre. Il suit désormais la barre du
+ * bas — Jouer, Progresser, Analyser, Plus — et « Plus » y est un menu qui
+ * reprend les entrées de la page `/plus`.
+ */
 export const SECTIONS_DANS_PLUS = ['communaute', 'outils'] as const
+
+/** Vrai si la rubrique vit dans « Plus » plutôt que dans sa propre case. */
+export function estDansPlus(section: SectionNav): boolean {
+  return (SECTIONS_DANS_PLUS as readonly string[]).includes(section.id)
+}
 
 /**
  * Barre inférieure sur téléphone : l'accueil, trois rubriques, et « Plus ».
