@@ -100,7 +100,7 @@ export function BarreDuPouce({
             icone={<Flag size={19} aria-hidden />}
             libelle={t('game.resign')}
             onClick={onResign}
-            danger
+            discret
           />
           {!sansAide && (
             <>

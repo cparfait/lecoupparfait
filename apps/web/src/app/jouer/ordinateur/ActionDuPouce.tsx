@@ -21,15 +21,22 @@ export function ActionDuPouce({
   onClick,
   href,
   disabled,
-  danger,
+  discret,
 }: {
   icone: ReactNode
   libelle: string
   onClick?: () => void
   href?: string
   disabled?: boolean
-  /** Une action qu'on ne défait pas : l'abandon. */
-  danger?: boolean
+  /**
+   * Une action qu'on ne défait pas et qu'on ne cherche pas : l'abandon.
+   *
+   * Elle était rouge, et c'était la case la plus visible de la barre : sous le
+   * pouce, pendant toute la partie, l'œil tombait d'abord sur la seule action
+   * qu'on ne veut presque jamais faire. Elle passe en encre discrète — la
+   * confirmation, elle, reste, et c'est elle qui protège du geste malheureux.
+   */
+  discret?: boolean
 }) {
   const classe = clsx(
     // Quarante-quatre points de haut au minimum : la barre en faisait
@@ -38,8 +45,8 @@ export function ActionDuPouce({
     'text-[12px] font-medium transition-colors',
     disabled
       ? 'pointer-events-none text-faint opacity-40'
-      : danger
-        ? 'text-[var(--q-blunder)] hover:bg-surface-hover'
+      : discret
+        ? 'text-faint hover:bg-surface-hover hover:text-muted'
         : 'text-muted hover:bg-surface-hover hover:text-ink',
   )
 

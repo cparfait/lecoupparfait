@@ -1033,8 +1033,10 @@ export function GameScreen({
         <MenuItem
           onClick={handleResign}
           disabled={gameOver}
-          danger
-          icone={<Flag size={15} className="shrink-0" aria-hidden />}
+          /* Encre discrète et non rouge, comme dans la barre du pouce : voir
+             `ActionDuPouce`. La confirmation de `handleResign` reste. */
+          className="text-muted"
+          icone={<Flag size={15} className="shrink-0 text-faint" aria-hidden />}
         >
           {t('game.resign')}
         </MenuItem>
