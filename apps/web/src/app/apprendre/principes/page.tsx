@@ -71,10 +71,7 @@ export default function PrincipesPage() {
 
   return (
     <div className="page">
-      <TitreDePage
-        retour={{ href: '/progresser', label: t('nav.progress') }}
-        intro={t('principles.intro', { n: PRINCIPES.length })}
-      >
+      <TitreDePage intro={t('principles.intro', { n: PRINCIPES.length })}>
         {t('principles.title')}
       </TitreDePage>
 

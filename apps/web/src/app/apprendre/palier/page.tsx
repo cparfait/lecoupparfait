@@ -156,12 +156,7 @@ export default function PalierPage() {
 
   return (
     <div className="page">
-      <TitreDePage
-        retour={{ href: '/progresser', label: t('nav.progress') }}
-        intro={t('tier.intro')}
-      >
-        {t('tier.title')}
-      </TitreDePage>
+      <TitreDePage intro={t('tier.intro')}>{t('tier.title')}</TitreDePage>
 
       {/* ── Le niveau retenu, et d'où il vient ─────────────────────────────
           Un nombre sans son origine ne sert à rien : on ne sait pas s'il faut

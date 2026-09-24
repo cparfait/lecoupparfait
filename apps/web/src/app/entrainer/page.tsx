@@ -71,12 +71,7 @@ export default function EntrainementPage() {
 
   return (
     <div className="page">
-      <TitreDePage
-        retour={{ href: '/progresser', label: t('nav.progress') }}
-        intro={t('train.intro')}
-      >
-        {t('train.title')}
-      </TitreDePage>
+      <TitreDePage intro={t('train.intro')}>{t('train.title')}</TitreDePage>
 
       <div className="grille-cartes">
         {EXERCICES.map(({ href, icon, titreKey, phraseKey, detailKey }, index) => (

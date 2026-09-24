@@ -992,35 +992,6 @@ button.glass:hover {
   }
 }
 
-/*
- * Le bandeau de page : chaque rubrique ouvre sur sa couleur.
- *
- * Un titre gris posé sur une page noire ne dit pas où l'on est ; la teinte
- * de la rubrique le dit avant qu'on lise. Un lavis dans le coin haut-gauche,
- * l'icône de la rubrique en filigrane géant à droite, et le titre par-dessus.
- * La teinte arrive par `--teinte-page`, posée par `TitreDePage` d'après la
- * navigation ; sans rubrique, c'est une bande neutre.
- */
-@utility bandeau-page {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--radius-lg);
-  border: 1px solid color-mix(in oklab, var(--teinte-page, var(--border)) 30%, var(--border));
-  background:
-    radial-gradient(
-      70% 140% at 0% 0%,
-      color-mix(in oklab, var(--teinte-page, var(--accent)) 24%, transparent),
-      transparent 70%
-    ),
-    linear-gradient(180deg, var(--sheen), transparent 50%), var(--surface);
-  box-shadow:
-    inset 0 1px 0 0 var(--inner-edge),
-    var(--shadow-sm);
-}
-[data-effects='low'] .bandeau-page {
-  background: var(--bg-elev);
-}
-
 /* Le lien en texte : la couleur de l'action, et rien d'autre. */
 @utility lien {
   color: var(--accent-text);

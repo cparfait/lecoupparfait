@@ -370,12 +370,7 @@ export default function TestDeNiveauPage() {
 
   return (
     <div className="page">
-      <TitreDePage
-        retour={{ href: '/progresser', label: t('nav.progress') }}
-        intro={t('level.intro')}
-      >
-        {t('level.title')}
-      </TitreDePage>
+      <TitreDePage intro={t('level.intro')}>{t('level.title')}</TitreDePage>
 
       {/* ── Avant de commencer ──────────────────────────────────────────── */}
       {phase === 'intro' && (

@@ -80,9 +80,7 @@ export default function SeancePage() {
 
   return (
     <div className="page">
-      <TitreDePage retour={{ href: '/jouer', label: t('nav.play') }} intro={t('session.intro')}>
-        {t('session.title')}
-      </TitreDePage>
+      <TitreDePage intro={t('session.intro')}>{t('session.title')}</TitreDePage>
 
       {/* ── 1. Le palier ────────────────────────────────────────────────── */}
       <Card className="overflow-hidden">

@@ -237,12 +237,7 @@ export default function EcoutePage() {
 
   return (
     <div className="page">
-      <TitreDePage
-        retour={{ href: '/progresser', label: t('nav.progress') }}
-        intro={t('listen.intro')}
-      >
-        {t('listen.title')}
-      </TitreDePage>
+      <TitreDePage intro={t('listen.intro')}>{t('listen.title')}</TitreDePage>
 
       {/* L'honnêteté d'abord : ce mode ne remplace pas les leçons, et le dire
           évite qu'on l'utilise à la place. */}

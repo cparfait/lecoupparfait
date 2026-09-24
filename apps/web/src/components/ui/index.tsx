@@ -19,8 +19,10 @@ import type {
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
+import { ChevronRight } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { SECTIONS, sectionActive } from '@/lib/navigation.ts'
+import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
+import { RACCOURCIS_MOBILES, SECTIONS, estActif, sectionActive } from '@/lib/navigation.ts'
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Bouton
@@ -224,11 +226,43 @@ export function Card({
 }
 
 /**
+ * La rubrique d'une page, trouvée d'après son adresse.
+ *
+ * D'abord les rubriques de la navigation ; à défaut, l'onglet du téléphone
+ * qui s'allume sur cette adresse — « Plus » pour les préférences, le profil,
+ * les crédits —, sans teinte puisque « Plus » n'est pas une rubrique. Aucune
+ * page n'a donc rien à déclarer : on ne peut pas se tromper de rubrique en
+ * recopiant un en-tête.
+ */
+function rubriqueDuChemin(pathname: string): {
+  labelKey: TranslationKey
+  icon: LucideIcon
+  teinte: string
+  sommaire?: string
+} | null {
+  const section = SECTIONS.find((candidate) => sectionActive(candidate, pathname))
+  if (section) return section
+  const onglet = RACCOURCIS_MOBILES.find(
+    (entree) => entree.href !== '/' && estActif(entree, pathname),
+  )
+  if (onglet) return { ...onglet, teinte: 'var(--text-muted)', sommaire: onglet.href }
+  return null
+}
+
+/**
  * Le titre d'une page, et sa phrase d'introduction.
  *
  * Dix-sept variantes de classes pour la balise `h1` dans l'application, de
  * `text-xl` à `text-4xl` selon l'écran : le titre changeait de taille en
  * changeant de rubrique. Une seule forme, ici, et les pages l'appellent.
+ *
+ * Un seul gabarit, celui de la planche `docs/maquettes/Composants.dc.html` :
+ * la rubrique en pastille teintée, le titre, une phrase. Ni carte autour ni
+ * illustration de fond. Le titre a porté un bandeau teinté, avec l'icône de
+ * la rubrique en filigrane géant, sur une partie des pages seulement — les
+ * autres avaient un titre nu, ou un titre de section en guise de titre :
+ * trois gabarits pour une même question, « où suis-je ? ». La pastille y
+ * répond sans décor, et c'est la seule couleur de l'en-tête.
  */
 export function TitreDePage({
   children,
@@ -241,52 +275,74 @@ export function TitreDePage({
   intro?: ReactNode
   /** Une commande à droite du titre : un bouton, un lien. */
   action?: ReactNode
-  /** Un lien de retour, au-dessus du titre. */
+  /**
+   * La page parente, quand ce n'est pas la page-sommaire de la rubrique.
+   *
+   * Inutile de désigner le sommaire : le nom de la rubrique y mène déjà. Un
+   * retour vers lui est ignoré, pour ne pas poser deux liens vers la même
+   * page côte à côte.
+   */
   retour?: { href: string; label: string }
 }) {
-  /*
-    La rubrique se lit sur la page, pas seulement dans la barre du haut.
-
-    Le titre est posé dans un bandeau à la couleur de sa rubrique — le lavis
-    dans le coin, l'icône en filigrane à droite —, trouvée d'après l'adresse :
-    aucune page n'a rien à déclarer, et toutes se ressemblent dans leur
-    différence. Hors rubrique (préférences, à propos), le bandeau reste, sans
-    couleur.
-  */
+  const t = useT()
   const pathname = usePathname()
-  const section = SECTIONS.find((candidate) => sectionActive(candidate, pathname))
-  const Icone = section?.icon
+  const rubrique = rubriqueDuChemin(pathname)
+  const Icone = rubrique?.icon
+  // Sur le sommaire lui-même, la rubrique ne mène nulle part, et son nom
+  // répéterait le titre (« Jouer » au-dessus de « Jouer ») : la pastille
+  // suffit.
+  const surLeSommaire = rubrique?.sommaire === pathname
+  const lienRubrique = rubrique?.sommaire && !surLeSommaire ? rubrique.sommaire : undefined
+  const parent = retour && retour.href !== rubrique?.sommaire ? retour : undefined
 
   return (
-    <header
-      className="bandeau-page mb-6 px-5 py-6 sm:px-7 sm:py-7 lg:px-8"
-      style={section ? ({ '--teinte-page': section.teinte } as CSSProperties) : undefined}
-    >
-      {Icone && (
-        <Icone
-          aria-hidden
-          strokeWidth={1}
-          className="pointer-events-none absolute -right-8 -top-10 h-[240px] w-[240px] opacity-[0.09] sm:-right-4"
-          style={{ color: section.teinte }}
-        />
-      )}
-      <div className="relative">
-        {retour && (
-          <Link href={retour.href} className="lien mb-3 inline-flex items-center gap-1">
-            <span aria-hidden>←</span> {retour.label}
-          </Link>
-        )}
-        <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
-          {/* Un titre d'affiche, pas un titre de document : c'est lui qui
-              donne son échelle à la page, et il doit se lire depuis l'autre
-              bout de la pièce. */}
-          <h1 className="titre-affiche text-[2rem] sm:text-[2.5rem] lg:text-[2.9rem]">
-            {children}
-          </h1>
-          {action && <div className="shrink-0 pb-1">{action}</div>}
+    <header className="mb-6">
+      {rubrique && Icone && (
+        <div className="mb-2 flex flex-wrap items-center gap-x-2 text-[13px] font-semibold text-muted print:hidden">
+          <span
+            className="grid h-6 w-6 shrink-0 place-items-center rounded-[7px]"
+            style={{
+              background: `color-mix(in oklab, ${rubrique.teinte} 14%, transparent)`,
+              color: rubrique.teinte,
+            }}
+            aria-hidden
+          >
+            <Icone size={14} />
+          </span>
+          {/* Une cible de 44 px de haut, rattrapée par une marge négative :
+              la ligne reste discrète, le doigt trouve quand même le lien. */}
+          {lienRubrique ? (
+            <Link
+              href={lienRubrique}
+              className="-my-2.5 inline-flex min-h-11 items-center hover:text-[var(--text)] hover:underline"
+            >
+              {t(rubrique.labelKey)}
+            </Link>
+          ) : (
+            !surLeSommaire && <span>{t(rubrique.labelKey)}</span>
+          )}
+          {parent && (
+            <>
+              <ChevronRight
+                size={13}
+                className="shrink-0 text-faint rtl:-scale-x-100"
+                aria-hidden
+              />
+              <Link
+                href={parent.href}
+                className="-my-2.5 inline-flex min-h-11 items-center hover:text-[var(--text)] hover:underline"
+              >
+                {parent.label}
+              </Link>
+            </>
+          )}
         </div>
-        {intro && <p className="mt-3 max-w-2xl text-[16px] leading-relaxed text-muted">{intro}</p>}
+      )}
+      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+        <h1 className="titre-affiche text-[2rem] sm:text-[2.4rem]">{children}</h1>
+        {action && <div className="shrink-0">{action}</div>}
       </div>
+      {intro && <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-muted">{intro}</p>}
     </header>
   )
 }
