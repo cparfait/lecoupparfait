@@ -465,6 +465,48 @@ export class GameRoom {
     return free
   }
 
+  /**
+   * Garde un siège à quelqu'un qui n'est pas encore là.
+   *
+   * C'est l'appariement qui s'en sert : il choisit les deux joueurs et leurs
+   * couleurs depuis la file d'attente, puis chacun ouvre la partie de son
+   * côté. Sans réservation, le premier arrivé tirait sa couleur au sort et
+   * celle annoncée par le serveur pouvait être fausse — ou un tiers qui
+   * devinait l'identifiant prenait la place. Le siège est tenu au nom du
+   * compte et du navigateur : `seat` le rend à l'arrivée comme à une
+   * reconnexion.
+   *
+   * Le joueur réservé compte comme **déconnecté depuis maintenant** : s'il ne
+   * vient jamais, l'abandon automatique de `veiller` annule la partie pour
+   * celui qui, lui, est venu — sans coup joué, sans vainqueur.
+   */
+  reserver(
+    color: Color,
+    participant: {
+      userId: string | null
+      clientId: string | null
+      name: string
+      rating: number | null
+    },
+  ): void {
+    if (this.players[color]) throw new Error(`Siège ${color} déjà occupé dans ${this.slug}.`)
+    this.players[color] = {
+      userId: participant.userId,
+      clientId: participant.clientId,
+      name: participant.name,
+      rating: participant.rating,
+      sockets: new Set(),
+      connected: false,
+      disconnectedAt: this.now(),
+    }
+    if (this.players.w && this.players.b && this.status === 'waiting') {
+      this.status = 'playing'
+      this.startedAt = this.now()
+      this.startFlagWatcher()
+    }
+    this.broadcastState()
+  }
+
   /** Retire une connexion. Le joueur n'est perdu que s'il n'en a plus aucune. */
   disconnect(socketId: string): void {
     // Un spectateur qui s'en va ne déclenche rien d'autre qu'un décompte.
