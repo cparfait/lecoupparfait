@@ -171,7 +171,7 @@ export default function SeancePage() {
                       )}
                     </span>
                     <span className="mt-1 block text-[13px] leading-relaxed text-muted">
-                      {entree.consigne}
+                      {t(entree.consigne)}
                     </span>
                   </span>
                 </button>
