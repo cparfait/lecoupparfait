@@ -1,79 +1,60 @@
 'use client'
 
 /**
- * L'accueil de quelqu'un qui a un compte.
+ * L'accueil de quelqu'un qui a un compte : « Ton chemin ».
  *
- * L'accueil public vend le produit — « les échecs, enfin expliqués », ce qu'un
- * compte apporte, les chiffres du catalogue. C'est ce qu'il faut dire à un
- * visiteur, et exactement ce dont quelqu'un qui revient n'a rien à faire : il a
- * déjà choisi, il vient jouer.
+ * L'accueil public vend le produit. Celui-ci répond à une seule question :
+ * **où j'en suis, et qu'est-ce que je fais maintenant ?** — et il y répond en
+ * un seul fil, de haut en bas.
  *
- * Cet écran répond donc à une seule question : **qu'est-ce que je fais
- * maintenant ?**
+ * ── Ce qui n'allait pas ───────────────────────────────────────────────────
  *
- * ── Ce qui n'allait pas, et qui a dicté cette forme ───────────────────────
+ * La version précédente était un tableau de bord en grille : la journée sur
+ * huit colonnes, le parcours sur quatre, puis les dernières parties et les
+ * analyses. Trois niveaux de lecture se disputaient le premier regard, deux
+ * boutons pleins s'affichaient dès qu'une partie attendait, et aucune échelle
+ * de niveau ne disait « tu es ici » : le rang de carrière était une pastille,
+ * le palier n'apparaissait pas.
  *
- * La version précédente posait la bonne intention en commentaire — « l'ordre de
- * l'urgence » — et ne la tenait pas à l'écran :
+ * ── Le fil retenu ─────────────────────────────────────────────────────────
  *
- *  - **trois appels à l'action de même poids** : un bouton « Commencer la
- *    leçon », un « Jouer → » dans le défi, cinq liens « Aller jouer ». Trois
- *    invitations concurrentes, donc aucune ; le regard n'avait nulle part où se
- *    poser et la page se lisait comme un sommaire ;
- *  - **la carrière passait avant le défi**, alors qu'elle n'a aucune échéance et
- *    que le défi meurt à minuit ;
- *  - **une carte « défi du jour » qui faisait quatre choses**, dont les deux
- *    tiers de la hauteur pour les quêtes — qui ne sont pas le défi ;
- *  - **« Aller jouer » recopiait la barre de navigation.** Les cinq destinations
- *    sont déjà dans les menus du haut ; c'est le doublon qu'on a retiré ailleurs
- *    du menu déroulé et de la barre du pouce ;
- *  - **deux compteurs nommés « points »** — l'expérience de carrière et celle du
- *    jour — sur le même écran ;
- *  - **une colonne latérale presque vide** face à une colonne principale qui
- *    empilait tout.
+ *  0. Ce qui a quelqu'un à l'autre bout (une demande d'ami, ton tour dans une
+ *     partie) — seulement quand il y en a, en lignes sobres ;
+ *  1. « Bonjour, pseudo », et dessous le **rang de carrière** avec ses points
+ *     et la barre jusqu'au rang suivant ;
+ *  2. **Ton palier** : la seule échelle de niveau de la page (voir
+ *     `CartePalier`) ;
+ *  3. **Prochaine étape** : le chapitre de carrière en cours et le seul bouton
+ *     plein de la page, « Continuer » (voir `ProchaineEtape`) ;
+ *  4. la **série** et le **défi du jour**, côte à côte ;
+ *  5. deux liens au plus.
  *
- * ── La forme retenue ──────────────────────────────────────────────────────
+ * Sur bureau, le fil se coupe en deux colonnes : le chemin à gauche, la
+ * journée à droite, avec la position du défi.
  *
- *  1. **Maintenant** — une seule chose à faire, calculée par urgence (voir
- *     `prochainesChoses`), avec le seul bouton primaire de la page. Ce qui
- *     attend aussi se range en dessous, une ligne chacun.
- *  2. **Aujourd'hui** et **Ton parcours**, côte à côte : où j'en suis dans la
- *     journée, où j'en suis dans le chemin long. Deux états, pas deux
- *     destinations.
- *  3. **Tes dernières parties** — ce qu'on a fait, et la porte vers l'analyse.
- *
- * Rien n'est inventé : toutes les données viennent d'API qui existaient déjà.
+ * Rien n'est inventé : toutes les données viennent d'API et de fonctions qui
+ * existaient déjà.
  */
 
 import { useEffect, useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Flame, Gauge, History, Map, Sparkles } from 'lucide-react'
-import {
-  BOT_PERSONALITIES,
-  CHAPITRES,
-  CARRIERE_TERMINEE,
-  chapitre as chapitreNumero,
-  etapesDe,
-  prochaineEtape,
-} from '@coupparfait/core'
-import type { BotPersonality } from '@coupparfait/core'
-import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
-import clsx from 'clsx'
-import { avecElements, useT, type TranslationKey } from '@/lib/i18n/index.tsx'
+import { Award, ChevronRight, Flame, Gauge, Map, Sun, Zap } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { rangPour, type Progression } from '@coupparfait/core'
+import { Board2D } from '@/components/board/Board2D.tsx'
+import { Skeleton } from '@/components/ui/index.tsx'
+import { avecElements, useT } from '@/lib/i18n/index.tsx'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
-import { Button, ButtonLink, Card, Chip, Skeleton } from '@/components/ui/index.tsx'
-import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { useCarriere } from '@/lib/carriere/useCarriere.ts'
-import { libelleDeSuite, titreDEtape } from '@/lib/carriere/textes.ts'
-import { listerAnalyses, type AnalyseEnregistree } from '@/lib/analysis/enregistrees.ts'
 import { chargerPartieEnCours, type PartieEnCours } from '@/lib/game/partieEnCours.ts'
-import { QUETES_HORS_DEFI, XP_TOTAL, xpPour } from '@/lib/daily/quetes.ts'
+import { QUETES_HORS_DEFI, XP_TOTAL, quetePar } from '@/lib/daily/quetes.ts'
 import { jourLocal, queteFaite } from '@/lib/daily/quotidien.ts'
 import { useQuotidien } from '@/lib/daily/useQuotidien.ts'
 import { DemandesDAmi } from '@/components/social/DemandesDAmi.tsx'
-import { PointsCarriere } from '@/components/carriere/PointsCarriere.tsx'
-import { Aujourdhui, type TrancheDefi } from './Aujourdhui.tsx'
+import { CartePalier } from './CartePalier.tsx'
 import { Maintenant } from './Maintenant.tsx'
+import { ProchaineEtape } from './ProchaineEtape.tsx'
 import { prochainesChoses, type EtatAccueil } from './prochainesChoses.ts'
 
 /** Une partie contre quelqu'un, encore ouverte dans la mémoire du serveur temps réel. */
@@ -94,7 +75,7 @@ interface PartieEnDirect {
  *
  * Le profil rend `moveCount` mais jamais les coups : il sait dire qu'une partie
  * a eu lieu, pas la rouvrir. La route privée rend le PGN, ce qui change la
- * nature de la liste — on passe d'un constat à une porte.
+ * nature du lien — on passe d'un constat à une porte.
  */
 interface PartieJouee {
   slug: string
@@ -102,61 +83,11 @@ interface PartieJouee {
   adversaire: string | null
   issue: 'gagnee' | 'perdue' | 'nulle'
   result: string | null
-  opening: string | null
-  coups: number
-  jouee: string
   pgn: string
 }
 
-const TEINTE: Record<PartieJouee['issue'], string> = {
-  gagnee: 'var(--q-best)',
-  perdue: 'var(--q-blunder)',
-  nulle: 'var(--q-forced)',
-}
-
-/**
- * Le score, écrit comme sur une feuille de partie.
- *
- * « 1–0 », « 0–1 », « ½–½ » : c'est la notation que tout joueur lit d'un coup
- * d'œil, et elle dit *comment* la partie s'est finie là où un trait de couleur
- * ne disait que « bien » ou « mal ». Depuis le camp du joueur, pour qu'un
- * « 1 » à gauche soit toujours *sa* victoire.
- */
-function score(partie: PartieJouee): string {
-  if (partie.issue === 'nulle') return '½–½'
-  return partie.issue === 'gagnee' ? '1–0' : '0–1'
-}
-
-/**
- * L'adversaire artificiel derrière un nom, s'il y en a un.
- *
- * La partie ne garde que le nom affiché — « Pion », « Rempart » —, qui est
- * celui d'une personnalité traduite. On le retrouve en comparant aux noms
- * traduits ; un pseudo humain ne correspond à rien, et c'est alors une
- * initiale qui tient lieu de portrait.
- */
-function personnaliteDe(nom: string | null, t: ReturnType<typeof useT>): BotPersonality | null {
-  if (!nom) return null
-  for (const personnalite of Object.values(BOT_PERSONALITIES)) {
-    if (tCoeur(t, personnalite.name) === nom) return personnalite
-  }
-  return null
-}
-
-const ISSUE: Record<PartieJouee['issue'], TranslationKey> = {
-  gagnee: 'homeIn.won',
-  perdue: 'homeIn.lost',
-  nulle: 'game.draw',
-}
-
-/**
- * Trois, et non cinq.
- *
- * La liste des parties jouées prenait autant de hauteur que tout ce qui est
- * actionnable sur la page. On en garde de quoi reconnaître sa dernière séance ;
- * « tout voir » mène au profil, dont c'est le métier.
- */
-const PARTIES_MONTREES = 3
+/** L'ancre visée par le panneau de la série, dans la barre du haut. */
+const ANCRE_JOURNEE = 'aujourdhui'
 
 /** Dépose la partie où l'écran d'analyse va la chercher, puis y va. */
 function analyser(partie: PartieJouee): void {
@@ -175,22 +106,13 @@ function analyser(partie: PartieJouee): void {
 export function AccueilConnecte({ pseudo }: { pseudo: string }) {
   const t = useT()
   const progression = useCarriere()
-  const { etat: journee } = useQuotidien()
+  const { etat: journee, xp } = useQuotidien()
 
   const [reprise, setReprise] = useState<PartieEnCours | null | undefined>(undefined)
   const [enDirect, setEnDirect] = useState<PartieEnDirect[] | null>(null)
-  const [parties, setParties] = useState<PartieJouee[] | null>(null)
-  const [analyses, setAnalyses] = useState<AnalyseEnregistree[] | null>(null)
+  const [derniere, setDerniere] = useState<PartieJouee | null | undefined>(undefined)
   const [correspondances, setCorrespondances] = useState<number | null>(null)
-  const [defi, setDefi] = useState<{
-    tranche: TrancheDefi | null
-    niveau: number | null
-    fen: string | null
-  }>({
-    tranche: null,
-    niveau: null,
-    fen: null,
-  })
+  const [positionDuJour, setPositionDuJour] = useState<string | null>(null)
 
   useEffect(() => {
     let vivant = true
@@ -202,12 +124,12 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
       .then((d: { games?: PartieEnDirect[] }) => vivant && setEnDirect(d.games ?? []))
       .catch(() => vivant && setEnDirect([]))
 
-    void fetch(`/api/parties/terminee?limite=${PARTIES_MONTREES}`, { cache: 'no-store' })
+    // Une seule : elle sert au lien « revoir ta dernière partie ». La liste
+    // complète est au profil, dont c'est le métier.
+    void fetch('/api/parties/terminee?limite=1', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : { parties: [] }))
-      .then((d: { parties?: PartieJouee[] }) => vivant && setParties(d.parties ?? []))
-      .catch(() => vivant && setParties([]))
-
-    void listerAnalyses().then((l) => vivant && setAnalyses(l.slice(0, 3)))
+      .then((d: { parties?: PartieJouee[] }) => vivant && setDerniere(d.parties?.[0] ?? null))
+      .catch(() => vivant && setDerniere(null))
 
     void fetch('/api/correspondance', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : { games: [] }))
@@ -216,17 +138,11 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
       })
       .catch(() => vivant && setCorrespondances(0))
 
-    // La tranche du jour et la cote du défi : ce qui reste à en dire une fois
-    // qu'il est résolu, et les paliers au-dessus.
+    // La position du défi, montrée sur bureau à côté de la carte du défi.
     void fetch(`/api/defi-du-jour?jour=${jourLocal()}`, { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d: { tranche?: TrancheDefi; puzzle?: { rating: number; fen?: string } } | null) => {
-        if (vivant)
-          setDefi({
-            tranche: d?.tranche ?? null,
-            niveau: d?.puzzle?.rating ?? null,
-            fen: d?.puzzle?.fen ?? null,
-          })
+      .then((d: { puzzle?: { fen?: string } } | null) => {
+        if (vivant) setPositionDuJour(d?.puzzle?.fen ?? null)
       })
       .catch(() => undefined)
 
@@ -235,454 +151,282 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
     }
   }, [pseudo])
 
-  const chapitre = progression ? chapitreNumero(progression.chapter) : null
-  const suite = chapitre && progression ? prochaineEtape(chapitre, progression) : null
-  const carriereEnCours =
-    progression != null && progression.chapter < CARRIERE_TERMINEE && chapitre != null
   const defiFait = journee ? queteFaite(journee, 'defi') : null
 
-  /*
-    On attend de savoir avant de proposer.
+  const chargement = reprise === undefined || enDirect === null || correspondances === null
 
-    Une proposition affichée puis remplacée une demi-seconde plus tard est pire
-    qu'un instant d'attente : on commence à lire, et la phrase change sous les
-    yeux. Les trois sources qui décident de l'ordre sont donc attendues.
-  */
-  const chargement =
-    reprise === undefined ||
-    enDirect === null ||
-    correspondances === null ||
-    defiFait === null ||
-    progression === undefined
-
-  const choses = useMemo(() => {
+  // Seules les urgences passent par `prochainesChoses` ici : la journée et la
+  // carrière ont chacune leur carte, et les reprendre en tête ferait doublon.
+  const urgentes = useMemo(() => {
     const etat: EtatAccueil = {
       enDirect: enDirect ?? [],
       correspondances: correspondances ?? 0,
       reprise: reprise ? { moves: reprise.moves.length } : null,
-      defiFait,
-      quetes: {
-        restantes: journee
-          ? // Le défi a sa propre proposition, qui passe avant : voir
-            // `prochainesChoses`. Le recompter ici en ferait deux.
-            QUETES_HORS_DEFI.filter((quete) => !queteFaite(journee, quete.id)).map(
-              ({ label, lien, action }) => ({ label, lien, action }),
-            )
-          : [],
-        xp: journee ? xpPour(journee.avancement) : 0,
-        total: XP_TOTAL,
-      },
-      carriere:
-        carriereEnCours && chapitre && progression
-          ? {
-              chapitre: chapitre.titre,
-              numero: chapitre.numero,
-              libelle: suite
-                ? libelleDeSuite(t, suite, chapitre, progression)
-                : t('homeIn.seeTheMap'),
-              lien: suite?.lien ?? '/carriere',
-            }
-          : null,
+      defiFait: null,
+      quetes: { restantes: [], xp: 0, total: XP_TOTAL },
+      carriere: null,
     }
-    return prochainesChoses(etat, t)
-  }, [
-    enDirect,
-    correspondances,
-    reprise,
-    defiFait,
-    journee,
-    carriereEnCours,
-    chapitre,
-    progression,
-    suite,
-    t,
-  ])
+    return prochainesChoses(etat, t).filter((chose) =>
+      ['tonTour', 'correspondance', 'partieOuverte', 'repriseOrdinateur'].includes(chose.id),
+    )
+  }, [enDirect, correspondances, reprise, t])
 
-  // Ce qui a quelqu'un à l'autre bout, ou une partie qui attend : la seule
-  // chose qui passe au-dessus de la journée.
-  const urgentes = choses.filter((chose) =>
-    ['tonTour', 'correspondance', 'partieOuverte', 'repriseOrdinateur'].includes(chose.id),
-  )
+  // La première quête qui reste, hors défi : le premier des deux liens.
+  const queteSuivante = journee
+    ? (QUETES_HORS_DEFI.find((quete) => !queteFaite(journee, quete.id)) ?? null)
+    : null
+
+  const liens: Array<{
+    cle: string
+    libelle: string
+    icone: LucideIcon
+    teinte: string
+    href?: string
+    onClick?: () => void
+  }> = []
+  if (queteSuivante) {
+    liens.push({
+      cle: 'quete',
+      libelle: t(queteSuivante.label),
+      icone: Sun,
+      teinte: 'var(--rub-entrainer)',
+      href: queteSuivante.lien,
+    })
+  } else {
+    liens.push({
+      cle: 'carte',
+      libelle: t('homeIn.seeTheMap'),
+      icone: Map,
+      teinte: 'var(--rub-jouer)',
+      href: '/carriere',
+    })
+  }
+  if (derniere) {
+    liens.push({
+      cle: 'derniere',
+      libelle: derniere.adversaire
+        ? t('chemin.reviewLastGameAgainst', { adversaire: derniere.adversaire })
+        : t('chemin.reviewLastGame'),
+      icone: Gauge,
+      teinte: 'var(--rub-analyser)',
+      onClick: () => analyser(derniere),
+    })
+  } else if (derniere === null) {
+    liens.push({
+      cle: 'analyser',
+      libelle: t('homeIn.analyseAGame'),
+      icone: Gauge,
+      teinte: 'var(--rub-analyser)',
+      href: '/analyse',
+    })
+  }
+
+  const lienDuDefi = quetePar('defi')?.lien ?? '/puzzles?defi=1'
+  const auTrait = positionDuJour?.split(' ')[1] === 'b' ? 'b' : 'w'
 
   return (
-    <div className="entree mx-auto w-full max-w-[1280px] px-4 py-5 sm:px-6 lg:py-6">
-      {/* ── L'en-tête : qui je suis, où j'en suis ──────────────────────
-          Les deux compteurs sont nommés. « 2560 points » seul, à côté d'un
-          « 45 / 80 points » plus bas, laissait deviner un rapport entre les
-          deux — il n'y en a aucun. */}
-      <header className="mb-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
-        <h1 className="titre-affiche text-[2rem] sm:text-[2.4rem] lg:text-[2.75rem]">
-          {avecElements(t('homeIn.hello'), {
-            pseudo: <span className="text-muted">{pseudo}</span>,
-          })}
-        </h1>
-        <div className="flex flex-wrap items-center gap-2">
-          {/* La série ne s'affiche qu'à partir de `sm`.
-              La flamme de la barre du haut porte le même chiffre, à trois
-              centimètres au-dessus et sur toutes les tailles d'écran. Sur
-              téléphone, où l'en-tête passe à la ligne, la pastille prenait une
-              ligne entière pour répéter ce qu'on venait de lire. Au-delà, elle
-              reste : elle nomme ce que la flamme ne fait que compter. */}
-          {/* Le pliage est porté par une enveloppe, et non par une classe posée
-              sur la pastille : `Chip` s'ouvre sur `inline-flex`, et deux
-              utilitaires d'affichage sur le même élément se départagent dans
-              l'ordre de la feuille de style, pas dans celui des classes. */}
-          {journee != null && journee.serie > 0 && (
-            <div className="hidden sm:block">
-              <Chip tone="warning" title={t('homeIn.streakTitle')}>
-                <Flame size={11} aria-hidden />
-                {t(journee.serie > 1 ? 'streak.inARow' : 'streak.inARowOne', { n: journee.serie })}
-              </Chip>
-            </div>
+    <div className="entree mx-auto w-full max-w-[1200px] px-4 py-4 sm:px-6 lg:py-9">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-7">
+        {/* ── Le chemin ─────────────────────────────────────────────── */}
+        <div className="flex min-w-0 flex-col gap-3.5 lg:gap-5">
+          <header className="flex flex-col gap-1.5 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
+            <h1 className="titre-affiche text-[1.65rem] lg:text-[2.5rem]">
+              {avecElements(t('homeIn.hello'), { pseudo: <span>{pseudo}</span> })}
+            </h1>
+            {progression === undefined ? (
+              <Skeleton className="h-5 w-56" />
+            ) : progression ? (
+              <RangDeCarriere progression={progression} />
+            ) : null}
+          </header>
+
+          {/* Quelqu'un demande à te connaître : rien ne s'affiche sans demande. */}
+          <DemandesDAmi />
+
+          {/* Rien tant qu'on ne sait pas : un squelette qui s'efface aussitôt
+              chez tous ceux que rien n'attend ferait sauter la page. */}
+          {!chargement && urgentes.length > 0 && (
+            <Maintenant choses={urgentes} chargement={false} />
           )}
-          {/* Les points s'ouvrent : voir `PointsCarriere`. */}
-          {progression && <PointsCarriere progression={progression} />}
-        </div>
-      </header>
 
-      {/* ── 0. Quelqu'un demande à te connaître ────────────────────────
-          Avant « Maintenant », et c'est le seul bloc qui a le droit de passer
-          devant : une personne attend une réponse, et elle l'attendait
-          jusqu'ici dans une page qu'on n'ouvre jamais sans raison. Rien ne
-          s'affiche quand il n'y a aucune demande. */}
-      <DemandesDAmi className="mb-4" />
-
-      {/* ── Ce qui presse, et seulement ça ──────────────────────────────
-          « Maintenant » portait tout ce qu'il y avait à faire, défi et
-          carrière compris — et le défi se retrouvait dit deux fois, ici en
-          grand et dans les quêtes juste dessous. Il ne garde que ce qui a
-          quelqu'un à l'autre bout ou une partie ouverte : le reste a sa
-          carte, et une seule. */}
-      {urgentes.length > 0 && (
-        <div className="mb-4">
-          <Maintenant choses={urgentes} chargement={chargement} />
-        </div>
-      )}
-
-      {/* ── Une grille, et elle tient dans l'écran ─────────────────────
-          Les blocs s'empilaient, et sur un écran de bureau il fallait faire
-          défiler pour voir ses dernières parties. Un tableau de bord qu'on
-          fait défiler n'en est plus un.
-
-          Douze colonnes, deux rangées. En haut, la journée sur huit — défi,
-          position, quêtes, en un seul bloc — et le parcours sur quatre. En
-          bas, les parties et les analyses, six chacune. Chaque carte remplit
-          sa case (`h-full`). Sous `lg`, tout s'empile dans l'ordre
-          d'urgence. */}
-      <div className="grid gap-4 lg:grid-cols-12">
-        <div className="lg:col-span-8">
-          <Aujourdhui
-            defiFait={defiFait === true}
-            tranche={defi.tranche}
-            niveauDefi={defi.niveau}
-            defi={choses.find((chose) => chose.id === 'defi') ?? null}
-            position={defi.fen}
-            chargement={chargement}
-          />
+          <CartePalier />
+          <ProchaineEtape progression={progression} />
         </div>
 
-        {progression === undefined ? (
-          <Skeleton className="h-48 w-full lg:col-span-4" />
-        ) : carriereEnCours && chapitre && progression ? (
-          <Card className="h-full overflow-hidden lg:col-span-4">
-            {/* La teinte de « Jouer », dont la carrière fait partie — et non
-                plus celle du chapitre : douze chapitres, douze couleurs, et
-                l'accueil changeait de palette à chaque étape. */}
-            <EnTeteDeCarte
-              titre={t('homeIn.yourPath')}
-              icone={<Map size={14} aria-hidden />}
-              teinte="var(--rub-jouer)"
-              fin={t('homeIn.chapterOf', { n: chapitre.numero, total: CHAPITRES.length })}
-            />
-            <div className="p-4">
-              {/* Le numéro du chapitre, en grand, à côté de son titre : c'est
-                  la seule chose qu'on retient d'un chemin en douze étapes —
-                  où l'on en est. La jauge en dessous compte les chapitres, un
-                  segment chacun, comme les cases d'une colonne. */}
-              <div className="flex items-start gap-4">
-                <span
-                  className="chiffre-affiche shrink-0 text-[2.4rem] leading-none text-[var(--rub-jouer)]"
-                  aria-hidden
-                >
-                  {String(chapitre.numero).padStart(2, '0')}
-                </span>
-                <div className="min-w-0 pt-0.5">
-                  <p className="font-display text-[1.05rem] font-bold leading-tight">
-                    {chapitre.titre}
-                  </p>
-                  <p className="mt-1 text-[13px] leading-snug text-muted">{chapitre.objectif}</p>
-                </div>
-              </div>
-              <div
-                className="mt-3 grid gap-1"
-                style={{ gridTemplateColumns: `repeat(${CHAPITRES.length}, minmax(0, 1fr))` }}
-                role="progressbar"
-                aria-valuenow={chapitre.numero}
-                aria-valuemin={1}
-                aria-valuemax={CHAPITRES.length}
-                aria-label={t('homeIn.yourPath')}
-              >
-                {CHAPITRES.map((c, i) => (
-                  <span
-                    key={c.numero}
-                    className={clsx(
-                      'h-1.5 rounded-full',
-                      i + 1 < chapitre.numero
-                        ? 'bg-[var(--rub-jouer)]'
-                        : i + 1 === chapitre.numero
-                          ? 'bg-[var(--rub-jouer)] opacity-60'
-                          : 'bg-surface-strong',
-                    )}
-                  />
-                ))}
-              </div>
-
-              {/* Les trois temps du chapitre, en une ligne chacun : c'est ce
-                  qui manquait pour savoir combien il reste avant le suivant. */}
-              <ul className="mt-3 space-y-1">
-                {etapesDe(chapitre, progression).map((etape) => (
-                  <li
-                    key={etape.cle}
-                    className={clsx(
-                      'flex items-center gap-2 text-[13px]',
-                      etape.termine ? 'text-faint line-through' : 'text-muted',
-                    )}
-                  >
-                    <span
-                      aria-hidden
-                      className={clsx(
-                        'grid h-4 w-4 shrink-0 place-items-center rounded-full border text-[9px] font-bold',
-                        etape.termine
-                          ? 'border-[var(--q-best)] bg-[var(--q-best)] text-white'
-                          : 'border-line',
-                      )}
-                    >
-                      {etape.termine ? '✓' : ''}
+        {/* ── La journée ────────────────────────────────────────────── */}
+        {/* `scroll-mt-20` : l'en-tête est collant, et sans cette marge la
+            journée s'arrêterait juste dessous quand la flamme y renvoie. */}
+        <aside
+          id={ANCRE_JOURNEE}
+          className="flex scroll-mt-20 flex-col gap-3.5 lg:gap-4 lg:pt-[68px]"
+        >
+          <div className="grid grid-cols-2 gap-2.5 lg:gap-3">
+            <div className="glass flex flex-col gap-1.5 p-3.5 lg:col-span-2 lg:p-4">
+              <span className="flex items-center gap-1.5 text-[12px] font-semibold text-faint">
+                <Flame size={15} className="shrink-0 text-[var(--rub-entrainer)]" aria-hidden />
+                {t('chemin.streak')}
+              </span>
+              {journee === null ? (
+                <Skeleton className="h-7 w-20" />
+              ) : (
+                <>
+                  <span className="font-display text-[1.4rem] font-bold leading-tight">
+                    {t(journee.serie > 1 ? 'chemin.days' : 'chemin.daysOne', {
+                      n: journee.serie,
+                    })}
+                  </span>
+                  {journee.meilleureSerie > journee.serie && (
+                    <span className="text-[12px] text-faint">
+                      {t('streak.record', { n: journee.meilleureSerie })}
                     </span>
-                    <span className="min-w-0 flex-1 truncate">{titreDEtape(t, etape)}</span>
-                    {etape.total > 1 && (
-                      <span className="shrink-0 tabular-nums text-[12px] text-faint">
-                        {etape.fait} / {etape.total}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-
-              {/* L'étape en cours a son bouton ici, et nulle part ailleurs :
-                  la carrière n'est plus reprise dans « Maintenant ». La carte
-                  reste à un clic, en dessous, en petit. */}
-              <ButtonLink
-                href={suite?.lien ?? '/carriere'}
-                variant="primary"
-                size="md"
-                fullWidth
-                className="mt-4"
-                icon={<ArrowRight size={15} />}
-              >
-                {suite ? libelleDeSuite(t, suite, chapitre, progression) : t('homeIn.seeTheMap')}
-              </ButtonLink>
-              {suite && (
-                <Link
-                  href="/carriere"
-                  className="mt-2 block text-center text-[12px] font-medium text-faint hover:text-accent"
-                >
-                  {t('homeIn.seeTheMap')}
-                </Link>
+                  )}
+                </>
               )}
             </div>
-          </Card>
-        ) : (
-          <Card className="p-4 lg:col-span-4">
-            <p className="font-display text-base font-bold leading-tight">
-              {t(
-                progression && progression.chapter >= CARRIERE_TERMINEE
-                  ? 'homeIn.careerDone'
-                  : 'homeIn.startCareer',
-              )}
-            </p>
-            <p className="mt-1 text-[12px] leading-snug text-muted">{t('homeIn.careerBlurb')}</p>
-            <ButtonLink href="/carriere" variant="secondary" size="sm" className="mt-3">
-              {t(
-                progression && progression.chapter >= CARRIERE_TERMINEE
-                  ? 'homeIn.reviewPath'
-                  : 'homeIn.start',
-              )}
-            </ButtonLink>
-          </Card>
-        )}
-
-        {/* ── Ce qu'on a fait ────────────────────────────────────────────
-          En bas, et c'est sa place : on ne rouvre pas l'application pour
-          relire ce qu'on a joué hier. Mais les lignes mènent à l'analyse, et
-          le disent maintenant — un chevron gris ne l'annonçait pas. */}
-        {(parties === null || parties.length > 0 || (analyses?.length ?? 0) > 0) && (
-          <>
-            <Card className="h-full overflow-hidden lg:col-span-6">
-              {/* La teinte d'« Analyse » : c'est là que mène chaque ligne. */}
-              <EnTeteDeCarte
-                titre={t('homeIn.lastGames')}
-                icone={<History size={14} aria-hidden />}
-                teinte="var(--rub-analyser)"
-                fin={
-                  <Link
-                    href={`/profil/${encodeURIComponent(pseudo)}`}
-                    className="text-accent hover:underline"
-                  >
-                    {t('homeIn.seeAll')}
-                  </Link>
-                }
-              />
-
-              {parties === null ? (
-                <div className="p-4">
-                  <Skeleton className="h-16 w-full" />
-                </div>
-              ) : parties.length === 0 ? (
-                <div className="px-4 py-5 text-center">
-                  <p className="text-[14px] text-muted">{t('homeIn.noGameSaved')}</p>
-                  <ButtonLink
-                    href="/jouer/ordinateur"
-                    variant="secondary"
-                    size="sm"
-                    className="mt-3"
-                  >
-                    {t('homeIn.playAGame')}
-                  </ButtonLink>
-                </div>
+            {/* Le défi à droite de la série sur téléphone, en petit ; en tête
+                de colonne sur bureau, en grand, avec sa position. Une fois
+                relevé, la carte ne mène plus nulle part : rejouer la position
+                ne rapporte rien. */}
+            <CarteDuDefi
+              href={defiFait ? null : lienDuDefi}
+              className="glass flex flex-col gap-1.5 p-3.5 lg:order-first lg:col-span-2 lg:gap-3 lg:p-5"
+            >
+              <span className="flex items-center gap-1.5 text-[12px] font-semibold text-faint lg:text-[15px] lg:text-ink">
+                <Zap size={15} className="shrink-0 text-[var(--rub-entrainer)]" aria-hidden />
+                {t('chemin.daily')}
+              </span>
+              {defiFait === null ? (
+                <Skeleton className="h-7 w-20" />
               ) : (
-                <ul>
-                  {parties.map((partie) => {
-                    const personnalite = personnaliteDe(partie.adversaire, t)
-                    return (
-                      <li key={partie.slug} className="border-b border-line/40 last:border-0">
-                        <button
-                          type="button"
-                          onClick={() => analyser(partie)}
-                          className="group flex w-full items-center gap-3 px-4 py-2 text-left transition-colors hover:bg-surface-hover"
-                        >
-                          {/* Le portrait de l'adversaire, quand c'est l'un des
-                          nôtres ; l'initiale du pseudo sinon. On reconnaît
-                          Rempart à sa tête avant de lire son nom. */}
-                          {personnalite ? (
-                            <PortraitAdversaire
-                              personality={personnalite}
-                              size={38}
-                              className="shrink-0 rounded-[9px]"
-                            />
-                          ) : (
-                            <span
-                              className="grid h-[38px] w-8 shrink-0 place-items-center rounded-[9px] bg-surface-strong font-display text-base font-bold text-muted"
-                              aria-hidden
-                            >
-                              {(partie.adversaire ?? '?').slice(0, 1).toUpperCase()}
-                            </span>
-                          )}
-                          <span className="min-w-0 flex-1">
-                            <span className="block truncate text-[14px]">
-                              {avecElements(t('common.versus'), {
-                                nom: (
-                                  <strong className="font-semibold">
-                                    {partie.adversaire ?? t('homeIn.anOpponent')}
-                                  </strong>
-                                ),
-                              })}
-                            </span>
-                            <span className="block truncate text-[12px] text-faint">
-                              {partie.opening ?? t('homeIn.unlistedOpening')} ·{' '}
-                              {t('homeIn.halfMoves', { n: partie.coups })}
-                            </span>
-                          </span>
-                          {/* Le score en notation, dans la couleur de l'issue :
-                          « 1–0 » se lit plus vite que « Gagnée », et c'est
-                          la langue du jeu. */}
-                          <span
-                            className="chiffre-affiche shrink-0 text-[1.15rem]"
-                            style={{ color: TEINTE[partie.issue] }}
-                            title={t(ISSUE[partie.issue])}
-                          >
-                            {score(partie)}
-                          </span>
-                          {/* Le mot, et pas seulement l'icône : rien ne disait que
-                          cliquer une ligne ouvrait l'analyse. */}
-                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-surface-strong text-muted ring-1 ring-line transition-all group-hover:bg-accent group-hover:text-[var(--accent-contrast)] group-hover:ring-transparent">
-                            <Gauge size={14} aria-hidden />
-                            <span className="sr-only">{t('bits.analyse')}</span>
-                          </span>
-                        </button>
-                      </li>
-                    )
-                  })}
-                </ul>
+                <span className="font-display text-[1.4rem] font-bold leading-tight lg:hidden">
+                  {t(defiFait ? 'chemin.dailyDone' : 'chemin.dailyTodo')}
+                </span>
               )}
-            </Card>
+              {!defiFait && positionDuJour && (
+                <span className="mx-auto hidden w-[240px] lg:block">
+                  <span className="block overflow-hidden rounded-[10px]">
+                    <Board2D
+                      fen={positionDuJour}
+                      orientation={auTrait}
+                      playable={null}
+                      allowAnnotations={false}
+                    />
+                  </span>
+                  <span className="mt-1.5 block text-center text-[12px] text-faint">
+                    {t(auTrait === 'w' ? 'puzzles.whiteToPlay' : 'puzzles.blackToPlay')}
+                  </span>
+                </span>
+              )}
+              <span className="text-[12px] font-semibold text-[var(--accent-text)] lg:text-[14px]">
+                {defiFait
+                  ? t('chemin.dailyDoneHint', { xp, total: XP_TOTAL })
+                  : t('chemin.dailyTodoHint')}
+              </span>
+            </CarteDuDefi>
+          </div>
 
-            {analyses && analyses.length > 0 ? (
-              <Card className="h-full overflow-hidden lg:col-span-6">
-                <EnTeteDeCarte
-                  titre={t('homeIn.yourAnalyses')}
-                  icone={<Gauge size={14} aria-hidden />}
-                  fin={
-                    <Link href="/analyse" className="text-accent hover:underline">
-                      {t('homeIn.seeAll')}
-                    </Link>
-                  }
-                />
-                <ul>
-                  {analyses.map((analyse) => (
-                    <li
-                      key={analyse.id}
-                      className="flex items-center gap-3 border-b border-line/40 px-4 py-2 text-[14px] last:border-0"
+          {liens.length > 0 && (
+            <nav
+              aria-label={t('chemin.alsoForYou')}
+              className="glass flex flex-col overflow-hidden"
+            >
+              {liens.map(({ cle, libelle, icone: Icone, teinte, href, onClick }) => {
+                const contenu = (
+                  <>
+                    <span
+                      className="grid h-8 w-8 shrink-0 place-items-center rounded-[10px]"
+                      style={{
+                        background: `color-mix(in oklab, ${teinte} 16%, transparent)`,
+                        color: teinte,
+                      }}
+                      aria-hidden
                     >
-                      {/* Les deux camps, en deux pastilles : blanche et noire,
-                        comme les pièces. C'est ce qu'une analyse contient. */}
-                      <span className="flex shrink-0 -space-x-1.5" aria-hidden>
-                        <span className="h-5 w-5 rounded-full border border-line-strong bg-[var(--eval-white)]" />
-                        <span className="h-5 w-5 rounded-full border border-line-strong bg-[var(--eval-black)]" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate">
-                          {t('homeIn.whiteVsBlack', {
-                            blancs: analyse.whiteName ?? t('common.white'),
-                            noirs: analyse.blackName ?? t('common.black'),
-                          })}
-                        </span>
-                        <span className="block truncate text-[12px] text-faint">
-                          {analyse.opening ?? t('homeIn.noOpeningListed')}
-                        </span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            ) : (
-              /* Pas d'analyse conservée : plutôt qu'une carte vide, on dit à quoi
-               sert la colonne. C'est la seule invitation de la page, et elle
-               vise ce qu'on ne pense pas à faire tout seul. */
-              <Card className="flex h-full flex-col overflow-hidden lg:col-span-6">
-                {/* Le même bandeau que ses voisines, alors que ce n'est pas une
-                  carte d'état : les quatre blocs du bas s'ouvrent ainsi sur la
-                  même ligne, et l'on sait de quoi parle chacun sans le lire en
-                  entier. */}
-                <EnTeteDeCarte
-                  titre={t('homeIn.getAnalysed')}
-                  icone={<Sparkles size={14} aria-hidden />}
-                />
-                <div className="flex flex-1 flex-col justify-center p-4">
-                  <p className="text-[12px] leading-relaxed text-muted">
-                    {t('homeIn.getAnalysedHint')}
-                  </p>
-                  <Link href="/analyse" className="mt-3">
-                    <Button variant="secondary" size="sm" fullWidth icon={<Gauge size={14} />}>
-                      {t('homeIn.analyseAGame')}
-                    </Button>
+                      <Icone size={17} />
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-[14px]">{libelle}</span>
+                    <ChevronRight
+                      size={16}
+                      className="shrink-0 text-faint rtl:-scale-x-100"
+                      aria-hidden
+                    />
+                  </>
+                )
+                const classes =
+                  'flex min-h-14 w-full items-center gap-3 border-b border-line/60 px-3.5 text-start transition-colors last:border-0 hover:bg-surface-hover'
+                return href ? (
+                  <Link key={cle} href={href} className={classes}>
+                    {contenu}
                   </Link>
-                </div>
-              </Card>
-            )}
-          </>
-        )}
+                ) : (
+                  <button key={cle} type="button" onClick={onClick} className={classes}>
+                    {contenu}
+                  </button>
+                )
+              })}
+            </nav>
+          )}
+        </aside>
       </div>
     </div>
+  )
+}
+
+/**
+ * Le rang de carrière et ses points, sous le bonjour.
+ *
+ * C'est la seule mesure de progression qu'on montre en tête — une décision
+ * prise avec la refonte : les points récompensent ce qu'on a fait, et le rang
+ * suivant dit ce qui reste à faire. La barre compte l'avancement dans le rang
+ * courant, pas depuis zéro.
+ */
+function RangDeCarriere({ progression }: { progression: Progression }) {
+  const t = useT()
+  const etat = rangPour(progression.xp)
+  const nom = tCoeur(t, etat.rang.nom)
+
+  return (
+    <Link
+      href="/carriere"
+      aria-label={t('chemin.rankAria', { rang: nom, xp: progression.xp })}
+      className="flex min-h-11 flex-wrap items-center gap-x-2 gap-y-1 text-[12px] font-semibold text-muted lg:glass lg:px-3.5 lg:py-2 lg:text-[14px] lg:text-ink"
+    >
+      <Award size={14} className="shrink-0 text-[var(--accent-text)]" aria-hidden />
+      {t('chemin.rankPoints', { rang: nom, xp: progression.xp })}
+      <span
+        className="block h-1 w-14 overflow-hidden rounded-full bg-surface-strong lg:h-[5px] lg:w-28"
+        aria-hidden
+      >
+        <span
+          className="block h-full rounded-full bg-accent"
+          style={{ width: `${etat.fraction * 100}%` }}
+        />
+      </span>
+      <span className="font-medium text-faint lg:text-[12px]">
+        {etat.suivant
+          ? t('chemin.nextRankAt', {
+              rang: tCoeur(t, etat.suivant.nom),
+              seuil: etat.suivant.seuil,
+            })
+          : t('chemin.topRank')}
+      </span>
+    </Link>
+  )
+}
+
+/** Un lien tant que le défi attend, un simple bloc une fois qu'il est relevé. */
+function CarteDuDefi({
+  href,
+  className,
+  children,
+}: {
+  href: string | null
+  className: string
+  children: ReactNode
+}) {
+  if (!href) return <div className={className}>{children}</div>
+  return (
+    <Link href={href} className={`${className} transition-colors hover:bg-surface-hover`}>
+      {children}
+    </Link>
   )
 }
