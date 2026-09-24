@@ -274,29 +274,30 @@ chaque fusion, typecheck, tests, prettier et eslint passent.
 
 ### Fait
 
-| Point            | Correction                                                                                                                                                  |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| L1               | Relais IA : redirections refusées, IP épinglée, IPv6 normalisée, limiteur (`scripts/check-relais-ia.mjs`)                                                   |
-| L2               | `ipClient` / `adresseDe` unique selon `TRUST_PROXY`, quota de connexion par pseudo seul                                                                     |
-| L4               | Correspondance : écriture conditionnelle, plus de résurrection                                                                                              |
-| L5               | Un seul barème de cadence ; `check-partie-terminee` importe la vraie règle                                                                                  |
-| L6               | `terminee` : 400 sur FEN invalide, types et tailles bornés                                                                                                  |
-| L7               | Salons plafonnés (`MAX_ROOMS`, `MAX_ROOMS_PER_IP`), `rated` réservé à un hôte connecté                                                                      |
-| L9               | `/api/import` limité                                                                                                                                        |
-| L10              | Tests de routes web (`apps/web/test`, `npm test -w @coupparfait/web`) : handlers appelés directement, sans base ni réseau                                   |
-| N1               | `botLevelAvecStyle` : le style imposé est celui qui joue                                                                                                    |
-| N2               | Carrière de 100 à 1 850 ; le ch. 12 garde la force du 11 (voir « À trancher »)                                                                              |
-| N3, N11, N13     | « Vingt-cinq » purgé, nombres interpolés, `check-lessons` compare README et menu au réel                                                                    |
-| N5               | Une seule fonction d'adversaire conseillé (`suggestedLevel`)                                                                                                |
-| N6               | `ratingTitle` aligné sur les tranches du défi, par clés i18n                                                                                                |
-| N8, N9, N10      | Coup de main d'un cran, plancher de performance à 100, thèmes de puzzle des chapitres 5, 7 et 11                                                            |
-| F1               | README : deux langues complètes, dix-huit partielles                                                                                                        |
-| F2               | README corrigé : le défi du jour demande un compte, par choix (4cadff0)                                                                                     |
-| F5               | Test de niveau dans la rubrique Apprendre                                                                                                                   |
-| F7               | `check-textes-durs` corrigé sous Windows (84 textes vus au lieu de 29), tous traités                                                                        |
-| F8               | État mort retiré de l'analyse                                                                                                                               |
-| D5, D6           | Paliers en grille sans orphelin ; abandon contre l'ordinateur confirmé                                                                                      |
-| Signalé en cours | Rappel du défi du jour envoyé à qui l'avait fait : défi résolu après une erreur non compté, envoi perdu à la fermeture, défi abandonné non noté comme tenté |
+| Point            | Correction                                                                                                                                                                                                      |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| L1               | Relais IA : redirections refusées, IP épinglée, IPv6 normalisée, limiteur (`scripts/check-relais-ia.mjs`)                                                                                                       |
+| L2               | `ipClient` / `adresseDe` unique selon `TRUST_PROXY`, quota de connexion par pseudo seul                                                                                                                         |
+| L4               | Correspondance : écriture conditionnelle, plus de résurrection                                                                                                                                                  |
+| L5               | Un seul barème de cadence ; `check-partie-terminee` importe la vraie règle                                                                                                                                      |
+| L6               | `terminee` : 400 sur FEN invalide, types et tailles bornés                                                                                                                                                      |
+| L7               | Salons plafonnés (`MAX_ROOMS`, `MAX_ROOMS_PER_IP`), `rated` réservé à un hôte connecté                                                                                                                          |
+| L9               | `/api/import` limité                                                                                                                                                                                            |
+| L10              | Tests de routes web (`apps/web/test`, `npm test -w @coupparfait/web`) : handlers appelés directement, sans base ni réseau                                                                                       |
+| L11              | `jouer/ordinateur/page.tsx` de 3 262 à 417 lignes : écrans de réglage et de jeu, barre du pouce et quatre crochets dans des fichiers voisins                                                                    |
+| N1               | `botLevelAvecStyle` : le style imposé est celui qui joue                                                                                                                                                        |
+| N2               | Carrière de 100 à 1 850 ; le ch. 12 garde la force du 11 (voir « Tranché »)                                                                                                                                     |
+| N3, N11, N13     | « Vingt-cinq » purgé, nombres interpolés, `check-lessons` compare README et menu au réel                                                                                                                        |
+| N5               | Une seule fonction d'adversaire conseillé (`suggestedLevel`)                                                                                                                                                    |
+| N6               | `ratingTitle` aligné sur les tranches du défi, par clés i18n                                                                                                                                                    |
+| N8, N9, N10      | Coup de main d'un cran, plancher de performance à 100, thèmes de puzzle des chapitres 5, 7 et 11                                                                                                                |
+| F1               | README : deux langues complètes, dix-huit partielles                                                                                                                                                            |
+| F2               | README corrigé : le défi du jour demande un compte, par choix (4cadff0)                                                                                                                                         |
+| F5               | Test de niveau dans la rubrique Apprendre                                                                                                                                                                       |
+| F7               | `check-textes-durs` corrigé sous Windows (84 textes vus au lieu de 29), tous traités ; puis élargi (ternaires, gabarits, texte collé aux expressions) : 181 textes de plus, traduits, rangs de carrière compris |
+| F8               | État mort retiré de l'analyse                                                                                                                                                                                   |
+| D5, D6           | Paliers en grille sans orphelin ; abandon contre l'ordinateur confirmé                                                                                                                                          |
+| Signalé en cours | Rappel du défi du jour envoyé à qui l'avait fait : défi résolu après une erreur non compté, envoi perdu à la fermeture, défi abandonné non noté comme tenté                                                     |
 
 ### Laissé volontairement
 
@@ -310,17 +311,21 @@ chaque fusion, typecheck, tests, prettier et eslint passent.
 
 - **L3** : les coups du bot ne sont pas vérifiés côté serveur ; limite
   structurelle.
-- **L8, L11, L12** : dette (dictionnaires chargés à la demande, découpage de
-  `jouer/ordinateur/page.tsx`, `useFetchJson`).
+- **L8, L12** : dette (dictionnaires chargés à la demande, `useFetchJson`).
+- **À revoir sur un vrai écran** après le découpage de l'écran contre
+  l'ordinateur : chute du drapeau, indice et annulation (partie « non
+  classée »), reprise d'une partie en cours. Le volet d'aperçu masqué ne joue
+  pas de coups ; réglages, abandon, fin de partie, `?perso=` et tournoi ont
+  été vérifiés.
 - **N4** : échelons supplémentaires vers 450 et 800 ; il faut Stockfish pour
   étalonner.
 - **N12** : leçons de calcul, de défense et de finales de tours ; c'est un
   travail de rédaction.
 - **Lot 5** : « Mes erreurs à revoir », appariement rapide.
-- Textes que le contrôle ne voit pas encore : `FlammeSerie`, les onglets
-  « Rapide » et « Classique » du classement, « j restants » en correspondance,
-  les noms de rangs de carrière. Les messages d'erreur de la correspondance et
-  des salons sont en français, comme leurs voisins.
+- Textes encore en français : les notifications poussées (la route ne connaît
+  pas la langue du destinataire) et les messages système du salon (« Partie
+  annulée. »). Les titres de chapitres de carrière et les familles de finales
+  sont du contenu, rédigé en français et en anglais seulement.
 
 ### Tranché le 24 septembre
 
