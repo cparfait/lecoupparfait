@@ -181,7 +181,12 @@ export class EngineClient {
             return
           }
           this.setStatus('error')
-          reject(new Error(`Le moteur n’a pas pu démarrer : ${event.message}`))
+          // Le code de panne, et non une phrase : écrite ici, elle restait en
+          // français dans toutes les langues, et `event.message` est vide quand
+          // c'est le script du moteur lui-même qui ne se charge pas — l'écran
+          // affichait alors « … : undefined ». Le détail va à la console.
+          console.warn('[moteur] démarrage impossible :', event.message)
+          reject(new Error(PANNES_MOTEUR.nonDemarre))
         }
 
         worker.onmessage = (event: MessageEvent) => {
