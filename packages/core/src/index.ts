@@ -61,6 +61,9 @@ export * from './report.ts'
 // Texte des notifications poussées (fr, en)
 export * from './notifications.ts'
 
+// Erreurs à revoir : relevé et boîtes de Leitner
+export * from './revision.ts'
+
 // Position de départ standard.
 export const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 

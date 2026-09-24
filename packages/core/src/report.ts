@@ -304,8 +304,11 @@ export async function analyseGame(options: AnalyseGameOptions): Promise<FullGame
  * score retomberait à zéro et le mat final serait interprété comme un
  * effondrement de l'évaluation — le coup gagnant serait classé « occasion
  * manquée ». On déduit donc le score de la position elle-même.
+ *
+ * Exportée pour le relevé des erreurs à revoir (`revision.ts`), qui doit lire
+ * les mêmes scores que le rapport pour marquer les mêmes coups.
  */
-function scoreOf(analysis: PositionAnalysis): Score {
+export function scoreOf(analysis: PositionAnalysis): Score {
   const top = analysis.lines.find((l) => l.multipv === 1) ?? analysis.lines[0]
   if (top?.score && top.pv.length > 0) return top.score
 
