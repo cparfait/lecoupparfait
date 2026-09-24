@@ -17,6 +17,7 @@ import { createHash } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { desc, eq, getDb, savedAnalyses, sql } from '@coupparfait/db'
 import { getCurrentUser } from '@/lib/server/session.ts'
+import { releverEtRanger } from '@/lib/server/revision.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -191,6 +192,26 @@ export async function POST(request: Request) {
         },
       })
       .returning({ id: savedAnalyses.id })
+
+    // Les fautes du joueur rejoignent ses erreurs à revoir. Sans ligne rendue,
+    // l'analyse en réserve était plus profonde et n'a pas été remplacée : ses
+    // fautes sont déjà relevées.
+    if (ligne?.id) {
+      try {
+        await releverEtRanger(database, user.userId, {
+          id: ligne.id,
+          moves: texteDesCoups,
+          startFen,
+          positions,
+          lecteur,
+        })
+      } catch (error) {
+        // L'analyse est rangée : ne pas savoir en tirer les fautes ne doit pas
+        // la faire passer pour perdue. Le rattrapage de `/api/revoir` s'en
+        // chargera, puisque l'analyse reste marquée non relevée.
+        console.error('[analyses] relevé des erreurs', error)
+      }
+    }
 
     return NextResponse.json({ ok: true, id: ligne?.id ?? null })
   } catch (error) {

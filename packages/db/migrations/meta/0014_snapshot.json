@@ -1,6 +1,6 @@
 {
-  "id": "8e2a4f6b-3c15-4d97-a0e8-22b1c7f5a012",
-  "prevId": "5d0f1c3e-7a41-4b8e-9c2d-11a0b6e4f011",
+  "id": "db5d2f5e-db1c-416c-8215-3fde8f29590c",
+  "prevId": "9df1772d-97c2-42ff-a06c-3874c2089b71",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1610,6 +1610,208 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.mistake_reviews": {
+      "name": "mistake_reviews",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "analysis_id": {
+          "name": "analysis_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ply": {
+          "name": "ply",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fen": {
+          "name": "fen",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "played_san": {
+          "name": "played_san",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "played_uci": {
+          "name": "played_uci",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "best_san": {
+          "name": "best_san",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "best_uci": {
+          "name": "best_uci",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "accepted": {
+          "name": "accepted",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quality": {
+          "name": "quality",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "explanation": {
+          "name": "explanation",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "box": {
+          "name": "box",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "due_on": {
+          "name": "due_on",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reviews": {
+          "name": "reviews",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "successes": {
+          "name": "successes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "last_reviewed_on": {
+          "name": "last_reviewed_on",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "mistake_reviews_position_idx": {
+          "name": "mistake_reviews_position_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "fen",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "played_uci",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "mistake_reviews_due_idx": {
+          "name": "mistake_reviews_due_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "due_on",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "mistake_reviews_user_id_users_id_fk": {
+          "name": "mistake_reviews_user_id_users_id_fk",
+          "tableFrom": "mistake_reviews",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "mistake_reviews_analysis_id_saved_analyses_id_fk": {
+          "name": "mistake_reviews_analysis_id_saved_analyses_id_fk",
+          "tableFrom": "mistake_reviews",
+          "tableTo": "saved_analyses",
+          "columnsFrom": [
+            "analysis_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.openings": {
       "name": "openings",
       "schema": "",
@@ -2584,6 +2786,13 @@
           "primaryKey": false,
           "notNull": false
         },
+        "revisions_extraites": {
+          "name": "revisions_extraites",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -3467,7 +3676,7 @@
           "type": "varchar(200)",
           "primaryKey": false,
           "notNull": false,
-          "default": "'\u265f\ufe0f'"
+          "default": "'♟️'"
         },
         "bio": {
           "name": "bio",

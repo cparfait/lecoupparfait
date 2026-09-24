@@ -355,6 +355,16 @@ export const savedAnalyses = pgTable(
      */
     partage: varchar('partage', { length: 12 }),
 
+    /**
+     * Vrai une fois ses fautes relevées dans `mistakeReviews`.
+     *
+     * Faux par défaut, et c'est ce qui fait le rattrapage : les analyses
+     * rangées avant l'arrivée des erreurs à revoir le sont encore, et la page
+     * les relève à son premier affichage. Une analyse sans aucune faute passe
+     * à vrai elle aussi — sans ce drapeau, on la relirait à chaque visite.
+     */
+    revisionsExtraites: boolean('revisions_extraites').notNull().default(false),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -364,6 +374,68 @@ export const savedAnalyses = pgTable(
     // Unique : c'est la clé d'accès publique, deux analyses ne peuvent pas la
     // partager. L'index sert aussi à la lecture par lien, qui n'a rien d'autre.
     uniqueIndex('saved_analyses_partage_idx').on(table.partage),
+  ],
+)
+
+/** Une explication conservée, dans une langue du contenu. */
+export interface ExplicationDeRevision {
+  headline: string
+  body: string[]
+  betterMove: string | null
+}
+
+/**
+ * Les erreurs à revoir : une ligne par faute du joueur, relevée dans une de
+ * ses analyses, avec sa place dans la boîte de Leitner.
+ *
+ * Le relevé (`releverLesErreurs` dans le cœur) est fait **une fois**, à
+ * l'enregistrement de l'analyse, et son résultat est recopié ici en clair : la
+ * page de révision n'a ni à recharger les évaluations d'une partie entière
+ * pour une seule position, ni à refaire le classement à chaque affichage.
+ *
+ * Une faute rejouée dans deux parties — la même position, le même mauvais
+ * coup — n'est qu'une ligne : c'est la même chose à réapprendre. La ligne
+ * suit l'analyse qui l'a vue en premier, et disparaît avec elle.
+ */
+export const mistakeReviews = pgTable(
+  'mistake_reviews',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    analysisId: uuid('analysis_id')
+      .notNull()
+      .references(() => savedAnalyses.id, { onDelete: 'cascade' }),
+    /** Demi-coup de la partie où la faute a été commise. */
+    ply: smallint('ply').notNull(),
+    /** Position avant la faute. */
+    fen: text('fen').notNull(),
+    playedSan: varchar('played_san', { length: 12 }).notNull(),
+    playedUci: varchar('played_uci', { length: 5 }).notNull(),
+    bestSan: varchar('best_san', { length: 12 }).notNull(),
+    bestUci: varchar('best_uci', { length: 5 }).notNull(),
+    /** Coups acceptés comme réponse, en UCI : le meilleur et ses équivalents. */
+    accepted: jsonb('accepted').$type<string[]>().notNull(),
+    /** `blunder`, `mistake` ou `miss`. */
+    quality: varchar('quality', { length: 12 }).notNull(),
+    /** L'explication de la faute, en français et en anglais. */
+    explanation: jsonb('explanation').$type<Record<'fr' | 'en', ExplicationDeRevision>>(),
+
+    /** Boîte de Leitner, de 1 à 5. */
+    box: smallint('box').notNull().default(1),
+    /** Premier jour où la position revient, `AAAA-MM-JJ` du joueur. */
+    dueOn: varchar('due_on', { length: 10 }).notNull(),
+    reviews: integer('reviews').notNull().default(0),
+    successes: integer('successes').notNull().default(0),
+    lastReviewedOn: varchar('last_reviewed_on', { length: 10 }),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('mistake_reviews_position_idx').on(table.userId, table.fen, table.playedUci),
+    // La lecture de chaque jour : les positions d'un joueur échues à une date.
+    index('mistake_reviews_due_idx').on(table.userId, table.dueOn),
   ],
 )
 
