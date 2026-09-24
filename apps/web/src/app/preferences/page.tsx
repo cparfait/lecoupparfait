@@ -22,6 +22,7 @@ import {
   SectionTitle,
   SegmentedControl,
   Slider,
+  TitreDePage,
   Toggle,
 } from '@/components/ui/index.tsx'
 import { pieceUrl } from '@/components/board/boardKit.ts'
@@ -125,10 +126,7 @@ export default function PreferencesPage() {
 
   return (
     <div className="page">
-      <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
-        {t('settings.title')}
-      </h1>
-      <p className="mt-2 text-muted">{t('settings.subtitle')}</p>
+      <TitreDePage intro={t('settings.subtitle')}>{t('settings.title')}</TitreDePage>
 
       {/* ── Onglets ──────────────────────────────────────────────────
           Horizontaux et non en colonne latérale : la colonne de droite est
@@ -138,7 +136,7 @@ export default function PreferencesPage() {
       <div
         role="tablist"
         aria-label={t('settings.tabsLabel')}
-        className="mt-6 flex gap-1 overflow-x-auto border-b border-line pb-px"
+        className="flex gap-1 overflow-x-auto border-b border-line pb-px"
       >
         {ONGLETS.map((entry) => {
           const Icone = entry.icon

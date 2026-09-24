@@ -37,8 +37,8 @@ import {
   Card,
   EmptyState,
   Input,
-  SectionTitle,
   Spinner,
+  TitreDePage,
 } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
@@ -328,10 +328,10 @@ function FriendsBook() {
 
   return (
     <div className="page-etroite">
-      <SectionTitle hint={t('friends.hint')}>{t('friends.title')}</SectionTitle>
+      <TitreDePage intro={t('friends.hint')}>{t('friends.title')}</TitreDePage>
 
       {/* ── Invitation ─────────────────────────────────────────────── */}
-      <Card className="mt-4 p-4">
+      <Card className="p-4">
         <div className="flex items-start gap-2.5">
           <Link2 size={18} className="mt-0.5 shrink-0 text-accent" aria-hidden />
           <div className="min-w-0 flex-1">

@@ -16,7 +16,7 @@ import { Medal, Trophy } from 'lucide-react'
 import clsx from 'clsx'
 import { PlayerSearch } from '@/components/social/PlayerSearch.tsx'
 import { SPEED_LABELS } from '@coupparfait/core'
-import { Card, EmptyState, Skeleton } from '@/components/ui/index.tsx'
+import { Card, EmptyState, Skeleton, TitreDePage } from '@/components/ui/index.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
 
 interface LeaderboardPlayer {
@@ -77,18 +77,16 @@ export default function LeaderboardPage() {
 
   return (
     <div className="page-etroite">
-      <h1 className="flex items-center gap-2.5 titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
-        <Trophy size={26} className="text-accent" aria-hidden />
+      <TitreDePage intro={t('leaderboard.intro', { n: minGames })}>
         {t('nav.leaderboard')}
-      </h1>
-      <p className="mt-2 text-sm text-muted">{t('leaderboard.intro', { n: minGames })}</p>
+      </TitreDePage>
 
       {/*
         Le classement écarte qui n'a pas joué cinq parties classées : chercher
         quelqu'un ne doit pas en dépendre. Cette recherche-là interroge tout
         l'annuaire, y compris les comptes du premier jour.
       */}
-      <PlayerSearch className="mt-4" />
+      <PlayerSearch />
 
       <div className="mt-5 flex flex-wrap gap-1.5">
         {CATEGORIES.map((entry) => (

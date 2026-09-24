@@ -16,7 +16,7 @@
  */
 
 import Link from 'next/link'
-import { Card } from '@/components/ui/index.tsx'
+import { Card, TitreDePage } from '@/components/ui/index.tsx'
 import { TITRES_CATEGORIE, creditsDe, type Credit } from '@/lib/credits/catalogue.ts'
 import { useT } from '@/lib/i18n/index.tsx'
 
@@ -25,12 +25,7 @@ export default function CreditsPage() {
 
   return (
     <div className="page-etroite">
-      <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
-        {t('credits.title')}
-      </h1>
-      <p className="mt-3 max-w-2xl leading-relaxed text-muted max-lg:text-[14px]">
-        {t('credits.intro')}
-      </p>
+      <TitreDePage intro={t('credits.intro')}>{t('credits.title')}</TitreDePage>
 
       <Section titre={TITRES_CATEGORIE.moteur} credits={creditsDe('moteur')} />
       <Section titre={TITRES_CATEGORIE.donnees} credits={creditsDe('donnees')} />

@@ -16,7 +16,7 @@ import Link from 'next/link'
 import { BarChart3, HelpCircle, TrendingDown } from 'lucide-react'
 import clsx from 'clsx'
 import { SPEED_LABELS } from '@coupparfait/core'
-import { Button, Card, EmptyState, SectionTitle, Spinner } from '@/components/ui/index.tsx'
+import { Button, Card, EmptyState, Spinner, TitreDePage } from '@/components/ui/index.tsx'
 import { BoiteExplication, type DemandeExplication } from '@/components/stats/BoiteExplication.tsx'
 import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
@@ -199,8 +199,8 @@ export default function StatsPage() {
 
   return (
     <div className="page-etroite">
-      <SectionTitle
-        hint={t('stats.hint', { n: stats.totals.games })}
+      <TitreDePage
+        intro={t('stats.hint', { n: stats.totals.games })}
         action={
           <div className="flex gap-1">
             {[30, 365, 3650].map((period) => (
@@ -220,10 +220,10 @@ export default function StatsPage() {
         }
       >
         {t('stats.title')}
-      </SectionTitle>
+      </TitreDePage>
 
       {/* ── L'essentiel ─────────────────────────────────────────────── */}
-      <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
+      <div className="grid gap-2.5 sm:grid-cols-3">
         {[
           { label: t('stats.allGames'), value: stats.totals.rate, games: stats.totals.games },
           {

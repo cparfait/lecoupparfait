@@ -13,7 +13,7 @@
 
 import Link from 'next/link'
 import { BOT_LEVELS, BOT_PERSONALITIES, CHAPITRES, motifGlossary } from '@coupparfait/core'
-import { Card, Chip } from '@/components/ui/index.tsx'
+import { Card, Chip, TitreDePage } from '@/components/ui/index.tsx'
 import { CURRICULUM_STATS } from '@/lib/lessons/index.ts'
 import { TERMS } from '@/lib/glossaire.ts'
 import { useT } from '@/lib/i18n/index.tsx'
@@ -44,12 +44,11 @@ export default function AboutPage() {
 
   return (
     <div className="page-etroite">
-      <Chip tone="accent">{t('about.licence')}</Chip>
-      <h1 className="mt-4 titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
+      <TitreDePage action={<Chip tone="accent">{t('about.licence')}</Chip>}>
         {t('about.title')}
-      </h1>
+      </TitreDePage>
 
-      <div className="mt-6 space-y-5 leading-relaxed text-muted">
+      <div className="space-y-5 leading-relaxed text-muted">
         <p>
           {t('about.whatBefore')} <strong className="text-ink">{t('about.whatStrong')}</strong>
           {t('about.whatAfter')}
