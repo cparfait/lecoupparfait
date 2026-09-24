@@ -983,12 +983,21 @@ button.glass:hover {
     gap: 0.75rem;
   }
 }
-/* Quatre colonnes dès qu'il y a la place : huit portes tiennent en deux
-   rangées et se voient d'un coup, sans faire défiler. */
+/* Trois colonnes dès qu'il y a la place, quatre quand le compte s'y prête.
+
+   La refonte plafonne une page à six cartes pleines : sur quatre colonnes,
+   six faisaient une rangée pleine et une rangée de deux, soit l'orphelin
+   qu'on retire partout ailleurs. Trois colonnes rangent six (et trois) sans
+   reste ; quatre et huit gardent leurs quatre colonnes, où elles tombent
+   juste. */
 @media (min-width: 1200px) {
   .grille-cartes {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.875rem;
+  }
+  .grille-cartes:has(> :nth-child(4):last-child),
+  .grille-cartes:has(> :nth-child(8):last-child) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
