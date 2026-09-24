@@ -1015,7 +1015,7 @@ async function shutdown(signal: string): Promise<void> {
     if (!room.isFinished) {
       // Un message, et rien d'autre : la partie reste ouverte, son instantané
       // est déjà en base, et elle repartira d'elle-même au redémarrage.
-      room.avertir('Le serveur redémarre, la partie reprend dans un instant.')
+      room.avertir('restarting')
     }
     room.dispose()
   }

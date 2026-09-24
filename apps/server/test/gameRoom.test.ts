@@ -420,7 +420,11 @@ test('changer de salon : la déconnexion du socket libère le premier siège', (
   jouer(sA, 'e2', 'e4')
   room.disconnect(sB)
   assert.equal(room.playerAt('b')?.connected, false)
-  assert.ok(events.some((e) => e.type === 'chat' && e.message.text.includes('déconnecté')))
+  assert.ok(
+    events.some(
+      (e) => e.type === 'chat' && e.message.code === 'disconnected' && e.message.name === 'Bob',
+    ),
+  )
 
   h.avancer(299_000)
   room.veiller()
@@ -457,6 +461,45 @@ test('l’absent ne perd pas si personne ne l’attend', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 //  Survie à un redémarrage
 // ─────────────────────────────────────────────────────────────────────────────
+
+test('les annonces du salon voyagent en code et en nom, le texte français en repli', () => {
+  // Elles partaient en français, affichées telles quelles dans toutes les
+  // langues. Le client traduit maintenant le code ; le texte ne reste que pour
+  // les pages d'avant et les messages déjà enregistrés.
+  const { room, events, sB } = partie()
+  const annonces = () =>
+    events.flatMap((e) => (e.type === 'chat' && e.message.system ? [e.message] : []))
+
+  assert.deepEqual(
+    annonces().map((m) => [m.code, m.name]),
+    [
+      ['joined', 'Alice'],
+      ['joined', 'Bob'],
+    ],
+  )
+
+  room.annoncerIndice(sB)
+  room.avertir('restarting')
+  room.abort()
+  const [indice, redemarrage, annulation] = annonces().slice(-3)
+  assert.equal(indice?.code, 'hint')
+  assert.equal(indice?.name, 'Bob')
+  assert.equal(indice?.text, 'Bob a demandé un indice au moteur.')
+  assert.equal(redemarrage?.code, 'restarting')
+  assert.equal(redemarrage?.name, undefined)
+  assert.equal(annulation?.code, 'aborted')
+  assert.equal(annulation?.text, 'Partie annulée.')
+})
+
+test('un ancien message sans code, relu en base, reste tel quel', () => {
+  const { room } = partie()
+  const brut = JSON.parse(JSON.stringify(room.etatPersistant())) as { chat: unknown[] }
+  brut.chat = [{ from: 'Le Coup Parfait', text: 'Coup repris.', at: 1, system: true }]
+  const relu = GameRoom.restaurer(brut, {})
+  assert.ok(relu)
+  ouverts.push(relu)
+  assert.deepEqual(relu.snapshot().chat, brut.chat)
+})
 
 test('un salon relu de son instantané reprend la même partie, pendule comprise', () => {
   const { room, h, jouer, sA, sB } = partie({ timeControl: { initial: 180, increment: 2 } })

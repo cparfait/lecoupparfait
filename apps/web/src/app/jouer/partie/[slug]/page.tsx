@@ -51,6 +51,7 @@ import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
 import { Button, ButtonLink, Card, Chip, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useLiveGame } from '@/lib/game/useLiveGame.ts'
+import { texteDuMessage } from '@/lib/game/annoncesDuSalon.ts'
 import { oublierPartieEnLigne, retenirPartieEnLigne } from '@/lib/game/partieEnLigne.ts'
 import { usePrecoup } from '@/lib/game/usePrecoup.ts'
 import { playMoveForSan, playResultSound, playSound } from '@/lib/sound.ts'
@@ -1165,7 +1166,7 @@ export default function LiveGamePage() {
                     {!message.system && (
                       <span className="font-semibold text-accent">{message.from} : </span>
                     )}
-                    {message.text}
+                    {texteDuMessage(t, message)}
                   </p>
                 ))
               )}

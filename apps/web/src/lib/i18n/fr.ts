@@ -2015,6 +2015,29 @@ export const fr = {
     },
   },
 
+  /**
+   * Ce que le serveur annonce de lui-même dans le tchat d'une partie. Il envoie
+   * un code et un nom, traduits ici — voir `EvenementDuSalon` dans
+   * `apps/server/src/realtime/gameRoom.ts`.
+   */
+  systeme: {
+    salon: {
+      joined: '{name} rejoint la partie.',
+      disconnected: '{name} s’est déconnecté.',
+      declined: '{name} ne jouera pas. La partie est annulée.',
+      left: '{name} a quitté la partie.',
+      drawDeclined: 'Nulle refusée.',
+      takeback: 'Coup repris.',
+      hint: '{name} a demandé un indice au moteur.',
+      hintSomeone: 'Un joueur a demandé un indice au moteur.',
+      noShow: '{name} n’est pas resté. La partie est annulée.',
+      notReconnected: '{name} ne s’est pas reconnecté.',
+      idleAborted: 'Personne n’a joué : la partie est annulée.',
+      aborted: 'Partie annulée.',
+      restarting: 'Le serveur redémarre, la partie reprend dans un instant.',
+    },
+  },
+
   notifications: {
     title: 'Notifications',
     thisDeviceOnly: 'Sur cet appareil uniquement.',

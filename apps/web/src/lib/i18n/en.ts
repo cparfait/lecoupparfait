@@ -1977,6 +1977,24 @@ export const en: Dictionary = {
     },
   },
 
+  systeme: {
+    salon: {
+      joined: '{name} joined the game.',
+      disconnected: '{name} disconnected.',
+      declined: '{name} won’t play. The game is cancelled.',
+      left: '{name} left the game.',
+      drawDeclined: 'Draw declined.',
+      takeback: 'Move taken back.',
+      hint: '{name} asked the engine for a hint.',
+      hintSomeone: 'A player asked the engine for a hint.',
+      noShow: '{name} didn’t stay. The game is cancelled.',
+      notReconnected: '{name} didn’t reconnect.',
+      idleAborted: 'Nobody moved: the game is cancelled.',
+      aborted: 'Game cancelled.',
+      restarting: 'The server is restarting; the game will resume in a moment.',
+    },
+  },
+
   notifications: {
     title: 'Notifications',
     thisDeviceOnly: 'On this device only.',

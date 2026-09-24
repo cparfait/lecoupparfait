@@ -61,11 +61,60 @@ export interface Participant {
   disconnectedAt: number | null
 }
 
+/**
+ * Ce que le salon annonce de lui-même dans le tchat.
+ *
+ * Ces messages étaient des phrases françaises, envoyées telles quelles à des
+ * joueurs qui lisaient l'interface en japonais : le serveur ne sait pas quelle
+ * langue lit chacun. Il envoie désormais un **code** et le nom concerné, que
+ * le client traduit (`texteDuMessage` dans `apps/web/src/lib/game/useLiveGame.ts`,
+ * section `systeme` des dictionnaires) — comme ses refus, voir `RefusDeCoup`.
+ */
+export type EvenementDuSalon =
+  | 'joined'
+  | 'disconnected'
+  | 'declined'
+  | 'left'
+  | 'drawDeclined'
+  | 'takeback'
+  | 'hint'
+  | 'noShow'
+  | 'notReconnected'
+  | 'idleAborted'
+  | 'aborted'
+  | 'restarting'
+
+/**
+ * Le texte français de chaque annonce, gardé dans `text`.
+ *
+ * Il ne sert plus à l'interface à jour, qui lit `code`. Il reste pour ce qui
+ * ne connaît pas encore les codes : une page chargée avant le déploiement, et
+ * les instantanés relus en base, dont les messages n'ont que `text`.
+ */
+const ANNONCES_FR: Record<EvenementDuSalon, (nom: string) => string> = {
+  joined: (nom) => `${nom} rejoint la partie.`,
+  disconnected: (nom) => `${nom} s’est déconnecté.`,
+  declined: (nom) => `${nom} ne jouera pas. La partie est annulée.`,
+  left: (nom) => `${nom} a quitté la partie.`,
+  drawDeclined: () => 'Nulle refusée.',
+  takeback: () => 'Coup repris.',
+  hint: (nom) => `${nom || 'Un joueur'} a demandé un indice au moteur.`,
+  noShow: (nom) => `${nom} n’est pas resté. La partie est annulée.`,
+  notReconnected: (nom) => `${nom} ne s’est pas reconnecté.`,
+  idleAborted: () => 'Personne n’a joué : la partie est annulée.',
+  aborted: () => 'Partie annulée.',
+  restarting: () => 'Le serveur redémarre, la partie reprend dans un instant.',
+}
+
 export interface ChatMessage {
   from: string
   text: string
   at: number
   system?: boolean
+  /** Pour un message système : ce qu'il annonce. Absent des anciens messages. */
+  code?: EvenementDuSalon
+  /** Le joueur concerné par l'annonce, quand il y en a un. */
+  name?: string
 }
 
 export interface GameSnapshot {
@@ -266,7 +315,7 @@ export class GameRoom {
     this.idleTimer = setTimeout(() => {
       this.idleTimer = null
       if (this.isFinished || this.chess.history().length > 0) return
-      this.abort('Personne n’a joué : la partie est annulée.')
+      this.abort('idleAborted')
     }, IDLE_ABORT_MS)
     this.idleTimer.unref?.()
   }
@@ -403,7 +452,7 @@ export class GameRoom {
       disconnectedAt: null,
     }
 
-    this.system(`${participant.name} rejoint la partie.`)
+    this.system('joined', participant.name)
 
     // Les deux sièges occupés : la partie commence.
     if (this.players.w && this.players.b && this.status === 'waiting') {
@@ -431,7 +480,7 @@ export class GameRoom {
       if (player.sockets.size === 0) {
         player.connected = false
         player.disconnectedAt = this.now()
-        this.system(`${player.name} s’est déconnecté.`)
+        this.system('disconnected', player.name)
       }
       this.broadcastState()
     }
@@ -573,12 +622,12 @@ export class GameRoom {
     if (!player) return false
 
     if (this.chess.history().length === 0) {
-      this.system(`${player.name} ne jouera pas. La partie est annulée.`)
+      this.system('declined', player.name)
       this.finish('aborted', '*')
       return true
     }
 
-    this.system(`${player.name} a quitté la partie.`)
+    this.system('left', player.name)
     this.finish('resign', color === 'w' ? '0-1' : '1-0')
     return true
   }
@@ -601,7 +650,7 @@ export class GameRoom {
     const color = this.colorOf(socketId)
     if (!color || this.drawOfferFrom === color) return
     this.drawOfferFrom = null
-    this.system('Nulle refusée.')
+    this.system('drawDeclined')
     this.broadcastState()
   }
 
@@ -662,7 +711,7 @@ export class GameRoom {
       ? { ...avant, running, updatedAt: now }
       : { ...stopClock(this.clock, now), running, updatedAt: now }
 
-    this.system('Coup repris.')
+    this.system('takeback')
     this.broadcastState()
   }
 
@@ -707,14 +756,21 @@ export class GameRoom {
     this.indicesAnnonces.add(color)
 
     const player = this.players[color]
-    this.system(`${player?.name ?? 'Un joueur'} a demandé un indice au moteur.`)
+    this.system('hint', player?.name)
   }
 
   /** Les camps dont l'indice a déjà été annoncé. Voir `annoncerIndice`. */
   private readonly indicesAnnonces = new Set<Color>()
 
-  private system(text: string): void {
-    const message: ChatMessage = { from: 'Le Coup Parfait', text, at: this.now(), system: true }
+  private system(code: EvenementDuSalon, name?: string): void {
+    const message: ChatMessage = {
+      from: 'Le Coup Parfait',
+      text: ANNONCES_FR[code](name ?? ''),
+      at: this.now(),
+      system: true,
+      code,
+      ...(name ? { name } : {}),
+    }
     this.chat.push(message)
     if (this.chat.length > 200) this.chat.shift()
     this.emit({ type: 'chat', message })
@@ -790,11 +846,11 @@ export class GameRoom {
         // offrait une « Victoire ! » sur zéro demi-coup — et, en partie
         // classée, des points de classement pour rien.
         if (this.chess.history().length === 0) {
-          this.system(`${player.name} n’est pas resté. La partie est annulée.`)
+          this.system('noShow', player.name)
           this.finish('aborted', '*')
           return
         }
-        this.system(`${player.name} ne s’est pas reconnecté.`)
+        this.system('notReconnected', player.name)
         this.finish('abandoned', color === 'w' ? '0-1' : '1-0')
         return
       }
@@ -833,8 +889,8 @@ export class GameRoom {
   }
 
   /** Termine la partie de l'extérieur (annulation). */
-  abort(reason = 'Partie annulée.'): void {
-    this.system(reason)
+  abort(code: EvenementDuSalon = 'aborted'): void {
+    this.system(code)
     this.finish('aborted', '*')
   }
 
@@ -846,8 +902,8 @@ export class GameRoom {
    * maintenant que le salon est écrit en base à chaque coup, il n'y a plus
    * rien à annuler — seulement à prévenir.
    */
-  avertir(texte: string): void {
-    this.system(texte)
+  avertir(code: EvenementDuSalon): void {
+    this.system(code)
   }
 
   dispose(): void {

@@ -22,6 +22,7 @@ import { io, type Socket } from 'socket.io-client'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import type { ClockState, GameResult, GameStatus, TimeControl } from '@coupparfait/core'
 import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
+import type { ChatMessage } from './annoncesDuSalon.ts'
 
 /**
  * Les refus du serveur temps réel, par code.
@@ -51,12 +52,7 @@ export interface LivePlayer {
   connected: boolean
 }
 
-export interface ChatMessage {
-  from: string
-  text: string
-  at: number
-  system?: boolean
-}
+export type { ChatMessage }
 
 export interface GameSnapshot {
   slug: string
