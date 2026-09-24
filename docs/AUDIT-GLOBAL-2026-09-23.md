@@ -321,12 +321,16 @@ chaque fusion, typecheck, tests, prettier et eslint passent.
   les noms de rangs de carrière. Les messages d'erreur de la correspondance et
   des salons sont en français, comme leurs voisins.
 
-### À trancher
+### Tranché le 24 septembre
 
-- **Chapitre 12** à 1 850 comme le 11 (distinct par l'absence d'aide) ou à
-  2 050 ?
-- **Profil** : « Maître », « Maître International » et « Grand Maître » ont
-  disparu, et 2 100 et plus s'appelle « Expert ». Faut-il garder une tranche
-  au-dessus ?
-- **Chapitre 5** ne relie que la leçon « mat dame et roi », pas « tour et
-  roi ».
+- **Chapitre 12** : il reste à 1 850, comme le 11. Au-delà, la carrière
+  sortirait de son public ; ce qu'il ajoute tient à l'absence d'aide, à un
+  adversaire sans penchant à exploiter et à des puzzles plus durs.
+  `check-carriere` n'autorise cette égalité qu'au dernier chapitre.
+- **Profil** : pas de tranche au-dessus d'« Expert » (2 100 et plus). Le même
+  mot doit désigner le même niveau au profil et au défi du jour, et une
+  tranche propre au profil recréerait l'écart qu'on vient de fermer.
+- **Chapitre 5** : il reste relié à la seule leçon « mat dame et roi » ; un
+  chapitre porte une leçon, et la tour vient naturellement après la dame.
+- **Branche** : fusionnée dans `main` une fois les derniers lots (textes, tests
+  de routes, découpage de l'écran contre l'ordinateur) vérifiés.
