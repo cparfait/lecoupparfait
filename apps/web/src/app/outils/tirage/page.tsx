@@ -20,10 +20,9 @@
  */
 
 import { useState } from 'react'
-import Link from 'next/link'
-import { ArrowLeft, Dices } from 'lucide-react'
+import { Dices } from 'lucide-react'
 import clsx from 'clsx'
-import { Button, Card, Input, SegmentedControl } from '@/components/ui/index.tsx'
+import { Button, Card, Input, SegmentedControl, TitreDePage } from '@/components/ui/index.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
 
 type Mode = 'couleurs' | 'paires' | 'ordre'
@@ -92,19 +91,9 @@ export default function TiragePage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-6 sm:py-6">
-      <Link
-        href="/outils"
-        className="inline-flex items-center gap-1.5 text-[14px] text-muted transition-colors hover:text-ink"
-      >
-        <ArrowLeft size={14} aria-hidden />
-        {t('nav.tools')}
-      </Link>
-      <h1 className="mt-3 titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
-        {t('draw.title')}
-      </h1>
-      <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">{t('draw.intro')}</p>
+      <TitreDePage intro={t('draw.intro')}>{t('draw.title')}</TitreDePage>
 
-      <div className="mt-5">
+      <div>
         <SegmentedControl
           value={mode}
           onChange={setMode}

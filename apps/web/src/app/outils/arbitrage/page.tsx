@@ -26,7 +26,6 @@ import type { Metadata } from 'next'
 import type { LucideIcon } from 'lucide-react'
 import {
   AlertTriangle,
-  ArrowLeft,
   Crown,
   Flag,
   Hand,
@@ -35,8 +34,7 @@ import {
   Smartphone,
   Timer,
 } from 'lucide-react'
-import Link from 'next/link'
-import { Card, Chip } from '@/components/ui/index.tsx'
+import { Card, Chip, TitreDePage } from '@/components/ui/index.tsx'
 import { metadonnees, tDesMetadonnees } from '@/lib/i18n/metadonnees.ts'
 import type { TranslationKey } from '@/lib/i18n/index.tsx'
 
@@ -269,17 +267,7 @@ export default async function ArbitragePage() {
   const t = await tDesMetadonnees()
   return (
     <div className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-6 sm:py-6">
-      <Link
-        href="/outils"
-        className="inline-flex items-center gap-1.5 text-[14px] text-muted transition-colors hover:text-ink print:hidden"
-      >
-        <ArrowLeft size={14} aria-hidden />
-        {t('nav.tools')}
-      </Link>
-      <h1 className="mt-3 titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
-        {t('arbitrage.title')}
-      </h1>
-      <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">{t('arbitrage.intro')}</p>
+      <TitreDePage intro={t('arbitrage.intro')}>{t('arbitrage.title')}</TitreDePage>
 
       {/* Le sommaire : huit ancres, pour aller droit à la carte qu'on cherche
           avec un joueur qui attend à côté. */}

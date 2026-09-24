@@ -31,9 +31,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Gauge, Pause, Play, RotateCcw, Timer } from 'lucide-react'
+import { Gauge, Pause, Play, RotateCcw, Timer } from 'lucide-react'
 import clsx from 'clsx'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import {
@@ -48,7 +47,7 @@ import {
   type ClockState,
   type TimeControl,
 } from '@coupparfait/core'
-import { Button, Card, Chip } from '@/components/ui/index.tsx'
+import { Button, Card, Chip, TitreDePage } from '@/components/ui/index.tsx'
 import { PhysicalBoardPanel } from '@/components/board/PhysicalBoardPanel.tsx'
 import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
 import { useChessGame } from '@/lib/game/useChessGame.ts'
@@ -235,19 +234,9 @@ export default function PendulePage() {
     <div className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-6 sm:py-6">
       {!partieLancee && (
         <>
-          <Link
-            href="/outils"
-            className="inline-flex items-center gap-1.5 text-[14px] text-muted transition-colors hover:text-ink"
-          >
-            <ArrowLeft size={14} aria-hidden />
-            {t('nav.tools')}
-          </Link>
-          <h1 className="mt-3 titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
-            {t('nav.clock')}
-          </h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">{t('clock.intro')}</p>
+          <TitreDePage intro={t('clock.intro')}>{t('nav.clock')}</TitreDePage>
 
-          <Card className="mt-5 p-4">
+          <Card className="p-4">
             <p className="text-[12px] font-semibold text-faint">{t('play.timeControl')}</p>
             <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
               {CADENCES.map((cadence) => (

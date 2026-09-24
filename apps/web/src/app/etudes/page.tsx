@@ -12,7 +12,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { BookMarked, Link2, Lock, Plus } from 'lucide-react'
-import { Button, Card, EmptyState, Input, SectionTitle, Spinner } from '@/components/ui/index.tsx'
+import { Button, Card, EmptyState, Input, Spinner, TitreDePage } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
 
@@ -97,7 +97,7 @@ export default function StudiesPage() {
 
   return (
     <div className="page-etroite">
-      <SectionTitle hint={t('studies.hint')}>{t('studies.title')}</SectionTitle>
+      <TitreDePage intro={t('studies.hint')}>{t('studies.title')}</TitreDePage>
 
       <Card className="mt-4 p-3">
         <form

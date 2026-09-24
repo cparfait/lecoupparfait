@@ -21,11 +21,10 @@
  */
 
 import { useMemo, useState } from 'react'
-import Link from 'next/link'
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import clsx from 'clsx'
 import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
-import { Button, Card, Input } from '@/components/ui/index.tsx'
+import { Button, Card, Input, TitreDePage } from '@/components/ui/index.tsx'
 import { bilan, scoreAttendu, variation, type Resultat } from '@/lib/outils/elo.ts'
 
 interface Ligne {
@@ -90,19 +89,9 @@ export default function EloPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-6 sm:py-6">
-      <Link
-        href="/outils"
-        className="inline-flex items-center gap-1.5 text-[14px] text-muted transition-colors hover:text-ink"
-      >
-        <ArrowLeft size={14} aria-hidden />
-        {t('nav.tools')}
-      </Link>
-      <h1 className="mt-3 titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
-        {t('elo.title')}
-      </h1>
-      <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">{t('elo.intro')}</p>
+      <TitreDePage intro={t('elo.intro')}>{t('elo.title')}</TitreDePage>
 
-      <Card className="mt-5 p-4">
+      <Card className="p-4">
         <div className="grid gap-4 sm:grid-cols-[10rem_1fr]">
           <Input
             label={t('elo.yourRating')}

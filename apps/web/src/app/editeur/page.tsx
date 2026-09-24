@@ -21,7 +21,7 @@ import { Eraser, Gauge, RotateCcw, Swords, Trash2 } from 'lucide-react'
 import clsx from 'clsx'
 import { useT } from '@/lib/i18n/index.tsx'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
-import { Button, Card, SectionTitle } from '@/components/ui/index.tsx'
+import { Button, Card, TitreDePage } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 
 const EMPTY = '8/8/8/8/8/8/8/8 w - - 0 1'
@@ -168,7 +168,7 @@ export default function EditorPage() {
 
   return (
     <div className="etude mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
-      <SectionTitle hint={t('editor.hint')}>{t('editor.title')}</SectionTitle>
+      <TitreDePage intro={t('editor.hint')}>{t('editor.title')}</TitreDePage>
 
       <div className="etude-corps grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="etude-plateau min-w-0">

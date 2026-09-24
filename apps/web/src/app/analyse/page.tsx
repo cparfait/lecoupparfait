@@ -49,7 +49,14 @@ import { ANNOTATION_COLORS } from '@/components/board/boardKit.ts'
 import { EvalBar, EvalGraph } from '@/components/game/EvalBar.tsx'
 import { GameNav } from '@/components/game/GameNav.tsx'
 import { MoveList } from '@/components/game/MoveList.tsx'
-import { Button, ButtonLink, Card, Chip, SectionTitle } from '@/components/ui/index.tsx'
+import {
+  Button,
+  ButtonLink,
+  Card,
+  Chip,
+  SectionTitle,
+  TitreDePage,
+} from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import {
   parseAnalysisInput,
@@ -470,13 +477,16 @@ function ImportScreen({
           lignes de texte —, soit le quart de l'écran avant la moindre
           commande, à chaque visite. La phrase longue reste, mais à partir de
           `sm` : c'est là qu'elle ne coûte rien. */}
-      <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
+      <TitreDePage
+        intro={
+          <>
+            <span className="sm:hidden">{t('analysis.tagShort')}</span>
+            <span className="max-sm:hidden">{t('analysis.tagLong')}</span>
+          </>
+        }
+      >
         {t('analysis.pageTitle')}
-      </h1>
-      <p className="mt-1.5 max-w-2xl text-sm text-muted sm:mt-2 sm:text-base">
-        <span className="sm:hidden">{t('analysis.tagShort')}</span>
-        <span className="max-sm:hidden">{t('analysis.tagLong')}</span>
-      </p>
+      </TitreDePage>
 
       {/* ── D'où vient la partie ? ───────────────────────────────────────
           Trois provenances, trois blocs, et c'est le sujet même de cet écran :
