@@ -2,9 +2,13 @@
 #
 # **Sans base de données, volontairement.** Ni les tests ni la construction n'en
 # ont besoin : le cœur ne fait aucune entrée-sortie, les scripts de contrôle
-# lisent des fichiers, et les tests du serveur tournent sur un faux moteur. Un
+# lisent des fichiers, les tests du serveur tournent sur un faux moteur et ceux
+# des routes web sur une fausse base (`apps/web/test/support/base.ts`). Un
 # service PostgreSQL ajouterait une minute de démarrage à chaque exécution pour
 # ne rien couvrir de plus.
+#
+# Node 22 est le plancher : les tests des routes web ont besoin de
+# `mock.module` (`--experimental-test-module-mocks`, Node 22.3 et après).
 #
 # Le dépôt est privé et le flux est court : les minutes offertes suffisent
 # largement.

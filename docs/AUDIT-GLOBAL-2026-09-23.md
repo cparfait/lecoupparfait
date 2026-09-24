@@ -283,6 +283,7 @@ chaque fusion, typecheck, tests, prettier et eslint passent.
 | L6               | `terminee` : 400 sur FEN invalide, types et tailles bornés                                                                                                  |
 | L7               | Salons plafonnés (`MAX_ROOMS`, `MAX_ROOMS_PER_IP`), `rated` réservé à un hôte connecté                                                                      |
 | L9               | `/api/import` limité                                                                                                                                        |
+| L10              | Tests de routes web (`apps/web/test`, `npm test -w @coupparfait/web`) : handlers appelés directement, sans base ni réseau                                   |
 | N1               | `botLevelAvecStyle` : le style imposé est celui qui joue                                                                                                    |
 | N2               | Carrière de 100 à 1 850 ; le ch. 12 garde la force du 11 (voir « À trancher »)                                                                              |
 | N3, N11, N13     | « Vingt-cinq » purgé, nombres interpolés, `check-lessons` compare README et menu au réel                                                                    |
@@ -309,8 +310,8 @@ chaque fusion, typecheck, tests, prettier et eslint passent.
 
 - **L3** : les coups du bot ne sont pas vérifiés côté serveur ; limite
   structurelle.
-- **L8, L10 à L12** : dette (dictionnaires chargés à la demande, tests de
-  routes, découpage de `jouer/ordinateur/page.tsx`, `useFetchJson`).
+- **L8, L11, L12** : dette (dictionnaires chargés à la demande, découpage de
+  `jouer/ordinateur/page.tsx`, `useFetchJson`).
 - **N4** : échelons supplémentaires vers 450 et 800 ; il faut Stockfish pour
   étalonner.
 - **N12** : leçons de calcul, de défense et de finales de tours ; c'est un
