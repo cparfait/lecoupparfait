@@ -2541,6 +2541,12 @@ export const fr = {
     revisionWatch: 'Observe — le coup se joue tout seul.',
   },
 
+  lessonNew: {
+    // Remplace le numéro du chapitre des pièges, rangé en annexe.
+    appendixHeading: 'Annexe',
+    // La même chose en minuscule, dans le titre de la carte de reprise.
+    appendixInline: 'annexe',
+  },
   lessonExtra: {
     theMoveWas: 'Le coup était {coup}. Joue-le pour continuer.',
     showMe: 'Montre-moi',

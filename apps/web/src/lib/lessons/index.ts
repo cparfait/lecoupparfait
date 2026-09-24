@@ -7,6 +7,11 @@
  * gagner des parties — et seulement ensuite l'ouverture et la stratégie.
  * Beaucoup de débutants font l'inverse et passent des heures sur des variantes
  * d'ouverture avant de savoir mater avec une tour.
+ *
+ * L'ordre ne porte aucune donnée : la progression, la carrière et les paliers
+ * désignent les leçons par leur identifiant, jamais par leur rang. Seuls les
+ * numéros de chapitre affichés et la position de reprise de « Écouter » —
+ * un rang dans la liste des étapes — suivent l'ordre.
  */
 
 import { basicsChapter } from './basics.ts'
@@ -28,15 +33,19 @@ export const CHAPTERS: Chapter[] = [
   openingMatesChapter,
   tacticsChapter,
   openingChapter,
-  repertoireChapter,
-  // Les pièges après les ouvertures, et pas avant : chacun d'eux vit dans une
-  // ouverture précise — l'espagnole, le gambit dame, le Budapest — et on ne
-  // comprend pas pourquoi le fou s'enferme en b3 si l'on ne sait pas encore ce
-  // que l'espagnole cherche à faire. Ils viennent donc quand les six grandes
-  // ouvertures ont été vues.
-  piegesChapter,
+  // Le milieu de partie et les finales avant le répertoire et les pièges :
+  // les quatorze pièges passaient avant les trois leçons de milieu de jeu et
+  // les cinq de finales, alors que chaque partie a un milieu et que beaucoup
+  // finissent en finale, quand un piège ne sert que dans son ouverture.
   middlegameChapter,
   endgameChapter,
+  repertoireChapter,
+  // Les pièges en annexe, après les ouvertures : chacun d'eux vit dans une
+  // ouverture précise — l'espagnole, le gambit dame, le Budapest — et on ne
+  // comprend pas pourquoi le fou s'enferme en b3 si l'on ne sait pas encore ce
+  // que l'espagnole cherche à faire. Le chapitre porte `annexe` : il se
+  // consulte, il ne se suit pas.
+  piegesChapter,
 ]
 
 /** Index plat de toutes les leçons, pour la navigation directe. */

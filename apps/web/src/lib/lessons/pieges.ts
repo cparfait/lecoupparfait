@@ -52,6 +52,8 @@ export const piegesChapter: Chapter = {
   // Pas le 🪤 : « Les mats de l'ouverture » le porte déjà, et deux chapitres
   // avec la même icône dans le même sommaire ne se distinguent plus.
   icon: '🎣',
+  // En fin de programme, hors numérotation : voir `annexe` dans `types.ts`.
+  annexe: true,
   lessons: [
     // ── Le Fegatello ────────────────────────────────────────────────────────
     {

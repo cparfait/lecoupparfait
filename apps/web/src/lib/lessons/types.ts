@@ -130,6 +130,13 @@ export interface Chapter {
   description: TranslationKey
   level: LessonLevel
   icon: string
+  /**
+   * Chapitre à consulter plutôt qu'à suivre, rangé en fin de programme et
+   * annoncé « Annexe » au lieu d'un numéro. C'est le cas des pièges
+   * d'ouverture : chacun ne sert que dans son ouverture, et les numéroter
+   * comme une étape du parcours les faisait passer avant les finales.
+   */
+  annexe?: boolean
   lessons: Lesson[]
 }
 

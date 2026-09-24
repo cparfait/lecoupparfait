@@ -134,7 +134,11 @@ export default function LearnPage() {
    */
   const prochaine = (() => {
     const toutes = CHAPTERS.flatMap((chapitre, index) =>
-      chapitre.lessons.map((lecon) => ({ lecon, chapitre: index + 1 })),
+      chapitre.lessons.map((lecon) => ({
+        lecon,
+        chapitre: index + 1,
+        annexe: chapitre.annexe === true,
+      })),
     )
     const entamee = toutes.find(({ lecon }) => {
       const etat = progress[lecon.id]
@@ -207,7 +211,7 @@ export default function LearnPage() {
       {prochaine && (
         <Card glow className="mt-4 overflow-hidden">
           <EnTeteDeCarte
-            titre={`${prochaine.entamee ? t('learn.resumeWhere') : t('learn.whereToStart')} · ${t('learn.chapterN', { n: prochaine.chapitre })}`}
+            titre={`${prochaine.entamee ? t('learn.resumeWhere') : t('learn.whereToStart')} · ${prochaine.annexe ? t('lessonNew.appendixInline') : t('learn.chapterN', { n: prochaine.chapitre })}`}
             icone={<Play size={14} aria-hidden />}
           />
           <div className="flex flex-wrap items-center gap-4 p-5">
@@ -385,7 +389,9 @@ export default function LearnPage() {
                     {/* Le numéro de chapitre situe la progression dans le
                         programme, et fait respirer le titre au-dessus. */}
                     <p className="text-[12px] font-semibold text-muted">
-                      {t('learn.chapterHeading', { n: chapterIndex + 1 })}
+                      {chapter.annexe
+                        ? t('lessonNew.appendixHeading')
+                        : t('learn.chapterHeading', { n: chapterIndex + 1 })}
                       {done > 0 && (
                         <span className="ml-2 font-normal normal-case tracking-normal text-muted">
                           {t('learn.doneOf', { faites: done, total: chapter.lessons.length })}

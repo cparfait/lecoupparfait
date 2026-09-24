@@ -2488,6 +2488,12 @@ export const en: Dictionary = {
     revisionWatch: 'Watch — this move plays itself.',
   },
 
+  lessonNew: {
+    // Remplace le numéro du chapitre des pièges, rangé en annexe.
+    appendixHeading: 'Appendix',
+    // La même chose en minuscule, dans le titre de la carte de reprise.
+    appendixInline: 'appendix',
+  },
   lessonExtra: {
     theMoveWas: 'The move was {coup}. Play it to carry on.',
     showMe: 'Show me',
