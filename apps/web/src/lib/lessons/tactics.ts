@@ -250,6 +250,166 @@ export const tacticsChapter: Chapter = {
       ],
     },
     {
+      /*
+        La routine plutôt qu'un motif de plus.
+
+        Les six leçons qui précèdent enseignent des figures ; celle-ci enseigne
+        à les **trouver**. Un débutant voit la fourchette quand on lui dit
+        qu'il y en a une, et la rate en partie, où personne ne le dit. Les deux
+        positions sont choisies pour que la routine, déroulée dans l'ordre,
+        tombe à chaque fois sur le bon coup : trois échecs dans la première,
+        dont un seul gagne, et ni échec ni prise dans la seconde, où il faut
+        aller jusqu'aux menaces.
+      */
+      id: 'echecs-prises-menaces',
+      title: 'lecons.tactique.echecs-prises-menaces.title',
+      summary: 'lecons.tactique.echecs-prises-menaces.summary',
+      level: 'beginner',
+      minutes: 7,
+      icon: '🔎',
+      steps: [
+        {
+          kind: 'show',
+          fen: 'r5k1/p3b1pp/8/8/8/8/5PPP/3Q2K1 w - - 0 1',
+          say: 'lecons.tactique.echecs-prises-menaces.e1.say',
+        },
+        {
+          // Trois échecs possibles : la dame en b3, en d5, en d8. Le dernier
+          // la perd — la tour et le fou la prennent —, le premier ne gagne
+          // rien. Seul d5 attaque aussi la tour : environ +6 au moteur, contre
+          // +1 pour tout autre coup.
+          kind: 'play',
+          say: 'lecons.tactique.echecs-prises-menaces.e2.say',
+          instruction: 'lecons.tactique.echecs-prises-menaces.e2.instruction',
+          answers: ['Qd5+'],
+          hint: 'lecons.tactique.echecs-prises-menaces.e2.hint',
+          arrows: [
+            { from: 'd1', to: 'b3', color: 'blue' },
+            { from: 'd1', to: 'd5', color: 'blue' },
+            { from: 'd1', to: 'd8', color: 'blue' },
+          ],
+          // Le roi a le choix entre f8 et h8 ; f8 est la meilleure défense —
+          // en h8, la tour prise avec échec mène au mat.
+          reply: 'Kf8',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.tactique.echecs-prises-menaces.e3.say',
+          instruction: 'lecons.tactique.echecs-prises-menaces.e3.instruction',
+          answers: ['Qxa8+'],
+          hint: 'lecons.tactique.echecs-prises-menaces.e3.hint',
+        },
+        {
+          kind: 'show',
+          fen: '6k1/pp3ppp/2pbpn2/8/3PP3/2P4P/PP1NBPP1/6K1 w - - 0 1',
+          say: 'lecons.tactique.echecs-prises-menaces.e4.say',
+          highlight: ['d6', 'f6'],
+        },
+        {
+          // e5, défendu par d4, attaque le fou et le cavalier : l'un des deux
+          // tombe. Le pion d'avance devient une pièce d'avance — le moteur
+          // passe d'environ +2,4 à +5,4, et aucun autre coup ne fait mieux
+          // que +2,4.
+          kind: 'play',
+          say: 'lecons.tactique.echecs-prises-menaces.e5.say',
+          instruction: 'lecons.tactique.echecs-prises-menaces.e5.instruction',
+          answers: ['e5'],
+          hint: 'lecons.tactique.echecs-prises-menaces.e5.hint',
+          reply: 'Nd5',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.tactique.echecs-prises-menaces.e6.say',
+          instruction: 'lecons.tactique.echecs-prises-menaces.e6.instruction',
+          answers: ['exd6'],
+          hint: 'lecons.tactique.echecs-prises-menaces.e6.hint',
+        },
+        {
+          kind: 'show',
+          say: 'lecons.tactique.echecs-prises-menaces.e7.say',
+        },
+      ],
+    },
+    {
+      /*
+        Les quatre parades, une position chacune.
+
+        L'ordre est celui dans lequel on les cherche : prendre l'attaquant
+        règle tout d'un coup, bloquer coûte souvent une pièce, fuir laisse
+        l'initiative, et la contre-attaque — la plus belle — est aussi la plus
+        risquée, d'où sa place en dernier.
+      */
+      id: 'defendre',
+      title: 'lecons.tactique.defendre.title',
+      summary: 'lecons.tactique.defendre.summary',
+      level: 'beginner',
+      minutes: 7,
+      icon: '🧱',
+      steps: [
+        {
+          kind: 'show',
+          fen: '4k3/ppp2ppp/8/8/8/8/PPn2PPP/R2QK2R w - - 0 1',
+          say: 'lecons.tactique.defendre.e1.say',
+          arrows: [
+            { from: 'c2', to: 'e1', color: 'red' },
+            { from: 'c2', to: 'a1', color: 'red' },
+          ],
+        },
+        {
+          // Le roi peut fuir en d2, e2 ou f1, mais la tour a1 tombe alors.
+          kind: 'play',
+          say: 'lecons.tactique.defendre.e2.say',
+          instruction: 'lecons.tactique.defendre.e2.instruction',
+          answers: ['Qxc2'],
+          hint: 'lecons.tactique.defendre.e2.hint',
+        },
+        {
+          // Un seul coup légal : ni prise, ni fuite — f1 et h1 sont sur la
+          // rangée de la tour, f2 et h2 sont occupées.
+          kind: 'play',
+          fen: '6k1/3R1ppp/8/8/8/3B4/P4PPP/4r1K1 w - - 0 1',
+          say: 'lecons.tactique.defendre.e3.say',
+          instruction: 'lecons.tactique.defendre.e3.instruction',
+          answers: ['Bf1'],
+          hint: 'lecons.tactique.defendre.e3.hint',
+        },
+        {
+          // Gambit dame refusé, 4…h6. Le fou peut aller n'importe où hors de
+          // portée — prendre en h6 le perd — ou s'échanger contre le cavalier.
+          kind: 'play',
+          fen: 'rnbqkb1r/ppp2pp1/4pn1p/3p2B1/2PP4/2N5/PP2PPPP/R2QKBNR w KQkq - 0 5',
+          say: 'lecons.tactique.defendre.e4.say',
+          instruction: 'lecons.tactique.defendre.e4.instruction',
+          answers: ['Bh4', 'Bf4', 'Be3', 'Bd2', 'Bc1', 'Bxf6'],
+          hint: 'lecons.tactique.defendre.e4.hint',
+          arrows: [{ from: 'h6', to: 'g5', color: 'red' }],
+        },
+        {
+          // La dame d7 attaque la tour a4. La sauver est possible ; mieux vaut
+          // la fourchette avec échec, qui gagne la dame.
+          kind: 'play',
+          fen: '6k1/3q1p1p/6p1/8/R3N3/7P/5PP1/6K1 w - - 0 1',
+          say: 'lecons.tactique.defendre.e5.say',
+          instruction: 'lecons.tactique.defendre.e5.instruction',
+          answers: ['Nf6+'],
+          hint: 'lecons.tactique.defendre.e5.hint',
+          arrows: [{ from: 'd7', to: 'a4', color: 'red' }],
+          reply: 'Kg7',
+        },
+        {
+          kind: 'play',
+          say: 'lecons.tactique.defendre.e6.say',
+          instruction: 'lecons.tactique.defendre.e6.instruction',
+          answers: ['Nxd7'],
+          hint: 'lecons.tactique.defendre.e6.hint',
+        },
+        {
+          kind: 'show',
+          say: 'lecons.tactique.defendre.e7.say',
+        },
+      ],
+    },
+    {
       id: 'sacrifice',
       title: 'lecons.tactique.sacrifice.title',
       summary: 'lecons.tactique.sacrifice.summary',

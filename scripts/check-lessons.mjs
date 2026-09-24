@@ -8,7 +8,8 @@
  *
  *  - chaque position FEN est valide et légale ;
  *  - chaque coup attendu est réellement jouable dans la position de l'étape ;
- *  - chaque réponse automatique de l'adversaire est légale après ce coup ;
+ *  - chaque réponse automatique de l'adversaire est légale après chacun des
+ *    coups acceptés ;
  *  - les cases surlignées existent ;
  *  - les étapes d'action ont bien au moins une réponse acceptée.
  *
@@ -141,6 +142,31 @@ for (const chapter of CHAPTERS) {
         }
 
         if (accepted.length === 0) continue
+
+        /*
+          La réponse adverse doit suivre **chacun** des coups acceptés.
+
+          Le reste du contrôle suit le premier coup de la liste, mais l'écran,
+          lui, rejoue le coup que l'apprenant a réellement choisi, puis la
+          réponse. Un second coup accepté après lequel la réponse devient
+          illégale laisserait l'adversaire muet et l'étape suivante figée —
+          précisément sur le chemin que ce script ne parcourt pas.
+        */
+        if (step.reply) {
+          for (const answer of accepted.slice(1)) {
+            const probe = new Chess(board.fen(), { skipValidation: true })
+            probe.move(answer)
+            try {
+              probe.move(step.reply)
+            } catch {
+              fail(
+                lesson,
+                index,
+                `réponse adverse « ${step.reply} » illégale après le coup accepté « ${answer} »`,
+              )
+            }
+          }
+        }
 
         // On applique le premier coup accepté pour la suite de la leçon.
         board.move(accepted[0])

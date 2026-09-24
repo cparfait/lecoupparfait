@@ -6768,6 +6768,75 @@ export const fr = {
           say: "Quand une pièce adverse te bloque, ne t'acharne pas dessus. Demande-toi plutôt : qui la protège ? Et attaque celui-là.",
         },
       },
+      'echecs-prises-menaces': {
+        title: 'Échecs, prises, menaces',
+        summary:
+          'La routine de trois questions qui trouve les coups gagnants. À dérouler avant chaque coup.',
+        e1: {
+          say: "Les figures, tu les connais. Reste à les voir en partie, où personne ne te prévient qu'il y en a une. Pour ça, il existe une routine en trois mots : les **échecs**, les **prises**, les **menaces**. Dans cet ordre, du coup le plus forçant au moins forçant.",
+        },
+        e2: {
+          say: "Premier mot : les échecs. Fais-en la liste, tous, même ceux qui ont l'air bêtes. Ta dame en a trois : en b3, en d5 et en d8. En d8, elle se fait prendre. En b3, elle ne gagne rien. Et en d5 ?",
+          instruction: "Donne l'échec qui gagne quelque chose",
+          hint: "En d5, la dame vise le roi en g8, et sur l'autre diagonale, la tour en a8.",
+        },
+        e3: {
+          say: "Le roi a dû s'écarter. Deuxième mot : les prises. Qu'est-ce qui est attaqué et sans défense ? La tour. Elle est à toi.",
+          instruction: 'Prends la tour en a8',
+          hint: 'La dame remonte la diagonale, de d5 jusqu’en a8.',
+        },
+        e4: {
+          say: 'Nouvelle position. Déroule la routine. Des échecs ? Aucun. Des prises ? Aucune non plus. Il reste le troisième mot : les menaces. Cherche le coup qui attaque deux choses à la fois. Regarde le fou et le cavalier noirs, côte à côte sur la même rangée.',
+        },
+        e5: {
+          say: 'Un simple pion peut les attaquer tous les deux. Lequel, et où ?',
+          instruction: 'Attaque le fou et le cavalier avec un pion',
+          hint: 'Le pion e4 avance en e5 : il touche d6 et f6, et le pion d4 le protège.',
+        },
+        e6: {
+          say: "Le cavalier s'est sauvé. Le fou ne pouvait pas se sauver en même temps. Il est à toi.",
+          instruction: 'Prends le fou en d6',
+          hint: 'Le pion e5 prend en diagonale, en d6.',
+        },
+        e7: {
+          say: "Voilà la routine : échecs, prises, menaces. Les tiens d'abord, puis ceux de ton adversaire. Au début c'est lent. Au bout de quelques semaines, ça prend deux secondes, et tu ne rates plus une fourchette, ni pour toi, ni contre toi.",
+        },
+      },
+      defendre: {
+        title: 'Défendre',
+        summary: 'Une pièce attaquée ? Quatre réponses, à essayer dans l’ordre.',
+        e1: {
+          say: "Ton adversaire menace quelque chose. Tu as quatre façons de répondre : prendre l'attaquant, bloquer la ligne, fuir, ou contre-attaquer. On les essaie dans cet ordre. Ici, le cavalier noir en c2 fait échec à ton roi, et il attaque ta tour en a1.",
+        },
+        e2: {
+          say: "Première question : peux-tu prendre l'attaquant ? Si ton roi fuit, la tour tombe. Mais ta dame touche le cavalier.",
+          instruction: 'Prends le cavalier',
+          hint: 'La dame en d1 est juste à côté du cavalier en c2.',
+        },
+        e3: {
+          say: "Deuxième réponse : bloquer. La tour noire donne échec sur ta première rangée. Tu ne peux pas la prendre, et ton roi n'a aucune case. Il faut mettre une pièce entre les deux.",
+          instruction: 'Interpose le fou en f1',
+          hint: 'Le fou de d3 recule en f1. Si la tour le prend, ton roi reprend la tour.',
+        },
+        e4: {
+          say: "Troisième réponse : fuir. Le pion h6 attaque ton fou en g5. Un pion ne vaut qu'un point : défendre le fou ne sert à rien, l'échange te coûterait quand même deux points. Mets-le à l'abri.",
+          instruction: 'Mets le fou à l’abri',
+          hint: 'Recule le fou, en h4 ou en f4 par exemple, ou échange-le contre le cavalier f6. Mais pas en h6 : le pion g7 le reprendrait.',
+        },
+        e5: {
+          say: "Quatrième réponse, la plus belle : contre-attaquer. La dame noire attaque ta tour en a4. Tu pourrais la déplacer. Mais cherche d'abord une menace plus grosse que la sienne : un échec, qui attaque aussi autre chose.",
+          instruction: 'Contre-attaque avec échec',
+          hint: 'Le cavalier saute en f6 : échec au roi, et il vise la dame en d7.',
+        },
+        e6: {
+          say: "Le roi a dû parer l'échec. La dame n'a pas eu le temps de prendre ta tour. Elle est à toi.",
+          instruction: 'Prends la dame en d7',
+          hint: 'Le cavalier de f6 saute en d7.',
+        },
+        e7: {
+          say: "Retiens l'ordre : prendre, bloquer, fuir, contre-attaquer. Et surtout, vois la menace avant qu'elle arrive. C'est la routine de la leçon précédente, appliquée à ton adversaire : avant chaque coup, demande-toi ce qu'il veut faire.",
+        },
+      },
       sacrifice: {
         title: 'Le sacrifice',
         summary: 'Donner du matériel pour obtenir mieux : du temps, des lignes, un roi à nu.',

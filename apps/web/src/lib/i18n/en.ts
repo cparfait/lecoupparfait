@@ -6709,6 +6709,74 @@ export const en: Dictionary = {
           say: 'When an enemy piece blocks you, do not batter away at it. Ask yourself instead: who protects it? And attack that one.',
         },
       },
+      'echecs-prises-menaces': {
+        title: 'Checks, captures, threats',
+        summary: 'The three-question routine that finds winning moves. Run it before every move.',
+        e1: {
+          say: 'You know the patterns now. The hard part is seeing them in a game, where nobody warns you there is one. For that there is a routine in three words: **checks**, **captures**, **threats**. In that order, from the most forcing move to the least.',
+        },
+        e2: {
+          say: 'First word: checks. List them all, even the ones that look silly. Your queen has three: on b3, on d5 and on d8. On d8 she gets taken. On b3 she wins nothing. And on d5?',
+          instruction: 'Give the check that wins something',
+          hint: 'On d5, the queen hits the king on g8, and along the other diagonal, the rook on a8.',
+        },
+        e3: {
+          say: 'The king had to step aside. Second word: captures. What is attacked and undefended? The rook. It is yours.',
+          instruction: 'Take the rook on a8',
+          hint: 'The queen goes up the diagonal, from d5 to a8.',
+        },
+        e4: {
+          say: 'New position. Run the routine. Any checks? None. Any captures? None either. That leaves the third word: threats. Look for the move that attacks two things at once. Look at the black bishop and knight, side by side on the same rank.',
+        },
+        e5: {
+          say: 'A plain pawn can attack them both. Which one, and where?',
+          instruction: 'Attack the bishop and the knight with a pawn',
+          hint: 'The e4 pawn steps to e5: it hits d6 and f6, and the d4 pawn protects it.',
+        },
+        e6: {
+          say: 'The knight got away. The bishop could not get away at the same time. It is yours.',
+          instruction: 'Take the bishop on d6',
+          hint: 'The e5 pawn captures diagonally, on d6.',
+        },
+        e7: {
+          say: 'That is the routine: checks, captures, threats. Yours first, then your opponent’s. At first it is slow. After a few weeks it takes two seconds, and you stop missing forks, for you or against you.',
+        },
+      },
+      defendre: {
+        title: 'Defending',
+        summary: 'A piece under attack? Four answers, to try in order.',
+        e1: {
+          say: 'Your opponent is threatening something. You have four ways to answer: take the attacker, block the line, run away, or counter-attack. Try them in that order. Here, the black knight on c2 checks your king, and it attacks your rook on a1.',
+        },
+        e2: {
+          say: 'First question: can you take the attacker? If your king runs, the rook falls. But your queen touches the knight.',
+          instruction: 'Take the knight',
+          hint: 'The queen on d1 is right next to the knight on c2.',
+        },
+        e3: {
+          say: 'Second answer: block. The black rook checks you along your first rank. You cannot take it, and your king has no square. You need to put a piece in between.',
+          instruction: 'Put the bishop in the way on f1',
+          hint: 'The bishop on d3 drops back to f1. If the rook takes it, your king takes the rook.',
+        },
+        e4: {
+          say: 'Third answer: run away. The h6 pawn attacks your bishop on g5. A pawn is worth one point: defending the bishop is pointless, the trade would still cost you two points. Get it to safety.',
+          instruction: 'Get the bishop to safety',
+          hint: 'Drop the bishop back, to h4 or f4 for example, or trade it for the f6 knight. But not on h6: the g7 pawn would take it.',
+        },
+        e5: {
+          say: 'Fourth answer, the finest: counter-attack. The black queen attacks your rook on a4. You could move it. But first look for a bigger threat than hers: a check that also attacks something else.',
+          instruction: 'Counter-attack with check',
+          hint: 'The knight jumps to f6: check to the king, and it hits the queen on d7.',
+        },
+        e6: {
+          say: 'The king had to deal with the check. The queen never got time to take your rook. It is yours.',
+          instruction: 'Take the queen on d7',
+          hint: 'The knight on f6 jumps to d7.',
+        },
+        e7: {
+          say: 'Remember the order: take, block, run, counter-attack. And above all, see the threat before it lands. It is the routine from the previous lesson, turned on your opponent: before every move, ask yourself what he wants to do.',
+        },
+      },
       sacrifice: {
         title: 'The sacrifice',
         summary: 'Giving up material to get something better: time, lines, a bare king.',
