@@ -9,7 +9,13 @@
 import { strict as assert } from 'node:assert'
 import { test } from 'node:test'
 import { texteDuMessage, type ChatMessage } from '../src/lib/game/annoncesDuSalon.ts'
-import { fabriquerT } from '../src/lib/i18n/resoudre.ts'
+import { fabriquerT as fabriquer } from '../src/lib/i18n/resoudre.ts'
+import { fr } from '../src/lib/i18n/fr.ts'
+import { en } from '../src/lib/i18n/en.ts'
+
+// `fabriquerT` reçoit ses dictionnaires : le navigateur n'a que ceux qu'il a
+// chargés. Ce test n'a besoin que du français et de l'anglais.
+const fabriquerT = (locale: 'fr' | 'en') => fabriquer(locale, { fr, en })
 
 const annonce = (code: string, name?: string): ChatMessage => ({
   from: 'Le Coup Parfait',
