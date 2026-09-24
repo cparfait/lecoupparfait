@@ -121,16 +121,17 @@ export interface Chapitre {
  * chapitres que d'échelons donneraient l'impression de piétiner. Au-delà de 1850, un joueur sait ce
  * qu'il doit travailler et n'a plus besoin qu'on le lui dise.
  *
- * ── Les échelons, un par chapitre, sauf le dernier ──
+ * ── Un échelon par chapitre, toujours plus haut ──
  *
- * Les chapitres 1 à 11 prennent les onze premiers échelons du barème, sans en
- * sauter : 100 à 1850. Il n'y en a que onze sous 1850, et monter d'un cran de
- * plus au chapitre 12 ferait finir la carrière à 2050, ce qu'on a déjà connu —
- * reportés à la main lors d'un changement d'échelle, les trois derniers
- * chapitres avaient glissé jusqu'à 2250. Le chapitre 12 garde donc la force
- * du 11 : ce qu'il ajoute, c'est l'absence de filet (son objectif), Oracle, qui
- * n'a aucun penchant à exploiter, et des puzzles plus difficiles.
- * `check-carriere` n'autorise cette égalité qu'au dernier chapitre.
+ * Treize échelons tiennent sous 1850 depuis l'ajout du 430 et du 770 ; les
+ * douze chapitres en prennent douze et ne sautent que le 1120, que la mesure
+ * place à une soixantaine de points du 980 — deux chapitres contre des
+ * adversaires presque égaux ne se sentiraient pas comme une marche. Le
+ * chapitre 12 n'a donc plus à garder la force du 11, comme il le faisait quand
+ * l'échelle n'offrait que onze échelons sous 1850 : il monte, et garde en plus
+ * l'absence de filet et Oracle. Les rangs reportés à la main avaient un jour
+ * emmené les derniers chapitres jusqu'à 2250 ; `check-carriere` vérifie le
+ * plafond.
  *
  * Aucune migration : la progression enregistrée (`career_progress`) retient un
  * numéro de chapitre, jamais un échelon. L'échelon se relit ici à chaque duel.
@@ -261,7 +262,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'sacrifice',
     puzzles: 5,
     adversaire: 'gambiteur',
-    niveau: 9,
+    niveau: 10,
     cotePuzzles: 1400,
     victoires: 2,
     teinte: '#e64980',
@@ -275,7 +276,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'promotion',
     puzzles: 5,
     adversaire: 'positionnel',
-    niveau: 10,
+    niveau: 11,
     cotePuzzles: 1550,
     victoires: 2,
     teinte: '#4dabf7',
@@ -292,7 +293,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'quietMove',
     puzzles: 5,
     adversaire: 'positionnel',
-    niveau: 11,
+    niveau: 12,
     cotePuzzles: 1700,
     victoires: 2,
     teinte: '#00b894',
@@ -306,7 +307,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     theme: 'mateIn2',
     puzzles: 5,
     adversaire: 'machine',
-    niveau: 11,
+    niveau: 13,
     cotePuzzles: 1850,
     victoires: 1,
     teinte: '#f03e3e',

@@ -122,19 +122,21 @@ délibérée : on doit savoir à quoi s'attendre sans relire les règles.
 | 2   | Ne rien laisser en prise      | Pion 🐣     | 180  | pièces défendues, prises gratuites     |
 | 3   | Sortir ses pièces             | Rempart 🛡️  | 250  | développement, roque, centre           |
 | 4   | La fourchette et le clouage   | Éclair ⚡   | 320  | motifs tactiques de base               |
-| 5   | Mater avec la dame et la tour | Rempart 🛡️  | 630  | mats élémentaires, opposition          |
-| 6   | Tenir face à une attaque      | Brasier 🔥  | 980  | défense, contre-attaque au centre      |
-| 7   | Compter le matériel           | Éclair ⚡   | 1120 | échanges, valeur des pièces            |
-| 8   | Une ouverture à soi           | Boussole 🧭 | 1320 | un répertoire minimal, blancs et noirs |
-| 9   | Accepter ou refuser un gambit | Mirage 🎭   | 1450 | initiative contre matériel             |
-| 10  | Les finales de pions          | Boussole 🧭 | 1650 | opposition, pion passé, carré          |
-| 11  | Le plan, pas le coup          | Boussole 🧭 | 1850 | jeu positionnel, faiblesses            |
+| 5   | Mater avec la dame et la tour | Rempart 🛡️  | 430  | mats élémentaires, opposition          |
+| 6   | Tenir face à une attaque      | Brasier 🔥  | 630  | défense, contre-attaque au centre      |
+| 7   | Compter le matériel           | Éclair ⚡   | 770  | échanges, valeur des pièces            |
+| 8   | Une ouverture à soi           | Boussole 🧭 | 980  | un répertoire minimal, blancs et noirs |
+| 9   | Accepter ou refuser un gambit | Mirage 🎭   | 1320 | initiative contre matériel             |
+| 10  | Les finales de pions          | Boussole 🧭 | 1450 | opposition, pion passé, carré          |
+| 11  | Le plan, pas le coup          | Boussole 🧭 | 1650 | jeu positionnel, faiblesses            |
 | 12  | Sans filet                    | Oracle 🜛    | 1850 | sans indice, sans commentaire          |
 
-Les chapitres 1 à 11 prennent les onze premiers échelons du barème, sans en
-sauter ; il n'y en a pas d'autre sous 1850. Le chapitre 12 garde donc la force
-du 11 : ce qu'il ajoute tient à son objectif — sans indice, sans commentaire —,
-à un adversaire sans penchant à exploiter et à des puzzles plus difficiles.
+Un échelon par chapitre, toujours plus haut. Treize échelons tiennent sous
+1850 depuis l'ajout du 430 et du 770 ; les douze chapitres n'en sautent qu'un,
+le 1120, que la mesure place à une soixantaine de points du 980. Le chapitre 12
+monte donc au-dessus du 11, et garde ce qui le distingue : son objectif — sans
+indice, sans commentaire —, un adversaire sans penchant à exploiter et des
+puzzles plus difficiles.
 
 Les adversaires ne suivent pas l'ordre du barème : le style sert la leçon.
 On affronte **Brasier** au chapitre « tenir face à une attaque » parce qu'il
@@ -264,12 +266,12 @@ déjà la légalité des coups.
 
 | Lot | Contenu                                                                                                                              | Estimation |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
-| 1   | `carriere.ts` : les 12 chapitres, typés, avec un contrôle automatique que chaque leçon et chaque thème de puzzle référencés existent | 0,5 j      |
-| 2   | Table, migration, les trois routes d'API                                                                                             | 0,5 j      |
-| 3   | Écran `/carriere` : la carte, l'étape courante, le bouton unique                                                                     | 1,5 j      |
-| 4   | Branchements : leçon, puzzles et partie renvoient à la carrière et valident l'étape                                                  | 1 j        |
-| 5   | Filet de sécurité : détection des cinq défaites, désignation de la faute dominante, proposition                                      | 0,5 j      |
-| 6   | Entrée dans la navigation, état anonyme, reprise, fin de carrière                                                                    | 0,5 j      |
+| 1   | `carriere.ts` : les 12 chapitres, typés, avec un contrôle automatique que chaque leçon et chaque thème de puzzle référencés existent | 0,5 j      | 100 |
+| 2   | Table, migration, les trois routes d'API                                                                                             | 0,5 j      | 180 |
+| 3   | Écran `/carriere` : la carte, l'étape courante, le bouton unique                                                                     | 1,5 j      | 250 |
+| 4   | Branchements : leçon, puzzles et partie renvoient à la carrière et valident l'étape                                                  | 1 j        | 320 |
+| 5   | Filet de sécurité : détection des cinq défaites, désignation de la faute dominante, proposition                                      | 0,5 j      | 430 |
+| 6   | Entrée dans la navigation, état anonyme, reprise, fin de carrière                                                                    | 0,5 j      | 630 |
 
 **Environ 4,5 jours**, en s'appuyant sur l'existant. Le lot 3 est le plus
 lourd et le seul entièrement neuf.

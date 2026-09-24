@@ -123,16 +123,14 @@ for (const c of CHAPITRES) {
 }
 
 // La difficulté doit monter. Un chapitre plus facile que le précédent casserait
-// la seule promesse du mode : que le chemin mène quelque part. Seul le dernier
-// peut garder la force de l'avant-dernier : il n'y a que onze échelons sous
-// 1850, et ce qu'il ajoute est l'absence de filet — voir `CHAPITRES`. Ses
-// puzzles, eux, doivent rester plus difficiles.
+// la seule promesse du mode : que le chemin mène quelque part. Sans exception
+// depuis l'ajout des échelons 430 et 770 : le dernier chapitre gardait la
+// force de l'avant-dernier faute d'échelon libre sous 1850.
 let croissant = true
 for (let i = 1; i < CHAPITRES.length; i++) {
-  const dernier = i === CHAPITRES.length - 1
   const avant = CHAPITRES[i - 1]
   const ici = CHAPITRES[i]
-  if (dernier ? ici.niveau < avant.niveau : ici.niveau <= avant.niveau) croissant = false
+  if (ici.niveau <= avant.niveau) croissant = false
   if (ici.cotePuzzles <= avant.cotePuzzles) croissant = false
 }
 check('la difficulté monte à chaque chapitre', croissant)
