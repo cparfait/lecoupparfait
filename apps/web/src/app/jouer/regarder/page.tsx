@@ -39,6 +39,7 @@ import Link from 'next/link'
 import { Eye, Swords, Users } from 'lucide-react'
 import clsx from 'clsx'
 import { SPEED_LABELS, speedCategory, type TimeControl } from '@coupparfait/core'
+import { IconeCadence } from '@/components/ui/IconeCadence.tsx'
 import {
   Card,
   Chip,
@@ -284,7 +285,8 @@ export default function WatchPage() {
                         )}
                       </span>
                       <span className="mt-0.5 block text-[12px] text-faint">
-                        {SPEED_LABELS[speed]?.icon} {SPEED_LABELS[speed]?.[contenu]}
+                        <IconeCadence categorie={speed} className="-mt-px me-1 inline" />
+                        {SPEED_LABELS[speed]?.[contenu]}
                         {game.statut === 'waiting' ? (
                           t('watch.freeSeat')
                         ) : (

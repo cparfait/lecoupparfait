@@ -16,6 +16,7 @@ import { Medal, Trophy } from 'lucide-react'
 import clsx from 'clsx'
 import { PlayerSearch } from '@/components/social/PlayerSearch.tsx'
 import { SPEED_LABELS } from '@coupparfait/core'
+import { IconeCadence } from '@/components/ui/IconeCadence.tsx'
 import { Card, EmptyState, Skeleton, TitreDePage } from '@/components/ui/index.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
 
@@ -102,9 +103,10 @@ export default function LeaderboardPage() {
             )}
           >
             {entry.id !== 'puzzle' && (
-              <span className="mr-1" aria-hidden>
-                {SPEED_LABELS[entry.id as keyof typeof SPEED_LABELS]?.icon}
-              </span>
+              <IconeCadence
+                categorie={entry.id as keyof typeof SPEED_LABELS}
+                className="-mt-px me-1 inline"
+              />
             )}
             {t(entry.label)}
           </button>

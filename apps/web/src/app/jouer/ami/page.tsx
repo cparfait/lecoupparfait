@@ -48,6 +48,7 @@ import {
 } from 'lucide-react'
 import clsx from 'clsx'
 import { SPEED_LABELS, TIME_CONTROLS } from '@coupparfait/core'
+import { IconeCadence } from '@/components/ui/IconeCadence.tsx'
 import {
   Button,
   Card,
@@ -389,7 +390,7 @@ export default function CreateFriendGamePage() {
                       catégorie, qui est ce qui détermine le classement mis à
                       jour à la fin de la partie. */}
                   <span className="block text-[12px] font-normal leading-tight text-faint">
-                    <span aria-hidden>{SPEED_LABELS[tc.category].icon}</span>{' '}
+                    <IconeCadence categorie={tc.category} className="-mt-px me-1 inline" />
                     {SPEED_LABELS[tc.category][contenu]}
                   </span>
                   <span className="mt-0.5 block text-sm">{tc.label}</span>
@@ -798,10 +799,10 @@ function PartiePrete({
 
         <div className="mt-5 flex flex-wrap justify-center gap-2">
           <Chip>
-            {
-              SPEED_LABELS[TIME_CONTROLS.find((tc) => tc.id === timeControlId)?.category ?? 'rapid']
-                .icon
-            }{' '}
+            <IconeCadence
+              categorie={TIME_CONTROLS.find((tc) => tc.id === timeControlId)?.category ?? 'rapid'}
+              className="-mt-px me-1 inline"
+            />
             {TIME_CONTROLS.find((tc) => tc.id === timeControlId)?.label}
           </Chip>
           <Chip tone={rated ? 'accent' : 'neutral'}>

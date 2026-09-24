@@ -27,6 +27,7 @@ import clsx from 'clsx'
 import { avecElements, langue, useI18n, useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
 import { SPEED_LABELS, ratingTitle } from '@coupparfait/core'
+import { IconeCadence } from '@/components/ui/IconeCadence.tsx'
 import { Button, Card, Chip, EmptyState, Skeleton } from '@/components/ui/index.tsx'
 import { AvatarPicker } from '@/components/profile/AvatarPicker.tsx'
 import { ComptesAilleurs } from '@/components/profile/ComptesAilleurs.tsx'
@@ -351,9 +352,7 @@ export default function ProfilePage() {
             <Card key={rating.category} className="p-4">
               <p className="flex items-center gap-1.5 text-[12px] font-semibold text-faint">
                 {rating.category !== 'puzzle' && (
-                  <span aria-hidden>
-                    {SPEED_LABELS[rating.category as keyof typeof SPEED_LABELS]?.icon}
-                  </span>
+                  <IconeCadence categorie={rating.category as keyof typeof SPEED_LABELS} />
                 )}
                 {libelleDeCategorie(t, rating.category)}
               </p>
