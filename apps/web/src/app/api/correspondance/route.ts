@@ -138,8 +138,7 @@ export async function POST(request: Request) {
       if (adversaire && result.game.result === '*') {
         const jours = result.game.daysPerMove
         prevenir(adversaire, 'invitations', {
-          titre: `${me.username} a joué`,
-          corps: `À toi de jouer — tu as ${jours} jour${jours > 1 ? 's' : ''} pour répondre.`,
+          sujet: { sujet: 'correspondance', auteur: me.username, jours },
           url: '/correspondance',
           fil: 'correspondance',
         })

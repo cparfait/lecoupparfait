@@ -89,14 +89,10 @@ export async function POST(request: Request) {
         vue, c'est une réponse, pas une demande.
       */
       prevenir(result.targetId, 'invitations', {
-        titre:
-          result.status === 'accepted'
-            ? `${me.username} et toi êtes amis`
-            : `${me.username} veut t’ajouter`,
-        corps:
-          result.status === 'accepted'
-            ? 'Ta demande a trouvé la sienne : vous pouvez vous défier.'
-            : 'Ouvre ton carnet pour accepter ou refuser.',
+        sujet: {
+          sujet: result.status === 'accepted' ? 'amiAccepte' : 'amiDemande',
+          auteur: me.username,
+        },
         url: '/amis',
         fil: 'ami',
       })

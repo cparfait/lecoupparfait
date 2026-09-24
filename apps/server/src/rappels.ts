@@ -26,6 +26,7 @@
  */
 
 import webpush from 'web-push'
+import { texteDeNotification } from '@coupparfait/core'
 import {
   abonnementsDefiEnAttente,
   defisDejaFaits,
@@ -163,9 +164,11 @@ export async function rappelDuDefi(maintenant = new Date()): Promise<number> {
             endpoint: abonnement.endpoint,
             keys: { p256dh: abonnement.p256dh, auth: abonnement.auth },
           },
+          // Dans la langue du compte, lue avec l'abonnement : le rappel part
+          // vers quelqu'un qui n'a pas la page ouverte, il n'y a pas d'autre
+          // source. Voir `packages/core/src/notifications.ts`.
           JSON.stringify({
-            titre: 'Le défi du jour t’attend',
-            corps: 'Un puzzle, à ton niveau, valable jusqu’à minuit.',
+            ...texteDeNotification({ sujet: 'defiDuJour' }, abonnement.locale),
             url: '/',
             fil: 'defi-du-jour',
           }),

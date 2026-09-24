@@ -50,10 +50,8 @@ function prevenirDuDefi(
   increment: number,
 ): void {
   if (!cible) return
-  const minutes = Math.round(initialTime / 60)
   prevenir(cible, 'invitations', {
-    titre: `${auteur} te propose une partie`,
-    corps: `${minutes} min${increment > 0 ? ` + ${increment} s` : ''} — l’invitation expire dans cinq minutes.`,
+    sujet: { sujet: 'defi', auteur, minutes: Math.round(initialTime / 60), increment },
     // La bannière du guetteur s'affiche sur toutes les pages : l'accueil suffit,
     // et c'est la page la moins coûteuse à ouvrir sur un téléphone.
     url: '/',

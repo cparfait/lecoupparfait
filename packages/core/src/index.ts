@@ -58,6 +58,9 @@ export * from './pgn.ts'
 // Analyse complète de partie
 export * from './report.ts'
 
+// Texte des notifications poussées (fr, en)
+export * from './notifications.ts'
+
 // Position de départ standard.
 export const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 

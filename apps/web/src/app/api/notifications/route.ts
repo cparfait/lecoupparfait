@@ -23,7 +23,7 @@ import {
 } from '@coupparfait/db/push'
 import { getCurrentUser } from '@/lib/server/session.ts'
 import { clePubliqueVapid, envoyerAux, notificationsActives } from '@/lib/server/push.ts'
-import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
+import { localeDeLaRequete, tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -88,12 +88,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: t('api.deviceNotSubscribed') }, { status: 404 })
     }
 
-    const { envoyes, morts } = await envoyerAux([abonnement], {
-      titre: 'Le Coup Parfait',
-      corps: 'Tout fonctionne : c’est ici que tes invitations arriveront.',
-      url: '/',
-      fil: 'invitation',
-    })
+    // L'essai se lit sur l'écran même où l'on vient de cocher la case : il
+    // parle la langue de la page plutôt que celle enregistrée au compte.
+    const { envoyes, morts } = await envoyerAux(
+      [abonnement],
+      { sujet: { sujet: 'essai' }, url: '/', fil: 'invitation' },
+      localeDeLaRequete(request),
+    )
     await retirerAbonnements(morts)
 
     if (envoyes.length === 0) {

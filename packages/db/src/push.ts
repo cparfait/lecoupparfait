@@ -12,9 +12,30 @@
  * ligne ne ferait qu'ajouter un envoi perdu à chaque notification.
  */
 
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, eq, getTableColumns, inArray, sql } from 'drizzle-orm'
 import { getDb } from './index.ts'
-import { dailyProgress, pushSubscriptions, type PushSubscriptionRow } from './schema.ts'
+import { dailyProgress, pushSubscriptions, users, type PushSubscriptionRow } from './schema.ts'
+
+/**
+ * Un abonnement, avec la langue du compte qui le porte.
+ *
+ * Le texte d'une notification s'écrit au moment de l'envoi, loin de toute
+ * page : la langue choisie dans le navigateur n'y est pas. Celle du compte
+ * (`preferences.locale`) si, et on la lit dans la même requête que les
+ * abonnements — une jointure par lot, pas une lecture par destinataire.
+ * `null` pour un compte qui n'a jamais enregistré de langue.
+ */
+export type AbonnementDestinataire = PushSubscriptionRow & { locale: string | null }
+
+function selectionAvecLangue() {
+  return getDb()
+    .select({
+      ...getTableColumns(pushSubscriptions),
+      locale: sql<string | null>`${users.preferences} ->> 'locale'`,
+    })
+    .from(pushSubscriptions)
+    .innerJoin(users, eq(users.id, pushSubscriptions.userId))
+}
 
 /** Ce qu'un navigateur nous remet en s'abonnant. */
 export interface AbonnementNavigateur {
@@ -101,15 +122,11 @@ export async function lireAbonnement(endpoint: string): Promise<PushSubscription
 export async function abonnementsPour(
   userId: string,
   usage: 'invitations' | 'defiDuJour',
-): Promise<PushSubscriptionRow[]> {
-  const database = getDb()
+): Promise<AbonnementDestinataire[]> {
   const colonne =
     usage === 'invitations' ? pushSubscriptions.invitations : pushSubscriptions.defiDuJour
 
-  return database
-    .select()
-    .from(pushSubscriptions)
-    .where(and(eq(pushSubscriptions.userId, userId), eq(colonne, true)))
+  return selectionAvecLangue().where(and(eq(pushSubscriptions.userId, userId), eq(colonne, true)))
 }
 
 /**
@@ -120,9 +137,8 @@ export async function abonnementsPour(
  * par appareil, même si l'ordonnanceur tourne toutes les dix minutes ou si le
  * conteneur redémarre entre deux passages.
  */
-export async function abonnementsDefiEnAttente(): Promise<PushSubscriptionRow[]> {
-  const database = getDb()
-  return database.select().from(pushSubscriptions).where(eq(pushSubscriptions.defiDuJour, true))
+export async function abonnementsDefiEnAttente(): Promise<AbonnementDestinataire[]> {
+  return selectionAvecLangue().where(eq(pushSubscriptions.defiDuJour, true))
 }
 
 /**

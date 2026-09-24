@@ -28,11 +28,19 @@ import 'server-only'
 import webpush from 'web-push'
 import { abonnementsPour, retirerAbonnements } from '@coupparfait/db/push'
 import type { PushSubscriptionRow } from '@coupparfait/db/schema'
+import { texteDeNotification, type SujetDeNotification } from '@coupparfait/core'
 
-/** Ce qu'on transmet au travailleur de service. Voir `public/sw.js`. */
+/**
+ * Ce qu'on veut annoncer. Le travailleur de service (`public/sw.js`) reçoit,
+ * lui, un `titre` et un `corps` déjà écrits.
+ *
+ * Le texte n'est plus donné par l'appelant : il était écrit en français dans
+ * chaque route, et partait tel quel chez tout le monde. On donne le sujet, et
+ * `envoyerAux` l'écrit dans la langue du compte de chaque appareil — voir
+ * `packages/core/src/notifications.ts`.
+ */
 export interface Notification {
-  titre: string
-  corps: string
+  sujet: SujetDeNotification
   /** Où aller quand on touche la notification. */
   url: string
   /**
@@ -99,16 +107,31 @@ function preparer(): boolean {
 /**
  * Envoie une notification à une liste d'appareils.
  *
+ * Chaque appareil la reçoit dans la langue de son compte, `locale` — lue avec
+ * les abonnements par `abonnementsPour`. Un abonnement qui n'en porte pas
+ * (l'essai de la page de préférences) prend `localeParDefaut`.
+ *
  * Rend les adresses dont l'abonnement est mort — l'appelant décide s'il les
  * nettoie tout de suite ou plus tard.
  */
 export async function envoyerAux(
-  abonnements: PushSubscriptionRow[],
+  abonnements: Array<PushSubscriptionRow & { locale?: string | null }>,
   notification: Notification,
+  localeParDefaut: string | null = null,
 ): Promise<{ envoyes: string[]; morts: string[] }> {
   if (!preparer() || abonnements.length === 0) return { envoyes: [], morts: [] }
 
-  const charge = JSON.stringify(notification)
+  const { sujet, ...reste } = notification
+  const charges = new Map<string, string>()
+  const chargePour = (locale: string | null): string => {
+    const cle = locale ?? ''
+    let charge = charges.get(cle)
+    if (!charge) {
+      charge = JSON.stringify({ ...texteDeNotification(sujet, locale), ...reste })
+      charges.set(cle, charge)
+    }
+    return charge
+  }
   const envoyes: string[] = []
   const morts: string[] = []
 
@@ -120,7 +143,7 @@ export async function envoyerAux(
             endpoint: abonnement.endpoint,
             keys: { p256dh: abonnement.p256dh, auth: abonnement.auth },
           },
-          charge,
+          chargePour(abonnement.locale ?? localeParDefaut),
           // Combien de temps le message attend chez le service de messagerie
           // si le téléphone est éteint. Une invitation périmée n'intéresse plus
           // personne — le défi expire en cinq minutes ; un coup de
