@@ -211,6 +211,13 @@ export const games = pgTable(
     /** Catégorie de cadence, pour le classement. */
     speed: varchar('speed', { length: 20 }).notNull().default('rapid'),
     rated: boolean('rated').notNull().default(false),
+    /**
+     * Une aide du moteur a servi : « Indice », « Annuler » ou le mode commenté.
+     * Une telle partie ne classe pas ; elle ne coche pas non plus le niveau de
+     * l'adversaire comme battu sur l'échelle. Faux pour les parties archivées
+     * avant l'ajout de la colonne, qui ne savaient pas le dire.
+     */
+    assisted: boolean('assisted').notNull().default(false),
 
     /** Joueurs. `null` = anonyme ou ordinateur. */
     whiteId: uuid('white_id').references(() => users.id, { onDelete: 'set null' }),

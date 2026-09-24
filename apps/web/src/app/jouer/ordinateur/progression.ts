@@ -4,6 +4,8 @@ export interface Progression {
   unlocked: number
   attempts: number
   wins: number
+  /** Niveaux gagnés sans aide, du plus faible au plus fort. */
+  battus?: number[]
   tracked: boolean
 }
 

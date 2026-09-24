@@ -1,7 +1,7 @@
 /**
  * Progression contre l'ordinateur.
  *
- *   GET  /api/progression                    → où j'en suis
+ *   GET  /api/progression                    → où j'en suis, et les niveaux battus
  *   POST /api/progression  { level, won }    → j'ai joué contre ce niveau
  *
  * Le déblocage est délibérément **généreux** : battre un niveau ouvre les deux
@@ -12,7 +12,7 @@
 
 import { NextResponse } from 'next/server'
 import { BOT_LEVELS } from '@coupparfait/core'
-import { botProgress, eq, getDb, sql } from '@coupparfait/db'
+import { and, botProgress, eq, games, getDb, isNull, or, sql } from '@coupparfait/db'
 import { getCurrentUser } from '@/lib/server/session.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
@@ -43,11 +43,42 @@ export async function GET() {
     .limit(1)
 
   const defeated = row?.defeated ?? 0
+
+  /*
+    Les niveaux réellement battus, pour la coche de l'échelle.
+
+    `defeated` ne retient que le plus haut, et cocher tout ce qui est en
+    dessous mentirait : on peut sauter des niveaux, ou avoir déclaré le sien à
+    l'inscription sans rien jouer. La table des parties sait, elle, lesquels
+    ont été gagnés — on la lit plutôt que d'en tenir une copie qui finirait
+    par diverger. Une victoire aidée (« Indice », « Annuler », mode commenté)
+    ou partie d'une position composée ne compte pas.
+  */
+  const gagnees = await getDb()
+    .selectDistinct({ niveau: games.botLevel })
+    .from(games)
+    .where(
+      and(
+        eq(games.mode, 'computer'),
+        eq(games.assisted, false),
+        isNull(games.startFen),
+        or(
+          and(eq(games.whiteId, me.userId), eq(games.result, '1-0')),
+          and(eq(games.blackId, me.userId), eq(games.result, '0-1')),
+        ),
+      ),
+    )
+  const battus = gagnees
+    .map((ligne) => ligne.niveau)
+    .filter((niveau): niveau is number => typeof niveau === 'number')
+    .sort((x, y) => x - y)
+
   return NextResponse.json({
     defeated,
     unlocked: Math.max(FLOOR, defeated + LOOKAHEAD),
     attempts: row?.attempts ?? 0,
     wins: row?.wins ?? 0,
+    battus,
     tracked: true,
   })
 }

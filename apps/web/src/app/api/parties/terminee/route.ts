@@ -109,6 +109,8 @@ export async function POST(request: Request) {
     startedAt?: string
     /** Le joueur a demandé une partie classée avant de commencer. */
     classee?: boolean
+    /** Une aide du moteur a servi pendant la partie. */
+    aidee?: boolean
   }
   // Le corps est lu en texte pour être mesuré avant d'être analysé : une
   // partie de quatre cents coups tient en quelques kilo-octets, et rien ne
@@ -354,6 +356,7 @@ export async function POST(request: Request) {
         */
         speed: speedCategory({ initial: initialTime, increment }),
         rated: classee,
+        assisted: body.aidee === true,
         whiteId: camp === 'w' ? user.userId : null,
         blackId: camp === 'b' ? user.userId : null,
         whiteName: camp === 'w' ? user.username : adversaire,

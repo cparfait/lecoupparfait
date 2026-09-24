@@ -113,6 +113,13 @@
       "when": 1790262639201,
       "tag": "0015_intermediate_rungs",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1790264145175,
+      "tag": "0016_assisted_games",
+      "breakpoints": true
     }
   ]
 }

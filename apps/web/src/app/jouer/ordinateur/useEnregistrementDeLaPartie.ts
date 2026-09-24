@@ -167,6 +167,9 @@ export function useArchivageDeFin({
         perdre à l'adversaire.
       */
       classee: classee && aideUtilisee === null,
+      // Pour la coche « déjà battu » de l'échelle : une victoire aidée ne
+      // la donne pas. Voir `/api/progression`.
+      aidee: aideUtilisee !== null,
       moves: state.moves.map((coup) => coup.san),
       result: issue,
       status: outcome?.status ?? state.status,

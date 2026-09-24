@@ -1,0 +1,1 @@
+ALTER TABLE "games" ADD COLUMN "assisted" boolean DEFAULT false NOT NULL;

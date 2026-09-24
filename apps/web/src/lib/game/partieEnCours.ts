@@ -152,6 +152,8 @@ export interface PartieTerminee {
   startedAt?: string
   /** Partie annoncée classée avant de commencer — voir l'écran de réglages. */
   classee?: boolean
+  /** Une aide du moteur a servi : la victoire ne coche pas le niveau. */
+  aidee?: boolean
 }
 
 /** Ce que le serveur renvoie d'une partie classée. */
