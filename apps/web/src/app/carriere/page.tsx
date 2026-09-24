@@ -20,6 +20,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Lock, RefreshCw, Sparkles, TriangleAlert } from 'lucide-react'
 import clsx from 'clsx'
+import { IconeCarriere } from '@/components/ui/IconeCarriere.tsx'
 import {
   BOT_LEVELS,
   BOT_PERSONALITIES,
@@ -218,8 +219,11 @@ function Bandeau({
   return (
     <Card className="mb-4 overflow-hidden p-4">
       <div className="flex items-center gap-3">
-        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[color-mix(in_oklab,var(--accent)_16%,transparent)] text-2xl">
-          {rang.rang.emoji}
+        <span
+          className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[color-mix(in_oklab,var(--accent)_16%,transparent)] text-[var(--accent-text)]"
+          aria-hidden
+        >
+          <IconeCarriere nom={rang.rang.icone} size={24} />
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-lg font-bold leading-tight">
@@ -418,13 +422,13 @@ function LigneRepliee({
     >
       <span
         className={clsx(
-          'z-[1] grid h-11 w-11 shrink-0 place-items-center rounded-full border-2 text-lg',
+          'z-[1] grid h-11 w-11 shrink-0 place-items-center rounded-full border-2',
           verrouille ? 'border-line bg-bg text-faint' : 'border-transparent text-white',
         )}
         style={verrouille ? undefined : { background: chapitre.teinte }}
         aria-hidden
       >
-        {verrouille ? <Lock size={15} /> : chapitre.emoji}
+        {verrouille ? <Lock size={15} /> : <IconeCarriere nom={chapitre.icone} size={20} />}
       </span>
 
       <div className="min-w-0 flex-1">
@@ -481,14 +485,14 @@ function CarteCourante({
       <div className="p-4">
         <div className="flex items-start gap-3">
           <span
-            className="animate-carriere-halo z-[1] grid h-11 w-11 shrink-0 place-items-center rounded-full text-lg text-white"
+            className="animate-carriere-halo z-[1] grid h-11 w-11 shrink-0 place-items-center rounded-full text-white"
             style={{
               background: chapitre.teinte,
               ['--halo' as string]: `color-mix(in oklab, ${chapitre.teinte} 55%, transparent)`,
             }}
             aria-hidden
           >
-            {chapitre.emoji}
+            <IconeCarriere nom={chapitre.icone} size={20} />
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-[12px] font-semibold text-faint">
@@ -603,9 +607,11 @@ function HautsFaits({ obtenus }: { obtenus: string[] }) {
                   : 'border-line bg-bg',
               )}
             >
-              <span className={clsx('text-base', !acquis && 'opacity-30 grayscale')} aria-hidden>
-                {fait.emoji}
-              </span>
+              <IconeCarriere
+                nom={fait.icone}
+                size={16}
+                className={clsx('shrink-0', acquis ? 'text-[var(--accent-text)]' : 'text-faint')}
+              />
               <span className="min-w-0">
                 <span
                   className={clsx(

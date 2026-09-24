@@ -39,11 +39,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { Award, ChevronRight, Flame, Gauge, Map, Sun, Zap } from 'lucide-react'
+import { ChevronRight, Flame, Gauge, Map, Sun, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { rangPour, type Progression } from '@coupparfait/core'
 import { Board2D } from '@/components/board/Board2D.tsx'
 import { Skeleton } from '@/components/ui/index.tsx'
+import { IconeCarriere } from '@/components/ui/IconeCarriere.tsx'
 import { avecElements, useT } from '@/lib/i18n/index.tsx'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
 import { useCarriere } from '@/lib/carriere/useCarriere.ts'
@@ -390,7 +391,11 @@ function RangDeCarriere({ progression }: { progression: Progression }) {
       aria-label={t('chemin.rankAria', { rang: nom, xp: progression.xp })}
       className="flex min-h-11 flex-wrap items-center gap-x-2 gap-y-1 text-[12px] font-semibold text-muted lg:glass lg:px-3.5 lg:py-2 lg:text-[14px] lg:text-ink"
     >
-      <Award size={14} className="shrink-0 text-[var(--accent-text)]" aria-hidden />
+      <IconeCarriere
+        nom={etat.rang.icone}
+        size={14}
+        className="shrink-0 text-[var(--accent-text)]"
+      />
       {t('chemin.rankPoints', { rang: nom, xp: progression.xp })}
       <span
         className="block h-1 w-14 overflow-hidden rounded-full bg-surface-strong lg:h-[5px] lg:w-28"

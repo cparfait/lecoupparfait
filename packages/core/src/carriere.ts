@@ -25,6 +25,42 @@
 
 import type { BotPersonalityId, CleDeTexte } from './types.ts'
 
+/**
+ * L'icône d'un chapitre, d'un rang ou d'un haut fait, par son nom.
+ *
+ * Ces trois listes portaient un emoji (♟ 🐣 🏇 🜛…), affiché tel quel par
+ * l'interface : son dessin changeait d'un système à l'autre et détonnait
+ * parmi les tracés lucide du reste de l'application. Le cœur ne dépend pas
+ * de React et ne peut pas importer lucide : il nomme l'icône, et
+ * `IconeCarriere.tsx`, côté web, fait la correspondance avec le tracé. Le
+ * type fermé oblige ce module à prévoir chaque nom.
+ */
+export type IconeCarriere =
+  | 'balance'
+  | 'bouclier'
+  | 'boussole'
+  | 'cavalier'
+  | 'cerveau'
+  | 'cible'
+  | 'couronne'
+  | 'drapeau'
+  | 'eclair'
+  | 'epees'
+  | 'etincelles'
+  | 'etoile'
+  | 'flamme'
+  | 'fourchette'
+  | 'jumelles'
+  | 'livre'
+  | 'livres'
+  | 'masque'
+  | 'montagne'
+  | 'oeil'
+  | 'pion'
+  | 'pousse'
+  | 'sommet'
+  | 'vent'
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  Les chapitres
 // ─────────────────────────────────────────────────────────────────────────────
@@ -73,7 +109,8 @@ export interface Chapitre {
   victoires: number
   /** Couleur d'accent du chapitre, pour la carte. */
   teinte: string
-  emoji: string
+  /** L'icône du chapitre, en identifiant : voir `IconeCarriere`. */
+  icone: IconeCarriere
 }
 
 /**
@@ -111,7 +148,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     cotePuzzles: 500,
     victoires: 1,
     teinte: '#7c5cff',
-    emoji: '♟',
+    icone: 'pion',
   },
   {
     numero: 2,
@@ -125,7 +162,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     cotePuzzles: 600,
     victoires: 2,
     teinte: '#22b8cf',
-    emoji: '👀',
+    icone: 'oeil',
   },
   {
     numero: 3,
@@ -139,7 +176,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     cotePuzzles: 700,
     victoires: 2,
     teinte: '#51cf66',
-    emoji: '🏇',
+    icone: 'cavalier',
   },
   {
     numero: 4,
@@ -153,7 +190,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     cotePuzzles: 800,
     victoires: 2,
     teinte: '#fcc419',
-    emoji: '🍴',
+    icone: 'fourchette',
   },
   {
     numero: 5,
@@ -170,7 +207,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     cotePuzzles: 900,
     victoires: 2,
     teinte: '#ff922b',
-    emoji: '👑',
+    icone: 'couronne',
   },
   {
     numero: 6,
@@ -184,7 +221,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     cotePuzzles: 1000,
     victoires: 2,
     teinte: '#ff6b6b',
-    emoji: '🛡️',
+    icone: 'bouclier',
   },
   {
     numero: 7,
@@ -200,7 +237,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     cotePuzzles: 1100,
     victoires: 2,
     teinte: '#845ef7',
-    emoji: '⚖️',
+    icone: 'balance',
   },
   {
     numero: 8,
@@ -214,7 +251,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     cotePuzzles: 1250,
     victoires: 2,
     teinte: '#20c997',
-    emoji: '📖',
+    icone: 'livre',
   },
   {
     numero: 9,
@@ -228,7 +265,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     cotePuzzles: 1400,
     victoires: 2,
     teinte: '#e64980',
-    emoji: '🎭',
+    icone: 'masque',
   },
   {
     numero: 10,
@@ -242,7 +279,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     cotePuzzles: 1550,
     victoires: 2,
     teinte: '#4dabf7',
-    emoji: '🏁',
+    icone: 'drapeau',
   },
   {
     numero: 11,
@@ -259,7 +296,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     cotePuzzles: 1700,
     victoires: 2,
     teinte: '#00b894',
-    emoji: '🧭',
+    icone: 'boussole',
   },
   {
     numero: 12,
@@ -273,7 +310,7 @@ export const CHAPITRES: readonly Chapitre[] = [
     cotePuzzles: 1850,
     victoires: 1,
     teinte: '#f03e3e',
-    emoji: '🜛',
+    icone: 'sommet',
   },
 ] as const
 
@@ -315,7 +352,7 @@ export interface Rang {
    * dans toutes les langues. `check-cles-coeur` vérifie que chaque clé existe.
    */
   nom: CleDeTexte
-  emoji: string
+  icone: IconeCarriere
 }
 
 /**
@@ -334,12 +371,12 @@ export interface Rang {
  * désormais à chaque exécution des tests.
  */
 export const RANGS: readonly Rang[] = [
-  { seuil: 0, id: 'poulain', nom: 'rangs.poulain', emoji: '🐣' },
-  { seuil: 800, id: 'cavale', nom: 'rangs.cavale', emoji: '🐎' },
-  { seuil: 2000, id: 'eclaireur', nom: 'rangs.eclaireur', emoji: '🏇' },
-  { seuil: 4000, id: 'francTireur', nom: 'rangs.francTireur', emoji: '⚔️' },
-  { seuil: 6500, id: 'stratege', nom: 'rangs.stratege', emoji: '🧠' },
-  { seuil: 9500, id: 'maitre', nom: 'rangs.maitre', emoji: '👑' },
+  { seuil: 0, id: 'poulain', nom: 'rangs.poulain', icone: 'pousse' },
+  { seuil: 800, id: 'cavale', nom: 'rangs.cavale', icone: 'cavalier' },
+  { seuil: 2000, id: 'eclaireur', nom: 'rangs.eclaireur', icone: 'jumelles' },
+  { seuil: 4000, id: 'francTireur', nom: 'rangs.francTireur', icone: 'epees' },
+  { seuil: 6500, id: 'stratege', nom: 'rangs.stratege', icone: 'cerveau' },
+  { seuil: 9500, id: 'maitre', nom: 'rangs.maitre', icone: 'couronne' },
 ] as const
 
 export interface EtatDuRang {
@@ -478,7 +515,7 @@ export interface HautFait {
   nom: string
   /** Ce qu'il faut faire, dit à l'avance. Un secret ne motive personne. */
   condition: string
-  emoji: string
+  icone: IconeCarriere
 }
 
 /**
@@ -490,42 +527,57 @@ export interface HautFait {
  * compris pour ceux qu'on n'a pas encore.
  */
 export const HAUTS_FAITS: readonly HautFait[] = [
-  { id: 'premier-pas', nom: 'Premier pas', condition: 'Terminer le chapitre 1', emoji: '🌱' },
+  { id: 'premier-pas', nom: 'Premier pas', condition: 'Terminer le chapitre 1', icone: 'pousse' },
   {
     id: 'sans-faute',
     nom: 'Sans faute',
     condition: 'Décrocher trois étoiles sur un chapitre',
-    emoji: '⭐',
+    icone: 'etoile',
   },
   {
     id: 'triplette',
     nom: 'Triplette',
     condition: 'Trois étoiles sur trois chapitres',
-    emoji: '✨',
+    icone: 'etincelles',
   },
-  { id: 'tacticien', nom: 'Tacticien', condition: 'Réussir 25 puzzles en carrière', emoji: '⚡' },
-  { id: 'erudit', nom: 'Érudit', condition: 'Voir les douze leçons de la carrière', emoji: '📚' },
+  {
+    id: 'tacticien',
+    nom: 'Tacticien',
+    condition: 'Réussir 25 puzzles en carrière',
+    icone: 'eclair',
+  },
+  {
+    id: 'erudit',
+    nom: 'Érudit',
+    condition: 'Voir les douze leçons de la carrière',
+    icone: 'livres',
+  },
   {
     id: 'revanche',
     nom: 'Revanche',
     condition: 'Gagner après trois défaites d’affilée',
-    emoji: '🔥',
+    icone: 'flamme',
   },
   {
     id: 'expeditif',
     nom: 'Expéditif',
     condition: 'Gagner une partie en moins de 25 coups',
-    emoji: '💨',
+    icone: 'vent',
   },
   {
     id: 'chirurgien',
     nom: 'Chirurgien',
     condition: 'Gagner un duel sans avoir demandé d’aide',
-    emoji: '🎯',
+    icone: 'cible',
   },
-  { id: 'mi-chemin', nom: 'À mi-chemin', condition: 'Atteindre le chapitre 7', emoji: '🧗' },
-  { id: 'sans-filet', nom: 'Sans filet', condition: 'Terminer le chapitre 12', emoji: '🜛' },
-  { id: 'couronne', nom: 'La couronne', condition: 'Terminer la carrière entière', emoji: '👑' },
+  { id: 'mi-chemin', nom: 'À mi-chemin', condition: 'Atteindre le chapitre 7', icone: 'montagne' },
+  { id: 'sans-filet', nom: 'Sans filet', condition: 'Terminer le chapitre 12', icone: 'sommet' },
+  {
+    id: 'couronne',
+    nom: 'La couronne',
+    condition: 'Terminer la carrière entière',
+    icone: 'couronne',
+  },
 ] as const
 
 export function hautFait(id: string): HautFait | null {

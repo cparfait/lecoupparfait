@@ -19,6 +19,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import clsx from 'clsx'
 import { HAUTS_FAITS, rangPour } from '@coupparfait/core'
 import { Button } from '@/components/ui/index.tsx'
+import { IconeCarriere } from '@/components/ui/IconeCarriere.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
@@ -170,8 +171,12 @@ export function Celebration({
         )}
 
         {monteEnRang && (
-          <p className="mt-3 rounded-[var(--radius-sm)] border border-accent/40 bg-[color-mix(in_oklab,var(--accent)_12%,transparent)] px-3 py-2 text-sm font-semibold">
-            <span className="mr-1.5 text-lg">{rang.rang.emoji}</span>
+          <p className="mt-3 flex items-center justify-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-[color-mix(in_oklab,var(--accent)_12%,transparent)] px-3 py-2 text-sm font-semibold">
+            <IconeCarriere
+              nom={rang.rang.icone}
+              size={18}
+              className="shrink-0 text-[var(--accent-text)]"
+            />
             {t('career2.newRank', { rang: tCoeur(t, rang.rang.nom) })}
           </p>
         )}
@@ -183,9 +188,11 @@ export function Celebration({
                 key={badge.id}
                 className="flex items-center gap-2.5 rounded-[var(--radius-sm)] border border-line bg-surface px-3 py-2 text-left"
               >
-                <span className="text-xl" aria-hidden>
-                  {badge.emoji}
-                </span>
+                <IconeCarriere
+                  nom={badge.icone}
+                  size={20}
+                  className="shrink-0 text-[var(--accent-text)]"
+                />
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-semibold">{badge.nom}</span>
                   <span className="block truncate text-[12px] text-faint">{badge.condition}</span>

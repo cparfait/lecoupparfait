@@ -30,6 +30,7 @@ import clsx from 'clsx'
 import { XP, detailXp, rangPour, type Progression } from '@coupparfait/core'
 import { Menu } from '@/components/ui/Menu.tsx'
 import { classesChip } from '@/components/ui/index.tsx'
+import { IconeCarriere } from '@/components/ui/IconeCarriere.tsx'
 import { XP_TOTAL } from '@/lib/daily/quetes.ts'
 import { avecElements, useT } from '@/lib/i18n/index.tsx'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
@@ -52,8 +53,8 @@ export function PointsCarriere({ progression }: { progression: Progression }) {
       boutonClassName={classesChip('accent', 'transition-colors hover:brightness-125')}
       declencheur={(ouvert) => (
         <>
-          <span aria-hidden>{rang.rang.emoji}</span> {tCoeur(t, rang.rang.nom)} · {progression.xp}{' '}
-          {t('career2.pointsSuffix')}
+          <IconeCarriere nom={rang.rang.icone} size={12} className="shrink-0" />{' '}
+          {tCoeur(t, rang.rang.nom)} · {progression.xp} {t('career2.pointsSuffix')}
           <ChevronDown
             size={11}
             aria-hidden
@@ -88,8 +89,9 @@ function PanneauPoints({ progression }: { progression: Progression }) {
           seule chose qui rend un compteur utile : savoir ce qu'il reste. */}
       <div className="mt-2 px-1">
         <div className="flex items-baseline justify-between gap-2 text-[12px]">
-          <span className="font-semibold text-accent">
-            <span aria-hidden>{rang.rang.emoji}</span> {tCoeur(t, rang.rang.nom)}
+          <span className="inline-flex items-center gap-1 font-semibold text-accent">
+            <IconeCarriere nom={rang.rang.icone} size={12} className="shrink-0" />
+            {tCoeur(t, rang.rang.nom)}
           </span>
           {rang.suivant && (
             <span className="tabular-nums text-faint">
