@@ -36,7 +36,7 @@ function warn(lesson, index, message) {
 }
 
 for (const chapter of CHAPTERS) {
-  console.log(`\n${chapter.icon}  ${chapter.title} — ${chapter.lessons.length} leçons`)
+  console.log(`\n${chapter.title} — ${chapter.lessons.length} leçons`)
 
   for (const lesson of chapter.lessons) {
     // Position courante, héritée d'une étape à l'autre.

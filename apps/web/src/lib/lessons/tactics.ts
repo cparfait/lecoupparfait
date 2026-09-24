@@ -11,6 +11,18 @@
  * sien : ils vivent maintenant dans `mats.ts`.
  */
 
+import {
+  ArrowRightToLine,
+  Bomb,
+  BrickWall,
+  Eye,
+  Pin,
+  Search,
+  Sword,
+  Target,
+  Utensils,
+  Zap,
+} from 'lucide-react'
 import type { Chapter } from './types.ts'
 
 export const tacticsChapter: Chapter = {
@@ -18,7 +30,7 @@ export const tacticsChapter: Chapter = {
   title: 'lecons.tactique.title',
   description: 'lecons.tactique.description',
   level: 'beginner',
-  icon: '⚡',
+  icon: Zap,
   lessons: [
     {
       id: 'piece-en-prise',
@@ -26,7 +38,7 @@ export const tacticsChapter: Chapter = {
       summary: 'lecons.tactique.piece-en-prise.summary',
       level: 'beginner',
       minutes: 5,
-      icon: '🎯',
+      icon: Target,
       steps: [
         {
           kind: 'show',
@@ -61,7 +73,7 @@ export const tacticsChapter: Chapter = {
       summary: 'lecons.tactique.fourchette.summary',
       level: 'beginner',
       minutes: 6,
-      icon: '🍴',
+      icon: Utensils,
       steps: [
         {
           kind: 'show',
@@ -114,7 +126,7 @@ export const tacticsChapter: Chapter = {
       summary: 'lecons.tactique.clouage.summary',
       level: 'beginner',
       minutes: 6,
-      icon: '📌',
+      icon: Pin,
       steps: [
         {
           kind: 'show',
@@ -156,7 +168,7 @@ export const tacticsChapter: Chapter = {
       summary: 'lecons.tactique.enfilade.summary',
       level: 'intermediate',
       minutes: 5,
-      icon: '🎣',
+      icon: ArrowRightToLine,
       steps: [
         {
           kind: 'show',
@@ -185,7 +197,7 @@ export const tacticsChapter: Chapter = {
       summary: 'lecons.tactique.decouverte.summary',
       level: 'intermediate',
       minutes: 6,
-      icon: '🎭',
+      icon: Eye,
       steps: [
         {
           kind: 'show',
@@ -221,7 +233,7 @@ export const tacticsChapter: Chapter = {
       summary: 'lecons.tactique.elimination-defenseur.summary',
       level: 'intermediate',
       minutes: 5,
-      icon: '🗡️',
+      icon: Sword,
       steps: [
         {
           kind: 'show',
@@ -266,7 +278,7 @@ export const tacticsChapter: Chapter = {
       summary: 'lecons.tactique.echecs-prises-menaces.summary',
       level: 'beginner',
       minutes: 7,
-      icon: '🔎',
+      icon: Search,
       steps: [
         {
           kind: 'show',
@@ -344,7 +356,7 @@ export const tacticsChapter: Chapter = {
       summary: 'lecons.tactique.defendre.summary',
       level: 'beginner',
       minutes: 7,
-      icon: '🧱',
+      icon: BrickWall,
       steps: [
         {
           kind: 'show',
@@ -415,7 +427,7 @@ export const tacticsChapter: Chapter = {
       summary: 'lecons.tactique.sacrifice.summary',
       level: 'advanced',
       minutes: 6,
-      icon: '💥',
+      icon: Bomb,
       steps: [
         {
           kind: 'show',

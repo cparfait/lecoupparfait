@@ -24,6 +24,7 @@
  */
 
 import type { Square } from 'chess.js'
+import type { LucideIcon } from 'lucide-react'
 import type { TranslationKey } from '@/lib/i18n/index.tsx'
 
 export type LessonLevel = 'beginner' | 'intermediate' | 'advanced'
@@ -114,8 +115,15 @@ export interface Lesson {
   level: LessonLevel
   /** Durée estimée, en minutes. */
   minutes: number
-  /** Emoji identifiant la leçon dans la liste. */
-  icon: string
+  /**
+   * L'icône de la leçon, dans la liste et à côté de son titre.
+   *
+   * C'était un emoji ou un glyphe de pièce (♜ ♝ 🍴 🎣) : leur dessin changeait
+   * d'un système à l'autre, les glyphes de pièces n'avaient ni la taille ni
+   * l'épaisseur des emojis voisins, et rien ne pouvait prendre la teinte de la
+   * rubrique. Un tracé lucide, comme toutes les autres icônes de l'interface.
+   */
+  icon: LucideIcon
   /**
    * Présent sur les leçons qui enseignent un piège, absent partout ailleurs.
    * Sa présence est ce qui déclenche la fiche d'accueil et le mode révision.
@@ -129,7 +137,8 @@ export interface Chapter {
   title: TranslationKey
   description: TranslationKey
   level: LessonLevel
-  icon: string
+  /** L'icône du chapitre, sur son bandeau. Voir `Lesson.icon`. */
+  icon: LucideIcon
   /**
    * Chapitre à consulter plutôt qu'à suivre, rangé en fin de programme et
    * annoncé « Annexe » au lieu d'un numéro. C'est le cas des pièges

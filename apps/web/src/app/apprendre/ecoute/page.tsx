@@ -281,15 +281,13 @@ export default function EcoutePage() {
               setPosition(0)
             }}
             className={clsx(
-              'rounded-[var(--radius-sm)] border px-3 py-2 text-[13px] font-semibold transition-colors',
+              'inline-flex items-center gap-1.5 rounded-[var(--radius-sm)] border px-3 py-2 text-[13px] font-semibold transition-colors',
               chapitreId === chapitre.id
                 ? 'border-accent bg-[color-mix(in_oklab,var(--accent)_12%,transparent)]'
                 : 'border-line bg-bg-elev hover:bg-surface-hover',
             )}
           >
-            <span aria-hidden className="mr-1.5">
-              {chapitre.icon}
-            </span>
+            <chapitre.icon size={14} className="shrink-0 text-[var(--rub-apprendre)]" aria-hidden />
             {t(chapitre.title)}
           </button>
         ))}

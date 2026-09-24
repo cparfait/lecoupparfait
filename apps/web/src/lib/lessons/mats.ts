@@ -29,6 +29,20 @@
  * chaque coup et refuse un « # » sur une position où le roi peut encore bouger.
  */
 
+import {
+  ChartNoAxesColumnIncreasing,
+  ChessBishop,
+  ChessQueen,
+  ChessRook,
+  Coins,
+  Crosshair,
+  Crown,
+  DoorClosed,
+  Frown,
+  Gavel,
+  Lock,
+  Timer,
+} from 'lucide-react'
 import type { Chapter } from './types.ts'
 
 export const matesChapter: Chapter = {
@@ -36,7 +50,7 @@ export const matesChapter: Chapter = {
   title: 'lecons.mats.title',
   description: 'lecons.mats.description',
   level: 'beginner',
-  icon: '👑',
+  icon: Crown,
   lessons: [
     {
       id: 'mat-couloir',
@@ -44,7 +58,7 @@ export const matesChapter: Chapter = {
       summary: 'lecons.mats.mat-couloir.summary',
       level: 'beginner',
       minutes: 5,
-      icon: '🚪',
+      icon: DoorClosed,
       steps: [
         {
           kind: 'show',
@@ -81,7 +95,7 @@ export const matesChapter: Chapter = {
       summary: 'lecons.mats.mat-escalier.summary',
       level: 'beginner',
       minutes: 6,
-      icon: '🪜',
+      icon: ChartNoAxesColumnIncreasing,
       steps: [
         {
           kind: 'show',
@@ -136,7 +150,7 @@ export const matesChapter: Chapter = {
       summary: 'lecons.mats.mat-tour-roi.summary',
       level: 'beginner',
       minutes: 7,
-      icon: '♖',
+      icon: ChessRook,
       steps: [
         {
           kind: 'show',
@@ -191,7 +205,7 @@ export const matesChapter: Chapter = {
       summary: 'lecons.mats.mat-dame-roi.summary',
       level: 'beginner',
       minutes: 7,
-      icon: '♕',
+      icon: ChessQueen,
       steps: [
         {
           kind: 'show',
@@ -247,7 +261,7 @@ export const matesChapter: Chapter = {
       summary: 'lecons.mats.mat-deux-fous.summary',
       level: 'intermediate',
       minutes: 6,
-      icon: '♗',
+      icon: ChessBishop,
       steps: [
         {
           kind: 'show',
@@ -296,7 +310,7 @@ export const matesChapter: Chapter = {
       summary: 'lecons.mats.mat-etouffe.summary',
       level: 'intermediate',
       minutes: 7,
-      icon: '😵',
+      icon: Lock,
       steps: [
         {
           kind: 'show',
@@ -396,7 +410,7 @@ export const openingMatesChapter: Chapter = {
   title: 'lecons.mats-ouverture.title',
   description: 'lecons.mats-ouverture.description',
   level: 'beginner',
-  icon: '🪤',
+  icon: Timer,
   lessons: [
     {
       /*
@@ -412,7 +426,7 @@ export const openingMatesChapter: Chapter = {
       summary: 'lecons.mats-ouverture.mat-imbecile.summary',
       level: 'beginner',
       minutes: 5,
-      icon: '🤦',
+      icon: Frown,
       trap: {
         opening: 'lecons.mats-ouverture.mat-imbecile.opening',
         color: 'b',
@@ -500,7 +514,7 @@ export const openingMatesChapter: Chapter = {
       summary: 'lecons.mats-ouverture.mat-berger.summary',
       level: 'beginner',
       minutes: 7,
-      icon: '🐑',
+      icon: Crosshair,
       trap: {
         opening: 'lecons.mats-ouverture.mat-berger.opening',
         color: 'w',
@@ -598,7 +612,7 @@ export const openingMatesChapter: Chapter = {
       summary: 'lecons.mats-ouverture.mat-shilling.summary',
       level: 'intermediate',
       minutes: 8,
-      icon: '🪙',
+      icon: Coins,
       trap: {
         opening: 'lecons.mats-ouverture.mat-shilling.opening',
         color: 'b',
@@ -722,7 +736,7 @@ export const openingMatesChapter: Chapter = {
       summary: 'lecons.mats-ouverture.mat-legal.summary',
       level: 'advanced',
       minutes: 8,
-      icon: '📌',
+      icon: Gavel,
       trap: {
         opening: 'lecons.mats-ouverture.mat-legal.opening',
         color: 'w',

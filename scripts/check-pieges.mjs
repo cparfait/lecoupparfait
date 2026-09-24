@@ -63,7 +63,7 @@ for (const chapter of CHAPTERS) {
   const avec = chapter.lessons.filter((lesson) => lesson.trap)
   if (!attendu && avec.length === 0) continue
 
-  console.log(`\n${chapter.icon}  ${chapter.id} — ${avec.length}/${chapter.lessons.length} fiches`)
+  console.log(`\n${chapter.id} — ${avec.length}/${chapter.lessons.length} fiches`)
 
   for (const lesson of chapter.lessons) {
     if (!lesson.trap) {

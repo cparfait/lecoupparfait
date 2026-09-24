@@ -216,11 +216,14 @@ export default function LearnPage() {
           />
           <div className="flex flex-wrap items-center gap-4 p-5">
             <span
-              className="grid h-14 w-14 shrink-0 place-items-center rounded-[var(--radius)] text-3xl"
-              style={{ background: 'color-mix(in oklab, var(--rub-apprendre) 16%, transparent)' }}
+              className="grid h-14 w-14 shrink-0 place-items-center rounded-[var(--radius)]"
+              style={{
+                background: 'color-mix(in oklab, var(--rub-apprendre) 16%, transparent)',
+                color: 'var(--rub-apprendre)',
+              }}
               aria-hidden
             >
-              {prochaine.lecon.icon}
+              <prochaine.lecon.icon size={26} strokeWidth={1.9} />
             </span>
             <div className="min-w-[14rem] flex-1">
               <h2 className="font-display text-lg font-semibold tracking-tight">
@@ -374,15 +377,16 @@ export default function LearnPage() {
                   className="bandeau -mx-3 -mt-3 flex w-[calc(100%+1.5rem)] items-center gap-3 border-b-2 px-3 py-3 text-left transition-colors hover:bg-surface-hover sm:-mx-4 sm:-mt-4 sm:w-[calc(100%+2rem)] sm:px-4"
                 >
                   <span
-                    className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius-sm)] text-xl"
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius-sm)]"
                     style={{
                       background: 'color-mix(in oklab, var(--bandeau-teinte) 18%, transparent)',
                       boxShadow:
                         'inset 0 0 0 1px color-mix(in oklab, var(--bandeau-teinte) 34%, transparent)',
+                      color: 'var(--bandeau-teinte)',
                     }}
                     aria-hidden
                   >
-                    {chapter.icon}
+                    <chapter.icon size={22} strokeWidth={1.9} />
                   </span>
 
                   <div className="min-w-0 flex-1">
@@ -456,8 +460,18 @@ export default function LearnPage() {
                           : 'border-line-strong/60 bg-surface-strong',
                       )}
                     >
-                      <span className="mt-0.5 text-xl" aria-hidden>
-                        {lesson.icon}
+                      {/* Une pastille dans la teinte de la rubrique, comme sur
+                          les cartes de destination : l'emoji qu'elle remplace
+                          portait ses propres couleurs, une par leçon. */}
+                      <span
+                        className="grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)]"
+                        style={{
+                          background: 'color-mix(in oklab, var(--rub-apprendre) 14%, transparent)',
+                          color: 'var(--rub-apprendre)',
+                        }}
+                        aria-hidden
+                      >
+                        <lesson.icon size={18} strokeWidth={1.9} />
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold leading-snug">{t(lesson.title)}</p>

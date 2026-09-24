@@ -7,6 +7,21 @@
  * est mon plan. En finale, où va mon roi.
  */
 
+import {
+  ArrowBigUpDash,
+  ArrowLeftRight,
+  Ban,
+  Bridge,
+  Compass,
+  Construction,
+  Flag,
+  Footprints,
+  Route,
+  Shield,
+  Square,
+  Sunrise,
+  TowerControl,
+} from 'lucide-react'
 import type { Chapter } from './types.ts'
 
 export const openingChapter: Chapter = {
@@ -14,7 +29,7 @@ export const openingChapter: Chapter = {
   title: 'lecons.ouverture.title',
   description: 'lecons.ouverture.description',
   level: 'beginner',
-  icon: '🌅',
+  icon: Sunrise,
   lessons: [
     {
       id: 'principes-ouverture',
@@ -22,7 +37,7 @@ export const openingChapter: Chapter = {
       summary: 'lecons.ouverture.principes-ouverture.summary',
       level: 'beginner',
       minutes: 7,
-      icon: '🧭',
+      icon: Compass,
       steps: [
         {
           kind: 'show',
@@ -81,7 +96,7 @@ export const openingChapter: Chapter = {
       summary: 'lecons.ouverture.erreurs-ouverture.summary',
       level: 'beginner',
       minutes: 6,
-      icon: '🚫',
+      icon: Ban,
       steps: [
         {
           kind: 'show',
@@ -127,7 +142,7 @@ export const middlegameChapter: Chapter = {
   title: 'lecons.milieu.title',
   description: 'lecons.milieu.description',
   level: 'intermediate',
-  icon: '🏗️',
+  icon: Construction,
   lessons: [
     {
       id: 'colonnes-ouvertes',
@@ -135,7 +150,7 @@ export const middlegameChapter: Chapter = {
       summary: 'lecons.milieu.colonnes-ouvertes.summary',
       level: 'intermediate',
       minutes: 6,
-      icon: '🛣️',
+      icon: Route,
       steps: [
         {
           kind: 'show',
@@ -166,7 +181,7 @@ export const middlegameChapter: Chapter = {
       summary: 'lecons.milieu.avant-poste.summary',
       level: 'intermediate',
       minutes: 5,
-      icon: '🏰',
+      icon: TowerControl,
       steps: [
         {
           kind: 'show',
@@ -191,7 +206,7 @@ export const middlegameChapter: Chapter = {
       summary: 'lecons.milieu.securite-roi.summary',
       level: 'intermediate',
       minutes: 6,
-      icon: '🛡️',
+      icon: Shield,
       steps: [
         {
           kind: 'show',
@@ -223,7 +238,7 @@ export const endgameChapter: Chapter = {
   title: 'lecons.finale.title',
   description: 'lecons.finale.description',
   level: 'intermediate',
-  icon: '🏁',
+  icon: Flag,
   lessons: [
     {
       id: 'roi-actif',
@@ -231,7 +246,7 @@ export const endgameChapter: Chapter = {
       summary: 'lecons.finale.roi-actif.summary',
       level: 'intermediate',
       minutes: 5,
-      icon: '🚶',
+      icon: Footprints,
       steps: [
         {
           kind: 'show',
@@ -263,7 +278,7 @@ export const endgameChapter: Chapter = {
       summary: 'lecons.finale.opposition.summary',
       level: 'intermediate',
       minutes: 7,
-      icon: '⚔️',
+      icon: ArrowLeftRight,
       steps: [
         {
           kind: 'show',
@@ -298,7 +313,7 @@ export const endgameChapter: Chapter = {
       summary: 'lecons.finale.regle-du-carre.summary',
       level: 'intermediate',
       minutes: 5,
-      icon: '⬜',
+      icon: Square,
       steps: [
         {
           kind: 'show',
@@ -330,7 +345,7 @@ export const endgameChapter: Chapter = {
       summary: 'lecons.finale.pion-passe.summary',
       level: 'intermediate',
       minutes: 6,
-      icon: '🏃',
+      icon: ArrowBigUpDash,
       steps: [
         {
           kind: 'show',
@@ -373,7 +388,7 @@ export const endgameChapter: Chapter = {
       summary: 'lecons.finale.finales-de-tours.summary',
       level: 'advanced',
       minutes: 10,
-      icon: '🌉',
+      icon: Bridge,
       steps: [
         {
           kind: 'show',

@@ -10,6 +10,19 @@
  * les pièces mobiles parce que son saut est le plus déroutant.
  */
 
+import {
+  Castle,
+  ChessBishop,
+  ChessKing,
+  ChessKnight,
+  ChessPawn,
+  ChessQueen,
+  ChessRook,
+  Crown,
+  Grid3x3,
+  Scale,
+  Sparkles,
+} from 'lucide-react'
 import type { Chapter } from './types.ts'
 
 export const basicsChapter: Chapter = {
@@ -17,7 +30,7 @@ export const basicsChapter: Chapter = {
   title: 'lecons.bases.title',
   description: 'lecons.bases.description',
   level: 'beginner',
-  icon: '♟️',
+  icon: ChessPawn,
   lessons: [
     // ── 1.1 L'échiquier ────────────────────────────────────────────────────
     {
@@ -26,7 +39,7 @@ export const basicsChapter: Chapter = {
       summary: 'lecons.bases.echiquier.summary',
       level: 'beginner',
       minutes: 4,
-      icon: '🗺️',
+      icon: Grid3x3,
       steps: [
         {
           kind: 'show',
@@ -65,7 +78,7 @@ export const basicsChapter: Chapter = {
       summary: 'lecons.bases.tour.summary',
       level: 'beginner',
       minutes: 4,
-      icon: '♜',
+      icon: ChessRook,
       steps: [
         {
           kind: 'show',
@@ -114,7 +127,7 @@ export const basicsChapter: Chapter = {
       summary: 'lecons.bases.fou.summary',
       level: 'beginner',
       minutes: 4,
-      icon: '♝',
+      icon: ChessBishop,
       steps: [
         {
           kind: 'show',
@@ -159,7 +172,7 @@ export const basicsChapter: Chapter = {
       summary: 'lecons.bases.dame.summary',
       level: 'beginner',
       minutes: 4,
-      icon: '♛',
+      icon: ChessQueen,
       steps: [
         {
           kind: 'show',
@@ -203,7 +216,7 @@ export const basicsChapter: Chapter = {
       summary: 'lecons.bases.cavalier.summary',
       level: 'beginner',
       minutes: 5,
-      icon: '♞',
+      icon: ChessKnight,
       steps: [
         {
           kind: 'show',
@@ -248,7 +261,7 @@ export const basicsChapter: Chapter = {
       summary: 'lecons.bases.pion.summary',
       level: 'beginner',
       minutes: 5,
-      icon: '♙',
+      icon: ChessPawn,
       steps: [
         {
           kind: 'show',
@@ -304,7 +317,7 @@ export const basicsChapter: Chapter = {
       summary: 'lecons.bases.roi.summary',
       level: 'beginner',
       minutes: 4,
-      icon: '♚',
+      icon: ChessKing,
       steps: [
         {
           kind: 'show',
@@ -337,7 +350,7 @@ export const basicsChapter: Chapter = {
       summary: 'lecons.bases.roque.summary',
       level: 'beginner',
       minutes: 5,
-      icon: '🏰',
+      icon: Castle,
       steps: [
         {
           kind: 'show',
@@ -382,7 +395,7 @@ export const basicsChapter: Chapter = {
       summary: 'lecons.bases.regles-speciales.summary',
       level: 'beginner',
       minutes: 5,
-      icon: '✨',
+      icon: Sparkles,
       steps: [
         {
           kind: 'show',
@@ -428,7 +441,7 @@ export const basicsChapter: Chapter = {
       summary: 'lecons.bases.echec-mat-pat.summary',
       level: 'beginner',
       minutes: 6,
-      icon: '👑',
+      icon: Crown,
       steps: [
         {
           kind: 'show',
@@ -489,7 +502,7 @@ export const basicsChapter: Chapter = {
       summary: 'lecons.bases.valeurs.summary',
       level: 'beginner',
       minutes: 4,
-      icon: '⚖️',
+      icon: Scale,
       steps: [
         {
           kind: 'show',

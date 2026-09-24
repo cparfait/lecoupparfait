@@ -41,6 +41,23 @@
  * qu'on ne s'en aperçoive.
  */
 
+import {
+  Beef,
+  ChessKnight,
+  CircleDashed,
+  Drama,
+  FishingHook,
+  FishingRod,
+  HandCoins,
+  Mountain,
+  Rat,
+  Ship,
+  Snowflake,
+  Telescope,
+  Tornado,
+  Weight,
+  Wheat,
+} from 'lucide-react'
 import type { Chapter } from './types.ts'
 import { START } from './types.ts'
 
@@ -51,7 +68,7 @@ export const piegesChapter: Chapter = {
   level: 'intermediate',
   // Pas le 🪤 : « Les mats de l'ouverture » le porte déjà, et deux chapitres
   // avec la même icône dans le même sommaire ne se distinguent plus.
-  icon: '🎣',
+  icon: FishingHook,
   // En fin de programme, hors numérotation : voir `annexe` dans `types.ts`.
   annexe: true,
   lessons: [
@@ -62,7 +79,7 @@ export const piegesChapter: Chapter = {
       summary: 'lecons.pieges.piege-fegatello.summary',
       level: 'beginner',
       minutes: 7,
-      icon: '🍖',
+      icon: Beef,
       trap: {
         opening: 'lecons.pieges.piege-fegatello.opening',
         color: 'w',
@@ -214,7 +231,7 @@ export const piegesChapter: Chapter = {
       summary: 'lecons.pieges.piege-elephant.summary',
       level: 'intermediate',
       minutes: 7,
-      icon: '🐘',
+      icon: Weight,
       trap: {
         opening: 'lecons.pieges.piege-elephant.opening',
         color: 'b',
@@ -333,7 +350,7 @@ export const piegesChapter: Chapter = {
       summary: 'lecons.pieges.piege-kieninger.summary',
       level: 'intermediate',
       minutes: 6,
-      icon: '😵',
+      icon: Tornado,
       trap: {
         opening: 'lecons.pieges.piege-kieninger.opening',
         color: 'b',
@@ -437,7 +454,7 @@ export const piegesChapter: Chapter = {
       summary: 'lecons.pieges.piege-lasker.summary',
       level: 'advanced',
       minutes: 6,
-      icon: '♘',
+      icon: ChessKnight,
       trap: {
         opening: 'lecons.pieges.piege-lasker.opening',
         color: 'b',
@@ -546,7 +563,7 @@ export const piegesChapter: Chapter = {
       summary: 'lecons.pieges.piege-arche-de-noe.summary',
       level: 'intermediate',
       minutes: 7,
-      icon: '🛶',
+      icon: Ship,
       trap: {
         opening: 'lecons.pieges.piege-arche-de-noe.opening',
         color: 'b',
@@ -683,7 +700,7 @@ export const piegesChapter: Chapter = {
       summary: 'lecons.pieges.piege-englund.summary',
       level: 'intermediate',
       minutes: 7,
-      icon: '🪤',
+      icon: Rat,
       trap: {
         opening: 'lecons.pieges.piege-englund.opening',
         color: 'b',
@@ -822,7 +839,7 @@ export const piegesChapter: Chapter = {
       summary: 'lecons.pieges.piege-canne-a-peche.summary',
       level: 'intermediate',
       minutes: 7,
-      icon: '🎣',
+      icon: FishingRod,
       trap: {
         opening: 'lecons.pieges.piege-canne-a-peche.opening',
         color: 'b',
@@ -962,7 +979,7 @@ export const piegesChapter: Chapter = {
       summary: 'lecons.pieges.piege-damiano.summary',
       level: 'beginner',
       minutes: 6,
-      icon: '🕳️',
+      icon: CircleDashed,
       trap: {
         opening: 'lecons.pieges.piege-damiano.opening',
         color: 'w',
@@ -1067,7 +1084,7 @@ export const piegesChapter: Chapter = {
       summary: 'lecons.pieges.piege-petroff.summary',
       level: 'intermediate',
       minutes: 6,
-      icon: '🔭',
+      icon: Telescope,
       trap: {
         opening: 'lecons.pieges.piege-petroff.opening',
         color: 'w',
@@ -1181,7 +1198,7 @@ export const piegesChapter: Chapter = {
       summary: 'lecons.pieges.piege-mortimer.summary',
       level: 'advanced',
       minutes: 7,
-      icon: '🎭',
+      icon: Drama,
       trap: {
         opening: 'lecons.pieges.piege-mortimer.opening',
         color: 'b',
@@ -1309,7 +1326,7 @@ export const piegesChapter: Chapter = {
       summary: 'lecons.pieges.piege-siberien.summary',
       level: 'advanced',
       minutes: 8,
-      icon: '❄️',
+      icon: Snowflake,
       trap: {
         opening: 'lecons.pieges.piege-siberien.opening',
         color: 'b',
@@ -1465,7 +1482,7 @@ export const piegesChapter: Chapter = {
       summary: 'lecons.pieges.piege-francaise-avance.summary',
       level: 'intermediate',
       minutes: 7,
-      icon: '🥖',
+      icon: Wheat,
       trap: {
         opening: 'lecons.pieges.piege-francaise-avance.opening',
         color: 'b',
@@ -1605,7 +1622,7 @@ export const piegesChapter: Chapter = {
       summary: 'lecons.pieges.piege-gambit-dame-accepte.summary',
       level: 'intermediate',
       minutes: 6,
-      icon: '💰',
+      icon: HandCoins,
       trap: {
         opening: 'lecons.pieges.piege-gambit-dame-accepte.opening',
         color: 'w',
@@ -1731,7 +1748,7 @@ export const piegesChapter: Chapter = {
       summary: 'lecons.pieges.piege-ecossaise.summary',
       level: 'intermediate',
       minutes: 6,
-      icon: '🏴',
+      icon: Mountain,
       trap: {
         opening: 'lecons.pieges.piege-ecossaise.opening',
         color: 'b',

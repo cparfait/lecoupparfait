@@ -10,6 +10,7 @@
  * après 1.e4, trois après 1.d4.
  */
 
+import { BookOpen, BowArrow, ChessQueen, Croissant, Pizza, Sun, Swords } from 'lucide-react'
 import type { Chapter } from './types.ts'
 
 export const repertoireChapter: Chapter = {
@@ -17,7 +18,7 @@ export const repertoireChapter: Chapter = {
   title: 'lecons.repertoire.title',
   description: 'lecons.repertoire.description',
   level: 'intermediate',
-  icon: '📖',
+  icon: BookOpen,
   lessons: [
     // ── 7.1 Partie italienne ────────────────────────────────────────────────
     {
@@ -26,7 +27,7 @@ export const repertoireChapter: Chapter = {
       summary: 'lecons.repertoire.italienne.summary',
       level: 'beginner',
       minutes: 6,
-      icon: '🇮🇹',
+      icon: Pizza,
       steps: [
         {
           kind: 'show',
@@ -82,7 +83,7 @@ export const repertoireChapter: Chapter = {
       summary: 'lecons.repertoire.espagnole.summary',
       level: 'intermediate',
       minutes: 6,
-      icon: '🇪🇸',
+      icon: Sun,
       steps: [
         {
           kind: 'show',
@@ -127,7 +128,7 @@ export const repertoireChapter: Chapter = {
       summary: 'lecons.repertoire.sicilienne.summary',
       level: 'intermediate',
       minutes: 7,
-      icon: '⚔️',
+      icon: Swords,
       steps: [
         {
           kind: 'show',
@@ -183,7 +184,7 @@ export const repertoireChapter: Chapter = {
       summary: 'lecons.repertoire.francaise.summary',
       level: 'intermediate',
       minutes: 6,
-      icon: '🇫🇷',
+      icon: Croissant,
       steps: [
         {
           kind: 'show',
@@ -237,7 +238,7 @@ export const repertoireChapter: Chapter = {
       summary: 'lecons.repertoire.gambit-dame.summary',
       level: 'intermediate',
       minutes: 6,
-      icon: '♕',
+      icon: ChessQueen,
       steps: [
         {
           kind: 'show',
@@ -282,7 +283,7 @@ export const repertoireChapter: Chapter = {
       summary: 'lecons.repertoire.est-indienne.summary',
       level: 'advanced',
       minutes: 6,
-      icon: '🏹',
+      icon: BowArrow,
       steps: [
         {
           kind: 'show',

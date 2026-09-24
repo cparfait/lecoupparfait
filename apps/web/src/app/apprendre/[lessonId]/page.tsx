@@ -451,8 +451,9 @@ export default function LessonPage() {
           <span className="text-faint" aria-hidden>
             /
           </span>
-          <span className="text-sm font-medium">
-            {lesson.icon} {t(lesson.title)}
+          <span className="inline-flex items-center gap-1.5 text-sm font-medium">
+            <lesson.icon size={15} className="shrink-0 text-[var(--rub-apprendre)]" aria-hidden />
+            {t(lesson.title)}
           </span>
         </div>
 
@@ -544,9 +545,8 @@ export default function LessonPage() {
                   className="flex items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-muted transition-colors hover:bg-surface-hover hover:text-ink"
                 >
                   <ArrowLeft size={12} aria-hidden />
-                  <span className="truncate">
-                    {previous.icon} {t(previous.title)}
-                  </span>
+                  <previous.icon size={12} className="shrink-0" aria-hidden />
+                  <span className="truncate">{t(previous.title)}</span>
                 </Link>
               )}
               {upcoming && (
@@ -555,9 +555,8 @@ export default function LessonPage() {
                   className="flex items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-muted transition-colors hover:bg-surface-hover hover:text-ink"
                 >
                   <ArrowRight size={12} aria-hidden />
-                  <span className="truncate">
-                    {upcoming.icon} {t(upcoming.title)}
-                  </span>
+                  <upcoming.icon size={12} className="shrink-0" aria-hidden />
+                  <span className="truncate">{t(upcoming.title)}</span>
                 </Link>
               )}
             </div>
@@ -582,8 +581,9 @@ export default function LessonPage() {
           <span className="text-faint" aria-hidden>
             /
           </span>
-          <span className="text-sm font-medium">
-            {lesson.icon} {t(lesson.title)}
+          <span className="inline-flex items-center gap-1.5 text-sm font-medium">
+            <lesson.icon size={15} className="shrink-0 text-[var(--rub-apprendre)]" aria-hidden />
+            {t(lesson.title)}
           </span>
           {/* Le haut-parleur n'est plus ici — il est dans le panneau du coach,
               c'est-à-dire à côté du texte qu'il fait lire. Sur téléphone,
@@ -775,9 +775,8 @@ export default function LessonPage() {
                 className="flex items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-muted transition-colors hover:bg-surface-hover hover:text-ink"
               >
                 <ArrowLeft size={12} aria-hidden />
-                <span className="truncate">
-                  {previous.icon} {t(previous.title)}
-                </span>
+                <previous.icon size={12} className="shrink-0" aria-hidden />
+                <span className="truncate">{t(previous.title)}</span>
               </Link>
             )}
             {upcoming && (
@@ -786,9 +785,8 @@ export default function LessonPage() {
                 className="flex items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-muted transition-colors hover:bg-surface-hover hover:text-ink"
               >
                 <ArrowRight size={12} aria-hidden />
-                <span className="truncate">
-                  {upcoming.icon} {t(upcoming.title)}
-                </span>
+                <upcoming.icon size={12} className="shrink-0" aria-hidden />
+                <span className="truncate">{t(upcoming.title)}</span>
               </Link>
             )}
           </div>
