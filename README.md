@@ -151,12 +151,12 @@ Autant le dire ici plutôt que de le laisser découvrir.
 
 ### Prérequis
 
-|                   | Version    | Pour quoi faire                                                                |
-| ----------------- | ---------- | ------------------------------------------------------------------------------ |
-| **Node.js**       | 22 ou plus | l'application ; le serveur exécute du TypeScript directement, sans compilation |
-| **Docker**        | récent     | PostgreSQL. Une base installée à la main convient aussi                        |
-| **Git**           | —          | récupérer le dépôt                                                             |
-| **Espace disque** | ~1,5 Go    | dont 1 Go de dépendances npm et 330 Mo de jeux de données                      |
+|                   | Version      | Pour quoi faire                                                                |
+| ----------------- | ------------ | ------------------------------------------------------------------------------ |
+| **Node.js**       | 22.3 ou plus | l'application ; le serveur exécute du TypeScript directement, sans compilation |
+| **Docker**        | récent       | PostgreSQL. Une base installée à la main convient aussi                        |
+| **Git**           | —            | récupérer le dépôt                                                             |
+| **Espace disque** | ~1,5 Go      | dont 1 Go de dépendances npm et 330 Mo de jeux de données                      |
 
 Aucune clé d'API, aucun compte à créer nulle part : tout ce que l'application
 utilise est libre et se télécharge sans identification. L'assistant IA est la

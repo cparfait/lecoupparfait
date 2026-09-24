@@ -9,7 +9,7 @@
     "apps/*"
   ],
   "engines": {
-    "node": ">=22"
+    "node": ">=22.3"
   },
   "scripts": {
     "setup": "node scripts/setup.mjs",
