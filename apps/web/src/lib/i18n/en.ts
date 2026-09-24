@@ -5,12 +5,11 @@
  * compilation. C'est le seul mécanisme qui empêche une traduction de dériver
  * en silence.
  *
- * **Il n'est pas chargé à la demande, et c'est mesuré.** L'idée était de le
- * sortir du paquet initial par un `import()`. Il pèse **quatre kilo-octets
- * gzippés** : le charger après coup ferait afficher le français une fraction
- * de seconde à quelqu'un qui a choisi l'anglais, pour quatre kilo-octets. Le
- * jour où il y aura un routage par langue — donc où le serveur saura quelle
- * langue servir —, la question se posera autrement.
+ * **Il n'est chargé que par ceux qui en ont besoin.** Il pesait dans le paquet
+ * de chaque page, au motif qu'il faisait « quatre kilo-octets gzippés » ; il en
+ * fait 103, et la plupart des visiteurs lisent le français. Il arrive donc par
+ * un `import()`, pour une autre langue que le français seulement, sans que la
+ * page s'affiche d'abord en français — voir `chargement.ts`.
  */
 
 import type { Dictionary } from './fr.ts'

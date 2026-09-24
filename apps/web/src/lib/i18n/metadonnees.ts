@@ -24,8 +24,8 @@ import 'server-only'
 
 import type { Metadata } from 'next'
 import type { TranslationKey } from './index.tsx'
-import { fabriquerT, type Traducteur } from './resoudre.ts'
-import { localeDuVisiteur } from './serveur.ts'
+import type { Traducteur } from './resoudre.ts'
+import { localeDuVisiteur, tDeLaLangue } from './serveur.ts'
 
 /**
  * Le `t()` du rendu de page.
@@ -41,7 +41,7 @@ import { localeDuVisiteur } from './serveur.ts'
  * rendrait l'onglet menteur, ce qui est précisément ce qu'on voulait éviter.
  */
 export async function tDesMetadonnees(): Promise<Traducteur> {
-  return fabriquerT(await localeDuVisiteur())
+  return tDeLaLangue(await localeDuVisiteur())
 }
 
 /**

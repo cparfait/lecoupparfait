@@ -27,13 +27,9 @@
  * `langues/<code>.ts`, un fichier par langue.
  */
 
-import { fr } from './fr.ts'
-import { en } from './en.ts'
 import { LANGUES } from './langues.ts'
-import { TRADUCTIONS } from './langues/index.ts'
 
 export { fr } from './fr.ts'
-export { en } from './en.ts'
 export type { Dictionary } from './fr.ts'
 
 import type { Dictionary } from './fr.ts'
@@ -55,24 +51,15 @@ type Partielle<T> = { [K in keyof T]?: T[K] extends string ? string : Partielle<
 
 export type Traduction = Partielle<Dictionary>
 
-/**
- * Les dictionnaires, par code de langue.
+/*
+ * Il n'y a plus ici de table de tous les dictionnaires, et c'est voulu.
  *
- * Le français et l'anglais sont complets ; les autres arrivent du dossier
- * `langues/`, et celles qui n'ont pas encore de fichier reçoivent un
- * dictionnaire vide — elles s'affichent donc intégralement en anglais, ce qui
- * est le comportement voulu tant que personne ne les a traduites.
+ * Ce fichier est importé par une quinzaine de composants du navigateur pour
+ * `localeDuContenu` ou `LOCALES` ; une table qui importe l'anglais et les
+ * dix-huit traductions les faisait donc entrer dans le paquet de chaque page.
+ * La table complète vit au serveur (`serveur.ts`), celle du navigateur ne
+ * contient que ce qui a été chargé (`chargement.ts`).
  */
-export const dictionaries: Record<string, Dictionary | Traduction> = {
-  fr,
-  en,
-  ...Object.fromEntries(
-    LANGUES.filter((langue) => langue.code !== 'fr' && langue.code !== 'en').map((langue) => [
-      langue.code,
-      TRADUCTIONS[langue.code] ?? {},
-    ]),
-  ),
-}
 
 /**
  * Le code d'une langue de l'interface.

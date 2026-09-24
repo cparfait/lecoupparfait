@@ -12,7 +12,7 @@
 
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
-import { I18nProvider, langue, type Locale } from '@/lib/i18n/index.tsx'
+import { I18nProvider, langue, useLangueChargee, type Locale } from '@/lib/i18n/index.tsx'
 import { TEMOIN_LANGUE } from '@/lib/i18n/temoin.ts'
 import { detectEffectsCapability, usePreferences } from '@/lib/store/preferences.ts'
 import { unlockAudio } from '@/lib/sound.ts'
@@ -41,7 +41,10 @@ export function Providers({
   const hydrated = usePreferences((state) => state.hydrated)
   const patch = usePreferences((state) => state.patch)
 
-  const locale = hydrated ? choisie : localeInitiale
+  // La langue réellement affichée, qui peut retarder d'un chargement sur celle
+  // qu'on a choisie : le sens de lecture, l'attribut `lang` et le témoin la
+  // suivent, pour ne jamais retourner la page avant que son texte ne change.
+  const locale = useLangueChargee(hydrated ? choisie : localeInitiale, localeInitiale)
 
   /*
     Répercute thème, langue et sens de lecture sur l'élément racine.

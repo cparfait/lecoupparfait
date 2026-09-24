@@ -29,9 +29,33 @@ import 'server-only'
  */
 
 import { cookies, headers } from 'next/headers'
-import { LOCALES, type Locale } from './dictionary.ts'
+import { fr } from './fr.ts'
+import { en } from './en.ts'
+import { TRADUCTIONS } from './langues/index.ts'
+import { LOCALES, type Dictionary, type Locale, type Traduction } from './dictionary.ts'
 import { fabriquerT, type Traducteur } from './resoudre.ts'
 import { TEMOIN_LANGUE } from './temoin.ts'
+
+/**
+ * Tous les dictionnaires, au serveur seulement.
+ *
+ * Le serveur doit pouvoir répondre dans n'importe quelle langue, et ce qu'il
+ * importe ne part pas au navigateur — `server-only` y veille. Une langue du
+ * registre sans traduction reçoit un dictionnaire vide et passe donc par
+ * l'anglais ; sans entrée du tout, `fabriquerT` la prendrait pour un code
+ * inconnu et répondrait en français.
+ */
+const DICTIONNAIRES: Readonly<Record<Locale, Dictionary | Traduction>> = {
+  ...Object.fromEntries(LOCALES.map((code) => [code, {}])),
+  ...TRADUCTIONS,
+  fr,
+  en,
+}
+
+/** Le `t()` d'une langue, avec tous les dictionnaires sous la main. */
+export function tDeLaLangue(locale: Locale): Traducteur {
+  return fabriquerT(locale, DICTIONNAIRES)
+}
 
 /**
  * Le code de langue d'un témoin et d'un `Accept-Language`.
@@ -88,5 +112,5 @@ export async function localeDuVisiteur(): Promise<Locale> {
 
 /** Raccourci : `const t = tDeLaRequete(request)`. */
 export function tDeLaRequete(request: Request): Traducteur {
-  return fabriquerT(localeDeLaRequete(request))
+  return tDeLaLangue(localeDeLaRequete(request))
 }

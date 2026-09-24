@@ -24,16 +24,22 @@
  * qui s'affiche quand tout a échoué est le dernier endroit où l'on peut se
  * permettre de n'être pas compris.
  *
- * Les deux imports qu'il s'autorise ne coûtent rien à la prudence : le
+ * Les imports qu'il s'autorise ne coûtent rien à la prudence : le
  * dictionnaire est de la donnée pure — pas de React, pas d'API du navigateur,
  * rien qui puisse lever —, et il est déjà chargé par le reste de l'application,
  * si bien qu'aucun module nouveau n'arrive dans ce chemin d'erreur.
+ *
+ * Il traduit avec ce qui est **déjà là** et ne charge rien : les dictionnaires
+ * que le fournisseur a rangés avant de casser, sinon le français. Un `import()`
+ * dans l'écran de secours serait une requête réseau de plus au moment précis où
+ * quelque chose vient d'échouer.
  *
  * La langue vient du témoin, lu à la main : `useI18n` est un crochet, et il n'y a
  * ici aucun fournisseur pour le porter.
  */
 
 import { fabriquerT } from '@/lib/i18n/resoudre.ts'
+import { dictionnairesCharges } from '@/lib/i18n/chargement.ts'
 import { TEMOIN_LANGUE } from '@/lib/i18n/temoin.ts'
 import { langue } from '@/lib/i18n/langues.ts'
 
@@ -58,7 +64,7 @@ export default function ErreurGlobale({
   retry: () => void
 }) {
   const locale = localeDuTemoin()
-  const t = fabriquerT(locale)
+  const t = fabriquerT(locale, dictionnairesCharges())
   const choisie = langue(locale)
 
   return (

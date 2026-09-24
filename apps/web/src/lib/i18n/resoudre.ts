@@ -18,7 +18,9 @@
  * qui s'affiche quand tout le reste a échoué.
  */
 
-import { dictionaries, fr, type Locale } from './dictionary.ts'
+import { fr } from './fr.ts'
+import type { Locale } from './dictionary.ts'
+import type { Dictionnaires } from './chargement.ts'
 import type { TranslationKey } from './index.tsx'
 
 export function resoudre(dictionnaire: unknown, chemin: string): string | null {
@@ -64,15 +66,21 @@ export function tCoeur(t: Traducteur, cle: string, vars?: Record<string, string 
  * l'interdit déjà, mais un appel calculé peut y échapper, et montrer
  * « settings.theme » au milieu d'un écran rend le défaut visible sans faire
  * tomber la page.
+ *
+ * Les dictionnaires sont passés et non importés : au serveur on les a tous
+ * (`serveur.ts`), au navigateur seulement ceux qu'on a chargés
+ * (`chargement.ts`). Importer ici la table complète la faisait entrer dans le
+ * paquet de chaque page, puisque `tCoeur` rend ce fichier omniprésent.
  */
-export function fabriquerT(locale: Locale): Traducteur {
-  // `?? fr` et non `?? dictionaries[DEFAULT_LOCALE]` : l'index rend
-  // `Dictionary | Traduction | undefined`, et le repli doit être typé pour de
-  // bon — un code de langue inconnu ne doit pas produire un dictionnaire vide.
-  const dictionnaire = dictionaries[locale] ?? fr
+export function fabriquerT(locale: Locale, dictionnaires: Dictionnaires): Traducteur {
+  // `?? fr` et non un dictionnaire vide : un code de langue inconnu doit
+  // retomber sur le français. Une langue connue mais sans traduction est, elle,
+  // rangée avec un dictionnaire vide et passe donc par l'anglais.
+  const dictionnaire = dictionnaires[locale] ?? fr
+  const anglais = dictionnaires.en
 
   return (cle, vars) => {
-    const brut = resoudre(dictionnaire, cle) ?? resoudre(dictionaries.en, cle) ?? resoudre(fr, cle)
+    const brut = resoudre(dictionnaire, cle) ?? resoudre(anglais, cle) ?? resoudre(fr, cle)
 
     if (brut === null) {
       if (process.env.NODE_ENV !== 'production') {

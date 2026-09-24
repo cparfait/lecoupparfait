@@ -30,6 +30,7 @@ const { fr } = await import('../apps/web/src/lib/i18n/fr.ts')
 const { en } = await import('../apps/web/src/lib/i18n/en.ts')
 const { LANGUES } = await import('../apps/web/src/lib/i18n/langues.ts')
 const { TRADUCTIONS } = await import('../apps/web/src/lib/i18n/langues/index.ts')
+const { CHARGEURS } = await import('../apps/web/src/lib/i18n/langues/chargeurs.ts')
 
 /** Tous les chemins pointés d'un dictionnaire, à plat. */
 function chemins(objet, prefixe = '') {
@@ -82,6 +83,26 @@ for (const code of Object.keys(TRADUCTIONS)) {
   if (!codes.has(code)) {
     erreurs++
     console.error(`  ✗ traduction « ${code} » absente du registre des langues`)
+  }
+}
+
+// Le navigateur charge les langues par `chargeurs.ts`, le serveur les lit dans
+// `TRADUCTIONS` : une langue présente d'un seul côté serait rendue traduite au
+// serveur et en anglais après un changement de langue, ou l'inverse.
+for (const code of new Set([...Object.keys(TRADUCTIONS), ...Object.keys(CHARGEURS)])) {
+  if (!(code in CHARGEURS)) {
+    erreurs++
+    console.error(`  ✗ traduction « ${code} » absente de langues/chargeurs.ts`)
+    continue
+  }
+  if (!(code in TRADUCTIONS)) {
+    erreurs++
+    console.error(`  ✗ chargeur « ${code} » sans traduction dans langues/index.ts`)
+    continue
+  }
+  if ((await CHARGEURS[code]()) !== TRADUCTIONS[code]) {
+    erreurs++
+    console.error(`  ✗ le chargeur « ${code} » ne rend pas la traduction de ${code}`)
   }
 }
 

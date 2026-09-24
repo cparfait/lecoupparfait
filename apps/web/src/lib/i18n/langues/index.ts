@@ -13,11 +13,10 @@
  * intégralement en anglais, ce qui est le bon comportement : elle est proposée,
  * elle fonctionne, et `check:langues` la montre à zéro pour cent.
  *
- * Tout est importé d'un bloc et non à la demande. C'est un choix mesuré, le
- * même que pour l'anglais : le dictionnaire entier d'une langue pèse quelques
- * kilooctets une fois compressé, et le chargement différé coûterait un aller-
- * retour réseau au premier rendu — c'est-à-dire un écran qui s'affiche dans la
- * mauvaise langue avant de se corriger sous les yeux du lecteur.
+ * Tout est importé d'un bloc, **pour le serveur et les scripts de contrôle
+ * seulement**. Le navigateur passe par `chargeurs.ts`, qui fait de chaque
+ * langue un morceau à part : il ne reçoit que celle qu'on lui demande — voir
+ * `chargement.ts`.
  */
 
 import type { Traduction } from '../dictionary.ts'

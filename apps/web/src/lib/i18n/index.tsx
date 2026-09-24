@@ -8,9 +8,10 @@
  * découvert en production.
  */
 
-import { Fragment, createContext, useContext, useMemo } from 'react'
+import { Fragment, createContext, use, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { dictionaries, fr, type Dictionary, type Locale, type Traduction } from './dictionary.ts'
+import { fr, type Dictionary, type Locale, type Traduction } from './dictionary.ts'
+import { chargerLangue, dictionnairesCharges } from './chargement.ts'
 import { fabriquerT } from './resoudre.ts'
 
 /**
@@ -41,21 +42,76 @@ interface I18nValue {
 
 const I18nContext = createContext<I18nValue | null>(null)
 
+/**
+ * @param locale Une langue **déjà chargée** — celle que rend
+ *   `useLangueChargee`. Une langue absente de `chargement.ts` s'afficherait en
+ *   français, faute de mieux.
+ */
 export function I18nProvider({ locale, children }: { locale: Locale; children: ReactNode }) {
-  // `?? fr` et non `?? dictionaries[DEFAULT_LOCALE]` : l'index rend
+  // `?? fr` et non un dictionnaire vide : l'index rend
   // `Dictionary | Traduction | undefined`, et le repli doit être typé pour de
   // bon — un code de langue inconnu ne doit pas produire un dictionnaire vide.
-  const dictionary: Dictionary | Traduction = dictionaries[locale] ?? fr
+  const dictionary: Dictionary | Traduction = dictionnairesCharges()[locale] ?? fr
 
   // La chaîne de repli vit dans `resoudre.ts` : l'écran de secours et les routes
   // d'API en ont besoin aussi, et trois copies d'une même règle finissent par
   // diverger sur celle qui compte — le repli se fait par clé, pas par
   // dictionnaire.
-  const t = useMemo(() => fabriquerT(locale), [locale])
+  const t = useMemo(() => fabriquerT(locale, dictionnairesCharges()), [locale])
 
   const value = useMemo<I18nValue>(() => ({ locale, t, dictionary }), [locale, t, dictionary])
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
+}
+
+/**
+ * La langue à afficher, compte tenu de celles qui sont arrivées.
+ *
+ * Le premier rendu, au serveur comme au navigateur, est **toujours** dans la
+ * langue décidée au serveur, quoi que dise le stockage local : les deux rendus
+ * produisent le même texte. Si ses dictionnaires ne sont pas encore là, le
+ * rendu **suspend** — au navigateur, React garde alors le HTML du serveur à
+ * l'écran et hydrate une fois le morceau arrivé ; au serveur, il attend
+ * l'`import()`, qui est local. Le chargement est lancé dès l'évaluation de
+ * `chargement.ts`, si bien que l'attente est en pratique celle d'un fichier en
+ * cache.
+ *
+ * Quand la langue voulue change ensuite — un choix dans les préférences, ou un
+ * réglage enregistré qui contredit le témoin —, on **ne suspend plus** : il n'y
+ * a pas de périmètre d'attente au-dessus du fournisseur, et suspendre sur une
+ * mise à jour ferait disparaître la page. On charge dans un effet et on garde
+ * l'ancienne langue à l'écran d'ici là, plutôt que d'afficher des phrases
+ * françaises le temps d'un aller-retour. Si le chargement échoue, la page reste
+ * dans la langue qu'elle avait : lisible, et le prochain choix retentera.
+ */
+export function useLangueChargee(voulue: Locale, initiale: Locale): Locale {
+  const [affichee, setAffichee] = useState(initiale)
+
+  // Sans condition, et c'est indispensable : React rejoue un rendu suspendu en
+  // rappelant les mêmes crochets, et un `use()` sauté au second passage le fait
+  // échouer. La promesse est la même d'un rendu à l'autre et, une fois tenue,
+  // `use()` la lit sans suspendre (voir `chargerLangue`). `affichee` ne change
+  // que par l'effet ci-dessous, qui attend le chargement : la suspension ne peut
+  // donc se produire qu'au premier rendu.
+  use(chargerLangue(affichee))
+
+  useEffect(() => {
+    if (voulue === affichee) return
+    let abandonne = false
+    chargerLangue(voulue).then(
+      () => {
+        if (!abandonne) setAffichee(voulue)
+      },
+      (erreur: unknown) => {
+        console.error(`[i18n] la langue « ${voulue} » n'a pas pu être chargée`, erreur)
+      },
+    )
+    return () => {
+      abandonne = true
+    }
+  }, [voulue, affichee])
+
+  return affichee
 }
 
 export function useI18n(): I18nValue {
