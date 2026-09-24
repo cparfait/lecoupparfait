@@ -407,6 +407,8 @@ export const en: Dictionary = {
     waitingOpponent: 'Waiting for your opponent…',
     waitingOpponentHint: 'Share the address of this page. The game starts as soon as they arrive.',
     copyLink: 'Copy the link',
+    coachPanel: 'The coach',
+    aboutMove: 'About {coup} ·',
   },
 
   friendGame: {

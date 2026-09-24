@@ -79,7 +79,7 @@ import { useT } from '@/lib/i18n/index.tsx'
 import { usePreferencesDe } from '@/lib/store/preferences.ts'
 import { speak } from '@/lib/speech.ts'
 import type { Arrow } from '@/components/board/boardKit.ts'
-import { useGrandEcran } from '@/lib/useMediaQuery.ts'
+import { useGrandEcran, useMediaQuery } from '@/lib/useMediaQuery.ts'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
 import { BarreDuPouce } from './BarreDuPouce.tsx'
 import { LegendeDuVerdict } from './LegendeDuVerdict.tsx'
@@ -322,6 +322,13 @@ export function GameScreen({
   /** L'en-tête de la colonne des coups, où le plateau pose sa bascule de vue. */
   const [emplacementBascule, setEmplacementBascule] = useState<HTMLElement | null>(null)
   const grandEcran = useGrandEcran()
+  /*
+    Sous `sm`, le coach quitte la colonne latérale pour un panneau compact posé
+    sous l'échiquier : voir `compact` dans `CommentaryPanel`. Le choix se fait
+    ici, en JavaScript, et non par deux copies masquées en CSS : chaque panneau
+    porte la voix, et deux panneaux montés parleraient deux fois.
+  */
+  const telephone = useMediaQuery('(max-width: 639px)')
   const lastPlayed = state.moves[state.moves.length - 1] ?? null
   // Le gestionnaire de touches est posé une fois pour toutes : il lit la
   // position courante ici plutôt que de se réabonner à chaque coup.
@@ -1293,6 +1300,25 @@ export function GameScreen({
 
             <RubanCoups coups={rubanCoups} cursor={state.cursor} onSeek={goTo} className="mt-1" />
 
+            {/* ── Le coach, sous l'échiquier ─────────────────────────────
+                Sur téléphone, le panneau complet restait au fond de la
+                colonne latérale : on faisait défiler la page pour le lire, et
+                l'échiquier dont il parlait sortait de l'écran. Il se tient ici,
+                fixe et compact, entre les coups et la barre du pouce. */}
+            {commentaryMode && telephone && (
+              <CommentaryPanel
+                compact
+                className="mt-2"
+                commentary={reviewedMove ? reviewedCommentary : commentary}
+                loading={reviewedMove ? false : coachLoading}
+                voix={commentaryMode}
+                onSpeakingChange={setCoachSpeaking}
+                onHoverAlternative={setHoveredAlternative}
+                stale={commentaryStale}
+                onReview={reviewCommented}
+              />
+            )}
+
             <BarreDuPouce
               classee={classee}
               gameOver={gameOver}
@@ -1360,24 +1386,26 @@ export function GameScreen({
               meilleur coup à la demande reviendrait à annuler ce que la case
               « classée » vient de garantir. */}
           {commentaryMode ? (
-            <CommentaryPanel
-              legende={arrowLegend}
-              voix={commentaryMode}
-              // En revue, on montre le commentaire du coup consulté plutôt que
-              // celui du dernier coup joué : sinon le texte et l'échiquier
-              // parlent de deux positions différentes.
-              commentary={reviewedMove ? reviewedCommentary : commentary}
-              loading={reviewedMove ? false : coachLoading}
-              paused={commentaryPaused}
-              onTogglePause={() => setCommentaryPaused((value) => !value)}
-              onSpeakingChange={setCoachSpeaking}
-              onHoverAlternative={setHoveredAlternative}
-              showBestMove={showBestMove}
-              onToggleBestMove={() => setShowBestMove((value) => !value)}
-              stale={commentaryStale}
-              onReview={reviewCommented}
-              onDesactiver={couperLeCommentaire}
-            />
+            telephone ? null : (
+              <CommentaryPanel
+                legende={arrowLegend}
+                voix={commentaryMode}
+                // En revue, on montre le commentaire du coup consulté plutôt que
+                // celui du dernier coup joué : sinon le texte et l'échiquier
+                // parlent de deux positions différentes.
+                commentary={reviewedMove ? reviewedCommentary : commentary}
+                loading={reviewedMove ? false : coachLoading}
+                paused={commentaryPaused}
+                onTogglePause={() => setCommentaryPaused((value) => !value)}
+                onSpeakingChange={setCoachSpeaking}
+                onHoverAlternative={setHoveredAlternative}
+                showBestMove={showBestMove}
+                onToggleBestMove={() => setShowBestMove((value) => !value)}
+                stale={commentaryStale}
+                onReview={reviewCommented}
+                onDesactiver={couperLeCommentaire}
+              />
+            )
           ) : classee ? null : (
             /* En revue, la question porte sur le coup qu'on regarde — pas sur
                le dernier de la partie. Sans quoi le panneau expliquait une

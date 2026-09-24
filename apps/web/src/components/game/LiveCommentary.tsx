@@ -31,6 +31,7 @@ import {
   MessageSquareText,
   Pause,
   Play,
+  RotateCcw,
   Volume2,
   VolumeX,
 } from 'lucide-react'
@@ -456,10 +457,27 @@ export function CommentaryPanel({
   voix = true,
   onDesactiver,
   placeholder = true,
+  compact = false,
   className,
 }: {
   commentary: Commentary | null
   loading: boolean
+  /**
+   * Le panneau du téléphone, posé sous l'échiquier.
+   *
+   * Sur un téléphone, le panneau complet vivait dans la colonne latérale, qui
+   * s'empile **sous** la barre d'actions, le mémo et le rappel de séance : pour
+   * lire le coach, il fallait faire défiler la page et perdre l'échiquier de
+   * vue — au moment précis où la phrase parle de ce qu'il montre. Le panneau
+   * compact tient sous le plateau, sans défilement : la phrase du coach, le
+   * bouton « Réécouter », et les trois options avec leur évaluation, la
+   * meilleure mise en avant. Le reste — pause, voix, flèche permanente —
+   * reste au panneau complet des écrans plus larges.
+   *
+   * Un seul des deux est monté à la fois (c'est la page qui choisit) : chacun
+   * porte la voix, et deux panneaux montés parleraient deux fois.
+   */
+  compact?: boolean
   /**
    * Sortir du mode commenté, depuis le panneau lui-même.
    *
@@ -657,6 +675,21 @@ export function CommentaryPanel({
       .join(' ')
     speak(full, { onEnd: () => markSpeaking(false) })
   }, [commentary, markSpeaking])
+
+  if (compact) {
+    return (
+      <PanneauCompact
+        commentary={commentary}
+        loading={loading}
+        stale={stale}
+        onReview={onReview}
+        onReplay={replay}
+        speaking={speaking}
+        onHoverAlternative={onHoverAlternative}
+        className={className}
+      />
+    )
+  }
 
   if (!commentary && !loading) {
     if (!placeholder) return null
@@ -955,6 +988,160 @@ export function CommentaryPanel({
             ))}
           </ul>
         </div>
+      )}
+    </Card>
+  )
+}
+
+/**
+ * Le coach du téléphone : une phrase, « Réécouter », trois options.
+ *
+ * La phrase est celle que la voix prononce (`speech`) : c'est le résumé du
+ * coup, et c'est ce qu'on entend en même temps qu'on le lit. L'explication
+ * longue n'est pas perdue — « Réécouter » la relit en entier.
+ *
+ * Les options sont les trois premières du moteur, dans les couleurs de leurs
+ * flèches : la meilleure porte le liseré et le fond de la flèche bleue, le
+ * coup joué ceux de la verte. Toucher une ligne dessine sa flèche sur
+ * l'échiquier — il n'y a pas de survol sur un écran tactile.
+ */
+function PanneauCompact({
+  commentary,
+  loading,
+  stale,
+  onReview,
+  onReplay,
+  speaking,
+  onHoverAlternative,
+  className,
+}: {
+  commentary: Commentary | null
+  loading: boolean
+  stale?: boolean
+  onReview?: () => void
+  onReplay: () => void
+  speaking: boolean
+  onHoverAlternative?: (alternative: Alternative | null) => void
+  className?: string
+}) {
+  const t = useT()
+  const san = useSan()
+  const options = commentary
+    ? commentary.alternatives.filter((alternative) => alternative.rank !== 99).slice(0, 3)
+    : []
+  const style = commentary ? QUALITY_STYLES[commentary.quality] : null
+
+  return (
+    <Card as="section" className={clsx('flex flex-col gap-2 p-3', className)}>
+      <h2 className="sr-only">{t('live.coachPanel')}</h2>
+      <div className="flex items-start gap-2.5">
+        <span
+          className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-[9px] text-[13px] font-bold"
+          style={{
+            background: style
+              ? `color-mix(in oklab, var(--q-${style.token}) 20%, transparent)`
+              : 'var(--surface-strong)',
+            color: style ? `var(--q-${style.token})` : 'var(--text-muted)',
+          }}
+          aria-hidden
+        >
+          {loading && !commentary ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : style ? (
+            style.glyph
+          ) : (
+            <MessageSquareText size={14} />
+          )}
+        </span>
+        {/* `aria-live` : la phrase change après chaque coup, et c'est la seule
+            chose que le panneau a à dire à qui n'entend pas la voix. */}
+        <p className="min-w-0 flex-1 text-[14px] leading-snug" aria-live="polite">
+          {loading && !commentary
+            ? t('commentary.analysing')
+            : commentary
+              ? commentary.speech.replace(/\*\*/g, '')
+              : t('commentary.placeholder')}
+        </p>
+        {commentary && (
+          <button
+            type="button"
+            onClick={onReplay}
+            aria-label={t('commentary.replay')}
+            title={t('commentary.replayFull')}
+            className={clsx(
+              '-my-2 -me-1.5 grid h-11 w-11 shrink-0 place-items-center rounded-[12px] transition-colors hover:bg-surface-hover',
+              speaking ? 'text-[var(--accent-text)]' : 'text-muted',
+            )}
+          >
+            <RotateCcw size={18} aria-hidden />
+          </button>
+        )}
+      </div>
+
+      {stale && commentary && onReview && (
+        <button
+          type="button"
+          onClick={onReview}
+          className="flex min-h-9 items-center gap-1.5 self-start rounded-[var(--radius-sm)] px-1 text-[12px] text-faint transition-colors hover:text-ink"
+        >
+          <History size={12} className="shrink-0" aria-hidden />
+          {t('live.aboutMove', { coup: san(commentary.san) })}
+          <span className="font-semibold text-[var(--accent-text)]">{t('commentary.review')}</span>
+        </button>
+      )}
+
+      {options.length > 0 && (
+        <ol
+          aria-label={t('commentary.whatYouCouldPlay')}
+          className="flex flex-col gap-1"
+          onMouseLeave={() => onHoverAlternative?.(null)}
+        >
+          {options.map((alternative) => {
+            const teinte = teinteDeLigne(alternative)
+            const couleur = couleurDeLigne(alternative)
+            return (
+              <li key={alternative.uci}>
+                <button
+                  type="button"
+                  onMouseEnter={() => onHoverAlternative?.(alternative)}
+                  onFocus={() => onHoverAlternative?.(alternative)}
+                  onClick={() => onHoverAlternative?.(alternative)}
+                  className="flex min-h-10 w-full items-center gap-2.5 rounded-[10px] border-s-2 px-2 py-1.5 text-start transition-colors hover:bg-surface-hover"
+                  style={{
+                    borderInlineStartColor: teinte.borderLeftColor,
+                    background: teinte.background,
+                  }}
+                >
+                  <span
+                    className={clsx(
+                      'w-12 shrink-0 font-mono text-[14px]',
+                      alternative.rank === 1 ? 'font-bold' : 'font-semibold',
+                    )}
+                  >
+                    {san(alternative.san)}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-[13px] text-muted">
+                    {alternative.played
+                      ? t('commentary.played')
+                      : (alternative.reason ??
+                        (alternative.rank === 1
+                          ? t('commentary.best')
+                          : alternative.line
+                              .slice(1, 3)
+                              .map((move) => san(move))
+                              .join(' ')))}
+                  </span>
+                  <span
+                    className="shrink-0 font-mono text-[12px] font-semibold tabular-nums"
+                    style={{ color: couleur ?? 'var(--text-faint)' }}
+                  >
+                    {formatScore(alternative.score)}
+                  </span>
+                </button>
+              </li>
+            )
+          })}
+        </ol>
       )}
     </Card>
   )

@@ -416,6 +416,8 @@ export const fr = {
     waitingOpponent: 'En attente de ton adversaire…',
     waitingOpponentHint: 'Partage l’adresse de cette page. La partie démarrera dès qu’il arrivera.',
     copyLink: 'Copier le lien',
+    coachPanel: 'Le coach',
+    aboutMove: 'À propos de {coup} ·',
   },
 
   friendGame: {
