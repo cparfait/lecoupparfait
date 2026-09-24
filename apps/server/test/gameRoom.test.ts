@@ -104,20 +104,20 @@ test('un spectateur ne peut pas jouer', () => {
     socketId: 'sC',
   })
   const refus = room.playMove('sC', { from: 'e2', to: 'e4' })
-  assert.deepEqual(refus, { ok: false, reason: 'Tu n’es pas joueur dans cette partie.' })
+  assert.deepEqual(refus, { ok: false, reason: 'notAPlayer' })
   assert.equal(room.snapshot().moves.length, 0)
 })
 
 test('un coup hors de son tour est refusé', () => {
   const { room, jouer, sB } = partie()
-  assert.deepEqual(jouer(sB, 'e7', 'e5'), { ok: false, reason: 'Ce n’est pas ton tour.' })
+  assert.deepEqual(jouer(sB, 'e7', 'e5'), { ok: false, reason: 'notYourTurn' })
   assert.equal(room.snapshot().moves.length, 0)
 })
 
 test('un coup illégal est refusé, et la position ne bouge pas', () => {
   const { room, jouer, sA } = partie()
   const fen = room.snapshot().fen
-  assert.deepEqual(jouer(sA, 'e2', 'e5'), { ok: false, reason: 'Coup illégal.' })
+  assert.deepEqual(jouer(sA, 'e2', 'e5'), { ok: false, reason: 'illegal' })
   assert.equal(room.snapshot().fen, fen)
 })
 
@@ -318,7 +318,7 @@ test('un coup tenté après la chute du drapeau est refusé, et la partie finie'
   const { room, h, jouer, sA, sB } = partie()
   jouer(sA, 'e2', 'e4')
   h.avancer(61_000)
-  assert.deepEqual(jouer(sB, 'e7', 'e5'), { ok: false, reason: 'Le temps est écoulé.' })
+  assert.deepEqual(jouer(sB, 'e7', 'e5'), { ok: false, reason: 'flagged' })
   assert.equal(room.snapshot().status, 'timeout')
   assert.equal(room.snapshot().result, '1-0')
 })

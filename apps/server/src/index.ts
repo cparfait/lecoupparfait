@@ -702,7 +702,7 @@ io.on('connection', (socket) => {
   /** `true` si l'événement doit être ignoré. Le client est prévenu une fois par refus. */
   function tropVite(seau: keyof typeof seaux): boolean {
     if (seaux[seau].prendre()) return false
-    socket.emit('error', { message: 'Trop d’envois d’un coup. Attends un instant.' })
+    socket.emit('error', { code: 'tooFast' })
     return true
   }
 
@@ -722,7 +722,7 @@ io.on('connection', (socket) => {
 
       const slug = String(payload.slug ?? '').slice(0, 12)
       if (!slug) {
-        socket.emit('error', { message: 'Identifiant de partie manquant.' })
+        socket.emit('error', { code: 'missingSlug' })
         return
       }
 
@@ -743,9 +743,7 @@ io.on('connection', (socket) => {
       // la première en base. Seuls les salons inconnus en mémoire sont
       // vérifiés — un salon vivant est, par construction, une partie en cours.
       if (!rooms.has(slug) && !BASE_ABSENTE && (await slugDejaServi(slug))) {
-        socket.emit('error', {
-          message: 'Ce lien a déjà servi à une partie terminée. Crée une nouvelle partie.',
-        })
+        socket.emit('error', { code: 'linkUsed' })
         return
       }
 
@@ -772,12 +770,7 @@ io.on('connection', (socket) => {
       if (nouveau) {
         const admission = registreSalons.admettre(adresseDe(socket.request), rooms.size)
         if (admission !== 'ok') {
-          socket.emit('error', {
-            message:
-              admission === 'plein'
-                ? 'Le serveur accueille déjà autant de parties qu’il peut. Réessaie dans un moment.'
-                : 'Tu as déjà trop de parties ouvertes. Termine-en une avant d’en créer une autre.',
-          })
+          socket.emit('error', { code: admission === 'plein' ? 'serverFull' : 'tooManyRooms' })
           return
         }
       }
@@ -814,7 +807,7 @@ io.on('connection', (socket) => {
     const room = rooms.get(currentSlug)
     if (!room) return
     const outcome = room.playMove(socket.id, payload ?? {})
-    if (!outcome.ok) socket.emit('error', { message: outcome.reason })
+    if (!outcome.ok) socket.emit('error', { code: outcome.reason })
   })
 
   /** Les actions hors coups partagent un seau : aucune n'a de raison d'être répétée. */

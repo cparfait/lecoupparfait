@@ -149,9 +149,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            result.reason === 'expired'
-              ? 'Ce lien a expiré. Demande-en un nouveau depuis ton profil.'
-              : 'Ce lien ne correspond à rien. Il a peut-être déjà servi.',
+            result.reason === 'expired' ? t('api.verifyLinkExpired') : t('api.verifyLinkUnknown'),
         },
         { status: 400 },
       )

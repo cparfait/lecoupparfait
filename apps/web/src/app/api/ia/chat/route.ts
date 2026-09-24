@@ -99,7 +99,7 @@ export async function POST(request: Request) {
       // la clé est refusée, le crédit épuisé ou le modèle inconnu.
       const texte = await amont.text()
       clearTimeout(minuterie)
-      return new Response(texte || 'Le fournisseur a refusé la requête.', {
+      return new Response(texte || t('api.providerRefused'), {
         status: amont.status,
         headers: { 'Content-Type': 'text/plain; charset=utf-8' },
       })

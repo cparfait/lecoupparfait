@@ -23,14 +23,15 @@ import {
 import { getCurrentUser } from '@/lib/server/session.ts'
 import { prevenir } from '@/lib/server/push.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const ADD_ERRORS: Record<string, string> = {
-  unknownUser: 'Personne de ce pseudo sur la plateforme.',
-  self: 'Difficile de devenir son propre ami.',
-  already: 'Vous êtes déjà en relation.',
+const ADD_ERRORS: Record<string, TranslationKey> = {
+  unknownUser: 'api.friendUnknownUser',
+  self: 'api.friendSelf',
+  already: 'api.friendAlready',
 }
 
 export async function GET(request: Request) {
@@ -68,7 +69,10 @@ export async function POST(request: Request) {
     case 'add': {
       const result = await addFriend(me.userId, String(body.username ?? ''))
       if (!result.ok) {
-        return NextResponse.json({ error: ADD_ERRORS[result.reason] }, { status: 400 })
+        return NextResponse.json(
+          { error: t(ADD_ERRORS[result.reason] ?? 'api.actionFailed') },
+          { status: 400 },
+        )
       }
 
       /*

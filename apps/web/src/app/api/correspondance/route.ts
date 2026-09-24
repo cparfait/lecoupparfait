@@ -17,23 +17,32 @@ import {
   playCorrespondence,
   resignCorrespondence,
   startCorrespondence,
+  type PlayResult,
 } from '@coupparfait/db/correspondence'
 import { areFriends } from '@coupparfait/db/friends'
 import { eq, getDb, users } from '@coupparfait/db'
 import { getCurrentUser } from '@/lib/server/session.ts'
 import { prevenir } from '@/lib/server/push.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
+import type { TranslationKey } from '@/lib/i18n/index.tsx'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const REASONS: Record<string, string> = {
-  unknown: 'Partie introuvable.',
-  notYourTurn: 'Ce n’est pas à toi de jouer.',
-  illegal: 'Coup illégal.',
-  finished: 'Cette partie est terminée.',
-  corrompue: 'Cette partie ne se relit plus : ses coups enregistrés sont illisibles.',
-  conflict: 'La partie a changé entre-temps. Recharge-la avant de rejouer.',
+/**
+ * Les refus d'un coup, en clés de dictionnaire.
+ *
+ * Ils étaient écrits ici en français, et la réponse les portait telle quelle
+ * au client, dans toutes les langues. Traduits dans la langue de la requête,
+ * comme les autres erreurs de la route.
+ */
+const REASONS: Record<Extract<PlayResult, { ok: false }>['reason'], TranslationKey> = {
+  unknown: 'api.gameNotFound',
+  notYourTurn: 'api.notYourTurn',
+  illegal: 'api.illegalMove',
+  finished: 'api.gameFinished',
+  corrompue: 'api.gameCorrupt',
+  conflict: 'api.gameChanged',
 }
 
 export async function GET(request: Request) {
@@ -109,7 +118,7 @@ export async function POST(request: Request) {
         // 409 pour le conflit : la requête n'était pas fausse, elle est
         // arrivée après une autre. Le client doit relire, pas corriger.
         return NextResponse.json(
-          { error: REASONS[result.reason] },
+          { error: t(REASONS[result.reason]) },
           { status: result.reason === 'conflict' ? 409 : 400 },
         )
       }
@@ -145,7 +154,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: t('api.gameNotFound') }, { status: 404 })
       }
       if (issue === 'conflict') {
-        return NextResponse.json({ error: REASONS.conflict }, { status: 409 })
+        return NextResponse.json({ error: t(REASONS.conflict) }, { status: 409 })
       }
       return NextResponse.json({ ok: true })
     }

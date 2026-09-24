@@ -28,6 +28,16 @@ import {
   type TimeControl,
 } from '@coupparfait/core'
 
+/**
+ * Pourquoi un coup est refusé, en code et non en phrase.
+ *
+ * Le serveur ne connaît pas la langue de chaque joueur : il écrivait ses refus
+ * en français, et le client les affichait tels quels, dans toutes les langues.
+ * Le client traduit désormais le code — voir `CLES_D_ERREUR` dans
+ * `apps/web/src/lib/game/useLiveGame.ts`, qui doit en connaître chaque valeur.
+ */
+export type RefusDeCoup = 'notAPlayer' | 'notPlaying' | 'notYourTurn' | 'flagged' | 'illegal'
+
 export interface Participant {
   /** Identifiant de compte, ou `null` pour un invité. */
   userId: string | null
@@ -473,18 +483,18 @@ export class GameRoom {
   playMove(
     socketId: string,
     move: { from: Square; to: Square; promotion?: PieceSymbol },
-  ): { ok: true } | { ok: false; reason: string } {
+  ): { ok: true } | { ok: false; reason: RefusDeCoup } {
     const color = this.colorOf(socketId)
-    if (!color) return { ok: false, reason: 'Tu n’es pas joueur dans cette partie.' }
-    if (this.status !== 'playing') return { ok: false, reason: 'La partie n’est pas en cours.' }
-    if (this.chess.turn() !== color) return { ok: false, reason: 'Ce n’est pas ton tour.' }
+    if (!color) return { ok: false, reason: 'notAPlayer' }
+    if (this.status !== 'playing') return { ok: false, reason: 'notPlaying' }
+    if (this.chess.turn() !== color) return { ok: false, reason: 'notYourTurn' }
 
     // Le temps a-t-il expiré avant même ce coup ?
     const now = this.now()
     const flagged = flaggedColor(this.clock, now)
     if (flagged) {
       this.tomberAuDrapeau(flagged)
-      return { ok: false, reason: 'Le temps est écoulé.' }
+      return { ok: false, reason: 'flagged' }
     }
 
     let played
@@ -495,7 +505,7 @@ export class GameRoom {
         promotion: move.promotion ?? 'q',
       })
     } catch {
-      return { ok: false, reason: 'Coup illégal.' }
+      return { ok: false, reason: 'illegal' }
     }
 
     this.lastMove = { from: played.from, to: played.to }

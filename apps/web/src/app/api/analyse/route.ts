@@ -90,7 +90,7 @@ export async function POST(request: Request) {
     if (!upstream.ok) {
       const text = await upstream.text()
       return NextResponse.json(
-        { error: text || 'Le serveur d’analyse a refusé la requête.' },
+        { error: text || t('api.analysisRefused') },
         { status: upstream.status },
       )
     }
@@ -112,9 +112,7 @@ export async function POST(request: Request) {
     const aborted = error instanceof Error && error.name === 'AbortError'
     return NextResponse.json(
       {
-        error: aborted
-          ? 'L’analyse a dépassé le temps imparti.'
-          : 'Le serveur d’analyse est injoignable. L’analyse se poursuivra dans ton navigateur, avec une profondeur plus modeste.',
+        error: aborted ? t('api.analysisTimeout') : t('api.analysisUnreachable'),
         fallbackToClient: true,
       },
       { status: 503 },

@@ -21,7 +21,29 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { io, type Socket } from 'socket.io-client'
 import type { Color, PieceSymbol, Square } from 'chess.js'
 import type { ClockState, GameResult, GameStatus, TimeControl } from '@coupparfait/core'
-import { useT } from '@/lib/i18n/index.tsx'
+import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
+
+/**
+ * Les refus du serveur temps réel, par code.
+ *
+ * Le serveur ne sait pas quelle langue lit chaque joueur : il envoyait ses
+ * refus en français, et on les affichait tels quels. Il envoie maintenant un
+ * code — voir `socket.emit('error', …)` dans `apps/server/src/index.ts` et
+ * `RefusDeCoup` dans `gameRoom.ts` —, traduit ici. Un code inconnu, d'un
+ * serveur plus récent que la page, retombe sur une phrase générale.
+ */
+const CLES_D_ERREUR: Record<string, TranslationKey> = {
+  tooFast: 'live.errors.tooFast',
+  missingSlug: 'live.errors.missingSlug',
+  linkUsed: 'live.errors.linkUsed',
+  serverFull: 'live.errors.serverFull',
+  tooManyRooms: 'live.errors.tooManyRooms',
+  notAPlayer: 'live.errors.notAPlayer',
+  notPlaying: 'live.errors.notPlaying',
+  notYourTurn: 'live.errors.notYourTurn',
+  flagged: 'live.errors.flagged',
+  illegal: 'live.errors.illegal',
+}
 
 export interface LivePlayer {
   name: string
@@ -200,8 +222,8 @@ export function useLiveGame({
       setChat((current) => [...current.slice(-80), event.message])
     })
 
-    socket.on('error', (payload: { message?: string }) => {
-      if (payload?.message) setError(payload.message)
+    socket.on('error', (payload: { code?: string }) => {
+      if (payload?.code) setError(t(CLES_D_ERREUR[payload.code] ?? 'live.errors.unknown'))
     })
 
     function applySnapshot(next: GameSnapshot): void {

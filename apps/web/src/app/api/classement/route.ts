@@ -31,7 +31,7 @@ export async function GET(request: Request) {
 
   if (!CATEGORIES.includes(category)) {
     return NextResponse.json(
-      { error: `Catégorie inconnue. Valeurs acceptées : ${CATEGORIES.join(', ')}.` },
+      { error: t('api.unknownCategory', { valeurs: CATEGORIES.join(', ') }) },
       { status: 400 },
     )
   }
