@@ -3,11 +3,12 @@
 /**
  * Choix du mode de jeu.
  *
- * Sept portes, à la même taille, dans l'ordre de ce qu'on vient chercher :
+ * Six portes, à la même taille, dans l'ordre de ce qu'on vient chercher :
  * jouer une partie tout de suite, contre la machine ou contre quelqu'un, puis
- * le reste. La carrière ferme la liste, et sa place ici plutôt que dans
- * « Apprendre » est un choix : ce sont douze duels contre des adversaires
- * choisis. On y vient pour jouer.
+ * le reste. La carrière n'est plus ici : elle vit dans « Progresser », au
+ * cœur de « Ton chemin », où le palier dit où l'on en est et le chapitre ce
+ * qu'il faut faire ensuite. Deux entrées pour un même parcours en faisaient
+ * deux parcours.
  *
  * Toutes les cartes sont de la même forme et de la même couleur — celle de la
  * rubrique, sur la pastille seulement. Deux grandes et cinq petites disaient
@@ -17,7 +18,7 @@
 
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
-import { Cpu, Eye, Footprints, Mail, MonitorSmartphone, Trophy, Users } from 'lucide-react'
+import { Cpu, Eye, Mail, MonitorSmartphone, Trophy, Users } from 'lucide-react'
 import { BOT_PERSONALITIES } from '@coupparfait/core'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
 import { cadreDuPortrait, TEINTES_ADVERSAIRES } from '@/lib/adversaires.ts'
@@ -71,13 +72,6 @@ const MODES = [
     titleKey: 'play.watchGame',
     blurbKey: 'play.watchBlurb',
     detailKey: 'play.watchDetail',
-  },
-  {
-    href: '/carriere',
-    icon: Footprints,
-    titleKey: 'play.career',
-    blurbKey: 'play.careerBlurb',
-    detailKey: 'play.careerDetail',
   },
 ] as const
 
