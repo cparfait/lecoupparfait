@@ -56,7 +56,7 @@ export default function PlayComputerPage() {
     if (phase === 'playing') window.scrollTo({ top: 0, behavior: 'instant' })
   }, [phase])
   const [setup, setSetup] = useState<Setup>({
-    level: 6,
+    level: 8,
     // Le hasard par défaut, et non les Blancs.
     //
     // Jouer toujours du même côté fait progresser de travers : on apprend les

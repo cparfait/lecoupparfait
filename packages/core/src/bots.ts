@@ -1,5 +1,5 @@
 /**
- * Adversaires artificiels : 18 niveaux, sept personnalités.
+ * Adversaires artificiels : 20 niveaux, sept personnalités.
  *
  * Brider un moteur est plus subtil qu'il n'y paraît. Se contenter de réduire la
  * profondeur produit un adversaire qui joue parfaitement puis s'effondre au
@@ -229,7 +229,7 @@ export function penchants(bias: StyleBias): Penchant[] {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  Barème des 18 niveaux
+//  Barème des 20 niveaux
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Elo minimum accepté par `UCI_Elo` de Stockfish. */
@@ -381,6 +381,34 @@ interface LevelSpec {
   raccourcis — ont été reportés sur la nouvelle échelle par l'Elo qu'ils
   visaient, non par décalage, parce qu'ils dataient encore de l'échelle à
   vingt-sept et n'avaient pas suivi la précédente réduction.
+
+  ── Deux échelons intermédiaires, à 430 et 770 ──────────────────────────────
+
+  Sous 1000, les marches étaient les plus hautes de toute l'échelle — 320 → 630
+  → 980, environ 350 points mesurés chacune — là même où débutent les joueurs
+  du projet. Deux échelons s'intercalent : un Mirage vers 430 et un Éclair vers
+  770, réglages interpolés entre leurs voisins. Le contrôle rapide
+  (`--pertes`) les place strictement entre eux ; la mesure par parties — trente
+  par couple, `scripts/etalonner-bots.mjs --du=4 --au=10`, Stockfish 19 lite —
+  donne :
+
+      couple          affiché   mesuré
+      320 →  430          110       83
+      430 →  630          200      147
+      630 →  770          140      134
+      770 →  980          210      207
+      980 → 1120          140       58
+     1120 → 1320          200      108
+
+  Leurs étiquettes sont posées à leur place mesurée entre leurs voisins, sur
+  l'échelle affichée : 320 + 83/230 × 310 ≈ 430, 630 + 134/341 × 350 ≈ 770.
+  Réétiqueter tout le bas sur cette seule série aurait été plus « exact » et
+  moins sûr : la chaîne, ancrée à 1320, place les niveaux 4 à 9 entre 150 et 260
+  points au-dessus de leurs étiquettes, à ±100 points par maillon qui
+  s'accumulent. C'est noté ; une seconde série le confirmera ou non.
+
+  Les rangs sont stockés : la migration `0015_intermediate_rungs` décale de un
+  ce qui valait 5, et de deux tout ce qui valait 6 ou plus.
 */
 const LEVEL_TABLE: LevelSpec[] = [
   {
@@ -424,6 +452,17 @@ const LEVEL_TABLE: LevelSpec[] = [
     nodes: 7000,
   },
   {
+    // Échelon intermédiaire (septembre 2026) : voir l'en-tête de LEVEL_TABLE.
+    elo: 430,
+    personality: 'gambiteur',
+    skill: 2,
+    depth: 3,
+    movetimeMs: 280,
+    temperature: 0.6,
+    multiPv: 9,
+    nodes: 10000,
+  },
+  {
     elo: 630,
     personality: 'novice',
     skill: 3,
@@ -432,6 +471,17 @@ const LEVEL_TABLE: LevelSpec[] = [
     temperature: 0.55,
     multiPv: 8,
     nodes: 14000,
+  },
+  {
+    // Échelon intermédiaire (septembre 2026) : voir l'en-tête de LEVEL_TABLE.
+    elo: 770,
+    personality: 'tacticien',
+    skill: 3,
+    depth: 4,
+    movetimeMs: 330,
+    temperature: 0.5,
+    multiPv: 7,
+    nodes: 24000,
   },
   {
     elo: 980,

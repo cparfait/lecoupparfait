@@ -679,7 +679,7 @@ export const challenges = pgTable(
 /**
  * Progression contre l'ordinateur.
  *
- * Une ligne par joueur, qui dit jusqu'où il est monté. Les vingt-cinq niveaux
+ * Une ligne par joueur, qui dit jusqu'où il est monté. Les niveaux de l'ordinateur
  * existaient déjà mais s'offraient tous d'emblée : un débutant choisissait au
  * hasard, tombait sur trop fort, et concluait qu'il était mauvais.
  *

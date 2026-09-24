@@ -12,7 +12,7 @@
  * intérêt : on garde le dernier, celui qu'on a une chance de vouloir finir.
  */
 
-import type { TournoiSolo } from '@coupparfait/core'
+import { BOT_LEVELS, type TournoiSolo } from '@coupparfait/core'
 
 const CLE = 'coupparfait.tournoiSolo'
 
@@ -24,6 +24,16 @@ export function lireTournoi(): TournoiSolo | null {
     // Une sauvegarde d'une version antérieure du format ferait planter l'écran
     // plutôt que de simplement ne pas s'ouvrir : on vérifie la forme.
     if (!Array.isArray(tournoi?.concurrents) || !Array.isArray(tournoi?.duels)) return null
+    // Un tournoi commencé avant un changement d'échelle garde les numéros de
+    // l'ancienne : le niveau 6 était 980, il est 630 depuis l'ajout des
+    // échelons 430 et 770. L'Elo, lui, est resté celui de l'adversaire : on
+    // retrouve son rang par là, et chacun garde la force qu'on lui a vue.
+    for (const concurrent of tournoi.concurrents) {
+      if (concurrent.niveau === null) continue
+      if (BOT_LEVELS[concurrent.niveau - 1]?.elo === concurrent.elo) continue
+      const rang = BOT_LEVELS.findIndex((niveau) => niveau.elo === concurrent.elo)
+      if (rang >= 0) concurrent.niveau = rang + 1
+    }
     return tournoi
   } catch {
     return null
