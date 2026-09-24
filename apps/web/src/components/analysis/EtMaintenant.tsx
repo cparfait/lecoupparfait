@@ -86,7 +86,9 @@ export function EtMaintenant({
       <EnTeteDeCarte
         titre={t('next2.title')}
         icone={<Compass size={14} aria-hidden />}
-        teinte="var(--rub-entrainer)"
+        // La teinte de « Progresser », où mènent ses liens. Elle portait celle
+        // de « S'entraîner », une rubrique qui n'existe plus.
+        teinte="var(--rub-apprendre)"
       />
 
       <div className="p-4">

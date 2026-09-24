@@ -237,7 +237,10 @@ export default function EcoutePage() {
 
   return (
     <div className="page">
-      <TitreDePage retour={{ href: '/apprendre', label: t('nav.learn') }} intro={t('listen.intro')}>
+      <TitreDePage
+        retour={{ href: '/progresser', label: t('nav.progress') }}
+        intro={t('listen.intro')}
+      >
         {t('listen.title')}
       </TitreDePage>
 

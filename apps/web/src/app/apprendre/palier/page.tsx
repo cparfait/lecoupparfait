@@ -156,7 +156,10 @@ export default function PalierPage() {
 
   return (
     <div className="page">
-      <TitreDePage retour={{ href: '/apprendre', label: t('nav.learn') }} intro={t('tier.intro')}>
+      <TitreDePage
+        retour={{ href: '/progresser', label: t('nav.progress') }}
+        intro={t('tier.intro')}
+      >
         {t('tier.title')}
       </TitreDePage>
 
@@ -270,7 +273,7 @@ export default function PalierPage() {
           <EnTeteDeCarte
             titre={t('tier.weaknesses')}
             icone={<TrendingUp size={14} aria-hidden />}
-            teinte="var(--rub-entrainer)"
+            teinte="var(--rub-apprendre)"
             fin={t('tier.weaknessesCount', { n: faiblesses.length })}
           />
           <div className="p-4">
