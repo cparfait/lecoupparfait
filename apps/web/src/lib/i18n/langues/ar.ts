@@ -71,7 +71,7 @@ export const ar: Traduction = {
     draw: 'القرعة',
     arbiter: 'مذكّرة التحكيم',
 
-    vsComputerHint: '18 مستوى، 7 طباع',
+    vsComputerHint: '20 مستوى، 7 طباع',
     vsFriendHint: 'رابط واحد، أو أيام لكل نقلة',
     localGameHint: 'اثنان، على جهاز واحد',
     clockHint: 'ساعة لمباراتك على رقعة حقيقية',
@@ -111,7 +111,7 @@ export const ar: Traduction = {
       analysisTitle: 'تحليل مشروح',
       analysisBody:
         'يعمل Stockfish 19 على الخادم بكامل قوّته. كل خطأ يُصنَّف، وأفضل نقلة تُعرض — والأهم أن السبب مكتوب بالكلمات.',
-      levelsTitle: '18 مستوى، 7 طباع',
+      levelsTitle: '20 مستوى، 7 طباع',
       levelsBody:
         'من 100 إلى 3200 في إيلو. خصوم لكلٍّ أسلوبه: واحد يهاجم، وآخر يخنق، وثالث يضحّي بكل شيء. اختر شريك تدريبك.',
       dataTitle: 'ملايين الوضعيات',

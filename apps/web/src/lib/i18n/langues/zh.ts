@@ -69,7 +69,7 @@ export const zh: Traduction = {
     draw: '抽签',
     arbiter: '裁判备忘',
 
-    vsComputerHint: '18 个等级，7 种性格',
+    vsComputerHint: '20 个等级，7 种性格',
     vsFriendHint: '一个链接，或每步数天',
     localGameHint: '两人，一台设备',
     clockHint: '为你的实体棋盘对局计时',
@@ -109,7 +109,7 @@ export const zh: Traduction = {
       analysisTitle: '讲得明白的分析',
       analysisBody:
         'Stockfish 19 在服务器上全力运行。每个失误都会分级，最佳着法会标出来——最重要的是，原因用文字写了出来。',
-      levelsTitle: '18 个等级，7 种性格',
+      levelsTitle: '20 个等级，7 种性格',
       levelsBody:
         '从 100 到 3200 等级分。对手各有棋风：有的猛攻，有的缠死你，有的什么都敢弃。挑一个陪练。',
       dataTitle: '数以百万计的局面',

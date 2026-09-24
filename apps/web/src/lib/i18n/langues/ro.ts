@@ -68,7 +68,7 @@ export const ro: Traduction = {
     draw: 'Tragere la sorți',
     arbiter: 'Memento de arbitraj',
 
-    vsComputerHint: '18 de niveluri, 7 personalități',
+    vsComputerHint: '20 de niveluri, 7 personalități',
     vsFriendHint: 'un link, sau mai multe zile pe mutare',
     localGameHint: 'în doi, pe un singur dispozitiv',
     clockHint: 'ceasul pentru partida ta pe tablă reală',
@@ -108,7 +108,7 @@ export const ro: Traduction = {
       analysisTitle: 'Analiză explicată',
       analysisBody:
         'Stockfish 19 rulează pe server la putere maximă. Fiecare greșeală este clasificată, cea mai bună mutare este arătată — și, mai ales, motivul este scris în cuvinte.',
-      levelsTitle: '18 de niveluri, 7 caractere',
+      levelsTitle: '20 de niveluri, 7 caractere',
       levelsBody:
         'De la 100 la 3200 Elo. Adversari cu stil: unul atacă, altul sufocă, al treilea sacrifică tot. Alege-ți partenerul de antrenament.',
       dataTitle: 'Milioane de poziții',

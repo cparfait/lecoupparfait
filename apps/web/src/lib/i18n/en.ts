@@ -79,7 +79,7 @@ export const en: Dictionary = {
     draw: 'Random draw',
     arbiter: 'Arbiter’s cheat sheet',
 
-    vsComputerHint: '18 levels, 7 personalities',
+    vsComputerHint: '20 levels, 7 personalities',
     vsFriendHint: 'a link, or days per move',
     localGameHint: 'two players, one device',
     clockHint: 'time your game on a real board',
@@ -127,7 +127,7 @@ export const en: Dictionary = {
       analysisTitle: 'Explained analysis',
       analysisBody:
         'Stockfish 19 runs server-side at full strength. Every error is classified, the best move is shown, and the reason is spelled out.',
-      levelsTitle: '18 levels, 7 personalities',
+      levelsTitle: '20 levels, 7 personalities',
       levelsBody:
         'From 100 to 3200 Elo. Opponents with a style — one charges, one squeezes, one sacrifices everything. Pick your sparring partner.',
       dataTitle: 'Millions of positions',
@@ -218,7 +218,7 @@ export const en: Dictionary = {
     arenaBlurb: 'A tournament you can join and leave at will.',
     lobbyIntro:
       'Against the machine to train at your own pace, against a friend for the fun of it, or two of you on one screen.',
-    vsComputerDetail: '18 levels · 7 personalities · from 100 to 3200 Elo',
+    vsComputerDetail: '20 levels · 7 personalities · from 100 to 3200 Elo',
     vsFriendDetail: 'From 15 seconds to 14 days per move · a link, or a friend',
     correspondenceDetail: 'A move whenever you can · 1 to 14 days per move',
     localDetail: 'The board flips after every move if you want it to',
@@ -6923,7 +6923,7 @@ export const en: Dictionary = {
   meta: {
     rootTitle: 'Le Coup Parfait — learn, play, improve at chess',
     rootDesc:
-      'A free and libre chess platform: voice-guided lessons, analysis explained move by move, 18 levels of opponents and games between friends. No advertising, no account required.',
+      'A free and libre chess platform: voice-guided lessons, analysis explained move by move, 20 levels of opponents and games between friends. No advertising, no account required.',
     ogTitle: 'Le Coup Parfait — chess, finally explained',
     ogDesc:
       'An engine that explains why, a voice that keeps you company, and zero euros. Free software you can host yourself.',

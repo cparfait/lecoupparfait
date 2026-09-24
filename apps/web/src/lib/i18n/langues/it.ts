@@ -65,7 +65,7 @@ export const it: Traduction = {
     draw: 'Sorteggio',
     arbiter: 'Promemoria d’arbitraggio',
 
-    vsComputerHint: '18 livelli, 7 personalità',
+    vsComputerHint: '20 livelli, 7 personalità',
     vsFriendHint: 'un link, o più giorni per mossa',
     localGameHint: 'in due, su un solo dispositivo',
     clockHint: 'l’orologio della tua partita su scacchiera vera',
@@ -105,7 +105,7 @@ export const it: Traduction = {
       analysisTitle: 'Analisi spiegata',
       analysisBody:
         'Stockfish 19 gira sul server a piena potenza. Ogni errore è classificato, la mossa migliore è mostrata e, soprattutto, la ragione è scritta per esteso.',
-      levelsTitle: '18 livelli, 7 caratteri',
+      levelsTitle: '20 livelli, 7 caratteri',
       levelsBody:
         'Da 100 a 3200 Elo. Avversari con uno stile: uno attacca, uno soffoca, un terzo sacrifica tutto. Scegli il tuo sparring.',
       dataTitle: 'Milioni di posizioni',

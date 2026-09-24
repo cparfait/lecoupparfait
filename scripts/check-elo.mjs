@@ -98,6 +98,50 @@ check(
 )
 check('plafond à 3000', estimateElo(0, 100, 200) <= 3000)
 
+// ── Le nombre de niveaux annoncé ─────────────────────────────────────────────
+//
+// Chaque changement d'échelle a laissé derrière lui un nombre périmé dans un
+// texte — « vingt-cinq niveaux » a survécu deux refontes. Ces quatre phrases
+// l'écrivent en toutes lettres, dans chaque langue, et le README aussi : leur
+// premier nombre doit être celui de BOT_LEVELS.
+{
+  const { readFileSync, readdirSync } = await import('node:fs')
+  const { fileURLToPath } = await import('node:url')
+  const { join } = await import('node:path')
+  const racine = fileURLToPath(new URL('..', import.meta.url))
+  const dossier = join(racine, 'apps', 'web', 'src', 'lib', 'i18n')
+  const fichiers = [
+    join(dossier, 'fr.ts'),
+    join(dossier, 'en.ts'),
+    ...readdirSync(join(dossier, 'langues'))
+      .filter((f) => /^[a-z]{2}\.ts$/.test(f))
+      .map((f) => join(dossier, 'langues', f)),
+  ]
+  const CLES = ['vsComputerHint', 'levelsTitle', 'vsComputerDetail', 'rootDesc']
+  const attendu = String(BOT_LEVELS.length)
+  for (const fichier of fichiers) {
+    const texte = readFileSync(fichier, 'utf8')
+    for (const cle of CLES) {
+      const m = texte.match(new RegExp(String.raw`\b${cle}:\s*(['"])([\s\S]*?)\1`))
+      if (!m) continue
+      const nombre = m[2].match(/\d+/)?.[0]
+      if (!nombre) continue
+      check(
+        `${fichier.split(/[\/]/).at(-1)} · ${cle} annonce ${attendu} niveaux`,
+        nombre === attendu,
+        `il en annonce ${nombre}`,
+      )
+    }
+  }
+  const readme = readFileSync(join(racine, 'README.md'), 'utf8')
+  const ligne = readme.match(/(\d+) niveaux d'ordinateur/)
+  check(
+    `le README annonce ${attendu} niveaux d'ordinateur`,
+    ligne?.[1] === attendu,
+    `il en annonce ${ligne?.[1] ?? 'aucun'}`,
+  )
+}
+
 console.log(
   failures === 0
     ? `\n✓ ${checks} vérifications passées\n`

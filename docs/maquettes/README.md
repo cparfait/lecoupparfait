@@ -11,7 +11,7 @@ dans l'application, elles passent par les jetons de `globals.css`.
 | `Composants.dc.html`       | boutons, cartes, en-tête, barre joueur, abandon      |
 | `AccueilVisiteur.dc.html`  | accueil sans compte                                  |
 | `TonChemin.dc.html`        | accueil connecté (palier + carrière + rang)          |
-| `ContreOrdinateur.dc.html` | réglage : échelle de 18 adversaires, options         |
+| `ContreOrdinateur.dc.html` | réglage : échelle des adversaires, options           |
 | `Partie.dc.html`           | écran de partie (prop `commente` : panneau du coach) |
 | `TonCheminBureau.dc.html`  | accueil connecté, 1 440 px                           |
 | `PartieBureau.dc.html`     | partie, 1 440 px                                     |

@@ -64,7 +64,7 @@ export const hu: Traduction = {
     draw: 'Sorsolás',
     arbiter: 'Bírói emlékeztető',
 
-    vsComputerHint: '18 szint, 7 jellem',
+    vsComputerHint: '20 szint, 7 jellem',
     vsFriendHint: 'egy link, vagy több nap lépésenként',
     localGameHint: 'ketten, egyetlen készüléken',
     clockHint: 'óra a valódi táblán zajló játszmádhoz',
@@ -104,7 +104,7 @@ export const hu: Traduction = {
       analysisTitle: 'Elmagyarázott elemzés',
       analysisBody:
         'A Stockfish 19 teljes erővel fut a kiszolgálón. Minden hiba besorolást kap, a legjobb lépés látszik — és ami a legfontosabb: az ok ki van írva szavakkal.',
-      levelsTitle: '18 szint, 7 jellem',
+      levelsTitle: '20 szint, 7 jellem',
       levelsBody:
         '100-tól 3200 Élőig. Stílussal rendelkező ellenfelek: az egyik támad, a másik fojtogat, a harmadik mindent feláldoz. Válaszd ki az edzőpartnered.',
       dataTitle: 'Több millió állás',

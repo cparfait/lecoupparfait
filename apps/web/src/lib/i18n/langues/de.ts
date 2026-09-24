@@ -69,7 +69,7 @@ export const de: Traduction = {
     draw: 'Auslosung',
     arbiter: 'Schiedsrichter-Spickzettel',
 
-    vsComputerHint: '18 Stufen, 7 Persönlichkeiten',
+    vsComputerHint: '20 Stufen, 7 Persönlichkeiten',
     vsFriendHint: 'ein Link, oder mehrere Tage pro Zug',
     localGameHint: 'zu zweit, an einem Gerät',
     clockHint: 'die Uhr für deine Partie am echten Brett',
@@ -109,7 +109,7 @@ export const de: Traduction = {
       analysisTitle: 'Erklärte Analyse',
       analysisBody:
         'Stockfish 19 läuft mit voller Kraft auf dem Server. Jeder Fehler wird eingeordnet, der beste Zug gezeigt — und vor allem steht der Grund ausgeschrieben da.',
-      levelsTitle: '18 Stufen, 7 Charaktere',
+      levelsTitle: '20 Stufen, 7 Charaktere',
       levelsBody:
         'Von 100 bis 3200 Elo. Gegner mit eigenem Stil: einer stürmt, einer erdrosselt, ein dritter opfert alles. Wähle deinen Sparringspartner.',
       dataTitle: 'Millionen von Stellungen',
