@@ -340,3 +340,31 @@ chaque fusion, typecheck, tests, prettier et eslint passent.
   chapitre porte une leçon, et la tour vient naturellement après la dame.
 - **Branche** : fusionnée dans `main` une fois les derniers lots (textes, tests
   de routes, découpage de l'écran contre l'ordinateur) vérifiés.
+
+### Deuxième vague — 24 septembre
+
+Poussée sur `main` (`8790448..3699b5c`), CI verte.
+
+- **Refonte « L'échiquier calme »** (maquettes dans `docs/maquettes/`) :
+  cinq onglets avec « Progresser », échelle des 18 adversaires, séance à
+  thème en option, accueils visiteur et « Ton chemin », coach en panneau fixe
+  sur téléphone, en-tête bureau aligné sur la barre mobile, un seul gabarit
+  d'en-tête pour 42 pages, plus aucune icône en emoji (cadences, séances,
+  leçons, carrière, finales).
+- **Mes erreurs à revoir** (`/progresser/erreurs`) : les fautes des analyses
+  enregistrées reviennent en révision espacée (boîtes de Leitner) —
+  migration `0014`, à appliquer au déploiement.
+- **Appariement rapide** sur « Contre quelqu'un » : file par cadence sur le
+  serveur temps réel.
+- **Leçons** : calcul (échecs, prises, menaces), défense, finales de tours
+  (Philidor, Lucena) ; les pièges d'ouverture passent en annexe. 60 leçons,
+  483 étapes.
+- **L8** : les dictionnaires se chargent à la demande (288 → 112 Ko pour un
+  visiteur francophone).
+- **Notifications et messages du salon** dans la langue du destinataire.
+
+Reste ouvert : **N4** (échelons vers 450 et 800 — étalonnage avec Stockfish),
+**L3** (coups du bot vérifiés par le serveur — changement d'architecture),
+**L12** (`useFetchJson` partout), la structure de pions et le plan dans les
+leçons, et la vérification à l'écran de l'accueil connecté, du panneau du
+coach et de « Mes erreurs à revoir » avec une vraie base.
