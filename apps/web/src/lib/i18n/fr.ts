@@ -304,7 +304,6 @@ export const fr = {
     colour: 'Couleur',
     whiteStarts: 'Les Blancs commencent. Pour apprendre, alterne.',
     randomColour: 'Couleur au hasard',
-    timeControlExample: '« 5 | 3 » : cinq minutes au départ, trois secondes gagnées à chaque coup.',
     step3: 'Pendant la partie',
     ratedNeedsAccount: 'Demande un compte : c’est lui qui porte le classement.',
     ratedHint:
@@ -368,6 +367,21 @@ export const fr = {
     unratedUnavailable:
       'le classement était indisponible. La partie est archivée, elle ne compte pas.',
     unratedUnknown: 'le serveur ne l’a pas comptée.',
+
+    // ── Cadences, en grille de boutons texte ─────────────────────────────
+    // Les libellés se composent des minutes et de l'incrément : le cœur écrit
+    // « 5 | 3 » et « Sans limite » en dur, en français seulement.
+    tcMinutes: '{m} min',
+    tcIncrement: '{m} + {s}',
+    tcUnlimited: 'Sans limite',
+    tcHelp3: 'Trois minutes chacun, sans incrément. Pour les réflexes.',
+    tcHelp5: 'Cinq minutes chacun, sans incrément.',
+    tcHelp5i3: 'Cinq minutes au départ, trois secondes gagnées à chaque coup.',
+    tcHelp10: 'Dix minutes chacun : le bon rythme pour apprendre.',
+    tcHelp10i5: 'Dix minutes au départ, cinq secondes gagnées à chaque coup.',
+    tcHelp15i10: 'Quinze minutes, dix secondes par coup : le temps de calculer.',
+    tcHelp30: 'Trente minutes chacun, pour une vraie partie longue.',
+    tcHelpNone: 'Pas de pendule. Tu prends le temps qu’il faut.',
   },
 
   live: {
@@ -456,9 +470,9 @@ export const fr = {
     offline: 'hors ligne',
     challenge: 'Défier',
     yourColour: 'Ta couleur',
-    colourRandom: '🎲 Hasard',
-    colourWhite: '♔ Blancs',
-    colourBlack: '♚ Noirs',
+    colourRandom: 'Hasard',
+    colourWhite: 'Blancs',
+    colourBlack: 'Noirs',
     colourNote:
       'Ton adversaire prendra l’autre couleur. Une fois la partie ouverte, elle est fixée.',
     guestName: 'Ton pseudo (facultatif)',

@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { ArrowRight, Play, Trophy } from 'lucide-react'
+import { ArrowRight, Circle, Play, Shuffle, Trophy } from 'lucide-react'
 import clsx from 'clsx'
 import type { Color } from 'chess.js'
 import {
@@ -16,7 +16,6 @@ import {
   MAIA_MAX_ELO,
   MAIA_MIN_ELO,
   maiaCouvre,
-  SPEED_LABELS,
   TIME_CONTROLS,
   botLevel,
   niveauProche,
@@ -37,7 +36,7 @@ import {
 } from '@/components/ui/index.tsx'
 import { getEngine } from '@/lib/engine/client.ts'
 import { depuis, oublierPartieEnCours, type PartieEnCours } from '@/lib/game/partieEnCours.ts'
-import { avecElements, langue, useI18n, useT } from '@/lib/i18n/index.tsx'
+import { avecElements, langue, useI18n, useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { useFetchJson } from '@/lib/useFetchJson.ts'
@@ -102,6 +101,38 @@ function teinteDeForce(part: number): string {
   const arrivee = premiere ? tiede : chaud
   const avancement = (premiere ? part * 2 : (part - 0.5) * 2) * 100
   return `color-mix(in oklab, ${arrivee} ${avancement.toFixed(1)}%, ${depart})`
+}
+
+/**
+ * Les huit cadences proposées, dans l'ordre de la grille, et la phrase qui
+ * dit ce que chacune vaut. Les identifiants sont ceux de `TIME_CONTROLS`.
+ */
+const CADENCES: Array<{ id: string; aide: TranslationKey }> = [
+  { id: '180+0', aide: 'computer.tcHelp3' },
+  { id: '300+0', aide: 'computer.tcHelp5' },
+  { id: '300+3', aide: 'computer.tcHelp5i3' },
+  { id: '600+0', aide: 'computer.tcHelp10' },
+  { id: '600+5', aide: 'computer.tcHelp10i5' },
+  { id: '900+10', aide: 'computer.tcHelp15i10' },
+  { id: '1800+0', aide: 'computer.tcHelp30' },
+  { id: '0+0', aide: 'computer.tcHelpNone' },
+]
+
+/**
+ * « 5 + 3 », « 10 min », « Sans limite ».
+ *
+ * Composé ici plutôt que lu dans `TIME_CONTROLS[].label` : le cœur écrit
+ * « 5 | 3 » et « Sans limite » en dur, donc en français dans toutes les
+ * langues. Une cadence que le tableau ne connaît pas s'affiche telle quelle.
+ */
+function libelleCadence(id: string, t: ReturnType<typeof useT>): string {
+  const cadence = TIME_CONTROLS.find((entree) => entree.id === id)
+  if (!cadence) return id
+  if (cadence.initial <= 0) return t('computer.tcUnlimited')
+  const minutes = Math.round(cadence.initial / 60)
+  return cadence.increment > 0
+    ? t('computer.tcIncrement', { m: minutes, s: cadence.increment })
+    : t('computer.tcMinutes', { m: minutes })
 }
 
 export function SetupScreen({
@@ -325,7 +356,6 @@ export function SetupScreen({
     return `${couleur} ${debut}% ${fin}%`
   }).join(', ')
 
-  const cadence = TIME_CONTROLS.find((tc) => tc.id === timeControlId)
   const couleurChoisie =
     color === 'w'
       ? t('settings.white')
@@ -751,10 +781,38 @@ export function SetupScreen({
                   value={color}
                   onChange={setColor}
                   label={t('computer.colour')}
+                  /* Des icônes lucide et non plus « ♔ », « ♚ », « 🎲 » : ces
+                     glyphes changent de dessin d'un système à l'autre, et le
+                     dé en couleur criait au milieu d'un écran calme. Cercle
+                     vide pour les Blancs, plein pour les Noirs. */
                   options={[
-                    { value: 'w' as const, label: t('friendGame.colourWhite') },
-                    { value: 'b' as const, label: t('friendGame.colourBlack') },
-                    { value: 'random' as const, label: t('friendGame.colourRandom') },
+                    {
+                      value: 'w' as const,
+                      label: (
+                        <span className="inline-flex items-center gap-1.5">
+                          <Circle size={15} aria-hidden />
+                          {t('friendGame.colourWhite')}
+                        </span>
+                      ),
+                    },
+                    {
+                      value: 'b' as const,
+                      label: (
+                        <span className="inline-flex items-center gap-1.5">
+                          <Circle size={15} fill="currentColor" aria-hidden />
+                          {t('friendGame.colourBlack')}
+                        </span>
+                      ),
+                    },
+                    {
+                      value: 'random' as const,
+                      label: (
+                        <span className="inline-flex items-center gap-1.5">
+                          <Shuffle size={15} aria-hidden />
+                          {t('friendGame.colourRandom')}
+                        </span>
+                      ),
+                    },
                   ]}
                 />
                 <p className="mt-2 text-xs text-faint">{t('computer.whiteStarts')}</p>
@@ -772,39 +830,42 @@ export function SetupScreen({
               de quoi poser trois pastilles, sinon en pleine largeur dessous. */}
               <div className="min-w-[19rem] flex-1">
                 <SectionTitle>{t('friendGame.timeControl')}</SectionTitle>
-                <div className="flex flex-wrap gap-1.5">
-                  {TIME_CONTROLS.filter((tc) =>
-                    [
-                      '180+0',
-                      '300+0',
-                      '300+3',
-                      '600+0',
-                      '600+5',
-                      '900+10',
-                      '1800+0',
-                      '0+0',
-                    ].includes(tc.id),
-                  ).map((tc) => (
-                    <button
-                      key={tc.id}
-                      type="button"
-                      onClick={() => setTimeControlId(tc.id)}
-                      className={clsx(
-                        'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors',
-                        timeControlId === tc.id
-                          ? 'border-accent bg-accent/15 text-ink'
-                          : 'border-line text-muted hover:bg-surface-hover',
-                      )}
-                    >
-                      <span aria-hidden>{SPEED_LABELS[tc.category].icon}</span>
-                      {tc.label}
-                    </button>
-                  ))}
+                {/* Huit boutons texte en grille de quatre, sans l'émoji de
+                    catégorie (⚡, 🐇, 🐢, ✉️) : il redisait la durée en image,
+                    et quatre couleurs d'émoji sur une ligne faisaient plus de
+                    bruit que tout le reste de l'écran. La phrase dessous dit
+                    ce que vaut la cadence choisie. */}
+                <div
+                  role="radiogroup"
+                  aria-label={t('friendGame.timeControl')}
+                  className="grid grid-cols-4 gap-1.5"
+                >
+                  {CADENCES.map((cadenceProposee) => {
+                    const choisie = timeControlId === cadenceProposee.id
+                    return (
+                      <button
+                        key={cadenceProposee.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={choisie}
+                        onClick={() => setTimeControlId(cadenceProposee.id)}
+                        className={clsx(
+                          'min-h-11 whitespace-nowrap rounded-[var(--radius-sm)] border px-1 text-[13px] font-semibold tabular-nums transition-colors',
+                          choisie
+                            ? 'border-accent bg-accent/15 text-ink ring-1 ring-accent'
+                            : 'border-line bg-surface text-muted hover:bg-surface-hover hover:text-ink',
+                        )}
+                      >
+                        {libelleCadence(cadenceProposee.id, t)}
+                      </button>
+                    )
+                  })}
                 </div>
-                {/* Ramenée à un exemple : la règle générale se déduit de
-                l'exemple, et prenait trois lignes pour le dire. */}
                 <p className="mt-2 text-xs leading-relaxed text-faint">
-                  {t('computer.timeControlExample')}
+                  {t(
+                    CADENCES.find((entree) => entree.id === timeControlId)?.aide ??
+                      'computer.tcHelp10i5',
+                  )}
                 </p>
               </div>
             </div>
@@ -863,7 +924,7 @@ export function SetupScreen({
               t('computer.summaryLine', {
                 elo: bot.elo,
                 couleur: couleurChoisie,
-                cadence: cadence?.label ?? timeControlId,
+                cadence: libelleCadence(timeControlId, t),
                 mode:
                   classee && connecte === true
                     ? t('computer.summaryRated')

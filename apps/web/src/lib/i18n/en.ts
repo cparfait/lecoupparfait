@@ -300,7 +300,6 @@ export const en: Dictionary = {
     colour: 'Colour',
     whiteStarts: 'White moves first. To learn, alternate.',
     randomColour: 'Random colour',
-    timeControlExample: '“5 | 3”: five minutes to start with, three seconds gained on every move.',
     step3: 'During the game',
     ratedNeedsAccount: 'Requires an account: that is what carries the rating.',
     ratedHint:
@@ -361,6 +360,18 @@ export const en: Dictionary = {
     unratedUnavailable:
       'the rating service was unavailable. The game is archived, it does not count.',
     unratedUnknown: 'the server did not count it.',
+
+    tcMinutes: '{m} min',
+    tcIncrement: '{m} + {s}',
+    tcUnlimited: 'No limit',
+    tcHelp3: 'Three minutes each, no increment. For reflexes.',
+    tcHelp5: 'Five minutes each, no increment.',
+    tcHelp5i3: 'Five minutes to start, three seconds gained on every move.',
+    tcHelp10: 'Ten minutes each: the right pace for learning.',
+    tcHelp10i5: 'Ten minutes to start, five seconds gained on every move.',
+    tcHelp15i10: 'Fifteen minutes, ten seconds per move: time to calculate.',
+    tcHelp30: 'Thirty minutes each, for a proper long game.',
+    tcHelpNone: 'No clock. Take all the time you need.',
   },
 
   live: {
@@ -447,9 +458,9 @@ export const en: Dictionary = {
     offline: 'offline',
     challenge: 'Challenge',
     yourColour: 'Your colour',
-    colourRandom: '🎲 Random',
-    colourWhite: '♔ White',
-    colourBlack: '♚ Black',
+    colourRandom: 'Random',
+    colourWhite: 'White',
+    colourBlack: 'Black',
     colourNote: 'Your opponent takes the other colour. Once the game is open, it is fixed.',
     guestName: 'Your name (optional)',
     guestNameHint: 'Only used so your opponent knows who they are facing.',
