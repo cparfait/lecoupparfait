@@ -378,7 +378,11 @@ export function SetupScreen({
             {/* Un seul contrôle : l'adversaire choisi en grand, puis l'échelle
                 de ses échelons qui défile. Voir `EchelleDesAdversaires`. */}
             <AdversaireChoisi level={level} />
-            <EchelleDesAdversaires level={level} onChoisir={choisirNiveau} />
+            <EchelleDesAdversaires
+              level={level}
+              onChoisir={choisirNiveau}
+              battus={progress?.battus}
+            />
 
             {progress && progress.tracked && (
               <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-muted">

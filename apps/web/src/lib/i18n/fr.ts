@@ -353,6 +353,9 @@ export const fr = {
     opponentStrength: '≈ {elo} Elo · niveau {n} sur {total}',
     ladderLabel: 'Choisir le niveau de l’adversaire, de 1 à {n}',
     ladderCard: 'Niveau {n}, {nom}, environ {elo} Elo',
+    ladderLevel: 'Niveau {n}',
+    ladderNameElo: '{nom} · ≈ {elo}',
+    ladderBeaten: 'déjà battu',
     ladderTier: 'Palier « {palier} ». Pas sûr de ton niveau ?',
     ladderTest: 'Le test de niveau te le dit',
 

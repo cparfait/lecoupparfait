@@ -17,11 +17,13 @@
 import { useEffect, useRef } from 'react'
 import type { KeyboardEvent } from 'react'
 import Link from 'next/link'
+import { Check } from 'lucide-react'
 import clsx from 'clsx'
-import { BOT_LEVELS, BOT_PERSONALITIES, botLevel } from '@coupparfait/core'
+import { BOT_LEVELS, BOT_PERSONALITIES, botLevel, niveauxDe } from '@coupparfait/core'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
 import { Defilement } from '@/components/ui/Defilement.tsx'
 import { palierPour } from '@/lib/apprendre/palier.ts'
+import { TEINTES_ADVERSAIRES } from '@/lib/adversaires.ts'
 import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
@@ -65,9 +67,12 @@ export function AdversaireChoisi({ level }: { level: number }) {
 export function EchelleDesAdversaires({
   level,
   onChoisir,
+  battus = [],
 }: {
   level: number
   onChoisir: (niveau: number) => void
+  /** Niveaux déjà gagnés sans aide : ils portent une coche. */
+  battus?: readonly number[]
 }) {
   const t = useT()
   const bcp47 = langue(useI18n().locale).bcp47
@@ -105,14 +110,20 @@ export function EchelleDesAdversaires({
    * Les flèches passent d'un échelon à l'autre, Début et Fin vont aux bouts.
    *
    * Une seule carte est dans l'ordre de tabulation — la choisie — sinon il
-   * fallait dix-huit appuis sur Tab pour atteindre la couleur. Les flèches
+   * fallait vingt appuis sur Tab pour atteindre la couleur. Les flèches
    * suivent le sens de lecture : en arabe, la flèche gauche monte d'un cran.
    */
   const auClavier = (event: KeyboardEvent<HTMLDivElement>) => {
-    const rtl = getComputedStyle(event.currentTarget).direction === 'rtl'
+    const style = getComputedStyle(event.currentTarget)
+    const rtl = style.direction === 'rtl'
+    // En grille (grand écran), haut et bas changent de rangée : un pas vaut
+    // alors le nombre de colonnes.
+    const colonnes =
+      style.display === 'grid' ? style.gridTemplateColumns.split(' ').filter(Boolean).length : 0
     const pas: Record<string, number> = {
       ArrowRight: rtl ? -1 : 1,
       ArrowLeft: rtl ? 1 : -1,
+      ...(colonnes > 0 ? { ArrowDown: colonnes, ArrowUp: -colonnes } : {}),
     }
     let suivant: number | null = null
     if (event.key in pas) suivant = level + (pas[event.key] ?? 0)
@@ -139,10 +150,33 @@ export function EchelleDesAdversaires({
         {/* Le gestionnaire de clavier est posé sur un conteneur sans rôle :
             `Defilement` ne transmet pas d'évènement, et les cartes restent
             des boutons ordinaires, chacun avec `aria-pressed`. */}
-        <div className="flex gap-2" onKeyDown={auClavier}>
+        {/* Une rangée qui défile au doigt ; sur grand écran, la place ne
+            manque pas et les vingt échelons se rangent les uns sous les
+            autres, autant par ligne que la colonne en tient sans écraser les
+            portraits. Les cartes y deviennent horizontales et portent le nom
+            du personnage : vingt vignettes de trente pixels, alignées sans
+            nom, ne se lisaient pas. On les voit toutes d'un coup, et
+            `Defilement` n'affiche plus ses flèches puisque rien ne déborde. */}
+        <div
+          className="flex gap-2 lg:grid lg:w-full lg:grid-cols-4 lg:gap-1.5"
+          onKeyDown={auClavier}
+        >
           {BOT_LEVELS.map((echelon) => {
             const choisi = echelon.level === level
+            const battu = battus.includes(echelon.level)
             const personnalite = BOT_PERSONALITIES[echelon.personality]
+            /*
+              Le fond dit à qui appartient la carte, et combien elle pèse dans
+              sa bande. Chaque personnage tient des niveaux d'affilée ; sa
+              teinte — celle de la matière de sa sculpture — colore ses cartes,
+              plus soutenue à mesure qu'on monte dans la bande. Les groupes se
+              lisent d'un coup d'œil, et la marche d'un échelon au suivant
+              aussi.
+            */
+            const teinte = TEINTES_ADVERSAIRES[echelon.personality]
+            const bande = niveauxDe(echelon.personality)
+            const rang = bande.findIndex((niveau) => niveau.level === echelon.level)
+            const force = 12 + Math.round((16 * rang) / Math.max(1, bande.length - 1))
             return (
               <button
                 key={echelon.level}
@@ -153,26 +187,51 @@ export function EchelleDesAdversaires({
                 type="button"
                 aria-pressed={choisi}
                 tabIndex={choisi ? 0 : -1}
-                aria-label={t('computer.ladderCard', {
-                  n: echelon.level,
-                  nom: tCoeur(t, personnalite.name),
-                  elo: echelon.elo,
-                })}
+                aria-label={
+                  t('computer.ladderCard', {
+                    n: echelon.level,
+                    nom: tCoeur(t, personnalite.name),
+                    elo: echelon.elo,
+                  }) + (battu ? `, ${t('computer.ladderBeaten')}` : '')
+                }
                 onClick={() => onChoisir(echelon.level)}
                 className={clsx(
-                  'flex w-[3.9rem] shrink-0 snap-start flex-col items-center gap-1 rounded-[var(--radius-sm)] border px-0 pb-1.5 pt-2 transition-colors',
-                  choisi
-                    ? 'border-accent bg-accent/15 ring-1 ring-accent'
-                    : 'border-line bg-surface hover:bg-surface-hover',
+                  // La même carte partout : le niveau d'abord — c'est ce qu'on
+                  // choisit —, puis le personnage et son Elo. Au doigt, elles
+                  // défilent sur une rangée ; sur grand écran, quatre
+                  // colonnes, la forme des boutons de cadence voisins.
+                  'relative flex min-h-11 w-[8.75rem] shrink-0 snap-start items-center gap-2 rounded-[var(--radius-sm)] border px-2 py-1.5 text-start transition-colors',
+                  'lg:w-auto lg:snap-none',
+                  choisi ? 'border-accent ring-1 ring-accent' : 'hover:brightness-[1.03]',
                 )}
+                style={{
+                  background: `linear-gradient(135deg, color-mix(in oklab, ${teinte} ${force + 6}%, var(--surface)), color-mix(in oklab, ${teinte} ${Math.max(4, force - 6)}%, var(--surface)))`,
+                  ...(choisi
+                    ? {}
+                    : { borderColor: `color-mix(in oklab, ${teinte} 38%, var(--border))` }),
+                }}
               >
-                <PortraitAdversaire personality={personnalite} size={36} />
-                <span className="text-[12px] font-bold tabular-nums leading-none">
-                  {echelon.level}
+                <PortraitAdversaire personality={personnalite} size={30} />
+                <span className="flex min-w-0 flex-col gap-0.5">
+                  <span className="text-[13px] font-bold leading-tight tabular-nums">
+                    {t('computer.ladderLevel', { n: echelon.level })}
+                  </span>
+                  <span className="truncate text-[11px] leading-tight tabular-nums text-faint">
+                    {t('computer.ladderNameElo', {
+                      nom: tCoeur(t, personnalite.name),
+                      elo: echelon.elo.toLocaleString(bcp47),
+                    })}
+                  </span>
                 </span>
-                <span className="text-[11px] tabular-nums leading-none text-faint">
-                  {echelon.elo.toLocaleString(bcp47)}
-                </span>
+                {/* Déjà battu sans aide : une coche, dans la couleur du bon coup. */}
+                {battu && (
+                  <span
+                    className="absolute -end-1 -top-1 grid h-[1.1rem] w-[1.1rem] place-items-center rounded-full bg-[var(--q-best)] text-white shadow-sm"
+                    aria-hidden
+                  >
+                    <Check size={11} strokeWidth={3.2} />
+                  </span>
+                )}
               </button>
             )
           })}

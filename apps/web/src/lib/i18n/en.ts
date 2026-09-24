@@ -341,6 +341,9 @@ export const en: Dictionary = {
     opponentStrength: '≈ {elo} Elo · level {n} of {total}',
     ladderLabel: 'Choose the opponent’s level, from 1 to {n}',
     ladderCard: 'Level {n}, {nom}, about {elo} Elo',
+    ladderLevel: 'Level {n}',
+    ladderNameElo: '{nom} · ≈ {elo}',
+    ladderBeaten: 'already beaten',
     ladderTier: 'Tier “{palier}”. Not sure of your level?',
     ladderTest: 'The level test will tell you',
 
