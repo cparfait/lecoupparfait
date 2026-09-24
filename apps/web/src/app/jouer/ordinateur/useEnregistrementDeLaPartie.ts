@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
-import type { MutableRefObject } from 'react'
+import type { RefObject } from 'react'
 import type { Color } from 'chess.js'
 import {
   remainingAt,
@@ -108,7 +108,7 @@ export function useArchivageDeFin({
   tournoi: boolean
   classee: boolean
   aideUtilisee: AideDuMoteur | null
-  aideRef: MutableRefObject<AideDuMoteur | null>
+  aideRef: RefObject<AideDuMoteur | null>
   playerColor: Color
   personality: BotPersonality
   level: number

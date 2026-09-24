@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
+import type { Dispatch, RefObject, SetStateAction } from 'react'
 import type { Chess, Color } from 'chess.js'
 import {
   flaggedColor,
@@ -56,7 +56,7 @@ export function useChuteDuDrapeau({
   startFen: string | null
   chess: Chess
   marquer: ReturnType<typeof useQuotidien>['marquer']
-  aideRef: MutableRefObject<AideDuMoteur | null>
+  aideRef: RefObject<AideDuMoteur | null>
 }): void {
   /*
     ── Chute du drapeau ─────────────────────────────────────────────────────
