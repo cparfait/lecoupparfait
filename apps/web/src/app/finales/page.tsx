@@ -30,6 +30,7 @@ import type { Color } from 'chess.js'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, Card, Chip, EmptyState, Spinner, TitreDePage } from '@/components/ui/index.tsx'
 import { BoutonEcouter } from '@/components/ui/BoutonEcouter.tsx'
+import { IconeFinale } from '@/components/ui/IconeFinale.tsx'
 import {
   familyProgress,
   loadEndgameProgress,
@@ -176,12 +177,17 @@ function FamilyList({
               className="animate-slide-up glass group flex w-full items-start gap-3 p-4 text-left transition-transform hover:-translate-y-0.5"
               style={{ animationDelay: `${index * 50}ms` }}
             >
+              {/* La teinte de la rubrique, pas le violet : il est réservé à
+                  l'action. */}
               <span
-                className="grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius)] text-xl"
-                style={{ background: 'color-mix(in oklab, var(--accent) 14%, transparent)' }}
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius)]"
+                style={{
+                  background: 'color-mix(in oklab, var(--rub-apprendre) 14%, transparent)',
+                  color: 'var(--rub-apprendre)',
+                }}
                 aria-hidden
               >
-                {family.icon}
+                <IconeFinale famille={family.id} />
               </span>
 
               <span className="min-w-0 flex-1">
@@ -263,7 +269,11 @@ function GroupList({
       </button>
 
       <h1 className="flex items-center gap-2.5 font-display text-2xl font-bold tracking-tight">
-        <span aria-hidden>{family.icon}</span>
+        <IconeFinale
+          famille={family.id}
+          size={22}
+          className="shrink-0 text-[var(--rub-apprendre)]"
+        />
         {family.nameFr}
       </h1>
       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">{family.blurb}</p>
