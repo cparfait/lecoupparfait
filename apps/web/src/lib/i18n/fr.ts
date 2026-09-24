@@ -609,6 +609,45 @@ export const fr = {
     scale:
       'Une leçon vaut {lecon}, un puzzle de carrière {puzzle}, une victoire en duel {victoire}. Un chapitre terminé rapporte {chapitre}, plus {etoile} par étoile — et les étoiles se gagnent en réussissant {sansAide}.',
     noHelp: 'sans aide',
+    // D'où viennent les points, une ligne par `LigneXp['cle']`, accordée au
+    // nombre : `…One` au singulier.
+    xpLines: {
+      lecon: 'leçons suivies',
+      leconOne: 'leçon suivie',
+      puzzle: 'puzzles réussis',
+      puzzleOne: 'puzzle réussi',
+      victoire: 'victoires en duel',
+      victoireOne: 'victoire en duel',
+      chapitre: 'chapitres terminés',
+      chapitreOne: 'chapitre terminé',
+      etoile: 'étoiles décrochées',
+      etoileOne: 'étoile décrochée',
+    },
+    // Les temps d'un chapitre, un par `Etape['cle']`.
+    steps: {
+      lecon: 'La leçon',
+      leconDetail: 'Deux à cinq minutes, sur l’échiquier',
+      puzzles: 'L’entraînement',
+      puzzlesDetail: '{n} puzzles du thème',
+      puzzlesDetailOne: '{n} puzzle du thème',
+      duel: 'Le duel',
+      duelDetail: '{n} victoires à décrocher',
+      duelDetailOne: '{n} victoire à décrocher',
+      bilan: 'Le bilan',
+    },
+    // Le bouton de la prochaine étape.
+    nextLesson: 'Commencer la leçon',
+    nextPuzzles: 'Passer aux puzzles',
+    morePuzzles: 'Encore {n} puzzles',
+    morePuzzlesOne: 'Encore {n} puzzle',
+    nextDuel: 'Affronter l’adversaire',
+    moreDuel: 'Encore une victoire',
+    pointsTowards: '{acquis} / {requis} points avant {rang}',
+    maxRank: 'Rang maximum atteint',
+    pointsWord: 'points',
+    newRank: 'Nouveau rang : {rang}',
+    starsOutOf3: '{n} étoiles sur 3',
+    starsOutOf3One: '{n} étoile sur 3',
   },
 
   moves: {
@@ -3069,6 +3108,16 @@ export const fr = {
     confirme: 'Confirmé',
     fort: 'Fort',
     expert: 'Expert',
+  },
+  // Les rangs de carrière, un par entrée de `RANGS` : nommés d'après la
+  // mascotte, une cavale.
+  rangs: {
+    poulain: 'Poulain',
+    cavale: 'Cavale',
+    eclaireur: 'Éclaireur',
+    francTireur: 'Franc-tireur',
+    stratege: 'Stratège',
+    maitre: 'Maître de la Cavale',
   },
   axes: {
     capture: {

@@ -42,6 +42,7 @@ import { Button, ButtonLink, Card, Skeleton } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { Celebration, type Gains } from '@/components/carriere/Celebration.tsx'
 import { recommencerCarriere, useCarriere } from '@/lib/carriere/useCarriere.ts'
+import { detailDEtape, libelleDeSuite, titreDEtape } from '@/lib/carriere/textes.ts'
 import { useT } from '@/lib/i18n/index.tsx'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
@@ -224,16 +225,22 @@ function Bandeau({
           {rang.rang.emoji}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate font-display text-lg font-bold leading-tight">{rang.rang.nom}</p>
+          <p className="truncate font-display text-lg font-bold leading-tight">
+            {tCoeur(t, rang.rang.nom)}
+          </p>
           <p className="text-[12px] text-faint">
             {rang.suivant
-              ? `${rang.acquis} / ${rang.requis} points avant ${rang.suivant.nom}`
-              : 'Rang maximum atteint'}
+              ? t('career2.pointsTowards', {
+                  acquis: rang.acquis,
+                  requis: rang.requis ?? 0,
+                  rang: tCoeur(t, rang.suivant.nom),
+                })
+              : t('career2.maxRank')}
           </p>
         </div>
         <div className="shrink-0 text-right">
           <p className="font-display text-xl font-bold tabular-nums text-accent">{affiche}</p>
-          <p className="text-[12px] text-faint">points</p>
+          <p className="text-[12px] text-faint">{t('career2.pointsWord')}</p>
         </div>
       </div>
 
@@ -516,8 +523,12 @@ function CarteCourante({
                 {etape.termine ? '✓' : etape.fait}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[14px] font-medium">{etape.titre}</span>
-                <span className="block truncate text-[12px] text-faint">{etape.detail}</span>
+                <span className="block truncate text-[14px] font-medium">
+                  {titreDEtape(t, etape)}
+                </span>
+                <span className="block truncate text-[12px] text-faint">
+                  {detailDEtape(t, etape)}
+                </span>
               </span>
               {etape.total > 1 && (
                 <span className="shrink-0 text-[12px] tabular-nums text-faint">
@@ -545,7 +556,7 @@ function CarteCourante({
         {suite ? (
           <Link href={suite.lien} className="mt-4 block">
             <Button variant="primary" size="lg" fullWidth icon={<Sparkles size={16} />}>
-              {suite.libelle}
+              {libelleDeSuite(t, suite, chapitre, progression)}
             </Button>
           </Link>
         ) : (

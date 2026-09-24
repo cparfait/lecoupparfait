@@ -230,15 +230,15 @@ const xpMinimale = xpParfaite - CHAPITRES.length * XP.etoile * 2
 check(
   'une carrière sans faute atteint le dernier rang',
   rangPour(xpParfaite).suivant === null,
-  `${xpParfaite} points, rang « ${rangPour(xpParfaite).rang.nom} »`,
+  `${xpParfaite} points, rang « ${rangPour(xpParfaite).rang.id} »`,
 )
 check(
   'une carrière à une étoile ne l’atteint pas',
   rangPour(xpMinimale).suivant !== null,
-  `${xpMinimale} points, rang « ${rangPour(xpMinimale).rang.nom} »`,
+  `${xpMinimale} points, rang « ${rangPour(xpMinimale).rang.id} »`,
 )
-console.log(`  ✓ carrière sans faute : ${xpParfaite} points → ${rangPour(xpParfaite).rang.nom}`)
-console.log(`  ✓ carrière minimale  : ${xpMinimale} points → ${rangPour(xpMinimale).rang.nom}`)
+console.log(`  ✓ carrière sans faute : ${xpParfaite} points → ${rangPour(xpParfaite).rang.id}`)
+console.log(`  ✓ carrière minimale  : ${xpMinimale} points → ${rangPour(xpMinimale).rang.id}`)
 
 check('la barre est pleine au dernier rang', rangPour(99999).fraction === 1)
 check('la barre part de zéro', rangPour(0).fraction === 0)

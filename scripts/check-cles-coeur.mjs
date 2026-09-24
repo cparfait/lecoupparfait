@@ -23,7 +23,7 @@ const { fr } = await import('../apps/web/src/lib/i18n/fr.ts')
 const coeur = await import('../packages/core/src/index.ts')
 
 /** Les racines du dictionnaire que le cœur alimente. */
-const RACINES = ['motifs', 'qualites', 'bots', 'axes', 'niveaux']
+const RACINES = ['motifs', 'qualites', 'bots', 'axes', 'niveaux', 'rangs']
 
 function resoudre(chemin) {
   let courant = fr
@@ -68,7 +68,7 @@ function recolter(valeur) {
   }
 }
 
-for (const nom of ['BOT_PERSONALITIES', 'BOT_LEVELS', 'QUALITY_STYLES']) {
+for (const nom of ['BOT_PERSONALITIES', 'BOT_LEVELS', 'QUALITY_STYLES', 'RANGS']) {
   recolter(coeur[nom])
 }
 // Les motifs ne sont pas exportés en table : on passe par le glossaire, qui les

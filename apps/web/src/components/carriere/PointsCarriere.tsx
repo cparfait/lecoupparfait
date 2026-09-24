@@ -32,6 +32,8 @@ import { Menu } from '@/components/ui/Menu.tsx'
 import { classesChip } from '@/components/ui/index.tsx'
 import { XP_TOTAL } from '@/lib/daily/quetes.ts'
 import { avecElements, useT } from '@/lib/i18n/index.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
+import { libelleDeLigneXp } from '@/lib/carriere/textes.ts'
 
 export function PointsCarriere({ progression }: { progression: Progression }) {
   const t = useT()
@@ -50,7 +52,7 @@ export function PointsCarriere({ progression }: { progression: Progression }) {
       boutonClassName={classesChip('accent', 'transition-colors hover:brightness-125')}
       declencheur={(ouvert) => (
         <>
-          <span aria-hidden>{rang.rang.emoji}</span> {rang.rang.nom} · {progression.xp}{' '}
+          <span aria-hidden>{rang.rang.emoji}</span> {tCoeur(t, rang.rang.nom)} · {progression.xp}{' '}
           {t('career2.pointsSuffix')}
           <ChevronDown
             size={11}
@@ -87,13 +89,13 @@ function PanneauPoints({ progression }: { progression: Progression }) {
       <div className="mt-2 px-1">
         <div className="flex items-baseline justify-between gap-2 text-[12px]">
           <span className="font-semibold text-accent">
-            <span aria-hidden>{rang.rang.emoji}</span> {rang.rang.nom}
+            <span aria-hidden>{rang.rang.emoji}</span> {tCoeur(t, rang.rang.nom)}
           </span>
           {rang.suivant && (
             <span className="tabular-nums text-faint">
               {t('career2.pointsBefore', {
                 n: rang.suivant.seuil - progression.xp,
-                rang: rang.suivant.nom,
+                rang: tCoeur(t, rang.suivant.nom),
               })}
             </span>
           )}
@@ -124,7 +126,7 @@ function PanneauPoints({ progression }: { progression: Progression }) {
             <li key={ligne.cle} className="flex items-baseline gap-2 px-1 text-[12px]">
               <span className="min-w-0 flex-1 truncate text-muted">
                 <strong className="font-semibold tabular-nums text-ink">{ligne.nombre}</strong>{' '}
-                {ligne.libelle}
+                {libelleDeLigneXp(t, ligne)}
                 <span className="text-faint"> × {ligne.unitaire}</span>
               </span>
               <span className="shrink-0 tabular-nums font-semibold text-ink">+{ligne.points}</span>

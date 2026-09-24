@@ -23,7 +23,7 @@
  * vérifie que chaque leçon et chaque thème référencés existent vraiment.
  */
 
-import type { BotPersonalityId } from './types.ts'
+import type { BotPersonalityId, CleDeTexte } from './types.ts'
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Les chapitres
@@ -307,7 +307,14 @@ export const XP = {
 
 export interface Rang {
   seuil: number
-  nom: string
+  id: string
+  /**
+   * Le nom, en clé de dictionnaire (`rangs.*`).
+   *
+   * Il était écrit ici en français — « Éclaireur » — et s'affichait tel quel
+   * dans toutes les langues. `check-cles-coeur` vérifie que chaque clé existe.
+   */
+  nom: CleDeTexte
   emoji: string
 }
 
@@ -327,12 +334,12 @@ export interface Rang {
  * désormais à chaque exécution des tests.
  */
 export const RANGS: readonly Rang[] = [
-  { seuil: 0, nom: 'Poulain', emoji: '🐣' },
-  { seuil: 800, nom: 'Cavale', emoji: '🐎' },
-  { seuil: 2000, nom: 'Éclaireur', emoji: '🏇' },
-  { seuil: 4000, nom: 'Franc-tireur', emoji: '⚔️' },
-  { seuil: 6500, nom: 'Stratège', emoji: '🧠' },
-  { seuil: 9500, nom: 'Maître de la Cavale', emoji: '👑' },
+  { seuil: 0, id: 'poulain', nom: 'rangs.poulain', emoji: '🐣' },
+  { seuil: 800, id: 'cavale', nom: 'rangs.cavale', emoji: '🐎' },
+  { seuil: 2000, id: 'eclaireur', nom: 'rangs.eclaireur', emoji: '🏇' },
+  { seuil: 4000, id: 'francTireur', nom: 'rangs.francTireur', emoji: '⚔️' },
+  { seuil: 6500, id: 'stratege', nom: 'rangs.stratege', emoji: '🧠' },
+  { seuil: 9500, id: 'maitre', nom: 'rangs.maitre', emoji: '👑' },
 ] as const
 
 export interface EtatDuRang {
@@ -368,9 +375,11 @@ export function rangPour(xp: number): EtatDuRang {
 
 /** Une ligne du détail des points : d'où viennent tel nombre de points. */
 export interface LigneXp {
+  /**
+   * Ce qui a été fait. L'écran en tire le libellé, accordé au nombre, dans son
+   * dictionnaire : le cœur l'écrivait ici en français.
+   */
   cle: 'lecon' | 'puzzle' | 'victoire' | 'chapitre' | 'etoile'
-  /** Ce qui a été fait, au pluriel accordé. */
-  libelle: string
   nombre: number
   /** Ce que vaut une unité. */
   unitaire: number
@@ -403,35 +412,30 @@ export function detailXp(progression: Progression): { lignes: LigneXp[]; total: 
   const brut: LigneXp[] = [
     {
       cle: 'lecon',
-      libelle: lecons > 1 ? 'leçons suivies' : 'leçon suivie',
       nombre: lecons,
       unitaire: XP.lecon,
       points: lecons * XP.lecon,
     },
     {
       cle: 'puzzle',
-      libelle: puzzles > 1 ? 'puzzles réussis' : 'puzzle réussi',
       nombre: puzzles,
       unitaire: XP.puzzle,
       points: puzzles * XP.puzzle,
     },
     {
       cle: 'victoire',
-      libelle: victoires > 1 ? 'victoires en duel' : 'victoire en duel',
       nombre: victoires,
       unitaire: XP.victoire,
       points: victoires * XP.victoire,
     },
     {
       cle: 'chapitre',
-      libelle: chapitres > 1 ? 'chapitres terminés' : 'chapitre terminé',
       nombre: chapitres,
       unitaire: XP.chapitre,
       points: chapitres * XP.chapitre,
     },
     {
       cle: 'etoile',
-      libelle: etoiles > 1 ? 'étoiles décrochées' : 'étoile décrochée',
       nombre: etoiles,
       unitaire: XP.etoile,
       points: etoiles * XP.etoile,
@@ -559,9 +563,11 @@ export const PROGRESSION_INITIALE: Progression = {
 
 /** Les quatre temps d'un chapitre, et où l'on en est. */
 export interface Etape {
+  /**
+   * Le temps du chapitre. Son titre et sa phrase viennent du dictionnaire de
+   * l'écran, qui les accorde à `total` : le cœur les écrivait en français.
+   */
   cle: 'lecon' | 'puzzles' | 'duel' | 'bilan'
-  titre: string
-  detail: string
   fait: number
   total: number
   termine: boolean
@@ -574,24 +580,18 @@ export function etapesDe(chapitre: Chapitre, progression: Progression): Etape[] 
   return [
     {
       cle: 'lecon',
-      titre: 'La leçon',
-      detail: 'Deux à cinq minutes, sur l’échiquier',
       fait: lecon ? 1 : 0,
       total: 1,
       termine: lecon,
     },
     {
       cle: 'puzzles',
-      titre: 'L’entraînement',
-      detail: `${chapitre.puzzles} puzzles du thème`,
       fait: puzzles,
       total: chapitre.puzzles,
       termine: puzzles >= chapitre.puzzles,
     },
     {
       cle: 'duel',
-      titre: 'Le duel',
-      detail: `${chapitre.victoires} victoire${chapitre.victoires > 1 ? 's' : ''} à décrocher`,
       fait: duels,
       total: chapitre.victoires,
       termine: duels >= chapitre.victoires,
@@ -617,22 +617,16 @@ export function chapitreAcheve(chapitre: Chapitre, progression: Progression): bo
 export function prochaineEtape(
   chapitre: Chapitre,
   progression: Progression,
-): { cle: Etape['cle']; libelle: string; lien: string } | null {
+): { cle: Etape['cle']; lien: string } | null {
   if (!progression.lessonDone) {
     return {
       cle: 'lecon',
-      libelle: 'Commencer la leçon',
       lien: `/apprendre/${chapitre.lecon}?carriere=${chapitre.numero}`,
     }
   }
   if (progression.puzzlesDone < chapitre.puzzles) {
-    const reste = chapitre.puzzles - progression.puzzlesDone
     return {
       cle: 'puzzles',
-      libelle:
-        reste === chapitre.puzzles
-          ? 'Passer aux puzzles'
-          : `Encore ${reste} puzzle${reste > 1 ? 's' : ''}`,
       /*
         La cote du chapitre voyage avec le thème.
 
@@ -654,7 +648,6 @@ export function prochaineEtape(
   if (progression.winsInChapter < chapitre.victoires) {
     return {
       cle: 'duel',
-      libelle: progression.winsInChapter === 0 ? 'Affronter l’adversaire' : 'Encore une victoire',
       lien: `/jouer/ordinateur?carriere=${chapitre.numero}`,
     }
   }

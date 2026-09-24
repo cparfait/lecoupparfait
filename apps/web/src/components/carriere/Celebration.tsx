@@ -20,6 +20,7 @@ import clsx from 'clsx'
 import { HAUTS_FAITS, rangPour } from '@coupparfait/core'
 import { Button } from '@/components/ui/index.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
+import { tCoeur } from '@/lib/i18n/resoudre.ts'
 
 export interface Gains {
   xp: number
@@ -92,7 +93,7 @@ export function Celebration({
 
   const rang = rangPour(xpTotal)
   const rangPrecedent = rangPour(Math.max(0, xpTotal - gains.xp))
-  const monteEnRang = rang.rang.nom !== rangPrecedent.rang.nom
+  const monteEnRang = rang.rang.id !== rangPrecedent.rang.id
 
   const badges = gains.badges
     .map((id) => HAUTS_FAITS.find((h) => h.id === id))
@@ -140,7 +141,9 @@ export function Celebration({
         {gains.etoiles > 0 && (
           <div
             className="mt-4 flex justify-center gap-2"
-            aria-label={`${gains.etoiles} étoiles sur 3`}
+            aria-label={t(gains.etoiles > 1 ? 'career2.starsOutOf3' : 'career2.starsOutOf3One', {
+              n: gains.etoiles,
+            })}
           >
             {[1, 2, 3].map((rang) => (
               <span
@@ -162,14 +165,14 @@ export function Celebration({
         {gains.xp > 0 && (
           <p className="mt-4 font-display text-3xl font-bold tabular-nums text-accent">
             +{gains.xp}
-            <span className="ml-1 text-sm font-semibold text-muted">points</span>
+            <span className="ml-1 text-sm font-semibold text-muted">{t('career2.pointsWord')}</span>
           </p>
         )}
 
         {monteEnRang && (
           <p className="mt-3 rounded-[var(--radius-sm)] border border-accent/40 bg-[color-mix(in_oklab,var(--accent)_12%,transparent)] px-3 py-2 text-sm font-semibold">
             <span className="mr-1.5 text-lg">{rang.rang.emoji}</span>
-            Nouveau rang : {rang.rang.nom}
+            {t('career2.newRank', { rang: tCoeur(t, rang.rang.nom) })}
           </p>
         )}
 

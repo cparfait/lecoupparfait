@@ -64,6 +64,7 @@ import { tCoeur } from '@/lib/i18n/resoudre.ts'
 import { Button, ButtonLink, Card, Chip, Skeleton } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { useCarriere } from '@/lib/carriere/useCarriere.ts'
+import { libelleDeSuite, titreDEtape } from '@/lib/carriere/textes.ts'
 import { listerAnalyses, type AnalyseEnregistree } from '@/lib/analysis/enregistrees.ts'
 import { chargerPartieEnCours, type PartieEnCours } from '@/lib/game/partieEnCours.ts'
 import { QUETES_HORS_DEFI, XP_TOTAL, xpPour } from '@/lib/daily/quetes.ts'
@@ -272,17 +273,30 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
         total: XP_TOTAL,
       },
       carriere:
-        carriereEnCours && chapitre
+        carriereEnCours && chapitre && progression
           ? {
               chapitre: chapitre.titre,
               numero: chapitre.numero,
-              libelle: suite?.libelle ?? t('homeIn.seeTheMap'),
+              libelle: suite
+                ? libelleDeSuite(t, suite, chapitre, progression)
+                : t('homeIn.seeTheMap'),
               lien: suite?.lien ?? '/carriere',
             }
           : null,
     }
     return prochainesChoses(etat, t)
-  }, [enDirect, correspondances, reprise, defiFait, journee, carriereEnCours, chapitre, suite, t])
+  }, [
+    enDirect,
+    correspondances,
+    reprise,
+    defiFait,
+    journee,
+    carriereEnCours,
+    chapitre,
+    progression,
+    suite,
+    t,
+  ])
 
   // Ce qui a quelqu'un à l'autre bout, ou une partie qui attend : la seule
   // chose qui passe au-dessus de la journée.
@@ -445,7 +459,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                     >
                       {etape.termine ? '✓' : ''}
                     </span>
-                    <span className="min-w-0 flex-1 truncate">{etape.titre}</span>
+                    <span className="min-w-0 flex-1 truncate">{titreDEtape(t, etape)}</span>
                     {etape.total > 1 && (
                       <span className="shrink-0 tabular-nums text-[12px] text-faint">
                         {etape.fait} / {etape.total}
@@ -466,7 +480,7 @@ export function AccueilConnecte({ pseudo }: { pseudo: string }) {
                 className="mt-4"
                 icon={<ArrowRight size={15} />}
               >
-                {suite?.libelle ?? t('homeIn.seeTheMap')}
+                {suite ? libelleDeSuite(t, suite, chapitre, progression) : t('homeIn.seeTheMap')}
               </ButtonLink>
               {suite && (
                 <Link
