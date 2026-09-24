@@ -363,8 +363,17 @@ Poussée sur `main` (`8790448..3699b5c`), CI verte.
   visiteur francophone).
 - **Notifications et messages du salon** dans la langue du destinataire.
 
-Reste ouvert : **N4** (échelons vers 450 et 800 — étalonnage avec Stockfish),
-**L3** (coups du bot vérifiés par le serveur — changement d'architecture),
+Reste ouvert : **L3** (coups du bot vérifiés par le serveur — changement d'architecture),
 **L12** (`useFetchJson` partout), la structure de pions et le plan dans les
 leçons, et la vérification à l'écran de l'accueil connecté, du panneau du
 coach et de « Mes erreurs à revoir » avec une vraie base.
+
+### Échelons intermédiaires — 24 septembre
+
+**N4 fait.** Deux échelons s'intercalent sous 1000 : Mirage à 430 et Éclair à
+770, mesurés par trente parties par couple (voir l'en-tête de `LEVEL_TABLE`).
+L'échelle passe à 20 niveaux ; migration `0015` pour les rangs stockés, à
+appliquer au déploiement. La carrière en profite : ses douze chapitres
+montent désormais strictement de 100 à 1850, et le chapitre 12 ne garde plus
+la force du 11 — la décision du 24 septembre sur ce point est dépassée.
+`check-elo` vérifie que les textes annoncent le bon nombre de niveaux.
