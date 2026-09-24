@@ -69,6 +69,7 @@ import type { PlayedMove } from '@/lib/game/useChessGame.ts'
 import type { Arrow } from '@/components/board/boardKit.ts'
 import { ArrowLegend, LEGEND, legendFor, type LegendItem } from '@/components/board/ArrowLegend.tsx'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
+import { VoiceQuickToggle } from '@/components/layout/VoiceQuickToggle.tsx'
 import type { Traducteur } from '@/lib/i18n/resoudre.ts'
 
 /** Une option qu'on avait, avec ce qu'elle valait. */
@@ -1076,6 +1077,10 @@ function PanneauCompact({
             <RotateCcw size={18} aria-hidden />
           </button>
         )}
+        {/* Couper la voix sans quitter la partie : le panneau complet a son
+            bouton, et le compact le perdait — il fallait éteindre tout le mode
+            commenté pour avoir le silence. */}
+        <VoiceQuickToggle className="-my-2 shrink-0" />
       </div>
 
       {stale && commentary && onReview && (
