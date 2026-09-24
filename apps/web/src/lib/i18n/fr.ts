@@ -2743,6 +2743,12 @@ export const fr = {
     readOnly: '. Lecture seule : tu ne peux pas jouer à sa place.',
   },
 
+  /** Les phrases d'en-tête des pages qui n'en avaient pas (`TitreDePage`). */
+  entetes: {
+    tournois:
+      'Seul contre l’ordinateur, tout de suite, ou dans une arène avec ceux qui sont connectés.',
+  },
+
   tools: {
     clockBlurb:
       'Deux temps, un incrément, on tape son côté après avoir joué. Branchée sur un échiquier électronique, elle note la partie.',

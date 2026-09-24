@@ -26,7 +26,7 @@ import { Clock, Flag, Mailbox, Plus } from 'lucide-react'
 import clsx from 'clsx'
 import { useT } from '@/lib/i18n/index.tsx'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
-import { Button, Card, EmptyState, SectionTitle, Spinner } from '@/components/ui/index.tsx'
+import { Button, Card, EmptyState, Spinner, TitreDePage } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 
 interface Game {
@@ -136,7 +136,7 @@ export default function CorrespondencePage() {
 
   return (
     <div className="page">
-      <SectionTitle hint={t('correspondence.hint')}>{t('correspondence.title')}</SectionTitle>
+      <TitreDePage intro={t('correspondence.hint')}>{t('correspondence.title')}</TitreDePage>
 
       <div className="grid gap-3 lg:grid-cols-[280px_minmax(0,1fr)]">
         {/* ── Parties et nouvelle partie ────────────────────────────── */}

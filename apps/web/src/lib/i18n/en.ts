@@ -2687,6 +2687,11 @@ export const en: Dictionary = {
     readOnly: '. Read only: you cannot play in their place.',
   },
 
+  /** Header sentences for pages that had none (`TitreDePage`). */
+  entetes: {
+    tournois: 'Alone against the computer, right away, or in an arena with whoever is online.',
+  },
+
   tools: {
     clockBlurb:
       'Two clocks, an increment, each player taps their side after moving. Connected to an electronic board, it writes the game down.',

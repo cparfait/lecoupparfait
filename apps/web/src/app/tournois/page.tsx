@@ -13,7 +13,15 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Swords, Timer, Users } from 'lucide-react'
 import clsx from 'clsx'
-import { Button, Card, EmptyState, Input, SectionTitle, Spinner } from '@/components/ui/index.tsx'
+import {
+  Button,
+  Card,
+  EmptyState,
+  Input,
+  SectionTitle,
+  Spinner,
+  TitreDePage,
+} from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { langue, useI18n, useT, type TranslationKey } from '@/lib/i18n/index.tsx'
@@ -99,6 +107,8 @@ export default function TournamentsPage() {
 
   return (
     <div className="page-etroite">
+      <TitreDePage intro={t('entetes.tournois')}>{t('nav.tournaments')}</TitreDePage>
+
       {/*
         Le tournoi solo en premier, et c'est délibéré.
         Une arène n'a d'intérêt qu'avec du monde connecté en même temps —

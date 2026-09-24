@@ -20,7 +20,7 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { BOT_LEVELS, BOT_PERSONALITIES } from '@coupparfait/core'
-import { Card } from '@/components/ui/index.tsx'
+import { Card, TitreDePage } from '@/components/ui/index.tsx'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
@@ -32,14 +32,11 @@ export default function GalerieAdversaires() {
 
   return (
     <div className="page">
-      <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
+      <TitreDePage intro={t('opponent.galleryIntro', { total: BOT_LEVELS.length })}>
         {t('play.opponentsTitle')}
-      </h1>
-      <p className="mt-3 max-w-2xl leading-relaxed text-muted max-lg:text-[14px]">
-        {t('opponent.galleryIntro', { total: BOT_LEVELS.length })}
-      </p>
+      </TitreDePage>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {Object.values(BOT_PERSONALITIES).map((personnalite) => (
           <Link key={personnalite.id} href={`/jouer/adversaires/${personnalite.id}`}>
             <Card className="group flex h-full gap-3 p-4 transition-colors hover:bg-surface-hover">

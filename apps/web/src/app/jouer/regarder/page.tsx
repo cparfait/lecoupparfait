@@ -43,9 +43,9 @@ import {
   Card,
   Chip,
   EmptyState,
-  SectionTitle,
   SegmentedControl,
   Spinner,
+  TitreDePage,
 } from '@/components/ui/index.tsx'
 import { PartiesDAmis, type PartieDAmi } from '@/components/social/PartiesDAmis.tsx'
 import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
@@ -197,7 +197,7 @@ export default function WatchPage() {
 
   return (
     <div className="page-etroite">
-      <SectionTitle hint={t('watch.intro')}>{t('bits.watch')}</SectionTitle>
+      <TitreDePage intro={t('watch.intro')}>{t('bits.watch')}</TitreDePage>
 
       {/* ── Les parties solo de ses amis ─────────────────────────────────
           Elles ne passent pas par le serveur temps réel — une partie contre

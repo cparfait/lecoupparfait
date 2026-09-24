@@ -41,7 +41,7 @@ import {
   type ChoixDeForce,
   type TournoiSolo,
 } from '@coupparfait/core'
-import { Button, Card, Chip, SectionTitle } from '@/components/ui/index.tsx'
+import { Button, Card, Chip, SectionTitle, TitreDePage } from '@/components/ui/index.tsx'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import {
@@ -138,14 +138,14 @@ function Composition({ onLancer }: { onLancer: (tournoi: TournoiSolo) => void })
 
   return (
     <>
-      <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
+      <TitreDePage
+        retour={{ href: '/tournois', label: t('nav.tournaments') }}
+        intro={t('arena.onlyHuman')}
+      >
         {t('arena.soloTitle')}
-      </h1>
-      <p className="mt-2 max-w-prose text-muted max-lg:text-[14px] max-lg:leading-relaxed">
-        {t('arena.onlyHuman')}
-      </p>
+      </TitreDePage>
 
-      <Card className="mt-6 p-5">
+      <Card className="p-5">
         <SectionTitle>{t('arena.howMany')}</SectionTitle>
         <div className="grid grid-cols-3 gap-1.5">
           {[3, 5, 7].map((n) => (
@@ -311,17 +311,19 @@ function Tableau({ tournoi, onAbandonner }: { tournoi: TournoiSolo; onAbandonner
 
   return (
     <>
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
-          {t('arena.yourTournament')}
-        </h1>
-        <Chip tone="accent">
-          {t('arena.roundOf', { n: Math.min(tournoi.ronde, rondes), total: rondes })}
-        </Chip>
-      </div>
+      <TitreDePage
+        retour={{ href: '/tournois', label: t('nav.tournaments') }}
+        action={
+          <Chip tone="accent">
+            {t('arena.roundOf', { n: Math.min(tournoi.ronde, rondes), total: rondes })}
+          </Chip>
+        }
+      >
+        {t('arena.yourTournament')}
+      </TitreDePage>
 
       {fini ? (
-        <Card className="mt-5 border-accent/50 p-5 text-center">
+        <Card className="border-accent/50 p-5 text-center">
           <p className="text-4xl">{moi?.rang === 1 ? '🏆' : moi?.rang === 2 ? '🥈' : '🎯'}</p>
           <p className="mt-2 font-display text-xl font-bold">
             {moi?.rang === 1

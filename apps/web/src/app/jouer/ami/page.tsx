@@ -48,7 +48,15 @@ import {
 } from 'lucide-react'
 import clsx from 'clsx'
 import { SPEED_LABELS, TIME_CONTROLS } from '@coupparfait/core'
-import { Button, Card, Chip, Input, SectionTitle, Spinner } from '@/components/ui/index.tsx'
+import {
+  Button,
+  Card,
+  Chip,
+  Input,
+  SectionTitle,
+  Spinner,
+  TitreDePage,
+} from '@/components/ui/index.tsx'
 import { localeDuContenu, useT } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 import { toast } from '@/components/ui/Toast.tsx'
@@ -311,19 +319,20 @@ export default function CreateFriendGamePage() {
 
   return (
     <div className="page-etroite">
-      <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
-        {t('friendGame.title')}
-      </h1>
       {/* La phrase suit la cadence choisie : les deux mécanismes n'ont ni les
           mêmes gestes ni les mêmes exigences, et annoncer « ton ami n'a besoin
           d'aucun compte » sur une correspondance serait faux. */}
-      <p className="mt-1.5 text-sm text-muted">
-        {jours === null
-          ? t('friendGame.introLive')
-          : jours > 1
-            ? t('friendGame.introDays', { jours })
-            : t('friendGame.introOneDay')}
-      </p>
+      <TitreDePage
+        intro={
+          jours === null
+            ? t('friendGame.introLive')
+            : jours > 1
+              ? t('friendGame.introDays', { jours })
+              : t('friendGame.introOneDay')
+        }
+      >
+        {t('friendGame.title')}
+      </TitreDePage>
 
       {recherche ? (
         <RechercheAdversaire cadenceInitiale={timeControlId} onRetour={() => setRecherche(false)} />
