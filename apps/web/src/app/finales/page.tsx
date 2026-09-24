@@ -28,7 +28,7 @@ import {
 import clsx from 'clsx'
 import type { Color } from 'chess.js'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
-import { Button, Card, Chip, EmptyState, Spinner } from '@/components/ui/index.tsx'
+import { Button, Card, Chip, EmptyState, Spinner, TitreDePage } from '@/components/ui/index.tsx'
 import { BoutonEcouter } from '@/components/ui/BoutonEcouter.tsx'
 import {
   familyProgress,
@@ -154,12 +154,9 @@ function FamilyList({
 
   return (
     <div className="page">
-      <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
+      <TitreDePage intro={t('endgames.intro', { n: total.toLocaleString(bcp47) })}>
         {t('endgames.title')}
-      </h1>
-      <p className="mt-2 max-w-2xl text-muted max-lg:text-[14px] max-lg:leading-relaxed">
-        {t('endgames.intro', { n: total.toLocaleString(bcp47) })}
-      </p>
+      </TitreDePage>
 
       {/* Deux colonnes, et des cartes plus basses.
           Huit familles empilées sur une seule colonne dans un conteneur large

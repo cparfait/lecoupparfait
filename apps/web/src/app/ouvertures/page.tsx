@@ -22,7 +22,7 @@ import { Chess } from 'chess.js'
 import type { PieceSymbol, Square } from 'chess.js'
 import { ECO_VOLUMES, toEpd } from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
-import { Button, Card, Chip, EmptyState, Spinner } from '@/components/ui/index.tsx'
+import { Button, Card, Chip, EmptyState, Spinner, TitreDePage } from '@/components/ui/index.tsx'
 import { CarteEnjeux } from '@/components/ouvertures/CarteEnjeux.tsx'
 import { ficheDeLaPartie, ficheEnjeux } from '@/lib/ouvertures/enjeux.ts'
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
@@ -290,27 +290,28 @@ export default function OpeningsPage() {
 
   return (
     <div className="etude mx-auto w-full max-w-[1400px] px-3 py-5 sm:px-5 lg:py-8">
-      <div className="mb-4">
-        <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
-          {t('rest.openingExplorer')}
-        </h1>
-        {/* Il fallait le dire : sans cette phrase, on attend que l'ordinateur
-            réponde et on croit l'échiquier cassé. Ce n'est pas une partie,
-            c'est un plateau d'étude où l'on joue les deux camps. */}
-        {/* En paysage sur téléphone, cette phrase coûterait trois rangées
-            d'échiquier ; elle reste partout ailleurs. */}
-        <p className="mt-1.5 text-sm text-muted paysage:hidden">
-          {t('openings.catalogued', { n: (book?.size ?? 0).toLocaleString(bcp47) })}{' '}
-          <strong className="font-semibold text-ink">{t('openings.bothColours')}</strong>{' '}
-          {t('openings.bothColoursAfter')}
-        </p>
-        {/* Le lien vers les fiches, ici et pas seulement dans le menu : c'est
-            en explorant qu'on se demande « oui, mais qu'est-ce que je cherche
-            avec ça ? », et la réponse est à un clic. */}
-        <Link href="/ouvertures/enjeux" className="lien mt-1.5 inline-block paysage:hidden">
-          {t('openings.stakesLink')}
-        </Link>
-      </div>
+      {/* Il fallait le dire : sans cette phrase, on attend que l'ordinateur
+          réponde et on croit l'échiquier cassé. Ce n'est pas une partie,
+          c'est un plateau d'étude où l'on joue les deux camps.
+
+          En paysage sur téléphone, elle coûterait trois rangées d'échiquier ;
+          elle reste partout ailleurs. Le lien vers les fiches la suit, ici et
+          pas seulement dans le menu : c'est en explorant qu'on se demande
+          « oui, mais qu'est-ce que je cherche avec ça ? ». */}
+      <TitreDePage
+        intro={
+          <span className="paysage:hidden">
+            {t('openings.catalogued', { n: (book?.size ?? 0).toLocaleString(bcp47) })}{' '}
+            <strong className="font-semibold text-ink">{t('openings.bothColours')}</strong>{' '}
+            {t('openings.bothColoursAfter')}
+            <Link href="/ouvertures/enjeux" className="lien mt-1.5 block w-fit">
+              {t('openings.stakesLink')}
+            </Link>
+          </span>
+        }
+      >
+        {t('rest.openingExplorer')}
+      </TitreDePage>
 
       <div className="etude-corps grid gap-4 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
         {/* ── Échiquier ────────────────────────────────────────────── */}

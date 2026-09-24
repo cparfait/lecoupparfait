@@ -35,7 +35,7 @@ import {
   overallProgress,
   type LessonProgress,
 } from '@/lib/lessons/index.ts'
-import { ButtonLink, Card, Chip } from '@/components/ui/index.tsx'
+import { ButtonLink, Card, Chip, TitreDePage } from '@/components/ui/index.tsx'
 import { CarteDestination } from '@/components/ui/CarteDestination.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
 import { useT } from '@/lib/i18n/index.tsx'
@@ -154,18 +154,14 @@ export default function LearnPage() {
 
   return (
     <div className="page">
-      <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
+      <TitreDePage
+        intro={t('learn.intro', {
+          lecons: CURRICULUM_STATS.lessons,
+          etapes: CURRICULUM_STATS.steps,
+        })}
+      >
         {t('learn.pageTitle')}
-      </h1>
-      {/* La consigne, en petit.
-
-          Elle occupait trois lignes en corps courant, juste sous un titre de
-          trente-six pixels : deux blocs de texte avant la moindre leçon, et la
-          progression repoussée d'autant. Elle se lit une fois, à la première
-          visite ; ensuite on vient reprendre un cours. */}
-      <p className="mt-1.5 max-w-2xl text-[14px] leading-relaxed text-muted">
-        {t('learn.intro', { lecons: CURRICULUM_STATS.lessons, etapes: CURRICULUM_STATS.steps })}
-      </p>
+      </TitreDePage>
 
       {/* ── Progression globale ────────────────────────────────────────
           Affichée même à zéro, et les cours se déplient dessous : c'est la

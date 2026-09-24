@@ -26,7 +26,7 @@ import {
   orderedSquares,
   squarePosition,
 } from '@/components/board/boardKit.ts'
-import { Button, Card, Chip, Toggle } from '@/components/ui/index.tsx'
+import { Button, Card, Chip, TitreDePage, Toggle } from '@/components/ui/index.tsx'
 import { playSound } from '@/lib/sound.ts'
 import { usePreferencesDe } from '@/lib/store/preferences.ts'
 import { useT } from '@/lib/i18n/index.tsx'
@@ -142,20 +142,16 @@ export default function VisionPage() {
 
   return (
     <div className="page">
-      {/* Sur téléphone, le titre est plus petit et la consigne disparaît pendant
-          la manche : chaque ligne gardée ici est prise sur l'échiquier, et la
-          consigne ne s'adresse qu'à celui qui n'a pas encore commencé. */}
-      <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
-        {t('nav.vision')}
-      </h1>
-      <p
-        className={clsx(
-          'mt-2 max-w-2xl text-muted max-lg:text-[14px]',
-          phase === 'enCours' && 'max-lg:hidden',
-        )}
+      {/* Sur téléphone, la consigne disparaît pendant la manche : chaque ligne
+          gardée ici est prise sur l'échiquier, et la consigne ne s'adresse
+          qu'à celui qui n'a pas encore commencé. */}
+      <TitreDePage
+        intro={
+          <span className={clsx(phase === 'enCours' && 'max-lg:hidden')}>{t('vision.intro')}</span>
+        }
       >
-        {t('vision.intro')}
-      </p>
+        {t('nav.vision')}
+      </TitreDePage>
 
       {/* ── L'ordre des blocs, et il n'est pas le même sur les deux écrans ──
           Sur grand écran, l'échiquier à gauche et le panneau à droite : on voit

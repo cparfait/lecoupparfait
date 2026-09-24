@@ -22,7 +22,7 @@ import { useMemo, useState } from 'react'
 import { Grid3x3, Search } from 'lucide-react'
 import clsx from 'clsx'
 import { motifGlossary } from '@coupparfait/core'
-import { Card, Chip } from '@/components/ui/index.tsx'
+import { Card, Chip, TitreDePage } from '@/components/ui/index.tsx'
 import { FAMILIES, TERMS, termesSynonymes } from '@/lib/glossaire.ts'
 import { POSITIONS_DU_GLOSSAIRE } from '@/lib/glossaire-positions.ts'
 import { BoiteTerme } from '@/components/glossaire/BoiteTerme.tsx'
@@ -264,12 +264,9 @@ export default function GlossaryPage() {
 
   return (
     <div className="page">
-      <h1 className="titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
+      <TitreDePage intro={t('nav.glossaryIntro', { n: entries.length, illustres })}>
         {t('nav.glossary')}
-      </h1>
-      <p className="mt-2 max-w-2xl text-muted max-lg:text-[14px] max-lg:leading-relaxed">
-        {t('nav.glossaryIntro', { n: entries.length, illustres })}
-      </p>
+      </TitreDePage>
 
       {/* ── Recherche ────────────────────────────────────────────────── */}
       <div className="relative mt-6">

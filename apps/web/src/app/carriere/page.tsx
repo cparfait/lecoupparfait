@@ -38,7 +38,7 @@ import {
   type Chapitre,
   type Progression,
 } from '@coupparfait/core'
-import { Button, ButtonLink, Card, Skeleton } from '@/components/ui/index.tsx'
+import { Button, ButtonLink, Card, Skeleton, TitreDePage } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { Celebration, type Gains } from '@/components/carriere/Celebration.tsx'
 import { recommencerCarriere, useCarriere } from '@/lib/carriere/useCarriere.ts'
@@ -52,13 +52,10 @@ export default function CarrierePage() {
 
   return (
     <div className="page-etroite">
-      <header className="mb-5">
-        <p className="text-[12px] font-semibold text-accent">{t('career.tag')}</p>
-        <h1 className="mt-1 titre-affiche text-[2.1rem] sm:text-[2.6rem] lg:text-[3rem]">
-          {t('career.title')}
-        </h1>
-        <p className="mt-2 max-w-prose text-sm text-muted">{t('career.intro')}</p>
-      </header>
+      {/* Le titre est le nom du mode, et non plus son slogan : la ligne de
+          rubrique a remplacé la petite étiquette violette qui le portait,
+          et « Douze chapitres, un chemin » ne disait pas où l'on était. */}
+      <TitreDePage intro={t('career.intro')}>{t('career.tag')}</TitreDePage>
 
       {progression === undefined ? (
         <div className="space-y-3">

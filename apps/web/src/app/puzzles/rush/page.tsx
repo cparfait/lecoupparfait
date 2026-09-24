@@ -24,7 +24,7 @@ import { Check, Flame, RotateCcw, Timer, X } from 'lucide-react'
 import clsx from 'clsx'
 import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
-import { Button, Card, SectionTitle, Spinner } from '@/components/ui/index.tsx'
+import { Button, Card, Spinner, TitreDePage } from '@/components/ui/index.tsx'
 import { playMoveFor, playSound } from '@/lib/sound.ts'
 
 interface Puzzle {
@@ -275,7 +275,7 @@ export default function RushPage() {
   if (phase === 'choix' || phase === 'chargement') {
     return (
       <div className="page-etroite">
-        <SectionTitle hint={t('rush.hint')}>{t('rush.title')}</SectionTitle>
+        <TitreDePage intro={t('rush.hint')}>{t('rush.title')}</TitreDePage>
 
         <div className="mt-4 space-y-2">
           {MODES.map((entry) => (
