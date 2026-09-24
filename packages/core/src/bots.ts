@@ -409,6 +409,18 @@ interface LevelSpec {
 
   Les rangs sont stockés : la migration `0015_intermediate_rungs` décale de un
   ce qui valait 5, et de deux tout ce qui valait 6 ou plus.
+
+  ── Les personnalités, par bandes ───────────────────────────────────────────
+
+  Elles étaient semées le long de l'échelle — Pion aux niveaux 1, 2 et 6,
+  Rempart à cinq endroits — et l'échelle, désormais montrée d'un bloc, se
+  lisait comme une mosaïque où « Pion » revenait après « Rempart ». Chacune
+  tient maintenant une bande continue, dans l'ordre où l'on rencontre les
+  styles en progressant : Pion (1-3), Brasier (4-6), Rempart (7-9), Éclair
+  (10-12), Mirage (13-14), Boussole (15-17), Oracle (18-20). Le biais de style
+  bouge un peu la force d'un échelon : le contrôle `--pertes` reste monotone
+  jusqu'au 1320, et au-delà la force vient d'`UCI_Elo`, que le style ne touche
+  pas. `check-elo` vérifie que les bandes restent continues.
 */
 const LEVEL_TABLE: LevelSpec[] = [
   {
@@ -433,7 +445,7 @@ const LEVEL_TABLE: LevelSpec[] = [
   },
   {
     elo: 250,
-    personality: 'fonceur',
+    personality: 'novice',
     skill: 1,
     depth: 2,
     movetimeMs: 220,
@@ -443,7 +455,7 @@ const LEVEL_TABLE: LevelSpec[] = [
   },
   {
     elo: 320,
-    personality: 'prudent',
+    personality: 'fonceur',
     skill: 2,
     depth: 3,
     movetimeMs: 260,
@@ -454,7 +466,7 @@ const LEVEL_TABLE: LevelSpec[] = [
   {
     // Échelon intermédiaire (septembre 2026) : voir l'en-tête de LEVEL_TABLE.
     elo: 430,
-    personality: 'gambiteur',
+    personality: 'fonceur',
     skill: 2,
     depth: 3,
     movetimeMs: 280,
@@ -464,7 +476,7 @@ const LEVEL_TABLE: LevelSpec[] = [
   },
   {
     elo: 630,
-    personality: 'novice',
+    personality: 'fonceur',
     skill: 3,
     depth: 4,
     movetimeMs: 300,
@@ -475,7 +487,7 @@ const LEVEL_TABLE: LevelSpec[] = [
   {
     // Échelon intermédiaire (septembre 2026) : voir l'en-tête de LEVEL_TABLE.
     elo: 770,
-    personality: 'tacticien',
+    personality: 'prudent',
     skill: 3,
     depth: 4,
     movetimeMs: 330,
@@ -485,7 +497,7 @@ const LEVEL_TABLE: LevelSpec[] = [
   },
   {
     elo: 980,
-    personality: 'fonceur',
+    personality: 'prudent',
     skill: 4,
     depth: 5,
     movetimeMs: 360,
@@ -505,7 +517,7 @@ const LEVEL_TABLE: LevelSpec[] = [
   },
   {
     elo: 1320,
-    personality: 'prudent',
+    personality: 'tacticien',
     skill: 5,
     depth: 6,
     movetimeMs: 400,
@@ -523,7 +535,7 @@ const LEVEL_TABLE: LevelSpec[] = [
   },
   {
     elo: 1650,
-    personality: 'gambiteur',
+    personality: 'tacticien',
     skill: 8,
     depth: 8,
     movetimeMs: 550,
@@ -532,7 +544,7 @@ const LEVEL_TABLE: LevelSpec[] = [
   },
   {
     elo: 1850,
-    personality: 'prudent',
+    personality: 'gambiteur',
     skill: 10,
     depth: 10,
     movetimeMs: 650,
@@ -541,7 +553,7 @@ const LEVEL_TABLE: LevelSpec[] = [
   },
   {
     elo: 2050,
-    personality: 'positionnel',
+    personality: 'gambiteur',
     skill: 12,
     depth: 12,
     movetimeMs: 800,
@@ -550,7 +562,7 @@ const LEVEL_TABLE: LevelSpec[] = [
   },
   {
     elo: 2250,
-    personality: 'gambiteur',
+    personality: 'positionnel',
     skill: 14,
     depth: 14,
     movetimeMs: 1000,
@@ -568,7 +580,7 @@ const LEVEL_TABLE: LevelSpec[] = [
   },
   {
     elo: 2700,
-    personality: 'prudent',
+    personality: 'positionnel',
     skill: 18,
     depth: 20,
     movetimeMs: 1600,
@@ -663,9 +675,9 @@ export function botLevelAvecStyle(level: number, personality?: BotPersonalityId 
 /**
  * Les niveaux tenus par une personnalité, du plus faible au plus fort.
  *
- * Une personnalité revient à plusieurs paliers de l'échelle — Rempart en tient
- * plusieurs, Oracle les derniers ; le compte se lit ici et nulle part
- * ailleurs. Sa fiche l'annonce, et l'écran de réglages
+ * Chaque personnalité tient une bande continue de l'échelle — deux ou trois
+ * niveaux d'affilée, de Pion en bas à Oracle en haut ; le compte se lit ici et
+ * nulle part ailleurs. Sa fiche l'annonce, et l'écran de réglages
  * s'en sert pour honorer « Jouer contre Mirage ».
  */
 export function niveauxDe(id: BotPersonalityId): BotLevel[] {

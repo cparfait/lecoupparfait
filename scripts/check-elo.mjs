@@ -142,6 +142,26 @@ check('plafond à 3000', estimateElo(0, 100, 200) <= 3000)
   )
 }
 
+// ── Les personnalités, par bandes ────────────────────────────────────────────
+//
+// Chaque personnage tient des niveaux d'affilée : semés le long de l'échelle,
+// ils faisaient lire « Pion » après « Rempart ». Voir l'en-tête de LEVEL_TABLE.
+{
+  const vus = new Set()
+  let precedente = null
+  for (const niveau of BOT_LEVELS) {
+    if (niveau.personality !== precedente) {
+      check(
+        `${niveau.personality} ne revient pas après une autre personnalité`,
+        !vus.has(niveau.personality),
+        `de retour au niveau ${niveau.level}`,
+      )
+      vus.add(niveau.personality)
+      precedente = niveau.personality
+    }
+  }
+}
+
 console.log(
   failures === 0
     ? `\n✓ ${checks} vérifications passées\n`
