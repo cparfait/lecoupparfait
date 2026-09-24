@@ -158,9 +158,7 @@ export default function SeancePage() {
                       : 'border-line bg-bg-elev hover:bg-surface-hover',
                   )}
                 >
-                  <span className="text-xl" aria-hidden>
-                    {entree.icone}
-                  </span>
+                  <entree.icone size={18} className="mt-0.5 shrink-0 text-muted" aria-hidden />
                   <span className="min-w-0 flex-1">
                     <span className="flex flex-wrap items-center gap-2">
                       <span className="text-[14px] font-semibold">{t(entree.nom)}</span>

@@ -1528,6 +1528,7 @@ export const fr = {
   },
 
   session: {
+    badge: 'séance',
     opponentLevel: '{elo} Elo · niveau {niveau}',
     atThisTier: '{n} à ce palier',
     title: 'Séance pédagogique',

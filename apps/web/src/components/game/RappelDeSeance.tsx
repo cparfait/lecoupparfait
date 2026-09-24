@@ -15,32 +15,32 @@
  */
 
 import { useState } from 'react'
+import type { LucideIcon } from 'lucide-react'
 import { Card } from '@/components/ui/index.tsx'
 import { EnTeteDeCarte } from '@/components/ui/EnTeteDeCarte.tsx'
+import { useT } from '@/lib/i18n/index.tsx'
 
 export function RappelDeSeance({
   nom,
-  icone,
+  icone: Icone,
   consigne,
 }: {
   nom: string
-  /** L'emoji du thème : il sert de repère, pas de décoration. */
-  icone: string
+  /** L'icône du thème, dans la pastille du bandeau : un repère, pas un décor. */
+  icone: LucideIcon
   consigne: string
 }) {
+  const t = useT()
   const [ouvert, setOuvert] = useState(true)
 
   return (
     <Card>
       <EnTeteDeCarte
-        titre={
-          <>
-            <span aria-hidden>{icone}</span> {nom}
-          </>
-        }
+        titre={nom}
+        icone={<Icone size={14} aria-hidden />}
         teinte="var(--rub-apprendre)"
         filet={ouvert}
-        fin="séance"
+        fin={t('session.badge')}
         onClick={() => setOuvert((etat) => !etat)}
         ouvert={ouvert}
       />

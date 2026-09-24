@@ -2,8 +2,9 @@
  * Le catalogue des thèmes de séance.
  *
  * Séparé de `seance.ts`, et pour une raison précise : ce fichier ne dépend que
- * du cœur, sans le moindre alias `@/`. Il est donc lisible par un script Node
- * ordinaire — `scripts/check-seances.mjs` — alors que `seance.ts`, qui importe
+ * du cœur et des icônes, sans le moindre alias `@/` à l'exécution — l'import
+ * des clés de traduction n'est qu'un type. Il est donc lisible par un script
+ * Node ordinaire — `scripts/check-seances.mjs` — alors que `seance.ts`, qui importe
  * les paliers, ne l'est pas. Les données d'un côté, ce qui s'en sert de l'autre.
  *
  * Ce n'est pas une précaution théorique : quatre des motifs listés ici
@@ -13,6 +14,19 @@
  * de vraies parties et refuse un thème qu'il n'a jamais vu apparaître.
  */
 
+import {
+  Castle,
+  ChessPawn,
+  Columns3,
+  Crosshair,
+  Crown,
+  DoorOpen,
+  Pin,
+  Rocket,
+  ShieldCheck,
+  Split,
+  type LucideIcon,
+} from 'lucide-react'
 import type { MotifId } from '@coupparfait/core'
 import type { TranslationKey } from '@/lib/i18n/index.tsx'
 
@@ -20,8 +34,14 @@ export interface ThemeSeance {
   id: string
   /** Le thème, nommé comme on le dirait à voix haute. */
   nom: TranslationKey
-  /** L'emoji qui l'identifie dans la liste. */
-  icone: string
+  /**
+   * L'icône qui l'identifie, dans la liste comme dans le rappel en partie.
+   *
+   * Une icône lucide et non plus un emoji : l'emoji changeait de dessin d'un
+   * système à l'autre, ignorait la couleur du texte, et c'était le dernier
+   * endroit de l'interface qui en portait (voir `docs/maquettes/README.md`).
+   */
+  icone: LucideIcon
   /** Ce qu'on cherche à faire pendant la partie. Une phrase, à l'impératif. */
   consigne: TranslationKey
   /** Ce qu'on regarde pour savoir si ça marche. */
@@ -49,7 +69,7 @@ export const THEMES_SEANCE: ThemeSeance[] = [
   {
     id: 'rien-en-prise',
     nom: 'seances.rien-en-prise.nom',
-    icone: '🎯',
+    icone: ShieldCheck,
     consigne: 'seances.rien-en-prise.consigne',
     aRegarder: 'seances.rien-en-prise.aRegarder',
     motifs: ['hangingPiece'],
@@ -58,7 +78,7 @@ export const THEMES_SEANCE: ThemeSeance[] = [
   {
     id: 'fourchettes',
     nom: 'seances.fourchettes.nom',
-    icone: '🍴',
+    icone: Split,
     consigne: 'seances.fourchettes.consigne',
     aRegarder: 'seances.fourchettes.aRegarder',
     motifs: ['fork'],
@@ -67,7 +87,7 @@ export const THEMES_SEANCE: ThemeSeance[] = [
   {
     id: 'clouages',
     nom: 'seances.clouages.nom',
-    icone: '📌',
+    icone: Pin,
     consigne: 'seances.clouages.consigne',
     aRegarder: 'seances.clouages.aRegarder',
     motifs: ['pin', 'skewer'],
@@ -76,7 +96,7 @@ export const THEMES_SEANCE: ThemeSeance[] = [
   {
     id: 'couloir',
     nom: 'seances.couloir.nom',
-    icone: '🚪',
+    icone: DoorOpen,
     consigne: 'seances.couloir.consigne',
     aRegarder: 'seances.couloir.aRegarder',
     motifs: ['backRankMate', 'seventhRank'],
@@ -85,7 +105,7 @@ export const THEMES_SEANCE: ThemeSeance[] = [
   {
     id: 'developpement',
     nom: 'seances.developpement.nom',
-    icone: '🚀',
+    icone: Rocket,
     consigne: 'seances.developpement.consigne',
     aRegarder: 'seances.developpement.aRegarder',
     motifs: ['development', 'centreControl'],
@@ -94,7 +114,7 @@ export const THEMES_SEANCE: ThemeSeance[] = [
   {
     id: 'colonnes',
     nom: 'seances.colonnes.nom',
-    icone: '🏛️',
+    icone: Columns3,
     consigne: 'seances.colonnes.consigne',
     aRegarder: 'seances.colonnes.aRegarder',
     motifs: ['openFile', 'semiOpenFile', 'seventhRank'],
@@ -103,7 +123,7 @@ export const THEMES_SEANCE: ThemeSeance[] = [
   {
     id: 'avant-poste',
     nom: 'seances.avant-poste.nom',
-    icone: '🏰',
+    icone: Castle,
     consigne: 'seances.avant-poste.consigne',
     aRegarder: 'seances.avant-poste.aRegarder',
     motifs: ['outpost'],
@@ -112,7 +132,7 @@ export const THEMES_SEANCE: ThemeSeance[] = [
   {
     id: 'roi-expose',
     nom: 'seances.roi-expose.nom',
-    icone: '⚔️',
+    icone: Crown,
     consigne: 'seances.roi-expose.consigne',
     aRegarder: 'seances.roi-expose.aRegarder',
     // `exposedKing` seul, et c'est un arbitrage. `kingSafety` compterait « ton
@@ -126,7 +146,7 @@ export const THEMES_SEANCE: ThemeSeance[] = [
   {
     id: 'pion-passe',
     nom: 'seances.pion-passe.nom',
-    icone: '♟️',
+    icone: ChessPawn,
     consigne: 'seances.pion-passe.consigne',
     aRegarder: 'seances.pion-passe.aRegarder',
     motifs: ['passedPawn', 'protectedPassedPawn', 'rookBehindPasser'],
@@ -135,7 +155,7 @@ export const THEMES_SEANCE: ThemeSeance[] = [
   {
     id: 'deux-faiblesses',
     nom: 'seances.deux-faiblesses.nom',
-    icone: '🪤',
+    icone: Crosshair,
     consigne: 'seances.deux-faiblesses.consigne',
     aRegarder: 'seances.deux-faiblesses.aRegarder',
     motifs: ['isolatedPawn', 'doubledPawns', 'backwardPawn'],

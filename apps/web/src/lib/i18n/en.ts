@@ -1494,6 +1494,7 @@ export const en: Dictionary = {
   },
 
   session: {
+    badge: 'session',
     opponentLevel: '{elo} Elo · level {niveau}',
     atThisTier: '{n} at this tier',
     title: 'Coaching session',

@@ -1523,7 +1523,7 @@ export function GameScreen({
           seance={
             seance && releveDeSeance
               ? {
-                  theme: `${seance.theme.icone} ${t(seance.theme.nom)}`,
+                  theme: t(seance.theme.nom),
                   pour: releveDeSeance.pour,
                   contre: releveDeSeance.contre,
                   coups: releveDeSeance.coups.slice(0, 8),
