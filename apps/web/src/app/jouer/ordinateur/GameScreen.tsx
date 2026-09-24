@@ -81,7 +81,7 @@ import { speak } from '@/lib/speech.ts'
 import type { Arrow } from '@/components/board/boardKit.ts'
 import { useGrandEcran } from '@/lib/useMediaQuery.ts'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
-import { ActionDuPouce } from './ActionDuPouce.tsx'
+import { BarreDuPouce } from './BarreDuPouce.tsx'
 import { LegendeDuVerdict } from './LegendeDuVerdict.tsx'
 import { motifDeRefus } from './motifDeRefus.ts'
 import { useAideUtilisee } from './useAideUtilisee.ts'
@@ -1293,89 +1293,23 @@ export function GameScreen({
 
             <RubanCoups coups={rubanCoups} cursor={state.cursor} onSeek={goTo} className="mt-1" />
 
-            <div className="mt-1 flex items-stretch justify-around gap-1 border-t border-line/60 pt-1">
-              <Menu
-                align="right"
-                sens="haut"
-                largeur="w-60"
-                label={t('computer.gameOptions')}
-                className="flex-1"
-                declencheur={() => (
-                  <span className="flex min-h-11 w-full flex-col items-center justify-center gap-0.5">
-                    <MoreHorizontal size={19} aria-hidden />
-                    <span className="text-[12px] font-medium leading-none">
-                      {t('bits.options')}
-                    </span>
-                  </span>
-                )}
-              >
-                <MenuItem
-                  onClick={onNewGame}
-                  icone={<RefreshCw size={15} className="shrink-0 text-accent" aria-hidden />}
-                >
-                  {t('game.newGame')}
-                </MenuItem>
-                <MenuItem
-                  href="/jouer"
-                  icone={<LayoutGrid size={15} className="shrink-0 text-accent" aria-hidden />}
-                >
-                  {t('game.over.backToMenu')}
-                </MenuItem>
-                {!classee && (
-                  <div data-garde-ouvert className="mt-1 border-t border-line/60 pt-1">
-                    {/* `data-garde-ouvert` : commuter le mode commenté ne doit pas refermer
-    le menu, sinon on ne voit pas ce qu’on vient de changer. */}
-                    <CommentaryToggle
-                      active={commentaryMode}
-                      onChange={(value) => {
-                        if (value) prefs.set('commentaryMode', true)
-                        else couperLeCommentaire()
-                      }}
-                    />
-                  </div>
-                )}
-              </Menu>
-
-              {gameOver ? (
-                <>
-                  <ActionDuPouce
-                    icone={<RefreshCw size={19} aria-hidden />}
-                    libelle={t('rush.playAgain')}
-                    onClick={onRematch}
-                  />
-                  <ActionDuPouce
-                    icone={<LayoutGrid size={19} aria-hidden />}
-                    libelle={t('nav.menu')}
-                    href="/jouer"
-                  />
-                </>
-              ) : (
-                <>
-                  <ActionDuPouce
-                    icone={<Flag size={19} aria-hidden />}
-                    libelle={t('game.resign')}
-                    onClick={handleResign}
-                    danger
-                  />
-                  {!sansAide && (
-                    <>
-                      <ActionDuPouce
-                        icone={<Lightbulb size={19} aria-hidden />}
-                        libelle={t('game.hint')}
-                        onClick={handleHint}
-                        disabled={state.turn !== playerColor}
-                      />
-                      <ActionDuPouce
-                        icone={<Undo2 size={19} aria-hidden />}
-                        libelle={t('bits.undo')}
-                        onClick={handleUndo}
-                        disabled={state.moves.length === 0}
-                      />
-                    </>
-                  )}
-                </>
-              )}
-            </div>
+            <BarreDuPouce
+              classee={classee}
+              gameOver={gameOver}
+              sansAide={sansAide}
+              commentaryMode={commentaryMode}
+              onCommentaryChange={(value) => {
+                if (value) prefs.set('commentaryMode', true)
+                else couperLeCommentaire()
+              }}
+              onNewGame={onNewGame}
+              onRematch={onRematch}
+              onResign={handleResign}
+              onHint={handleHint}
+              onUndo={handleUndo}
+              hintDisabled={state.turn !== playerColor}
+              undoDisabled={state.moves.length === 0}
+            />
           </div>
         </div>
 
