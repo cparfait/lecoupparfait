@@ -107,7 +107,7 @@ check('plafond à 3000', estimateElo(0, 100, 200) <= 3000)
 {
   const { readFileSync, readdirSync } = await import('node:fs')
   const { fileURLToPath } = await import('node:url')
-  const { join } = await import('node:path')
+  const { basename, join } = await import('node:path')
   const racine = fileURLToPath(new URL('..', import.meta.url))
   const dossier = join(racine, 'apps', 'web', 'src', 'lib', 'i18n')
   const fichiers = [
@@ -127,7 +127,7 @@ check('plafond à 3000', estimateElo(0, 100, 200) <= 3000)
       const nombre = m[2].match(/\d+/)?.[0]
       if (!nombre) continue
       check(
-        `${fichier.split(/[\/]/).at(-1)} · ${cle} annonce ${attendu} niveaux`,
+        `${basename(fichier)} · ${cle} annonce ${attendu} niveaux`,
         nombre === attendu,
         `il en annonce ${nombre}`,
       )
