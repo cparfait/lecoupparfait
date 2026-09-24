@@ -40,6 +40,7 @@ import {
   Mail,
   Monitor,
   Puzzle,
+  RotateCcw,
   Scale,
   Settings,
   Swords,
@@ -234,6 +235,16 @@ export const SECTIONS: SectionNav[] = [
         labelKey: 'nav.puzzleRush',
         icon: Timer,
         hintKey: 'nav.puzzleRushHint',
+      },
+      // Ses propres fautes, après les positions des autres : même geste que
+      // les puzzles, mais le matériau vient de ses analyses. Sous
+      // `/progresser`, ce qui allume la rubrique sans rien ajouter à
+      // `actifSur`.
+      {
+        href: '/progresser/erreurs',
+        labelKey: 'revoir.nav',
+        icon: RotateCcw,
+        hintKey: 'revoir.navHint',
       },
       { href: '/finales', labelKey: 'nav.endgames', icon: Crown, hintKey: 'nav.endgamesHint' },
       // Puis les références, qu'on consulte plus qu'on ne les pratique.

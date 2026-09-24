@@ -78,6 +78,11 @@ export const AVANTAGES: Record<string, AvantageCompte> = {
     raison: 'catalog.studiesGateWhy',
     gains: ['catalog.studiesGain1', 'catalog.studiesGain2'],
   },
+  '/progresser/erreurs': {
+    titre: 'revoir.gateTitle',
+    raison: 'revoir.gateWhy',
+    gains: ['revoir.gain1', 'revoir.gain2', 'revoir.gain3'],
+  },
   '/puzzles?defi=1': {
     titre: 'catalog.dailyGate',
     raison: 'catalog.dailyGateWhy',
