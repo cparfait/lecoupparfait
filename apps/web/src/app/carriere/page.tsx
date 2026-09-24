@@ -21,6 +21,7 @@ import Link from 'next/link'
 import { Lock, RefreshCw, Sparkles, TriangleAlert } from 'lucide-react'
 import clsx from 'clsx'
 import { IconeCarriere } from '@/components/ui/IconeCarriere.tsx'
+import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
 import {
   BOT_LEVELS,
   BOT_PERSONALITIES,
@@ -541,9 +542,9 @@ function CarteCourante({
         </ul>
 
         <div className="mt-3 flex items-center gap-2 rounded-[var(--radius-sm)] border border-line bg-bg px-2.5 py-2">
-          <span className="text-lg" aria-hidden>
-            {personnalite.emoji}
-          </span>
+          {/* Le portrait, comme sur l'écran de partie et la fiche : l'emoji
+              n'est plus qu'un secours, quand l'image manque. */}
+          <PortraitAdversaire personality={personnalite} size={28} />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-[14px] font-medium">
               {tCoeur(t, personnalite.name)} · {elo} Elo
