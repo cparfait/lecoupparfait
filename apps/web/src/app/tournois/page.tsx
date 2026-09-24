@@ -11,7 +11,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Swords, Timer, Users } from 'lucide-react'
+import { ChevronRight, Swords, Timer, Trophy, Users } from 'lucide-react'
 import clsx from 'clsx'
 import {
   Button,
@@ -119,12 +119,17 @@ export default function TournamentsPage() {
       <Link href="/tournois/ordinateur" className="block">
         <Card className="mb-5 p-4 transition-colors hover:bg-surface-hover">
           <div className="flex items-center gap-3">
+            {/* La teinte de la rubrique, pas le violet : il est réservé à
+                l'action, et une pastille n'en est pas une. */}
             <span
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-xl"
-              style={{ background: 'color-mix(in oklab, var(--accent) 16%, transparent)' }}
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-full"
+              style={{
+                background: 'color-mix(in oklab, var(--rub-jouer) 16%, transparent)',
+                color: 'var(--rub-jouer)',
+              }}
               aria-hidden
             >
-              🏆
+              <Trophy size={20} />
             </span>
             <div className="min-w-0 flex-1">
               <p className="font-display text-lg font-bold leading-tight">
@@ -132,9 +137,7 @@ export default function TournamentsPage() {
               </p>
               <p className="text-[14px] text-muted">{t('arenas.soloBlurb')}</p>
             </div>
-            <span className="shrink-0 text-muted" aria-hidden>
-              →
-            </span>
+            <ChevronRight size={18} className="shrink-0 text-faint" aria-hidden />
           </div>
         </Card>
       </Link>

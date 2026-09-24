@@ -1722,7 +1722,7 @@ export const en: Dictionary = {
     bothColours: 'You play both colours',
     bothColoursAfter:
       '— nobody answers for you: this is a study board, not a game. Go move by move, on the board or by clicking in the lists, and see where each branch leads.',
-    stakesLink: 'What is at stake in the 25 openings played at club level →',
+    stakesLink: 'What is at stake in the {n} openings played at club level',
     exactlyListed: 'Position listed exactly.',
     lastKnown: 'Last known position at move {n}. You have left the theory.',
     startHint:

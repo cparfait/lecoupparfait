@@ -24,7 +24,7 @@ import { ECO_VOLUMES, toEpd } from '@coupparfait/core'
 import { ChessBoard } from '@/components/board/ChessBoard.tsx'
 import { Button, Card, Chip, EmptyState, Spinner, TitreDePage } from '@/components/ui/index.tsx'
 import { CarteEnjeux } from '@/components/ouvertures/CarteEnjeux.tsx'
-import { ficheDeLaPartie, ficheEnjeux } from '@/lib/ouvertures/enjeux.ts'
+import { FICHES_ENJEUX, ficheDeLaPartie, ficheEnjeux } from '@/lib/ouvertures/enjeux.ts'
 import { useOpeningBook } from '@/lib/game/useOpeningBook.ts'
 import { useMoveStats, useOpeningStats, type StatsBand } from '@/lib/game/useOpeningStats.ts'
 import { playMoveFor } from '@/lib/sound.ts'
@@ -305,7 +305,7 @@ export default function OpeningsPage() {
             <strong className="font-semibold text-ink">{t('openings.bothColours')}</strong>{' '}
             {t('openings.bothColoursAfter')}
             <Link href="/ouvertures/enjeux" className="lien mt-1.5 block w-fit">
-              {t('openings.stakesLink')}
+              {t('openings.stakesLink', { n: FICHES_ENJEUX.length })}
             </Link>
           </span>
         }

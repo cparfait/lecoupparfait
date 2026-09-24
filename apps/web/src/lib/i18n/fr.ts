@@ -1757,7 +1757,7 @@ export const fr = {
     bothColours: 'Tu joues les deux couleurs',
     bothColoursAfter:
       '— personne ne répond à ta place : c’est un plateau d’étude, pas une partie. Avance coup par coup, sur l’échiquier ou en cliquant dans les listes, et vois où mène chaque branche.',
-    stakesLink: 'Les enjeux des 25 ouvertures qui se jouent en club →',
+    stakesLink: 'Les enjeux des {n} ouvertures qui se jouent en club',
     exactlyListed: 'Position exactement répertoriée.',
     lastKnown: 'Dernière position connue au coup {n}. Tu es sorti de la théorie.',
     startHint:
