@@ -381,6 +381,14 @@ export const fr = {
     ladderCard: 'Niveau {n}, {nom}, environ {elo} Elo',
     ladderTier: 'Palier « {palier} ». Pas sûr de ton niveau ?',
     ladderTest: 'Le test de niveau te le dit',
+
+    // ── La séance à thème, dans les options de la partie ──────────────────
+    sessionToggle: 'Séance à thème',
+    sessionHint: 'Un thème annoncé, un bilan qui compte où il est apparu.',
+    sessionRated: 'Indisponible en partie classée : une séance est un entraînement.',
+    sessionThemes: 'Thèmes du palier « {palier} »',
+    ratedSession: 'Indisponible pendant une séance à thème : c’est un entraînement.',
+    summarySession: 'séance « {theme} »',
   },
 
   live: {

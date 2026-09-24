@@ -13,7 +13,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Chess } from 'chess.js'
 import type { Color } from 'chess.js'
 import { BOT_PERSONALITIES, maiaCouvre, botLevel, normalizeTimeControlId } from '@coupparfait/core'
-import { seanceDeLUrl, type Seance } from '@/lib/game/seance.ts'
+import { seanceDeLUrl } from '@/lib/game/seance.ts'
 import { lireNiveauEstime, niveauBotPour } from '@/lib/apprendre/palier.ts'
 import { toast } from '@/components/ui/Toast.tsx'
 import {
@@ -71,6 +71,7 @@ export default function PlayComputerPage() {
     // Non par défaut : on vient d'abord s'entraîner, et s'entraîner suppose de
     // pouvoir revenir en arrière.
     classee: false,
+    seance: null,
   })
   const [resolvedColor, setResolvedColor] = useState<Color>('w')
   const [gameKey, setGameKey] = useState(0)
@@ -116,7 +117,6 @@ export default function PlayComputerPage() {
    * quelqu'un pour toutes ses parties suivantes. Voir son traitement dans
    * `GameScreen`.
    */
-  const [seance, setSeance] = useState<Seance | null>(null)
   const [seanceCommentee, setSeanceCommentee] = useState(false)
   const seanceLancee = useRef(false)
   /**
@@ -175,6 +175,7 @@ export default function PlayComputerPage() {
       human: false,
       // Un tournoi tient son propre tableau : il n'alimente pas le classement.
       classee: false,
+      seance: null,
     })
     setResolvedColor(couleur)
     setCoupsRepris(undefined)
@@ -222,6 +223,7 @@ export default function PlayComputerPage() {
         timeControlId: '600+5',
         human: false,
         classee: false,
+        seance: null,
       })
       setResolvedColor(Math.random() < 0.5 ? 'w' : 'b')
       setCoupsRepris(undefined)
@@ -239,7 +241,6 @@ export default function PlayComputerPage() {
     if (!demandee) return
 
     seanceLancee.current = true
-    setSeance(demandee)
     setSeanceCommentee(new URLSearchParams(window.location.search).get('commente') === '1')
 
     setSetup({
@@ -255,6 +256,7 @@ export default function PlayComputerPage() {
       // joue avec le mode commenté allumé, c'est-à-dire avec le moteur qui
       // montre le meilleur coup. Porter cela au classement n'aurait aucun sens.
       classee: false,
+      seance: demandee,
     })
     setResolvedColor(Math.random() < 0.5 ? 'w' : 'b')
     setCoupsRepris(undefined)
@@ -335,6 +337,9 @@ export default function PlayComputerPage() {
   const start = useCallback((next: Setup) => {
     niveauArbitre.current = true
     setSetup(next)
+    // La séance lancée depuis l'écran de réglages suit la préférence du mode
+    // commenté ; seul le lien d'une séance porte son propre `commente=1`.
+    setSeanceCommentee(false)
     setResolvedColor(next.color === 'random' ? (Math.random() < 0.5 ? 'w' : 'b') : next.color)
     // Commencer une partie remplace celle qu'on gardait : on ne conserve que la
     // dernière, et la nouvelle l'écrasera de toute façon au premier coup.
@@ -359,6 +364,7 @@ export default function PlayComputerPage() {
       // Une partie reprise n'est pas classée : rien ne dit ce qui s'est passé
       // pendant la séance précédente, ni quelles aides on y a utilisées.
       classee: false,
+      seance: null,
     })
     setResolvedColor(partie.playerColor)
     setCoupsRepris(partie.moves)
@@ -385,7 +391,7 @@ export default function PlayComputerPage() {
     <GameScreen
       key={gameKey}
       duel={duel}
-      seance={seance}
+      seance={setup.seance}
       seanceCommentee={seanceCommentee}
       startFen={fenImposee}
       tournoi={tournoi}

@@ -17,16 +17,7 @@
 
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
-import {
-  Cpu,
-  Eye,
-  Footprints,
-  GraduationCap,
-  Mail,
-  MonitorSmartphone,
-  Trophy,
-  Users,
-} from 'lucide-react'
+import { Cpu, Eye, Footprints, Mail, MonitorSmartphone, Trophy, Users } from 'lucide-react'
 import { BOT_PERSONALITIES } from '@coupparfait/core'
 import { PortraitAdversaire } from '@/components/brand/PortraitAdversaire.tsx'
 import { cadreDuPortrait, TEINTES_ADVERSAIRES } from '@/lib/adversaires.ts'
@@ -45,17 +36,6 @@ const MODES = [
     titleKey: 'play.vsComputer',
     blurbKey: 'play.vsComputerBlurb',
     detailKey: 'play.vsComputerDetail',
-  },
-  // La séance en deuxième, juste derrière la partie libre contre la machine :
-  // c'est la même partie, avec un thème et un bilan. Mise plus bas, personne ne
-  // la trouverait — et c'est le seul mode de cette page qui apprenne quelque
-  // chose sans demander de compte.
-  {
-    href: '/jouer/pedagogique',
-    icon: GraduationCap,
-    titleKey: 'play.seance',
-    blurbKey: 'play.seanceBlurb',
-    detailKey: 'play.seanceDetail',
   },
   {
     href: '/jouer/ami',

@@ -37,6 +37,8 @@ import { usePreferences } from '@/lib/store/preferences.ts'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { useFetchJson } from '@/lib/useFetchJson.ts'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
+import { palierPour } from '@/lib/apprendre/palier.ts'
+import { themesPour, type Seance } from '@/lib/game/seance.ts'
 import type { Progression } from './progression.ts'
 import { AdversaireChoisi, EchelleDesAdversaires } from './EchelleDesAdversaires.tsx'
 
@@ -56,6 +58,11 @@ export interface Setup {
    * lieu d'essayer de les comptabiliser après coup.
    */
   classee: boolean
+  /**
+   * Séance à thème : un thème annoncé avant la partie et un bilan qui compte
+   * où il est apparu. Jamais avec une partie classée. `null` sans séance.
+   */
+  seance: Seance | null
 }
 
 /**
@@ -131,6 +138,9 @@ export function SetupScreen({
   const [timeControlId, setTimeControlId] = useState(initial.timeControlId)
   const [human, setHuman] = useState(initial.human)
   const [classee, setClassee] = useState(initial.classee)
+  /** La séance à thème : allumée, et le thème retenu. Voir l'étape 3. */
+  const [seanceActive, setSeanceActive] = useState(initial.seance !== null)
+  const [themeId, setThemeId] = useState<string | null>(initial.seance?.theme.id ?? null)
 
   /**
    * A-t-on un compte ?
@@ -251,6 +261,20 @@ export function SetupScreen({
   const dernierNiveauMaia = niveauxMaia[niveauxMaia.length - 1]?.level ?? BOT_LEVELS.length
   /** L'adversaire réellement retenu, une fois Maia écartée si elle ne peut pas. */
   const humainRetenu = human && maiaPossible
+
+  /**
+   * Les thèmes proposés sont ceux du palier de l'adversaire choisi, comme sur
+   * la page de séance. Changer d'adversaire peut rendre le thème hors sujet :
+   * on retombe alors sur le premier du palier plutôt que de lancer une séance
+   * d'avant-postes contre un adversaire de 250 Elo.
+   */
+  const palierAdversaire = palierPour(bot.elo)
+  const themes = themesPour(palierAdversaire.id)
+  const themeRetenu = themes.find((theme) => theme.id === themeId) ?? themes[0] ?? null
+  const seanceRetenue: Seance | null =
+    seanceActive && !classee && themeRetenu
+      ? { palier: palierAdversaire, theme: themeRetenu }
+      : null
 
   const couleurChoisie =
     color === 'w'
@@ -538,40 +562,106 @@ export function SetupScreen({
 
           {/* ── 3. Les aides ───────────────────────────────────────────────── */}
           <Etape numero={3} titre={t('computer.step3')}>
-            {/* La partie classée en tête, parce qu'elle commande les autres :
-            cochée, elle retire le mode commenté, l'indice et l'annulation.
-            Ce n'est pas une punition, c'est ce qui rend le résultat
+            {/* L'ordre de la maquette : ce qu'on allume pour apprendre, puis ce
+            qu'on allume pour être mesuré. La partie classée commande les deux
+            autres — cochée, elle retire le mode commenté, l'indice,
+            l'annulation et la séance —, ce qui rend le résultat
             interprétable. Éteinte par défaut : on vient d'abord s'entraîner. */}
             <Toggle
-              label={t('friendGame.ratedLabel')}
-              description={
-                connecte === false ? t('computer.ratedNeedsAccount') : t('computer.ratedHint')
-              }
-              checked={classee && connecte !== false}
-              disabled={connecte === false}
-              onChange={setClassee}
+              label={t('computer.commentaryEach')}
+              description={classee ? t('computer.commentaryRated') : t('computer.commentaryHint')}
+              checked={commentaryMode && !classee}
+              disabled={classee}
+              onChange={(valeur) => setPreference('commentaryMode', valeur)}
             />
+
+            {/* Subordonné : il n'apparaît qu'une fois le mode commenté actif. */}
+            {commentaryMode && !classee && (
+              <div className="mt-3 border-t border-line/60 pt-3">
+                <Toggle
+                  label={t('computer.commentaryOpponent')}
+                  description={t('computer.commentaryOpponentHint')}
+                  checked={commentaryOpponent}
+                  onChange={(valeur) => setPreference('commentaryOpponent', valeur)}
+                />
+              </div>
+            )}
+
+            {/* ── La séance à thème ─────────────────────────────────────────
+            Elle vivait sur sa propre page, /jouer/pedagogique, qui choisissait
+            l'adversaire à ta place d'après un palier. C'est pourtant la même
+            partie, avec un thème annoncé et un bilan : on la propose ici, avec
+            l'adversaire qu'on vient de choisir, et les thèmes sont ceux du
+            palier de cet adversaire (`themesPour`). La page reste pour les
+            liens qui y mènent. */}
+            <div className="mt-3 border-t border-line/60 pt-3">
+              <Toggle
+                label={t('computer.sessionToggle')}
+                description={classee ? t('computer.sessionRated') : t('computer.sessionHint')}
+                checked={seanceActive && !classee}
+                disabled={classee}
+                onChange={setSeanceActive}
+              />
+              {seanceActive && !classee && themeRetenu && (
+                <div className="mt-2">
+                  <div
+                    role="radiogroup"
+                    aria-label={t('computer.sessionThemes', { palier: t(palierAdversaire.nom) })}
+                    className="flex flex-wrap gap-1.5"
+                  >
+                    {themes.map((theme) => {
+                      const choisi = theme.id === themeRetenu.id
+                      return (
+                        <button
+                          key={theme.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={choisi}
+                          onClick={() => setThemeId(theme.id)}
+                          className={clsx(
+                            'min-h-11 rounded-[var(--radius-sm)] border px-3 text-[13px] font-medium transition-colors',
+                            choisi
+                              ? 'border-accent bg-accent/15 text-ink ring-1 ring-accent'
+                              : 'border-line bg-surface text-muted hover:bg-surface-hover hover:text-ink',
+                          )}
+                        >
+                          {t(theme.nom)}
+                        </button>
+                      )
+                    })}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const tire = themes[Math.floor(Math.random() * themes.length)]
+                        if (tire) setThemeId(tire.id)
+                      }}
+                      className="lien inline-flex min-h-11 items-center gap-1.5 px-1"
+                    >
+                      <Shuffle size={13} aria-hidden />
+                      {t('session.pickForMe')}
+                    </button>
+                  </div>
+                  <p className="mt-2 text-xs leading-relaxed text-muted">
+                    {t(themeRetenu.consigne)}
+                  </p>
+                </div>
+              )}
+            </div>
 
             <div className="mt-3 border-t border-line/60 pt-3">
               <Toggle
-                label={t('computer.commentaryEach')}
-                description={classee ? t('computer.commentaryRated') : t('computer.commentaryHint')}
-                checked={commentaryMode && !classee}
-                disabled={classee}
-                onChange={(valeur) => setPreference('commentaryMode', valeur)}
+                label={t('friendGame.ratedLabel')}
+                description={
+                  connecte === false
+                    ? t('computer.ratedNeedsAccount')
+                    : seanceActive
+                      ? t('computer.ratedSession')
+                      : t('computer.ratedHint')
+                }
+                checked={classee && connecte !== false && !seanceActive}
+                disabled={connecte === false || seanceActive}
+                onChange={setClassee}
               />
-
-              {/* Subordonné : il n'apparaît qu'une fois le mode commenté actif. */}
-              {commentaryMode && !classee && (
-                <div className="mt-3 border-t border-line/60 pt-3">
-                  <Toggle
-                    label={t('computer.commentaryOpponent')}
-                    description={t('computer.commentaryOpponentHint')}
-                    checked={commentaryOpponent}
-                    onChange={(valeur) => setPreference('commentaryOpponent', valeur)}
-                  />
-                </div>
-              )}
             </div>
           </Etape>
         </div>
@@ -590,8 +680,9 @@ export function SetupScreen({
                 elo: bot.elo,
                 couleur: couleurChoisie,
                 cadence: libelleCadence(timeControlId, t),
-                mode:
-                  classee && connecte === true
+                mode: seanceRetenue
+                  ? t('computer.summarySession', { theme: t(seanceRetenue.theme.nom) })
+                  : classee && connecte === true
                     ? t('computer.summaryRated')
                     : commentaryMode
                       ? t('computer.summaryCoach')
@@ -615,7 +706,8 @@ export function SetupScreen({
                 color,
                 timeControlId,
                 human: humainRetenu,
-                classee: classee && connecte === true,
+                classee: classee && connecte === true && !seanceRetenue,
+                seance: seanceRetenue,
               })
             }
           >

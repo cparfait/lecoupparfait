@@ -370,6 +370,13 @@ export const en: Dictionary = {
     ladderCard: 'Level {n}, {nom}, about {elo} Elo',
     ladderTier: 'Tier “{palier}”. Not sure of your level?',
     ladderTest: 'The level test will tell you',
+
+    sessionToggle: 'Themed session',
+    sessionHint: 'A theme announced up front, a debrief that counts where it came up.',
+    sessionRated: 'Not available in a rated game: a session is practice.',
+    sessionThemes: 'Themes for the “{palier}” tier',
+    ratedSession: 'Not available during a themed session: it is practice.',
+    summarySession: '“{theme}” session',
   },
 
   live: {
