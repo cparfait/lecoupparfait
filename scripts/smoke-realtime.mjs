@@ -247,6 +247,64 @@ check(
 white.socket.disconnect()
 black.socket.disconnect()
 
+// ── Appariement rapide ──────────────────────────────────────────────────────
+console.log('\nAppariement rapide')
+
+/** Un chercheur : il s'inscrit à la file et note ce que le serveur lui dit. */
+function chercher(name, clientId, timeControl) {
+  const socket = io(ADRESSE, { transports: ['websocket'], reconnection: false })
+  const state = { socket, seeking: false, matched: null, cancelled: null }
+  socket.on('connect', () => socket.emit('seek', { timeControl, name, clientId }))
+  socket.on('seeking', () => (state.seeking = true))
+  socket.on('matched', (payload) => (state.matched = payload))
+  socket.on('seekCancelled', (payload) => (state.cancelled = payload))
+  return state
+}
+
+const partant = chercher('Carole', 'clientcarole00000000000000000003', '180+2')
+await wait(400)
+check('le premier chercheur est mis en attente', partant.seeking && !partant.matched)
+partant.socket.emit('cancelSeek')
+await wait(300)
+check('« Annuler » le retire de la file', partant.cancelled?.reason === 'cancelled')
+
+const chercheurA = chercher('David', 'clientdavid000000000000000000004', '180+2')
+await wait(300)
+const chercheurB = chercher('Eve', 'clienteve00000000000000000000005', '180+2')
+await wait(600)
+check(
+  'deux chercheurs de la même cadence sont appariés',
+  !!chercheurA.matched && chercheurA.matched.slug === chercheurB.matched?.slug,
+  chercheurA.matched?.slug,
+)
+check(
+  'avec des couleurs opposées',
+  !!chercheurA.matched && chercheurA.matched.color !== chercheurB.matched?.color,
+)
+check('l’annulé n’a pas été apparié', partant.matched === null)
+check('une partie entre invités n’est pas classée', chercheurA.matched?.rated === false)
+
+// Chacun ouvre ensuite la partie comme un lien : son siège l'attend.
+if (chercheurA.matched) {
+  const siege = await new Promise((resolve) => {
+    const socket = io(ADRESSE, { transports: ['websocket'], reconnection: false })
+    socket.on('connect', () =>
+      socket.emit('join', {
+        slug: chercheurA.matched.slug,
+        clientId: 'clientdavid000000000000000000004',
+      }),
+    )
+    socket.on('joined', (payload) => {
+      socket.disconnect()
+      resolve(payload.color)
+    })
+    setTimeout(() => resolve(null), 3000)
+  })
+  check('le salon rend au joueur la couleur annoncée', siege === chercheurA.matched.color, siege)
+}
+
+for (const chercheur of [partant, chercheurA, chercheurB]) chercheur.socket.disconnect()
+
 console.log(
   `\n${failures === 0 ? '✓ Tout est conforme.' : `✗ ${failures} vérification(s) en échec.`}`,
 )

@@ -139,7 +139,9 @@ Autant le dire ici plutôt que de le laisser découvrir.
   les leçons, les deux écrans de jeu solo) ; il n'est pas fait.
 - **Ça ne tient pas la charge à plusieurs instances.** Une seule instance du
   serveur temps réel : la boucle des tournois créerait deux fois les mêmes
-  paires, et les limiteurs de rythme comptent chacun pour soi.
+  paires, les limiteurs de rythme comptent chacun pour soi, et la file de
+  l'appariement rapide (« Trouver un adversaire ») vit en mémoire : deux
+  joueurs sur deux instances ne se verraient jamais.
 - **Ça n'empêche pas quelqu'un de tricher contre lui-même.** Les parties contre
   l'ordinateur se jouent dans le navigateur. Le résultat est recoupé avec la
   position atteinte, ce qui ferme les cas faciles, mais quelqu'un de déterminé y

@@ -9,6 +9,28 @@
  *  - **Temps réel.** Les parties entre amis, en Socket.IO, avec le serveur pour
  *    seule autorité sur les coups et les pendules.
  *
+ * Messages du temps réel (client → serveur, puis ce que le serveur répond) :
+ *
+ *  - `join {slug, token?, clientId?, name?, souhait?, timeControl?, rated?}`
+ *    → `joined {color, snapshot}`, puis `state` / `move` / `end` / `chat`
+ *    diffusés au salon. Les actions de partie : `move`, `resign`,
+ *    `offerDraw`, `declineDraw`, `requestTakeback`, `acceptTakeback`,
+ *    `chat`, `indice`.
+ *  - **Appariement rapide.** `seek {timeControl, token?, clientId?, name?}`
+ *    inscrit dans la file de cette cadence (un identifiant de
+ *    `TIME_CONTROLS`, hors partie sans pendule) → `seeking {timeControl,
+ *    waiting}`. Quand un adversaire compatible arrive : `matched {slug,
+ *    color, timeControl, rated, opponent: {name, rating}}` ; le client ouvre
+ *    alors `/jouer/partie/<slug>` et y envoie un `join` ordinaire, qui lui
+ *    rend le siège réservé. `cancelSeek` → `seekCancelled {reason:
+ *    'cancelled'}` ; une nouvelle demande de la même personne ailleurs vaut
+ *    `seekCancelled {reason: 'replaced'}` à l'ancienne connexion, un salon
+ *    refusé par les plafonds `seekCancelled {reason: 'refused'}`. La
+ *    déconnexion retire de la file sans message. Règles : `appariement.ts`.
+ *  - Les refus arrivent en `error {code}` — `tooFast`, `missingSlug`,
+ *    `linkUsed`, `serverFull`, `tooManyRooms`, `badTimeControl`,
+ *    `queueFull`, et ceux de `RefusDeCoup` —, que le client traduit.
+ *
  * L'authentification et les données de compte restent du ressort de
  * l'application Next.js : elle a déjà les cookies de session et l'accès à la
  * base. Ce serveur ne fait que vérifier un jeton quand il en reçoit un.
@@ -45,6 +67,8 @@ import { verifySessionToken } from './auth.ts'
 import { adresseDe, creerLimiteur, creerSeau } from './limites.ts'
 import { rappelDuDefi, rappelsPossibles } from './rappels.ts'
 import { classementAccorde, creerRegistre } from './salons.ts'
+import { creerFile, type Candidat } from './appariement.ts'
+import { randomInt } from 'node:crypto'
 import {
   enregistrerSalon,
   oublierSalon,
@@ -697,6 +721,7 @@ io.on('connection', (socket) => {
     move: creerSeau(30, 10_000),
     chat: creerSeau(10, 10_000),
     action: creerSeau(10, 60_000),
+    seek: creerSeau(10, 60_000),
   }
 
   /** `true` si l'événement doit être ignoré. Le client est prévenu une fois par refus. */
@@ -856,11 +881,158 @@ io.on('connection', (socket) => {
     withRoom(currentSlug, (room) => room.annoncerIndice(socket.id))
   })
 
+  /*
+    Appariement rapide : voir `appariement.ts` pour la règle, et
+    `apparierLesFiles` plus bas pour ce qui suit une paire formée.
+  */
+  socket.on(
+    'seek',
+    async (payload: { timeControl?: string; token?: string; clientId?: string; name?: string }) => {
+      if (tropVite('seek')) return
+      const cadence = String(payload?.timeControl ?? '')
+      const timeControl = parseTimeControl(cadence)
+      if (!timeControl) {
+        socket.emit('error', { code: 'badTimeControl' })
+        return
+      }
+      const identity = await verifySessionToken(
+        payload.token,
+        categorieDeClassement(speedCategory(timeControl)),
+      )
+      // La connexion a pu tomber pendant la vérification du jeton : une
+      // inscription posthume resterait dans la file, appariable et injoignable.
+      if (!socket.connected) return
+
+      const inscription = fileDAttente.inscrire({
+        socketId: socket.id,
+        cadence,
+        userId: identity?.userId ?? null,
+        clientId: sanitiseClientId(payload.clientId),
+        name: identity?.username ?? sanitiseName(payload.name) ?? 'Invité',
+        rating: identity?.rating ?? null,
+        adresse: adresseDe(socket.request),
+      })
+      if (!inscription.ok) {
+        socket.emit('error', { code: inscription.code })
+        return
+      }
+      for (const ancien of inscription.remplaces) {
+        io.to(ancien).emit('seekCancelled', { reason: 'replaced' })
+      }
+      socket.emit('seeking', { timeControl: cadence, waiting: fileDAttente.taille(cadence) })
+      apparierLesFiles()
+    },
+  )
+
+  socket.on('cancelSeek', () => {
+    if (fileDAttente.retirer(socket.id)) socket.emit('seekCancelled', { reason: 'cancelled' })
+  })
+
   socket.on('disconnect', () => {
+    // Qui ferme l'onglet ne doit pas être apparié : l'autre attendrait un
+    // adversaire qui ne viendra jamais.
+    fileDAttente.retirer(socket.id)
     if (!currentSlug) return
     rooms.get(currentSlug)?.disconnect(socket.id)
   })
 })
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Appariement rapide
+// ─────────────────────────────────────────────────────────────────────────────
+
+const fileDAttente = creerFile()
+
+/** Même alphabet que `generateGameSlug` côté client : rien qu'on confonde. */
+function nouveauSlug(): string {
+  const alphabet = '23456789abcdefghjkmnpqrstuvwxyz'
+  for (;;) {
+    let slug = ''
+    for (let i = 0; i < 10; i++) slug += alphabet[randomInt(alphabet.length)]
+    if (!rooms.has(slug)) return slug
+  }
+}
+
+/**
+ * Transforme les paires formées par la file en parties.
+ *
+ * Le salon est créé ici, et non par le premier `join` : c'est le serveur qui
+ * a choisi les deux joueurs, il leur réserve leurs sièges et leurs couleurs
+ * (`GameRoom.reserver`), puis leur envoie `matched`. Chacun ouvre ensuite la
+ * partie comme un lien ordinaire, et `seat` le reconnaît à son compte ou à
+ * son navigateur.
+ *
+ * Les plafonds de `salons.ts` s'appliquent comme à tout salon neuf, pour
+ * **les deux** adresses : un appariement n'est pas une porte dérobée pour
+ * ouvrir plus de parties qu'un lien n'en ouvrirait. Celui qui est refusé
+ * sort de la file avec le code ; l'autre y retourne, à sa place d'origine
+ * dans le temps — il ne perd pas l'élargissement déjà acquis.
+ */
+function apparierLesFiles(): void {
+  for (const [a, b] of fileDAttente.apparier()) {
+    const refus = [a, b].map((candidat) => ({
+      candidat,
+      admission: registreSalons.admettre(candidat.adresse, rooms.size),
+    }))
+    if (refus.some((r) => r.admission !== 'ok')) {
+      for (const { candidat, admission } of refus) {
+        if (admission === 'ok') {
+          fileDAttente.reinscrire(candidat)
+        } else {
+          io.to(candidat.socketId).emit('error', {
+            code: admission === 'plein' ? 'serverFull' : 'tooManyRooms',
+          })
+          io.to(candidat.socketId).emit('seekCancelled', { reason: 'refused' })
+        }
+      }
+      continue
+    }
+    ouvrirLaPartie(a, b)
+  }
+}
+
+function ouvrirLaPartie(a: Candidat, b: Candidat): void {
+  const timeControl = normaliserCadence(parseTimeControl(a.cadence) ?? CADENCE_PAR_DEFAUT)
+  // Même règle que les salons par lien : un classement engage deux comptes.
+  const rated = classementAccorde(true, a.userId !== null && b.userId !== null)
+  const slug = nouveauSlug()
+  const room = roomFor(slug, { timeControl, rated })
+  registreSalons.noter(slug, a.adresse)
+  brancher(room)
+
+  const [blancs, noirs] = randomInt(2) === 0 ? [a, b] : [b, a]
+  for (const [couleur, joueur] of [
+    ['w', blancs],
+    ['b', noirs],
+  ] as const) {
+    room.reserver(couleur, {
+      userId: joueur.userId,
+      clientId: joueur.clientId,
+      name: joueur.name,
+      rating: joueur.rating,
+    })
+  }
+
+  for (const [couleur, joueur, adversaire] of [
+    ['w', blancs, noirs],
+    ['b', noirs, blancs],
+  ] as const) {
+    io.to(joueur.socketId).emit('matched', {
+      slug,
+      color: couleur,
+      timeControl: joueur.cadence,
+      rated,
+      opponent: { name: adversaire.name, rating: adversaire.rating },
+    })
+  }
+}
+
+/*
+  L'écart admis grandit avec l'attente : deux joueurs trop éloignés à
+  l'inscription deviennent compatibles sans que personne n'envoie rien. On
+  repasse donc sur les files toutes les deux secondes.
+*/
+setInterval(apparierLesFiles, 2000).unref?.()
 
 function withRoom(slug: string | null, action: (room: GameRoom) => void): void {
   if (!slug) return
