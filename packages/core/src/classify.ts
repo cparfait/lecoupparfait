@@ -18,6 +18,7 @@ import {
   centipawnLoss,
   moveAccuracy,
   qualityFromWinLoss,
+  scoreForColor,
   scoreToCp,
   winPercentFor,
 } from './eval.ts'
@@ -120,6 +121,15 @@ export function classifyMove(input: ClassifyInput): Classification {
     sacrificed = Math.max(0, recapture - gained)
   }
 
+  // Chute d'évaluation **sans plafond**. `cpLoss` est borné à ±1000 pour les
+  // courbes et l'ACPL : de −18 à −9, il ne voit que 0,8 pion. Pour juger si un
+  // sacrifice rapporte, il faut la vraie chute — ici, plus que la tour donnée.
+  const evalDrop = Math.max(
+    0,
+    scoreToCp(scoreForColor(input.before.score, mover)) -
+      scoreToCp(scoreForColor(input.after.score, mover)),
+  )
+
   const legalMoveCount = input.legalMoveCount ?? board.moves().length
 
   const quality = decideQuality({
@@ -129,6 +139,7 @@ export function classifyMove(input: ClassifyInput): Classification {
     isTopMove,
     onlyMoveMargin,
     sacrificed,
+    evalDrop,
     legalMoveCount,
     inBook: input.inBook ?? false,
     scoreBefore: input.before.score,
@@ -158,6 +169,8 @@ interface QualityInput {
   isTopMove: boolean
   onlyMoveMargin: number
   sacrificed: number
+  /** Chute d'évaluation non bornée, en centipions. */
+  evalDrop: number
   legalMoveCount: number
   inBook: boolean
   scoreBefore: Score
@@ -190,13 +203,34 @@ function decideQuality(input: QualityInput): MoveQuality {
 
   // Sacrifice sain : on abandonne du matériel, c'est quand même le meilleur
   // coup, et la position reste au moins équilibrée. C'est le « brillant ».
+  //
+  // Hors premier choix du moteur, il faut en plus que le sacrifice se paie :
+  // que l'évaluation perde moins de la moitié de ce qu'on a donné. Les chances
+  // de victoire seules ne le disent pas dans une position déjà gagnée — elles
+  // y sont saturées. Txe3+ à −18, tour donnée pour un pion et évaluation
+  // tombée à −9, passait ainsi pour « brillant ! », avec une phrase assurant
+  // que la position rapportait « plus lourd que la pièce ».
   if (
     input.sacrificed >= SACRIFICE_THRESHOLD &&
     input.winLoss < 3 &&
     input.winAfter >= 45 &&
-    (input.isTopMove || input.winLoss < 1)
+    (input.isTopMove || (input.winLoss < 1 && input.evalDrop < input.sacrificed / 2))
   ) {
     return 'brilliant'
+  }
+
+  // Sacrifice qui ne se paie pas : de la matière donnée pour rien, dans une
+  // position si gagnée que les chances de victoire n'en bougent presque pas.
+  // Le barème seul l'aurait dit « excellent », et la phrase du sacrifice
+  // aurait parlé d'avantage pris ailleurs. Donner une tour pour un pion reste
+  // la leçon à retenir, même à +18.
+  if (
+    !input.isTopMove &&
+    input.sacrificed >= SACRIFICE_THRESHOLD &&
+    input.evalDrop >= input.sacrificed / 2
+  ) {
+    const quality = qualityFromWinLoss(input.winLoss)
+    return quality === 'excellent' || quality === 'good' ? 'inaccuracy' : quality
   }
 
   // Coup unique : toutes les autres options étaient nettement pires.

@@ -11,8 +11,10 @@ import { strict as assert } from 'node:assert'
 import { test } from 'node:test'
 import { Chess } from 'chess.js'
 import type { PieceSymbol, Square } from 'chess.js'
+import { classifyMove } from '../src/classify.ts'
 import { explainMove } from '../src/explain.ts'
 import { detectMoveMotifs } from '../src/motifs.ts'
+import type { EngineLine } from '../src/types.ts'
 
 /** La position de la partie signalée, Noirs au trait, avant Da5. */
 const AVANT = '1r1qkb1r/5p1p/2p5/4pp2/1N2nP2/P2QP3/1PP3PP/R1B1K2R b - - 1 16'
@@ -64,4 +66,34 @@ test('le cavalier reste au masculin', () => {
   assert.doesNotMatch(texte, /cavalier en b4 est (collée|piégée)/)
   assert.doesNotMatch(texte, /\bElle\b/)
   assert.match(texte, /le cavalier en b4 est collé devant son roi en e1\. Il ne peut plus bouger/)
+})
+
+// ─── Le sacrifice qui ne rapporte rien ───────────────────────────────────────
+//
+// Txe3+ à −18 : tour donnée pour un pion, évaluation tombée à −9, et le coup
+// s'affichait « brillant ! ». Les chances de victoire, saturées, n'avaient
+// presque pas bougé ; la matière, elle, était perdue.
+
+const AVANT_TXE3 = '5b1r/4kp1p/8/q3pp2/4rP2/4P2P/1PP1K1P1/1nB4R b - - 0 23'
+
+function classerTxe3(apres: number) {
+  const lignes = [
+    { multipv: 1, score: { type: 'cp', value: -1821 }, pv: ['e5f4'] },
+    { multipv: 2, score: { type: 'cp', value: -1821 }, pv: ['h8g8'] },
+  ] as EngineLine[]
+  return classifyMove({
+    fenBefore: AVANT_TXE3,
+    uci: 'e4e3',
+    san: 'Rxe3+',
+    before: { score: { type: 'cp', value: -1821 }, lines: lignes },
+    after: { score: { type: 'cp', value: apres } },
+  }).quality
+}
+
+test('une tour donnée pour rien n’est pas brillante, même à +18', () => {
+  assert.equal(classerTxe3(-917), 'inaccuracy')
+})
+
+test('un sacrifice qui garde l’évaluation reste brillant', () => {
+  assert.equal(classerTxe3(-1800), 'brilliant')
 })
