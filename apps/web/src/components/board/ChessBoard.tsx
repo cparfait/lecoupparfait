@@ -18,7 +18,7 @@
  * était donc à la fois invisible et injouable.
  */
 
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import dynamic from 'next/dynamic'
 import { Box, Grid2x2, Maximize2, Minimize2 } from 'lucide-react'
@@ -116,6 +116,22 @@ export interface ChessBoardProps extends Board2DProps {
    * plateau ne réapparaît pas entre-temps. `undefined` : sous le plateau.
    */
   emplacementBascule?: HTMLElement | null
+  /**
+   * Un bouton de plus dans la bascule, après le plein écran.
+   *
+   * L'écran de partie y range le branchement d'un échiquier électronique : un
+   * réglage du plateau, à côté des autres réglages du plateau, plutôt qu'une
+   * ligne permanente dans la colonne.
+   */
+  actionBascule?: ActionBascule
+}
+
+export interface ActionBascule {
+  icone: ReactNode
+  libelle: string
+  /** Allumé — un plateau branché, un panneau ouvert. */
+  actif?: boolean
+  onClick: () => void
 }
 
 /**
@@ -160,6 +176,7 @@ export const ChessBoard = memo(function ChessBoard({
   dernierCoupSan,
   onFit,
   emplacementBascule,
+  actionBascule,
   ...props
 }: ChessBoardProps) {
   const view = usePreferences((state) => state.view)
@@ -366,6 +383,7 @@ export const ChessBoard = memo(function ChessBoard({
             className="mt-1.5 self-end"
             fullscreen={fullscreen}
             onToggleFullscreen={pleinEcranPossible ? toggleFullscreen : undefined}
+            action={actionBascule}
           />
         )}
         {externe &&
@@ -375,6 +393,7 @@ export const ChessBoard = memo(function ChessBoard({
             <ViewToggle
               fullscreen={fullscreen}
               onToggleFullscreen={pleinEcranPossible ? toggleFullscreen : undefined}
+              action={actionBascule}
             />,
             emplacementBascule,
           )}
@@ -399,10 +418,12 @@ export function ViewToggle({
   className,
   fullscreen,
   onToggleFullscreen,
+  action,
 }: {
   className?: string
   fullscreen?: boolean
   onToggleFullscreen?: () => void
+  action?: ActionBascule
 }) {
   const t = useT()
   const view = usePreferences((state) => state.view)
@@ -458,6 +479,24 @@ export function ViewToggle({
           <span className="sr-only">
             {t(fullscreen ? 'misc.exitFullscreen' : 'misc.fullscreen')}
           </span>
+        </button>
+      )}
+
+      {action && (
+        <button
+          type="button"
+          onClick={action.onClick}
+          aria-pressed={action.actif ?? false}
+          title={action.libelle}
+          className={clsx(
+            'grid h-8 w-8 place-items-center rounded-full transition-all pointer-coarse:h-11 pointer-coarse:w-11',
+            action.actif
+              ? 'text-accent hover:bg-surface-hover'
+              : 'text-muted hover:bg-surface-hover hover:text-ink',
+          )}
+        >
+          {action.icone}
+          <span className="sr-only">{action.libelle}</span>
         </button>
       )}
     </div>

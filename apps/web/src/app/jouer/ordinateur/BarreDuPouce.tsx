@@ -73,10 +73,12 @@ export function BarreDuPouce({
           {t('game.over.backToMenu')}
         </MenuItem>
         {!classee && (
-          <div data-garde-ouvert className="mt-1 border-t border-line/60 pt-1">
-            {/* `data-garde-ouvert` : commuter le mode commenté ne doit pas refermer
-    le menu, sinon on ne voit pas ce qu’on vient de changer. */}
-            <CommentaryToggle active={commentaryMode} onChange={onCommentaryChange} />
+          <div className="mt-1 border-t border-line/60 pt-1">
+            <CommentaryToggle
+              variante="menu"
+              active={commentaryMode}
+              onChange={onCommentaryChange}
+            />
           </div>
         )}
       </Menu>

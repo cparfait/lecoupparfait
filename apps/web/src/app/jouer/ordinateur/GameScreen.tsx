@@ -29,7 +29,9 @@ import {
   applyMove,
   botLevel,
   createClock,
+  explainRecommendedMove,
   formatScore,
+  meriteUnMeilleurCoup,
   sanToSpeech,
   stopClock,
   type ClockState,
@@ -65,6 +67,7 @@ import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
 import { Button, ButtonLink, Card, Chip } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
+import { PANNEAU_PLATEAU_ID, useBranchementPlateau } from '@/lib/board/useBranchementPlateau.tsx'
 import { useEcranAllume } from '@/lib/ecranAllume.ts'
 import { useChessGame } from '@/lib/game/useChessGame.ts'
 import { oublierPartieEnCours } from '@/lib/game/partieEnCours.ts'
@@ -82,7 +85,7 @@ import type { Arrow } from '@/components/board/boardKit.ts'
 import { useGrandEcran, useMediaQuery } from '@/lib/useMediaQuery.ts'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
 import { BarreDuPouce } from './BarreDuPouce.tsx'
-import { LegendeDuVerdict } from './LegendeDuVerdict.tsx'
+import { LegendeDuVerdict, PhraseDuConseil } from './LegendeDuVerdict.tsx'
 import { motifDeRefus } from './motifDeRefus.ts'
 import { useAideUtilisee } from './useAideUtilisee.ts'
 import { useAnnonceClassee } from './useAnnonceClassee.ts'
@@ -174,6 +177,23 @@ export function GameScreen({
   const [hintArrow, setHintArrow] = useState<Arrow | null>(null)
   // L'aide du moteur qui a servi, s'il y en a une : voir `useAideUtilisee`.
   const { aideUtilisee, aideRef, noterAide } = useAideUtilisee()
+  /**
+   * La partie se poursuit après sa fin — chute du drapeau, ou mat défait.
+   *
+   * Le résultat a été compté au moment où il est tombé — progression, quêtes,
+   * historique. La suite se joue sans pendule et **ne compte nulle part** : ni
+   * l'échelle des adversaires, ni les quêtes, ni l'archive, qui a déjà reçu la
+   * partie une fois. On la joue pour savoir, pas pour marquer.
+   *
+   * Doublé d'un renvoi pour la même raison que `aideRef` : `onGameOver` lit les
+   * valeurs du rendu où il a été créé.
+   */
+  const [prolongation, setProlongation] = useState(false)
+  const prolongationRef = useRef(false)
+  /** La pendule compte-t-elle ? Plus après une reprise. */
+  const pendule = timed && !prolongation
+  const penduleRef = useRef(pendule)
+  penduleRef.current = pendule
 
   /**
    * Les parties où le moteur ne souffle rien : ni indice, ni reprise de coup.
@@ -270,7 +290,7 @@ export function GameScreen({
     onMove: (move) => {
       playMoveSound(move)
       setHintArrow(null)
-      if (timed) {
+      if (penduleRef.current) {
         setClock((current) => applyMove(current, move.color, Date.now(), current.running === null))
       }
     },
@@ -279,6 +299,9 @@ export function GameScreen({
       setOutcome({ status, result })
       const won = result === (playerColor === 'w' ? '1-0' : '0-1')
       playResultSound(result === '1/2-1/2' ? 'draw' : won ? 'win' : 'loss')
+      // La fin d'une partie rouverte ne compte pas : le résultat est celui
+      // d'avant la reprise, et il est déjà enregistré.
+      if (prolongationRef.current) return
       // Une partie partie d'une position composée ne fait avancer aucune
       // échelle : rien n'empêche de s'y donner une dame de plus.
       if (!startFen) recordBotGame(level, won)
@@ -455,12 +478,50 @@ export function GameScreen({
     onMove: (from, to, promotion) => playRef.current(from, to, promotion),
   })
 
+  /*
+    ── La pendule s'arrête pendant l'explication ────────────────────────────
+
+    L'adversaire patientait déjà pendant qu'on lisait le commentaire — mais sa
+    pendule, elle, tournait : on lisait l'explication en regardant fondre des
+    secondes qui n'étaient à personne. Même condition que ci-dessus, donc :
+    tant que la partie est retenue pour le coach, le temps est gelé.
+
+    On arrête la pendule avec `stopClock` en retenant le camp dont elle
+    tournait, et on la relance du même côté au moment où la lecture se
+    termine. Si l'on joue pendant la suspension — le commentaire d'un coup
+    adverse s'affiche sur son propre temps de jeu —, `applyMove` voit une
+    pendule arrêtée et ne décompte rien : c'est le comportement voulu, et elle
+    repart d'elle-même du côté de l'adversaire. Il n'y a alors rien à relancer.
+  */
+  const penduleSuspendue =
+    pendule &&
+    commentaryMode &&
+    !state.isGameOver &&
+    outcome === null &&
+    (commentaryPaused || coachBusy || awaitingReview)
+  const campSuspendu = useRef<Color | null>(null)
+  useEffect(() => {
+    if (penduleSuspendue) {
+      if (clock.running === null) return
+      campSuspendu.current = clock.running
+      setClock((current) => stopClock(current, Date.now()))
+      return
+    }
+    const camp = campSuspendu.current
+    campSuspendu.current = null
+    // Une partie finie pendant la suspension — abandon — ne se relance pas.
+    if (!camp || state.isGameOver || outcome !== null) return
+    setClock((current) =>
+      current.running === null ? { ...current, running: camp, updatedAt: Date.now() } : current,
+    )
+  }, [penduleSuspendue, clock.running, state.isGameOver, outcome])
+
   // La chute du drapeau : un minuteur armé sur l'échéance, réarmé au coup.
-  // Voir `useChuteDuDrapeau`.
+  // Voir `useChuteDuDrapeau`. Plus de drapeau après une reprise.
   useChuteDuDrapeau({
     clock,
     setClock,
-    timed,
+    timed: pendule,
     isGameOver: state.isGameOver,
     outcome,
     setOutcome,
@@ -516,6 +577,9 @@ export function GameScreen({
     play: handleMove,
     lastMove: state.lastMove,
   })
+  // Le branchement d'un échiquier électronique : un bouton de la bascule du
+  // plateau, et le panneau seulement à la demande. Voir le crochet.
+  const branchement = useBranchementPlateau(physicalBoard)
 
   const handleHint = useCallback(async () => {
     if (state.turn !== playerColor) return
@@ -570,12 +634,68 @@ export function GameScreen({
     // partie et la chute du drapeau s'en gardaient déjà ; cette voie-ci, non,
     // et l'on gonflait son nombre de tentatives en abandonnant des positions
     // qu'on venait de fabriquer.
-    if (!startFen) recordBotGame(level, false)
+    // Et rien du tout dans une partie rouverte : le résultat est déjà compté.
+    if (!startFen && !prolongation) recordBotGame(level, false)
     playResultSound('loss')
     // Une partie abandonnée n'est plus à reprendre : sans cet oubli, l'écran
     // de départ la proposait comme si on l'avait quittée en cours.
     oublierPartieEnCours()
-  }, [playerColor, level, startFen, t])
+  }, [playerColor, level, startFen, t, prolongation])
+
+  /**
+   * Rouvrir une partie finie, sans pendule et hors statistiques.
+   *
+   * Le résultat est déjà écrit partout où il devait l'être ; on rouvre
+   * seulement l'échiquier. L'archive ne repartira pas — `useArchivageDeFin`
+   * n'archive qu'une fois —, et `prolongation` coupe le reste : échelle,
+   * quêtes, reprise.
+   *
+   * `annuler` : combien de demi-coups défaire avant de rendre la main. Zéro
+   * après la chute du drapeau — la position est encore à jouer. Deux après un
+   * mat : le coup qui mate et celui qui l'a permis, pour chercher ce qu'on
+   * aurait pu jouer à sa place. « Annuler » remonte ensuite plus loin.
+   */
+  const reprendreHorsStats = useCallback(
+    (annuler: number) => {
+      prolongationRef.current = true
+      setProlongation(true)
+      setClock((current) => stopClock(current, Date.now()))
+      if (annuler > 0) undo(annuler)
+      setOutcome(null)
+      // Le drapeau a pu tomber pendant que l'ordinateur réfléchissait, et le
+      // mat défait ramène une position qu'il croit déjà traitée : sans cet
+      // oubli, il ne jouerait plus.
+      oublierPositionDuBot()
+    },
+    [undo, oublierPositionDuBot],
+  )
+
+  /** Ce que la boîte de fin propose pour rouvrir la partie, s'il y a lieu. */
+  const repriseProposee = (() => {
+    const statut = outcome?.status ?? state.status
+    if (statut === 'timeout' && !state.isGameOver) {
+      return {
+        libelle: t('game.over.continueUntimed'),
+        precision: t('game.over.continueUntimedHint'),
+        icone: <Play size={16} />,
+        action: () => reprendreHorsStats(0),
+      }
+    }
+    // Le mat qu'on a subi, pas celui qu'on a donné : c'est la défaite qu'on
+    // veut comprendre. Deux demi-coups au moins, sans quoi il n'y a pas de coup
+    // à soi à défaire.
+    const resultat = outcome?.result ?? state.result
+    const perdu = resultat === (playerColor === 'w' ? '0-1' : '1-0')
+    if (statut === 'checkmate' && perdu && state.moves.length >= 2) {
+      return {
+        libelle: t('game.over.rewindMate'),
+        precision: t('game.over.rewindMateHint'),
+        icone: <Undo2 size={16} />,
+        action: () => reprendreHorsStats(2),
+      }
+    }
+    return undefined
+  })()
 
   /**
    * Sens de lecture de l'échiquier.
@@ -594,7 +714,9 @@ export function GameScreen({
   // La partie en cours, sauvegardée après chaque coup : voir
   // `useSauvegardeEnCours`.
   useSauvegardeEnCours({
-    gameOver,
+    // Une partie rouverte n'est pas à reprendre : elle reviendrait comme une
+    // partie neuve, et sa fin compterait.
+    gameOver: gameOver || prolongation,
     moves: state.moves,
     level,
     playerColor,
@@ -876,15 +998,56 @@ export function GameScreen({
       (alternative) => alternative.rank === 1 && !alternative.played,
     )
     if (!meilleur) return null
+
+    /*
+      Pourquoi ce coup-là, en phrases et non en un mot.
+
+      On n'affichait que `reason` : une phrase quand `pourquoiCeCoup` en
+      trouvait une — « Le pion en d5 attaque en même temps le fou en c4… » —,
+      sinon le nom d'un motif relevé **sur la position**, pas sur le coup. D'où
+      « Il fallait jouer Td8… Clouage » : le clouage était celui de la dame sur
+      le pion g5, déjà là avant Td8, et qui n'expliquait rien.
+
+      On y ajoute donc l'explication complète du coup conseillé — celle que
+      donne déjà le haut-parleur du panneau, `explainRecommendedMove` : le coup
+      rejoué et raconté comme s'il avait été joué, avec les seuls motifs qu'il
+      crée. Puis la suite attendue, qui montre ce qu'il devient. Le nom du motif
+      ne sert plus qu'en dernier recours.
+
+      Seulement pour ses propres coups : l'explication tutoie celui qui joue,
+      et elle tutoierait l'ordinateur sur les siens.
+    */
+    const phrases: string[] = []
+    if (meilleur.reason && /[.!?…]$/.test(meilleur.reason)) phrases.push(meilleur.reason)
+    if (commentary.color === playerColor) {
+      const explication = explainRecommendedMove({
+        locale: localeDuContenu(prefs.locale),
+        fenBefore: commentary.fenBefore,
+        bestSan: meilleur.sanEn,
+        mover: commentary.color,
+        scoreBefore: commentary.scoreBefore,
+        scoreAfter: meilleur.score,
+        bestLine: meilleur.line,
+      })
+      for (const paragraphe of explication?.body ?? []) {
+        const propre = paragraphe.replace(/\*\*/g, '')
+        if (!phrases.includes(propre)) phrases.push(propre)
+      }
+    }
+    if (phrases.length === 0 && meilleur.reason) phrases.push(meilleur.reason)
+
     return {
       conseille: formatMove(meilleur.san),
       joue: formatMove(commentary.san),
-      // « Le pion en d5 attaque en même temps le fou en c4 et le cavalier en
-      // e4. Il est défendu par la dame en d8. » C'est ce qui manquait : on
-      // montrait un coup sans jamais dire ce qu'il fait.
-      pourquoi: meilleur.reason,
+      pourquoi: phrases.length > 0 ? phrases.join(' ') : null,
+      suite:
+        meilleur.line.length > 1
+          ? t('computer.expectedLine', {
+              coups: meilleur.line.slice(0, 4).map(formatMove).join(' '),
+            })
+          : null,
     }
-  }, [verdictDuCoup, commentary, formatMove])
+  }, [verdictDuCoup, commentary, formatMove, playerColor, prefs.locale, t])
 
   /**
    * Pièces prises et avantage matériel — ou rien du tout.
@@ -1043,12 +1206,15 @@ export function GameScreen({
 
         {/* Absent en partie classée, comme dans la barre du pouce : le mode y
             est neutralisé de toute façon, et un interrupteur qui ne commute
-            rien se lit comme une panne. */}
+            rien se lit comme une panne.
+
+            Le menu se referme au clic, comme pour toute autre entrée : on
+            voit le changement sur l'écran lui-même — le panneau du coach qui
+            paraît ou s'efface —, pas sur un interrupteur. */}
         {!classee && (
-          <div data-garde-ouvert className="mt-1 border-t border-line/60 pt-1">
-            {/* `data-garde-ouvert` : commuter le mode commenté ne doit pas refermer
-    le menu, sinon on ne voit pas ce qu’on vient de changer. */}
+          <div className="mt-1 border-t border-line/60 pt-1">
             <CommentaryToggle
+              variante="menu"
               active={commentaryMode}
               onChange={(value) => {
                 // Quitter le mode commenté rend la main tout de suite : ni
@@ -1092,7 +1258,7 @@ export function GameScreen({
           rating={bot.elo}
           color={botColor}
           avatar={personality.portrait}
-          clock={timed ? clock : null}
+          clock={pendule ? clock : null}
           timeControl={timeControl}
           active={state.turn === botColor && !gameOver}
           {...matiereAffichee(botColor)}
@@ -1142,6 +1308,7 @@ export function GameScreen({
                 // elle reprend sa rangée sous le plateau.
 
                 emplacementBascule={grandEcran ? emplacementBascule : undefined}
+                actionBascule={branchement.action}
                 fen={state.fen}
                 orientation={orientation}
                 playable={state.isLive && !gameOver ? playerColor : null}
@@ -1180,13 +1347,31 @@ export function GameScreen({
 
                 Elle rend du même coup la pastille franchement décorative,
                 ce qui justifie enfin son `aria-hidden` : le mot est lu ici,
-                une seule fois. */}
-            {verdictDuCoup && (
-              <LegendeDuVerdict quality={verdictDuCoup.quality} conseil={conseilDuCoup} />
+                une seule fois.
+
+                Sa place est réservée tant que le mode commenté est allumé,
+                qu'il y ait un verdict ou non : une légende qui paraissait après
+                l'analyse et s'effaçait au coup suivant faisait bouger tout ce
+                qui est dessous. La hauteur est fixe, et une explication plus
+                longue défile dans sa case.
+
+                Et seulement en portrait sous `lg`. Partout où le panneau du
+                coach est à côté de l'échiquier — grand écran, paysage —, cette
+                légende le répétait en rognant le plateau de cent pixels ; le
+                conseil passe alors dans le panneau (voir `complement`).
+
+                Calée sur la largeur du plateau, comme le bouton « Continuer » :
+                elle courait sur toute la colonne et débordait des deux côtés. */}
+            {commentaryMode && (
+              <div className="mx-auto mb-1.5 h-24 w-full max-w-[var(--cote-plateau)] overflow-y-auto overscroll-contain lg:hidden paysage:hidden">
+                {verdictDuCoup && (
+                  <LegendeDuVerdict quality={verdictDuCoup.quality} conseil={conseilDuCoup} />
+                )}
+              </div>
             )}
 
             {reviewing && (
-              <div className="mb-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2 text-[14px]">
+              <div className="mx-auto mb-1.5 flex w-full max-w-[var(--cote-plateau)] items-center gap-2 rounded-[var(--radius-sm)] border border-accent/40 bg-accent/10 px-3 py-2 text-[14px]">
                 <Eye size={15} className="shrink-0 text-accent" aria-hidden />
                 <span className="min-w-0 flex-1 leading-snug text-muted">
                   {reviewedMove
@@ -1212,7 +1397,7 @@ export function GameScreen({
             )}
 
             {studyPause && (
-              <div className="mb-1.5 h-10">
+              <div className="mx-auto mb-1.5 h-10 w-full max-w-[var(--cote-plateau)]">
                 {awaitingReview && (
                   <button
                     type="button"
@@ -1233,7 +1418,7 @@ export function GameScreen({
           name={t('common.you')}
           color={playerColor}
           avatar="🙂"
-          clock={timed ? clock : null}
+          clock={pendule ? clock : null}
           timeControl={timeControl}
           active={state.turn === playerColor && !gameOver}
           {...matiereAffichee(playerColor)}
@@ -1390,6 +1575,33 @@ export function GameScreen({
           {commentaryMode ? (
             telephone ? null : (
               <CommentaryPanel
+                // Hauteur fixe sur grand écran : le panneau changeait de taille
+                // à chaque coup — un ou deux paragraphes, trois ou quatre
+                // options, la légende des flèches ou non — et la liste des
+                // coups sautait d'autant en dessous. Ce qui dépasse défile dans
+                // le panneau. Incompressible : la colonne est pleine, et sans
+                // cela la liste qui s'allonge le rognait d'un pixel à chaque
+                // coup. Plafonnée à 38 % de la fenêtre, pour laisser sa place à
+                // la liste sur un portable bas.
+                className="lg:h-[min(22rem,38dvh)] lg:shrink-0"
+                /*
+                  Le conseil, là où la légende sous l'échiquier n'est plus :
+                  grand écran et paysage. Seulement quand l'explication ne le
+                  donne pas déjà — sur une faute, elle dit elle-même « mieux
+                  valait… », avec sa raison et un exemple ; le répéter en
+                  dessous ne ferait que doubler le texte.
+                */
+                complement={
+                  conseilDuCoup &&
+                  commentary &&
+                  !reviewedMove &&
+                  !meriteUnMeilleurCoup(commentary.quality, commentary.winLoss) ? (
+                    <PhraseDuConseil
+                      conseil={conseilDuCoup}
+                      className="hidden lg:block paysage:block"
+                    />
+                  ) : undefined
+                }
                 legende={arrowLegend}
                 voix={commentaryMode}
                 // En revue, on montre le commentaire du coup consulté plutôt que
@@ -1426,7 +1638,13 @@ export function GameScreen({
             openingName={opening?.name ?? null}
           />
 
-          <PhysicalBoardPanel state={physicalBoard} />
+          <div id={PANNEAU_PLATEAU_ID} className="empty:hidden">
+            <PhysicalBoardPanel
+              state={physicalBoard}
+              ouvert={branchement.ouvert}
+              onFermer={branchement.fermer}
+            />
+          </div>
 
           {/* ── La liste garde les derniers coups, pas tous ───────────────
               Elle prenait toute la hauteur restante de la colonne
@@ -1444,8 +1662,14 @@ export function GameScreen({
               pas. */}
           {/* La carte garde ses trois zones : en tête la bascule de vue, au
               milieu la liste — la seule qui défile —, au pied la navigation
-              et les actions. */}
-          <Card className="flex max-h-[45vh] flex-col overflow-hidden lg:max-h-none">
+              et les actions.
+
+              Sur grand écran, elle laisse déborder : le menu « … » de son pied
+              s'ouvre vers le haut quand la place manque en bas, et la carte le
+              coupait à son bord — « Nouvelle partie » à moitié caché. La liste
+              défile déjà seule ; `min-h-0` garde à la carte le droit de
+              rétrécir, que `overflow-hidden` lui donnait jusque-là. */}
+          <Card className="flex max-h-[45vh] flex-col overflow-hidden lg:max-h-none lg:min-h-0 lg:overflow-visible">
             {grandEcran && (
               <div className="flex items-center gap-2 border-b border-line/60 px-3 py-2">
                 <span className="text-[12px] font-semibold text-faint">{t('game.moves')}</span>
@@ -1509,16 +1733,21 @@ export function GameScreen({
             prochaine fois —, puis le verdict du serveur, qui ne parlait à
             personne : sa réponse était jetée à l'arrivée.
           */
+          // Rien à redire sur une partie rouverte : la première boîte a déjà
+          // dit si elle comptait, et la mention `prolongee` dit que cette
+          // fin-ci ne compte pas. « Tu as annulé un coup » y serait du bruit.
           nonClassee={
-            aideUtilisee
-              ? aideUtilisee === 'indice'
-                ? t('computer.usedHint')
-                : t('computer.usedTakeback')
-              : refusClassement
-                ? motifDeRefus(t, refusClassement)
-                : annonceManquee && classee
-                  ? t('computer.ratedAnnounceFailed')
-                  : null
+            prolongation
+              ? null
+              : aideUtilisee
+                ? aideUtilisee === 'indice'
+                  ? t('computer.usedHint')
+                  : t('computer.usedTakeback')
+                : refusClassement
+                  ? motifDeRefus(t, refusClassement)
+                  : annonceManquee && classee
+                    ? t('computer.ratedAnnounceFailed')
+                    : null
           }
           seance={
             seance && releveDeSeance
@@ -1542,6 +1771,8 @@ export function GameScreen({
           }
           onRematch={onRematch}
           onNewGame={onNewGame}
+          reprise={repriseProposee}
+          prolongee={prolongation}
         />
       )}
     </div>

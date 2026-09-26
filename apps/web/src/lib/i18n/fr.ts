@@ -841,6 +841,14 @@ export const fr = {
       halfMoves: '{n} demi-coups joués',
       notRated: 'Partie non classée :',
       timeoutNoMate: 'temps écoulé, mais l’adversaire ne pouvait plus mater',
+      continueUntimed: 'Continuer sans pendule',
+      continueUntimedHint:
+        'Le résultat au temps reste acquis ; la suite ne compte pas dans tes statistiques.',
+      continuedUntimed:
+        'Partie reprise après sa fin : cette fin-ci ne compte pas dans tes statistiques.',
+      rewindMate: 'Revenir avant le mat',
+      rewindMateHint:
+        'La défaite reste comptée. Rejoue la fin autrement pour voir ce qui aurait pu être fait — hors statistiques. « Annuler » remonte plus loin.',
       pgnEvent: 'Partie Le Coup Parfait',
       seanceTheme: 'Thème de la séance',
       seanceNever:

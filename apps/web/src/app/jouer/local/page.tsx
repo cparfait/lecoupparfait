@@ -48,6 +48,7 @@ import { useQualitesDesCoups } from '@/lib/game/useQualitesDesCoups.ts'
 import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
 import { Button, Card, Chip, Toggle } from '@/components/ui/index.tsx'
 import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
+import { PANNEAU_PLATEAU_ID, useBranchementPlateau } from '@/lib/board/useBranchementPlateau.tsx'
 import { useEcranAllume } from '@/lib/ecranAllume.ts'
 import { useChessGame } from '@/lib/game/useChessGame.ts'
 import { useCurrentOpening, useOpeningBook } from '@/lib/game/useOpeningBook.ts'
@@ -193,6 +194,9 @@ export default function LocalGamePage() {
     play: handleMove,
     lastMove: state.lastMove,
   })
+  // Le branchement : un bouton de la bascule du plateau, et le panneau
+  // seulement à la demande. Voir le crochet.
+  const branchement = useBranchementPlateau(physicalBoard)
 
   const newGame = useCallback(() => {
     annulerRotation()
@@ -324,6 +328,7 @@ export default function LocalGamePage() {
             // elle reprend sa rangée sous le plateau.
 
             emplacementBascule={grandEcran ? emplacementBascule : undefined}
+            actionBascule={branchement.action}
             fen={state.fen}
             orientation={orientation}
             playable={state.isLive && !state.isGameOver && !rotationEnAttente ? 'both' : null}
@@ -364,7 +369,7 @@ export default function LocalGamePage() {
             {/* La bascule 2D / 3D sous `sm` et en paysage : ailleurs elle
                 occupait une rangée entière sous l'échiquier pour trois
                 boutons alignés à droite. */}
-            <ViewToggle className="sm:hidden paysage:flex" />
+            <ViewToggle className="sm:hidden paysage:flex" action={branchement.action} />
             <span className="mr-auto flex items-center gap-2 pl-1 text-sm">
               <span
                 className={
@@ -383,6 +388,10 @@ export default function LocalGamePage() {
         <div className="[grid-area:aside] mt-4 flex min-h-0 flex-col gap-3 lg:mt-0 paysage:mt-0 paysage:overflow-y-auto paysage:overscroll-contain">
           {commentaryMode ? (
             <CommentaryPanel
+              // Hauteur fixe sur grand écran, comme contre l'ordinateur : sans
+              // elle, la liste des coups sautait au gré de la longueur de
+              // chaque commentaire. Voir l'écran de partie contre l'ordinateur.
+              className="lg:h-[min(22rem,38dvh)] lg:shrink-0"
               legende={arrowLegend}
               commentary={commentary}
               loading={coachLoading}
@@ -403,7 +412,13 @@ export default function LocalGamePage() {
             />
           )}
 
-          <PhysicalBoardPanel state={physicalBoard} />
+          <div id={PANNEAU_PLATEAU_ID} className="empty:hidden">
+            <PhysicalBoardPanel
+              state={physicalBoard}
+              ouvert={branchement.ouvert}
+              onFermer={branchement.fermer}
+            />
+          </div>
 
           <Card className="p-4">
             <Toggle

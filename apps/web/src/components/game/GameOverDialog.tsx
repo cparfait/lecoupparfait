@@ -12,7 +12,7 @@
  * qu'on avait en tête.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useDialogue } from '@/lib/useDialogue.ts'
 import Link from 'next/link'
 import { Check, Gauge, LayoutGrid, RotateCcw, Swords, Target, Trophy, X } from 'lucide-react'
@@ -46,6 +46,8 @@ export function GameOverDialog({
   nonClassee,
   onRematch,
   onNewGame,
+  reprise,
+  prolongee,
   retour,
   quete,
   seance,
@@ -76,6 +78,18 @@ export function GameOverDialog({
   nonClassee?: string | null
   onRematch?: () => void
   onNewGame?: () => void
+  /**
+   * Reprendre la partie hors statistiques, le résultat restant acquis.
+   *
+   * Deux cas, une même idée. Au temps : perdre une position qu'on était en
+   * train de jouer ne dit rien de ce qu'on aurait su en faire — on continue
+   * sans pendule. Sur un mat : on revient avant le coup qui l'a permis, pour
+   * chercher ce qu'on aurait pu jouer à la place. Dans les deux cas le résultat
+   * a déjà été compté, et la suite ne compte nulle part.
+   */
+  reprise?: { libelle: string; precision: string; icone: ReactNode; action: () => void }
+  /** La partie a été reprise après sa fin : cette fin-ci ne compte pas. */
+  prolongee?: boolean
   /**
    * Retour vers l'écran qui a envoyé jouer, quand il y en a un.
    *
@@ -294,6 +308,11 @@ export function GameOverDialog({
             {t('game.over.notRated')}&nbsp;{nonClassee}
           </p>
         )}
+        {prolongee && (
+          <p className="mt-3 text-[13px] leading-relaxed text-muted">
+            {t('game.over.continuedUntimed')}
+          </p>
+        )}
 
         <p className="mt-4 text-xs text-faint">{t('game.over.halfMoves', { n: moves.length })}</p>
 
@@ -449,6 +468,24 @@ export function GameOverDialog({
                 {t('game.analyse')}
               </Button>
             </Link>
+          )}
+
+          {reprise && (
+            <div>
+              <Button
+                variant="secondary"
+                size="lg"
+                fullWidth
+                icon={reprise.icone}
+                onClick={() => {
+                  setDismissed(true)
+                  reprise.action()
+                }}
+              >
+                {reprise.libelle}
+              </Button>
+              <p className="mt-1.5 text-[12px] leading-relaxed text-faint">{reprise.precision}</p>
+            </div>
           )}
 
           <div className="flex gap-2">

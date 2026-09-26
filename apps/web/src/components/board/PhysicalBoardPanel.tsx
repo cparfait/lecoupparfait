@@ -11,7 +11,7 @@
 import { useEffect, useState } from 'react'
 import { Bluetooth, Check, CircleAlert, Hand, Unplug, Usb } from 'lucide-react'
 import type { PieceSymbol } from 'chess.js'
-import { Button, Card, Chip, SectionTitle } from '@/components/ui/index.tsx'
+import { Button, Card, Chip, SectionTitle, Spinner } from '@/components/ui/index.tsx'
 import { availableDrivers } from '@/lib/board/registry.ts'
 import type { BoardDriver } from '@/lib/board/types.ts'
 import type { PhysicalBoardState } from '@/lib/board/usePhysicalBoard.ts'
@@ -27,9 +27,21 @@ const PROMOTION_LABELS: ReadonlyArray<{ piece: PieceSymbol; label: TranslationKe
 export function PhysicalBoardPanel({
   state,
   className,
+  ouvert,
+  onFermer,
 }: {
   state: PhysicalBoardState
   className?: string
+  /**
+   * Ouverture pilotée de l'extérieur.
+   *
+   * Fournie, le panneau ne pose plus sa ligne « Brancher un échiquier
+   * électronique » : c'est l'écran qui offre l'entrée ailleurs — le menu
+   * « … » de la partie contre l'ordinateur, où elle ne prend aucune place à
+   * côté de l'échiquier. Il ne s'affiche alors que demandé, ou branché.
+   */
+  ouvert?: boolean
+  onFermer?: () => void
 }) {
   const t = useT()
   // Les trois APIs se lisent sur `navigator` : le rendu serveur n'en sait
@@ -50,13 +62,20 @@ export function PhysicalBoardPanel({
    * qu'à la demande. Dès qu'un plateau est connecté, il s'ouvre de lui-même :
    * c'est à ce moment-là qu'on a besoin de le voir.
    */
-  const [deplie, setDeplie] = useState(false)
+  const [deplieInterne, setDeplieInterne] = useState(false)
+  const pilote = ouvert !== undefined
+  const deplie = pilote ? ouvert : deplieInterne
+  const setDeplie = (valeur: boolean) => {
+    if (!pilote) setDeplieInterne(valeur)
+    else if (!valeur) onFermer?.()
+  }
 
   // Aucune des trois APIs — Safari, Firefox, iOS. Le panneau n'a alors rien à
   // proposer : mieux vaut ne pas l'afficher du tout que promettre en vain.
   if (drivers.length === 0 && !state.board) return null
 
   if (!state.board && !deplie) {
+    if (pilote) return null
     return (
       <button
         type="button"
@@ -90,22 +109,37 @@ export function PhysicalBoardPanel({
       </SectionTitle>
 
       {!state.board && (
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-0.5">
+          {/* Des lignes, et non des `Button` : ceux-ci ont une hauteur fixe
+              et ne passent jamais à la ligne. Deux lignes de texte y
+              débordaient l'une sur l'autre, et la liste des modèles
+              — « Exclusive, Supreme Tournament 55, King Performance, eONE » —
+              sortait de la carte par la droite. Ici elle revient à la ligne :
+              c'est le détail qui dit si l'on a le bon plateau. */}
           {drivers.map((driver) => (
-            <Button
+            <button
               key={driver.id}
-              size="sm"
-              variant="ghost"
-              className="justify-start"
-              loading={state.status === 'connecting'}
-              icon={driver.transport === 'bluetooth' ? <Bluetooth size={14} /> : <Usb size={14} />}
+              type="button"
+              disabled={state.status === 'connecting'}
               onClick={() => void state.connect(driver)}
+              className="flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-left transition-colors hover:bg-surface-hover disabled:opacity-50 pointer-coarse:min-h-11"
             >
-              <span className="flex min-w-0 flex-col items-start">
-                <span className="text-sm">{t(driver.labelKey)}</span>
-                <span className="truncate text-[12px] text-muted">{t(driver.modelsKey)}</span>
+              <span className="shrink-0 text-muted" aria-hidden>
+                {state.status === 'connecting' ? (
+                  <Spinner size={14} />
+                ) : driver.transport === 'bluetooth' ? (
+                  <Bluetooth size={14} />
+                ) : (
+                  <Usb size={14} />
+                )}
               </span>
-            </Button>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold">{t(driver.labelKey)}</span>
+                <span className="block text-[12px] leading-snug text-muted">
+                  {t(driver.modelsKey)}
+                </span>
+              </span>
+            </button>
           ))}
         </div>
       )}

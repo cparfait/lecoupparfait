@@ -1499,7 +1499,14 @@ const AnnotationLayer = memo(function AnnotationLayer({
             // Le trait visible est fin ; on lui superpose une zone de clic plus
             // large et invisible, sinon viser une flèche à la souris relève de
             // l'adresse plutôt que de l'intention.
-            style={{ pointerEvents: 'stroke', cursor: 'pointer' }}
+            //
+            // `outline: none` : au clic, le groupe prend le focus, et le
+            // navigateur l'entourait de son anneau noir et blanc — un grand
+            // rectangle arrondi sur toute l'emprise de la flèche, qu'on
+            // prenait pour un élément de l'échiquier. `tabIndex={-1}` le
+            // tient déjà hors de la tabulation : cet anneau ne guidait aucun
+            // clavier, il ne faisait que masquer les cases.
+            style={{ pointerEvents: 'stroke', cursor: 'pointer', outline: 'none' }}
             onClick={(event) => {
               event.stopPropagation()
               onArrowClick?.(arrow)

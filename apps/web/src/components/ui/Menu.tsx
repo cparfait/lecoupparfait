@@ -246,10 +246,9 @@ export function Menu({
   /**
    * Un clic dans le panneau le referme — sauf sur ce qui demande à rester.
    *
-   * Choisir une entrée ferme le menu, c'est le geste attendu. Mais un
-   * interrupteur posé dans le panneau — le mode commenté, en partie — se
-   * commute sans qu'on veuille partir : on veut voir la position du curseur
-   * changer. Il se marque `data-garde-ouvert`, et le clic ne referme rien.
+   * Choisir une entrée ferme le menu, c'est le geste attendu. Une entrée qui
+   * doit laisser le menu ouvert — un réglage qu'on veut voir basculer sans
+   * partir — se marque `data-garde-ouvert`, et le clic ne referme rien.
    */
   const surClicDuPanneau = useCallback(
     (evenement: React.MouseEvent<HTMLDivElement>) => {

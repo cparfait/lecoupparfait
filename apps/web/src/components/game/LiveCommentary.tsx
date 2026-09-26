@@ -20,14 +20,13 @@
  *     avant de poursuivre.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   Eye,
   EyeOff,
   History,
-  Lightbulb,
-  LightbulbOff,
   Loader2,
+  MessageSquareOff,
   MessageSquareText,
   Pause,
   Play,
@@ -459,6 +458,7 @@ export function CommentaryPanel({
   onDesactiver,
   placeholder = true,
   compact = false,
+  complement,
   className,
 }: {
   commentary: Commentary | null
@@ -545,6 +545,14 @@ export function CommentaryPanel({
   /** Le coup proposé est-il fléché en permanence sur l'échiquier ? */
   showBestMove?: boolean
   onToggleBestMove?: () => void
+  /**
+   * Un texte de plus, sous l'explication, fourni par l'écran.
+   *
+   * L'écran de partie y met le conseil — « il fallait jouer… », sa raison et
+   * sa suite — là où il n'a plus sa place sous l'échiquier. C'est à lui de
+   * décider quand : le panneau ne sait pas ce qui est affiché ailleurs.
+   */
+  complement?: ReactNode
   className?: string
 }) {
   const t = useT()
@@ -707,14 +715,27 @@ export function CommentaryPanel({
 
   const style = commentary ? QUALITY_STYLES[commentary.quality] : null
 
+  /*
+    Une colonne dont seul le bas défile.
+
+    L'appelant peut imposer une hauteur au panneau — l'écran de partie le fait
+    sur grand écran, où ce qui est dessous sautait à chaque coup au gré du
+    nombre de paragraphes, d'options ou de la légende des flèches. L'en-tête
+    reste alors en place, et c'est l'explication qui défile dans sa case.
+    Sans hauteur imposée, rien ne change : la carte suit son contenu.
+  */
   return (
-    <Card className={clsx('overflow-hidden', className)}>
+    <Card className={clsx('flex flex-col overflow-hidden', className)}>
       {style && (
-        <div className="h-1" style={{ background: `var(--q-${style.token})` }} aria-hidden />
+        <div
+          className="h-1 shrink-0"
+          style={{ background: `var(--q-${style.token})` }}
+          aria-hidden
+        />
       )}
 
       {stale && commentary && (
-        <div className="flex items-center gap-2 border-b border-line bg-surface-strong px-3 py-1.5 text-[12px] text-faint">
+        <div className="flex shrink-0 items-center gap-2 border-b border-line bg-surface-strong px-3 py-1.5 text-[12px] text-faint">
           <History size={12} className="shrink-0" aria-hidden />
           <span className="min-w-0 flex-1 leading-snug">
             {t('commentary.staleBefore')}{' '}
@@ -734,12 +755,12 @@ export function CommentaryPanel({
       )}
 
       {legende.length > 0 && (
-        <div className="border-b border-line/60 px-4 py-2">
+        <div className="shrink-0 border-b border-line/60 px-4 py-2">
           <ArrowLegend items={legende} className="!bg-transparent !px-0 !py-0" />
         </div>
       )}
 
-      <div className="p-4">
+      <div className="shrink-0 px-4 pt-4">
         <div className="flex items-start gap-3">
           <span
             className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm font-bold"
@@ -882,9 +903,19 @@ export function CommentaryPanel({
             {onDesactiver && <BoutonDesactiver onClick={onDesactiver} />}
           </div>
         </div>
+      </div>
 
+      {/* Remonté à chaque coup : un nouveau commentaire se lit depuis le
+          début, pas depuis là où l'on avait laissé le précédent. */}
+      <div
+        key={commentary?.fenAfter ?? 'attente'}
+        className={clsx(
+          'min-h-0 flex-1 overflow-y-auto overscroll-contain',
+          !commentary?.alternatives.length && 'pb-4',
+        )}
+      >
         {commentary && commentary.body.length > 0 && (
-          <div className="mt-2.5 space-y-1.5">
+          <div className="mt-2.5 space-y-1.5 px-4">
             {commentary.body.slice(0, 2).map((paragraph, index) => (
               <p key={index} className="text-[14px] leading-relaxed text-muted">
                 {paragraph}
@@ -892,57 +923,58 @@ export function CommentaryPanel({
             ))}
           </div>
         )}
-      </div>
 
-      {/* ── Les options qu'on avait ─────────────────────────────────────── */}
-      {commentary && commentary.alternatives.length > 0 && (
-        <div className="border-t border-line/60">
-          <p className="px-4 py-2 text-[12px] font-semibold text-faint">
-            {t('commentary.whatYouCouldPlay')}
-          </p>
-          <ul onMouseLeave={() => onHoverAlternative?.(null)}>
-            {commentary.alternatives.map((alternative) => (
-              /* La ligne et l'écoute sont **deux** boutons côte à côte, et non
+        {complement && <div className="mt-2.5 px-4">{complement}</div>}
+
+        {/* ── Les options qu'on avait ─────────────────────────────────────── */}
+        {commentary && commentary.alternatives.length > 0 && (
+          <div className="mt-4 border-t border-line/60">
+            <p className="px-4 py-2 text-[12px] font-semibold text-faint">
+              {t('commentary.whatYouCouldPlay')}
+            </p>
+            <ul onMouseLeave={() => onHoverAlternative?.(null)}>
+              {commentary.alternatives.map((alternative) => (
+                /* La ligne et l'écoute sont **deux** boutons côte à côte, et non
                  l'un dans l'autre : un bouton ne peut pas en contenir un autre.
                  Le survol de la ligne montre la flèche, l'icône dit pourquoi. */
-              <li key={alternative.uci} className="flex items-stretch">
-                <button
-                  type="button"
-                  onMouseEnter={() => onHoverAlternative?.(alternative)}
-                  onFocus={() => onHoverAlternative?.(alternative)}
-                  className="flex min-w-0 flex-1 items-center gap-2.5 border-l-2 py-2 pl-3.5 pr-1 text-left transition-colors hover:bg-surface-hover"
-                  style={teinteDeLigne(alternative)}
-                >
-                  <span
-                    className={clsx(
-                      'grid h-5 w-5 shrink-0 place-items-center rounded text-[12px] font-bold',
-                      !couleurDeLigne(alternative) && 'bg-surface-strong text-faint',
-                    )}
-                    style={teinteDeRang(alternative)}
-                    aria-hidden
+                <li key={alternative.uci} className="flex items-stretch">
+                  <button
+                    type="button"
+                    onMouseEnter={() => onHoverAlternative?.(alternative)}
+                    onFocus={() => onHoverAlternative?.(alternative)}
+                    className="flex min-w-0 flex-1 items-center gap-2.5 border-l-2 py-2 pl-3.5 pr-1 text-left transition-colors hover:bg-surface-hover"
+                    style={teinteDeLigne(alternative)}
                   >
-                    {alternative.rank === 99 ? '·' : alternative.rank}
-                  </span>
+                    <span
+                      className={clsx(
+                        'grid h-5 w-5 shrink-0 place-items-center rounded text-[12px] font-bold',
+                        !couleurDeLigne(alternative) && 'bg-surface-strong text-faint',
+                      )}
+                      style={teinteDeRang(alternative)}
+                      aria-hidden
+                    >
+                      {alternative.rank === 99 ? '·' : alternative.rank}
+                    </span>
 
-                  <span className="w-16 shrink-0 font-mono text-sm font-semibold">
-                    {san(alternative.san)}
-                  </span>
+                    <span className="w-16 shrink-0 font-mono text-sm font-semibold">
+                      {san(alternative.san)}
+                    </span>
 
-                  <span className="w-12 shrink-0 text-xs tabular-nums text-muted">
-                    {alternative.rank === 99 ? '—' : formatScore(alternative.score)}
-                  </span>
+                    <span className="w-12 shrink-0 text-xs tabular-nums text-muted">
+                      {alternative.rank === 99 ? '—' : formatScore(alternative.score)}
+                    </span>
 
-                  <span className="min-w-0 flex-1 truncate text-[12px] text-faint">
-                    {alternative.reason ??
-                      (alternative.line.length > 1
-                        ? alternative.line
-                            .slice(1, 4)
-                            .map((move) => san(move))
-                            .join(' ')
-                        : '')}
-                  </span>
+                    <span className="min-w-0 flex-1 truncate text-[12px] text-faint">
+                      {alternative.reason ??
+                        (alternative.line.length > 1
+                          ? alternative.line
+                              .slice(1, 4)
+                              .map((move) => san(move))
+                              .join(' ')
+                          : '')}
+                    </span>
 
-                  {/* Les deux lignes remarquables portent leur nom.
+                    {/* Les deux lignes remarquables portent leur nom.
                   
                       « Joué » existait déjà ; le premier choix du moteur, lui,
                       n'avait qu'un chevron — un signe qui ne dit rien et qu'on
@@ -953,43 +985,52 @@ export function CommentaryPanel({
                       Elle reprend la teinte de la flèche correspondante, pour
                       que l'étiquette, le liseré, la pastille du rang et la
                       flèche sur l'échiquier ne fassent qu'une seule couleur. */}
-                  {alternative.played && (
-                    <Chip className="shrink-0 border-transparent" style={teinteDeRang(alternative)}>
-                      {t('commentary.played')}
-                    </Chip>
-                  )}
-                  {!alternative.played && alternative.rank === 1 && (
-                    <Chip className="shrink-0 border-transparent" style={teinteDeRang(alternative)}>
-                      {t('commentary.best')}
-                    </Chip>
-                  )}
-                </button>
+                    {alternative.played && (
+                      <Chip
+                        className="shrink-0 border-transparent"
+                        style={teinteDeRang(alternative)}
+                      >
+                        {t('commentary.played')}
+                      </Chip>
+                    )}
+                    {!alternative.played && alternative.rank === 1 && (
+                      <Chip
+                        className="shrink-0 border-transparent"
+                        style={teinteDeRang(alternative)}
+                      >
+                        {t('commentary.best')}
+                      </Chip>
+                    )}
+                  </button>
 
-                {/* L'explication d'une alternative n'existe pas d'avance : la
+                  {/* L'explication d'une alternative n'existe pas d'avance : la
                     calculer pour les trois lignes à chaque coup coûterait trois
                     fois le prix pour deux qu'on n'écoutera jamais. On la produit
                     au clic, avec `explainRecommendedMove` — la même machinerie
                     que le « Pourquoi ? » de la page d'analyse. */}
-                {!alternative.played && alternative.rank !== 99 && (
-                  <button
-                    type="button"
-                    onClick={() => expliquerAlternative(alternative)}
-                    title={t('commentary.listenWhy', { coup: san(alternative.san) })}
-                    aria-label={t('commentary.listenExplanationOf', { coup: san(alternative.san) })}
-                    className={clsx(
-                      'grid w-9 shrink-0 place-items-center transition-colors hover:bg-surface-hover',
-                      'text-faint hover:text-accent',
-                    )}
-                    style={{ background: teinteDeLigne(alternative).background }}
-                  >
-                    <Volume2 size={13} aria-hidden />
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+                  {!alternative.played && alternative.rank !== 99 && (
+                    <button
+                      type="button"
+                      onClick={() => expliquerAlternative(alternative)}
+                      title={t('commentary.listenWhy', { coup: san(alternative.san) })}
+                      aria-label={t('commentary.listenExplanationOf', {
+                        coup: san(alternative.san),
+                      })}
+                      className={clsx(
+                        'grid w-9 shrink-0 place-items-center transition-colors hover:bg-surface-hover',
+                        'text-faint hover:text-accent',
+                      )}
+                      style={{ background: teinteDeLigne(alternative).background }}
+                    >
+                      <Volume2 size={13} aria-hidden />
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </Card>
   )
 }
@@ -1350,8 +1391,8 @@ function teinteDeRang(alternative: Alternative): { background: string; color: st
  * La sortie du mode commenté, posée sur le commentaire lui-même.
  *
  * Même dessin que ses voisins de la barre d'icônes, mais avec un libellé écrit
- * en toutes lettres au survol : une ampoule barrée seule se lit « masquer les
- * indices », ce qui n'est pas la même chose que couper le mode.
+ * en toutes lettres au survol : une bulle barrée seule se lit « masquer les
+ * messages », ce qui n'est pas la même chose que couper le mode.
  */
 function BoutonDesactiver({ onClick }: { onClick: () => void }) {
   const t = useT()
@@ -1364,7 +1405,7 @@ function BoutonDesactiver({ onClick }: { onClick: () => void }) {
       aria-label={t('commentary.disable')}
       className="grid h-7 w-7 shrink-0 place-items-center rounded-[var(--radius-sm)] text-faint transition-colors hover:bg-surface-hover hover:text-ink"
     >
-      <LightbulbOff size={14} aria-hidden />
+      <MessageSquareOff size={14} aria-hidden />
     </button>
   )
 }
@@ -1373,13 +1414,62 @@ function BoutonDesactiver({ onClick }: { onClick: () => void }) {
 export function CommentaryToggle({
   active,
   onChange,
+  variante = 'bouton',
   className,
 }: {
   active: boolean
   onChange: (value: boolean) => void
+  /**
+   * `menu` : une ligne de menu avec son interrupteur, pour le menu « … » de
+   * l'écran de partie.
+   *
+   * La pastille pleine y détonnait. Posée sous « Nouvelle partie » et
+   * « Abandonner », elle se lisait comme le bouton principal du menu — une
+   * action à lancer — et rien ne disait qu'elle était un état, déjà allumé, ni
+   * qu'un clic allait l'éteindre. Un interrupteur dit les deux d'un regard.
+   */
+  variante?: 'bouton' | 'menu'
   className?: string
 }) {
   const t = useT()
+
+  /*
+    L'icône n'est plus l'ampoule : c'était déjà celle d'« Indice », juste à
+    côté dans la même barre, pour une chose toute différente. La bulle est
+    celle du panneau de commentaire lui-même.
+  */
+  if (variante === 'menu') {
+    return (
+      <button
+        type="button"
+        role="menuitemcheckbox"
+        aria-checked={active}
+        onClick={() => onChange(!active)}
+        title={t('commentary.toggleTitle')}
+        className={clsx(
+          'flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-left text-sm transition-colors hover:bg-surface-hover pointer-coarse:min-h-11',
+          className,
+        )}
+      >
+        <MessageSquareText size={15} className="shrink-0 text-muted" aria-hidden />
+        <span className="min-w-0 flex-1">{t('commentary.mode')}</span>
+        <span
+          aria-hidden
+          className={clsx(
+            'relative h-5 w-9 shrink-0 rounded-full transition-colors duration-200',
+            active ? 'bg-accent' : 'border border-line-strong bg-surface-strong',
+          )}
+        >
+          <span
+            className={clsx(
+              'absolute left-0 top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform duration-150',
+              active ? 'translate-x-[18px]' : 'translate-x-0.5',
+            )}
+          />
+        </span>
+      </button>
+    )
+  }
 
   return (
     <button
@@ -1395,7 +1485,7 @@ export function CommentaryToggle({
         className,
       )}
     >
-      <Lightbulb size={14} aria-hidden />
+      <MessageSquareText size={14} aria-hidden />
       {t('commentary.mode')}
     </button>
   )

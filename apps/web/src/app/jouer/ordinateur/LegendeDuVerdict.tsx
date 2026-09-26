@@ -1,8 +1,18 @@
 'use client'
 
+import clsx from 'clsx'
 import { QUALITY_STYLES, type MoveQuality } from '@coupparfait/core'
 import { avecElements, useT } from '@/lib/i18n/index.tsx'
 import { tCoeur } from '@/lib/i18n/resoudre.ts'
+
+/** Le coup qu'il fallait jouer, celui qu'on a joué, et ce que le premier fait. */
+export interface Conseil {
+  conseille: string
+  joue: string
+  pourquoi?: string | null
+  /** La suite attendue après le coup conseillé : ce qu'il devient. */
+  suite?: string | null
+}
 
 /**
  * Ce que dit la pastille posée sur la case d'arrivée, écrit.
@@ -16,15 +26,14 @@ export function LegendeDuVerdict({
   conseil,
 }: {
   quality: MoveQuality
-  /** Le coup qu'il fallait jouer, celui qu'on a joué, et ce que le premier fait. */
-  conseil?: { conseille: string; joue: string; pourquoi?: string | null } | null
+  conseil?: Conseil | null
 }) {
   const t = useT()
   const style = QUALITY_STYLES[quality]
   const teinte = `var(--q-${style.token})`
 
   return (
-    <div className="mb-1.5">
+    <div>
       <p className="flex items-baseline gap-1.5 text-[14px] leading-snug" style={{ color: teinte }}>
         <span aria-hidden>{style.glyph}</span>
         <span className="font-semibold">{tCoeur(t, style.label)}</span>
@@ -36,18 +45,30 @@ export function LegendeDuVerdict({
       {/* Visible à toutes les tailles, contrairement à la description : c'est
           la clé de lecture de la flèche bleue, et elle manque surtout là où
           l'écran est petit. */}
-      {conseil && (
-        <p className="mt-0.5 text-[14px] leading-snug text-muted">
-          {avecElements(t('computer.shouldHavePlayed'), {
-            conseille: <strong className="font-semibold text-accent">{conseil.conseille}</strong>,
-            joue: <strong className="font-semibold text-ink">{conseil.joue}</strong>,
-          })}
-          {/* Et ce qu'il faisait. Sans cette phrase, on regarde un coup dont on
-              ne comprend pas l'intérêt, et l'on n'apprend rien — la
-              justification vaut mieux que le verdict. */}
-          {conseil.pourquoi && <span className="text-ink"> {conseil.pourquoi}</span>}
-        </p>
-      )}
+      {conseil && <PhraseDuConseil conseil={conseil} className="mt-0.5" />}
     </div>
+  )
+}
+
+/**
+ * « Il fallait jouer… », avec sa raison et sa suite.
+ *
+ * Sous l'échiquier sur téléphone, dans le panneau du coach ailleurs : la même
+ * phrase aux deux endroits, écrite une fois.
+ */
+export function PhraseDuConseil({ conseil, className }: { conseil: Conseil; className?: string }) {
+  const t = useT()
+  return (
+    <p className={clsx('text-[14px] leading-snug text-muted', className)}>
+      {avecElements(t('computer.shouldHavePlayed'), {
+        conseille: <strong className="font-semibold text-accent">{conseil.conseille}</strong>,
+        joue: <strong className="font-semibold text-ink">{conseil.joue}</strong>,
+      })}
+      {/* Et ce qu'il faisait. Sans cette phrase, on regarde un coup dont on
+          ne comprend pas l'intérêt, et l'on n'apprend rien — la
+          justification vaut mieux que le verdict. */}
+      {conseil.pourquoi && <span className="text-ink"> {conseil.pourquoi}</span>}
+      {conseil.suite && <span> {conseil.suite}</span>}
+    </p>
   )
 }

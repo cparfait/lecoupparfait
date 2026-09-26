@@ -43,6 +43,7 @@ import {
 import { ChessBoard, ViewToggle } from '@/components/board/ChessBoard.tsx'
 import { PhysicalBoardPanel } from '@/components/board/PhysicalBoardPanel.tsx'
 import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
+import { PANNEAU_PLATEAU_ID, useBranchementPlateau } from '@/lib/board/useBranchementPlateau.tsx'
 import { useEcranAllume } from '@/lib/ecranAllume.ts'
 import { MoveList } from '@/components/game/MoveList.tsx'
 import { RubanCoups, rubanDepuisLesCoups } from '@/components/game/RubanCoups.tsx'
@@ -646,6 +647,9 @@ export default function LiveGamePage() {
     play: handleMove,
     lastMove: snapshot?.lastMove ?? null,
   })
+  // Le branchement : un bouton de la bascule du plateau, et le panneau
+  // seulement à la demande. Voir le crochet.
+  const branchement = useBranchementPlateau(physicalBoard)
 
   // L'adversaire réfléchit, on ne touche à rien, et l'écran du téléphone
   // s'éteint : au retour, la pendule a tourné. Le crochet se déclare avant les
@@ -882,6 +886,7 @@ export default function LiveGamePage() {
               // elle reprend sa rangée sous le plateau.
 
               emplacementBascule={grandEcran ? emplacementBascule : undefined}
+              actionBascule={branchement.action}
               fen={revue?.fen ?? fenAffichee ?? snapshot.fen}
               orientation={orientation}
               playable={
@@ -978,7 +983,7 @@ export default function LiveGamePage() {
             {/* La bascule 2D / 3D sous `sm` et en paysage : ailleurs elle
                 occupait une rangée entière sous l'échiquier pour trois
                 boutons alignés à droite. */}
-            <ViewToggle className="sm:hidden paysage:flex" />
+            <ViewToggle className="sm:hidden paysage:flex" action={branchement.action} />
             {actions}
 
             <Button
@@ -1054,7 +1059,14 @@ export default function LiveGamePage() {
           {/* La liste cède la place : c'est elle qui peut se réduire, pas le
               tchat — deux lignes de coups restent lisibles, deux lignes de
               conversation ne sont plus une conversation. */}
-          <PhysicalBoardPanel state={physicalBoard} className="p-3.5" />
+          <div id={PANNEAU_PLATEAU_ID} className="empty:hidden">
+            <PhysicalBoardPanel
+              state={physicalBoard}
+              className="p-3.5"
+              ouvert={branchement.ouvert}
+              onFermer={branchement.fermer}
+            />
+          </div>
 
           {/* Sur téléphone, la liste prend la hauteur de ce qu'elle contient,
               plafonnée à 40 % de la fenêtre. Elle réservait 120 px et poussait

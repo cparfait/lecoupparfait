@@ -815,6 +815,14 @@ export const en: Dictionary = {
       halfMoves: '{n} half-moves played',
       notRated: 'Unrated game:',
       timeoutNoMate: 'time ran out, but your opponent could no longer mate',
+      continueUntimed: 'Continue without the clock',
+      continueUntimedHint:
+        'The result on time stands; the rest of the game does not count in your statistics.',
+      continuedUntimed:
+        'Game resumed after it ended: this ending does not count in your statistics.',
+      rewindMate: 'Go back before the mate',
+      rewindMateHint:
+        'The loss still counts. Replay the ending differently to see what could have been done — outside your statistics. “Undo” goes further back.',
       pgnEvent: 'Le Coup Parfait game',
       seanceTheme: 'Theme of the session',
       seanceNever:
