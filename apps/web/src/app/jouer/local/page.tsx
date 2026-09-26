@@ -27,6 +27,7 @@
  */
 const PAUSE_AVANT_ROTATION = 900
 
+import clsx from 'clsx'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { RefreshCw, RotateCcw, Undo2 } from 'lucide-react'
 import type { Color, PieceSymbol, Square } from 'chess.js'
@@ -388,10 +389,11 @@ export default function LocalGamePage() {
         <div className="[grid-area:aside] mt-4 flex min-h-0 flex-col gap-3 lg:mt-0 paysage:mt-0 paysage:overflow-y-auto paysage:overscroll-contain">
           {commentaryMode ? (
             <CommentaryPanel
-              // Hauteur fixe sur grand écran, comme contre l'ordinateur : sans
-              // elle, la liste des coups sautait au gré de la longueur de
-              // chaque commentaire. Voir l'écran de partie contre l'ordinateur.
-              className="lg:h-[min(22rem,38dvh)] lg:shrink-0"
+              // Toute la hauteur libre sur grand écran, comme contre
+              // l'ordinateur, et la carte des coups à hauteur fixe : le
+              // panneau ne dépend plus de la longueur de chaque commentaire,
+              // et ses options restent visibles. Voir `GameScreen`.
+              className="lg:min-h-[14rem] lg:flex-1"
               legende={arrowLegend}
               commentary={commentary}
               loading={coachLoading}
@@ -439,7 +441,12 @@ export default function LocalGamePage() {
           {/* Même règle qu'en partie contre l'ordinateur : douze rangées, la
               carte se règle sur ce qu'elle contient, et le reste de la colonne
               n'est pas un cadre vide. */}
-          <Card className="flex max-h-[45vh] flex-col overflow-hidden lg:max-h-none">
+          <Card
+            className={clsx(
+              'flex max-h-[45vh] flex-col overflow-hidden lg:max-h-none lg:overflow-visible',
+              commentaryMode && 'lg:h-[min(19rem,30dvh)] lg:shrink-0',
+            )}
+          >
             {grandEcran && (
               <div className="flex items-center gap-2 border-b border-line/60 px-3 py-2">
                 <span className="text-[12px] font-semibold text-faint">{t('game.moves')}</span>

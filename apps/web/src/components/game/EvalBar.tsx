@@ -40,6 +40,23 @@ export const EvalBar = memo(function EvalBar({
   const t = useT()
   const decisive = score?.type === 'mate'
 
+  /*
+    Les chances de chaque camp, en pourcentage, à son bout de la barre.
+
+    Le score en pions (« +0.06 ») ne parle qu'à qui sait lire un moteur ; la
+    hauteur de la jauge, elle, suit déjà les chances de victoire — on les
+    écrit. Chaque camp lit son chiffre de son côté : en bas le sien, en haut
+    celui de l'adversaire, et les deux font cent.
+
+    Ce sont des chances **attendues** (une nulle compte pour moitié), la
+    même mesure que la jauge. Arrondies à l'unité : une décimale promettrait
+    une précision que l'évaluation n'a pas.
+  */
+  const partBas = Math.round(bottomShare)
+  const partHaut = 100 - partBas
+  const pourcentBas = score && !loading ? `${partBas}%` : null
+  const pourcentHaut = score && !loading ? `${partHaut}%` : null
+
   if (orientationAxis === 'horizontal') {
     return (
       <div
@@ -68,6 +85,16 @@ export const EvalBar = memo(function EvalBar({
             {loading ? '…' : label}
           </span>
         )}
+        {showLabel && pourcentBas && (
+          <>
+            <span className="absolute inset-y-0 left-2 grid place-items-center text-[13px] font-extrabold tabular-nums mix-blend-difference text-white">
+              {pourcentBas}
+            </span>
+            <span className="absolute inset-y-0 right-2 grid place-items-center text-[13px] font-extrabold tabular-nums mix-blend-difference text-white">
+              {pourcentHaut}
+            </span>
+          </>
+        )}
       </div>
     )
   }
@@ -75,7 +102,8 @@ export const EvalBar = memo(function EvalBar({
   return (
     <div
       className={clsx(
-        'relative w-7 shrink-0 overflow-hidden rounded-[var(--radius-sm)] transition-opacity',
+        // Neuf et non sept : « 100% » en treize points bien gras n'y tenait pas.
+        'relative w-9 shrink-0 overflow-hidden rounded-[var(--radius-sm)] transition-opacity',
         loading && 'opacity-60',
         className,
       )}
@@ -100,15 +128,33 @@ export const EvalBar = memo(function EvalBar({
       {/* Repère du milieu : l'égalité parfaite. */}
       <div className="absolute inset-x-0 top-1/2 h-px bg-black/25" aria-hidden />
 
+      {/* Le pourcentage de chaque camp à son bout, et le score en dessous de
+          celui du camp qui mène. La couleur suit le fond sous le texte : un
+          camp à 3 % n'a plus de blanc sous son chiffre. */}
       {showLabel && (
         <span
           className={clsx(
-            'absolute inset-x-0 text-center text-[12px] font-bold tabular-nums leading-none',
-            // L'étiquette se place du côté du camp qui mène, pour rester lisible.
-            bottomShare > 50 ? 'bottom-1 text-black/80' : 'top-1 text-white/85',
+            'absolute inset-x-0 top-1.5 flex flex-col items-center gap-1 tabular-nums leading-none',
+            partHaut >= 6 ? 'text-white' : 'text-black',
           )}
         >
-          {loading ? '…' : label}
+          {pourcentHaut && <span className="text-[13px] font-extrabold">{pourcentHaut}</span>}
+          {bottomShare <= 50 && (
+            <span className="text-[11px] font-semibold opacity-75">{loading ? '…' : label}</span>
+          )}
+        </span>
+      )}
+      {showLabel && (
+        <span
+          className={clsx(
+            'absolute inset-x-0 bottom-1.5 flex flex-col-reverse items-center gap-1 tabular-nums leading-none',
+            partBas >= 6 ? 'text-black' : 'text-white',
+          )}
+        >
+          {pourcentBas && <span className="text-[13px] font-extrabold">{pourcentBas}</span>}
+          {bottomShare > 50 && (
+            <span className="text-[11px] font-semibold opacity-75">{loading ? '…' : label}</span>
+          )}
         </span>
       )}
     </div>

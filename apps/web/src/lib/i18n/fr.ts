@@ -295,6 +295,8 @@ export const fr = {
     reviewingMove: 'Tu revois la partie — coup {coup}. Rien n’est effacé.',
     shouldHavePlayed:
       'Il fallait jouer {conseille} au lieu de {joue} — la flèche bleue montre ce coup-là dans la position d’avant, pas un coup à jouer maintenant.',
+    enginePreferred:
+      'Ton coup se joue. Le moteur préférait de peu {conseille} — la flèche bleue le montre dans la position d’avant, pas comme un coup à jouer maintenant.',
     gameOptions: 'Options de la partie',
     yourMove: 'Ton coup',
     advisedMove: 'Coup conseillé (n°{rang})',

@@ -906,13 +906,15 @@ export function CommentaryPanel({
       </div>
 
       {/* Remonté à chaque coup : un nouveau commentaire se lit depuis le
-          début, pas depuis là où l'on avait laissé le précédent. */}
+          début, pas depuis là où l'on avait laissé le précédent.
+
+          Seule l'explication défile. Les options restent dessous, hors de la
+          zone qui défile : dans un panneau à hauteur imposée, elles passaient
+          sous le pli, et « ce que tu pouvais jouer » — la moitié de ce que le
+          mode commenté a à dire — demandait de faire défiler pour être vu. */}
       <div
         key={commentary?.fenAfter ?? 'attente'}
-        className={clsx(
-          'min-h-0 flex-1 overflow-y-auto overscroll-contain',
-          !commentary?.alternatives.length && 'pb-4',
-        )}
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4"
       >
         {commentary && commentary.body.length > 0 && (
           <div className="mt-2.5 space-y-1.5 px-4">
@@ -925,56 +927,57 @@ export function CommentaryPanel({
         )}
 
         {complement && <div className="mt-2.5 px-4">{complement}</div>}
+      </div>
 
-        {/* ── Les options qu'on avait ─────────────────────────────────────── */}
-        {commentary && commentary.alternatives.length > 0 && (
-          <div className="mt-4 border-t border-line/60">
-            <p className="px-4 py-2 text-[12px] font-semibold text-faint">
-              {t('commentary.whatYouCouldPlay')}
-            </p>
-            <ul onMouseLeave={() => onHoverAlternative?.(null)}>
-              {commentary.alternatives.map((alternative) => (
-                /* La ligne et l'écoute sont **deux** boutons côte à côte, et non
+      {/* ── Les options qu'on avait ─────────────────────────────────────── */}
+      {commentary && commentary.alternatives.length > 0 && (
+        <div className="shrink-0 border-t border-line/60">
+          <p className="px-4 py-2 text-[12px] font-semibold text-faint">
+            {t('commentary.whatYouCouldPlay')}
+          </p>
+          <ul onMouseLeave={() => onHoverAlternative?.(null)}>
+            {commentary.alternatives.map((alternative) => (
+              /* La ligne et l'écoute sont **deux** boutons côte à côte, et non
                  l'un dans l'autre : un bouton ne peut pas en contenir un autre.
                  Le survol de la ligne montre la flèche, l'icône dit pourquoi. */
-                <li key={alternative.uci} className="flex items-stretch">
-                  <button
-                    type="button"
-                    onMouseEnter={() => onHoverAlternative?.(alternative)}
-                    onFocus={() => onHoverAlternative?.(alternative)}
-                    className="flex min-w-0 flex-1 items-center gap-2.5 border-l-2 py-2 pl-3.5 pr-1 text-left transition-colors hover:bg-surface-hover"
-                    style={teinteDeLigne(alternative)}
+              <li key={alternative.uci} className="flex items-stretch">
+                <button
+                  type="button"
+                  onMouseEnter={() => onHoverAlternative?.(alternative)}
+                  onFocus={() => onHoverAlternative?.(alternative)}
+                  className="flex min-w-0 flex-1 items-center gap-2.5 border-l-2 py-2 pl-3.5 pr-1 text-left transition-colors hover:bg-surface-hover"
+                  style={teinteDeLigne(alternative)}
+                >
+                  <span
+                    className={clsx(
+                      'grid h-5 w-5 shrink-0 place-items-center rounded text-[12px] font-bold',
+                      !couleurDeLigne(alternative) && 'bg-surface-strong text-faint',
+                    )}
+                    style={teinteDeRang(alternative)}
+                    aria-hidden
                   >
-                    <span
-                      className={clsx(
-                        'grid h-5 w-5 shrink-0 place-items-center rounded text-[12px] font-bold',
-                        !couleurDeLigne(alternative) && 'bg-surface-strong text-faint',
-                      )}
-                      style={teinteDeRang(alternative)}
-                      aria-hidden
-                    >
-                      {alternative.rank === 99 ? '·' : alternative.rank}
-                    </span>
+                    {alternative.rank === 99 ? '·' : alternative.rank}
+                  </span>
 
-                    <span className="w-16 shrink-0 font-mono text-sm font-semibold">
-                      {san(alternative.san)}
-                    </span>
+                  <span className="w-16 shrink-0 font-mono text-sm font-semibold">
+                    {san(alternative.san)}
+                  </span>
 
-                    <span className="w-12 shrink-0 text-xs tabular-nums text-muted">
-                      {alternative.rank === 99 ? '—' : formatScore(alternative.score)}
-                    </span>
+                  <span className="w-12 shrink-0 text-xs tabular-nums text-muted">
+                    {alternative.rank === 99 ? '—' : formatScore(alternative.score)}
+                  </span>
 
-                    <span className="min-w-0 flex-1 truncate text-[12px] text-faint">
-                      {alternative.reason ??
-                        (alternative.line.length > 1
-                          ? alternative.line
-                              .slice(1, 4)
-                              .map((move) => san(move))
-                              .join(' ')
-                          : '')}
-                    </span>
+                  <span className="min-w-0 flex-1 truncate text-[12px] text-faint">
+                    {alternative.reason ??
+                      (alternative.line.length > 1
+                        ? alternative.line
+                            .slice(1, 4)
+                            .map((move) => san(move))
+                            .join(' ')
+                        : '')}
+                  </span>
 
-                    {/* Les deux lignes remarquables portent leur nom.
+                  {/* Les deux lignes remarquables portent leur nom.
                   
                       « Joué » existait déjà ; le premier choix du moteur, lui,
                       n'avait qu'un chevron — un signe qui ne dit rien et qu'on
@@ -985,52 +988,45 @@ export function CommentaryPanel({
                       Elle reprend la teinte de la flèche correspondante, pour
                       que l'étiquette, le liseré, la pastille du rang et la
                       flèche sur l'échiquier ne fassent qu'une seule couleur. */}
-                    {alternative.played && (
-                      <Chip
-                        className="shrink-0 border-transparent"
-                        style={teinteDeRang(alternative)}
-                      >
-                        {t('commentary.played')}
-                      </Chip>
-                    )}
-                    {!alternative.played && alternative.rank === 1 && (
-                      <Chip
-                        className="shrink-0 border-transparent"
-                        style={teinteDeRang(alternative)}
-                      >
-                        {t('commentary.best')}
-                      </Chip>
-                    )}
-                  </button>
+                  {alternative.played && (
+                    <Chip className="shrink-0 border-transparent" style={teinteDeRang(alternative)}>
+                      {t('commentary.played')}
+                    </Chip>
+                  )}
+                  {!alternative.played && alternative.rank === 1 && (
+                    <Chip className="shrink-0 border-transparent" style={teinteDeRang(alternative)}>
+                      {t('commentary.best')}
+                    </Chip>
+                  )}
+                </button>
 
-                  {/* L'explication d'une alternative n'existe pas d'avance : la
+                {/* L'explication d'une alternative n'existe pas d'avance : la
                     calculer pour les trois lignes à chaque coup coûterait trois
                     fois le prix pour deux qu'on n'écoutera jamais. On la produit
                     au clic, avec `explainRecommendedMove` — la même machinerie
                     que le « Pourquoi ? » de la page d'analyse. */}
-                  {!alternative.played && alternative.rank !== 99 && (
-                    <button
-                      type="button"
-                      onClick={() => expliquerAlternative(alternative)}
-                      title={t('commentary.listenWhy', { coup: san(alternative.san) })}
-                      aria-label={t('commentary.listenExplanationOf', {
-                        coup: san(alternative.san),
-                      })}
-                      className={clsx(
-                        'grid w-9 shrink-0 place-items-center transition-colors hover:bg-surface-hover',
-                        'text-faint hover:text-accent',
-                      )}
-                      style={{ background: teinteDeLigne(alternative).background }}
-                    >
-                      <Volume2 size={13} aria-hidden />
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
+                {!alternative.played && alternative.rank !== 99 && (
+                  <button
+                    type="button"
+                    onClick={() => expliquerAlternative(alternative)}
+                    title={t('commentary.listenWhy', { coup: san(alternative.san) })}
+                    aria-label={t('commentary.listenExplanationOf', {
+                      coup: san(alternative.san),
+                    })}
+                    className={clsx(
+                      'grid w-9 shrink-0 place-items-center transition-colors hover:bg-surface-hover',
+                      'text-faint hover:text-accent',
+                    )}
+                    style={{ background: teinteDeLigne(alternative).background }}
+                  >
+                    <Volume2 size={13} aria-hidden />
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </Card>
   )
 }

@@ -6,6 +6,7 @@
  * page tout ce que l'écran de réglages ou l'adresse ont décidé.
  */
 
+import clsx from 'clsx'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Eye,
@@ -1040,6 +1041,7 @@ export function GameScreen({
       conseille: formatMove(meilleur.san),
       joue: formatMove(commentary.san),
       pourquoi: phrases.length > 0 ? phrases.join(' ') : null,
+      leger: !meriteUnMeilleurCoup(commentary.quality, commentary.winLoss),
       suite:
         meilleur.line.length > 1
           ? t('computer.expectedLine', {
@@ -1575,15 +1577,16 @@ export function GameScreen({
           {commentaryMode ? (
             telephone ? null : (
               <CommentaryPanel
-                // Hauteur fixe sur grand écran : le panneau changeait de taille
-                // à chaque coup — un ou deux paragraphes, trois ou quatre
-                // options, la légende des flèches ou non — et la liste des
-                // coups sautait d'autant en dessous. Ce qui dépasse défile dans
-                // le panneau. Incompressible : la colonne est pleine, et sans
-                // cela la liste qui s'allonge le rognait d'un pixel à chaque
-                // coup. Plafonnée à 38 % de la fenêtre, pour laisser sa place à
-                // la liste sur un portable bas.
-                className="lg:h-[min(22rem,38dvh)] lg:shrink-0"
+                // Sur grand écran, le panneau prend toute la hauteur que la
+                // colonne lui laisse. Elle ne dépend plus de son contenu — un ou
+                // deux paragraphes, trois ou quatre options, la légende des
+                // flèches ou non — mais de ce qui l'entoure, qui ne bouge pas
+                // d'un coup à l'autre : la carte des coups a une hauteur fixe,
+                // plus bas. Rien ne saute, et quand la place est là on la prend
+                // — une hauteur plafonnée laissait les options sous le pli, avec
+                // un grand vide dessous. L'explication défile ; les options
+                // restent visibles au pied du panneau.
+                className="lg:min-h-[14rem] lg:flex-1"
                 /*
                   Le conseil, là où la légende sous l'échiquier n'est plus :
                   grand écran et paysage. Seulement quand l'explication ne le
@@ -1667,9 +1670,19 @@ export function GameScreen({
               Sur grand écran, elle laisse déborder : le menu « … » de son pied
               s'ouvre vers le haut quand la place manque en bas, et la carte le
               coupait à son bord — « Nouvelle partie » à moitié caché. La liste
-              défile déjà seule ; `min-h-0` garde à la carte le droit de
-              rétrécir, que `overflow-hidden` lui donnait jusque-là. */}
-          <Card className="flex max-h-[45vh] flex-col overflow-hidden lg:max-h-none lg:min-h-0 lg:overflow-visible">
+              défile déjà seule.
+
+              Et elle a une hauteur fixe : c'est ce qui laisse au panneau du
+              coach, au-dessus, une place qui ne change pas d'un coup à l'autre.
+              La liste s'allongeait à chaque coup, et le panneau rétrécissait
+              d'autant. Quatre rangées y tiennent ; au-delà, elle défile et se
+              cale d'elle-même sur le coup courant. */}
+          <Card
+            className={clsx(
+              'flex max-h-[45vh] flex-col overflow-hidden lg:max-h-none lg:overflow-visible',
+              commentaryMode && 'lg:h-[min(19rem,30dvh)] lg:shrink-0',
+            )}
+          >
             {grandEcran && (
               <div className="flex items-center gap-2 border-b border-line/60 px-3 py-2">
                 <span className="text-[12px] font-semibold text-faint">{t('game.moves')}</span>

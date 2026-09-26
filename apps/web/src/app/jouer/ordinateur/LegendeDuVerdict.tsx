@@ -12,6 +12,16 @@ export interface Conseil {
   pourquoi?: string | null
   /** La suite attendue après le coup conseillé : ce qu'il devient. */
   suite?: string | null
+  /**
+   * Le coup joué ne méritait pas de correction.
+   *
+   * « Il fallait jouer Cf6 au lieu de g6 » sous le verdict « théorie
+   * d'ouverture », ou sous « excellent — aussi bon que le meilleur » : les
+   * deux phrases se démentaient. Sous le seuil où un meilleur coup vaut d'être
+   * signalé (`meriteUnMeilleurCoup`), on dit la même chose sans corriger : le
+   * coup se joue, le moteur en préférait de peu un autre.
+   */
+  leger?: boolean
 }
 
 /**
@@ -60,7 +70,7 @@ export function PhraseDuConseil({ conseil, className }: { conseil: Conseil; clas
   const t = useT()
   return (
     <p className={clsx('text-[14px] leading-snug text-muted', className)}>
-      {avecElements(t('computer.shouldHavePlayed'), {
+      {avecElements(t(conseil.leger ? 'computer.enginePreferred' : 'computer.shouldHavePlayed'), {
         conseille: <strong className="font-semibold text-accent">{conseil.conseille}</strong>,
         joue: <strong className="font-semibold text-ink">{conseil.joue}</strong>,
       })}

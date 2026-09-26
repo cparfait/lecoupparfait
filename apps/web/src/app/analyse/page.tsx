@@ -1665,8 +1665,8 @@ export function ReviewScreen({
                   {explanation.motifs.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       {explanation.motifs.map((motif) => (
-                        <Chip key={motif.id} tone="accent" title={motif.definition}>
-                          {motif.name}
+                        <Chip key={motif.id} tone="accent" title={tCoeur(t, motif.definition)}>
+                          {tCoeur(t, motif.name)}
                         </Chip>
                       ))}
                     </div>
@@ -1739,8 +1739,12 @@ export function ReviewScreen({
                             {pourquoi.motifs.length > 0 && (
                               <div className="mt-2 flex flex-wrap gap-1.5">
                                 {pourquoi.motifs.map((motif) => (
-                                  <Chip key={motif.id} tone="accent" title={motif.definition}>
-                                    {motif.name}
+                                  <Chip
+                                    key={motif.id}
+                                    tone="accent"
+                                    title={tCoeur(t, motif.definition)}
+                                  >
+                                    {tCoeur(t, motif.name)}
                                   </Chip>
                                 ))}
                               </div>

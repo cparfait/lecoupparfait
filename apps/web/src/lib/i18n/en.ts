@@ -289,6 +289,8 @@ export const en: Dictionary = {
     reviewingMove: 'You are reviewing the game — move {coup}. Nothing is erased.',
     shouldHavePlayed:
       'You should have played {conseille} instead of {joue} — the blue arrow shows that move in the position before, not a move to play now.',
+    enginePreferred:
+      'Your move is fine. The engine slightly preferred {conseille} — the blue arrow shows it in the position before, not as a move to play now.',
     gameOptions: 'Game options',
     yourMove: 'Your move',
     advisedMove: 'Suggested move (no.{rang})',
