@@ -1863,6 +1863,8 @@ export const fr = {
     needsAccountHint:
       'Elle demande un compte, pour une raison simple : une progression sur douze chapitres n’a aucun sens si elle disparaît en fermant l’onglet. Le compte est gratuit — un pseudo, un mot de passe, et rien d’autre.',
     restartConfirm: 'Recommencer la carrière depuis le premier chapitre ?',
+    restartHint: 'Tes étoiles, tes points et tes hauts faits de carrière seront effacés.',
+    restartAction: 'Tout recommencer',
     restarted: 'Carrière remise à zéro.',
     restartFailed: 'Impossible de recommencer.',
     finished: 'Carrière terminée.',

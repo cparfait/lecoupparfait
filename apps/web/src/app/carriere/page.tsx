@@ -42,6 +42,7 @@ import {
 } from '@coupparfait/core'
 import { Button, ButtonLink, Card, Skeleton, TitreDePage } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { BoiteConfirmation } from '@/components/ui/BoiteConfirmation.tsx'
 import { Celebration, type Gains } from '@/components/carriere/Celebration.tsx'
 import { recommencerCarriere, useCarriere } from '@/lib/carriere/useCarriere.ts'
 import { detailDEtape, libelleDeSuite, titreDEtape } from '@/lib/carriere/textes.ts'
@@ -148,8 +149,16 @@ function Parcours({ progression }: { progression: Progression }) {
     }
   }, [])
 
-  const recommencer = useCallback(async () => {
-    if (!window.confirm(t('career.restartConfirm'))) return
+  /*
+    Une question dans une boîte du jeu, et non `window.confirm` : celle du
+    navigateur s'ouvrait en haut de l'écran, titrée du nom de domaine, et ne
+    disait pas ce qu'on perdait. Or tout part — la ligne de progression est
+    effacée d'un bloc, étoiles, points et hauts faits compris.
+  */
+  const [confirmation, setConfirmation] = useState(false)
+  const recommencer = useCallback(() => setConfirmation(true), [])
+  const toutRecommencer = useCallback(async () => {
+    setConfirmation(false)
     if (await recommencerCarriere()) toast.success(t('career.restarted'))
     else toast.error(t('career.restartFailed'), t('analysis.tryAgainSoon'))
   }, [t])
@@ -157,6 +166,16 @@ function Parcours({ progression }: { progression: Progression }) {
   return (
     <>
       <Bandeau progression={progression} onRecommencer={recommencer} />
+      {confirmation && (
+        <BoiteConfirmation
+          titre={t('career.restartConfirm')}
+          texte={t('career.restartHint')}
+          confirmer={t('career.restartAction')}
+          danger
+          onConfirmer={() => void toutRecommencer()}
+          onAnnuler={() => setConfirmation(false)}
+        />
+      )}
 
       {termine ? (
         <Card className="mb-4 border-accent/50 p-5 text-center">

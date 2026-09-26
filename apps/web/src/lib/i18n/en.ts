@@ -1826,6 +1826,8 @@ export const en: Dictionary = {
     needsAccountHint:
       'It requires an account, for a simple reason: progress across twelve chapters makes no sense if it vanishes when you close the tab. The account is free — a username, a password, and nothing else.',
     restartConfirm: 'Restart the career from the first chapter?',
+    restartHint: 'Your career stars, points and achievements will be erased.',
+    restartAction: 'Start over',
     restarted: 'Career reset.',
     restartFailed: 'Could not restart.',
     finished: 'Career finished.',
