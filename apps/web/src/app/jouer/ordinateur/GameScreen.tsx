@@ -65,6 +65,7 @@ import { RappelDeSeance } from '@/components/game/RappelDeSeance.tsx'
 import { noterSeance, releverLeTheme, type Seance } from '@/lib/game/seance.ts'
 import { LEGEND, legendFor, type LegendItem } from '@/components/board/ArrowLegend.tsx'
 import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
+import { BoiteConfirmation } from '@/components/ui/BoiteConfirmation.tsx'
 import { Button, ButtonLink, Card, Chip } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
@@ -623,11 +624,22 @@ export function GameScreen({
     playSound('confirm')
   }, [undo, state.moves.length, state.isGameOver, outcome, oublierPositionDuBot, noterAide])
 
-  const handleResign = useCallback(() => {
-    // Une confirmation, comme en ligne et en correspondance. Le bouton vit
-    // dans la barre du pouce, à un doigt d'« Indice » : un seul appui perdait
-    // la partie, et en partie classée la défaite s'enregistrait.
-    if (!window.confirm(t('live.resignConfirm'))) return
+  /**
+   * La question posée avant d'abandonner ou de quitter, dans une boîte du jeu.
+   *
+   * C'était `window.confirm` : une boîte du navigateur, en haut de l'écran,
+   * titrée « coupparfait.cparfait.ovh indique », qu'on prenait pour un message
+   * étranger à la partie. Voir `BoiteConfirmation`.
+   */
+  const [question, setQuestion] = useState<'abandonner' | 'quitter' | null>(null)
+
+  // Une confirmation, comme en ligne et en correspondance. Le bouton vit dans
+  // la barre du pouce, à un doigt d'« Indice » : un seul appui perdait la
+  // partie, et en partie classée la défaite s'enregistrait.
+  const handleResign = useCallback(() => setQuestion('abandonner'), [])
+
+  const abandonner = useCallback(() => {
+    setQuestion(null)
     setClock((current) => stopClock(current, Date.now()))
     setOutcome({ status: 'resign', result: playerColor === 'w' ? '0-1' : '1-0' })
     // Un abandon compte comme une tentative, jamais comme une victoire — sauf
@@ -641,7 +653,7 @@ export function GameScreen({
     // Une partie abandonnée n'est plus à reprendre : sans cet oubli, l'écran
     // de départ la proposait comme si on l'avait quittée en cours.
     oublierPartieEnCours()
-  }, [playerColor, level, startFen, t, prolongation])
+  }, [playerColor, level, startFen, prolongation])
 
   /**
    * Rouvrir une partie finie, sans pendule et hors statistiques.
@@ -738,11 +750,15 @@ export function GameScreen({
    * directement.
    */
   const enCours = !gameOver && state.moves.length > 0
+  /** `false` quand une question est posée : l'appelant n'a pas encore quitté. */
   const quitterLaPartie = useCallback(() => {
-    if (enCours && !window.confirm(t('computer.leaveConfirm'))) return false
+    if (enCours) {
+      setQuestion('quitter')
+      return false
+    }
     onNewGame()
     return true
-  }, [enCours, onNewGame, t])
+  }, [enCours, onNewGame])
   const quitterRef = useRef(quitterLaPartie)
   quitterRef.current = quitterLaPartie
 
@@ -767,8 +783,8 @@ export function GameScreen({
       const cible = new URL(lien.href)
       if (cible.origin !== window.location.origin) return
       if (cible.pathname !== window.location.pathname || cible.search !== '') return
-      // Refusé, le clic est annulé avant que le lien ne navigue : on reste dans
-      // la partie, à l'adresse où l'on était.
+      // Partie en cours : le lien ne navigue pas, la boîte pose la question,
+      // et c'est sa réponse qui ramène aux réglages — ou nulle part.
       if (!quitterRef.current()) event.preventDefault()
     }
     // En capture : avant le gestionnaire du lien, qui navigue.
@@ -1565,7 +1581,9 @@ export function GameScreen({
                 if (value) prefs.set('commentaryMode', true)
                 else couperLeCommentaire()
               }}
-              onNewGame={onNewGame}
+              // Même question qu'au menu « … » du grand écran : sur téléphone,
+              // c'est ici que « Nouvelle partie » se touche, en pleine partie.
+              onNewGame={quitterLaPartie}
               onRematch={onRematch}
               onResign={handleResign}
               onHint={handleHint}
@@ -1764,6 +1782,30 @@ export function GameScreen({
           )}
         </div>
       </div>
+
+      {/* La partie a pu finir pendant la question — un mat, le drapeau : on
+          n'abandonne pas une partie terminée. */}
+      {question === 'abandonner' && !gameOver && (
+        <BoiteConfirmation
+          titre={t('live.resignConfirm')}
+          confirmer={t('game.resign')}
+          danger
+          onConfirmer={abandonner}
+          onAnnuler={() => setQuestion(null)}
+        />
+      )}
+      {question === 'quitter' && (
+        <BoiteConfirmation
+          titre={t('computer.leaveTitle')}
+          texte={t('computer.leaveHint')}
+          confirmer={t('computer.leaveAction')}
+          onConfirmer={() => {
+            setQuestion(null)
+            onNewGame()
+          }}
+          onAnnuler={() => setQuestion(null)}
+        />
+      )}
 
       {gameOver && (
         <GameOverDialog
