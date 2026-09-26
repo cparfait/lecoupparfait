@@ -1514,6 +1514,20 @@ function describeQuietMove(
 
   const sentences: string[] = []
 
+  // ── Une prise ─────────────────────────────────────────────────────────────
+  //
+  // Une prise passait ici comme un coup calme : après cxd4, on lisait « depuis
+  // d4, ton pion attaque le cavalier en c3 et le pion en e3 », sans un mot de
+  // la prise elle-même. Le joueur voyait alors un pion laissé sans défense, que
+  // le pion e3 allait prendre, sous le verdict « excellent » — alors qu'il
+  // venait de prendre un pion et qu'on ne faisait que le lui rendre. Ce qu'on
+  // prend, et ce qu'on risque de rendre, passe avant ce qu'on attaque.
+  const prise = decrirePrise(input, ctx, to, piece.type)
+  if (prise) {
+    sentences.push(prise.sentence)
+    cited.push(...prise.squares)
+  }
+
   // ── Ce que la pièce vise depuis sa nouvelle case ──────────────────────────
   const targets = attacksFrom(board, to, mover)
   const enemies = targets.filter((square) => board.get(square)?.color === opposite(mover))
@@ -1559,8 +1573,10 @@ function describeQuietMove(
   }
 
   // ── Développement ─────────────────────────────────────────────────────────
+  // Une prise se juge au matériel : « une pièce de plus dans le jeu » là où
+  // l'on vient de ramasser une pièce passe à côté.
   const asleep = MINOR_HOME[mover].filter((square) => board.get(square))
-  if ((piece.type === 'n' || piece.type === 'b') && asleep.length > 0) {
+  if (!prise && (piece.type === 'n' || piece.type === 'b') && asleep.length > 0) {
     cited.push(...asleep)
     // Le conseil s'adresse à celui qui joue, pas au lecteur. Sur le coup d'en
     // face, « il t'en reste 3 au fond » comptait les pièces de l'adversaire et
@@ -1672,6 +1688,98 @@ function describeQuietMove(
     // Aucune case si l'on n'a rien dit : surligner sans expliquer désoriente.
     squares: kept.length > 0 ? [...new Set(cited)] : [],
   }
+}
+
+/**
+ * Ce qu'un coup prend, et ce qu'il risque de rendre.
+ *
+ * Deux faits vérifiables sur l'échiquier : la pièce ramassée, puis les reprises
+ * **légales** en face — on interroge les coups de l'adversaire et non les cases
+ * qu'il attaque, pour ne pas compter une pièce clouée. Le bilan n'est dit que
+ * lorsqu'il est sans appel : pièce contre pièce de même valeur, gain au change,
+ * ou rien pour reprendre. Quand on prend plus petit que soi et que la reprise
+ * existe, il faudrait compter les défenseurs de chaque camp ; les motifs et le
+ * verdict du moteur en parlent déjà, et mieux vaut se taire que se tromper.
+ */
+function decrirePrise(
+  input: MoveExplanationInput,
+  ctx: ExplainContext,
+  to: Square,
+  mine: PieceSymbol,
+): { sentence: string; squares: Square[] } | null {
+  if (!input.fenBefore || !input.san.includes('x')) return null
+  let captured: PieceSymbol | undefined
+  try {
+    const probe = new Chess(input.fenBefore, { skipValidation: true })
+    captured = probe.move(input.san).captured as PieceSymbol | undefined
+  } catch {
+    return null
+  }
+  if (!captured) return null
+
+  const fr = ctx.locale === 'fr'
+  const sien = estLeLecteur(ctx)
+
+  // Une reprise par case de départ : une prise-promotion en compte quatre.
+  const repreneurs = [
+    ...new Map(
+      ctx.board
+        .moves({ verbose: true })
+        .filter((move) => move.to === to)
+        .map((move) => [move.from as Square, move.piece as PieceSymbol] as const),
+    ),
+  ]
+    .sort((a, b) => SIMPLE_VALUES[a[1]] - SIMPLE_VALUES[b[1]])
+    .slice(0, 2)
+  const liste = repreneurs
+    .map(([square, type]) =>
+      fr
+        ? `${pieceWithArticle(type, 'fr')} en ${square}`
+        : `the ${PIECE_NAMES[type].en} on ${square}`,
+    )
+    .join(fr ? ' ou ' : ' or ')
+
+  const nom = (type: PieceSymbol) => PIECE_NAMES[type][ctx.locale]
+  const feminine = captured === 'r' || captured === 'q'
+  let sentence = fr
+    ? sien
+      ? `Tu prends ${PIECE_ARTICLE[captured]} ${nom(captured)} en ${to}.`
+      : `Ton adversaire prend ${feminine ? 'ta' : 'ton'} ${nom(captured)} en ${to}.`
+    : sien
+      ? `You take the ${nom(captured)} on ${to}.`
+      : `Your opponent takes your ${nom(captured)} on ${to}.`
+
+  const donne = SIMPLE_VALUES[mine]
+  const recu = SIMPLE_VALUES[captured]
+  if (repreneurs.length === 0) {
+    sentence += fr
+      ? sien
+        ? ` Aucune pièce adverse ne peut reprendre en ${to}.`
+        : ` Aucune de tes pièces ne peut reprendre en ${to}.`
+      : sien
+        ? ` Nothing can take back on ${to}.`
+        : ` None of your pieces can take back on ${to}.`
+  } else if (donne === recu) {
+    sentence += fr
+      ? sien
+        ? ` Ton adversaire peut reprendre en ${to} avec ${liste}, mais c'est un échange : ${nom(captured)} contre ${nom(mine)}, le matériel reste égal.`
+        : ` Tu peux reprendre en ${to} avec ${liste} : c'est un échange, ${nom(captured)} contre ${nom(mine)}, le matériel reste égal.`
+      : sien
+        ? ` Your opponent can take back on ${to} with ${liste}, but that is a trade: ${nom(captured)} for ${nom(mine)}, material stays level.`
+        : ` You can take back on ${to} with ${liste}: a trade, ${nom(captured)} for ${nom(mine)}, material stays level.`
+  } else if (recu > donne) {
+    sentence += fr
+      ? sien
+        ? ` Même si ton adversaire reprend en ${to}, tu gagnes au change : ${nom(captured)} contre ${nom(mine)}.`
+        : ` Même si tu reprends en ${to}, il gagne au change : ${nom(captured)} contre ${nom(mine)}.`
+      : sien
+        ? ` Even if your opponent takes back on ${to}, you come out ahead: ${nom(captured)} for ${nom(mine)}.`
+        : ` Even if you take back on ${to}, they come out ahead: ${nom(captured)} for ${nom(mine)}.`
+  } else {
+    return { sentence, squares: [] }
+  }
+
+  return { sentence, squares: repreneurs.map(([square]) => square) }
 }
 
 /** Case d'arrivée lue dans la notation : `Nxe5+` → `e5`. */
