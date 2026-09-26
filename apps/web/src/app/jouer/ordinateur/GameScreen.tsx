@@ -34,6 +34,7 @@ import {
   formatScore,
   meriteUnMeilleurCoup,
   sanToSpeech,
+  remainingAt,
   stopClock,
   type ClockState,
   type GameResult,
@@ -72,7 +73,7 @@ import { usePhysicalBoard } from '@/lib/board/usePhysicalBoard.ts'
 import { PANNEAU_PLATEAU_ID, useBranchementPlateau } from '@/lib/board/useBranchementPlateau.tsx'
 import { useEcranAllume } from '@/lib/ecranAllume.ts'
 import { useChessGame } from '@/lib/game/useChessGame.ts'
-import { oublierPartieEnCours } from '@/lib/game/partieEnCours.ts'
+import { oublierPartieEnCours, type PartieEnCours } from '@/lib/game/partieEnCours.ts'
 import { requestHint, useBotPlayer } from '@/lib/game/useBotPlayer.ts'
 import { usePrecoup } from '@/lib/game/usePrecoup.ts'
 import { type BotPersonalityId, type Chapitre } from '@coupparfait/core'
@@ -110,6 +111,7 @@ export function GameScreen({
   initialMoves,
   initialClock,
   onNewGame,
+  onPartieLaissee,
   onRematch,
 }: {
   /** Chapitre de carrière en cours, quand la partie en est le duel. */
@@ -142,6 +144,11 @@ export function GameScreen({
   /** Temps restant à la reprise, en millisecondes. */
   initialClock?: { w: number; b: number } | null
   onNewGame: () => void
+  /**
+   * La partie qu'on quitte en cours de route, telle qu'on pourra la reprendre.
+   * Voir `laisserLaPartie`.
+   */
+  onPartieLaissee: (partie: PartieEnCours) => void
   onRematch: () => void
 }) {
   // Huit réglages nommés, et non tout le store : régler la profondeur du
@@ -759,6 +766,36 @@ export function GameScreen({
     onNewGame()
     return true
   }, [enCours, onNewGame])
+  /**
+   * Quitter pour de bon, en laissant la partie à reprendre.
+   *
+   * L'écran de réglages ne relisait la partie sauvegardée qu'à son premier
+   * affichage : on quittait une partie en cours, et le bandeau « Reprendre »
+   * n'apparaissait qu'après un rechargement. On la lui passe donc directement,
+   * dans l'état exact où on la laisse — sans attendre le serveur, dont la
+   * dernière écriture peut être encore en route, et sans compte : la reprise
+   * vaut alors pour la visite en cours.
+   *
+   * Deux parties ne se laissent pas. Une partie rouverte après sa fin : son
+   * résultat est compté, elle n'est jamais sauvegardée. Une position composée :
+   * la reprise rejoue les coups depuis le départ ordinaire, et ceux-ci n'y
+   * seraient pas légaux.
+   */
+  const laisserLaPartie = () => {
+    setQuestion(null)
+    if (!prolongation && !startFen) {
+      onPartieLaissee({
+        moves: state.moves.map((coup) => coup.san),
+        level,
+        playerColor,
+        timeControlId,
+        human,
+        clock: timed ? remainingAt(clock, Date.now()) : null,
+        enregistreLe: new Date().toISOString(),
+      })
+    }
+    onNewGame()
+  }
   const quitterRef = useRef(quitterLaPartie)
   quitterRef.current = quitterLaPartie
 
@@ -1799,10 +1836,7 @@ export function GameScreen({
           titre={t('computer.leaveTitle')}
           texte={t('computer.leaveHint')}
           confirmer={t('computer.leaveAction')}
-          onConfirmer={() => {
-            setQuestion(null)
-            onNewGame()
-          }}
+          onConfirmer={laisserLaPartie}
           onAnnuler={() => setQuestion(null)}
         />
       )}

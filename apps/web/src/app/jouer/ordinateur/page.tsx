@@ -342,9 +342,11 @@ export default function PlayComputerPage() {
     setSeanceCommentee(false)
     setResolvedColor(next.color === 'random' ? (Math.random() < 0.5 ? 'w' : 'b') : next.color)
     // Commencer une partie remplace celle qu'on gardait : on ne conserve que la
-    // dernière, et la nouvelle l'écrasera de toute façon au premier coup.
+    // dernière, et la nouvelle l'écrasera de toute façon au premier coup. Le
+    // bandeau s'efface avec elle, sans quoi il la proposerait encore au retour.
     setCoupsRepris(undefined)
     setHorlogeReprise(null)
+    setReprise(null)
     oublierPartieEnCours()
     setGameKey((key) => key + 1)
     setPhase('playing')
@@ -369,6 +371,9 @@ export default function PlayComputerPage() {
     setResolvedColor(partie.playerColor)
     setCoupsRepris(partie.moves)
     setHorlogeReprise(partie.clock)
+    // Reprise, elle n'est plus « laissée » : si on la quitte de nouveau, c'est
+    // son nouvel état qui reviendra, par `onPartieLaissee`.
+    setReprise(null)
     setGameKey((key) => key + 1)
     setPhase('playing')
     playSound('start')
@@ -404,6 +409,9 @@ export default function PlayComputerPage() {
       initialMoves={coupsRepris}
       initialClock={horlogeReprise}
       onNewGame={() => setPhase('setup')}
+      // Quittée en cours : l'écran de réglages la propose aussitôt. Voir
+      // `laisserLaPartie` dans `GameScreen`.
+      onPartieLaissee={setReprise}
       onRematch={() => {
         setResolvedColor(
           setup.color === 'random'
