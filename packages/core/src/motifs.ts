@@ -292,6 +292,12 @@ export function findDiscoveredAttacks(
  * attaquées. Typiquement le fou qui s'aventure en h3 et se fait enfermer.
  */
 export function findTrappedPieces(chess: Chess, color: Color): Square[] {
+  // En échec, les coups se réduisent aux parades — ou à rien, quand on
+  // inverse le trait. Toute pièce menacée passait alors pour piégée : après
+  // Dh4+, le remède justifiait l'échec par « le cavalier en b4 est piégé »,
+  // alors qu'il ne l'était que le temps de parer.
+  if (chess.inCheck()) return []
+
   const enemy = opposite(color)
   const fen = chess.fen()
   const moves = movesForColor(chess, color)

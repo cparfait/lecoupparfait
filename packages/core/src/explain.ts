@@ -575,6 +575,24 @@ function pieceAt(ctx: ExplainContext, square: Square | undefined): string {
 }
 
 /**
+ * Accord avec la pièce nommée.
+ *
+ * Les phrases des motifs ont été écrites pour « la pièce », puis `pieceAt` a
+ * appris à dire « le cavalier » — et l'on a lu « le cavalier en b4 est
+ * collée… Elle ne peut plus bouger ». Sans type connu, on reste sur « la
+ * pièce », donc au féminin.
+ */
+function accordDe(type: PieceSymbol | undefined): { e: string; il: string; Il: string } {
+  return !type || type === 'r' || type === 'q'
+    ? { e: 'e', il: 'elle', Il: 'Elle' }
+    : { e: '', il: 'il', Il: 'Il' }
+}
+
+function accord(ctx: ExplainContext, square: Square | undefined): ReturnType<typeof accordDe> {
+  return accordDe(square ? ctx.board.get(square)?.type : undefined)
+}
+
+/**
  * Textes français de chaque motif.
  *
  * Le ton est celui d'un entraîneur bienveillant qui tutoie : on s'adresse à un
@@ -589,7 +607,7 @@ const MOTIFS_FR: Partial<Record<MotifId, MotifCopy>> = {
       const square = m.squares[0]
       const gain = Number(m.detail?.gain ?? 0)
       if (m.detail?.ownBlunder) {
-        return `${capitalise(pieceWithPossessive(type, ctx))} en ${square} reste sans défense suffisante : elle sera reprise, et c'est ${materialWord(gain, 'fr')} de perdus.`
+        return `${capitalise(pieceWithPossessive(type, ctx))} en ${square} reste sans défense suffisante : ${accordDe(type).il} sera repris${accordDe(type).e}, et c'est ${materialWord(gain, 'fr')} de perdus.`
       }
       return `${capitalise(pieceWithArticle(type, 'fr'))} adverse en ${square} est en prise — ${materialWord(gain, 'fr')} à récupérer.`
     },
@@ -612,7 +630,7 @@ const MOTIFS_FR: Partial<Record<MotifId, MotifCopy>> = {
       const back = m.squares[2]
       const absolute = m.detail?.absolute === true
       return absolute
-        ? `Clouage absolu : ${pieceAt(ctx, front)} en ${front} est collée devant son roi en ${back}. Elle ne peut plus bouger du tout, tu peux l'attaquer à loisir.`
+        ? `Clouage absolu : ${pieceAt(ctx, front)} en ${front} est collé${accord(ctx, front).e} devant son roi en ${back}. ${accord(ctx, front).Il} ne peut plus bouger du tout, tu peux l'attaquer à loisir.`
         : `Clouage : ${pieceAt(ctx, front)} en ${front} ne peut pas s'écarter sans livrer ${pieceAt(ctx, back)} en ${back}.`
     },
   },
@@ -620,7 +638,7 @@ const MOTIFS_FR: Partial<Record<MotifId, MotifCopy>> = {
     name: 'motifs.skewer.name',
     definition: 'motifs.skewer.definition',
     sentence: (m, ctx) =>
-      `Enfilade : ${pieceAt(ctx, m.squares[1])} en ${m.squares[1]} doit s'écarter, et en partant elle laisse tomber ${pieceAt(ctx, m.squares[2])} en ${m.squares[2]}.`,
+      `Enfilade : ${pieceAt(ctx, m.squares[1])} en ${m.squares[1]} doit s'écarter, et en partant ${accord(ctx, m.squares[1]).il} laisse tomber ${pieceAt(ctx, m.squares[2])} en ${m.squares[2]}.`,
   },
   discoveredAttack: {
     name: 'motifs.discoveredAttack.name',
@@ -646,13 +664,13 @@ const MOTIFS_FR: Partial<Record<MotifId, MotifCopy>> = {
     name: 'motifs.overloadedPiece.name',
     definition: 'motifs.overloadedPiece.definition',
     sentence: (m, ctx) =>
-      `${capitalise(pieceAt(ctx, m.squares[0]))} en ${m.squares[0]} est surchargée : elle défend à la fois ${m.squares.slice(1).join(' et ')}. Attaque l'une des deux, et l'autre tombe.`,
+      `${capitalise(pieceAt(ctx, m.squares[0]))} en ${m.squares[0]} est surchargé${accord(ctx, m.squares[0]).e} : ${accord(ctx, m.squares[0]).il} défend à la fois ${m.squares.slice(1).join(' et ')}. Attaque l'une des deux, et l'autre tombe.`,
   },
   trappedPiece: {
     name: 'motifs.trappedPiece.name',
     definition: 'motifs.trappedPiece.definition',
     sentence: (m, ctx) =>
-      `${capitalise(pieceAt(ctx, m.squares[0]))} en ${m.squares[0]} est piégée : toutes ses cases de fuite sont couvertes. Elle est condamnée.`,
+      `${capitalise(pieceAt(ctx, m.squares[0]))} en ${m.squares[0]} est piégé${accord(ctx, m.squares[0]).e} : toutes ses cases de fuite sont couvertes. ${accord(ctx, m.squares[0]).Il} est condamné${accord(ctx, m.squares[0]).e}.`,
   },
   backRankMate: {
     name: 'motifs.backRankMate.name',
@@ -1230,7 +1248,16 @@ export function explainMove(input: MoveExplanationInput): MoveExplanation {
     betterMove = fr
       ? `Mieux valait ${best}.${why ? ` ${why}` : ''}${example}`
       : `Better was ${best}.${why ? ` ${why}` : ''}${example}`
-    body.push(betterMove)
+    // Deuxième, juste après la cause — pas en fin de liste. Le panneau
+    // commenté, sa réécoute et la relecture guidée n'affichent que deux
+    // paragraphes : sur Da5, gaffe, le clouage et la pièce piégée les
+    // occupaient, et « mieux valait Dh4+ » ne se lisait nulle part. Le joueur
+    // voyait un coup qui cloue et piège un cavalier sous le verdict « gaffe »,
+    // sans un mot de ce qu'il avait manqué. Le nom de l'ouverture, lui, peut
+    // attendre.
+    const ouverture = input.openingName ? body.shift() : undefined
+    body.splice(1, 0, betterMove)
+    if (ouverture) body.push(ouverture)
   }
 
   const speech = buildSpeech(input, san, body, fr)
