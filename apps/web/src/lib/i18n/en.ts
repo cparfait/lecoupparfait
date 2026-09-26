@@ -352,6 +352,7 @@ export const en: Dictionary = {
     sessionToggle: 'Themed session',
     sessionHint: 'A theme announced up front, a debrief that counts where it came up.',
     sessionRated: 'Not available in a rated game: a session is practice.',
+    leaveConfirm: 'Leave the game in progress and go back to the setup?',
     sessionThemes: 'Themes for the “{palier}” tier',
     ratedSession: 'Not available during a themed session: it is practice.',
     summarySession: '“{theme}” session',

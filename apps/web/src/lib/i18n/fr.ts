@@ -365,6 +365,7 @@ export const fr = {
     sessionToggle: 'Séance à thème',
     sessionHint: 'Un thème annoncé, un bilan qui compte où il est apparu.',
     sessionRated: 'Indisponible en partie classée : une séance est un entraînement.',
+    leaveConfirm: 'Quitter la partie en cours pour revenir aux réglages ?',
     sessionThemes: 'Thèmes du palier « {palier} »',
     ratedSession: 'Indisponible pendant une séance à thème : c’est un entraînement.',
     summarySession: 'séance « {theme} »',

@@ -728,6 +728,54 @@ export function GameScreen({
   })
   gameOverRef.current = gameOver
 
+  /**
+   * Quitter la partie pour l'écran de réglages — après confirmation si elle
+   * est en cours.
+   *
+   * Une partie commencée ne se quitte pas sur un clic égaré, pas plus qu'on
+   * n'abandonne sans confirmer — les deux sont voisins dans le même menu.
+   * Finie, ou pas encore entamée, il n'y a rien à perdre et l'on part
+   * directement.
+   */
+  const enCours = !gameOver && state.moves.length > 0
+  const quitterLaPartie = useCallback(() => {
+    if (enCours && !window.confirm(t('computer.leaveConfirm'))) return false
+    onNewGame()
+    return true
+  }, [enCours, onNewGame, t])
+  const quitterRef = useRef(quitterLaPartie)
+  quitterRef.current = quitterLaPartie
+
+  /*
+    « Jouer → Contre l'ordinateur » depuis une partie ne faisait rien.
+
+    Le lien mène à la page où l'on est déjà : Next ne la recharge pas, et
+    l'écran de partie n'est qu'un état de la page, que l'adresse ignore. Le clic
+    se perdait, en partie comme après la boîte de fin. On l'intercepte donc ici,
+    une fois pour tous les endroits qui portent ce lien — menu de l'en-tête,
+    barre du téléphone, liens de la rubrique.
+
+    La page nue seulement : une adresse avec paramètres (`?seance=`, `?perso=`)
+    demande autre chose qu'un retour aux réglages.
+  */
+  useEffect(() => {
+    function surClic(event: MouseEvent) {
+      if (event.defaultPrevented || event.button !== 0) return
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+      const lien = event.target instanceof Element ? event.target.closest('a[href]') : null
+      if (!(lien instanceof HTMLAnchorElement) || lien.target === '_blank') return
+      const cible = new URL(lien.href)
+      if (cible.origin !== window.location.origin) return
+      if (cible.pathname !== window.location.pathname || cible.search !== '') return
+      // Refusé, le clic est annulé avant que le lien ne navigue : on reste dans
+      // la partie, à l'adresse où l'on était.
+      if (!quitterRef.current()) event.preventDefault()
+    }
+    // En capture : avant le gestionnaire du lien, qui navigue.
+    document.addEventListener('click', surClic, true)
+    return () => document.removeEventListener('click', surClic, true)
+  }, [])
+
   // La partie finie, archivée une fois : voir `useArchivageDeFin`.
   const { variationClassement, refusClassement } = useArchivageDeFin({
     gameOver,
@@ -1190,7 +1238,7 @@ export function GameScreen({
         declencheur={() => <MoreHorizontal size={16} aria-hidden />}
       >
         <MenuItem
-          onClick={onNewGame}
+          onClick={quitterLaPartie}
           icone={<RefreshCw size={15} className="shrink-0 text-accent" aria-hidden />}
         >
           {t('game.newGame')}
