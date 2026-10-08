@@ -2604,14 +2604,15 @@ export const en: Dictionary = {
       ', not just to play. The difference comes down to one thing: when you make a mistake, the tool does not merely show a number — it tells you what you missed, in the words chess players use with each other.',
     freeTitle: 'Why it is free',
     free1:
-      'Because nothing here is expensive. The engine — Stockfish — is free and open source. The opening and puzzle datasets are public domain, given by Lichess. The pieces and the sounds are free-licensed. The speech synthesis is your operating system’s, and goes through no paid service.',
+      'Because nothing here is expensive. The engine — Stockfish — is free and open source. The opening and puzzle datasets are public domain, given by Lichess. The pieces and the sounds are free-licensed. The voice comes from a free model running on this server, or from your operating system: neither goes through a paid service.',
     free2:
       'That leaves only hosting, and this app is built to run on a modest machine. So there is no paid feature, no subscription, no daily limit — and none of that is planned for later either.',
     dataTitle: 'What happens to your data',
     data1:
-      'No tracker, no advertising, no audience analytics. No request is sent to a third-party domain: even the fonts are served from this server, precisely so that your IP address does not go elsewhere.',
+      'No tracker, no advertising, no audience analytics. The fonts are served from this server, precisely so that your IP address does not go elsewhere. What does leave, and only when you use it — endgames sent to the Lichess tablebases, importing your games, the AI assistant, the app’s notifications — is detailed in the privacy policy.',
     data2:
-      'Your settings live in your browser. If you create an account, we store a username, a password hash, your ratings and your games — nothing else. The email address is optional and only serves to recover a forgotten password.',
+      'Your settings live in your browser. If you create an account, we keep your username, a hash of your password, your ratings, your games and your progress. The email address is optional and only serves to recover a forgotten password. And you can delete your account at any time.',
+    privacyLink: 'Read the privacy policy',
     howTitle: 'How it works',
     how1: 'Two engines work together. In your browser, a WebAssembly build of Stockfish gives an instant opinion after every move, without sending anything anywhere. On the server, a native build runs at full strength for complete game analyses.',
     how2Before: 'The explanations, though, do not come from a language model but from a',
@@ -7077,7 +7078,7 @@ export const en: Dictionary = {
       'Install Le Coup Parfait on your Android phone: the file, step-by-step installation and updates.',
     about: 'About',
     aboutDesc:
-      'What Le Coup Parfait is, why it is free, and what becomes of your data. Short answer: nothing, it stays with you.',
+      'What Le Coup Parfait is, why it is free, and what becomes of your data. Short answer: the bare minimum, and you can erase it all.',
     admin: 'Administration',
     friends: 'Friends',
     friendsDesc: 'Your address book, the challenges received and the ones you sent.',

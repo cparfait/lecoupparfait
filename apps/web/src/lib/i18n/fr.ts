@@ -2662,14 +2662,15 @@ export const fr = {
       ', pas seulement pour jouer. La différence tient en une chose : quand tu fais une erreur, l’outil ne se contente pas d’afficher un nombre — il te dit ce que tu as raté, avec les mots que les joueurs d’échecs utilisent entre eux.',
     freeTitle: 'Pourquoi c’est gratuit',
     free1:
-      'Parce que rien ici ne coûte cher. Le moteur — Stockfish — est libre et gratuit. Les jeux de données d’ouvertures et de puzzles sont dans le domaine public, offerts par Lichess. Les pièces et les sons sont sous licence libre. La synthèse vocale est celle de ton système d’exploitation, elle ne passe par aucun service payant.',
+      'Parce que rien ici ne coûte cher. Le moteur — Stockfish — est libre et gratuit. Les jeux de données d’ouvertures et de puzzles sont dans le domaine public, offerts par Lichess. Les pièces et les sons sont sous licence libre. La voix vient d’un modèle libre qui tourne sur ce serveur, ou de ton système d’exploitation : aucune ne passe par un service payant.',
     free2:
       'Il ne reste que l’hébergement, et cette application est faite pour tourner sur une machine modeste. Il n’y a donc aucune fonctionnalité payante, aucun abonnement, aucune limite quotidienne — et rien de tout cela n’est prévu pour plus tard.',
     dataTitle: 'Ce qu’il advient de tes données',
     data1:
-      'Aucun traqueur, aucune publicité, aucun outil d’analyse d’audience. Aucune requête n’est envoyée à un domaine tiers : même les polices de caractères sont servies depuis ce serveur, précisément pour que ton adresse IP ne parte pas ailleurs.',
+      'Aucun traqueur, aucune publicité, aucun outil d’analyse d’audience. Les polices de caractères sont servies depuis ce serveur, précisément pour que ton adresse IP ne parte pas ailleurs. Ce qui sort quand même, et seulement quand tu t’en sers — les finales soumises aux tables de Lichess, l’import de tes parties, l’assistant IA, les notifications de l’appli —, la politique de confidentialité le détaille.',
     data2:
-      'Tes préférences vivent dans ton navigateur. Si tu crées un compte, on stocke un pseudo, une empreinte de mot de passe, tes classements et tes parties — rien d’autre. L’adresse e-mail est facultative et ne sert qu’à récupérer un mot de passe oublié.',
+      'Tes préférences vivent dans ton navigateur. Si tu crées un compte, on garde ton pseudo, une empreinte de ton mot de passe, tes classements, tes parties et ta progression. L’adresse e-mail est facultative et ne sert qu’à récupérer un mot de passe oublié. Et tu peux supprimer ton compte à tout moment.',
+    privacyLink: 'Lire la politique de confidentialité',
     howTitle: 'Comment ça marche',
     how1: 'Deux moteurs travaillent ensemble. Dans ton navigateur, une version WebAssembly de Stockfish donne un avis instantané après chaque coup, sans rien envoyer nulle part. Sur le serveur, une version native tourne à pleine puissance pour les analyses de partie complètes.',
     how2Before: 'Les explications, elles, ne viennent pas d’un modèle de langue mais d’un',
@@ -7146,7 +7147,7 @@ export const fr = {
       'Installe Le Coup Parfait sur ton téléphone Android : le fichier, l’installation pas à pas et les mises à jour.',
     about: 'À propos',
     aboutDesc:
-      'Ce qu’est Le Coup Parfait, pourquoi c’est gratuit, et ce qu’il advient de tes données. Réponse courte : rien, elles restent chez toi.',
+      'Ce qu’est Le Coup Parfait, pourquoi c’est gratuit, et ce qu’il advient de tes données. Réponse courte : le strict nécessaire, et tu peux tout effacer.',
     admin: 'Administration',
     friends: 'Amis',
     friendsDesc: 'Ton carnet, les défis reçus et ceux que tu as lancés.',

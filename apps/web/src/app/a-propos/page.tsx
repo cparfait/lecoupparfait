@@ -65,6 +65,11 @@ export default function AboutPage() {
         </h2>
         <p>{t('about.data1')}</p>
         <p>{t('about.data2')}</p>
+        <p>
+          <Link href="/confidentialite" className="text-accent hover:underline">
+            {t('about.privacyLink')}
+          </Link>
+        </p>
 
         <h2 className="pt-2 font-display text-xl font-semibold tracking-tight text-ink">
           {t('about.howTitle')}

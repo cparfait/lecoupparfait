@@ -479,22 +479,29 @@ comptent :
 ## Vie privée
 
 - Aucun traqueur, aucune publicité, aucun outil de mesure d'audience.
-- **Aucune requête vers un domaine tiers** : les polices sont auto-hébergées,
-  précisément pour que l'adresse IP des joueurs ne parte nulle part.
-- Les préférences vivent dans le navigateur. Un compte ne stocke qu'un pseudo,
-  une empreinte de mot de passe (scrypt), des classements et des parties.
+- Les polices sont auto-hébergées, précisément pour que l'adresse IP des
+  joueurs ne parte nulle part.
+- Les préférences vivent dans le navigateur. Un compte garde un pseudo, une
+  empreinte de mot de passe (scrypt), des classements, des parties et la
+  progression. Chacun peut le supprimer (`/compte/supprimer`) : ce qui lui
+  appartient est effacé, ses parties restent sous un pseudo anonyme.
 - L'adresse e-mail est facultative et ne sert qu'à la récupération de mot de
   passe.
 - Les notifications sont **chiffrées pour ton navigateur** : le service qui les
   relaie — Google, Mozilla, Apple — ne peut pas les lire. Un abonnement se
   révoque d'un bouton, et ne conserve que l'adresse de l'appareil, deux clés de
   chiffrement et ton fuseau horaire.
+- Dans l'appli Android, les notifications passent par Firebase Cloud
+  Messaging, de Google, qui en voit le titre et le texte.
 - La synthèse vocale tourne **sur ta machine** : soit celle du système
-  d'exploitation, soit Piper installé sur ton propre serveur. Aucun texte ne
-  part vers un service de synthèse, et aucune clé d'API n'est nécessaire.
+  d'exploitation, soit Piper installé sur ton propre serveur. Aucune clé d'API
+  n'est nécessaire.
 
-Les seuls appels sortants possibles sont vers les tables de finales de Lichess,
-désactivables en vidant `LICHESS_TABLEBASE_URL`.
+Les appels sortants, tous liés à un geste du joueur ou désactivables : les
+tables de finales de Lichess (vider `LICHESS_TABLEBASE_URL` les coupe),
+l'import de parties depuis chess.com ou Lichess, l'assistant IA configuré avec
+la clé du joueur, le courriel de récupération, et Firebase pour l'appli.
+Le détail, tel que les joueurs le lisent : `/confidentialite`.
 
 ---
 
