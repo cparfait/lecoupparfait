@@ -196,17 +196,22 @@ export default function PseudoGooglePage() {
               >
                 {t('auth.google.mergeSubmit')}
               </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                fullWidth
-                onClick={() => {
-                  setErreur(null)
-                  setNouveau(true)
-                }}
-              >
-                {t('auth.google.mergeOther')}
-              </Button>
+              {/* Une phrase et un lien, comme sous la connexion — pas un bouton : un
+                  bouton ne passe pas à la ligne, et cette phrase-là élargissait la
+                  carte au-delà d'un écran de téléphone. */}
+              <p className="pt-1 text-center text-sm text-muted">
+                {t('auth.google.mergeOtherQuestion')}{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setErreur(null)
+                    setNouveau(true)
+                  }}
+                  className="font-medium text-accent hover:underline"
+                >
+                  {t('auth.google.mergeOtherLink')}
+                </button>
+              </p>
             </form>
           ) : attente.attente ? (
             <form onSubmit={(evenement) => void creer(evenement)} className="space-y-4">

@@ -2677,7 +2677,8 @@ export const fr = {
       mergeBlurb:
         'Le compte « {pseudo} » utilise déjà l’adresse de ton compte Google. Si c’est le tien, entre son mot de passe : tu pourras ensuite t’y connecter avec Google.',
       mergeSubmit: 'Rejoindre mon compte',
-      mergeOther: 'Ce n’est pas mon compte : en créer un nouveau',
+      mergeOtherQuestion: 'Ce n’est pas ton compte ?',
+      mergeOtherLink: 'Créer un nouveau compte',
       mergeWrongPassword: 'Ce n’est pas le mot de passe de ce compte.',
       mergeDone: 'Google est lié à ton compte {pseudo} : tu peux maintenant te connecter avec.',
       link: 'Lier mon compte Google',

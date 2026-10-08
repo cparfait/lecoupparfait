@@ -2617,7 +2617,8 @@ export const en: Dictionary = {
       mergeBlurb:
         'The account “{pseudo}” already uses your Google account’s address. If it is yours, enter its password: you can then sign in to it with Google.',
       mergeSubmit: 'Join my account',
-      mergeOther: 'Not my account: create a new one',
+      mergeOtherQuestion: 'Not your account?',
+      mergeOtherLink: 'Create a new one',
       mergeWrongPassword: 'That is not this account’s password.',
       mergeDone: 'Google is linked to your account {pseudo}: you can now sign in with it.',
       link: 'Link my Google account',
