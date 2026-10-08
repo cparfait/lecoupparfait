@@ -2069,19 +2069,16 @@ export const fr = {
       'Écris à la personne qui héberge cette instance — elle peut redonner la main à ton compte directement. Ton mot de passe, lui, n’a pas changé.',
     backToSignIn: 'Retour à la connexion',
     sent: 'C’est envoyé',
-    sentBefore: 'Si un compte utilise cette adresse',
-    sentStrong: 'et qu’elle a été confirmée',
-    sentAfter: ', un lien vient d’y être envoyé. Il est valable une heure.',
-    nothingReceived:
-      'Rien reçu ? L’adresse n’est peut-être pas celle du compte, ou n’a jamais été confirmée — auquel cas elle ne peut pas servir à reprendre la main.',
+    sentBody:
+      'Si cette adresse est celle d’un compte, un lien vient d’y partir. Il est valable une heure.',
+    checkSpam: 'Rien reçu d’ici quelques minutes ? Regarde dans tes spams.',
     emailLabel: 'Adresse électronique',
     emailHint: 'Celle que tu as renseignée à l’inscription.',
     sending: 'Envoi…',
     sendLink: 'Envoyer le lien',
     requestFailed: 'Demande impossible.',
     serverUnreachable: 'Le serveur est injoignable.',
-    noEmailNote:
-      'Pas d’adresse sur ton compte ? Un compte sans adresse confirmée ne peut pas être récupéré — c’est le prix de ne rien demander à l’inscription.',
+    noEmailNote: 'Seul un compte avec une adresse confirmée peut être récupéré.',
   },
 
   profile: {

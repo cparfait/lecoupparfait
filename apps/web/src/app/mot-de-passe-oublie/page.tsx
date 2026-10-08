@@ -108,12 +108,11 @@ export default function ForgotPasswordPage() {
               </span>
               <p className="text-sm font-semibold">{t('password.sent')}</p>
               <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
-                {t('password.sentBefore')} <strong>{t('password.sentStrong')}</strong>
-                {t('password.sentAfter')}
+                {t('password.sentBody')}
               </p>
-              <p className="mt-2 text-xs leading-relaxed text-faint">
-                {t('password.nothingReceived')}
-              </p>
+              {/* Les premiers messages d'un serveur neuf finissent souvent dans
+                  les indésirables : c'est le premier endroit où chercher. */}
+              <p className="mt-2 text-xs leading-relaxed text-faint">{t('password.checkSpam')}</p>
               <Link href="/connexion" className="mt-4 block">
                 <Button variant="secondary" fullWidth>
                   {t('password.backToSignIn')}
@@ -149,7 +148,9 @@ export default function ForgotPasswordPage() {
           )}
         </Card>
 
-        <p className="mt-4 text-center text-xs text-faint">{t('password.noEmailNote')}</p>
+        {!sent && courriel !== false && (
+          <p className="mt-4 text-center text-xs text-faint">{t('password.noEmailNote')}</p>
+        )}
       </div>
     </div>
   )

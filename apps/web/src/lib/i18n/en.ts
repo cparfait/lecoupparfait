@@ -2028,19 +2028,16 @@ export const en: Dictionary = {
       'Write to whoever hosts this instance — they can give you back access to your account directly. Your password itself has not changed.',
     backToSignIn: 'Back to sign-in',
     sent: 'It has been sent',
-    sentBefore: 'If an account uses this address',
-    sentStrong: 'and it has been confirmed',
-    sentAfter: ', a link has just gone out. It is valid for one hour.',
-    nothingReceived:
-      'Nothing received? The address may not be the account’s, or may never have been confirmed — in which case it cannot be used to get back in.',
+    sentBody:
+      'If this address belongs to an account, a link is on its way. It is valid for one hour.',
+    checkSpam: 'Nothing within a few minutes? Check your spam folder.',
     emailLabel: 'Email address',
     emailHint: 'The one you gave when you signed up.',
     sending: 'Sending…',
     sendLink: 'Send the link',
     requestFailed: 'Request failed.',
     serverUnreachable: 'The server is unreachable.',
-    noEmailNote:
-      'No address on your account? An account without a confirmed address cannot be recovered — that is the price of asking for nothing at sign-up.',
+    noEmailNote: 'Only an account with a confirmed address can be recovered.',
   },
 
   profile: {
