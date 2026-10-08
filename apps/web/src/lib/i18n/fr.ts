@@ -56,6 +56,7 @@ export const fr = {
     account: 'Compte',
     about: 'À propos',
     credits: 'Crédits & licences',
+    androidApp: 'Appli Android',
     admin: 'Administration',
 
     // Entrées de section.
@@ -738,6 +739,50 @@ export const fr = {
     stillFree:
       'Jouer, apprendre, résoudre des puzzles et analyser tes parties restent entièrement libres, sans rien créer. Le compte est gratuit : un pseudo, un mot de passe, et l’adresse est facultative.',
     lookAnyway: 'Voir quand même',
+  },
+
+  appli: {
+    title: 'L’appli Android',
+    intro:
+      'Le Coup Parfait sur ton téléphone : une icône sur l’écran d’accueil, le plein écran, et plus de navigateur à ouvrir.',
+    download: 'Télécharger l’appli',
+    fileLine: 'Version {version} · fichier APK pour Android',
+    installTitle: 'L’installer',
+    step1:
+      'Depuis ton téléphone Android, touche « Télécharger l’appli ». Si le navigateur prévient que ce type de fichier peut être dangereux, confirme le téléchargement.',
+    step2:
+      'Ouvre le fichier le-coup-parfait.apk, depuis la notification de téléchargement ou dans l’appli Fichiers, rubrique Téléchargements.',
+    step3:
+      'La première fois, Android bloque les applis qui ne viennent pas du Play Store : touche « Paramètres », active « Autoriser cette source », puis reviens en arrière.',
+    step4: 'Touche « Installer ». Le cavalier apparaît sur ton écran d’accueil.',
+    fromComputer: 'Sur ordinateur ? Ouvre cette page depuis ton téléphone.',
+    iphone:
+      'Sur iPhone ou iPad, pas de fichier à installer : ajoute le site à ton écran d’accueil depuis Safari, avec le bouton de partage puis « Sur l’écran d’accueil ».',
+    updatesTitle: 'Les mises à jour',
+    updatesContent:
+      'Le contenu se met à jour tout seul : l’appli affiche le site en direct, et chaque nouveauté y arrive en même temps.',
+    updatesShell:
+      'L’appli elle-même change plus rarement. Quand une nouvelle version sort, elle te la propose et s’installe par-dessus l’ancienne : ton compte, tes parties et tes réglages restent là.',
+    differencesTitle: 'Ce qui diffère du site',
+    noNotifications:
+      'Les notifications (invitations, tour de jeu) ne passent pas encore par l’appli. Si tu en as besoin, garde aussi le site installé depuis ton navigateur.',
+    yourApp: 'Ton appli',
+    installedVersion: 'Version {version}',
+    upToDate: 'À jour',
+    newVersion: 'La version {version} est prête.',
+    update: 'Mettre à jour',
+    auto: 'Mise à jour automatique',
+    autoHint:
+      'Quand une nouvelle version sort, l’appli la télécharge d’elle-même et ouvre l’installeur. Android te demande toujours de confirmer.',
+    stepAuthorize:
+      'Autorise « Le Coup Parfait » à installer des applis, puis reviens ici : la mise à jour reprendra d’elle-même.',
+    stepDownload: 'Téléchargement de la mise à jour…',
+    stepDownloadPercent: 'Téléchargement de la mise à jour… {pourcentage} %',
+    stepInstaller: 'Confirme la mise à jour dans la fenêtre d’Android.',
+    stepError: 'La mise à jour n’a pas pu se télécharger. Vérifie ta connexion, puis réessaie.',
+    bannerTitle: 'Nouvelle version de l’appli',
+    bannerBlurb:
+      'La version {version} s’installe par-dessus celle-ci : ton compte et tes parties restent là.',
   },
 
   install: {
@@ -7007,6 +7052,9 @@ export const fr = {
     ogTitle: 'Le Coup Parfait — les échecs, enfin expliqués',
     ogDesc:
       'Un moteur qui explique pourquoi, une voix qui accompagne, et zéro euro. Libre et auto-hébergeable.',
+    androidApp: 'L’appli Android',
+    androidAppDesc:
+      'Installe Le Coup Parfait sur ton téléphone Android : le fichier, l’installation pas à pas et les mises à jour.',
     about: 'À propos',
     aboutDesc:
       'Ce qu’est Le Coup Parfait, pourquoi c’est gratuit, et ce qu’il advient de tes données. Réponse courte : rien, elles restent chez toi.',

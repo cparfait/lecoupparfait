@@ -25,6 +25,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react'
+import { dansAppliAndroid } from './appliAndroid.ts'
 
 /**
  * L'événement que Chrome émet, et que les types du DOM ne connaissent pas :
@@ -63,6 +64,9 @@ if (typeof window !== 'undefined') {
 export function dejaInstallee(): boolean {
   if (typeof window === 'undefined') return false
   return (
+    // L'appli Android n'est pas en mode « standalone » pour sa WebView : sans
+    // ce test, les préférences y proposaient d'installer… l'application.
+    dansAppliAndroid() ||
     window.matchMedia('(display-mode: standalone)').matches ||
     window.matchMedia('(display-mode: window-controls-overlay)').matches ||
     (navigator as Navigator & { standalone?: boolean }).standalone === true

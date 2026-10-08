@@ -30,9 +30,11 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { Bell, Download, Share, X } from 'lucide-react'
+import { Bell, Download, RefreshCw, Share, X } from 'lucide-react'
+import { messageEtape } from '@/components/appli/etapeMiseAJour.ts'
 import { Alerte } from '@/components/ui/Alerte.tsx'
 import { Button } from '@/components/ui/index.tsx'
+import { APPLI_ANDROID, lancerMiseAJourAuto, useAppliAndroid } from '@/lib/appliAndroid.ts'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { usePartieEnLigne } from '@/lib/game/partieEnLigne.ts'
 import { useNotifications } from '@/lib/notifications.ts'
@@ -43,6 +45,8 @@ import { useT } from '@/lib/i18n/index.tsx'
 const CLES = {
   notifications: 'coupparfait.propose.notifications',
   installation: 'coupparfait.propose.installation',
+  // Une clé par version : écarter la 2 ne doit pas faire taire la 3.
+  miseAJourAppli: `coupparfait.propose.appli-${APPLI_ANDROID.versionCode}`,
 } as const
 
 function dejaPropose(cle: string): boolean {
@@ -76,6 +80,7 @@ export function MiseEnRoute() {
   const t = useT()
   const identite = useIdentite()
   const installation = useInstallation()
+  const appli = useAppliAndroid()
   const partieEnCours = usePartieEnLigne()
   const pathname = usePathname()
 
@@ -109,6 +114,21 @@ export function MiseEnRoute() {
   // fois : la partie commence après l'affichage du bandeau aussi souvent
   // qu'avant, et deux encarts superposés valent moins que pas d'encart du tout.
   if (partieEnCours) return null
+
+  /*
+    Une nouvelle version de l'appli Android passe devant tout le reste : elle
+    seule ne se rattrape pas ailleurs, faute de magasin d'applications. Les deux
+    autres propositions n'ont de toute façon pas cours dans l'appli — elle est
+    installée, et sa WebView ne reçoit pas de notifications.
+  */
+  if (
+    appli.natif &&
+    !appli.aJour &&
+    ecarte !== CLES.miseAJourAppli &&
+    !dejaPropose(CLES.miseAJourAppli)
+  ) {
+    return <BandeauMiseAJourAppli onFermer={() => ecarter(CLES.miseAJourAppli)} />
+  }
 
   /*
     L'installation : ce qu'on propose quand les notifications n'ont rien à
@@ -225,6 +245,44 @@ function ProposerNotifications({
           }}
         >
           {t('notifications.enable')}
+        </Button>
+      }
+    />
+  )
+}
+
+/**
+ * La nouvelle version de l'appli Android.
+ *
+ * Monté seulement quand `MiseEnRoute` le laisse paraître — jamais pendant une
+ * partie — et c'est aussi là que démarre la mise à jour automatique : l'écran
+ * d'installation d'Android ne doit pas surgir au milieu d'un coup à jouer.
+ */
+function BandeauMiseAJourAppli({ onFermer }: { onFermer: () => void }) {
+  const t = useT()
+  const appli = useAppliAndroid()
+
+  useEffect(() => {
+    lancerMiseAJourAuto()
+  }, [appli.installee, appli.miseAJourAuto])
+
+  return (
+    <Bandeau
+      icone={<RefreshCw size={18} aria-hidden />}
+      titre={t('appli.bannerTitle')}
+      detail={
+        messageEtape(t, appli) ?? t('appli.bannerBlurb', { version: APPLI_ANDROID.versionName })
+      }
+      onFermer={onFermer}
+      action={
+        <Button
+          size="sm"
+          variant="primary"
+          icon={<Download size={14} />}
+          disabled={appli.etape === 'telechargement'}
+          onClick={() => void appli.mettreAJour()}
+        >
+          {t('appli.update')}
         </Button>
       }
     />

@@ -58,6 +58,7 @@ export const en: Dictionary = {
     account: 'Account',
     about: 'About',
     credits: 'Credits & licences',
+    androidApp: 'Android app',
     admin: 'Administration',
 
     vsComputer: 'Against the computer',
@@ -714,6 +715,49 @@ export const en: Dictionary = {
     stillFree:
       'Playing, learning, solving puzzles and analysing your games all stay entirely free, without creating anything. The account is free: a username, a password, and the address is optional.',
     lookAnyway: 'Look anyway',
+  },
+
+  appli: {
+    title: 'The Android app',
+    intro:
+      'Le Coup Parfait on your phone: an icon on your home screen, full screen, and no browser to open.',
+    download: 'Download the app',
+    fileLine: 'Version {version} · APK file for Android',
+    installTitle: 'Installing it',
+    step1:
+      'On your Android phone, tap “Download the app”. If the browser warns that this type of file can be harmful, confirm the download.',
+    step2:
+      'Open the le-coup-parfait.apk file, from the download notification or in the Files app, under Downloads.',
+    step3:
+      'The first time, Android blocks apps that don’t come from the Play Store: tap “Settings”, turn on “Allow from this source”, then go back.',
+    step4: 'Tap “Install”. The knight appears on your home screen.',
+    fromComputer: 'On a computer? Open this page on your phone.',
+    iphone:
+      'On iPhone or iPad, there is no file to install: add the site to your home screen from Safari, with the share button then “Add to Home Screen”.',
+    updatesTitle: 'Updates',
+    updatesContent:
+      'The content updates itself: the app shows the live site, and every new feature lands there at the same time.',
+    updatesShell:
+      'The app itself changes less often. When a new version comes out, it offers it to you and installs over the old one: your account, games and settings stay put.',
+    differencesTitle: 'What differs from the site',
+    noNotifications:
+      'Notifications (invitations, your turn to play) don’t go through the app yet. If you need them, keep the site installed from your browser too.',
+    yourApp: 'Your app',
+    installedVersion: 'Version {version}',
+    upToDate: 'Up to date',
+    newVersion: 'Version {version} is ready.',
+    update: 'Update',
+    auto: 'Automatic updates',
+    autoHint:
+      'When a new version comes out, the app downloads it by itself and opens the installer. Android always asks you to confirm.',
+    stepAuthorize:
+      'Allow “Le Coup Parfait” to install apps, then come back here: the update will resume by itself.',
+    stepDownload: 'Downloading the update…',
+    stepDownloadPercent: 'Downloading the update… {pourcentage}%',
+    stepInstaller: 'Confirm the update in the Android window.',
+    stepError: 'The update could not be downloaded. Check your connection, then try again.',
+    bannerTitle: 'New version of the app',
+    bannerBlurb: 'Version {version} installs over this one: your account and games stay put.',
   },
 
   install: {
@@ -6945,6 +6989,9 @@ export const en: Dictionary = {
     ogTitle: 'Le Coup Parfait — chess, finally explained',
     ogDesc:
       'An engine that explains why, a voice that keeps you company, and zero euros. Free software you can host yourself.',
+    androidApp: 'The Android app',
+    androidAppDesc:
+      'Install Le Coup Parfait on your Android phone: the file, step-by-step installation and updates.',
     about: 'About',
     aboutDesc:
       'What Le Coup Parfait is, why it is free, and what becomes of your data. Short answer: nothing, it stays with you.',

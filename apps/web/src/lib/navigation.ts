@@ -43,6 +43,7 @@ import {
   RotateCcw,
   Scale,
   Settings,
+  Smartphone,
   Swords,
   Target,
   Timer,
@@ -368,6 +369,7 @@ export const SECTIONS: SectionNav[] = [
  */
 export const PAGES_APPLICATION: EntreeNav[] = [
   { href: '/preferences', labelKey: 'nav.settings', icon: Settings },
+  { href: '/appli', labelKey: 'nav.androidApp', icon: Smartphone },
   { href: '/a-propos', labelKey: 'nav.about', icon: Info },
   { href: '/credits', labelKey: 'nav.credits', icon: Scale },
 ]
@@ -448,6 +450,7 @@ export const RACCOURCIS_MOBILES: EntreeNav[] = [
       '/preferences',
       '/profil',
       '/connexion',
+      '/appli',
       '/a-propos',
       '/credits',
       '/admin',

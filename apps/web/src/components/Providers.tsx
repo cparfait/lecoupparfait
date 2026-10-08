@@ -12,6 +12,7 @@
 
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
+import { accorderBarreEtat } from '@/lib/appliAndroid.ts'
 import { I18nProvider, langue, useLangueChargee, type Locale } from '@/lib/i18n/index.tsx'
 import { TEMOIN_LANGUE } from '@/lib/i18n/temoin.ts'
 import { detectEffectsCapability, usePreferences } from '@/lib/store/preferences.ts'
@@ -65,6 +66,7 @@ export function Providers({
     document.documentElement.dataset.theme = theme
     document.documentElement.lang = choisie.bcp47
     document.documentElement.dir = choisie.rtl ? 'rtl' : 'ltr'
+    accorderBarreEtat(theme)
   }, [theme, locale])
 
   /*
