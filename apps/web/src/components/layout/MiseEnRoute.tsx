@@ -117,9 +117,9 @@ export function MiseEnRoute() {
 
   /*
     Une nouvelle version de l'appli Android passe devant tout le reste : elle
-    seule ne se rattrape pas ailleurs, faute de magasin d'applications. Les deux
-    autres propositions n'ont de toute façon pas cours dans l'appli — elle est
-    installée, et sa WebView ne reçoit pas de notifications.
+    seule ne se rattrape pas ailleurs, faute de magasin d'applications. Les
+    notifications, qui passent par Firebase dans l'appli, attendront le
+    lancement suivant ; l'installation, elle, n'y a pas cours.
   */
   if (
     appli.natif &&

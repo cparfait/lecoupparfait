@@ -23,10 +23,15 @@
  * une application Next, l'autre un serveur Node ordinaire —, ils ne partagent
  * ni alias d'import ni frontière `server-only`, et mutualiser trente lignes
  * imposerait un paquet de plus à construire et à publier dans les deux images.
+ *
+ * Seul le transport vers l'appli Android est partagé (`@coupparfait/core/fcm`) :
+ * signer un jeton Google et parler à Firebase n'est pas trente lignes qu'on
+ * accepte de tenir en double.
  */
 
 import webpush from 'web-push'
 import { texteDeNotification } from '@coupparfait/core'
+import { envoyerFcm, lireCompteDeService } from '@coupparfait/core/fcm'
 import {
   abonnementsDefiEnAttente,
   defisDejaFaits,
@@ -36,6 +41,7 @@ import {
 
 const CLE_PUBLIQUE = process.env.VAPID_PUBLIC_KEY?.trim()
 const CLE_PRIVEE = process.env.VAPID_PRIVATE_KEY?.trim()
+const COMPTE_FCM = lireCompteDeService(process.env.FCM_COMPTE_SERVICE)
 
 /**
  * L'heure locale du rappel, sur 24 h.
@@ -59,13 +65,15 @@ const HEURE_LIMITE = 22
 const configurable = Boolean(CLE_PUBLIQUE && CLE_PRIVEE)
 let configure = false
 
-/** Vrai si le processus peut envoyer des notifications. */
+/** Vrai si le processus peut envoyer des notifications, au navigateur ou à l'appli. */
 export function rappelsPossibles(): boolean {
-  return configurable && Number.isInteger(HEURE) && HEURE >= 0 && HEURE <= 23
+  return (
+    (configurable || COMPTE_FCM !== null) && Number.isInteger(HEURE) && HEURE >= 0 && HEURE <= 23
+  )
 }
 
 function preparer(): void {
-  if (configure) return
+  if (configure || !configurable) return
   const sujet =
     process.env.VAPID_SUBJECT?.trim() ||
     process.env.NEXT_PUBLIC_APP_URL?.trim() ||
@@ -157,6 +165,23 @@ export async function rappelDuDefi(maintenant = new Date()): Promise<number> {
         passes.push(abonnement.endpoint)
         return
       }
+
+      if (abonnement.canal === 'fcm') {
+        // Sans compte Firebase, l'appli n'est pas joignable : on ne marque pas,
+        // elle sera servie le jour où la configuration arrive.
+        if (!COMPTE_FCM) return
+        const resultat = await envoyerFcm(COMPTE_FCM, abonnement.endpoint, {
+          ...texteDeNotification({ sujet: 'defiDuJour' }, abonnement.locale),
+          url: '/',
+          fil: 'defi-du-jour',
+          ttlSecondes: 6 * 3600,
+          urgent: false,
+        })
+        if (resultat === 'envoye') envoyes.push(abonnement.endpoint)
+        else if (resultat === 'mort') morts.push(abonnement.endpoint)
+        return
+      }
+      if (!configurable) return
 
       try {
         await webpush.sendNotification(

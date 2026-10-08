@@ -16,7 +16,11 @@ s'installent à part (`cd mobile && npm ci`) et n'entrent ni dans le
 - le SDK Android, avec `platforms/android-36` et `build-tools/35.0.0`, et
   `android/local.properties` qui le désigne :
   `sdk.dir=C\:/Users/<toi>/AppData/Local/Android/Sdk` ;
-- la clé de signature (ci-dessous).
+- la clé de signature (ci-dessous) ;
+- `android/app/google-services.json`, la configuration Firebase de l'appli :
+  console Firebase, Paramètres du projet, appli Android
+  `ovh.cparfait.coupparfait`. Git l'ignore. Sans lui, l'APK se construit mais
+  ne reçoit aucune notification.
 
 ## Publier une nouvelle version
 
@@ -52,9 +56,10 @@ keyPassword=…
 
 ## Ce qui diffère du site
 
-- **Notifications** : une WebView n'a pas de service de push. Il faudra
-  brancher Firebase Cloud Messaging (`@capacitor/push-notifications`, un
-  projet Firebase et son `google-services.json`).
+- **Notifications** : une WebView n'a pas de service de push. L'appli passe
+  par Firebase Cloud Messaging (`@capacitor/push-notifications`), et le serveur
+  envoie par la même voie dès que `FCM_COMPTE_SERVICE` est posé. Voir
+  `docs/notifications.md`.
 - **Stockfish** : Capacitor relaie chaque page pour y injecter son pont, et
   la resert sans les en-têtes `Cross-Origin-Opener-Policy` et
   `Cross-Origin-Embedder-Policy`. La page n'est donc pas isolée,

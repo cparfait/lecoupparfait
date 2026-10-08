@@ -10,7 +10,7 @@
  * jour automatique : voir `lib/appliAndroid.ts`.
  */
 
-import { Download, Info, RefreshCw, Smartphone } from 'lucide-react'
+import { Bell, Download, RefreshCw, Smartphone } from 'lucide-react'
 import {
   Button,
   ButtonLink,
@@ -48,8 +48,8 @@ export default function AppliPage() {
       </section>
 
       <section className="mt-10">
-        <TitreDeSection icon={Info}>{t('appli.differencesTitle')}</TitreDeSection>
-        <p className="text-[15px] leading-relaxed text-muted">{t('appli.noNotifications')}</p>
+        <TitreDeSection icon={Bell}>{t('appli.notificationsTitle')}</TitreDeSection>
+        <p className="text-[15px] leading-relaxed text-muted">{t('appli.notificationsInApp')}</p>
       </section>
     </div>
   )

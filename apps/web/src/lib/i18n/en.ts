@@ -739,9 +739,9 @@ export const en: Dictionary = {
       'The content updates itself: the app shows the live site, and every new feature lands there at the same time.',
     updatesShell:
       'The app itself changes less often. When a new version comes out, it offers it to you and installs over the old one: your account, games and settings stay put.',
-    differencesTitle: 'What differs from the site',
-    noNotifications:
-      'Notifications (invitations, your turn to play) don’t go through the app yet. If you need them, keep the site installed from your browser too.',
+    notificationsTitle: 'Notifications',
+    notificationsInApp:
+      'The app notifies you like any other app on your phone: a game invitation, a friend request, a correspondence move, the daily challenge. Turn them on in Settings, Notifications tab.',
     yourApp: 'Your app',
     installedVersion: 'Version {version}',
     upToDate: 'Up to date',
@@ -2106,12 +2106,18 @@ export const en: Dictionary = {
   notifications: {
     title: 'Notifications',
     thisDeviceOnly: 'On this device only.',
+    channelInvitation: 'Game invitations',
+    channelFriends: 'Friends',
+    channelCorrespondence: 'Correspondence',
+    channelDailyChallenge: 'Daily challenge',
     iosNeedsInstall:
       'On iPhone and iPad, notifications only work once the app is installed. Touch the share button, then “Add to Home Screen”, and come back here from the icon.',
     unsupported: 'This browser cannot receive notifications.',
     needsAccount: 'An account is needed: an invitation is addressed to someone.',
     refused:
       'Notifications have been refused for this site. The browser will not ask again — you have to allow them in its settings, next to the site address.',
+    refusedApp:
+      'Notifications are turned off for the app. Turn them back on in the phone settings: Apps, Le Coup Parfait, Notifications.',
     active: 'This device will be notified.',
     whenWaiting: 'When someone is waiting for you',
     whenWaitingHint:

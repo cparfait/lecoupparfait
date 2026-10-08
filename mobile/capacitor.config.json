@@ -16,6 +16,9 @@
       "insetsHandling": "css",
       "initialViewportFitValueHint": "cover",
       "style": "DARK"
+    },
+    "PushNotifications": {
+      "presentationOptions": ["alert", "sound"]
     }
   }
 }

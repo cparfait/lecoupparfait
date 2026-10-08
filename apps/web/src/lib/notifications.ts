@@ -21,10 +21,24 @@
  * ordinaire, `PushManager` n'existe même pas, et l'interface doit expliquer
  * qu'il faut d'abord ajouter le site à l'écran d'accueil — sans quoi le bouton
  * ne fait visiblement rien.
+ *
+ * L'appli Android, enfin, n'a pas de push du navigateur du tout : sa WebView
+ * n'en a pas. Elle passe par Firebase (`notificationsAppli.ts`), et ce module
+ * choisit le chemin au montage. Les états, les réglages et l'essai restent les
+ * mêmes ; seuls changent la permission demandée — celle du téléphone — et ce
+ * qu'on transmet au serveur — un jeton Firebase au lieu d'un abonnement.
  */
 
 import { useCallback, useEffect, useState } from 'react'
+import { dansAppliAndroid } from '@/lib/appliAndroid.ts'
 import { useT } from '@/lib/i18n/index.tsx'
+import {
+  creerCanaux,
+  jetonAppli,
+  permissionAppli,
+  pluginNotifications,
+  type NomsDeCanaux,
+} from '@/lib/notificationsAppli.ts'
 
 /** Où en est cet appareil. */
 export type EtatNotifications =
@@ -122,6 +136,15 @@ export interface Reglages {
 
 const REGLAGES_PAR_DEFAUT: Reglages = { invitations: true, defiDuJour: true }
 
+/** Le corps commun des deux enregistrements : ce qu'on veut recevoir, et à quelle heure. */
+function reglagesPourLeServeur(reglages: Reglages) {
+  return {
+    invitations: reglages.invitations,
+    defiDuJour: reglages.defiDuJour,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  }
+}
+
 /**
  * Le réglage des notifications pour cet appareil.
  *
@@ -137,11 +160,59 @@ export function useNotifications() {
   const [clePublique, setClePublique] = useState<string | null>(null)
   const [endpoint, setEndpoint] = useState<string | null>(null)
   const [choix, setChoix] = useState<Reglages>(REGLAGES_PAR_DEFAUT)
+  /** Dans l'appli Android : `endpoint` porte alors le jeton Firebase. */
+  const [appli, setAppli] = useState(false)
+
+  const nomsDeCanaux = useCallback(
+    (): NomsDeCanaux => ({
+      invitation: t('notifications.channelInvitation'),
+      ami: t('notifications.channelFriends'),
+      correspondance: t('notifications.channelCorrespondence'),
+      defiDuJour: t('notifications.channelDailyChallenge'),
+    }),
+    [t],
+  )
 
   useEffect(() => {
     let vivant = true
 
     void (async () => {
+      const plugin = dansAppliAndroid() ? pluginNotifications() : null
+      if (plugin) {
+        setAppli(true)
+        try {
+          const reponse = await fetch('/api/notifications')
+          const donnees = (await reponse.json()) as { appli?: boolean }
+          if (!donnees.appli) {
+            if (vivant) setEtat('indisponible')
+            return
+          }
+          const permission = await permissionAppli(plugin)
+          if (!vivant) return
+          if (permission !== 'granted') {
+            setEtat(permission === 'denied' ? 'refuse' : 'a-activer')
+            return
+          }
+          // Permission accordée : l'appareil est peut-être déjà abonné, et seul
+          // son jeton permet de le demander au serveur.
+          await creerCanaux(plugin, nomsDeCanaux())
+          const jeton = await jetonAppli(plugin)
+          const lecture = await fetch(`/api/notifications?endpoint=${encodeURIComponent(jeton)}`)
+          const enregistre = (await lecture.json()) as { abonnement?: Reglages | null }
+          if (!vivant) return
+          if (enregistre.abonnement) {
+            setEndpoint(jeton)
+            setChoix(enregistre.abonnement)
+            setEtat('actif')
+          } else {
+            setEtat('a-activer')
+          }
+        } catch {
+          if (vivant) setEtat('a-activer')
+        }
+        return
+      }
+
       if (!navigateurCompatible()) {
         if (vivant) setEtat('impossible')
         return
@@ -205,10 +276,48 @@ export function useNotifications() {
     return () => {
       vivant = false
     }
+    // Au montage seulement. Les noms de canaux suivent la langue, mais leur
+    // recréation à chaque activation suffit à les tenir à jour.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const activer = useCallback(
     async (reglages: Reglages = REGLAGES_PAR_DEFAUT) => {
+      const plugin = appli ? pluginNotifications() : null
+      if (plugin) {
+        setOccupe(true)
+        setErreur(null)
+        try {
+          // Android 13 et plus demandent la permission, comme un navigateur :
+          // ici aussi, seulement dans le clic.
+          const permission = (await plugin.requestPermissions()).receive
+          if (permission !== 'granted') {
+            setEtat(permission === 'denied' ? 'refuse' : 'a-activer')
+            return
+          }
+          await creerCanaux(plugin, nomsDeCanaux())
+          const jeton = await jetonAppli(plugin)
+          const reponse = await fetch('/api/notifications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ appli: { jeton }, ...reglagesPourLeServeur(reglages) }),
+          })
+          if (!reponse.ok) {
+            const donnees = (await reponse.json().catch(() => ({}))) as { error?: string }
+            setErreur(donnees.error ?? t('rest.subscribeFailed'))
+            return
+          }
+          setEndpoint(jeton)
+          setChoix(reglages)
+          setEtat('actif')
+        } catch {
+          setErreur(t('rest.subscribeFailed'))
+        } finally {
+          setOccupe(false)
+        }
+        return
+      }
+
       if (!clePublique) return
       setOccupe(true)
       setErreur(null)
@@ -263,7 +372,7 @@ export function useNotifications() {
         setOccupe(false)
       }
     },
-    [clePublique, t],
+    [appli, clePublique, nomsDeCanaux, t],
   )
 
   /**
@@ -279,6 +388,23 @@ export function useNotifications() {
       setChoix(reglages)
       setErreur(null)
       try {
+        if (appli) {
+          if (!endpoint) return
+          const reponse = await fetch('/api/notifications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              appli: { jeton: endpoint },
+              ...reglagesPourLeServeur(reglages),
+            }),
+          })
+          if (!reponse.ok) {
+            setChoix(precedent)
+            setErreur(t('rest.settingNotSaved'))
+          }
+          return
+        }
+
         const inscription = await navigator.serviceWorker.ready
         const abonnement = await inscription.pushManager.getSubscription()
         if (!abonnement) return
@@ -306,13 +432,28 @@ export function useNotifications() {
         setErreur(t('rest.settingNotSaved'))
       }
     },
-    [choix, t],
+    [appli, choix, endpoint, t],
   )
 
   const desactiver = useCallback(async () => {
     setOccupe(true)
     setErreur(null)
     try {
+      if (appli) {
+        // Le jeton reste au téléphone : sans ligne en base, plus rien ne lui
+        // est envoyé, et le réactiver ne redemande rien à Firebase.
+        if (endpoint) {
+          await fetch('/api/notifications', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endpoint }),
+          }).catch(() => undefined)
+        }
+        setEndpoint(null)
+        setEtat('a-activer')
+        return
+      }
+
       const inscription = await navigator.serviceWorker.ready
       const abonnement = await inscription.pushManager.getSubscription()
       const adresse = abonnement?.endpoint ?? endpoint
@@ -331,7 +472,7 @@ export function useNotifications() {
     } finally {
       setOccupe(false)
     }
-  }, [endpoint])
+  }, [appli, endpoint])
 
   /** Envoie une notification à cet appareil, pour vérifier qu'elle arrive. */
   const essayer = useCallback(async () => {
@@ -353,5 +494,5 @@ export function useNotifications() {
     }
   }, [endpoint, t])
 
-  return { etat, occupe, erreur, choix, activer, desactiver, changerChoix, essayer }
+  return { etat, appli, occupe, erreur, choix, activer, desactiver, changerChoix, essayer }
 }

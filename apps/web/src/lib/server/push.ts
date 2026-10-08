@@ -23,12 +23,19 @@ import 'server-only'
  * La configuration est facultative. Sans clés VAPID, `notificationsActives()`
  * répond faux et l'interface retire le réglage : mieux vaut ne rien proposer
  * que proposer un abonnement qui ne recevra jamais rien.
+ *
+ * L'appli Android passe par un autre chemin : sa WebView n'a pas de push, elle
+ * reçoit ses messages de Firebase (`@coupparfait/core/fcm`). Même table, mêmes
+ * règles, mêmes textes — seul le transport change, selon la colonne `canal`.
+ * Sans `FCM_COMPTE_SERVICE`, `notificationsAppliActives()` répond faux et
+ * l'appli retire le réglage, comme le navigateur sans clés VAPID.
  */
 
 import webpush from 'web-push'
 import { abonnementsPour, retirerAbonnements } from '@coupparfait/db/push'
 import type { PushSubscriptionRow } from '@coupparfait/db/schema'
 import { texteDeNotification, type SujetDeNotification } from '@coupparfait/core'
+import { envoyerFcm, lireCompteDeService } from '@coupparfait/core/fcm'
 
 /**
  * Ce qu'on veut annoncer. Le travailleur de service (`public/sw.js`) reçoit,
@@ -56,6 +63,7 @@ export interface Notification {
 
 const CLE_PUBLIQUE = process.env.VAPID_PUBLIC_KEY?.trim()
 const CLE_PRIVEE = process.env.VAPID_PRIVATE_KEY?.trim()
+const COMPTE_FCM = lireCompteDeService(process.env.FCM_COMPTE_SERVICE)
 
 /**
  * L'adresse de contact exigée par la norme.
@@ -90,6 +98,11 @@ export function notificationsActives(): boolean {
   return Boolean(CLE_PUBLIQUE && CLE_PRIVEE)
 }
 
+/** Vrai si le serveur peut prévenir l'appli Android. */
+export function notificationsAppliActives(): boolean {
+  return COMPTE_FCM !== null
+}
+
 /** La clé publique à remettre au navigateur, ou `null` si rien n'est configuré. */
 export function clePubliqueVapid(): string | null {
   return notificationsActives() ? (CLE_PUBLIQUE ?? null) : null
@@ -119,7 +132,10 @@ export async function envoyerAux(
   notification: Notification,
   localeParDefaut: string | null = null,
 ): Promise<{ envoyes: string[]; morts: string[] }> {
-  if (!preparer() || abonnements.length === 0) return { envoyes: [], morts: [] }
+  const webPret = preparer()
+  const navigateurs = webPret ? abonnements.filter((abonnement) => abonnement.canal !== 'fcm') : []
+  const applis = COMPTE_FCM ? abonnements.filter((abonnement) => abonnement.canal === 'fcm') : []
+  if (navigateurs.length === 0 && applis.length === 0) return { envoyes: [], morts: [] }
 
   const { sujet, ...reste } = notification
   const charges = new Map<string, string>()
@@ -135,8 +151,8 @@ export async function envoyerAux(
   const envoyes: string[] = []
   const morts: string[] = []
 
-  await Promise.all(
-    abonnements.map(async (abonnement) => {
+  await Promise.all([
+    ...navigateurs.map(async (abonnement) => {
       try {
         await webpush.sendNotification(
           {
@@ -171,7 +187,20 @@ export async function envoyerAux(
         }
       }
     }),
-  )
+    ...applis.map(async (abonnement) => {
+      const resultat = await envoyerFcm(COMPTE_FCM!, abonnement.endpoint, {
+        ...texteDeNotification(sujet, abonnement.locale ?? localeParDefaut),
+        url: notification.url,
+        fil: notification.fil,
+        ttlSecondes: DUREES[notification.fil],
+        // Seule l'invitation réveille le téléphone sur-le-champ : elle expire
+        // en cinq minutes. Le reste peut attendre que le système le distribue.
+        urgent: notification.fil === 'invitation',
+      })
+      if (resultat === 'envoye') envoyes.push(abonnement.endpoint)
+      else if (resultat === 'mort') morts.push(abonnement.endpoint)
+    }),
+  ])
 
   return { envoyes, morts }
 }
@@ -189,7 +218,7 @@ export function prevenir(
   usage: 'invitations' | 'defiDuJour',
   notification: Notification,
 ): void {
-  if (!notificationsActives()) return
+  if (!notificationsActives() && !notificationsAppliActives()) return
 
   void (async () => {
     try {

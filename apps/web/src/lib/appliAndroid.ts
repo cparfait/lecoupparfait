@@ -28,8 +28,8 @@ import { useCallback, useEffect, useSyncExternalStore } from 'react'
  * `appliAndroid.test.ts` y veille.
  */
 export const APPLI_ANDROID = {
-  versionCode: 1,
-  versionName: '1.0.0',
+  versionCode: 2,
+  versionName: '1.1.0',
   fichier: '/telechargements/le-coup-parfait.apk',
 } as const
 
@@ -74,6 +74,15 @@ function pont(): PontCapacitor | null {
 /** Vrai dans l'appli Android. À n'appeler qu'après l'hydratation. */
 export function dansAppliAndroid(): boolean {
   return pont() !== null
+}
+
+/**
+ * Un module natif de l'appli, par son nom, ou `null` hors de l'appli — ou
+ * dans une coque trop ancienne pour le connaître.
+ */
+export function moduleNatif<T>(nom: string): T | null {
+  const plugins = pont()?.Plugins as Record<string, unknown> | undefined
+  return (plugins?.[nom] as T | undefined) ?? null
 }
 
 /**

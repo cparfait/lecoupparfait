@@ -763,9 +763,9 @@ export const fr = {
       'Le contenu se met à jour tout seul : l’appli affiche le site en direct, et chaque nouveauté y arrive en même temps.',
     updatesShell:
       'L’appli elle-même change plus rarement. Quand une nouvelle version sort, elle te la propose et s’installe par-dessus l’ancienne : ton compte, tes parties et tes réglages restent là.',
-    differencesTitle: 'Ce qui diffère du site',
-    noNotifications:
-      'Les notifications (invitations, tour de jeu) ne passent pas encore par l’appli. Si tu en as besoin, garde aussi le site installé depuis ton navigateur.',
+    notificationsTitle: 'Les notifications',
+    notificationsInApp:
+      'L’appli te prévient comme n’importe quelle appli du téléphone : une invitation à jouer, une demande d’ami, un coup en correspondance, le défi du jour. Active-les dans Préférences, onglet Notifications.',
     yourApp: 'Ton appli',
     installedVersion: 'Version {version}',
     upToDate: 'À jour',
@@ -2152,12 +2152,20 @@ export const fr = {
   notifications: {
     title: 'Notifications',
     thisDeviceOnly: 'Sur cet appareil uniquement.',
+    // Les canaux de l'appli Android, tels qu'ils apparaissent dans les
+    // paramètres de notification du téléphone.
+    channelInvitation: 'Invitations à jouer',
+    channelFriends: 'Amis',
+    channelCorrespondence: 'Correspondance',
+    channelDailyChallenge: 'Défi du jour',
     iosNeedsInstall:
       'Sur iPhone et iPad, les notifications ne fonctionnent qu’une fois l’application installée. Touche le bouton de partage, puis « Sur l’écran d’accueil », et reviens ici depuis l’icône.',
     unsupported: 'Ce navigateur ne sait pas recevoir de notifications.',
     needsAccount: 'Il faut un compte : une invitation s’adresse à quelqu’un.',
     refused:
       'Les notifications ont été refusées pour ce site. Le navigateur ne redemandera pas — il faut les réautoriser dans ses réglages, à côté de l’adresse du site.',
+    refusedApp:
+      'Les notifications sont coupées pour l’appli. Rends-les dans les paramètres du téléphone : Applis, Le Coup Parfait, Notifications.',
     active: 'Cet appareil est prévenu.',
     whenWaiting: 'Quand quelqu’un t’attend',
     whenWaitingHint:

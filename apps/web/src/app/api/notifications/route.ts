@@ -3,6 +3,7 @@
  *
  *   GET    /api/notifications   → la clé publique, et si le serveur sait envoyer
  *   POST   /api/notifications     { abonnement, invitations, defiDuJour, … }
+ *   POST   /api/notifications     { appli: { jeton }, invitations, defiDuJour, … }
  *   POST   /api/notifications     { action: 'essai' }
  *   DELETE /api/notifications     { endpoint }
  *
@@ -17,12 +18,18 @@
 import { NextResponse } from 'next/server'
 import {
   enregistrerAbonnement,
+  enregistrerAppli,
   lireAbonnement,
   retirerAbonnement,
   retirerAbonnements,
 } from '@coupparfait/db/push'
 import { getCurrentUser } from '@/lib/server/session.ts'
-import { clePubliqueVapid, envoyerAux, notificationsActives } from '@/lib/server/push.ts'
+import {
+  clePubliqueVapid,
+  envoyerAux,
+  notificationsActives,
+  notificationsAppliActives,
+} from '@/lib/server/push.ts'
 import { localeDeLaRequete, tDeLaRequete } from '@/lib/i18n/serveur.ts'
 
 export const runtime = 'nodejs'
@@ -43,6 +50,8 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     disponible: notificationsActives(),
+    // L'appli Android ne lit que celui-ci : elle passe par Firebase, pas par VAPID.
+    appli: notificationsAppliActives(),
     clePublique: clePubliqueVapid(),
     abonnement: abonnement
       ? { invitations: abonnement.invitations, defiDuJour: abonnement.defiDuJour }
@@ -52,7 +61,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const t = tDeLaRequete(request)
-  if (!notificationsActives()) {
+  if (!notificationsActives() && !notificationsAppliActives()) {
     return NextResponse.json({ error: t('api.notificationsUnconfigured') }, { status: 503 })
   }
 
@@ -63,6 +72,7 @@ export async function POST(request: Request) {
     action?: string
     endpoint?: string
     abonnement?: { endpoint?: string; keys?: { p256dh?: string; auth?: string } }
+    appli?: { jeton?: unknown }
     invitations?: boolean
     defiDuJour?: boolean
     timezone?: string
@@ -103,6 +113,36 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true })
   }
 
+  const choix = {
+    invitations: body.invitations !== false,
+    defiDuJour: body.defiDuJour !== false,
+  }
+  // Le fuseau vient de l'appareil : c'est la seule façon d'envoyer le rappel du
+  // jour à dix-huit heures *chez la personne* et non chez le serveur.
+  const timezone = String(body.timezone ?? 'Europe/Paris').slice(0, 60)
+
+  /*
+    L'appli Android : un jeton Firebase au lieu d'un abonnement de navigateur.
+
+    Un jeton fait un peu plus de cent cinquante caractères ; la borne haute ne
+    sert qu'à refuser n'importe quoi d'énorme dans une colonne indexée.
+  */
+  if (body.appli) {
+    if (!notificationsAppliActives()) {
+      return NextResponse.json({ error: t('api.notificationsUnconfigured') }, { status: 503 })
+    }
+    const jeton = body.appli.jeton
+    if (typeof jeton !== 'string' || jeton.length < 20 || jeton.length > 4096) {
+      return NextResponse.json({ error: t('api.subscriptionIncomplete') }, { status: 400 })
+    }
+    await enregistrerAppli({ userId: me.userId, jeton, choix, timezone })
+    return NextResponse.json({ ok: true })
+  }
+
+  if (!notificationsActives()) {
+    return NextResponse.json({ error: t('api.notificationsUnconfigured') }, { status: 503 })
+  }
+
   const endpoint = body.abonnement?.endpoint
   const p256dh = body.abonnement?.keys?.p256dh
   const auth = body.abonnement?.keys?.auth
@@ -113,13 +153,8 @@ export async function POST(request: Request) {
   await enregistrerAbonnement({
     userId: me.userId,
     abonnement: { endpoint, keys: { p256dh, auth } },
-    choix: {
-      invitations: body.invitations !== false,
-      defiDuJour: body.defiDuJour !== false,
-    },
-    // Le fuseau vient du navigateur : c'est la seule façon d'envoyer le rappel
-    // du jour à dix-huit heures *chez la personne* et non chez le serveur.
-    timezone: String(body.timezone ?? 'Europe/Paris').slice(0, 60),
+    choix,
+    timezone,
   })
 
   return NextResponse.json({ ok: true })

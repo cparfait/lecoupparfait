@@ -224,6 +224,7 @@ services:
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
       VAPID_SUBJECT: ${VAPID_SUBJECT:-}
+      FCM_COMPTE_SERVICE: ${FCM_COMPTE_SERVICE:-}
       DEFI_RAPPEL_HEURE: ${DEFI_RAPPEL_HEURE:-18}
     # Aucun port publié : NPM joint le conteneur par `web-coupparfait`. Publier
     # « 3001:3001 » l'ouvrait sur toutes les interfaces de la machine, donc
@@ -321,6 +322,7 @@ services:
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
       VAPID_SUBJECT: ${VAPID_SUBJECT:-}
+      FCM_COMPTE_SERVICE: ${FCM_COMPTE_SERVICE:-}
       PORT: 3000
       HOSTNAME: 0.0.0.0
     # Aucun port publié : voir la remarque du service `server`.

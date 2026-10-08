@@ -26,7 +26,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { ChevronRight, LayoutGrid, Lock } from 'lucide-react'
 import clsx from 'clsx'
 import { AccountButton } from '@/components/layout/AccountButton.tsx'
@@ -43,6 +43,7 @@ import { PorteDuCompte } from '@/components/compte/PorteDuCompte.tsx'
 import type { ReactNode } from 'react'
 import { useT } from '@/lib/i18n/index.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { brancherToucher } from '@/lib/notificationsAppli.ts'
 import { avantagePour, type AvantageCompte } from '@/lib/compte/avantages.ts'
 import {
   estActif,
@@ -76,8 +77,14 @@ type Intercepteur = (href: string) => AvantageCompte | null
 export function AppShell({ children }: { children: ReactNode }) {
   const t = useT()
   const pathname = usePathname()
+  const router = useRouter()
   const identite = useIdentite()
   const [porte, setPorte] = useState<{ avantage: AvantageCompte; href: string } | null>(null)
+
+  // Dans l'appli Android, toucher une notification ouvre sa page — même quand
+  // l'appli était fermée : le module natif garde l'événement jusqu'ici. La
+  // coque est le seul composant monté partout, parties comprises.
+  useEffect(() => brancherToucher((chemin) => router.push(chemin)), [router])
 
   const intercepter = useCallback<Intercepteur>(
     (href) => (identite === null ? avantagePour(href) : null),

@@ -105,6 +105,29 @@ part de ce serveur vers cet appareil, et c'est tout ce qu'ils sauront jamais.
 
 « Ne plus recevoir » supprime la ligne. Supprimer son compte aussi.
 
+## L'appli Android
+
+L'appli (`mobile/`) affiche le site dans une WebView, et une WebView n'a pas
+de push du navigateur. Elle reçoit donc ses notifications de **Firebase Cloud
+Messaging** : au moment d'activer, le téléphone obtient un jeton Firebase et le
+remet au serveur, qui l'enregistre dans la même table, avec `canal = 'fcm'`.
+Mêmes réglages, mêmes textes, même essai ; seul le transport change.
+
+Côté serveur, il faut le compte de service du projet Firebase dans
+`FCM_COMPTE_SERVICE` (voir `.env.example`), pour le service `web` comme pour
+`server`. Côté appli, `mobile/android/app/google-services.json`, téléchargé
+depuis la console Firebase avant de construire l'APK.
+
+Deux différences avec le navigateur, à connaître :
+
+- **Le contenu n'est pas chiffré de bout en bout.** Firebase remet le titre et
+  le texte à l'appli tels quels : Google peut les lire. Ils ne disent jamais
+  plus que « Untel t'invite à jouer » ou « c'est à toi dans ta partie par
+  correspondance ».
+- **Chaque fil est un canal Android** (`invitation`, `ami`, `correspondance`,
+  `defi-du-jour`), réglable à part dans les paramètres de notification du
+  téléphone. Le site les crée, dans la langue de la page, à chaque activation.
+
 ## Où c'est écrit
 
 | Rôle                                     | Fichier                                                     |
@@ -116,6 +139,8 @@ part de ce serveur vers cet appareil, et c'est tout ce qu'ils sauront jamais.
 | Envoi d'une invitation                   | `apps/web/src/lib/server/push.ts`                           |
 | Rappel du défi du jour                   | `apps/server/src/rappels.ts`                                |
 | Table des abonnements                    | `packages/db/src/push.ts`                                   |
+| Envoi vers l'appli Android (Firebase)    | `packages/core/src/fcm.ts`                                  |
+| Abonnement et clic, dans l'appli         | `apps/web/src/lib/notificationsAppli.ts`                    |
 
 Le rappel quotidien vit dans le **serveur temps réel** et non dans
 l'application web : il doit partir vers quelqu'un qui n'est justement pas venu,

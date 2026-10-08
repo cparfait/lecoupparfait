@@ -33,11 +33,27 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- Les notifications reçues de Firebase : le cavalier en silhouette,
+             teinté de l'accent, et le canal des invitations pour tout message
+             qui n'en précise pas. Les canaux eux-mêmes sont créés par le site,
+             dans la langue de la page (notificationsAppli.ts). -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/accent" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="invitation" />
     </application>
 
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Android 13 et plus : la permission que le site demande dans le clic. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Pour installer elle-même ses mises à jour : voir MiseAJourPlugin. -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 </manifest>

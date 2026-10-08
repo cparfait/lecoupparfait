@@ -120,6 +120,13 @@
       "when": 1790264145175,
       "tag": "0016_assisted_games",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791460746269,
+      "tag": "0017_push_canal_appli",
+      "breakpoints": true
     }
   ]
 }

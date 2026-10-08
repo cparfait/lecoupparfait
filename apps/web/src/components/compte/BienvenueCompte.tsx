@@ -632,7 +632,7 @@ function EtapeNotifications({
   notifications: ReturnType<typeof useNotifications>
 }) {
   const t = useT()
-  const { etat, occupe, erreur, activer } = notifications
+  const { etat, appli, occupe, erreur, activer } = notifications
 
   return (
     <Etage
@@ -662,7 +662,7 @@ function EtapeNotifications({
           {etat === 'refuse' && (
             <p className="mt-2 flex items-start gap-2 text-[12px] leading-relaxed text-muted">
               <BellOff size={14} className="mt-0.5 shrink-0" aria-hidden />
-              {t('auth.notificationsRefused')}
+              {t(appli ? 'notifications.refusedApp' : 'auth.notificationsRefused')}
             </p>
           )}
         </>

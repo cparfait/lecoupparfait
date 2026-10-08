@@ -25,7 +25,7 @@ import { useT } from '@/lib/i18n/index.tsx'
 export function ReglageNotifications() {
   const t = useT()
   const identite = useIdentite()
-  const { etat, occupe, erreur, choix, activer, desactiver, changerChoix, essayer } =
+  const { etat, appli, occupe, erreur, choix, activer, desactiver, changerChoix, essayer } =
     useNotifications()
 
   // Rien tant qu'on ne sait pas : voir `useIdentite`. Un panneau qui dit
@@ -53,7 +53,9 @@ export function ReglageNotifications() {
       ) : !identite ? (
         <p className="text-sm leading-relaxed text-muted">{t('notifications.needsAccount')}</p>
       ) : etat === 'refuse' ? (
-        <p className="text-sm leading-relaxed text-muted">{t('notifications.refused')}</p>
+        <p className="text-sm leading-relaxed text-muted">
+          {t(appli ? 'notifications.refusedApp' : 'notifications.refused')}
+        </p>
       ) : etat === 'actif' ? (
         <>
           <p className="flex items-center gap-2 text-sm text-ink">

@@ -9,7 +9,8 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./data/openings": "./src/data/openings.generated.ts"
+    "./data/openings": "./src/data/openings.generated.ts",
+    "./fcm": "./src/fcm.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit",

@@ -1002,6 +1002,11 @@ export const dailyProgress = pgTable(
  * `p256dh` et `auth` sont les clés de chiffrement : le contenu de la
  * notification est chiffré pour ce navigateur-là, le service de messagerie qui
  * la relaie ne peut pas le lire. On les stocke telles quelles, en base64url.
+ *
+ * L'appli Android est un appareil comme un autre, mais elle ne passe pas par
+ * le push du navigateur : sa WebView n'en a pas. Elle s'abonne chez Firebase,
+ * et `canal` vaut alors `fcm` : `endpoint` porte le jeton Firebase du
+ * téléphone, et les deux clés, sans objet, restent vides.
  */
 export const pushSubscriptions = pgTable(
   'push_subscriptions',
@@ -1010,6 +1015,8 @@ export const pushSubscriptions = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
+    /** `web` : push du navigateur. `fcm` : appli Android, via Firebase. */
+    canal: varchar('canal', { length: 8 }).$type<'web' | 'fcm'>().notNull().default('web'),
     endpoint: text('endpoint').notNull(),
     p256dh: text('p256dh').notNull(),
     auth: text('auth').notNull(),

@@ -1,10 +1,11 @@
 /**
  * Les abonnements aux notifications.
  *
- * Accès à la table `push_subscriptions` : enregistrer un appareil, le retirer,
- * et retrouver ceux qu'il faut prévenir. Le chiffrement et l'envoi ne sont pas
- * ici — ils dépendent des clés VAPID, qui n'existent que côté application web.
- * Ce module ne connaît que des lignes.
+ * Accès à la table `push_subscriptions` : enregistrer un appareil — navigateur
+ * ou appli Android —, le retirer, et retrouver ceux qu'il faut prévenir. Le
+ * chiffrement et l'envoi ne sont pas ici : ils dépendent des clés VAPID et du
+ * compte Firebase, qui n'existent que dans les processus qui envoient. Ce
+ * module ne connaît que des lignes.
  *
  * Une règle traverse tout le fichier : **un abonnement mort se supprime sans
  * bruit**. Le service de messagerie d'un navigateur répond 404 ou 410 quand
@@ -86,6 +87,36 @@ export async function enregistrerAbonnement(options: {
         timezone: options.timezone,
       },
     })
+}
+
+/**
+ * Enregistre — ou met à jour — l'appli Android d'un téléphone.
+ *
+ * Même table et mêmes règles qu'un navigateur : le jeton Firebase tient lieu
+ * d'`endpoint` (unique, fabriqué par le téléphone, stable tant que l'appli
+ * n'est pas réinstallée), et il n'y a pas de clés de chiffrement — Firebase
+ * remet le message en clair à l'appli, qui l'affiche elle-même.
+ */
+export async function enregistrerAppli(options: {
+  userId: string
+  jeton: string
+  choix: ChoixNotifications
+  timezone: string
+}): Promise<void> {
+  const database = getDb()
+  const valeurs = {
+    userId: options.userId,
+    canal: 'fcm' as const,
+    p256dh: '',
+    auth: '',
+    invitations: options.choix.invitations,
+    defiDuJour: options.choix.defiDuJour,
+    timezone: options.timezone,
+  }
+  await database
+    .insert(pushSubscriptions)
+    .values({ ...valeurs, endpoint: options.jeton })
+    .onConflictDoUpdate({ target: pushSubscriptions.endpoint, set: valeurs })
 }
 
 /** Retire un appareil. */

@@ -13,7 +13,9 @@
  *  - un fond uni, le noir de l'icône du site ;
  *  - le cavalier détouré, centré, haut de 52 % du calque : coins de sa boîte
  *    compris, il tient dans le cercle de 72 dp ;
- *  - sa silhouette en blanc, que les icônes à thème d'Android 13 teintent ;
+ *  - sa silhouette en blanc, que les icônes à thème d'Android 13 teintent, et
+ *    qui sert aussi de petite icône aux notifications : Android n'y lit que
+ *    l'opacité, une image en couleur y devient un carré blanc ;
  *  - pour Android 7, qui ne connaît pas les calques, l'icône du site en carré
  *    arrondi et une variante ronde.
  *
@@ -64,8 +66,8 @@ async function pieceCentree(cote) {
 }
 
 /** La silhouette en blanc : seule l'opacité compte pour une icône à thème. */
-async function silhouette(cote) {
-  const hauteur = Math.round(cote * HAUTEUR_PIECE)
+async function silhouette(cote, part = HAUTEUR_PIECE) {
+  const hauteur = Math.round(cote * part)
   const alpha = await sharp(PIECE)
     .resize({ height: hauteur })
     .ensureAlpha()
@@ -118,6 +120,14 @@ for (const [densite, facteur] of Object.entries(DENSITES)) {
   await (await silhouette(calque)).toFile(join(dossier, 'ic_launcher_monochrome.png'))
   await sharp(ICONE_SITE).resize(legacy).png().toFile(join(dossier, 'ic_launcher.png'))
   await (await iconeRonde(legacy)).toFile(join(dossier, 'ic_launcher_round.png'))
+
+  // La petite icône des notifications : 24 dp, la pièce presque à pleine
+  // hauteur — à cette taille, la moindre marge la réduit à une tache.
+  const notifications = join(res, `drawable-${densite}`)
+  mkdirSync(notifications, { recursive: true })
+  await (
+    await silhouette(Math.round(24 * facteur), 0.92)
+  ).toFile(join(notifications, 'ic_notification.png'))
 }
 
 const adaptative = `<?xml version="1.0" encoding="utf-8"?>
