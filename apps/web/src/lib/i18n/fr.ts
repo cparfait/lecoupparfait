@@ -780,6 +780,9 @@ export const fr = {
     stepDownloadPercent: 'Téléchargement de la mise à jour… {pourcentage} %',
     stepInstaller: 'Confirme la mise à jour dans la fenêtre d’Android.',
     stepError: 'La mise à jour n’a pas pu se télécharger. Vérifie ta connexion, puis réessaie.',
+    signInTitle: 'Sois prévenu sur ce téléphone',
+    signInBlurb:
+      'Connecte-toi dans l’appli : tu pourras ensuite recevoir les invitations, les coups en correspondance et le rappel du défi du jour.',
     bannerTitle: 'Nouvelle version de l’appli',
     bannerBlurb:
       'La version {version} s’installe par-dessus celle-ci : ton compte et tes parties restent là.',

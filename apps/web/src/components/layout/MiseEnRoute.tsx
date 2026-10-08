@@ -20,6 +20,10 @@
  *     quelque chose qui a une échéance.
  *  2. **Une seule fois.** Refusée, la proposition ne revient pas — le réglage
  *     reste dans les préférences, qui est sa place pour qui la cherche.
+ *     L'appli Android fait exception, pour les notifications seulement : elles
+ *     sont sa raison d'être, et on les repropose à chaque version installée
+ *     tant qu'elles ne sont pas actives. Une version nouvelle est rare, et
+ *     c'est le moment où l'on rouvre l'appli en se demandant ce qui a changé.
  *  3. **Jamais pendant une partie.** L'écran de jeu est calibré au pixel près,
  *     et l'on n'interrompt pas quelqu'un qui réfléchit.
  *
@@ -30,10 +34,10 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { Bell, Download, RefreshCw, Share, X } from 'lucide-react'
+import { Bell, Download, LogIn, RefreshCw, Share, X } from 'lucide-react'
 import { messageEtape } from '@/components/appli/etapeMiseAJour.ts'
 import { Alerte } from '@/components/ui/Alerte.tsx'
-import { Button } from '@/components/ui/index.tsx'
+import { Button, ButtonLink } from '@/components/ui/index.tsx'
 import { APPLI_ANDROID, lancerMiseAJourAuto, useAppliAndroid } from '@/lib/appliAndroid.ts'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { usePartieEnLigne } from '@/lib/game/partieEnLigne.ts'
@@ -131,6 +135,46 @@ export function MiseEnRoute() {
   }
 
   /*
+    Dans l'appli, la proposition des notifications vaut pour une version
+    installée, et non pour toujours : voir la règle 2 en tête de fichier. Tant
+    que la coque n'a pas dit sa version, on attend plutôt que de proposer avec
+    la mauvaise clé.
+  */
+  if (appli.natif && !appli.installee) return null
+  const cleNotifications = appli.installee
+    ? `${CLES.notifications}.appli-${appli.installee.code}`
+    : CLES.notifications
+
+  /*
+    L'appli, au premier lancement, n'a pas de compte : sa WebView ne partage
+    pas les témoins du navigateur, même connecté de l'autre côté. Or les
+    notifications s'adressent à un compte. On commence donc par là, en disant
+    pourquoi — sans quoi la proposition des notifications n'arriverait jamais.
+  */
+  const cleConnexion = `coupparfait.propose.connexion.appli-${appli.installee?.code}`
+  if (appli.natif && identite === null && ecarte !== cleConnexion && !dejaPropose(cleConnexion)) {
+    return (
+      <Bandeau
+        icone={<LogIn size={18} aria-hidden />}
+        titre={t('appli.signInTitle')}
+        detail={t('appli.signInBlurb')}
+        onFermer={() => ecarter(cleConnexion)}
+        action={
+          <ButtonLink
+            href="/connexion"
+            size="sm"
+            variant="primary"
+            icon={<LogIn size={14} aria-hidden />}
+            onClick={() => marquerPropose(cleConnexion)}
+          >
+            {t('nav.signIn')}
+          </ButtonLink>
+        }
+      />
+    )
+  }
+
+  /*
     L'installation : ce qu'on propose quand les notifications n'ont rien à
     proposer. Calculée d'abord parce qu'elle sert de repli au bandeau des
     notifications, qui ne sait qu'à l'exécution — et depuis un composant enfant
@@ -188,10 +232,11 @@ export function MiseEnRoute() {
     application dont l'argument est qu'on peut jouer sans compte — pour une
     réponse dont on n'aurait rien fait.
   */
-  if (identite != null && ecarte !== CLES.notifications && !dejaPropose(CLES.notifications)) {
+  if (identite != null && ecarte !== cleNotifications && !dejaPropose(cleNotifications)) {
     return (
       <ProposerNotifications
-        onFermer={() => ecarter(CLES.notifications)}
+        cle={cleNotifications}
+        onFermer={() => ecarter(cleNotifications)}
         secours={bandeauInstallation}
       />
     )
@@ -213,9 +258,12 @@ export function MiseEnRoute() {
  * un compte déjà abonné n'aurait jamais vu la proposition d'installation.
  */
 function ProposerNotifications({
+  cle,
   onFermer,
   secours,
 }: {
+  /** Ce qui se marque comme proposé : par version de l'appli, ou une fois pour toutes. */
+  cle: string
   onFermer: () => void
   secours: React.ReactNode
 }) {
@@ -240,7 +288,7 @@ function ProposerNotifications({
           icon={<Bell size={14} />}
           disabled={occupe}
           onClick={() => {
-            marquerPropose(CLES.notifications)
+            marquerPropose(cle)
             void activer()
           }}
         >

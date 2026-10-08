@@ -756,6 +756,9 @@ export const en: Dictionary = {
     stepDownloadPercent: 'Downloading the update… {pourcentage}%',
     stepInstaller: 'Confirm the update in the Android window.',
     stepError: 'The update could not be downloaded. Check your connection, then try again.',
+    signInTitle: 'Get notified on this phone',
+    signInBlurb:
+      'Sign in to the app: you can then receive invitations, correspondence moves and the daily challenge reminder.',
     bannerTitle: 'New version of the app',
     bannerBlurb: 'Version {version} installs over this one: your account and games stay put.',
   },
