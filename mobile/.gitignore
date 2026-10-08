@@ -1,0 +1,4 @@
+node_modules/
+# La clé de signature et ses mots de passe : à sauvegarder hors du dépôt,
+# jamais à versionner. La perdre, c'est ne plus pouvoir publier de mise à jour.
+signature/

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/fond</item>
+        <item name="colorPrimaryDark">@color/fond</item>
+        <item name="colorAccent">@color/accent</item>
+    </style>
+
+    <!-- Le fond reste celui du site pendant qu'il charge : sans lui, la WebView
+         montrait un écran blanc entre le démarrage et la première page. -->
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/fond</item>
+    </style>
+
+    <!-- Écran de démarrage : le cavalier de l'icône sur le fond du site. Le
+         modèle de Capacitor y posait son propre logo. -->
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/fond</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
+    </style>
+</resources>

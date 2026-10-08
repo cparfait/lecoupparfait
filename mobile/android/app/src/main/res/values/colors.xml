@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Le fond et l'accent du manifeste du site (background_color et la couleur d’accent). -->
+<resources>
+    <color name="fond">#0B0B14</color>
+    <color name="accent">#7C5CFF</color>
+</resources>

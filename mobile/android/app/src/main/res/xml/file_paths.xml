@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Le seul fichier que l'appli confie à un autre programme : l'APK de mise à
+     jour, remis à l'installeur d'Android. Rien d'autre n'est exposé. -->
+<paths>
+    <cache-path name="mises_a_jour" path="mises-a-jour/" />
+</paths>

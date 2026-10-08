@@ -1,0 +1,77 @@
+<!doctype html>
+<!--
+  Ce que l'appli affiche quand le site ne répond pas : pas de réseau, ou le
+  serveur arrêté. Sans elle, la WebView montrait sa page d'erreur brute, en
+  anglais, avec l'adresse du serveur.
+
+  Elle vit dans l'APK et ne peut donc rien lire du site : ni le dictionnaire,
+  ni les jetons de couleur. Les deux langues de contenu y sont écrites en dur,
+  et le fond reprend celui du manifeste.
+-->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Le Coup Parfait</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #0b0b14;
+        color: #ecebf5;
+        font-family: system-ui, sans-serif;
+        text-align: center;
+      }
+      main {
+        max-width: 22rem;
+        padding: 2rem 1.5rem;
+      }
+      h1 {
+        font-size: 1.4rem;
+        margin: 0 0 0.75rem;
+      }
+      p {
+        color: #a9a7bd;
+        line-height: 1.5;
+        margin: 0 0 1.75rem;
+      }
+      button {
+        min-height: 44px;
+        padding: 0 1.5rem;
+        border: 0;
+        border-radius: 999px;
+        background: #7c5cff;
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1 id="titre">Pas de connexion</h1>
+      <p id="texte">
+        Le Coup Parfait a besoin d’Internet pour s’afficher. Vérifie ton Wi-Fi ou tes données
+        mobiles, puis réessaie.
+      </p>
+      <button id="reessayer" type="button">Réessayer</button>
+    </main>
+    <script>
+      if (!navigator.language.toLowerCase().startsWith('fr')) {
+        document.documentElement.lang = 'en'
+        document.getElementById('titre').textContent = 'No connection'
+        document.getElementById('texte').textContent =
+          'Le Coup Parfait needs the Internet to load. Check your Wi-Fi or mobile data, then try again.'
+        document.getElementById('reessayer').textContent = 'Try again'
+      }
+      document.getElementById('reessayer').addEventListener('click', () => {
+        window.location.href = 'https://coupparfait.cparfait.ovh/'
+      })
+    </script>
+  </body>
+</html>

@@ -55,3 +55,10 @@ scripts/.tmp/
 zzsccreens/
 apercu.png
 essai-voix.wav
+
+# ── Application Android ─────────────────────────────────────────────────────
+# Le Dockerfile web fait `COPY . .` : sans cette ligne, la clé de signature de
+# l'APK et ses mots de passe (mobile/signature/) entreraient dans l'étape de
+# construction, avec les dépendances et les sorties Gradle. Seul l'APK publié
+# compte pour le site, et il vit dans apps/web/public/telechargements/.
+mobile/

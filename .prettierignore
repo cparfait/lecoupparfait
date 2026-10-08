@@ -17,3 +17,6 @@ apps/web/next-env.d.ts
 # Planches exportées du canevas de design : le format .dc.html a ses propres règles.
 docs/maquettes/*.dc.html
 docs/maquettes/canvas.json
+# Le projet Android : du Java et du Gradle, plus ce que `cap sync` y recopie
+# (configuration JSON, pont JavaScript), régénéré à chaque construction.
+mobile/android

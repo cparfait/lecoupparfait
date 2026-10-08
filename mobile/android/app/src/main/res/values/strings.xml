@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Le Coup Parfait</string>
+    <string name="title_activity_main">Le Coup Parfait</string>
+    <string name="package_name">ovh.cparfait.coupparfait</string>
+    <string name="custom_url_scheme">ovh.cparfait.coupparfait</string>
+</resources>

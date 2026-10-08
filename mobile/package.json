@@ -1,0 +1,18 @@
+{
+  "name": "coupparfait-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Le Coup Parfait pour Android : une coque Capacitor autour du site en ligne.",
+  "license": "AGPL-3.0-or-later",
+  "scripts": {
+    "sync": "cap sync android",
+    "apk": "node scripts/apk.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/core": "8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.3"
+  }
+}

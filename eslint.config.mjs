@@ -35,6 +35,9 @@ export default tseslint.config(
       'packages/core/src/data/*.generated.ts',
       'apps/web/public/**',
       'data/**',
+      // Le projet Android : du Java, et les sorties de Gradle qui recopient le
+      // pont JavaScript de Capacitor.
+      'mobile/android/**',
     ],
   },
 
