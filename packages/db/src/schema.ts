@@ -69,6 +69,15 @@ export const users = pgTable(
     resetTokenExpiresAt: timestamp('reset_token_expires_at', { withTimezone: true }),
     /** Empreinte scrypt du mot de passe. Jamais le mot de passe lui-même. */
     passwordHash: text('password_hash').notNull(),
+    /**
+     * L'identifiant du compte Google lié, quand on se connecte par Google.
+     *
+     * Le `sub` d'OpenID Connect : stable et unique pour une personne chez
+     * Google, contrairement à l'adresse, qui peut changer. Un compte créé par
+     * Google n'a pas de mot de passe utilisable — son empreinte commence par
+     * `google:` et ne correspond à rien. Voir `@coupparfait/db/google`.
+     */
+    googleSub: varchar('google_sub', { length: 64 }),
 
     /** Emoji ou URL. On n'héberge pas d'images d'utilisateurs. */
     avatar: varchar('avatar', { length: 200 }).default('♟️'),
@@ -91,6 +100,9 @@ export const users = pgTable(
     uniqueIndex('users_email_idx')
       .on(table.email)
       .where(sql`${table.email} is not null`),
+    uniqueIndex('users_google_sub_idx')
+      .on(table.googleSub)
+      .where(sql`${table.googleSub} is not null`),
     index('users_last_seen_idx').on(table.lastSeenAt),
   ],
 )

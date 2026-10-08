@@ -127,6 +127,13 @@
       "when": 1791460746269,
       "tag": "0017_push_canal_appli",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791468671226,
+      "tag": "0018_compte_google",
+      "breakpoints": true
     }
   ]
 }

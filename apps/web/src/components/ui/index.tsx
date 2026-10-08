@@ -121,6 +121,30 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   )
 })
 
+/**
+ * Les classes d'un bouton, pour ce qui ne peut être ni `Button` ni `ButtonLink`.
+ *
+ * Un lien vers une route du serveur qui redirige ailleurs — la connexion avec
+ * Google, par exemple — doit être une balise `<a>` ordinaire : `Link` tenterait
+ * d'abord une navigation interne, suivrait la redirection en arrière-plan et
+ * n'atterrirait qu'au second essai. Il garde ainsi l'apparence exacte des
+ * autres boutons, sans en recopier la recette.
+ */
+export function classesBouton(
+  variant: ButtonVariant = 'secondary',
+  size: ButtonSize = 'md',
+  options: { fullWidth?: boolean; className?: string } = {},
+): string {
+  return clsx(
+    'inline-flex select-none items-center justify-center whitespace-nowrap font-semibold tracking-[-0.01em]',
+    'transition-all duration-150 active:scale-[.985]',
+    VARIANTS[variant],
+    SIZES[size],
+    options.fullWidth && 'w-full',
+    options.className,
+  )
+}
+
 /** Même apparence que {@link Button}, mais c'est un lien. */
 export function ButtonLink({
   href,
@@ -141,18 +165,7 @@ export function ButtonLink({
   children: ReactNode
 } & Omit<React.ComponentProps<typeof Link>, 'href' | 'className'>) {
   return (
-    <Link
-      href={href}
-      className={clsx(
-        'inline-flex select-none items-center justify-center whitespace-nowrap font-semibold tracking-[-0.01em]',
-        'transition-all duration-150 active:scale-[.985]',
-        VARIANTS[variant],
-        SIZES[size],
-        fullWidth && 'w-full',
-        className,
-      )}
-      {...rest}
-    >
+    <Link href={href} className={classesBouton(variant, size, { fullWidth, className })} {...rest}>
       {icon}
       {children}
     </Link>

@@ -799,6 +799,8 @@ export const en: Dictionary = {
     accountPublic:
       'Your username, avatar, ratings, statistics and recent games. They are public: that is how a leaderboard works.',
     accountPassword: 'A hash of your password, never the password itself.',
+    accountGoogle:
+      'If you sign in with Google: your Google account identifier and, if verified, your email address. Google, for its part, learns that you sign in to Le Coup Parfait.',
     accountEmail: 'Your email address, if you give one: it is only used to recover your password.',
     accountProgress:
       'Your games, your progress (lessons, puzzles, career, daily challenge), your saved analyses and studies, your friends and your challenges.',
@@ -2592,6 +2594,31 @@ export const en: Dictionary = {
       linkExpired: 'That link has expired, or matches nothing. Ask for a new one.',
       emailTaken: 'That address is already in use.',
       generic: 'Something went wrong. Please try again.',
+    },
+
+    google: {
+      button: 'Continue with Google',
+      or: 'or',
+      expired: 'Time is up: start again with “Continue with Google”.',
+      alreadyUsed: 'This Google account is already linked to another account on this site.',
+      failCancelled: 'Google sign-in cancelled.',
+      failRefused: 'Google could not confirm who you are. Try again.',
+      failUnavailable: 'Google sign-in is not offered on this server.',
+      failKnownEmail:
+        'An account on this site already uses the address of this Google account. Sign in with your username, then link Google from your profile.',
+      chooseTitle: 'Just a username left',
+      chooseHello: 'Hello {nom}!',
+      chooseBlurb:
+        'Your Google account is verified. Choose the username shown in your games and the leaderboards: it is also your profile’s address.',
+      chooseSubmit: 'Create my account',
+      chooseExpired: 'This sign-up has expired.',
+      chooseRestart: 'Start again with Google',
+      link: 'Link my Google account',
+      linked: 'Google sign-in enabled',
+      linkedNow: 'Your Google account is linked: you can now sign in with it.',
+      linkedElsewhere: 'This Google account is already linked to another account on this site.',
+      noPasswordDelete:
+        'Your account was created with Google and has no password: your username is enough to confirm.',
     },
   },
 

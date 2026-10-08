@@ -20,7 +20,6 @@ import {
   startPasswordReset,
   suggestUsername,
   verifyEmail,
-  type ValidationError,
 } from '@coupparfait/db/auth'
 import { avatarAuHasard, isKnownAvatar } from '@/lib/avatars.ts'
 import { courrielDisponible, resetMail, sendMail, verificationMail } from '@/lib/server/mailer.ts'
@@ -30,7 +29,9 @@ import { ipClient } from '@/lib/server/ip.ts'
 import { endSession, getCurrentUser, startSession } from '@/lib/server/session.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
 import { LOCALES } from '@/lib/i18n/dictionary.ts'
-import type { TranslationKey } from '@/lib/i18n/index.tsx'
+import { CLES_DE_REFUS } from '@/lib/auth/refus.ts'
+import { etatGoogle } from '@coupparfait/db/google'
+import { googleDisponible } from '@/lib/server/google.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -68,27 +69,6 @@ function langueDuCompte(preferences: Record<string, unknown> | null): string | n
   return typeof code === 'string' && LOCALES.includes(code) ? code : null
 }
 
-/**
- * Le refus d'une inscription, dans la langue de celui qui s'inscrit.
- *
- * Ces sept phrases étaient écrites en français dans la route, et ce sont les
- * seules que lit quelqu'un qui n'a pas encore de compte : il découvrait donc
- * l'application par un message qu'il ne comprenait pas, sans même avoir eu
- * l'occasion de choisir sa langue.
- *
- * La moitié existait déjà au dictionnaire, sous `auth.errors` — écrite deux
- * fois, donc, et les deux versions avaient déjà divergé d'un mot.
- */
-const CLES_DE_REFUS: Record<ValidationError, TranslationKey> = {
-  usernameTooShort: 'auth.errors.usernameTooShort',
-  usernameTooLong: 'auth.errors.usernameTooLong',
-  usernameCharacters: 'auth.errors.usernameCharacters',
-  usernameTaken: 'auth.errors.usernameTaken',
-  weakPassword: 'auth.errors.weakPassword',
-  emailTaken: 'auth.errors.emailTaken',
-  invalidCredentials: 'auth.errors.invalidCredentials',
-}
-
 export async function GET() {
   const user = await getCurrentUser()
 
@@ -100,8 +80,11 @@ export async function GET() {
   // Ce n'est pas un renseignement sensible : que le serveur sache ou non
   // envoyer un courriel se déduit de toute façon en essayant.
   const courriel = courrielDisponible()
+  // Même raisonnement pour Google : l'écran de connexion est anonyme, et c'est
+  // lui qui montre — ou non — « Continuer avec Google ».
+  const google = googleDisponible()
 
-  if (!user) return NextResponse.json({ user: null, courriel })
+  if (!user) return NextResponse.json({ user: null, courriel, google })
 
   // L'état de l'adresse n'accompagne que sa propre identité : la fiche
   // publique d'un joueur ne doit jamais laisser voir son adresse, ni même
@@ -115,7 +98,16 @@ export async function GET() {
   // Ce drapeau n'autorise rien. Chaque route d'administration revérifie de son
   // côté et répond 404 : un champ JSON se retouche depuis la console du
   // navigateur, et l'on ferait apparaître un menu, pas un droit.
-  return NextResponse.json({ user, email, courriel, admin: estAdministrateur(user) })
+  // `compteGoogle` : le profil propose de lier Google, et la suppression ne
+  // demande pas de mot de passe à un compte qui n'en a jamais eu.
+  return NextResponse.json({
+    user,
+    email,
+    courriel,
+    google,
+    compteGoogle: await etatGoogle(user.userId),
+    admin: estAdministrateur(user),
+  })
 }
 
 export async function POST(request: Request) {

@@ -17,7 +17,7 @@ import Link from 'next/link'
 import { Trash2 } from 'lucide-react'
 import { Button, ButtonLink, Card, Input, TitreDePage } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
-import { useEstAdmin, useIdentite } from '@/lib/auth/useIdentite.ts'
+import { useCompteGoogle, useEstAdmin, useIdentite } from '@/lib/auth/useIdentite.ts'
 import { useT } from '@/lib/i18n/index.tsx'
 
 export default function SupprimerComptePage() {
@@ -54,6 +54,9 @@ export default function SupprimerComptePage() {
 
 function Formulaire({ pseudo }: { pseudo: string }) {
   const t = useT()
+  // Un compte créé par Google n'a jamais eu de mot de passe : on ne lui en
+  // demande pas, la session et le pseudo retapé confirment.
+  const sansMotDePasse = useCompteGoogle()?.sansMotDePasse ?? false
   const [motDePasse, setMotDePasse] = useState('')
   const [confirmation, setConfirmation] = useState('')
   const [erreur, setErreur] = useState<string | null>(null)
@@ -63,7 +66,7 @@ function Formulaire({ pseudo }: { pseudo: string }) {
 
   async function supprimer(evenement: React.FormEvent) {
     evenement.preventDefault()
-    if (!confirme || !motDePasse) return
+    if (!confirme || (!sansMotDePasse && !motDePasse)) return
     setOccupe(true)
     setErreur(null)
     try {
@@ -91,14 +94,18 @@ function Formulaire({ pseudo }: { pseudo: string }) {
 
   return (
     <form onSubmit={(evenement) => void supprimer(evenement)} className="space-y-4">
-      <Input
-        name="motDePasse"
-        type="password"
-        autoComplete="current-password"
-        label={t('suppressionCompte.password')}
-        value={motDePasse}
-        onChange={(evenement) => setMotDePasse(evenement.target.value)}
-      />
+      {sansMotDePasse ? (
+        <p className="text-sm leading-relaxed text-muted">{t('auth.google.noPasswordDelete')}</p>
+      ) : (
+        <Input
+          name="motDePasse"
+          type="password"
+          autoComplete="current-password"
+          label={t('suppressionCompte.password')}
+          value={motDePasse}
+          onChange={(evenement) => setMotDePasse(evenement.target.value)}
+        />
+      )}
       <Input
         name="confirmation"
         autoComplete="off"
@@ -110,14 +117,18 @@ function Formulaire({ pseudo }: { pseudo: string }) {
         error={erreur ?? undefined}
       />
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-        <Link href="/mot-de-passe-oublie" className="text-sm text-accent hover:underline">
-          {t('suppressionCompte.forgot')}
-        </Link>
+        {sansMotDePasse ? (
+          <span />
+        ) : (
+          <Link href="/mot-de-passe-oublie" className="text-sm text-accent hover:underline">
+            {t('suppressionCompte.forgot')}
+          </Link>
+        )}
         <Button
           type="submit"
           variant="danger"
           icon={<Trash2 size={16} aria-hidden />}
-          disabled={!confirme || !motDePasse || occupe}
+          disabled={!confirme || (!sansMotDePasse && !motDePasse) || occupe}
           className="max-sm:w-full"
         >
           {t('suppressionCompte.button')}

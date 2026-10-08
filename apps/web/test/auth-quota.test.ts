@@ -37,6 +37,9 @@ simulerModule('@coupparfait/db/auth', {
   startPasswordReset: inutile,
   suggestUsername: () => null,
   verifyEmail: inutile,
+  // Importées par `@coupparfait/db/google`, que la route lit pour `GET`.
+  initialiserClassements: inutile,
+  validateUsername: () => null,
 })
 
 const { POST } = await import('../src/app/api/auth/route.ts')

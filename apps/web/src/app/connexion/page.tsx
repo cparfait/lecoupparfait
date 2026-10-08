@@ -21,9 +21,10 @@ import { ArrowRight, Swords } from 'lucide-react'
 import { Button, Card, Input } from '@/components/ui/index.tsx'
 import { ChoixDeLangue } from '@/components/ui/ChoixDeLangue.tsx'
 import { BienvenueCompte } from '@/components/compte/BienvenueCompte.tsx'
+import { BoutonGoogle } from '@/components/compte/BoutonGoogle.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useCourrielDisponible, useIdentite } from '@/lib/auth/useIdentite.ts'
-import { useT } from '@/lib/i18n/index.tsx'
+import { useT, type TranslationKey } from '@/lib/i18n/index.tsx'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
 /**
@@ -57,6 +58,17 @@ function marque(texte: string): ReactNode[] {
 }
 
 type Mode = 'signin' | 'signup'
+
+/**
+ * Ce que dit le retour de Google quand il n'a pas abouti (`?google=…`, posé par
+ * `api/auth/google/retour`).
+ */
+const ECHECS_GOOGLE: Record<string, TranslationKey> = {
+  annule: 'auth.google.failCancelled',
+  refuse: 'auth.google.failRefused',
+  indisponible: 'auth.google.failUnavailable',
+  'adresse-connue': 'auth.google.failKnownEmail',
+}
 
 /** Voir la note de `/amis` : le paramètre `?ami=` impose cette frontière. */
 export default function AuthPage() {
@@ -139,7 +151,12 @@ function AuthForm() {
   const [password, setPassword] = useState('')
   const [email, setEmail] = useState('')
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  // Un retour de Google qui n'a pas abouti arrive ici avec sa raison : on la
+  // dit d'emblée, à l'endroit où l'on dit les autres refus.
+  const [error, setError] = useState<string | null>(() => {
+    const raison = params.get('google')
+    return raison && ECHECS_GOOGLE[raison] ? t(ECHECS_GOOGLE[raison]) : null
+  })
   /** Pseudo de remplacement proposé par le serveur, quand la saisie est refusée. */
   const [suggestion, setSuggestion] = useState<string | null>(null)
   /** Pseudo choisi par un invité qui préfère jouer tout de suite. */
@@ -387,6 +404,10 @@ function AuthForm() {
         </div>
 
         <Card glow className="p-6">
+          {/* Google d'abord, à l'inscription comme à la connexion : c'est le
+              chemin le plus court, et il ne demande ni pseudo à retenir ni mot
+              de passe. Le formulaire reste dessous pour qui n'en veut pas. */}
+          <BoutonGoogle suite={destination} separateur />
           <form onSubmit={submit} className="space-y-4">
             <Input
               label={t('auth.username')}

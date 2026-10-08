@@ -324,6 +324,8 @@ services:
       VAPID_SUBJECT: ${VAPID_SUBJECT:-}
       FCM_COMPTE_SERVICE: ${FCM_COMPTE_SERVICE:-}
       CONTACT_EMAIL: ${CONTACT_EMAIL:-}
+      AUTH_GOOGLE_ID: ${AUTH_GOOGLE_ID:-}
+      AUTH_GOOGLE_SECRET: ${AUTH_GOOGLE_SECRET:-}
       PORT: 3000
       HOSTNAME: 0.0.0.0
     # Aucun port publié : voir la remarque du service `server`.

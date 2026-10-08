@@ -824,6 +824,8 @@ export const fr = {
     accountPublic:
       'Ton pseudo, ton avatar, tes classements, tes statistiques et tes parties récentes. Ils sont publics : c’est le principe d’un classement.',
     accountPassword: 'Une empreinte de ton mot de passe, jamais le mot de passe lui-même.',
+    accountGoogle:
+      'Si tu te connectes avec Google : l’identifiant de ton compte Google et, s’il est vérifié, ton adresse e-mail. Google, lui, apprend que tu te connectes au Coup Parfait.',
     accountEmail:
       'Ton adresse e-mail, si tu en donnes une : elle ne sert qu’à récupérer ton mot de passe.',
     accountProgress:
@@ -2650,6 +2652,33 @@ export const fr = {
       linkExpired: 'Ce lien a expiré ou ne correspond à rien. Demande-en un nouveau.',
       emailTaken: 'Cette adresse est déjà utilisée.',
       generic: 'Quelque chose s’est mal passé. Réessaie.',
+    },
+
+    // La connexion avec Google. Les clés `fail*` traduisent le `?google=` que
+    // pose le retour de Google sur la page de connexion.
+    google: {
+      button: 'Continuer avec Google',
+      or: 'ou',
+      expired: 'Le délai est dépassé : recommence avec « Continuer avec Google ».',
+      alreadyUsed: 'Ce compte Google est déjà lié à un autre compte du site.',
+      failCancelled: 'Connexion avec Google annulée.',
+      failRefused: 'Google n’a pas pu confirmer qui tu es. Réessaie.',
+      failUnavailable: 'La connexion avec Google n’est pas proposée sur ce serveur.',
+      failKnownEmail:
+        'Un compte du site utilise déjà l’adresse de ce compte Google. Connecte-toi avec ton pseudo, puis lie Google depuis ton profil.',
+      chooseTitle: 'Plus qu’un pseudo',
+      chooseHello: 'Bonjour {nom} !',
+      chooseBlurb:
+        'Ton compte Google est vérifié. Choisis le pseudo qui apparaîtra dans tes parties et les classements : il sert aussi d’adresse à ton profil.',
+      chooseSubmit: 'Créer mon compte',
+      chooseExpired: 'Cette inscription a expiré.',
+      chooseRestart: 'Recommencer avec Google',
+      link: 'Lier mon compte Google',
+      linked: 'Connexion avec Google activée',
+      linkedNow: 'Ton compte Google est lié : tu peux maintenant te connecter avec.',
+      linkedElsewhere: 'Ce compte Google est déjà lié à un autre compte du site.',
+      noPasswordDelete:
+        'Ton compte a été créé avec Google et n’a pas de mot de passe : ton pseudo suffit à confirmer.',
     },
   },
 

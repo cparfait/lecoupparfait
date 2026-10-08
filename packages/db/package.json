@@ -19,7 +19,8 @@
     "./push": "./src/push.ts",
     "./live": "./src/live.ts",
     "./menage": "./src/menage.ts",
-    "./suppression": "./src/suppression.ts"
+    "./suppression": "./src/suppression.ts",
+    "./google": "./src/google.ts"
   },
   "scripts": {
     "db:generate": "drizzle-kit generate",

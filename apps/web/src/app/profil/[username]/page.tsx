@@ -10,6 +10,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { LiaisonGoogle } from '@/components/compte/LiaisonGoogle.tsx'
 import { useParams } from 'next/navigation'
 import {
   BarChart3,
@@ -582,6 +583,10 @@ export default function ProfilePage() {
             <ComptesAilleurs />
 
             {email?.email && <EmailStatus email={email} />}
+
+            {/* Se connecter avec Google : la seule façon de rattacher Google
+                à un compte qui existait déjà. */}
+            <LiaisonGoogle suite={`/profil/${encodeURIComponent(profile.user.username)}`} />
 
             {/* La seule action de cette page qu'on vienne y faire exprès — le
                 reste s'y consulte. Pleine largeur sur téléphone, où viser un

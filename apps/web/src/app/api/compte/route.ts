@@ -18,6 +18,7 @@
  */
 
 import { NextResponse } from 'next/server'
+import { etatGoogle } from '@coupparfait/db/google'
 import { supprimerCompte, verifierMotDePasse } from '@coupparfait/db/suppression'
 import { estAdministrateur } from '@/lib/server/admin.ts'
 import { ipClient } from '@/lib/server/ip.ts'
@@ -61,9 +62,12 @@ export async function DELETE(request: Request) {
   ) {
     return NextResponse.json({ error: t('api.deleteAccountWrongName') }, { status: 400 })
   }
+  // Un compte créé par Google n'a pas de mot de passe : la session et le
+  // pseudo retapé tiennent alors lieu de confirmation.
+  const { sansMotDePasse } = await etatGoogle(me.userId)
   if (
-    typeof body.motDePasse !== 'string' ||
-    !(await verifierMotDePasse(me.userId, body.motDePasse))
+    !sansMotDePasse &&
+    (typeof body.motDePasse !== 'string' || !(await verifierMotDePasse(me.userId, body.motDePasse)))
   ) {
     return NextResponse.json({ error: t('api.deleteAccountWrongPassword') }, { status: 403 })
   }

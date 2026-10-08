@@ -233,15 +233,27 @@ export async function createUser(
 
   const user = inserted[0]!
 
-  // Un classement provisoire par catégorie, pour que le profil ne soit pas vide.
-  await database.insert(ratings).values(
-    ['bullet', 'blitz', 'rapid', 'classical', 'correspondence', 'puzzle'].map((category) => ({
-      userId: user.id,
-      category,
-    })),
-  )
+  await initialiserClassements(user.id)
 
   return { ok: true, user }
+}
+
+/**
+ * Un classement provisoire par catégorie, pour que le profil ne soit pas vide.
+ *
+ * Partagé avec la création de compte par Google (`google.ts`) : un compte qui
+ * n'aurait pas ses lignes de classement afficherait un profil vide, et le
+ * premier calcul d'Elo partirait de rien.
+ */
+export async function initialiserClassements(userId: string): Promise<void> {
+  await getDb()
+    .insert(ratings)
+    .values(
+      ['bullet', 'blitz', 'rapid', 'classical', 'correspondence', 'puzzle'].map((category) => ({
+        userId,
+        category,
+      })),
+    )
 }
 
 export async function authenticate(

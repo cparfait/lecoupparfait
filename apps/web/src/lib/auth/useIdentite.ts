@@ -33,6 +33,13 @@ export interface StatutCourriel {
   verified: boolean
 }
 
+export interface CompteGoogle {
+  /** Un compte Google est lié : on peut se connecter avec. */
+  lie: boolean
+  /** Le compte a été créé par Google et n'a jamais eu de mot de passe. */
+  sansMotDePasse: boolean
+}
+
 let identite: Identite | null | undefined = undefined
 /**
  * Le serveur sait-il envoyer un courriel ?
@@ -61,6 +68,10 @@ let adresse: StatutCourriel | null | undefined = undefined
  * à lui apprendre qu'elle existe.
  */
 let administrateur = false
+/** Le serveur propose-t-il « Continuer avec Google » ? Faux tant qu'on ne sait pas. */
+let google = false
+/** Sa propre liaison avec Google ; `null` pour un visiteur. */
+let compteGoogle: CompteGoogle | null = null
 let enCours: Promise<void> | null = null
 const abonnes = new Set<() => void>()
 
@@ -89,11 +100,15 @@ export function rafraichirIdentite(): Promise<void> {
         courriel?: boolean
         email?: StatutCourriel
         admin?: boolean
+        google?: boolean
+        compteGoogle?: CompteGoogle
       }) => {
         identite = donnees.user
         courriel = donnees.courriel ?? false
         adresse = donnees.email ?? null
         administrateur = donnees.admin ?? false
+        google = donnees.google ?? false
+        compteGoogle = donnees.compteGoogle ?? null
       },
     )
     .catch(() => {
@@ -106,6 +121,8 @@ export function rafraichirIdentite(): Promise<void> {
       courriel = false
       adresse = null
       administrateur = false
+      google = false
+      compteGoogle = null
     })
     .finally(() => {
       enCours = null
@@ -182,6 +199,39 @@ export function useEstAdmin(): boolean {
     souscrire,
     instantaneAdministrateur,
     instantaneAdministrateurServeur,
+  )
+  useEffect(() => {
+    void rafraichirIdentite()
+  }, [])
+  return valeur
+}
+
+const instantaneGoogle = () => google
+const instantaneGoogleServeur = () => false
+
+/**
+ * Le serveur propose-t-il la connexion avec Google ?
+ *
+ * Faux tant qu'on ne sait pas, comme pour l'administration : mieux vaut un
+ * bouton qui apparaît qu'un bouton qui mène à « non disponible ».
+ */
+export function useGoogleDisponible(): boolean {
+  const valeur = useSyncExternalStore(souscrire, instantaneGoogle, instantaneGoogleServeur)
+  useEffect(() => {
+    void rafraichirIdentite()
+  }, [])
+  return valeur
+}
+
+const instantaneCompteGoogle = () => compteGoogle
+const instantaneCompteGoogleServeur = () => null
+
+/** Sa propre liaison avec Google, ou `null` pour un visiteur et tant qu'on ne sait pas. */
+export function useCompteGoogle(): CompteGoogle | null {
+  const valeur = useSyncExternalStore(
+    souscrire,
+    instantaneCompteGoogle,
+    instantaneCompteGoogleServeur,
   )
   useEffect(() => {
     void rafraichirIdentite()

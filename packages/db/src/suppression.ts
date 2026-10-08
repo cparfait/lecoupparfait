@@ -95,6 +95,9 @@ export async function supprimerCompte(userId: string): Promise<string> {
         // Une empreinte qui ne correspond à aucun mot de passe : la ligne
         // existe encore pour les parties, personne ne peut plus y entrer.
         passwordHash: `supprime:${crypto.randomUUID()}`,
+        // L'identité Google se détache : la même personne pourra recréer un
+        // compte avec Google, et ce compte-ci ne s'ouvrira plus par là.
+        googleSub: null,
         avatar: '♟️',
         bio: null,
         countryCode: null,
