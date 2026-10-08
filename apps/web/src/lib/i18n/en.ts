@@ -150,7 +150,6 @@ export const en: Dictionary = {
     accountLink: 'free, a username and a password',
     accountAfter:
       '— adds the daily challenge, your streak, your rating per time control and the history of your games.',
-    demoCaption: 'The coach comments · Anderssen – Kieseritzky, London 1851',
     goFurther: 'Go further',
 
     statsGames: 'games played',
@@ -161,8 +160,9 @@ export const en: Dictionary = {
     discoverHint: 'First lesson · {lecon} · {minutes} min',
     knowTitle: 'I already know how to play',
     knowHint: 'Level test · {n} positions',
-    playNowLink: 'Or play the computer right away',
-    demoTitle: 'A coach who comments on every move',
+    playTitle: 'I just want to play',
+    playHint: 'Against the computer · {n} levels · no account',
+    catalogTitle: 'Enough to keep improving for years',
     dailyNeedsAccount: 'Needs a free account — it keeps your day streak',
   },
 
@@ -7235,14 +7235,6 @@ export const en: Dictionary = {
   },
   rest: {
     boardFixSquares: 'To fix on the board: {cases}.',
-    immortal0: 'The King’s Gambit: White offers a pawn to open lines towards the enemy king.',
-    immortal1: 'Black is collecting material while White develops. Two philosophies are clashing.',
-    immortal2: 'A second pawn falls. The evaluation has Black winning easily — and yet.',
-    immortal3: 'Black has just taken the rook on a1. They are a queen and two rooks ahead.',
-    immortal4:
-      'Knight takes g7, check. The black king is bare in the centre: material no longer protects it.',
-    immortal5: 'Queen sacrifice! Anderssen gives up his last heavy piece.',
-    immortal6: 'Bishop e7, mate. Three minor pieces are enough when the king has no square left.',
     doorLearn: 'Learn chess from scratch',
     doorAnalyse: 'Analyse a game',
     doorComputer: 'Play against the computer',

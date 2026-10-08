@@ -151,7 +151,6 @@ export const fr = {
     accountLink: 'gratuit, un pseudo et un mot de passe',
     accountAfter:
       '— ajoute le défi du jour, ta série, ton classement par cadence et l’historique de tes parties.',
-    demoCaption: 'Le coach commente · Anderssen – Kieseritzky, Londres 1851',
     goFurther: 'Aller plus loin',
 
     statsGames: 'parties jouées',
@@ -162,8 +161,9 @@ export const fr = {
     discoverHint: 'Première leçon · {lecon} · {minutes} min',
     knowTitle: 'Je sais déjà jouer',
     knowHint: 'Test de niveau · {n} positions',
-    playNowLink: 'Ou joue tout de suite contre l’ordinateur',
-    demoTitle: 'Un coach qui commente chaque coup',
+    playTitle: 'Je veux juste jouer',
+    playHint: 'Contre l’ordinateur · {n} niveaux · sans compte',
+    catalogTitle: 'De quoi progresser pendant des années',
     dailyNeedsAccount: 'Demande un compte gratuit — il tient ta série de jours',
   },
 
@@ -7305,17 +7305,6 @@ export const fr = {
   },
   rest: {
     boardFixSquares: 'À corriger sur le plateau : {cases}.',
-    immortal0:
-      'Le gambit du roi : les Blancs offrent un pion pour ouvrir des lignes vers le roi adverse.',
-    immortal1:
-      'Les Noirs ramassent du matériel pendant que les Blancs développent. Deux philosophies s’affrontent.',
-    immortal2:
-      'Un deuxième pion tombe. L’évaluation donne les Noirs largement gagnants — et pourtant.',
-    immortal3: 'Les Noirs viennent de prendre la tour a1. Ils ont une dame et deux tours d’avance.',
-    immortal4:
-      'Cavalier prend g7, échec. Le roi noir est nu au centre : le matériel ne le protège plus.',
-    immortal5: 'Sacrifice de la dame ! Anderssen abandonne sa dernière pièce lourde.',
-    immortal6: 'Fou e7, mat. Trois pièces mineures suffisent quand le roi n’a plus une seule case.',
     doorLearn: 'Apprendre les échecs de zéro',
     doorAnalyse: 'Analyser une partie',
     doorComputer: 'Jouer contre l’ordinateur',

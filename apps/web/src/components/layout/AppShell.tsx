@@ -162,11 +162,15 @@ export function AppShell({ children }: { children: ReactNode }) {
             {/* La marque plutôt qu'une maison générique : Cavale, le cavalier
                 de buis, est le seul dessin que personne d'autre n'a. Même rôle
                 que la maison — dire que ceci est un bouton, et qu'il ramène
-                chez soi — et il n'habite qu'un endroit à la fois, à partir de
-                `lg` (voir ci-dessus). */}
-            <span className="hidden lg:block">
-              <LogoMark size={26} />
-            </span>
+                chez soi.
+
+                À toutes les largeurs, et non plus à partir de `lg` seulement.
+                La règle « une seule maison à l'écran » valait pour un
+                pictogramme générique ; celui-ci est le logo, et sur téléphone
+                l'en-tête n'affichait plus qu'un nom, sans rien qui le signe. La
+                barre du bas garde sa maison : l'une dit où l'on est, l'autre
+                qui l'on est. */}
+            <LogoMark size={26} />
             Le Coup Parfait
           </Link>
 

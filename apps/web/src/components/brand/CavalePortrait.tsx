@@ -1,12 +1,18 @@
 'use client'
 
 /**
- * Cavale, dans la bannière.
+ * Cavale, la sculpture de la marque, en fond d'une section.
  *
- * La sculpture est posée derrière l'échiquier, pas à côté : la maquette la met
- * au centre et laisse le plateau flotter par-dessus. C'est ce chevauchement qui
- * donne la profondeur — deux colonnes bien rangées côte à côte auraient l'air
- * d'un gabarit.
+ * Elle se pose derrière ce que la section met en avant, pas à côté : la
+ * maquette la met au centre et laisse une carte ou un plateau flotter
+ * par-dessus. C'est ce chevauchement qui donne la profondeur — deux colonnes
+ * bien rangées côte à côte auraient l'air d'un gabarit.
+ *
+ * L'endroit dépend de la section — ses colonnes, la longueur de ses lignes —
+ * et se règle donc là où on la pose, par `className` : mode de position
+ * (`absolute` en fond, `relative` dans le flux), hauteur, largeur, et à partir
+ * de quelle largeur d'écran elle paraît. La sculpture est toujours contenue
+ * dans son cadre, sans être rognée.
  *
  * Ce composant affichait auparavant une photographie de coach, produite par
  * `build-coach.mjs` : un septuagénaire à lunettes, tiré au sort entre un homme
@@ -31,10 +37,11 @@
  */
 
 import { useState } from 'react'
+import clsx from 'clsx'
 import Image from 'next/image'
 import { usePreferences } from '@/lib/store/preferences.ts'
 
-export function CavalePortrait() {
+export function CavalePortrait({ className }: { className: string }) {
   const theme = usePreferences((state) => state.theme)
   const hydrated = usePreferences((state) => state.hydrated)
   const [manquants, setManquants] = useState<string[]>([])
@@ -50,19 +57,7 @@ export function CavalePortrait() {
   return (
     <div
       aria-hidden
-      // `left-[33%]`, et le chiffre se lit entre deux voisins.
-      //
-      // À droite, l'échiquier commence à 60 % de la bannière. À gauche, le
-      // sous-titre pousse ses lignes les plus longues jusqu'à 40 %. La
-      // sculpture fait 30 % de large : il n'existe aucune position qui dégage
-      // les deux, l'intervalle libre étant plus étroit qu'elle.
-      //
-      // Le réglage arbitre donc entre deux gênes. À 37 %, le plateau mangeait
-      // 38 % de la pièce — et c'était sa tête, la seule partie qui la rende
-      // reconnaissable. À 30 %, il n'en mangeait plus que 16 %, mais le mufle
-      // passait sous deux lignes du sous-titre. À 33 %, le plateau en couvre un
-      // quart par l'arrière-train, et il ne reste qu'une ligne effleurée.
-      className="pointer-events-none absolute inset-y-0 left-[33%] hidden w-[40%] select-none lg:block"
+      className={clsx('pointer-events-none select-none', className)}
       style={{
         // Un fondu **radial** d'abord, un fondu vertical ensuite.
         //
@@ -131,10 +126,13 @@ export function CavalePortrait() {
         src={src}
         alt=""
         fill
-        sizes="40vw"
-        // Élément le plus lourd de la bannière, et au-dessus de la ligne de
-        // flottaison : on le charge tout de suite. `preload` remplace
-        // `priority`, déprécié depuis Next 16.
+        // Servie telle quelle : un WebP de quarante kilo-octets, déjà à la
+        // bonne taille. Passée par l'optimiseur de Next, elle arrivait la
+        // dernière de la page — le temps qu'il la recalcule en 3 840 px — et
+        // la bannière s'affichait d'abord sans son logo.
+        unoptimized
+        // Au-dessus de la ligne de flottaison : on la charge tout de suite.
+        // `preload` remplace `priority`, déprécié depuis Next 16.
         preload
         onError={() => setManquants((liste) => [...liste, src])}
         // `contain`, et c'est un retour en arrière assumé.
