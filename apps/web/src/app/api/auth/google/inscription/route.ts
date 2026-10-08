@@ -1,7 +1,7 @@
 /**
  * Le pseudo d'un nouveau compte créé par Google.
  *
- *   GET  /api/auth/google/inscription   → { nom, suggestion } de l'identité en attente
+ *   GET  /api/auth/google/inscription   → { nom, suggestion, rattacher } de l'identité en attente
  *   POST /api/auth/google/inscription     { pseudo, locale }
  *
  * L'identité vient de `api/auth/google/retour`, qui l'a gardée en mémoire et
@@ -17,7 +17,12 @@ import { avatarAuHasard } from '@/lib/avatars.ts'
 import { CLES_DE_REFUS } from '@/lib/auth/refus.ts'
 import { LOCALES } from '@/lib/i18n/dictionary.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
-import { TEMOIN_NOUVEAU, lireAttente, oublierAttente } from '@/lib/server/google.ts'
+import {
+  TEMOIN_NOUVEAU,
+  lireAttente,
+  lireRattachement,
+  oublierAttente,
+} from '@/lib/server/google.ts'
 import { ipClient } from '@/lib/server/ip.ts'
 import { creerLimiteur } from '@/lib/server/limiteur.ts'
 import { startSession } from '@/lib/server/session.ts'
@@ -28,7 +33,8 @@ export const dynamic = 'force-dynamic'
 const tentatives = creerLimiteur(10 * 60_000, 20)
 
 export async function GET() {
-  const identite = lireAttente((await cookies()).get(TEMOIN_NOUVEAU)?.value)
+  const cle = (await cookies()).get(TEMOIN_NOUVEAU)?.value
+  const identite = lireAttente(cle)
   if (!identite) return NextResponse.json({ attente: false })
   // Un pseudo proposé d'après le nom, ou le début de l'adresse : on le
   // corrige plus volontiers qu'on ne l'invente.
@@ -37,6 +43,9 @@ export async function GET() {
     attente: true,
     nom: identite.nom,
     suggestion: source ? suggestUsername(source) : null,
+    // Le pseudo du compte qui a déjà cette adresse, pour proposer de le
+    // rejoindre. Celui qui le lit a prouvé à Google que l'adresse est la sienne.
+    rattacher: lireRattachement(cle)?.pseudo ?? null,
   })
 }
 

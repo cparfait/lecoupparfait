@@ -14,7 +14,11 @@
 import { simulerModule } from './modules.ts'
 import type { SessionIdentity } from '@coupparfait/db/auth'
 
-export const session: { utilisateur: SessionIdentity | null } = { utilisateur: null }
+/** `ouverte` : le dernier compte dont une route a ouvert la session. */
+export const session: { utilisateur: SessionIdentity | null; ouverte: string | null } = {
+  utilisateur: null,
+  ouverte: null,
+}
 
 export function joueur(userId: string, username = userId): SessionIdentity {
   return { userId, username, avatar: null, role: 'user' }
@@ -25,7 +29,9 @@ export function simulerSession(): void {
     SESSION_COOKIE: 'coupparfait_session',
     JETON_TEMPS_REEL_MS: 15 * 60 * 1000,
     getCurrentUser: async () => session.utilisateur,
-    startSession: async () => {},
+    startSession: async (userId: string) => {
+      session.ouverte = userId
+    },
     endSession: async () => {},
     getSessionToken: async () => null,
     creerJetonTempsReel: async () => null,

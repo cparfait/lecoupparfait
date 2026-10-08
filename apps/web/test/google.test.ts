@@ -4,11 +4,13 @@
  * Google n'est jamais appelé : `fetch` est remplacé pour l'échange du code, et
  * rend un jeton d'identité fabriqué ici. Ce qu'on vérifie, c'est ce que le site
  * en fait — et surtout ce qu'il refuse d'en faire : un retour dont le `state`
- * ne correspond pas, une adresse déjà prise, une identité Google déjà liée.
+ * ne correspond pas, une identité Google déjà liée, un compte rejoint d'après
+ * une adresse que rien ne garantit.
  */
 
 import { strict as assert } from 'node:assert'
 import { beforeEach, test } from 'node:test'
+import { hashPassword } from '@coupparfait/db/auth'
 import { installerFausseBase, type FausseBase, type Operation } from './support/base.ts'
 import { simulerModule } from './support/modules.ts'
 import { joueur, session, simulerSession } from './support/session.ts'
@@ -31,7 +33,9 @@ simulerSession()
 
 const { GET: depart } = await import('../src/app/api/auth/google/route.ts')
 const { GET: retour } = await import('../src/app/api/auth/google/retour/route.ts')
-const { POST: inscrire } = await import('../src/app/api/auth/google/inscription/route.ts')
+const { GET: attente, POST: inscrire } =
+  await import('../src/app/api/auth/google/inscription/route.ts')
+const { POST: rattacher } = await import('../src/app/api/auth/google/rattacher/route.ts')
 const { TEMOIN_DEPART, TEMOIN_NOUVEAU, encoderDepart, mettreEnAttente } =
   await import('../src/lib/server/google.ts')
 
@@ -59,6 +63,7 @@ let reponses: Record<string, unknown[][]>
 beforeEach(() => {
   temoins.clear()
   session.utilisateur = null
+  session.ouverte = null
   reponses = {}
   base = installerFausseBase((op: Operation) =>
     op.type === 'select' || op.type === 'insert'
@@ -128,11 +133,118 @@ test('une identité inconnue attend son pseudo', async () => {
   assert.match(reponse.headers.get('set-cookie') ?? '', /coupparfait_google_nouveau=/)
 })
 
-test('une adresse déjà prise ne crée pas de doublon, ni ne lie d’office', async () => {
-  // Pas de compte Google, mais un compte du site a la même adresse.
-  reponses['select:users'] = [[], [{ id: 'autre-compte' }]]
+/** Le compte du site qui a déjà l'adresse de Jeanne. */
+function titulaire(champs: Record<string, unknown> = {}) {
+  return {
+    id: 'compte-jeanne',
+    username: 'Jeanne',
+    emailVerifiedAt: new Date(),
+    googleSub: null,
+    disabled: false,
+    ...champs,
+  }
+}
+
+test('une adresse confirmée, dont Google fait autorité, rejoint son compte', async () => {
+  // Pas de compte Google, mais un compte du site a la même adresse, confirmée.
+  reponses['select:users'] = [[], [titulaire()]]
+  const reponse = await revenir('etat-essai', 'connexion', '/jouer')
+  assert.equal(destination(reponse), 'https://coupparfait.test/jouer')
+  const [liaison] = base.sur('update', 'users')
+  assert.equal((liaison!.set as Record<string, unknown>).googleSub, 'google-123')
+  assert.equal(session.ouverte, 'compte-jeanne')
+  assert.equal(base.sur('insert', 'users').length, 0, 'pas de doublon')
+})
+
+test('une adresse jamais confirmée : on propose le compte, sans le lier', async () => {
+  reponses['select:users'] = [[], [titulaire({ emailVerifiedAt: null })]]
   const reponse = await revenir()
-  assert.equal(destination(reponse), 'https://coupparfait.test/connexion?google=adresse-connue')
+  assert.equal(destination(reponse), 'https://coupparfait.test/connexion/google')
+  assert.equal(base.sur('update', 'users').length, 0)
+  assert.equal(session.ouverte, null)
+  const cle = /coupparfait_google_nouveau=([^;]+)/.exec(
+    reponse.headers.get('set-cookie') ?? '',
+  )![1]!
+  temoins.set(TEMOIN_NOUVEAU, cle)
+  const proposee = (await (await attente()).json()) as { rattacher: string | null }
+  assert.equal(proposee.rattacher, 'Jeanne')
+})
+
+test('une adresse dont Google n’est pas l’autorité : on propose, même confirmée', async () => {
+  simulerGoogle({ email: 'jeanne@exemple.fr' })
+  reponses['select:users'] = [[], [titulaire()]]
+  const reponse = await revenir()
+  assert.equal(destination(reponse), 'https://coupparfait.test/connexion/google')
+  assert.equal(base.sur('update', 'users').length, 0)
+})
+
+test('un domaine Google Workspace fait autorité', async () => {
+  simulerGoogle({ email: 'jeanne@club-echecs.fr', hd: 'club-echecs.fr' })
+  reponses['select:users'] = [[], [titulaire()]]
+  const reponse = await revenir()
+  assert.equal(destination(reponse), 'https://coupparfait.test/')
+  assert.equal(session.ouverte, 'compte-jeanne')
+})
+
+test('un compte désactivé, ou lié à un autre Google, ne se rejoint pas', async () => {
+  for (const champs of [{ disabled: true }, { googleSub: 'google-autre' }]) {
+    reponses['select:users'] = [[], [titulaire(champs)]]
+    const reponse = await revenir()
+    assert.equal(destination(reponse), 'https://coupparfait.test/connexion?google=adresse-connue')
+  }
+  assert.equal(base.sur('update', 'users').length, 0)
+  assert.equal(session.ouverte, null)
+})
+
+/** Une identité Google en attente, avec le compte à rejoindre. */
+function proposer() {
+  temoins.set(
+    TEMOIN_NOUVEAU,
+    mettreEnAttente(
+      { sub: 'google-123', email: 'jeanne@gmail.com', nom: 'Jeanne Échecs' },
+      { id: 'compte-jeanne', pseudo: 'Jeanne' },
+    ),
+  )
+}
+
+function confirmer(motDePasse: string) {
+  return rattacher(
+    new Request('http://interne:3000/api/auth/google/rattacher', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ motDePasse }),
+    }),
+  )
+}
+
+test('le mot de passe du compte le rejoint', async () => {
+  proposer()
+  reponses['select:users'] = [[{ passwordHash: await hashPassword('le-bon-mot-de-passe') }]]
+  const reponse = await confirmer('le-bon-mot-de-passe')
+  assert.equal(reponse.status, 200)
+  const [liaison] = base.sur('update', 'users')
+  assert.equal((liaison!.set as Record<string, unknown>).googleSub, 'google-123')
+  assert.equal(session.ouverte, 'compte-jeanne')
+  assert.equal(temoins.has(TEMOIN_NOUVEAU), false, 'l’attente ne sert qu’une fois')
+})
+
+test('un mauvais mot de passe ne rejoint rien', async () => {
+  proposer()
+  reponses['select:users'] = [[{ passwordHash: await hashPassword('le-bon-mot-de-passe') }]]
+  const reponse = await confirmer('un-autre')
+  assert.equal(reponse.status, 403)
+  assert.equal(base.sur('update', 'users').length, 0)
+  assert.equal(session.ouverte, null)
+  assert.equal(temoins.has(TEMOIN_NOUVEAU), true, 'on peut réessayer')
+})
+
+test('sans compte proposé, le mot de passe ne sert à rien', async () => {
+  temoins.set(
+    TEMOIN_NOUVEAU,
+    mettreEnAttente({ sub: 'google-123', email: 'jeanne@gmail.com', nom: 'Jeanne Échecs' }),
+  )
+  const reponse = await confirmer('peu-importe')
+  assert.equal(reponse.status, 410)
   assert.equal(base.sur('update', 'users').length, 0)
 })
 

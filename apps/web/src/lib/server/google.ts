@@ -10,7 +10,8 @@ import 'server-only'
  *  2. Google revient sur `api/auth/google/retour` avec un code, qu'on échange
  *     — avec le secret, de serveur à serveur — contre un jeton d'identité ;
  *  3. on y lit qui est la personne : compte connu, on ouvre la session ;
- *     inconnu, on lui fait choisir un pseudo (`/connexion/google`).
+ *     inconnu, on lui fait choisir un pseudo (`/connexion/google`) — ou, si
+ *     son adresse est déjà celle d'un compte, on lui propose de le rejoindre.
  *
  * Le jeton d'identité n'est pas vérifié par signature, et c'est permis : il
  * vient de l'échange direct avec Google, en HTTPS, authentifié par notre
@@ -127,7 +128,17 @@ export interface IdentiteGoogle {
   /** Seulement si Google l'a vérifiée : une adresse non vérifiée ne prouve rien. */
   email: string | null
   nom: string | null
+  /**
+   * Google fait autorité sur cette adresse : une boîte Gmail, ou un domaine
+   * Google Workspace (`hd`). Pour une adresse d'ailleurs, il l'a vérifiée un
+   * jour, sans savoir qui la détient aujourd'hui — de quoi la proposer, pas
+   * de quoi ouvrir un compte sur sa seule foi.
+   */
+  adresseSure?: boolean
 }
+
+/** Les domaines dont Google est lui-même le fournisseur de messagerie. */
+const DOMAINES_GOOGLE = ['gmail.com', 'googlemail.com']
 
 /** Échange le code contre l'identité. `null` si Google refuse ou si le jeton ne tient pas. */
 export async function echangerCode(
@@ -164,6 +175,7 @@ export async function echangerCode(
       email?: string
       email_verified?: boolean
       name?: string
+      hd?: string
     }
     if (
       typeof jeton.sub !== 'string' ||
@@ -175,10 +187,13 @@ export async function echangerCode(
       console.error('[google] jeton d’identité inattendu')
       return null
     }
+    const email = jeton.email_verified && jeton.email ? jeton.email : null
+    const domaine = email?.split('@')[1]?.toLowerCase() ?? ''
     return {
       sub: jeton.sub,
-      email: jeton.email_verified && jeton.email ? jeton.email : null,
+      email,
       nom: jeton.name?.trim() || null,
+      adresseSure: Boolean(email && (DOMAINES_GOOGLE.includes(domaine) || jeton.hd)),
     }
   } catch (erreur) {
     console.error('[google] échange impossible :', erreur)
@@ -193,24 +208,49 @@ export async function echangerCode(
   confier au navigateur, qui pourrait le retoucher. Une table en mémoire suffit :
   le serveur web est un seul processus, et l'attente ne dure que dix minutes —
   un redémarrage pendant ce temps renvoie simplement à « Continuer avec Google ».
-*/
-const enAttente = new Map<string, { identite: IdentiteGoogle; expire: number }>()
 
-export function mettreEnAttente(identite: IdentiteGoogle): string {
+  Le compte à qui proposer de rattacher Google, quand l'adresse est déjà prise,
+  attend au même endroit et pour la même raison : c'est le serveur qui l'a
+  trouvé, le navigateur ne doit pas pouvoir en désigner un autre.
+*/
+
+/** Le compte qui a déjà l'adresse de cette identité Google. */
+export interface Rattachement {
+  id: string
+  pseudo: string
+}
+
+const enAttente = new Map<
+  string,
+  { identite: IdentiteGoogle; rattachement: Rattachement | null; expire: number }
+>()
+
+export function mettreEnAttente(
+  identite: IdentiteGoogle,
+  rattachement: Rattachement | null = null,
+): string {
   const maintenant = Date.now()
   for (const [cle, valeur] of enAttente) {
     if (valeur.expire < maintenant) enAttente.delete(cle)
   }
   const cle = randomBytes(24).toString('base64url')
-  enAttente.set(cle, { identite, expire: maintenant + DUREE_SECONDES * 1000 })
+  enAttente.set(cle, { identite, rattachement, expire: maintenant + DUREE_SECONDES * 1000 })
   return cle
 }
 
-export function lireAttente(cle: string | undefined): IdentiteGoogle | null {
+function attente(cle: string | undefined) {
   if (!cle) return null
   const valeur = enAttente.get(cle)
   if (!valeur || valeur.expire < Date.now()) return null
-  return valeur.identite
+  return valeur
+}
+
+export function lireAttente(cle: string | undefined): IdentiteGoogle | null {
+  return attente(cle)?.identite ?? null
+}
+
+export function lireRattachement(cle: string | undefined): Rattachement | null {
+  return attente(cle)?.rattachement ?? null
 }
 
 export function oublierAttente(cle: string) {

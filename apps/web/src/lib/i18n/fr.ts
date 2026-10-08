@@ -2665,7 +2665,7 @@ export const fr = {
       failRefused: 'Google n’a pas pu confirmer qui tu es. Réessaie.',
       failUnavailable: 'La connexion avec Google n’est pas proposée sur ce serveur.',
       failKnownEmail:
-        'Un compte du site utilise déjà l’adresse de ce compte Google. Connecte-toi avec ton pseudo, puis lie Google depuis ton profil.',
+        'Un compte du site utilise déjà l’adresse de ce compte Google, et ne peut pas lui être lié. Connecte-toi avec ton pseudo.',
       chooseTitle: 'Plus qu’un pseudo',
       chooseHello: 'Bonjour {nom} !',
       chooseBlurb:
@@ -2673,6 +2673,13 @@ export const fr = {
       chooseSubmit: 'Créer mon compte',
       chooseExpired: 'Cette inscription a expiré.',
       chooseRestart: 'Recommencer avec Google',
+      mergeTitle: 'Tu as déjà un compte ?',
+      mergeBlurb:
+        'Le compte « {pseudo} » utilise déjà l’adresse de ton compte Google. Si c’est le tien, entre son mot de passe : tu pourras ensuite t’y connecter avec Google.',
+      mergeSubmit: 'Rejoindre mon compte',
+      mergeOther: 'Ce n’est pas mon compte : en créer un nouveau',
+      mergeWrongPassword: 'Ce n’est pas le mot de passe de ce compte.',
+      mergeDone: 'Google est lié à ton compte {pseudo} : tu peux maintenant te connecter avec.',
       link: 'Lier mon compte Google',
       linked: 'Connexion avec Google activée',
       linkedNow: 'Ton compte Google est lié : tu peux maintenant te connecter avec.',

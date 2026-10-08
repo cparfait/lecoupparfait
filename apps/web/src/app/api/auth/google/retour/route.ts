@@ -3,15 +3,17 @@
  *
  *   GET /api/auth/google/retour?code=…&state=…
  *
- * Trois issues, toutes des redirections :
+ * Quatre issues, toutes des redirections :
  *  - **lier** (depuis son profil) : l'identité Google s'attache au compte
  *    connecté, et l'on revient au profil ;
  *  - **compte connu** : la session s'ouvre, on va où l'on allait ;
+ *  - **adresse connue** : un compte a déjà cette adresse. Confirmée par
+ *    courriel, et Google en est l'autorité : on y rattache Google et l'on
+ *    ouvre la session. Sinon on le propose (`/connexion/google`), et le mot de
+ *    passe du compte le confirmera — voir `@coupparfait/db/google` sur
+ *    pourquoi l'adresse seule ne suffit pas toujours ;
  *  - **inconnu** : on garde l'identité en attente et l'on fait choisir un
- *    pseudo (`/connexion/google`). Sauf si son adresse est déjà celle d'un
- *    compte : on ne crée pas un doublon, on dit de se connecter puis de lier
- *    Google depuis son profil — voir `@coupparfait/db/google` sur pourquoi on
- *    ne lie jamais d'après l'adresse.
+ *    pseudo (`/connexion/google`).
  *
  * Chaque échec renvoie à la connexion avec `?google=<raison>`, que la page
  * traduit en une phrase.
@@ -19,7 +21,7 @@
 
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { adresseConnue, compteGoogle, lierCompteGoogle } from '@coupparfait/db/google'
+import { compteGoogle, lierCompteGoogle, titulaireDeLAdresse } from '@coupparfait/db/google'
 import {
   DUREE_SECONDES,
   TEMOIN_DEPART,
@@ -29,6 +31,7 @@ import {
   decoderDepart,
   echangerCode,
   mettreEnAttente,
+  type Rattachement,
 } from '@/lib/server/google.ts'
 import { getCurrentUser, startSession } from '@/lib/server/session.ts'
 
@@ -71,10 +74,21 @@ export async function GET(request: Request) {
     return vers(depart.suite)
   }
 
-  if (identite.email && (await adresseConnue(identite.email))) return echec('adresse-connue')
+  let rattachement: Rattachement | null = null
+  const titulaire = identite.email ? await titulaireDeLAdresse(identite.email) : null
+  if (titulaire) {
+    // Désactivé, ou déjà lié à un autre compte Google : rien à rejoindre.
+    if (titulaire.desactive || titulaire.lie) return echec('adresse-connue')
+    if (titulaire.confirme && identite.adresseSure) {
+      await lierCompteGoogle(titulaire.id, identite.sub)
+      await startSession(titulaire.id)
+      return vers(depart.suite)
+    }
+    rattachement = { id: titulaire.id, pseudo: titulaire.username }
+  }
 
   const reponse = vers('/connexion/google')
-  reponse.cookies.set(TEMOIN_NOUVEAU, mettreEnAttente(identite), {
+  reponse.cookies.set(TEMOIN_NOUVEAU, mettreEnAttente(identite, rattachement), {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',

@@ -2605,7 +2605,7 @@ export const en: Dictionary = {
       failRefused: 'Google could not confirm who you are. Try again.',
       failUnavailable: 'Google sign-in is not offered on this server.',
       failKnownEmail:
-        'An account on this site already uses the address of this Google account. Sign in with your username, then link Google from your profile.',
+        'An account on this site already uses the address of this Google account and cannot be linked to it. Sign in with your username.',
       chooseTitle: 'Just a username left',
       chooseHello: 'Hello {nom}!',
       chooseBlurb:
@@ -2613,6 +2613,13 @@ export const en: Dictionary = {
       chooseSubmit: 'Create my account',
       chooseExpired: 'This sign-up has expired.',
       chooseRestart: 'Start again with Google',
+      mergeTitle: 'Already have an account?',
+      mergeBlurb:
+        'The account “{pseudo}” already uses your Google account’s address. If it is yours, enter its password: you can then sign in to it with Google.',
+      mergeSubmit: 'Join my account',
+      mergeOther: 'Not my account: create a new one',
+      mergeWrongPassword: 'That is not this account’s password.',
+      mergeDone: 'Google is linked to your account {pseudo}: you can now sign in with it.',
       link: 'Link my Google account',
       linked: 'Google sign-in enabled',
       linkedNow: 'Your Google account is linked: you can now sign in with it.',

@@ -6,11 +6,15 @@
  * reste celui du site. Ce module ne connaît que des lignes ; l'échange avec
  * Google vit dans l'application web (`lib/server/google.ts`).
  *
- * **On ne lie jamais un compte existant d'après son adresse.** Ici l'adresse
- * d'un compte n'est pas vérifiée — n'importe qui peut s'inscrire avec celle
- * d'un autre. Rattacher d'office un compte Google à « celui qui a la même
- * adresse » offrirait ce compte à quiconque aurait saisi la bonne adresse le
- * premier. La liaison se fait donc connecté, depuis son profil.
+ * **Une même adresse ne suffit pas toujours à lier.** L'adresse d'un compte
+ * n'est pas vérifiée à l'inscription — n'importe qui peut s'inscrire avec
+ * celle d'un autre, puis attendre que le vrai titulaire arrive par Google.
+ * Rattacher d'office livrerait alors au titulaire un compte dont l'intrus
+ * garde le mot de passe. La liaison d'après l'adresse n'est donc automatique
+ * que si le compte l'a **confirmée par courriel** : c'est la confiance que lui
+ * accorde déjà « Mot de passe oublié », qui ouvre le compte à qui reçoit ses
+ * messages. Sinon, le retour de Google la propose, et le mot de passe du
+ * compte la confirme (`api/auth/google/rattacher`).
  */
 
 import { randomUUID } from 'node:crypto'
@@ -46,6 +50,40 @@ export async function adresseConnue(email: string): Promise<boolean> {
     .where(eq(users.email, email.trim().toLowerCase()))
     .limit(1)
   return lignes.length > 0
+}
+
+/** Le compte qui utilise déjà une adresse, et ce qu'il faut en savoir pour lui rattacher Google. */
+export interface TitulaireAdresse {
+  id: string
+  username: string
+  /** L'adresse a été confirmée par courriel. */
+  confirme: boolean
+  /** Déjà lié à une identité Google — forcément une autre, sinon on l'aurait trouvé par elle. */
+  lie: boolean
+  desactive: boolean
+}
+
+export async function titulaireDeLAdresse(email: string): Promise<TitulaireAdresse | null> {
+  const lignes = await getDb()
+    .select({
+      id: users.id,
+      username: users.username,
+      emailVerifiedAt: users.emailVerifiedAt,
+      googleSub: users.googleSub,
+      disabled: users.disabled,
+    })
+    .from(users)
+    .where(eq(users.email, email.trim().toLowerCase()))
+    .limit(1)
+  const ligne = lignes[0]
+  if (!ligne) return null
+  return {
+    id: ligne.id,
+    username: ligne.username,
+    confirme: ligne.emailVerifiedAt != null,
+    lie: ligne.googleSub != null,
+    desactive: Boolean(ligne.disabled),
+  }
 }
 
 /**
@@ -97,7 +135,8 @@ export async function creerCompteGoogle(options: {
 }
 
 /**
- * Lie une identité Google à un compte existant, depuis son profil.
+ * Lie une identité Google à un compte existant : depuis son profil, ou au
+ * retour de Google quand l'adresse est la sienne.
  *
  * Refusé si cette identité est déjà celle d'un autre compte : on ne la déplace
  * pas d'un compte à l'autre en silence.
