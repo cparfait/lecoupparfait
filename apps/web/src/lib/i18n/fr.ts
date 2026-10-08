@@ -57,6 +57,7 @@ export const fr = {
     about: 'À propos',
     credits: 'Crédits & licences',
     androidApp: 'Appli Android',
+    privacy: 'Confidentialité',
     admin: 'Administration',
 
     // Entrées de section.
@@ -786,6 +787,72 @@ export const fr = {
     bannerTitle: 'Nouvelle version de l’appli',
     bannerBlurb:
       'La version {version} s’installe par-dessus celle-ci : ton compte et tes parties restent là.',
+  },
+
+  suppressionCompte: {
+    title: 'Supprimer ton compte',
+    intro: 'C’est définitif : on ne peut pas revenir en arrière.',
+    erased:
+      'Ce qui est effacé : ton adresse e-mail, ton mot de passe, ta progression, tes analyses et tes études, tes amis, tes défis, tes notifications, ton classement et son historique.',
+    kept: 'Ce qui reste : tes parties, sous un pseudo anonyme (joueur-…), parce qu’elles appartiennent aussi à tes adversaires. Rien n’y désigne plus ton compte.',
+    password: 'Ton mot de passe',
+    confirmName: 'Retape ton pseudo, {pseudo}, pour confirmer',
+    button: 'Supprimer définitivement mon compte',
+    done: 'Ton compte est supprimé. Au revoir !',
+    signedOut: 'Connecte-toi d’abord : la suppression se confirme avec ton mot de passe.',
+    admin:
+      'Un compte administrateur ne se supprime pas d’ici : son pseudo donne des droits, et le libérer les offrirait au premier venu qui le prendrait.',
+    forgot: 'Mot de passe oublié ? Récupère-le d’abord, puis reviens ici.',
+    link: 'Supprimer mon compte',
+  },
+
+  confidentialite: {
+    title: 'Politique de confidentialité',
+    intro:
+      'Ce que Le Coup Parfait sait de toi, pourquoi, combien de temps, et comment tout effacer. Pas de publicité, pas de mesure d’audience, pas de revente : rien de tout ça n’existe ici.',
+    updated: 'Mise à jour : {date}',
+    whoTitle: 'Qui s’en occupe',
+    who: 'Ce site est une instance de Le Coup Parfait, un logiciel libre. Elle est exploitée par son administrateur, seul à avoir accès au serveur et à sa base.',
+    contact: 'Pour toute question sur tes données : {contact}.',
+    contactUnknown:
+      'Pour toute question sur tes données, écris à l’administrateur de cette instance.',
+    withoutAccountTitle: 'Sans compte',
+    withoutAccount:
+      'Tu peux jouer, apprendre et analyser sans compte. Tes réglages et ta progression restent alors dans ton navigateur : le serveur ne les voit pas. Un seul témoin est posé, celui de ta langue, pour que les messages du serveur te parlent dans la bonne (un an).',
+    accountTitle: 'Avec un compte',
+    accountPublic:
+      'Ton pseudo, ton avatar, tes classements, tes statistiques et tes parties récentes. Ils sont publics : c’est le principe d’un classement.',
+    accountPassword: 'Une empreinte de ton mot de passe, jamais le mot de passe lui-même.',
+    accountEmail:
+      'Ton adresse e-mail, si tu en donnes une : elle ne sert qu’à récupérer ton mot de passe.',
+    accountProgress:
+      'Tes parties, ta progression (leçons, puzzles, carrière, défi du jour), tes analyses et études enregistrées, tes amis et tes défis.',
+    accountSessions:
+      'Tes sessions de connexion, avec le nom de ton navigateur pour que tu reconnaisses tes appareils, et le témoin qui te garde connecté (30 jours).',
+    notificationsTitle: 'Notifications',
+    notifications:
+      'Si tu les actives, l’appareil est enregistré avec ton fuseau horaire, pour que le rappel du jour arrive à la bonne heure. Dans un navigateur, le contenu est chiffré pour lui seul : Google, Mozilla ou Apple le relaient sans pouvoir le lire. Dans l’appli Android, il passe par Firebase Cloud Messaging, de Google, qui peut en lire le titre et le texte, par exemple « Untel t’invite à jouer ». « Ne plus recevoir » efface l’enregistrement.',
+    outsideTitle: 'Ce qui sort du serveur',
+    outsideTablebase:
+      'Les finales à sept pièces ou moins : la position seule est envoyée aux tables de finales de Lichess.',
+    outsideImport:
+      'L’import de tes parties : le pseudo que tu tapes est envoyé à chess.com ou à Lichess.',
+    outsideAi:
+      'L’assistant IA, si tu le configures avec ta propre clé : la position, l’analyse et ta question partent chez le fournisseur choisi (OpenAI, Anthropic, Google, Mistral…). Ta clé transite par ce serveur, qui ne la garde pas et ne l’écrit dans aucun journal. Un modèle local, comme Ollama, est appelé directement depuis ton navigateur.',
+    outsideEmail: 'Les courriels de récupération de mot de passe, envoyés à ton adresse.',
+    outsideVoice:
+      'La voix synthétique de ton navigateur peut, selon ton système, passer par un service en ligne. Celle du serveur reste sur place.',
+    outsideNothingElse:
+      'Rien d’autre : aucune police, aucun script, aucune image n’est chargé depuis un autre site.',
+    retentionTitle: 'Combien de temps',
+    retention:
+      'Tes données restent tant que ton compte existe. Les sessions expirent au bout de 30 jours. La base est sauvegardée chaque jour et chaque sauvegarde est gardée 14 jours : une donnée effacée disparaît donc tout à fait au bout de deux semaines.',
+    deleteTitle: 'Supprimer ton compte',
+    delete:
+      'Tu peux supprimer ton compte à tout moment, depuis ton profil ou depuis la page dédiée, dans l’appli comme dans le navigateur. Tout ce qui n’appartient qu’à toi est effacé. Tes parties, qui appartiennent aussi à tes adversaires, restent sous un pseudo anonyme, sans rien qui te désigne.',
+    rightsTitle: 'Tes droits',
+    rights:
+      'Tu peux demander une copie de tes données, leur correction ou leur effacement en écrivant au contact indiqué plus haut. En cas de désaccord, tu peux aussi saisir la CNIL.',
   },
 
   install: {
@@ -3051,6 +3118,9 @@ export const fr = {
       'Si tu n’as rien demandé, ignore ce message : tant que le lien n’est pas ouvert, ton mot de passe reste inchangé.',
   },
   api: {
+    deleteAccountAdmin: 'Un compte administrateur ne se supprime pas d’ici.',
+    deleteAccountWrongName: 'Le pseudo ne correspond pas.',
+    deleteAccountWrongPassword: 'Mot de passe incorrect.',
     unreadable: 'Requête illisible.',
     unknownAction: 'Action inconnue.',
     signInRequired: 'Connexion requise.',
@@ -7065,6 +7135,12 @@ export const fr = {
     ogDesc:
       'Un moteur qui explique pourquoi, une voix qui accompagne, et zéro euro. Libre et auto-hébergeable.',
     androidApp: 'L’appli Android',
+    privacy: 'Politique de confidentialité',
+    privacyDesc:
+      'Ce que Le Coup Parfait sait de toi, pourquoi, combien de temps, et comment tout effacer.',
+    deleteAccount: 'Supprimer ton compte',
+    deleteAccountDesc:
+      'Supprimer ton compte Le Coup Parfait : ce qui est effacé, et ce qui reste anonymisé.',
     androidAppDesc:
       'Installe Le Coup Parfait sur ton téléphone Android : le fichier, l’installation pas à pas et les mises à jour.',
     about: 'À propos',

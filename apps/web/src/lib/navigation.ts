@@ -43,6 +43,7 @@ import {
   RotateCcw,
   Scale,
   Settings,
+  ShieldCheck,
   Smartphone,
   Swords,
   Target,
@@ -372,6 +373,7 @@ export const PAGES_APPLICATION: EntreeNav[] = [
   { href: '/appli', labelKey: 'nav.androidApp', icon: Smartphone },
   { href: '/a-propos', labelKey: 'nav.about', icon: Info },
   { href: '/credits', labelKey: 'nav.credits', icon: Scale },
+  { href: '/confidentialite', labelKey: 'nav.privacy', icon: ShieldCheck },
 ]
 
 /**
@@ -451,6 +453,8 @@ export const RACCOURCIS_MOBILES: EntreeNav[] = [
       '/profil',
       '/connexion',
       '/appli',
+      '/confidentialite',
+      '/compte',
       '/a-propos',
       '/credits',
       '/admin',

@@ -59,6 +59,7 @@ export const en: Dictionary = {
     about: 'About',
     credits: 'Credits & licences',
     androidApp: 'Android app',
+    privacy: 'Privacy',
     admin: 'Administration',
 
     vsComputer: 'Against the computer',
@@ -761,6 +762,69 @@ export const en: Dictionary = {
       'Sign in to the app: you can then receive invitations, correspondence moves and the daily challenge reminder.',
     bannerTitle: 'New version of the app',
     bannerBlurb: 'Version {version} installs over this one: your account and games stay put.',
+  },
+
+  suppressionCompte: {
+    title: 'Delete your account',
+    intro: 'This is permanent: there is no going back.',
+    erased:
+      'What gets erased: your email address, your password, your progress, your analyses and studies, your friends, your challenges, your notifications, your rating and its history.',
+    kept: 'What remains: your games, under an anonymous name (joueur-…), because they also belong to your opponents. Nothing in them points to your account any more.',
+    password: 'Your password',
+    confirmName: 'Type your username, {pseudo}, to confirm',
+    button: 'Delete my account permanently',
+    done: 'Your account has been deleted. Goodbye!',
+    signedOut: 'Sign in first: deletion is confirmed with your password.',
+    admin:
+      'An administrator account cannot be deleted from here: its username grants rights, and freeing it would hand them to whoever took it next.',
+    forgot: 'Forgot your password? Recover it first, then come back here.',
+    link: 'Delete my account',
+  },
+
+  confidentialite: {
+    title: 'Privacy policy',
+    intro:
+      'What Le Coup Parfait knows about you, why, for how long, and how to erase it all. No ads, no audience measurement, no resale: none of that exists here.',
+    updated: 'Updated: {date}',
+    whoTitle: 'Who is in charge',
+    who: 'This site is an instance of Le Coup Parfait, a free software. It is run by its administrator, the only one with access to the server and its database.',
+    contact: 'For any question about your data: {contact}.',
+    contactUnknown:
+      'For any question about your data, write to the administrator of this instance.',
+    withoutAccountTitle: 'Without an account',
+    withoutAccount:
+      'You can play, learn and analyse without an account. Your settings and progress then stay in your browser: the server does not see them. A single cookie is set, for your language, so that server messages speak the right one (one year).',
+    accountTitle: 'With an account',
+    accountPublic:
+      'Your username, avatar, ratings, statistics and recent games. They are public: that is how a leaderboard works.',
+    accountPassword: 'A hash of your password, never the password itself.',
+    accountEmail: 'Your email address, if you give one: it is only used to recover your password.',
+    accountProgress:
+      'Your games, your progress (lessons, puzzles, career, daily challenge), your saved analyses and studies, your friends and your challenges.',
+    accountSessions:
+      'Your login sessions, with your browser name so you can recognise your devices, and the cookie that keeps you signed in (30 days).',
+    notificationsTitle: 'Notifications',
+    notifications:
+      'If you turn them on, the device is registered with your time zone, so the daily reminder arrives at the right time. In a browser, the content is encrypted for that browser only: Google, Mozilla or Apple relay it without being able to read it. In the Android app, it goes through Google’s Firebase Cloud Messaging, which can read its title and text, for example “Someone invites you to play”. “Stop receiving” erases the registration.',
+    outsideTitle: 'What leaves the server',
+    outsideTablebase:
+      'Endgames with seven pieces or fewer: only the position is sent to the Lichess endgame tablebases.',
+    outsideImport: 'Importing your games: the username you type is sent to chess.com or Lichess.',
+    outsideAi:
+      'The AI assistant, if you set it up with your own key: the position, the analysis and your question go to the provider you chose (OpenAI, Anthropic, Google, Mistral…). Your key passes through this server, which neither keeps it nor writes it to any log. A local model, such as Ollama, is called directly from your browser.',
+    outsideEmail: 'Password recovery emails, sent to your address.',
+    outsideVoice:
+      'Your browser’s speech synthesis may, depending on your system, use an online service. The server’s own voice stays on the server.',
+    outsideNothingElse: 'Nothing else: no font, script or image is loaded from another site.',
+    retentionTitle: 'How long',
+    retention:
+      'Your data stays as long as your account exists. Sessions expire after 30 days. The database is backed up every day and each backup is kept for 14 days: erased data is therefore fully gone after two weeks.',
+    deleteTitle: 'Delete your account',
+    delete:
+      'You can delete your account at any time, from your profile or from the dedicated page, in the app as in the browser. Everything that belongs only to you is erased. Your games, which also belong to your opponents, remain under an anonymous name, with nothing pointing to you.',
+    rightsTitle: 'Your rights',
+    rights:
+      'You can ask for a copy of your data, its correction or its deletion by writing to the contact given above. If you disagree, you can also contact your data protection authority.',
   },
 
   install: {
@@ -2987,6 +3051,9 @@ export const en: Dictionary = {
       'If you asked for nothing, ignore this message: as long as the link is not opened, your password stays unchanged.',
   },
   api: {
+    deleteAccountAdmin: 'An administrator account cannot be deleted from here.',
+    deleteAccountWrongName: 'The username does not match.',
+    deleteAccountWrongPassword: 'Wrong password.',
     unreadable: 'Unreadable request.',
     unknownAction: 'Unknown action.',
     signInRequired: 'Sign-in required.',
@@ -6999,6 +7066,12 @@ export const en: Dictionary = {
     ogDesc:
       'An engine that explains why, a voice that keeps you company, and zero euros. Free software you can host yourself.',
     androidApp: 'The Android app',
+    privacy: 'Privacy policy',
+    privacyDesc:
+      'What Le Coup Parfait knows about you, why, for how long, and how to erase it all.',
+    deleteAccount: 'Delete your account',
+    deleteAccountDesc:
+      'Delete your Le Coup Parfait account: what gets erased, and what remains anonymised.',
     androidAppDesc:
       'Install Le Coup Parfait on your Android phone: the file, step-by-step installation and updates.',
     about: 'About',

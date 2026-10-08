@@ -86,6 +86,9 @@ export function installerFausseBase(repondre: Repondeur = () => []): FausseBase 
     insert: (table: Table) => chaine({ type: 'insert', table: getTableName(table) }),
     update: (table: Table) => chaine({ type: 'update', table: getTableName(table) }),
     delete: (table: Table) => chaine({ type: 'delete', table: getTableName(table) }),
+    // Une transaction rejoue ses requêtes sur la même fausse base : on vérifie
+    // ce qui est écrit, pas l'atomicité, qui est l'affaire de Postgres.
+    transaction: <T>(rappel: (tx: unknown) => Promise<T>) => rappel(base),
   }
   globalThis.__coupParfaitDb = base as unknown as Database
 

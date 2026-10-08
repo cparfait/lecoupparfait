@@ -586,7 +586,15 @@ export default function ProfilePage() {
             {/* La seule action de cette page qu'on vienne y faire exprès — le
                 reste s'y consulte. Pleine largeur sur téléphone, où viser un
                 bouton de trois mots dans un coin n'a rien d'évident. */}
-            <div className="mt-4 flex justify-end border-t border-line/60 pt-4">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line/60 pt-4">
+              {/* Discret, mais toujours là : le Play Store exige qu'on puisse
+                  supprimer son compte depuis l'appli, et c'est un droit. */}
+              <Link
+                href="/compte/supprimer"
+                className="inline-flex min-h-11 items-center text-sm text-muted hover:text-ink hover:underline"
+              >
+                {t('suppressionCompte.link')}
+              </Link>
               <Button
                 variant="secondary"
                 icon={<LogOut size={15} />}

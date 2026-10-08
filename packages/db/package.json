@@ -18,7 +18,8 @@
     "./ratings": "./src/ratings.ts",
     "./push": "./src/push.ts",
     "./live": "./src/live.ts",
-    "./menage": "./src/menage.ts"
+    "./menage": "./src/menage.ts",
+    "./suppression": "./src/suppression.ts"
   },
   "scripts": {
     "db:generate": "drizzle-kit generate",
