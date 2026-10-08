@@ -773,6 +773,7 @@ export const fr = {
     newVersion: 'La version {version} est prête.',
     update: 'Mettre à jour',
     auto: 'Mise à jour automatique',
+    updatesByPlay: 'Les mises à jour arrivent par le Play Store, comme pour tes autres applis.',
     autoHint:
       'Quand une nouvelle version sort, l’appli la télécharge d’elle-même et ouvre l’installeur. Android te demande toujours de confirmer.',
     stepAuthorize:

@@ -32,6 +32,30 @@ android {
     buildFeatures {
         buildConfig true
     }
+
+    /*
+     * Deux distributions de la même appli.
+     *
+     *  - `site` : l'APK servi par la page /appli. Il se met à jour lui-même
+     *    (MiseAJourPlugin, permission REQUEST_INSTALL_PACKAGES), faute de
+     *    magasin pour le faire. `npm run apk`.
+     *  - `play` : l'AAB du Play Store. Google interdit l'auto-mise à jour et la
+     *    permission qui va avec : c'est le Play Store qui met l'appli à jour.
+     *    `npm run aab`.
+     *
+     * Même identifiant, même version, même clé : un joueur peut passer de l'une
+     * à l'autre sans réinstaller, pourvu que Google signe l'AAB avec cette clé-ci
+     * (voir mobile/README.md, « Le Play Store »).
+     */
+    flavorDimensions = ["distribution"]
+    productFlavors {
+        site {
+            dimension "distribution"
+        }
+        play {
+            dimension "distribution"
+        }
+    }
     signingConfigs {
         if (fichierSignature.exists()) {
             release {

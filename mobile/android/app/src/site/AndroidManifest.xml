@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fusionné avec src/main/AndroidManifest.xml pour l'APK du site seulement :
+     le Play Store refuse cette permission à une appli qui s'en sert pour se
+     mettre à jour elle-même. Voir MiseAJourPlugin. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+</manifest>

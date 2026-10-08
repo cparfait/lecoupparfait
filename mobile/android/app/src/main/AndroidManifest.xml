@@ -54,6 +54,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Android 13 et plus : la permission que le site demande dans le clic. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <!-- Pour installer elle-même ses mises à jour : voir MiseAJourPlugin. -->
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- REQUEST_INSTALL_PACKAGES, pour la mise à jour par l'appli elle-même,
+         n'est déclarée que pour l'APK du site : src/site/AndroidManifest.xml. -->
 </manifest>

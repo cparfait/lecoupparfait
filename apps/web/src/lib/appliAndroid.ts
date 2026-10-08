@@ -36,16 +36,31 @@ export const APPLI_ANDROID = {
 /** L'adresse de téléchargement, qui change à chaque version : aucun relais ne resert l'ancienne. */
 export const URL_APK = `${APPLI_ANDROID.fichier}?v=${APPLI_ANDROID.versionCode}`
 
+/**
+ * Par où l'appli a été installée.
+ *
+ * `site` : l'APK de la page /appli, qui se met à jour lui-même. `play` : le
+ * Play Store, qui met l'appli à jour à sa place — Google interdit toute autre
+ * voie, et le site n'y propose donc rien.
+ */
+export type Distribution = 'site' | 'play'
+
 interface VersionInstallee {
   code: number
   nom: string
+  distribution: Distribution
   /** L'utilisateur a permis à l'appli d'« installer des applis inconnues ». */
   installationAutorisee: boolean
 }
 
-/** Le module natif de `mobile/android/.../MiseAJourPlugin.java`. */
+/** Le module natif `AppliPlugin.java`, présent dans les deux distributions. */
+interface PluginAppli {
+  version(): Promise<{ code: number; nom: string; distribution: Distribution }>
+}
+
+/** Le module natif `MiseAJourPlugin.java`, dans l'APK du site seulement. */
 interface PluginMiseAJour {
-  version(): Promise<VersionInstallee>
+  version(): Promise<{ code: number; nom: string; installationAutorisee: boolean }>
   autoriser(): Promise<void>
   installer(options: { url: string }): Promise<void>
   addListener(
@@ -59,6 +74,7 @@ interface PontCapacitor {
   isNativePlatform?: () => boolean
   getPlatform?: () => string
   Plugins?: {
+    Appli?: PluginAppli
     MiseAJour?: PluginMiseAJour
     SystemBars?: { setStyle(options: { style: 'LIGHT' | 'DARK' }): Promise<void> }
   }
@@ -156,18 +172,38 @@ function modifier(partiel: Partial<EtatAppli>) {
   for (const abonne of abonnes) abonne()
 }
 
-/** Une coque plus ancienne que la dernière publiée. */
+/** Une coque du site plus ancienne que la dernière publiée. Celle du Play Store n'est pas de notre ressort. */
 export function aMettreAJour(installee: VersionInstallee | null): boolean {
-  return installee !== null && installee.code < APPLI_ANDROID.versionCode
+  return (
+    installee !== null &&
+    installee.distribution === 'site' &&
+    installee.code < APPLI_ANDROID.versionCode
+  )
 }
 
 async function relireVersion() {
-  const plugin = pont()?.Plugins?.MiseAJour
-  if (!plugin) return
+  const plugins = pont()?.Plugins
   try {
-    modifier({ installee: await plugin.version() })
+    /*
+      `Appli` dit la distribution ; les coques 1.0.0 et 1.1.0 ne l'ont pas, et
+      ne connaissent que `MiseAJour` — elles viennent toutes du site. Celui-ci
+      seul sait aussi si l'installation est autorisée : la question n'a pas de
+      sens pour le Play Store.
+    */
+    const appli = plugins?.Appli ? await plugins.Appli.version() : null
+    const miseAJour = plugins?.MiseAJour ? await plugins.MiseAJour.version() : null
+    const version = appli ?? miseAJour
+    if (!version) return
+    modifier({
+      installee: {
+        code: version.code,
+        nom: version.nom,
+        distribution: appli?.distribution ?? 'site',
+        installationAutorisee: miseAJour?.installationAutorisee ?? false,
+      },
+    })
   } catch {
-    // Une coque sans le module : on la traite comme hors de l'appli.
+    // Une coque sans ces modules : on la traite comme hors de l'appli.
   }
 }
 

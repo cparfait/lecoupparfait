@@ -10,7 +10,9 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         // Avant `super.onCreate` : c'est là que le pont charge ses modules.
-        registerPlugin(MiseAJourPlugin.class);
+        registerPlugin(AppliPlugin.class);
+        // La mise à jour par l'appli elle-même, pour l'APK du site seulement.
+        Distribution.enregistrer(this);
         super.onCreate(savedInstanceState);
 
         // Le bouton Retour fermait l'appli depuis n'importe quelle page :

@@ -147,14 +147,19 @@ function TonAppli() {
         </div>
       )}
 
-      <div className="border-t border-line pt-2">
-        <Toggle
-          checked={appli.miseAJourAuto}
-          onChange={choisirMiseAJourAuto}
-          label={t('appli.auto')}
-          description={t('appli.autoHint')}
-        />
-      </div>
+      {appli.installee?.distribution === 'play' ? (
+        // Le Play Store met l'appli à jour lui-même : rien à régler ici.
+        <p className="text-sm leading-relaxed text-muted">{t('appli.updatesByPlay')}</p>
+      ) : (
+        <div className="border-t border-line pt-2">
+          <Toggle
+            checked={appli.miseAJourAuto}
+            onChange={choisirMiseAJourAuto}
+            label={t('appli.auto')}
+            description={t('appli.autoHint')}
+          />
+        </div>
+      )}
     </Card>
   )
 }

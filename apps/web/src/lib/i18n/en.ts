@@ -749,6 +749,7 @@ export const en: Dictionary = {
     newVersion: 'Version {version} is ready.',
     update: 'Update',
     auto: 'Automatic updates',
+    updatesByPlay: 'Updates come through the Play Store, like your other apps.',
     autoHint:
       'When a new version comes out, the app downloads it by itself and opens the installer. Android always asks you to confirm.',
     stepAuthorize:

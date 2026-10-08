@@ -1,10 +1,17 @@
 # L'appli Android
 
-Une coque [Capacitor](https://capacitorjs.com) autour du site en ligne : l'APK
+Une coque [Capacitor](https://capacitorjs.com) autour du site en ligne : l'appli
 ouvre `https://coupparfait.cparfait.ovh` dans sa propre WebView, avec son
-icône, son écran de démarrage et son module de mise à jour. Le contenu vient
-toujours du serveur, et chaque déploiement du site est donc visible dans
-l'appli sans rien réinstaller.
+icône, son écran de démarrage et ses notifications. Le contenu vient toujours
+du serveur, et chaque déploiement du site est donc visible dans l'appli sans
+rien réinstaller.
+
+Elle existe en deux distributions, tirées du même code (`android/app/build.gradle`) :
+
+| Distribution | Fichier | Mises à jour                                                       |
+| ------------ | ------- | ------------------------------------------------------------------ |
+| `site`       | APK     | par l'appli elle-même (`MiseAJourPlugin`), depuis la page `/appli` |
+| `play`       | AAB     | par le Play Store, seul autorisé à le faire                        |
 
 Ce dossier ne fait pas partie des espaces de travail npm : ses dépendances
 s'installent à part (`cd mobile && npm ci`) et n'entrent ni dans le
@@ -34,6 +41,9 @@ s'installent à part (`cd mobile && npm ci`) et n'entrent ni dans le
    « Nouvelle version de l'appli » au lancement suivant, et ceux qui ont gardé
    la mise à jour automatique la téléchargent d'eux-mêmes. Android demande
    toujours de confirmer l'installation.
+4. `npm run aab`, puis téléverser `android/app/build/outputs/bundle/playRelease/app-play-release.aab`
+   dans Play Console (Tester et publier → Créer une version). Le Play Store
+   refuse un `versionCode` déjà envoyé : c'est le même que celui de l'APK.
 
 Une nouvelle version n'est nécessaire que si la coque change (icône,
 configuration Capacitor, code Java) : pour le reste, déployer le site suffit.
@@ -53,6 +63,33 @@ storePassword=…
 keyAlias=coupparfait
 keyPassword=…
 ```
+
+## Le Play Store
+
+Ce que Google exige, et où c'est fait :
+
+- **Pas d'auto-mise à jour** : la distribution `play` n'a ni `MiseAJourPlugin`
+  ni la permission `REQUEST_INSTALL_PACKAGES` (elles vivent dans `src/site/`).
+  Le site lit la distribution (`AppliPlugin`) et n'y propose aucune mise à jour.
+- **Format AAB**, cible Android 36 (`variables.gradle`).
+- **Suppression du compte** dans l'appli et par une adresse web : profil,
+  « Ton compte », et `/compte/supprimer`.
+- **Politique de confidentialité** publique : `/confidentialite`.
+
+**La signature.** Google signe lui-même les appli du Play Store (« Play App
+Signing »). Pour qu'un joueur puisse passer de l'APK du site à la version du
+Play Store sans désinstaller, il faut lui confier **notre** clé plutôt que de
+le laisser en créer une. À la première version, dans Play Console : Intégrité
+de l'appli → Signature de l'appli → « Utiliser une clé exportée depuis un
+keystore Java ». Google fournit `pepk.jar` et une clé publique de chiffrement :
+
+```bash
+java -jar pepk.jar --keystore=signature/coupparfait.jks --alias=coupparfait --output=signature/cle-pour-google.zip --include-cert --rsa-aes-encryption --encryption-key-path=encryption_public_key.pem
+```
+
+puis téléverser `cle-pour-google.zip`. Le mot de passe demandé est celui de
+`keystore.properties`. Ce choix ne se refait pas : une fois la première version
+envoyée, la clé de signature d'une appli ne change plus.
 
 ## Ce qui diffère du site
 

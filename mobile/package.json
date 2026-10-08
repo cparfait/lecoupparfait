@@ -6,7 +6,8 @@
   "license": "AGPL-3.0-or-later",
   "scripts": {
     "sync": "cap sync android",
-    "apk": "node scripts/apk.mjs"
+    "apk": "node scripts/apk.mjs",
+    "aab": "node scripts/apk.mjs --play"
   },
   "dependencies": {
     "@capacitor/android": "8.5.3",
