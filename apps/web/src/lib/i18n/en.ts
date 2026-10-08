@@ -2613,7 +2613,7 @@ export const en: Dictionary = {
   },
 
   draw: {
-    namesPlaceholder: 'Alice\nBob\nCarol\nDavid',
+    namesPlaceholder: 'Chloé\nMathieu\nClément\nLaetitia',
     title: 'Random draw',
     intro:
       'The colours of a game, the pairings of a round, the running order. A draw everyone can see, and nobody disputes.',

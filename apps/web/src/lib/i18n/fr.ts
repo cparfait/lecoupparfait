@@ -2668,8 +2668,9 @@ export const fr = {
   },
 
   draw: {
-    // Des prénoms d'exemple : chaque langue prend les siens.
-    namesPlaceholder: 'Alice\nBernard\nChloé\nDavid',
+    // Les prénoms d'exemple sont ceux de la famille de l'auteur : un clin d'œil,
+    // gardé tel quel dans toutes les langues.
+    namesPlaceholder: 'Chloé\nMathieu\nClément\nLaetitia',
     title: 'Tirage au sort',
     intro:
       'Les couleurs d’une partie, les paires d’une ronde, l’ordre de passage. Un tirage que tout le monde voit, et personne ne conteste.',
