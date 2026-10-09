@@ -17,7 +17,10 @@ import { useT } from '@/lib/i18n/index.tsx'
 
 export function ReglageInstallation() {
   const t = useT()
-  const { possible, installee, manuelle, installer } = useInstallation()
+  const { possible, installee, manuelle, installer, concernee } = useInstallation()
+
+  // Un téléphone Android : l'appli du Play Store s'en charge — voir `pwa.ts`.
+  if (!concernee) return null
 
   return (
     <Card className="p-5">

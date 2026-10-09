@@ -73,8 +73,24 @@ export function dejaInstallee(): boolean {
   )
 }
 
+/**
+ * Un écran tactile : téléphone ou tablette.
+ *
+ * L'installation ne s'y propose plus. Sur Android, c'est l'appli du Play Store
+ * qui prend le relais, et l'icône du site sur l'écran d'accueil ferait double
+ * emploi avec elle. Reste l'iPhone, qui n'a pas d'appli et où l'installation
+ * est le seul chemin vers les notifications : il garde son explication
+ * (`manuelle`), qui ne dépend pas de ce test.
+ */
+function auDoigt(): boolean {
+  return window.matchMedia('(pointer: coarse)').matches
+}
+
 export interface EtatInstallation {
-  /** Le navigateur a proposé l'installation : on peut la rouvrir d'un clic. */
+  /**
+   * Le navigateur a proposé l'installation, et l'on peut la rouvrir d'un clic.
+   * Jamais au doigt : voir `auDoigt`.
+   */
   possible: boolean
   /** Déjà installée — ou lancée depuis l'écran d'accueil. */
   installee: boolean
@@ -87,19 +103,27 @@ export interface EtatInstallation {
   manuelle: boolean
   /** Rouvre la proposition du navigateur. Rend vrai si elle a été acceptée. */
   installer: () => Promise<boolean>
+  /**
+   * Faut-il seulement parler d'installation sur cet appareil ? Faux sur un
+   * écran tactile qui n'est ni un iPhone ni déjà l'application : il n'y a
+   * rien à y proposer, pas même le chemin à la main.
+   */
+  concernee: boolean
 }
 
 export function useInstallation(): EtatInstallation {
   const [possible, setPossible] = useState(false)
   const [installee, setInstallee] = useState(false)
   const [manuelle, setManuelle] = useState(false)
+  const [tactile, setTactile] = useState(false)
 
   useEffect(() => {
     const synchroniser = () => {
-      setPossible(differe !== null)
+      setPossible(differe !== null && !auDoigt())
       setInstallee(dejaInstallee())
     }
     synchroniser()
+    setTactile(auDoigt())
 
     // iOS n'émet pas l'événement : sans ce test, l'application y paraîtrait
     // simplement non installable, ce qui est faux — elle l'est, à la main.
@@ -131,5 +155,5 @@ export function useInstallation(): EtatInstallation {
     }
   }, [])
 
-  return { possible, installee, manuelle, installer }
+  return { possible, installee, manuelle, installer, concernee: installee || manuelle || !tactile }
 }
