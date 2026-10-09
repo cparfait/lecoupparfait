@@ -565,3 +565,79 @@ test('un instantané illisible est écarté, jamais rejoué de travers', () => {
   assert.equal(GameRoom.restaurer({ version: 2, slug: 'x' }), null)
   assert.equal(GameRoom.restaurer({ version: 1 }), null)
 })
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Tchat : signaler, bloquer
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Le dernier message du fil, tel que le reçoivent les joueurs. */
+function dernierMessage(events: RoomEvent[]) {
+  const messages = events.flatMap((e) => (e.type === 'chat' ? [e.message] : []))
+  return messages[messages.length - 1]!
+}
+
+test('un message porte un numéro et une empreinte, jamais l’identité de son auteur', () => {
+  const { room, events, sB } = partie()
+  room.sendChat(sB, 'Bien joué')
+  const message = dernierMessage(events)
+  assert.ok(message.id, 'un numéro pour le signaler')
+  assert.ok(message.auteur, 'une empreinte pour le bloquer')
+  assert.equal(JSON.stringify(message).includes(BOB.clientId), false)
+})
+
+test('l’empreinte reste la même d’une partie à l’autre', () => {
+  const premiere = partie()
+  premiere.room.sendChat(premiere.sB, 'Salut')
+  const seconde = partie()
+  seconde.room.sendChat(seconde.sB, 'Re-salut')
+  assert.equal(dernierMessage(premiere.events).auteur, dernierMessage(seconde.events).auteur)
+  seconde.room.sendChat(seconde.sA, 'Bonjour')
+  assert.notEqual(dernierMessage(seconde.events).auteur, dernierMessage(premiere.events).auteur)
+})
+
+test('signaler un message désigne celui qui l’a écrit, et celui qui signale', () => {
+  const { room, events, sA, sB } = partie()
+  room.sendChat(sB, 'Tu es nul')
+  const signale = room.pourSignaler(sA, dernierMessage(events).id!)
+  assert.deepEqual(signale, {
+    partie: 'test',
+    texte: 'Tu es nul',
+    auteurNom: 'Bob',
+    auteurId: null,
+    auteurNavigateur: BOB.clientId,
+    parId: null,
+    parNavigateur: ALICE.clientId,
+  })
+})
+
+test('on ne signale ni ses propres mots, ni une annonce, ni un numéro inventé', () => {
+  const { room, events, sA, sB } = partie()
+  room.sendChat(sB, 'Bonjour')
+  assert.equal(room.pourSignaler(sB, dernierMessage(events).id!), null)
+  room.disconnect(sB)
+  assert.equal(dernierMessage(events).id, undefined, 'une annonce n’a pas de numéro')
+  assert.equal(room.pourSignaler(sA, 'invente'), null)
+})
+
+test('un spectateur qui écrit se signale comme un joueur', () => {
+  const { room, events, sA } = partie()
+  room.seat({
+    userId: 'compte-carole',
+    clientId: 'carole-navigateur-01',
+    name: 'Carole',
+    rating: null,
+    socketId: 'sC',
+  })
+  room.sendChat('sC', 'Quelle partie nulle')
+  const signale = room.pourSignaler(sA, dernierMessage(events).id!)
+  assert.equal(signale?.auteurNom, 'Carole')
+  assert.equal(signale?.auteurId, 'compte-carole')
+})
+
+test('un message tombé du fil ne se signale plus', () => {
+  const { room, events, sA, sB } = partie()
+  room.sendChat(sB, 'Le premier')
+  const premier = dernierMessage(events).id!
+  for (let i = 0; i < 200; i += 1) room.sendChat(sA, `message ${i}`)
+  assert.equal(room.pourSignaler(sA, premier), null)
+})

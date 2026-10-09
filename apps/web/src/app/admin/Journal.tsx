@@ -80,6 +80,10 @@ const ACTES: Record<
     ton: 'danger',
   },
   purge: { texteKey: 'admin.actPurge', filtreKey: 'admin.filterLabelPurge' },
+  traiterSignalement: {
+    texteKey: 'admin.actHandleReport',
+    filtreKey: 'admin.filterLabelHandleReport',
+  },
 }
 
 export function Journal() {

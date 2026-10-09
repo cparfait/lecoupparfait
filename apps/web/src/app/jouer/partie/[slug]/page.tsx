@@ -49,6 +49,7 @@ import { MoveList } from '@/components/game/MoveList.tsx'
 import { RubanCoups, rubanDepuisLesCoups } from '@/components/game/RubanCoups.tsx'
 import { PlayerBar } from '@/components/game/PlayerBar.tsx'
 import { GameOverDialog } from '@/components/game/GameOverDialog.tsx'
+import { MessageDuTchat } from '@/components/game/MessageDuTchat.tsx'
 import { Button, ButtonLink, Card, Chip, Spinner } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { useLiveGame } from '@/lib/game/useLiveGame.ts'
@@ -187,6 +188,53 @@ export default function LiveGamePage() {
   })
 
   const { snapshot, color, pendule, connection, chat } = game
+
+  // ── Signaler, bloquer ───────────────────────────────────────────────────
+  //
+  // Les joueurs bloqués vivent dans les préférences : le blocage suit d'une
+  // partie à l'autre, puisque l'empreinte de l'auteur ne change pas.
+  const bloques = usePreferences((state) => state.bloques)
+  const patchPreferences = usePreferences((state) => state.patch)
+  const [signales, setSignales] = useState<ReadonlySet<string>>(() => new Set())
+  const estBloque = useCallback(
+    (message: ChatMessage) => Boolean(message.auteur && bloques[message.auteur]),
+    [bloques],
+  )
+  const signaler = useCallback(
+    async (message: ChatMessage) => {
+      if (!message.id) return
+      if (await game.signaler(message.id)) {
+        setSignales((avant) => new Set(avant).add(message.id!))
+        toast.success(t('live.reportedToast'))
+      } else {
+        toast.error(t('live.reportFailed'))
+      }
+    },
+    [game, t],
+  )
+  const bloquer = useCallback(
+    (message: ChatMessage) => {
+      if (!message.auteur) return
+      patchPreferences({ bloques: { ...bloques, [message.auteur]: message.from } })
+      toast.info(t('live.blockedToast', { nom: message.from }))
+    },
+    [bloques, patchPreferences, t],
+  )
+  const debloquer = useCallback(
+    (auteur: string) => {
+      const { [auteur]: _retire, ...restants } = bloques
+      patchPreferences({ bloques: restants })
+    },
+    [bloques, patchPreferences],
+  )
+  /** Les joueurs bloqués qui ont écrit dans cette partie : une ligne chacun, pour les débloquer. */
+  const bloquesIci = [
+    ...new Map(
+      chat.flatMap((message) =>
+        message.auteur && bloques[message.auteur] ? [[message.auteur, message.from] as const] : [],
+      ),
+    ),
+  ]
 
   /**
    * Demander le meilleur coup au moteur, et le dire à l'adversaire.
@@ -333,6 +381,18 @@ export default function LiveGamePage() {
   const dernierVu = useRef<string | null>(null)
   const chatCharge = useRef(false)
   const monNom = color ? (snapshot?.players[color]?.name ?? null) : null
+  /**
+   * Ce message est-il le sien ? Par l'empreinte que le serveur nous a donnée,
+   * et non par le pseudo : deux invités s'appellent tous les deux « Invité »,
+   * et l'on prenait les mots de l'adversaire pour les siens. Le pseudo ne sert
+   * plus qu'aux messages d'avant l'empreinte.
+   */
+  const moi = game.moi
+  const estDeMoi = useCallback(
+    (message: ChatMessage) =>
+      message.auteur && moi ? message.auteur === moi : message.from === monNom,
+    [moi, monNom],
+  )
 
   // L'instantané et le fil de discussion arrivent par le même message du
   // serveur, donc dans le même rendu : ce qui s'y trouve est du passé, et
@@ -362,8 +422,9 @@ export default function LiveGamePage() {
     const arrives = chat
       .slice(depuis)
       // Ses propres mots ne sont pas une nouvelle, et les messages système —
-      // « la partie commence » — ont déjà leur place à l'écran.
-      .filter((message) => !message.system && message.from !== monNom)
+      // « la partie commence » — ont déjà leur place à l'écran. Ceux d'un
+      // joueur bloqué ne sonnent pas : c'est tout l'objet du blocage.
+      .filter((message) => !message.system && !estDeMoi(message) && !estBloque(message))
     if (chat.length > 0) dernierVu.current = cleDuMessage(chat[chat.length - 1]!)
 
     const dernier = arrives[arrives.length - 1]
@@ -372,7 +433,7 @@ export default function LiveGamePage() {
     playSound('notify')
     if (!chatVisible) setNonLus((total) => total + arrives.length)
     toast.info(t('game.writesToYou', { nom: dernier.from }), dernier.text)
-  }, [chat, monNom, chatVisible, t])
+  }, [chat, estDeMoi, chatVisible, estBloque, t])
 
   // Le fil ne se déroule pas tout seul : sans cela le dernier message se
   // déposait sous le bord du cadre, et la pastille annonçait un message
@@ -1170,18 +1231,32 @@ export default function LiveGamePage() {
               {chat.length === 0 ? (
                 <p className="text-xs text-faint">{t('live.chatEmpty')}</p>
               ) : (
-                chat.map((message, index) => (
-                  <p
-                    key={`${message.at}-${index}`}
-                    className={message.system ? 'text-xs italic text-faint' : ''}
-                  >
-                    {!message.system && (
-                      <span className="font-semibold text-accent">{message.from} : </span>
-                    )}
-                    {texteDuMessage(t, message)}
-                  </p>
-                ))
+                chat
+                  .filter((message) => !estBloque(message))
+                  .map((message, index) => (
+                    <MessageDuTchat
+                      key={message.id ?? `${message.at}-${index}`}
+                      message={message}
+                      texte={texteDuMessage(t, message)}
+                      siens={estDeMoi(message)}
+                      signale={Boolean(message.id && signales.has(message.id))}
+                      onSignaler={() => void signaler(message)}
+                      onBloquer={() => bloquer(message)}
+                    />
+                  ))
               )}
+              {bloquesIci.map(([auteur, nom]) => (
+                <p key={auteur} className="text-xs text-faint">
+                  {t('live.blockedLine', { nom })}{' '}
+                  <button
+                    type="button"
+                    onClick={() => debloquer(auteur)}
+                    className="font-medium text-accent hover:underline"
+                  >
+                    {t('live.unblock')}
+                  </button>
+                </p>
+              ))}
             </div>
             <form
               className="flex gap-1.5 border-t border-line/60 p-2"

@@ -117,6 +117,8 @@ export function useLiveGame({
 }: UseLiveGameOptions) {
   const t = useT()
   const socketRef = useRef<Socket | null>(null)
+  /** Les signalements qui attendent la réponse du serveur, par numéro de message. */
+  const signalements = useRef(new Map<string, (enregistre: boolean) => void>())
   const obtenirJetonRef = useRef(obtenirJeton)
   obtenirJetonRef.current = obtenirJeton
   const [connection, setConnection] = useState<ConnectionState>('connecting')
@@ -124,6 +126,13 @@ export function useLiveGame({
   const [snapshot, setSnapshot] = useState<GameSnapshot | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [chat, setChat] = useState<ChatMessage[]>([])
+  /**
+   * Sa propre empreinte dans le tchat, donnée par le serveur à l'arrivée.
+   *
+   * C'est elle, et non le pseudo, qui dit quels messages sont les siens :
+   * deux invités s'appellent tous les deux « Invité ».
+   */
+  const [moi, setMoi] = useState<string | null>(null)
 
   /**
    * La pendule, figée en horodatages absolus.
@@ -188,10 +197,14 @@ export function useLiveGame({
 
     socket.on('disconnect', () => setConnection('disconnected'))
 
-    socket.on('joined', (payload: { color: Color | null; snapshot: GameSnapshot }) => {
-      setColor(payload.color)
-      applySnapshot(payload.snapshot)
-    })
+    socket.on(
+      'joined',
+      (payload: { color: Color | null; snapshot: GameSnapshot; moi?: string | null }) => {
+        setColor(payload.color)
+        setMoi(payload.moi ?? null)
+        applySnapshot(payload.snapshot)
+      },
+    )
 
     socket.on('state', (event: { snapshot: GameSnapshot }) => applySnapshot(event.snapshot))
     socket.on('move', (event: { snapshot: GameSnapshot }) => applySnapshot(event.snapshot))
@@ -199,6 +212,14 @@ export function useLiveGame({
 
     socket.on('chat', (event: { message: ChatMessage }) => {
       setChat((current) => [...current.slice(-80), event.message])
+    })
+
+    socket.on('signale', (reponse: { id?: string; ok?: boolean }) => {
+      const id = String(reponse?.id ?? '')
+      const repondre = signalements.current.get(id)
+      if (!repondre) return
+      signalements.current.delete(id)
+      repondre(Boolean(reponse?.ok))
     })
 
     socket.on('error', (payload: { code?: string }) => {
@@ -244,6 +265,27 @@ export function useLiveGame({
   }, [])
 
   /**
+   * Signale un message du tchat. Rend vrai quand le serveur l'a enregistré.
+   *
+   * On n'envoie que le numéro du message : c'est le serveur qui sait qui l'a
+   * écrit, et lui seul. Sans réponse au bout de huit secondes — connexion
+   * perdue entre-temps —, on considère que c'est raté plutôt que d'attendre.
+   */
+  const signaler = useCallback(
+    (id: string) =>
+      new Promise<boolean>((resolve) => {
+        const socket = socketRef.current
+        if (!socket) return resolve(false)
+        signalements.current.set(id, resolve)
+        socket.emit('signaler', { id })
+        setTimeout(() => {
+          if (signalements.current.delete(id)) resolve(false)
+        }, 8000)
+      }),
+    [],
+  )
+
+  /**
    * Annonce à la table qu'on vient de demander un indice au moteur.
    *
    * Ce n'est pas une demande d'autorisation : l'indice est calculé dans le
@@ -266,6 +308,7 @@ export function useLiveGame({
     snapshot,
     pendule,
     chat,
+    moi,
     error,
     dismissError: () => setError(null),
     move,
@@ -275,6 +318,7 @@ export function useLiveGame({
     requestTakeback,
     acceptTakeback,
     sendChat,
+    signaler,
     annoncerIndice,
   }
 }

@@ -12,10 +12,11 @@
  * Messages du temps réel (client → serveur, puis ce que le serveur répond) :
  *
  *  - `join {slug, token?, clientId?, name?, souhait?, timeControl?, rated?}`
- *    → `joined {color, snapshot}`, puis `state` / `move` / `end` / `chat`
+ *    → `joined {color, snapshot, moi}`, puis `state` / `move` / `end` / `chat`
  *    diffusés au salon. Les actions de partie : `move`, `resign`,
  *    `offerDraw`, `declineDraw`, `requestTakeback`, `acceptTakeback`,
  *    `chat`, `indice`.
+ *  - `signaler {id}` → `signale {id, ok}`, à celui qui signale seulement.
  *  - **Appariement rapide.** `seek {timeControl, token?, clientId?, name?}`
  *    inscrit dans la file de cette cadence (un identifiant de
  *    `TIME_CONTROLS`, hors partie sans pendule) → `seeking {timeControl,
@@ -59,10 +60,11 @@ import { FileSaturee, getPool, disposePool } from './engine/pool.ts'
 import { analyseGamePositions, analysePosition } from './engine/analysis.ts'
 import { isTablebaseEnabled } from './engine/tablebase.ts'
 import { isPiperAvailable, listPiperVoices, synthesise } from './tts/piper.ts'
-import { GameRoom } from './realtime/gameRoom.ts'
+import { GameRoom, empreinte } from './realtime/gameRoom.ts'
 import { persistFinishedGame } from './persistence.ts'
 import { pruneSessions } from '@coupparfait/db/auth'
 import { pruneEvaluations } from '@coupparfait/db/menage'
+import { enregistrerSignalement, oublierSignalements } from '@coupparfait/db/signalements'
 import { verifySessionToken } from './auth.ts'
 import { adresseDe, creerLimiteur, creerSeau } from './limites.ts'
 import { rappelDuDefi, rappelsPossibles } from './rappels.ts'
@@ -720,6 +722,9 @@ io.on('connection', (socket) => {
     join: creerSeau(5, 60_000),
     move: creerSeau(30, 10_000),
     chat: creerSeau(10, 10_000),
+    // Cinq par minute : de quoi signaler une rafale d'insultes, pas de quoi
+    // remplir la file de l'administrateur.
+    signaler: creerSeau(5, 60_000),
     action: creerSeau(10, 60_000),
     seek: creerSeau(10, 60_000),
   }
@@ -822,7 +827,14 @@ io.on('connection', (socket) => {
         souhait: payload.souhait === 'w' || payload.souhait === 'b' ? payload.souhait : null,
       })
 
-      socket.emit('joined', { color, snapshot: room.snapshot() })
+      // `moi` : sa propre empreinte, pour que le tchat reconnaisse ses
+      // messages sans se fier au pseudo — deux invités s'appellent « Invité ».
+      const personne = room.personne(socket.id)
+      socket.emit('joined', {
+        color,
+        snapshot: room.snapshot(),
+        moi: personne ? empreinte(personne, socket.id) : null,
+      })
       brancher(room)
     },
   )
@@ -864,6 +876,31 @@ io.on('connection', (socket) => {
   socket.on('chat', (payload: { text?: string }) => {
     if (tropVite('chat')) return
     withRoom(currentSlug, (room) => room.sendChat(socket.id, String(payload?.text ?? '')))
+  })
+
+  /*
+    Signaler un message du tchat.
+
+    Le navigateur n'envoie que le numéro du message : c'est le salon qui sait
+    qui l'a écrit (`pourSignaler`). La réponse `signale` ne va qu'à celui qui
+    signale — personne d'autre n'a à savoir qu'un message l'a été.
+  */
+  socket.on('signaler', (payload: { id?: string }) => {
+    if (tropVite('signaler')) return
+    const id = String(payload?.id ?? '').slice(0, 16)
+    withRoom(currentSlug, (room) => {
+      const signalement = room.pourSignaler(socket.id, id)
+      if (!signalement || BASE_ABSENTE) {
+        socket.emit('signale', { id, ok: false })
+        return
+      }
+      enregistrerSignalement(signalement)
+        .then(() => socket.emit('signale', { id, ok: true }))
+        .catch((erreur: unknown) => {
+          console.error('[signalement] enregistrement impossible :', erreur)
+          socket.emit('signale', { id, ok: false })
+        })
+    })
   })
 
   /*
@@ -1407,10 +1444,12 @@ async function menageQuotidien(): Promise<void> {
   const sessions = await pruneSessions()
   const evaluations = await pruneEvaluations(CONSERVATION_EVALUATIONS)
   const salons = await purgerSalonsPerimes(FENETRE_REPRISE_MS)
+  const signalements = await oublierSignalements()
 
   console.log(
     `[ménage] sessions expirées : ${sessions} · évaluations de plus de ` +
-      `${CONSERVATION_EVALUATIONS} jours : ${evaluations} · salons périmés : ${salons}`,
+      `${CONSERVATION_EVALUATIONS} jours : ${evaluations} · salons périmés : ${salons}` +
+      ` · signalements de plus de 90 jours : ${signalements}`,
   )
 }
 

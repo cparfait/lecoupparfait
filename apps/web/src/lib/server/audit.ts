@@ -27,7 +27,7 @@ import type { Administrateur } from './admin.ts'
 export interface ActeAdministratif {
   /** Le verbe, tel qu'il figure dans la route : `desactiver`, `purge`… */
   action: string
-  cible?: 'compte' | 'partie' | 'analyse' | 'systeme'
+  cible?: 'compte' | 'partie' | 'analyse' | 'systeme' | 'signalement'
   cibleId?: string | null
   /** De quoi reconnaître la cible sans avoir à la retrouver. */
   cibleNom?: string | null

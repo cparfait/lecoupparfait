@@ -12,6 +12,7 @@ import { ExternalLink, Trash2 } from 'lucide-react'
 import { Button, Card, EmptyState, SectionTitle, Skeleton } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
+import { Signalements } from './Signalements.tsx'
 
 interface Contenus {
   parties: Array<{
@@ -79,6 +80,8 @@ export function Contenus() {
 
   return (
     <div className="space-y-5">
+      {/* En tête : c'est pour un signalement qu'on ouvre cet onglet. */}
+      <Signalements />
       <div>
         <SectionTitle hint={t('admin.recentGamesHint')}>{t('admin.recentGames')}</SectionTitle>
         {contenus.parties.length === 0 ? (

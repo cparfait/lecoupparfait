@@ -12,6 +12,7 @@
  * ralenti ne fait donc perdre personne au temps.
  */
 
+import { createHash, randomBytes } from 'node:crypto'
 import { Chess } from 'chess.js'
 import type { Color, Square, PieceSymbol } from 'chess.js'
 import {
@@ -107,6 +108,19 @@ const ANNONCES_FR: Record<EvenementDuSalon, (nom: string) => string> = {
 }
 
 export interface ChatMessage {
+  /**
+   * Le numéro du message dans son salon, pour le signaler. Les annonces du
+   * salon n'en ont pas : il n'y a personne à signaler.
+   */
+  id?: string
+  /**
+   * L'empreinte de l'auteur, la même d'une partie à l'autre.
+   *
+   * C'est elle qu'on bloque. Elle ne dit rien de lui : ni compte, ni
+   * navigateur — le salon n'en confie jamais aux autres joueurs —, seulement
+   * de quoi reconnaître les messages d'une même personne. Voir `empreinte`.
+   */
+  auteur?: string
   from: string
   text: string
   at: number
@@ -184,6 +198,38 @@ export interface EtatPersistant {
 
 /** Un joueur, sans ce qui appartient au processus : ses connexions. */
 export type PersonneRangee = Pick<Participant, 'userId' | 'clientId' | 'name' | 'rating'>
+
+/** Qui est derrière une connexion : joueur ou spectateur. */
+export type Personne = Pick<Participant, 'userId' | 'clientId' | 'name'>
+
+/** Ce qu'il faut pour enregistrer un signalement — voir `@coupparfait/db/signalements`. */
+export interface MessageSignale {
+  partie: string
+  texte: string
+  auteurNom: string
+  auteurId: string | null
+  auteurNavigateur: string | null
+  parId: string | null
+  parNavigateur: string | null
+}
+
+/**
+ * L'empreinte d'une personne, pour qu'on puisse la bloquer sans la connaître.
+ *
+ * Un condensat de son compte, ou de son navigateur pour un invité : stable
+ * d'une partie à l'autre, et sans retour possible — l'identifiant d'un compte
+ * est un UUID aléatoire, il ne se devine pas à partir de son condensat.
+ * Faute des deux, la connexion elle-même : l'empreinte ne vaut alors que pour
+ * cette partie, ce qui reste mieux que rien.
+ */
+export function empreinte(personne: Personne, socketId: string): string {
+  const source = personne.userId
+    ? `compte:${personne.userId}`
+    : personne.clientId
+      ? `navigateur:${personne.clientId}`
+      : `connexion:${socketId}`
+  return createHash('sha256').update(source).digest('base64url').slice(0, 16)
+}
 
 function personneRangee(joueur: Participant | null): PersonneRangee | null {
   if (!joueur) return null
@@ -277,7 +323,16 @@ export class GameRoom {
    * quand les deux places sont prises — mais personne ne le savait : ni les
    * joueurs, ni lui-même. On les compte pour pouvoir le dire.
    */
-  private readonly spectators = new Set<string>()
+  private readonly spectators = new Map<string, Personne>()
+
+  /**
+   * Qui a écrit chaque message encore au fil, par numéro.
+   *
+   * Gardé à part, et jamais envoyé : les autres joueurs ne reçoivent que
+   * l'empreinte. C'est ce qui permet au signalement de dire au serveur « ce
+   * message-là » sans que le navigateur puisse désigner quelqu'un d'autre.
+   */
+  private readonly auteurs = new Map<string, { personne: Personne; texte: string }>()
 
   private readonly listeners = new Set<(event: RoomEvent) => void>()
   private flagTimer: ReturnType<typeof setInterval> | null = null
@@ -410,7 +465,11 @@ export class GameRoom {
     const libres = (['w', 'b'] as const).filter((color) => this.players[color] === null)
     if (libres.length === 0) {
       // Les deux places sont prises : la personne regarde.
-      this.spectators.add(participant.socketId)
+      this.spectators.set(participant.socketId, {
+        userId: participant.userId,
+        clientId: participant.clientId,
+        name: participant.name,
+      })
       this.broadcastState()
       return null
     }
@@ -526,6 +585,14 @@ export class GameRoom {
       }
       this.broadcastState()
     }
+  }
+
+  /** La personne derrière une connexion, qu'elle joue ou qu'elle regarde. */
+  personne(socketId: string): Personne | null {
+    const color = this.colorOf(socketId)
+    const player = color ? this.players[color] : null
+    if (player) return { userId: player.userId, clientId: player.clientId, name: player.name }
+    return this.spectators.get(socketId) ?? null
   }
 
   colorOf(socketId: string): Color | null {
@@ -763,13 +830,57 @@ export class GameRoom {
     const trimmed = text.trim().slice(0, 300)
     if (!trimmed) return
 
-    const message: ChatMessage = {
+    const personne = this.personne(socketId) ?? { userId: null, clientId: null, name: 'Spectateur' }
+    // Tiré au hasard et non compté : le fil survit à un redémarrage
+    // (`restaurer`), pas cette table. Un compteur reparti de zéro redonnerait
+    // à un nouveau message le numéro d'un ancien, et le signalement de l'un
+    // désignerait l'auteur de l'autre. Les messages d'avant le redémarrage ne
+    // se signalent plus : leur auteur est oublié avec la table.
+    const id = randomBytes(6).toString('base64url')
+    this.auteurs.set(id, { personne, texte: trimmed })
+    this.ajouterAuFil({
+      id,
+      auteur: empreinte(personne, socketId),
       from: player?.name ?? 'Spectateur',
       text: trimmed,
       at: this.now(),
+    })
+  }
+
+  /**
+   * Ce qu'il faut pour signaler le message `id`, au nom de la connexion qui le
+   * demande.
+   *
+   * `null` si le message n'est plus au fil — le salon n'en garde que deux
+   * cents —, si c'est une annonce du salon, ou si l'on signale ses propres
+   * mots : rien à modérer là.
+   */
+  pourSignaler(socketId: string, id: string): MessageSignale | null {
+    const ecrit = this.auteurs.get(id)
+    if (!ecrit) return null
+    const par = this.personne(socketId) ?? { userId: null, clientId: null, name: '' }
+    const memePersonne =
+      (par.userId !== null && par.userId === ecrit.personne.userId) ||
+      (par.clientId !== null && par.clientId === ecrit.personne.clientId)
+    if (memePersonne) return null
+    return {
+      partie: this.slug,
+      texte: ecrit.texte,
+      auteurNom: ecrit.personne.name,
+      auteurId: ecrit.personne.userId,
+      auteurNavigateur: ecrit.personne.clientId,
+      parId: par.userId,
+      parNavigateur: par.clientId,
     }
+  }
+
+  /** Ajoute au fil, en oubliant l'auteur de ce qui en tombe. */
+  private ajouterAuFil(message: ChatMessage): void {
     this.chat.push(message)
-    if (this.chat.length > 200) this.chat.shift()
+    if (this.chat.length > 200) {
+      const tombe = this.chat.shift()
+      if (tombe?.id) this.auteurs.delete(tombe.id)
+    }
     this.emit({ type: 'chat', message })
   }
 
@@ -813,9 +924,7 @@ export class GameRoom {
       code,
       ...(name ? { name } : {}),
     }
-    this.chat.push(message)
-    if (this.chat.length > 200) this.chat.shift()
-    this.emit({ type: 'chat', message })
+    this.ajouterAuFil(message)
   }
 
   // ── Pendules et fin de partie ─────────────────────────────────────────────

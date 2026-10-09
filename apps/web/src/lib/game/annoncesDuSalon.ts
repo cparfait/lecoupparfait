@@ -9,6 +9,10 @@
 import type { TranslationKey } from '@/lib/i18n/index.tsx'
 
 export interface ChatMessage {
+  /** Le numéro du message dans son salon, pour le signaler. Absent des annonces. */
+  id?: string
+  /** L'empreinte de l'auteur, la même d'une partie à l'autre : ce qu'on bloque. */
+  auteur?: string
   from: string
   text: string
   at: number

@@ -201,6 +201,16 @@ export interface Preferences {
   chesscomUsername: string
   /** Pseudo Lichess, même usage. */
   lichessUsername: string
+
+  // Tchat des parties
+  /**
+   * Les joueurs dont on ne veut plus lire les messages : empreinte → pseudo.
+   *
+   * L'empreinte vient du serveur (`auteur` d'un message) et reste la même
+   * d'une partie à l'autre ; le pseudo n'est là que pour dire qui l'on a
+   * bloqué, et pouvoir le débloquer.
+   */
+  bloques: Record<string, string>
 }
 
 const DEFAULTS: Preferences = {
@@ -287,6 +297,7 @@ const DEFAULTS: Preferences = {
 
   chesscomUsername: '',
   lichessUsername: '',
+  bloques: {},
 }
 
 interface PreferencesStore extends Preferences {

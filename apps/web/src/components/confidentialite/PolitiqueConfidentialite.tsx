@@ -18,7 +18,7 @@ import { ButtonLink, TitreDePage } from '@/components/ui/index.tsx'
 import { avecElements, langue, useI18n, type TranslationKey } from '@/lib/i18n/index.tsx'
 
 /** Date de la dernière révision du texte. */
-const MISE_A_JOUR = new Date('2026-10-08T18:00:00Z')
+const MISE_A_JOUR = new Date('2026-10-09T12:00:00Z')
 
 const SECTIONS: Array<{
   titre: TranslationKey
@@ -49,6 +49,7 @@ const SECTIONS: Array<{
       'confidentialite.outsideNothingElse',
     ],
   },
+  { titre: 'confidentialite.chatTitle', paragraphes: ['confidentialite.chat'] },
   { titre: 'confidentialite.retentionTitle', paragraphes: ['confidentialite.retention'] },
 ]
 

@@ -93,6 +93,7 @@ test('le compte est anonymisé et tout ce qui lui appartient est effacé', async
     'rating_history',
     'puzzle_attempts',
     'daily_progress',
+    'signalements',
     'sessions',
   ]) {
     assert.equal(base.sur('delete', table).length, 1, `${table} n’est pas effacée`)

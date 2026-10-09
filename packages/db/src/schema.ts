@@ -1234,6 +1234,39 @@ export const levelTests = pgTable('level_tests', {
 })
 
 /**
+ * Les messages du tchat qu'un joueur a signalés.
+ *
+ * Le tchat d'une partie ne vit qu'en mémoire, dans son salon : rien ne s'en
+ * écrit nulle part. Un signalement est la seule exception, et c'est voulu — il
+ * faut que l'administrateur puisse lire ce qui a été écrit, et par qui, après
+ * que la partie s'est refermée. Le texte et le pseudo sont donc **figés** ici :
+ * le salon aura disparu, et le pseudo peut changer.
+ *
+ * Gardés quatre-vingt-dix jours au plus (`oublierSignalements`), traités ou
+ * non : c'est le temps d'y répondre, pas une archive.
+ */
+export const signalements = pgTable(
+  'signalements',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    /** Le salon où le message a été écrit. */
+    partie: varchar('partie', { length: 12 }).notNull(),
+    texte: varchar('texte', { length: 300 }).notNull(),
+    auteurNom: varchar('auteur_nom', { length: 40 }).notNull(),
+    /** L'auteur, s'il avait un compte. Un invité n'est connu que par son navigateur. */
+    auteurId: uuid('auteur_id').references(() => users.id, { onDelete: 'set null' }),
+    auteurNavigateur: varchar('auteur_navigateur', { length: 40 }),
+    /** Qui a signalé : pour repérer celui qui signale tout le monde. */
+    parId: uuid('par_id').references(() => users.id, { onDelete: 'set null' }),
+    parNavigateur: varchar('par_navigateur', { length: 40 }),
+    /** Vide tant que l'administrateur ne l'a pas regardé. */
+    traiteLe: timestamp('traite_le', { withTimezone: true }),
+  },
+  (table) => [index('signalements_recus_idx').on(table.createdAt)],
+)
+
+/**
  * Les messages qu'un administrateur adresse aux joueurs.
  *
  * **Deux portées, une seule table.** `targetId` vide désigne tout le monde,

@@ -20,7 +20,8 @@
     "./live": "./src/live.ts",
     "./menage": "./src/menage.ts",
     "./suppression": "./src/suppression.ts",
-    "./google": "./src/google.ts"
+    "./google": "./src/google.ts",
+    "./signalements": "./src/signalements.ts"
   },
   "scripts": {
     "db:generate": "drizzle-kit generate",

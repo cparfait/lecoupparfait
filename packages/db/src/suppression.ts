@@ -46,6 +46,7 @@ import {
   ratings,
   savedAnalyses,
   sessions,
+  signalements,
   studies,
   tournamentPlayers,
   users,
@@ -144,6 +145,11 @@ export async function supprimerCompte(userId: string): Promise<string> {
     await tx.delete(levelTests).where(eq(levelTests.userId, userId))
     await tx.delete(activeGames).where(eq(activeGames.userId, userId))
     await tx.delete(ratedIntents).where(eq(ratedIntents.userId, userId))
+    // Ses messages signalés partent avec lui — le pseudo qu'ils figent est
+    // justement ce qu'on efface —, et ses propres signalements aussi.
+    await tx
+      .delete(signalements)
+      .where(or(eq(signalements.auteurId, userId), eq(signalements.parId, userId)))
     // En dernier : jusque-là, la session prouvait encore qui demandait.
     await tx.delete(sessions).where(eq(sessions.userId, userId))
   })
