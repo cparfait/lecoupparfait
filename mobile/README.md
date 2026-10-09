@@ -75,6 +75,9 @@ Ce que Google exige, et où c'est fait :
 - **Suppression du compte** dans l'appli et par une adresse web : profil,
   « Ton compte », et `/compte/supprimer`.
 - **Politique de confidentialité** publique : `/confidentialite`.
+- **La fiche** : textes, icône, bannière et captures dans `play-store/`.
+  `node scripts/fiche-play.mjs` régénère l'icône et la bannière ; les captures
+  viennent du site affiché au format téléphone (405 × 720, zoom 1,6).
 
 **La signature.** Google signe lui-même les appli du Play Store (« Play App
 Signing »). Pour qu'un joueur puisse passer de l'APK du site à la version du
