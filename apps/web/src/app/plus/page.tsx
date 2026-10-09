@@ -124,6 +124,7 @@ export default function PlusPage() {
               icon={page.icon}
               titre={t(page.labelKey)}
               compacte
+              className={page.bureau ? 'pointer-coarse:hidden' : undefined}
             />
           ))}
         </div>

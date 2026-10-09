@@ -181,6 +181,8 @@ export function MiseEnRoute() {
     — s'il a quelque chose à dire.
   */
   const proposeInstallation =
+    // Pas sur la page qui ne sert qu'à ça : le bandeau y doublerait son bouton.
+    pathname !== '/installer' &&
     !installation.installee &&
     (installation.possible || installation.manuelle) &&
     ecarte !== CLES.installation &&

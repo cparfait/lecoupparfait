@@ -58,7 +58,7 @@ export const en: Dictionary = {
     account: 'Account',
     about: 'About',
     credits: 'Credits & licences',
-    androidApp: 'Android app',
+    installDesktop: 'Install on your computer',
     privacy: 'Privacy',
     admin: 'Administration',
 
@@ -828,6 +828,17 @@ export const en: Dictionary = {
     rightsTitle: 'Your rights',
     rights:
       'You can ask for a copy of your data, its correction or its deletion by writing to the contact given above. If you disagree, you can also contact your data protection authority.',
+  },
+
+  installDesktop: {
+    title: 'On your computer',
+    intro:
+      'An icon on your desktop and a window of its own, without tabs or address bar. Nothing to download: it is the same site.',
+    button: 'Install on this computer',
+    done: 'Installed: Le Coup Parfait is waiting on your desktop.',
+    chrome: 'Chrome or Edge: click the install icon on the right of the address bar.',
+    safari: 'Safari on Mac: File menu, then “Add to Dock”.',
+    firefox: 'Firefox cannot install a site: open this page in Chrome or Edge.',
   },
 
   install: {
@@ -7106,6 +7117,8 @@ export const en: Dictionary = {
     deleteAccount: 'Delete your account',
     deleteAccountDesc:
       'Delete your Le Coup Parfait account: what gets erased, and what remains anonymised.',
+    installDesktop: 'Install on your computer',
+    installDesktopDesc: 'Le Coup Parfait on your desktop, in a window of its own.',
     androidAppDesc:
       'Install Le Coup Parfait on your Android phone: the file, step-by-step installation and updates.',
     about: 'About',

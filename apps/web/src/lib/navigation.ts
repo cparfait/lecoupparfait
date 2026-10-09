@@ -39,12 +39,12 @@ import {
   ListChecks,
   Mail,
   Monitor,
+  MonitorDown,
   Puzzle,
   RotateCcw,
   Scale,
   Settings,
   ShieldCheck,
-  Smartphone,
   Swords,
   Target,
   Timer,
@@ -74,6 +74,11 @@ export interface EntreeNav {
    * savait plus dans quelle rubrique on se trouvait.
    */
   actifSur?: string[]
+  /**
+   * Réservée à l'ordinateur : masquée au doigt — téléphone, tablette, appli
+   * Android —, où elle ne mènerait à rien d'utile.
+   */
+  bureau?: boolean
 }
 
 export interface SectionNav {
@@ -367,10 +372,14 @@ export const SECTIONS: SectionNav[] = [
  * page : elles vivaient dans un menu sous le nom du site, derrière un
  * engrenage, et dans un pied de page invisible sous `lg`, c'est-à-dire à trois
  * endroits dont aucun n'était le bon.
+ *
+ * L'appli Android n'y figure plus, le temps qu'elle arrive sur le Play Store :
+ * `/appli` reste en ligne pour qui l'a déjà, et ses mises à jour continuent de
+ * s'annoncer dans l'appli elle-même.
  */
 export const PAGES_APPLICATION: EntreeNav[] = [
   { href: '/preferences', labelKey: 'nav.settings', icon: Settings },
-  { href: '/appli', labelKey: 'nav.androidApp', icon: Smartphone },
+  { href: '/installer', labelKey: 'nav.installDesktop', icon: MonitorDown, bureau: true },
   { href: '/a-propos', labelKey: 'nav.about', icon: Info },
   { href: '/credits', labelKey: 'nav.credits', icon: Scale },
   { href: '/confidentialite', labelKey: 'nav.privacy', icon: ShieldCheck },
@@ -453,6 +462,7 @@ export const RACCOURCIS_MOBILES: EntreeNav[] = [
       '/profil',
       '/connexion',
       '/appli',
+      '/installer',
       '/confidentialite',
       '/compte',
       '/a-propos',

@@ -50,7 +50,12 @@ function EntreesDuSite({ estAdmin }: { estAdmin: boolean }) {
       {PAGES_APPLICATION.map((page) => {
         const Icone = page.icon
         return (
-          <Link key={page.href} href={page.href} role="menuitem" className={ENTREE}>
+          <Link
+            key={page.href}
+            href={page.href}
+            role="menuitem"
+            className={page.bureau ? `${ENTREE} pointer-coarse:hidden` : ENTREE}
+          >
             <Icone size={16} className="shrink-0 text-muted" aria-hidden />
             {t(page.labelKey)}
           </Link>

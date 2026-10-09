@@ -749,7 +749,11 @@ function SiteFooter() {
         <p>{t('misc.footer')}</p>
         <nav className="flex gap-4" aria-label={t('bits.secondaryLinks')}>
           {PAGES_APPLICATION.map((page) => (
-            <Link key={page.href} href={page.href} className="transition-colors hover:text-ink">
+            <Link
+              key={page.href}
+              href={page.href}
+              className={`transition-colors hover:text-ink ${page.bureau ? 'pointer-coarse:hidden' : ''}`}
+            >
               {t(page.labelKey)}
             </Link>
           ))}

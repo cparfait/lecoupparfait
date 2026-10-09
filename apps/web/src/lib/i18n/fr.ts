@@ -56,7 +56,7 @@ export const fr = {
     account: 'Compte',
     about: 'À propos',
     credits: 'Crédits & licences',
-    androidApp: 'Appli Android',
+    installDesktop: 'Installer sur l’ordinateur',
     privacy: 'Confidentialité',
     admin: 'Administration',
 
@@ -856,6 +856,17 @@ export const fr = {
     rightsTitle: 'Tes droits',
     rights:
       'Tu peux demander une copie de tes données, leur correction ou leur effacement en écrivant au contact indiqué plus haut. En cas de désaccord, tu peux aussi saisir la CNIL.',
+  },
+
+  installDesktop: {
+    title: 'Sur ton ordinateur',
+    intro:
+      'Une icône sur ton bureau et une fenêtre à part, sans onglets ni barre d’adresse. Rien à télécharger : c’est le même site.',
+    button: 'Installer sur cet ordinateur',
+    done: 'C’est installé : Le Coup Parfait t’attend sur ton bureau.',
+    chrome: 'Chrome ou Edge : clique sur l’icône d’installation, à droite de la barre d’adresse.',
+    safari: 'Safari sur Mac : menu Fichier, puis « Ajouter au Dock ».',
+    firefox: 'Firefox ne sait pas installer un site : ouvre cette page dans Chrome ou Edge.',
   },
 
   install: {
@@ -7177,6 +7188,8 @@ export const fr = {
     deleteAccount: 'Supprimer ton compte',
     deleteAccountDesc:
       'Supprimer ton compte Le Coup Parfait : ce qui est effacé, et ce qui reste anonymisé.',
+    installDesktop: 'Installer sur l’ordinateur',
+    installDesktopDesc: 'Le Coup Parfait sur ton bureau, dans sa propre fenêtre.',
     androidAppDesc:
       'Installe Le Coup Parfait sur ton téléphone Android : le fichier, l’installation pas à pas et les mises à jour.',
     about: 'À propos',
