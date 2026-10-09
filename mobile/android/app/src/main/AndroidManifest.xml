@@ -22,6 +22,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Le retour de la connexion avec Google. Google refuse sa page
+                 dans la WebView : l'appli l'ouvre dans Chrome, et le site y
+                 renvoie vers ce lien une fois la connexion faite. Le lien ne
+                 porte rien ; l'issue attend sur le serveur, que seule la
+                 WebView qui l'a demandée peut retirer (api/auth/google/appli). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="ovh.cparfait.coupparfait" android:host="connexion" />
+            </intent-filter>
+
         </activity>
 
         <provider

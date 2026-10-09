@@ -2,11 +2,16 @@
  * Le départ vers Google.
  *
  *   GET /api/auth/google?mode=connexion|lier&suite=/chemin
+ *   GET /api/auth/google?appli=<empreinte>      depuis l'appli, dans Chrome
  *
  * Un lien ordinaire, pas un appel `fetch` : c'est le navigateur entier qui doit
  * aller chez Google et en revenir. Le `state` et le vérificateur PKCE partent
  * dans un témoin limité au chemin du parcours, pour dix minutes. Voir
  * `lib/server/google.ts`.
+ *
+ * Depuis l'appli, le mode et la suite viennent de la demande que la WebView a
+ * ouverte (`api/auth/google/appli`), pas de l'adresse : Chrome ne fait que
+ * l'exécuter.
  */
 
 import { NextResponse } from 'next/server'
@@ -15,6 +20,7 @@ import {
   TEMOIN_DEPART,
   adresseDuSite,
   cheminDuSite,
+  demandeAppli,
   encoderDepart,
   googleDisponible,
   preparerDepart,
@@ -29,9 +35,16 @@ export function GET(request: Request) {
     return NextResponse.redirect(new URL('/connexion?google=indisponible', adresseDuSite(request)))
   }
 
-  const mode = parametres.get('mode') === 'lier' ? 'lier' : 'connexion'
-  const suite = cheminDuSite(parametres.get('suite')) ?? '/'
+  const appli = parametres.get('appli')
+  const demande = demandeAppli(appli)
+  if (appli && !demande) {
+    return NextResponse.redirect(new URL('/connexion?google=refuse', adresseDuSite(request)))
+  }
+
+  const mode = demande?.mode ?? (parametres.get('mode') === 'lier' ? 'lier' : 'connexion')
+  const suite = demande?.suite ?? cheminDuSite(parametres.get('suite')) ?? '/'
   const { depart, adresse } = preparerDepart(request, mode, suite)
+  if (appli && demande) depart.appli = appli
 
   const reponse = NextResponse.redirect(adresse)
   reponse.cookies.set(TEMOIN_DEPART, encoderDepart(depart), {

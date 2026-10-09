@@ -107,6 +107,13 @@ envoyée, la clé de signature d'une appli ne change plus.
   seul fil. Remettre les en-têtes dans `shouldInterceptRequest` n'a pas suffi
   au premier essai (Pixel 10 Pro, WebView 153) : reste à savoir si la WebView
   accepte l'isolation.
+- **Connexion avec Google** : Google refuse sa page dans une WebView
+  (« disallowed_useragent »). L'appli l'ouvre dans Chrome
+  (`@capacitor/browser`), qui revient par le lien
+  `ovh.cparfait.coupparfait://connexion` déclaré dans le manifeste
+  (`@capacitor/app`). Le lien ne porte rien : l'issue attend sur le serveur,
+  et seule la WebView qui l'a demandée peut la retirer. Voir « Depuis
+  l'appli » dans `apps/web/src/lib/server/google.ts`.
 - **Partage et téléchargements** : `navigator.share` n'existe pas dans une
   WebView (le site retombe sur la copie du lien), et l'export d'image d'une
   position ne télécharge rien.

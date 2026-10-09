@@ -28,8 +28,8 @@ import { useCallback, useEffect, useSyncExternalStore } from 'react'
  * `appliAndroid.test.ts` y veille.
  */
 export const APPLI_ANDROID = {
-  versionCode: 2,
-  versionName: '1.1.0',
+  versionCode: 3,
+  versionName: '1.2.0',
   fichier: '/telechargements/le-coup-parfait.apk',
 } as const
 

@@ -3,20 +3,24 @@
 /**
  * « Continuer avec Google ».
  *
- * Un lien et non un bouton : c'est le navigateur entier qui part chez Google et
- * en revient, par `api/auth/google`. Voir `lib/server/google.ts`.
+ * Sur le site, un lien et non un bouton : c'est le navigateur entier qui part
+ * chez Google et en revient, par `api/auth/google`. Voir `lib/server/google.ts`.
+ *
+ * Dans l'appli Android, un bouton : Google refuse sa connexion dans une
+ * WebView (« disallowed_useragent »), le parcours passe donc par Chrome et
+ * revient dans l'appli — voir `lib/auth/googleAppli.ts`.
  *
  * Absent dans deux cas :
  *  - le serveur n'a pas de client Google configuré ;
- *  - on est dans l'appli Android. Google refuse sa connexion dans une WebView
- *    (« disallowed_useragent ») : le bouton y mènerait à une page d'erreur de
- *    Google. Il y reviendra quand l'appli saura passer par le navigateur du
- *    téléphone et revenir.
+ *  - une version de l'appli trop ancienne pour passer par Chrome : le bouton
+ *    y mènerait à la page d'erreur de Google.
  */
 
 import { useEffect, useState } from 'react'
 import { classesBouton } from '@/components/ui/index.tsx'
+import { toast } from '@/components/ui/Toast.tsx'
 import { dansAppliAndroid } from '@/lib/appliAndroid.ts'
+import { connecterAvecGoogleDansAppli, googleDansAppliPossible } from '@/lib/auth/googleAppli.ts'
 import { useGoogleDisponible } from '@/lib/auth/useIdentite.ts'
 import { useT } from '@/lib/i18n/index.tsx'
 
@@ -38,20 +42,49 @@ export function BoutonGoogle({
   const t = useT()
   const disponible = useGoogleDisponible()
   // Lu après l'hydratation : le serveur ne sait pas s'il rend pour l'appli.
-  const [dansAppli, setDansAppli] = useState(false)
-  useEffect(() => setDansAppli(dansAppliAndroid()), [])
+  const [appli, setAppli] = useState<'non' | 'chrome' | 'ancienne'>('non')
+  useEffect(() => {
+    if (dansAppliAndroid()) setAppli(googleDansAppliPossible() ? 'chrome' : 'ancienne')
+  }, [])
+  const [occupe, setOccupe] = useState(false)
 
-  if (!disponible || dansAppli) return null
+  if (!disponible || appli === 'ancienne') return null
+
+  const contenu = (
+    <>
+      <LogoGoogle />
+      {libelle ?? t('auth.google.button')}
+    </>
+  )
+  const classes = classesBouton('secondary', 'lg', { fullWidth: true, className })
 
   return (
     <>
-      <a
-        href={`/api/auth/google?${new URLSearchParams({ mode, suite })}`}
-        className={classesBouton('secondary', 'lg', { fullWidth: true, className })}
-      >
-        <LogoGoogle />
-        {libelle ?? t('auth.google.button')}
-      </a>
+      {appli === 'chrome' ? (
+        <button
+          type="button"
+          className={classes}
+          disabled={occupe}
+          onClick={async () => {
+            setOccupe(true)
+            try {
+              if (!(await connecterAvecGoogleDansAppli(mode, suite))) {
+                toast.error(t('auth.errors.generic'))
+              }
+            } catch {
+              toast.error(t('auth.accountsUnreachable'))
+            } finally {
+              setOccupe(false)
+            }
+          }}
+        >
+          {contenu}
+        </button>
+      ) : (
+        <a href={`/api/auth/google?${new URLSearchParams({ mode, suite })}`} className={classes}>
+          {contenu}
+        </a>
+      )}
       {separateur && (
         <div className="my-5 flex items-center gap-3 text-xs text-faint" aria-hidden>
           <span className="h-px flex-1 bg-line" />

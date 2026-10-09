@@ -44,6 +44,7 @@ import type { ReactNode } from 'react'
 import { useT } from '@/lib/i18n/index.tsx'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { brancherToucher } from '@/lib/notificationsAppli.ts'
+import { brancherRetourGoogle } from '@/lib/auth/googleAppli.ts'
 import { avantagePour, type AvantageCompte } from '@/lib/compte/avantages.ts'
 import {
   estActif,
@@ -85,6 +86,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   // l'appli était fermée : le module natif garde l'événement jusqu'ici. La
   // coque est le seul composant monté partout, parties comprises.
   useEffect(() => brancherToucher((chemin) => router.push(chemin)), [router])
+  // Dans l'appli, le retour de la connexion avec Google, faite dans Chrome.
+  useEffect(() => brancherRetourGoogle(), [])
 
   const intercepter = useCallback<Intercepteur>(
     (href) => (identite === null ? avantagePour(href) : null),

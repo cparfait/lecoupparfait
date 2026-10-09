@@ -20,8 +20,8 @@ android {
         // À augmenter à chaque APK publié, en même temps que `APPLI_ANDROID`
         // dans apps/web/src/lib/appliAndroid.ts : c'est cette comparaison qui
         // propose la mise à jour aux appareils déjà équipés.
-        versionCode 2
-        versionName "1.1.0"
+        versionCode 3
+        versionName "1.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

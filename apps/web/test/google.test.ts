@@ -36,8 +36,17 @@ const { GET: retour } = await import('../src/app/api/auth/google/retour/route.ts
 const { GET: attente, POST: inscrire } =
   await import('../src/app/api/auth/google/inscription/route.ts')
 const { POST: rattacher } = await import('../src/app/api/auth/google/rattacher/route.ts')
-const { TEMOIN_DEPART, TEMOIN_NOUVEAU, encoderDepart, mettreEnAttente } =
-  await import('../src/lib/server/google.ts')
+const { POST: departAppli } = await import('../src/app/api/auth/google/appli/route.ts')
+const { GET: finAppli } = await import('../src/app/api/auth/google/appli/fin/route.ts')
+const {
+  RETOUR_APPLI,
+  TEMOIN_APPLI,
+  TEMOIN_DEPART,
+  TEMOIN_NOUVEAU,
+  empreinteDeCle,
+  encoderDepart,
+  mettreEnAttente,
+} = await import('../src/lib/server/google.ts')
 
 const IDENTITE = {
   sub: 'google-123',
@@ -288,4 +297,126 @@ test('sans identité en attente, pas de compte', async () => {
   )
   assert.equal(reponse.status, 410)
   assert.equal(base.sur('insert', 'users').length, 0)
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Depuis l'appli : le parcours passe par Chrome
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Ce que la WebView reçoit en ouvrant une demande : la clé (témoin) et l'adresse pour Chrome. */
+async function ouvrirDemande(mode: 'connexion' | 'lier' = 'connexion', suite = '/jouer') {
+  const reponse = await departAppli(
+    new Request('http://interne:3000/api/auth/google/appli', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-forwarded-for': '198.51.100.9' },
+      body: JSON.stringify({ mode, suite }),
+    }),
+  )
+  const cle = new RegExp(`${TEMOIN_APPLI}=([^;]+)`).exec(
+    reponse.headers.get('set-cookie') ?? '',
+  )?.[1]
+  const corps = (await reponse.json().catch(() => ({}))) as { adresse?: string }
+  return { reponse, cle, adresse: corps.adresse }
+}
+
+/** Le retour de Google dans Chrome, pour la demande `id`. Chrome n'a pas la session de l'appli. */
+function revenirDansChrome(id: string, mode: 'connexion' | 'lier' = 'connexion', suite = '/jouer') {
+  temoins.clear()
+  session.utilisateur = null
+  temoins.set(
+    TEMOIN_DEPART,
+    encoderDepart({ etat: 'etat-essai', verificateur: 'verificateur', mode, suite, appli: id }),
+  )
+  return retour(
+    new Request('http://interne:3000/api/auth/google/retour?code=code-essai&state=etat-essai'),
+  )
+}
+
+/** De retour dans l'appli : la WebView retire l'issue avec sa clé. */
+function finirDansLAppli(cle: string | undefined) {
+  temoins.clear()
+  if (cle) temoins.set(TEMOIN_APPLI, cle)
+  return finAppli(new Request('http://interne:3000/api/auth/google/appli/fin'))
+}
+
+test('l’appli ouvre une demande : la clé reste dans la WebView, l’adresse n’en a que l’empreinte', async () => {
+  const { reponse, cle, adresse } = await ouvrirDemande()
+  assert.equal(reponse.status, 200)
+  assert.ok(cle)
+  const appli = new URL(adresse!).searchParams.get('appli')
+  assert.equal(appli, empreinteDeCle(cle!))
+  assert.notEqual(appli, cle, 'la clé ne passe jamais par Chrome')
+})
+
+test('Chrome ne part que pour une demande ouverte par l’appli', async () => {
+  const inconnue = depart(new Request('http://interne:3000/api/auth/google?appli=inventee'))
+  assert.equal(destination(inconnue), 'https://coupparfait.test/connexion?google=refuse')
+
+  const { adresse } = await ouvrirDemande('connexion', '/apprendre')
+  const reponse = depart(
+    new Request(adresse!.replace('https://coupparfait.test', 'http://interne:3000')),
+  )
+  const temoin = new RegExp(`${TEMOIN_DEPART}=([^;]+)`).exec(
+    reponse.headers.get('set-cookie') ?? '',
+  )![1]!
+  const enregistre = JSON.parse(Buffer.from(temoin, 'base64url').toString('utf8'))
+  assert.equal(enregistre.suite, '/apprendre', 'la suite vient de la demande')
+  assert.equal(enregistre.appli, new URL(adresse!).searchParams.get('appli'))
+})
+
+test('compte connu : rien ne s’ouvre dans Chrome, la session s’ouvre dans l’appli', async () => {
+  const { cle, adresse } = await ouvrirDemande()
+  reponses['select:users'] = [[{ id: 'compte-jeanne', username: 'Jeanne' }]]
+  const dansChrome = await revenirDansChrome(new URL(adresse!).searchParams.get('appli')!)
+  assert.equal(destination(dansChrome), RETOUR_APPLI, 'Chrome renvoie vers l’appli')
+  assert.equal(session.ouverte, null, 'aucune session dans Chrome')
+
+  const dansLAppli = await finirDansLAppli(cle)
+  assert.equal(destination(dansLAppli), 'https://coupparfait.test/jouer')
+  assert.equal(session.ouverte, 'compte-jeanne')
+})
+
+test('identité nouvelle : l’appli reçoit l’attente et mène au choix du pseudo', async () => {
+  const { cle, adresse } = await ouvrirDemande()
+  await revenirDansChrome(new URL(adresse!).searchParams.get('appli')!)
+  const dansLAppli = await finirDansLAppli(cle)
+  assert.equal(destination(dansLAppli), 'https://coupparfait.test/connexion/google')
+  assert.match(dansLAppli.headers.get('set-cookie') ?? '', /coupparfait_google_nouveau=/)
+})
+
+test('l’issue ne se retire qu’une fois, et pas sans la clé', async () => {
+  const { cle, adresse } = await ouvrirDemande()
+  reponses['select:users'] = [[{ id: 'compte-jeanne', username: 'Jeanne' }]]
+  await revenirDansChrome(new URL(adresse!).searchParams.get('appli')!)
+
+  // L'empreinte vue passer dans Chrome ne suffit pas.
+  const avecLEmpreinte = await finirDansLAppli(new URL(adresse!).searchParams.get('appli')!)
+  assert.equal(destination(avecLEmpreinte), 'https://coupparfait.test/connexion?google=annule')
+  assert.equal(session.ouverte, null)
+
+  await finirDansLAppli(cle)
+  session.ouverte = null
+  const deuxieme = await finirDansLAppli(cle)
+  assert.equal(destination(deuxieme), 'https://coupparfait.test/connexion?google=annule')
+  assert.equal(session.ouverte, null)
+})
+
+test('Chrome refermé avant la fin : l’appli dit « annulée »', async () => {
+  const { cle } = await ouvrirDemande()
+  const dansLAppli = await finirDansLAppli(cle)
+  assert.equal(destination(dansLAppli), 'https://coupparfait.test/connexion?google=annule')
+})
+
+test('lier depuis l’appli : le compte vient de la WebView, pas de Chrome', async () => {
+  session.utilisateur = null
+  assert.equal((await ouvrirDemande('lier', '/profil/Jeanne')).reponse.status, 401)
+
+  session.utilisateur = joueur('compte-jeanne', 'Jeanne')
+  const { cle, adresse } = await ouvrirDemande('lier', '/profil/Jeanne')
+  await revenirDansChrome(new URL(adresse!).searchParams.get('appli')!, 'lier', '/profil/Jeanne')
+  const [liaison] = base.sur('update', 'users')
+  assert.equal((liaison!.set as Record<string, unknown>).googleSub, 'google-123')
+
+  const dansLAppli = await finirDansLAppli(cle)
+  assert.equal(destination(dansLAppli), 'https://coupparfait.test/profil/Jeanne?google=lie')
 })

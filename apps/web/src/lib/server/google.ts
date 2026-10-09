@@ -20,6 +20,9 @@ import 'server-only'
  *
  * Sans `AUTH_GOOGLE_ID` et `AUTH_GOOGLE_SECRET`, `googleDisponible()` répond
  * faux et l'interface retire le bouton.
+ *
+ * **Dans l'appli Android**, le même parcours passe par Chrome : Google refuse
+ * sa page dans une WebView. Voir « Depuis l'appli », en bas de ce fichier.
  */
 
 import { createHash, randomBytes } from 'node:crypto'
@@ -69,6 +72,8 @@ export interface Depart {
   mode: 'connexion' | 'lier'
   /** Où revenir une fois fini. */
   suite: string
+  /** Parti de l'appli : le numéro de sa demande. Voir `preparerDepartAppli`. */
+  appli?: string
 }
 
 /** Prépare l'aller chez Google : rend le départ à garder, et l'adresse où envoyer. */
@@ -112,7 +117,8 @@ export function decoderDepart(valeur: string | undefined): Depart | null {
       typeof depart.etat !== 'string' ||
       typeof depart.verificateur !== 'string' ||
       (depart.mode !== 'connexion' && depart.mode !== 'lier') ||
-      !cheminDuSite(depart.suite)
+      !cheminDuSite(depart.suite) ||
+      (depart.appli !== undefined && typeof depart.appli !== 'string')
     ) {
       return null
     }
@@ -255,4 +261,105 @@ export function lireRattachement(cle: string | undefined): Rattachement | null {
 
 export function oublierAttente(cle: string) {
   enAttente.delete(cle)
+}
+
+/*
+  Depuis l'appli.
+
+  Google refuse sa page de connexion dans une WebView (« disallowed_useragent »).
+  L'appli l'ouvre donc dans Chrome, par-dessus elle — et c'est Chrome, pas la
+  WebView, qui reçoit le retour de Google. La session doit pourtant s'ouvrir
+  dans la WebView.
+
+  D'où un aller-retour en quatre temps :
+
+   1. la WebView demande un départ (`api/auth/google/appli`) : le serveur tire
+      une clé, la garde dans un témoin **de la WebView**, et n'en met que
+      l'empreinte dans l'adresse que Chrome va ouvrir ;
+   2. Chrome fait le parcours ordinaire ; au retour, le serveur range l'issue
+      sous cette empreinte (`deposerIssueAppli`), sans rien ouvrir dans
+      Chrome, et renvoie vers `RETOUR_APPLI` ;
+   3. ce lien rouvre l'appli. Il ne porte rien : une autre appli qui
+      l'intercepterait n'apprendrait rien ;
+   4. la WebView va chercher l'issue (`api/auth/google/appli/fin`) avec son
+      témoin. Seule elle connaît la clé ; l'empreinte vue passer dans Chrome
+      ne suffit pas à la retirer.
+*/
+
+/** Le lien qui rouvre l'appli. Déclaré dans `mobile/android/app/src/main/AndroidManifest.xml`. */
+export const RETOUR_APPLI = 'ovh.cparfait.coupparfait://connexion'
+/** Le témoin de la WebView qui garde la clé de sa demande. */
+export const TEMOIN_APPLI = 'coupparfait_google_appli'
+
+/** Ce qu'a donné le retour de Google, à appliquer là où la session doit s'ouvrir. */
+export type IssueGoogle =
+  | { type: 'session'; userId: string; suite: string }
+  | { type: 'nouveau'; cle: string }
+  | { type: 'echec'; raison: string }
+  | { type: 'lier'; resultat: 'lie' | 'deja-ailleurs'; suite: string }
+
+interface DemandeAppli {
+  mode: Depart['mode']
+  suite: string
+  /** Pour `lier` : le compte connecté dans la WebView, que Chrome ne connaît pas. */
+  userId: string | null
+  issue: IssueGoogle | null
+  expire: number
+}
+
+const demandesAppli = new Map<string, DemandeAppli>()
+
+/** L'empreinte d'une clé : ce qui circule, la clé restant dans la WebView. */
+export function empreinteDeCle(cle: string): string {
+  return createHash('sha256').update(cle).digest('base64url').slice(0, 32)
+}
+
+/** Ouvre une demande depuis l'appli. Rend la clé (pour le témoin) et l'empreinte (pour l'adresse). */
+export function preparerDepartAppli(
+  mode: Depart['mode'],
+  suite: string,
+  userId: string | null,
+): { cle: string; id: string } {
+  const maintenant = Date.now()
+  for (const [id, demande] of demandesAppli) {
+    if (demande.expire < maintenant) demandesAppli.delete(id)
+  }
+  const cle = randomBytes(24).toString('base64url')
+  const id = empreinteDeCle(cle)
+  demandesAppli.set(id, {
+    mode,
+    suite,
+    userId,
+    issue: null,
+    expire: maintenant + DUREE_SECONDES * 1000,
+  })
+  return { cle, id }
+}
+
+/** La demande `id`, si elle existe et n'a pas expiré. */
+export function demandeAppli(id: string | null | undefined): DemandeAppli | null {
+  if (!id) return null
+  const demande = demandesAppli.get(id)
+  if (!demande || demande.expire < Date.now()) return null
+  return demande
+}
+
+/** Range l'issue du retour de Google pour la WebView qui l'attend. */
+export function deposerIssueAppli(id: string, issue: IssueGoogle): boolean {
+  const demande = demandeAppli(id)
+  if (!demande) return false
+  demande.issue = issue
+  return true
+}
+
+/**
+ * Retire l'issue de la demande dont la WebView tient la clé. Une fois : la
+ * demande disparaît, qu'il y ait eu une issue ou non.
+ */
+export function retirerIssueAppli(cle: string | undefined): IssueGoogle | null {
+  if (!cle) return null
+  const id = empreinteDeCle(cle)
+  const demande = demandeAppli(id)
+  demandesAppli.delete(id)
+  return demande?.issue ?? null
 }
