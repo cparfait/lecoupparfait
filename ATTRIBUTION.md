@@ -53,6 +53,10 @@ rejoue à l’identique, et rien n’est téléversé nulle part.
 | -------------- | ------------------------------------------------------------------ | ----------------- |
 | `sounds/*.mp3` | [Enigmahack](https://github.com/Enigmahack) et les auteurs de lila | AGPL-3.0-or-later |
 
+> Sauf `sounds/check.mp3` : le fichier de lila était muet. Il est composé par
+> `scripts/build-son-echec.mjs` à partir de `move.mp3` (même licence) et de
+> deux notes synthétisées.
+
 ## Données
 
 | Jeu de données                       | Source                                                                      | Licence       |
