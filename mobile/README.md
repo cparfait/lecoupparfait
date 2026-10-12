@@ -118,4 +118,26 @@ envoyée, la clé de signature d'une appli ne change plus.
   WebView (le site retombe sur la copie du lien), et l'export d'image d'une
   position ne télécharge rien.
 - **Icônes** : `node scripts/icones.mjs`, depuis le cavalier détouré de la
-  marque. Les PNG produits sont versionnés.
+  marque. Les PNG produits sont versionnés. Le même script produit l'image de
+  l'écran de démarrage (`drawable-*/splash_cavale.png`, la Cavale violette de
+  l'accueil).
+- **Ouverture animée** (`Ouverture.java`) : dès la première image, l'écran de
+  démarrage natif cède la place à `res/raw/ouverture.webp`, dont la première
+  image lui est identique. La Cavale s'élève, le nom et la frise de damier
+  apparaissent, puis l'animation tient sa dernière image jusqu'à ce que le site
+  soit peint (six secondes au plus). Avant Android 9, l'écran natif reste seul.
+  Ses bruitages (`res/raw/son_coup.mp3` et `son_mat.mp3`, copies de
+  `apps/web/public/sounds/move.mp3` et `victory.mp3`) se taisent en silencieux
+  ou en vibreur, et quand le joueur a coupé les sons : le site recopie ce
+  réglage dans la coque (`AppliPlugin.reglerSons`), qui s'en sert au lancement
+  suivant.
+  L'animation se rend avec HyperFrames depuis `video/ouverture-appli` :
+
+  ```bash
+  cd video/ouverture-appli
+  npx hyperframes render . --format png-sequence -o ./renders/frames
+  ffmpeg -framerate 30 -i renders/frames/frame_%06d.png -c:v libwebp_anim -pix_fmt yuva420p -lossless 0 -quality 85 -compression_level 6 -loop 1 ../../mobile/android/app/src/main/res/raw/ouverture.webp
+  ```
+
+  La Cavale de l'animation (`assets/cavale.png`) doit rester celle de
+  `splash_cavale.png` : même source, détourée, 504 px de haut (168 dp à 3×).

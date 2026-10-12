@@ -17,7 +17,11 @@
  *    qui sert aussi de petite icône aux notifications : Android n'y lit que
  *    l'opacité, une image en couleur y devient un carré blanc ;
  *  - pour Android 7, qui ne connaît pas les calques, l'icône du site en carré
- *    arrondi et une variante ronde.
+ *    arrondi et une variante ronde ;
+ *  - l'image de l'écran de démarrage : la Cavale violette de l'accueil, sur
+ *    un calque de 288 dp dont Android ne garde que le cercle central de
+ *    192 dp. Détourée de ses marges et haute de 168 dp, elle y tient entière,
+ *    des oreilles au socle (elle n'y tiendrait plus au-delà de 177 dp).
  *
  * À relancer seulement si la marque change : les PNG produits sont versionnés.
  *   node mobile/scripts/icones.mjs
@@ -49,6 +53,11 @@ const PIECE = [
   join(racine, 'apps', 'web', 'public', 'brand', 'cavale-piece.webp'),
 ].find((chemin) => existsSync(chemin))
 const ICONE_SITE = join(racine, 'apps', 'web', 'public', 'icons', 'icon-512.png')
+/** La Cavale violette de la page d'accueil (thème aurora), pour l'écran de démarrage. */
+const CAVALE = [
+  join(racine, 'data', 'brand-sources', 'cavale-aurora.png'),
+  join(racine, 'apps', 'web', 'public', 'brand', 'cavale-aurora.webp'),
+].find((chemin) => existsSync(chemin))
 
 const DENSITES = { mdpi: 1, hdpi: 1.5, xhdpi: 2, xxhdpi: 3, xxxhdpi: 4 }
 
@@ -105,8 +114,27 @@ async function iconeRonde(cote) {
     .png()
 }
 
+/** L'écran de démarrage : 288 dp de côté, la Cavale haute de 168 dp au centre. */
+async function ecranDemarrage(facteur) {
+  const cote = Math.round(288 * facteur)
+  const cavale = await sharp(CAVALE)
+    .trim({ threshold: 10 })
+    .resize({ height: Math.round(168 * facteur) })
+    .png()
+    .toBuffer()
+  return sharp({
+    create: { width: cote, height: cote, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+  })
+    .composite([{ input: cavale, gravity: 'centre' }])
+    .png()
+}
+
 if (!PIECE) {
   console.error('✗ Cavalier détouré introuvable (cavale-piece.png ou .webp).')
+  process.exit(1)
+}
+if (!CAVALE) {
+  console.error('✗ Cavale violette introuvable (cavale-aurora.png ou .webp).')
   process.exit(1)
 }
 
@@ -128,6 +156,7 @@ for (const [densite, facteur] of Object.entries(DENSITES)) {
   await (
     await silhouette(Math.round(24 * facteur), 0.92)
   ).toFile(join(notifications, 'ic_notification.png'))
+  await (await ecranDemarrage(facteur)).toFile(join(notifications, 'splash_cavale.png'))
 }
 
 const adaptative = `<?xml version="1.0" encoding="utf-8"?>

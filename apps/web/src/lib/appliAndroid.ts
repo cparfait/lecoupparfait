@@ -56,6 +56,8 @@ interface VersionInstallee {
 /** Le module natif `AppliPlugin.java`, présent dans les deux distributions. */
 interface PluginAppli {
   version(): Promise<{ code: number; nom: string; distribution: Distribution }>
+  /** Depuis la 1.3.0 : les coques plus anciennes ne l'ont pas. */
+  reglerSons?(options: { actifs: boolean; volume: number }): Promise<void>
 }
 
 /** Le module natif `MiseAJourPlugin.java`, dans l'APK du site seulement. */
@@ -113,6 +115,22 @@ export function accorderBarreEtat(theme: 'aurora' | 'clair') {
     .catch(() => {
       // Une coque trop ancienne pour ce module : les icônes restent claires.
     })
+}
+
+/**
+ * Recopie le réglage des sons dans la coque.
+ *
+ * L'ouverture animée de l'appli a ses bruitages, et la coque les joue avant
+ * que le site soit chargé : elle ne peut donc pas lire ce réglage dans le
+ * stockage du site. Sans cette copie, l'appli sonnait au démarrage chez qui
+ * avait coupé les sons. La copie sert au lancement suivant.
+ */
+export function accorderSons(actifs: boolean, volume: number) {
+  const appli = pont()?.Plugins?.Appli
+  if (typeof appli?.reglerSons !== 'function') return
+  void appli.reglerSons({ actifs, volume }).catch(() => {
+    // Réglage non transmis : l'ouverture garde le précédent.
+  })
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

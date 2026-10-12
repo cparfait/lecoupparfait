@@ -12,7 +12,7 @@
 
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
-import { accorderBarreEtat } from '@/lib/appliAndroid.ts'
+import { accorderBarreEtat, accorderSons } from '@/lib/appliAndroid.ts'
 import { I18nProvider, langue, useLangueChargee, type Locale } from '@/lib/i18n/index.tsx'
 import { TEMOIN_LANGUE } from '@/lib/i18n/temoin.ts'
 import { detectEffectsCapability, usePreferences } from '@/lib/store/preferences.ts'
@@ -41,6 +41,8 @@ export function Providers({
   const effects = usePreferences((state) => state.effects)
   const hydrated = usePreferences((state) => state.hydrated)
   const patch = usePreferences((state) => state.patch)
+  const soundEnabled = usePreferences((state) => state.soundEnabled)
+  const volume = usePreferences((state) => state.volume)
 
   // La langue réellement affichée, qui peut retarder d'un chargement sur celle
   // qu'on a choisie : le sens de lecture, l'attribut `lang` et le témoin la
@@ -90,6 +92,13 @@ export function Providers({
   useEffect(() => {
     document.documentElement.dataset.effects = effects
   }, [effects])
+
+  // Dans l'appli Android : le réglage des sons, pour l'ouverture animée du
+  // lancement suivant. Pas avant la relecture du stockage, qui enverrait le
+  // réglage par défaut à la place de celui du joueur.
+  useEffect(() => {
+    if (hydrated) accorderSons(soundEnabled, volume)
+  }, [hydrated, soundEnabled, volume])
 
   // Première visite : on devine ce que la machine peut encaisser.
   useEffect(() => {
