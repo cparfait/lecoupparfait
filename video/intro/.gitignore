@@ -1,0 +1,7 @@
+renders/
+snapshots/
+.thumbnails/
+.hyperframes/
+.waveform-cache/
+AGENTS.md
+CLAUDE.md
