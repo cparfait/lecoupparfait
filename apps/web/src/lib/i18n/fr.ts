@@ -57,6 +57,7 @@ export const fr = {
     about: 'À propos',
     credits: 'Crédits & licences',
     installDesktop: 'Installer sur l’ordinateur',
+    androidApp: 'L’appli Android',
     privacy: 'Confidentialité',
     admin: 'Administration',
 
@@ -755,48 +756,30 @@ export const fr = {
     title: 'L’appli Android',
     intro:
       'Le Coup Parfait sur ton téléphone : une icône sur l’écran d’accueil, le plein écran, et plus de navigateur à ouvrir.',
-    download: 'Télécharger l’appli',
-    fileLine: 'Version {version} · fichier APK pour Android',
-    installTitle: 'L’installer',
-    step1:
-      'Depuis ton téléphone Android, touche « Télécharger l’appli ». Si le navigateur prévient que ce type de fichier peut être dangereux, confirme le téléchargement.',
-    step2:
-      'Ouvre le fichier le-coup-parfait.apk, depuis la notification de téléchargement ou dans l’appli Fichiers, rubrique Téléchargements.',
-    step3:
-      'La première fois, Android bloque les applis qui ne viennent pas du Play Store : touche « Paramètres », active « Autoriser cette source », puis reviens en arrière.',
-    step4: 'Touche « Installer ». Le cavalier apparaît sur ton écran d’accueil.',
-    fromComputer: 'Sur ordinateur ? Ouvre cette page depuis ton téléphone.',
+    playStore: 'Télécharger sur Google Play',
+    playStoreLine: 'Gratuite, sans publicité · Android 7 ou plus récent',
+    fromComputer:
+      'Sur ordinateur ? La page du Play Store te propose de l’installer directement sur ton téléphone.',
     iphone:
-      'Sur iPhone ou iPad, pas de fichier à installer : ajoute le site à ton écran d’accueil depuis Safari, avec le bouton de partage puis « Sur l’écran d’accueil ».',
+      'Sur iPhone ou iPad, pas d’appli à installer : ajoute le site à ton écran d’accueil depuis Safari, avec le bouton de partage puis « Sur l’écran d’accueil ».',
     updatesTitle: 'Les mises à jour',
     updatesContent:
       'Le contenu se met à jour tout seul : l’appli affiche le site en direct, et chaque nouveauté y arrive en même temps.',
     updatesShell:
-      'L’appli elle-même change plus rarement. Quand une nouvelle version sort, elle te la propose et s’installe par-dessus l’ancienne : ton compte, tes parties et tes réglages restent là.',
+      'L’appli elle-même change plus rarement, et ses nouvelles versions arrivent par le Play Store, comme pour tes autres applis.',
     notificationsTitle: 'Les notifications',
     notificationsInApp:
       'L’appli te prévient comme n’importe quelle appli du téléphone : une invitation à jouer, une demande d’ami, un coup en correspondance, le défi du jour. Active-les dans Préférences, onglet Notifications.',
     yourApp: 'Ton appli',
     installedVersion: 'Version {version}',
     upToDate: 'À jour',
-    newVersion: 'La version {version} est prête.',
-    update: 'Mettre à jour',
-    auto: 'Mise à jour automatique',
     updatesByPlay: 'Les mises à jour arrivent par le Play Store, comme pour tes autres applis.',
-    autoHint:
-      'Quand une nouvelle version sort, l’appli la télécharge d’elle-même et ouvre l’installeur. Android te demande toujours de confirmer.',
-    stepAuthorize:
-      'Autorise « Le Coup Parfait » à installer des applis, puis reviens ici : la mise à jour reprendra d’elle-même.',
-    stepDownload: 'Téléchargement de la mise à jour…',
-    stepDownloadPercent: 'Téléchargement de la mise à jour… {pourcentage} %',
-    stepInstaller: 'Confirme la mise à jour dans la fenêtre d’Android.',
-    stepError: 'La mise à jour n’a pas pu se télécharger. Vérifie ta connexion, puis réessaie.',
+    leaveSiteTitle: 'L’appli est maintenant sur le Play Store',
+    leaveSiteText:
+      'Cette version, téléchargée depuis le site, ne recevra plus de mises à jour. Installe celle du Play Store : si elle refuse de s’installer par-dessus, désinstalle d’abord celle-ci — ton compte et tes parties sont sur le serveur, il suffira de te reconnecter.',
     signInTitle: 'Sois prévenu sur ce téléphone',
     signInBlurb:
       'Connecte-toi dans l’appli : tu pourras ensuite recevoir les invitations, les coups en correspondance et le rappel du défi du jour.',
-    bannerTitle: 'Nouvelle version de l’appli',
-    bannerBlurb:
-      'La version {version} s’installe par-dessus celle-ci : ton compte et tes parties restent là.',
   },
 
   suppressionCompte: {
@@ -7202,7 +7185,7 @@ export const fr = {
     installDesktop: 'Installer sur l’ordinateur',
     installDesktopDesc: 'Le Coup Parfait sur ton bureau, dans sa propre fenêtre.',
     androidAppDesc:
-      'Installe Le Coup Parfait sur ton téléphone Android : le fichier, l’installation pas à pas et les mises à jour.',
+      'Le Coup Parfait sur ton téléphone Android, depuis le Play Store : notifications, plein écran, et les mises à jour qui arrivent seules.',
     about: 'À propos',
     aboutDesc:
       'Ce qu’est Le Coup Parfait, pourquoi c’est gratuit, et ce qu’il advient de tes données. Réponse courte : le strict nécessaire, et tu peux tout effacer.',

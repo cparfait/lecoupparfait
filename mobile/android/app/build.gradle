@@ -17,9 +17,9 @@ android {
         applicationId "ovh.cparfait.coupparfait"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        // À augmenter à chaque APK publié, en même temps que `APPLI_ANDROID`
-        // dans apps/web/src/lib/appliAndroid.ts : c'est cette comparaison qui
-        // propose la mise à jour aux appareils déjà équipés.
+        // À augmenter à chaque version envoyée au Play Store, en même temps que
+        // `APPLI_ANDROID` dans apps/web/src/lib/appliAndroid.ts : l'admin s'en
+        // sert pour repérer les coques en retard.
         versionCode 4
         versionName "1.3.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -34,28 +34,12 @@ android {
     }
 
     /*
-     * Deux distributions de la même appli.
-     *
-     *  - `site` : l'APK servi par la page /appli. Il se met à jour lui-même
-     *    (MiseAJourPlugin, permission REQUEST_INSTALL_PACKAGES), faute de
-     *    magasin pour le faire. `npm run apk`.
-     *  - `play` : l'AAB du Play Store. Google interdit l'auto-mise à jour et la
-     *    permission qui va avec : c'est le Play Store qui met l'appli à jour.
-     *    `npm run aab`.
-     *
-     * Même identifiant, même version, même clé : un joueur peut passer de l'une
-     * à l'autre sans réinstaller, pourvu que Google signe l'AAB avec cette clé-ci
-     * (voir mobile/README.md, « Le Play Store »).
+     * Une seule distribution : l'AAB du Play Store (`npm run aab`). L'APK que
+     * servait le site, et sa mise à jour par lui-même, ont disparu en
+     * octobre 2026 : un fichier hors magasin demandait trois réglages
+     * qu'Android n'explique pas. Ceux qui l'ont encore sont envoyés au Play
+     * Store par le site (`apps/web/src/lib/appliAndroid.ts`).
      */
-    flavorDimensions = ["distribution"]
-    productFlavors {
-        site {
-            dimension "distribution"
-        }
-        play {
-            dimension "distribution"
-        }
-    }
     signingConfigs {
         if (fichierSignature.exists()) {
             release {

@@ -59,6 +59,7 @@ export const en: Dictionary = {
     about: 'About',
     credits: 'Credits & licences',
     installDesktop: 'Install on your computer',
+    androidApp: 'The Android app',
     privacy: 'Privacy',
     admin: 'Administration',
 
@@ -731,47 +732,30 @@ export const en: Dictionary = {
     title: 'The Android app',
     intro:
       'Le Coup Parfait on your phone: an icon on your home screen, full screen, and no browser to open.',
-    download: 'Download the app',
-    fileLine: 'Version {version} · APK file for Android',
-    installTitle: 'Installing it',
-    step1:
-      'On your Android phone, tap “Download the app”. If the browser warns that this type of file can be harmful, confirm the download.',
-    step2:
-      'Open the le-coup-parfait.apk file, from the download notification or in the Files app, under Downloads.',
-    step3:
-      'The first time, Android blocks apps that don’t come from the Play Store: tap “Settings”, turn on “Allow from this source”, then go back.',
-    step4: 'Tap “Install”. The knight appears on your home screen.',
-    fromComputer: 'On a computer? Open this page on your phone.',
+    playStore: 'Get it on Google Play',
+    playStoreLine: 'Free, ad-free · Android 7 or later',
+    fromComputer:
+      'On a computer? The Play Store page lets you install it straight onto your phone.',
     iphone:
-      'On iPhone or iPad, there is no file to install: add the site to your home screen from Safari, with the share button then “Add to Home Screen”.',
+      'On iPhone or iPad, there is no app to install: add the site to your home screen from Safari, with the share button then “Add to Home Screen”.',
     updatesTitle: 'Updates',
     updatesContent:
       'The content updates itself: the app shows the live site, and every new feature lands there at the same time.',
     updatesShell:
-      'The app itself changes less often. When a new version comes out, it offers it to you and installs over the old one: your account, games and settings stay put.',
+      'The app itself changes less often, and its new versions come through the Play Store, like your other apps.',
     notificationsTitle: 'Notifications',
     notificationsInApp:
       'The app notifies you like any other app on your phone: a game invitation, a friend request, a correspondence move, the daily challenge. Turn them on in Settings, Notifications tab.',
     yourApp: 'Your app',
     installedVersion: 'Version {version}',
     upToDate: 'Up to date',
-    newVersion: 'Version {version} is ready.',
-    update: 'Update',
-    auto: 'Automatic updates',
     updatesByPlay: 'Updates come through the Play Store, like your other apps.',
-    autoHint:
-      'When a new version comes out, the app downloads it by itself and opens the installer. Android always asks you to confirm.',
-    stepAuthorize:
-      'Allow “Le Coup Parfait” to install apps, then come back here: the update will resume by itself.',
-    stepDownload: 'Downloading the update…',
-    stepDownloadPercent: 'Downloading the update… {pourcentage}%',
-    stepInstaller: 'Confirm the update in the Android window.',
-    stepError: 'The update could not be downloaded. Check your connection, then try again.',
+    leaveSiteTitle: 'The app is now on the Play Store',
+    leaveSiteText:
+      'This version, downloaded from the website, will not get any more updates. Install the Play Store one: if it refuses to install over this one, uninstall this one first — your account and games live on the server, you will just need to sign in again.',
     signInTitle: 'Get notified on this phone',
     signInBlurb:
       'Sign in to the app: you can then receive invitations, correspondence moves and the daily challenge reminder.',
-    bannerTitle: 'New version of the app',
-    bannerBlurb: 'Version {version} installs over this one: your account and games stay put.',
   },
 
   suppressionCompte: {
@@ -7131,7 +7115,7 @@ export const en: Dictionary = {
     installDesktop: 'Install on your computer',
     installDesktopDesc: 'Le Coup Parfait on your desktop, in a window of its own.',
     androidAppDesc:
-      'Install Le Coup Parfait on your Android phone: the file, step-by-step installation and updates.',
+      'Le Coup Parfait on your Android phone, from the Play Store: notifications, full screen, and updates that arrive by themselves.',
     about: 'About',
     aboutDesc:
       'What Le Coup Parfait is, why it is free, and what becomes of your data. Short answer: the bare minimum, and you can erase it all.',
