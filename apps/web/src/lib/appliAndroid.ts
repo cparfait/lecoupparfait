@@ -26,8 +26,8 @@ import { useEffect, useSyncExternalStore } from 'react'
  * L'administration s'en sert pour signaler une coque en retard.
  */
 export const APPLI_ANDROID = {
-  versionCode: 4,
-  versionName: '1.3.0',
+  versionCode: 5,
+  versionName: '1.3.1',
 } as const
 
 /**
