@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "appareil" varchar(40);

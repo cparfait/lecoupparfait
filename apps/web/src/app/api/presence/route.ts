@@ -25,15 +25,22 @@
 
 import { NextResponse } from 'next/server'
 import { touchPresence } from '@coupparfait/db/auth'
+import { encoderAppareil, lireAppareil } from '@/lib/appareil.ts'
 import { getCurrentUser } from '@/lib/server/session.ts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     const utilisateur = await getCurrentUser()
-    if (utilisateur) await touchPresence(utilisateur.userId)
+    if (utilisateur) {
+      // L'appareil est facultatif : un onglet resté ouvert depuis avant ce
+      // champ bat encore sans corps, et la présence doit compter quand même.
+      const corps: unknown = await request.json().catch(() => null)
+      const appareil = lireAppareil((corps as { appareil?: unknown } | null)?.appareil)
+      await touchPresence(utilisateur.userId, appareil ? encoderAppareil(appareil) : undefined)
+    }
   } catch (error) {
     // Base injoignable : la présence est la dernière chose dont on veuille
     // qu'elle fasse échouer quoi que ce soit. Le prochain battement réessaiera.

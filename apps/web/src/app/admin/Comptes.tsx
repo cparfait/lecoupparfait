@@ -21,14 +21,18 @@ import {
   ChevronLeft,
   ChevronRight,
   KeyRound,
+  Monitor,
   Search,
   ShieldCheck,
   ShieldOff,
+  Smartphone,
   UserX,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { Button, Card, Chip, EmptyState, Input, Skeleton } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
+import { lireAppareil } from '@/lib/appareil.ts'
+import { APPLI_ANDROID } from '@/lib/appliAndroid.ts'
 import { langue, useI18n, useT } from '@/lib/i18n/index.tsx'
 import type { TranslationKey } from '@/lib/i18n/index.tsx'
 import { nombre } from './graphiques.tsx'
@@ -50,6 +54,8 @@ interface Compte {
   enLigne: boolean
   inscrit: string
   vu: string
+  /** D'où est parti le dernier battement ; `null` s'il n'a pas battu depuis que la question existe. */
+  appareil: string | null
 }
 
 /*
@@ -260,6 +266,56 @@ export function Comptes() {
   )
 }
 
+/** Vrai si `a` est une version strictement plus ancienne que `b` (`1.2.0` < `1.10.0`). */
+function plusAncienne(a: string, b: string): boolean {
+  const pa = a.split('.').map(Number)
+  const pb = b.split('.').map(Number)
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const ecart = (pa[i] ?? 0) - (pb[i] ?? 0)
+    if (ecart !== 0) return ecart < 0
+  }
+  return false
+}
+
+/**
+ * Sur quoi joue ce compte, d'après son dernier battement.
+ *
+ * C'est la première question quand quelqu'un signale un défaut, et le joueur
+ * ne sait pas y répondre : la coque Android ne se voit pas. Une coque plus
+ * ancienne que la dernière publiée passe à l'orange — c'est souvent la
+ * réponse.
+ */
+function PastilleAppareil({ brut }: { brut: string | null }) {
+  const t = useT()
+  const appareil = lireAppareil(brut)
+  if (!appareil) return null
+
+  if (appareil.genre !== 'appli') {
+    const mobile = appareil.genre === 'mobile'
+    return (
+      <Chip>
+        {mobile ? <Smartphone size={12} aria-hidden /> : <Monitor size={12} aria-hidden />}
+        {t(mobile ? 'admin.deviceMobile' : 'admin.deviceComputer')}
+      </Chip>
+    )
+  }
+
+  const ancienne = plusAncienne(appareil.version, APPLI_ANDROID.versionName)
+  return (
+    <Chip
+      tone={ancienne ? 'warning' : 'neutral'}
+      title={
+        ancienne ? t('admin.deviceOutdated', { version: APPLI_ANDROID.versionName }) : undefined
+      }
+    >
+      <Smartphone size={12} aria-hidden />
+      {t(appareil.distribution === 'play' ? 'admin.deviceAppPlay' : 'admin.deviceAppSite', {
+        version: appareil.version,
+      })}
+    </Chip>
+  )
+}
+
 /**
  * « Vu le 12/03 » ne suffit plus depuis que la date dit quelque chose.
  *
@@ -318,6 +374,7 @@ function LigneCompte({
               temps, et ne voulait plus rien dire.
             */}
             {compte.enLigne && !compte.disabled && <Chip tone="success">{t('admin.online')}</Chip>}
+            <PastilleAppareil brut={compte.appareil} />
           </p>
           <p className="mt-0.5 truncate text-[12px] text-faint">
             {[

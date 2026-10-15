@@ -199,7 +199,11 @@ export function aMettreAJour(installee: VersionInstallee | null): boolean {
   )
 }
 
-async function relireVersion() {
+/**
+ * La coque qui affiche cette page, demandée à elle-même ; `null` hors de
+ * l'appli, ou dans une coque qui ne sait pas répondre.
+ */
+export async function versionCoque(): Promise<VersionInstallee | null> {
   const plugins = pont()?.Plugins
   try {
     /*
@@ -211,18 +215,22 @@ async function relireVersion() {
     const appli = plugins?.Appli ? await plugins.Appli.version() : null
     const miseAJour = plugins?.MiseAJour ? await plugins.MiseAJour.version() : null
     const version = appli ?? miseAJour
-    if (!version) return
-    modifier({
-      installee: {
-        code: version.code,
-        nom: version.nom,
-        distribution: appli?.distribution ?? 'site',
-        installationAutorisee: miseAJour?.installationAutorisee ?? false,
-      },
-    })
+    if (!version) return null
+    return {
+      code: version.code,
+      nom: version.nom,
+      distribution: appli?.distribution ?? 'site',
+      installationAutorisee: miseAJour?.installationAutorisee ?? false,
+    }
   } catch {
     // Une coque sans ces modules : on la traite comme hors de l'appli.
+    return null
   }
+}
+
+async function relireVersion() {
+  const installee = await versionCoque()
+  if (installee) modifier({ installee })
 }
 
 let initialise = false

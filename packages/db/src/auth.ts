@@ -16,7 +16,7 @@
 
 import { randomBytes, scrypt as scryptCallback, timingSafeEqual, createHash } from 'node:crypto'
 import { promisify } from 'node:util'
-import { and, eq, gt, lt, sql } from 'drizzle-orm'
+import { and, eq, gt, lt, or, sql } from 'drizzle-orm'
 import { getDb } from './index.ts'
 import { ratings, sessions, users, type User } from './schema.ts'
 
@@ -314,15 +314,21 @@ const PRESENCE_THROTTLE_MS = 45 * 1000
  * L'écriture est conditionnée en SQL plutôt que lue puis écrite : deux onglets
  * qui battent ensemble font alors une seule mise à jour, sans course.
  */
-export async function touchPresence(userId: string): Promise<void> {
+export async function touchPresence(userId: string, appareil?: string): Promise<void> {
   const database = getDb()
+  const vieux = lt(
+    users.lastSeenAt,
+    sql`now() - ${`${PRESENCE_THROTTLE_MS} milliseconds`}::interval`,
+  )
   await database
     .update(users)
-    .set({ lastSeenAt: new Date() })
+    .set(appareil ? { lastSeenAt: new Date(), appareil } : { lastSeenAt: new Date() })
     .where(
       and(
         eq(users.id, userId),
-        lt(users.lastSeenAt, sql`now() - ${`${PRESENCE_THROTTLE_MS} milliseconds`}::interval`),
+        // Un changement d'appareil passe outre la limite : passer du PC au
+        // téléphone dans la minute doit se voir tout de suite.
+        appareil ? or(vieux, sql`${users.appareil} is distinct from ${appareil}`) : vieux,
       ),
     )
 }

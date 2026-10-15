@@ -94,6 +94,14 @@ export const users = pgTable(
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow(),
+    /**
+     * D'où vient le dernier battement de présence : `appli:<version>:<distribution>`,
+     * `mobile` ou `ordinateur`. Pour savoir, quand quelqu'un signale un défaut,
+     * s'il joue dans une vieille coque Android ou sur un PC — le user-agent des
+     * sessions ne le dit pas, il n'est lu qu'à la connexion et sans la version.
+     * Voir `apps/web/src/lib/appareil.ts`.
+     */
+    appareil: varchar('appareil', { length: 40 }),
   },
   (table) => [
     uniqueIndex('users_username_lower_idx').on(table.usernameLower),

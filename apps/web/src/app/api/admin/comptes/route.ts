@@ -132,6 +132,7 @@ export async function GET(request: Request) {
           countryCode: users.countryCode,
           createdAt: users.createdAt,
           lastSeenAt: users.lastSeenAt,
+          appareil: users.appareil,
           // Le nombre de parties dit en un coup d'œil si un compte est vivant ou
           // s'il a été créé puis abandonné — la distinction qu'on cherche quand
           // on regarde une liste de comptes.
@@ -193,6 +194,8 @@ export async function GET(request: Request) {
         enLigne: Date.now() - ligne.lastSeenAt.getTime() < PRESENCE_MS,
         inscrit: ligne.createdAt.toISOString(),
         vu: ligne.lastSeenAt.toISOString(),
+        // Tel que la base le garde ; l'interface le relit avec `lireAppareil`.
+        appareil: ligne.appareil,
       })),
       // Deux totaux, parce qu'ils répondent à deux questions : « combien pour
       // cette recherche » et « combien en tout ». N'en montrer qu'un laisserait

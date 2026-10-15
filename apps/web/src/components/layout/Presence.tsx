@@ -26,13 +26,35 @@
  *
  * Rien n'est envoyé pour un visiteur sans compte : il n'y a pas de présence à
  * enregistrer, et l'on ne réveille pas le serveur pour rien.
+ *
+ * **Le battement dit aussi d'où il part** — l'appli Android et sa version, un
+ * téléphone ou un ordinateur —, pour que l'administration puisse répondre à
+ * « sur quoi joues-tu ? » sans le demander. Voir `lib/appareil.ts`.
  */
 
 import { useEffect } from 'react'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
+import { encoderAppareil, type Appareil } from '@/lib/appareil.ts'
+import { versionCoque } from '@/lib/appliAndroid.ts'
 
 /** Rythme du battement. Cinq fois plus court que la fenêtre de présence. */
 const BATTEMENT_MS = 60_000
+
+/**
+ * L'appareil, une fois pour la visite : la coque ne change pas sous la page.
+ *
+ * Hors de l'appli, téléphone ou ordinateur se lit dans le user-agent. L'iPad
+ * se fait passer pour un Mac depuis iPadOS 13 ; son écran tactile le trahit.
+ */
+async function decrireAppareil(): Promise<Appareil> {
+  const coque = await versionCoque()
+  if (coque) return { genre: 'appli', version: coque.nom, distribution: coque.distribution }
+  const ua = navigator.userAgent
+  const mobile =
+    /Android|iPhone|iPad|iPod|Mobi/i.test(ua) ||
+    (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)
+  return { genre: mobile ? 'mobile' : 'ordinateur' }
+}
 
 export function Presence() {
   const identite = useIdentite()
@@ -42,13 +64,23 @@ export function Presence() {
     if (!connecte) return
 
     let vivant = true
+    const appareil = decrireAppareil()
+      .then(encoderAppareil)
+      .catch(() => null)
     const battre = () => {
       if (!vivant || document.visibilityState !== 'visible') return
-      // `keepalive` : le battement part même si la page se ferme dans la
-      // seconde, et ne retient rien au déchargement.
-      void fetch('/api/presence', { method: 'POST', keepalive: true }).catch(() => {
-        // Hors ligne, serveur muet : le prochain tour réessaiera.
-      })
+      void appareil.then((valeur) =>
+        // `keepalive` : le battement part même si la page se ferme dans la
+        // seconde, et ne retient rien au déchargement.
+        fetch('/api/presence', {
+          method: 'POST',
+          keepalive: true,
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ appareil: valeur }),
+        }).catch(() => {
+          // Hors ligne, serveur muet : le prochain tour réessaiera.
+        }),
+      )
     }
 
     battre()

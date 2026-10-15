@@ -141,6 +141,13 @@
       "when": 1791533863685,
       "tag": "0019_signalements_tchat",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792083780741,
+      "tag": "0020_appareil_joueur",
+      "breakpoints": true
     }
   ]
 }
