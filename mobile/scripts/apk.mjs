@@ -1,15 +1,18 @@
 #!/usr/bin/env node
 /**
- * Construit l'AAB signé du Play Store, à téléverser à la main.
+ * Construit l'appli signée, dans l'une ou l'autre de ses distributions.
  *
- *   cd mobile && npm run aab
+ *   cd mobile && npm run apk   → l'APK du site, déposé là où /appli le sert
+ *   cd mobile && npm run aab   → l'AAB du Play Store, à téléverser à la main
  *
- * Deux étapes, toujours dans cet ordre : `cap sync` recopie la configuration
+ * Trois étapes, toujours dans cet ordre : `cap sync` recopie la configuration
  * (une configuration de test laissée dans `android/` partirait sinon dans
- * l'appli publiée), puis Gradle construit et signe.
+ * l'appli publiée), Gradle construit et signe, puis le fichier rejoint sa
+ * destination. Les deux distributions sont décrites dans
+ * `android/app/build.gradle`.
  */
 
-import { existsSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
@@ -17,6 +20,7 @@ import { fileURLToPath } from 'node:url'
 const mobile = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const android = join(mobile, 'android')
 const windows = process.platform === 'win32'
+const playStore = process.argv.includes('--play')
 
 /**
  * Sous Windows, `npx` et `gradlew` sont des scripts `.cmd`/`.bat` qu'on ne lance
@@ -47,7 +51,18 @@ lancer('npx', ['cap', 'sync', 'android'], mobile)
 const gradlew = join(android, windows ? 'gradlew.bat' : 'gradlew')
 const sorties = join(android, 'app', 'build', 'outputs')
 
-lancer(gradlew, ['bundleRelease'], android)
-const aab = join(sorties, 'bundle', 'release', 'app-release.aab')
-console.log(`✓ AAB du Play Store : ${aab}`)
-console.log('  À téléverser dans Play Console, Tester et publier → Créer une version.')
+if (playStore) {
+  lancer(gradlew, ['bundlePlayRelease'], android)
+  const aab = join(sorties, 'bundle', 'playRelease', 'app-play-release.aab')
+  console.log(`✓ AAB du Play Store : ${aab}`)
+  console.log('  À téléverser dans Play Console, Tester et publier → Créer une version.')
+} else {
+  lancer(gradlew, ['assembleSiteRelease'], android)
+  const cible = join(mobile, '..', 'apps', 'web', 'public', 'telechargements')
+  mkdirSync(cible, { recursive: true })
+  copyFileSync(
+    join(sorties, 'apk', 'site', 'release', 'app-site-release.apk'),
+    join(cible, 'le-coup-parfait.apk'),
+  )
+  console.log('✓ APK déposé dans apps/web/public/telechargements/le-coup-parfait.apk')
+}

@@ -34,10 +34,11 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { Bell, Download, ExternalLink, LogIn, Share, X } from 'lucide-react'
+import { Bell, Download, LogIn, RefreshCw, Share, X } from 'lucide-react'
+import { messageEtape } from '@/components/appli/etapeMiseAJour.ts'
 import { Alerte } from '@/components/ui/Alerte.tsx'
 import { Button, ButtonLink } from '@/components/ui/index.tsx'
-import { URL_PLAY_STORE, useAppliAndroid } from '@/lib/appliAndroid.ts'
+import { APPLI_ANDROID, lancerMiseAJourAuto, useAppliAndroid } from '@/lib/appliAndroid.ts'
 import { useIdentite } from '@/lib/auth/useIdentite.ts'
 import { usePartieEnLigne } from '@/lib/game/partieEnLigne.ts'
 import { useNotifications } from '@/lib/notifications.ts'
@@ -48,7 +49,8 @@ import { useT } from '@/lib/i18n/index.tsx'
 const CLES = {
   notifications: 'coupparfait.propose.notifications',
   installation: 'coupparfait.propose.installation',
-  playStore: 'coupparfait.propose.playStore',
+  // Une clé par version : écarter la 2 ne doit pas faire taire la 3.
+  miseAJourAppli: `coupparfait.propose.appli-${APPLI_ANDROID.versionCode}`,
 } as const
 
 function dejaPropose(cle: string): boolean {
@@ -118,14 +120,18 @@ export function MiseEnRoute() {
   if (partieEnCours) return null
 
   /*
-    Un ancien APK du site passe devant tout le reste : le site ne le sert plus,
-    et sa coque ne se mettra plus jamais à jour. Seul le Play Store l'en sort,
-    et rien d'autre ne le lui dira. Les notifications attendront le lancement
-    suivant ; l'installation, elle, n'a pas cours dans l'appli. Une fois
-    écarté, le bandeau ne revient pas : la page /appli garde le lien.
+    Une nouvelle version de l'appli Android passe devant tout le reste : elle
+    seule ne se rattrape pas ailleurs, faute de magasin d'applications. Les
+    notifications, qui passent par Firebase dans l'appli, attendront le
+    lancement suivant ; l'installation, elle, n'y a pas cours.
   */
-  if (appli.aQuitterLeSite && ecarte !== CLES.playStore && !dejaPropose(CLES.playStore)) {
-    return <BandeauPlayStore onFermer={() => ecarter(CLES.playStore)} />
+  if (
+    appli.natif &&
+    !appli.aJour &&
+    ecarte !== CLES.miseAJourAppli &&
+    !dejaPropose(CLES.miseAJourAppli)
+  ) {
+    return <BandeauMiseAJourAppli onFermer={() => ecarter(CLES.miseAJourAppli)} />
   }
 
   /*
@@ -295,28 +301,39 @@ function ProposerNotifications({
   )
 }
 
-/** L'invitation à quitter l'APK du site pour le Play Store. */
-function BandeauPlayStore({ onFermer }: { onFermer: () => void }) {
+/**
+ * La nouvelle version de l'appli Android.
+ *
+ * Monté seulement quand `MiseEnRoute` le laisse paraître — jamais pendant une
+ * partie — et c'est aussi là que démarre la mise à jour automatique : l'écran
+ * d'installation d'Android ne doit pas surgir au milieu d'un coup à jouer.
+ */
+function BandeauMiseAJourAppli({ onFermer }: { onFermer: () => void }) {
   const t = useT()
+  const appli = useAppliAndroid()
+
+  useEffect(() => {
+    lancerMiseAJourAuto()
+  }, [appli.installee, appli.miseAJourAuto])
+
   return (
     <Bandeau
-      icone={<ExternalLink size={18} aria-hidden />}
-      titre={t('appli.leaveSiteTitle')}
-      detail={t('appli.leaveSiteText')}
+      icone={<RefreshCw size={18} aria-hidden />}
+      titre={t('appli.bannerTitle')}
+      detail={
+        messageEtape(t, appli) ?? t('appli.bannerBlurb', { version: APPLI_ANDROID.versionName })
+      }
       onFermer={onFermer}
       action={
-        <ButtonLink
-          href={URL_PLAY_STORE}
-          target="_blank"
-          rel="noopener noreferrer"
-          prefetch={false}
+        <Button
           size="sm"
           variant="primary"
-          icon={<ExternalLink size={14} aria-hidden />}
-          onClick={() => marquerPropose(CLES.playStore)}
+          icon={<Download size={14} />}
+          disabled={appli.etape === 'telechargement'}
+          onClick={() => void appli.mettreAJour()}
         >
-          {t('appli.playStore')}
-        </ButtonLink>
+          {t('appli.update')}
+        </Button>
       }
     />
   )

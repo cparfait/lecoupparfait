@@ -6,11 +6,12 @@ icône, son écran de démarrage et ses notifications. Le contenu vient toujours
 du serveur, et chaque déploiement du site est donc visible dans l'appli sans
 rien réinstaller.
 
-Elle se distribue par le Play Store seulement, qui la met à jour. Le site a
-servi un APK jusqu'en octobre 2026, qui se mettait à jour lui-même : ceux qui
-l'ont encore (`distribution` = `site`, versions 1.0.0 à 1.3.0) n'en recevront
-plus, et le site les invite à passer au Play Store (page `/appli` et bandeau,
-voir `apps/web/src/lib/appliAndroid.ts`).
+Elle existe en deux distributions, tirées du même code (`android/app/build.gradle`) :
+
+| Distribution | Fichier | Mises à jour                                                       |
+| ------------ | ------- | ------------------------------------------------------------------ |
+| `site`       | APK     | par l'appli elle-même (`MiseAJourPlugin`), depuis la page `/appli` |
+| `play`       | AAB     | par le Play Store, seul autorisé à le faire                        |
 
 Ce dossier ne fait pas partie des espaces de travail npm : ses dépendances
 s'installent à part (`cd mobile && npm ci`) et n'entrent ni dans le
@@ -25,21 +26,24 @@ s'installent à part (`cd mobile && npm ci`) et n'entrent ni dans le
 - la clé de signature (ci-dessous) ;
 - `android/app/google-services.json`, la configuration Firebase de l'appli :
   console Firebase, Paramètres du projet, appli Android
-  `ovh.cparfait.coupparfait`. Git l'ignore. Sans lui, l'appli se construit
-  mais ne reçoit aucune notification.
+  `ovh.cparfait.coupparfait`. Git l'ignore. Sans lui, l'APK se construit mais
+  ne reçoit aucune notification.
 
 ## Publier une nouvelle version
 
 1. Augmenter `versionCode` (de 1) et `versionName` dans
    `android/app/build.gradle`, et les mêmes valeurs dans `APPLI_ANDROID`
    (`apps/web/src/lib/appliAndroid.ts`). Le test `appliAndroid.test.ts`
-   refuse un écart entre les deux ; l'administration s'en sert pour signaler
-   les coques en retard.
-2. `npm run aab` : synchronise la configuration et construit l'AAB signé,
-   `android/app/build/outputs/bundle/release/app-release.aab`.
-3. Le téléverser dans Play Console (Tester et publier → Créer une version).
-   Le Play Store refuse un `versionCode` déjà envoyé.
-4. Commiter, puis déployer le site.
+   refuse un écart entre les deux.
+2. `npm run apk` : synchronise la configuration, construit l'APK signé et le
+   dépose dans `apps/web/public/telechargements/`.
+3. Commiter, puis déployer le site. Les appareils équipés voient le bandeau
+   « Nouvelle version de l'appli » au lancement suivant, et ceux qui ont gardé
+   la mise à jour automatique la téléchargent d'eux-mêmes. Android demande
+   toujours de confirmer l'installation.
+4. `npm run aab`, puis téléverser `android/app/build/outputs/bundle/playRelease/app-play-release.aab`
+   dans Play Console (Tester et publier → Créer une version). Le Play Store
+   refuse un `versionCode` déjà envoyé : c'est le même que celui de l'APK.
 
 Une nouvelle version n'est nécessaire que si la coque change (icône,
 configuration Capacitor, code Java) : pour le reste, déployer le site suffit.
@@ -47,8 +51,9 @@ configuration Capacitor, code Java) : pour le reste, déployer le site suffit.
 ## La clé de signature
 
 `signature/coupparfait.jks` et `signature/keystore.properties`, que Git
-ignore. À sauvegarder hors de cette machine : c'est elle que Google attend à
-chaque version envoyée au Play Store.
+ignore. À sauvegarder hors de cette machine : un APK signé d'une autre clé ne
+peut pas mettre à jour celui qui est installé, et chaque joueur devrait
+désinstaller l'appli pour en changer.
 
 `keystore.properties` contient :
 
@@ -63,9 +68,9 @@ keyPassword=…
 
 Ce que Google exige, et où c'est fait :
 
-- **Pas d'auto-mise à jour** : l'appli n'a ni module de mise à jour ni la
-  permission `REQUEST_INSTALL_PACKAGES`. Le site ne s'adresse qu'aux anciens
-  APK, pour les envoyer au Play Store.
+- **Pas d'auto-mise à jour** : la distribution `play` n'a ni `MiseAJourPlugin`
+  ni la permission `REQUEST_INSTALL_PACKAGES` (elles vivent dans `src/site/`).
+  Le site lit la distribution (`AppliPlugin`) et n'y propose aucune mise à jour.
 - **Format AAB**, cible Android 36 (`variables.gradle`).
 - **Suppression du compte** dans l'appli et par une adresse web : profil,
   « Ton compte », et `/compte/supprimer`.

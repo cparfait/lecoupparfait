@@ -1,17 +1,32 @@
 'use client'
 
 /**
- * L'appli Android : où l'obtenir, et ce qu'on a installé.
+ * L'appli Android : le fichier, la façon de l'installer, et ses mises à jour.
  *
- * Deux pages en une. Depuis un navigateur, c'est le lien vers le Play Store.
- * Depuis l'appli elle-même, c'est sa version — et, pour qui a encore l'APK
- * que le site servait autrefois, l'invitation à passer au Play Store : cette
- * coque-là ne se mettra plus jamais à jour. Voir `lib/appliAndroid.ts`.
+ * Deux pages en une. Depuis un navigateur, c'est le téléchargement et le mode
+ * d'emploi — un APK hors Play Store demande trois gestes qu'Android ne
+ * explique pas, et l'on ne peut pas compter sur le joueur pour les deviner.
+ * Depuis l'appli elle-même, c'est sa version, et l'interrupteur de mise à
+ * jour automatique : voir `lib/appliAndroid.ts`.
  */
 
-import { Bell, ExternalLink, RefreshCw, Smartphone } from 'lucide-react'
-import { ButtonLink, Card, Chip, TitreDePage, TitreDeSection } from '@/components/ui/index.tsx'
-import { APPLI_ANDROID, URL_PLAY_STORE, useAppliAndroid } from '@/lib/appliAndroid.ts'
+import { Bell, Download, RefreshCw, Smartphone } from 'lucide-react'
+import {
+  Button,
+  ButtonLink,
+  Card,
+  Chip,
+  TitreDePage,
+  TitreDeSection,
+  Toggle,
+} from '@/components/ui/index.tsx'
+import { messageEtape } from '@/components/appli/etapeMiseAJour.ts'
+import {
+  APPLI_ANDROID,
+  URL_APK,
+  choisirMiseAJourAuto,
+  useAppliAndroid,
+} from '@/lib/appliAndroid.ts'
 import { useT } from '@/lib/i18n/index.tsx'
 
 export default function AppliPage() {
@@ -22,7 +37,7 @@ export default function AppliPage() {
     <div className="page-etroite">
       <TitreDePage intro={t('appli.intro')}>{t('appli.title')}</TitreDePage>
 
-      {appli.natif ? <TonAppli /> : <PlayStore />}
+      {appli.natif ? <TonAppli /> : <Telechargement />}
 
       <section className="mt-10">
         <TitreDeSection icon={RefreshCw}>{t('appli.updatesTitle')}</TitreDeSection>
@@ -40,38 +55,51 @@ export default function AppliPage() {
   )
 }
 
-/** Le bouton vers la fiche, partagé par les deux vues. */
-function BoutonPlayStore() {
+function Telechargement() {
   const t = useT()
-  return (
-    // Une fiche hors du site : nouvel onglet dans un navigateur ; dans l'appli,
-    // la coque confie l'adresse à Android, qui ouvre le Play Store.
-    <ButtonLink
-      href={URL_PLAY_STORE}
-      target="_blank"
-      rel="noopener noreferrer"
-      prefetch={false}
-      variant="primary"
-      size="lg"
-      icon={<ExternalLink size={18} aria-hidden />}
-    >
-      {t('appli.playStore')}
-    </ButtonLink>
-  )
-}
+  const etapes = [t('appli.step1'), t('appli.step2'), t('appli.step3'), t('appli.step4')]
 
-function PlayStore() {
-  const t = useT()
   return (
     <>
       <Card className="p-5">
-        <BoutonPlayStore />
-        <p className="mt-3 text-xs text-muted">{t('appli.playStoreLine')}</p>
+        {/* Un lien de téléchargement, et non une navigation : `download` fait
+            passer `Link` la main au navigateur, et `prefetch` désactivé évite
+            de rapatrier l'APK entier dès que le bouton paraît à l'écran. */}
+        <ButtonLink
+          href={URL_APK}
+          download="le-coup-parfait.apk"
+          prefetch={false}
+          variant="primary"
+          size="lg"
+          icon={<Download size={18} aria-hidden />}
+        >
+          {t('appli.download')}
+        </ButtonLink>
+        <p className="mt-3 text-xs text-muted">
+          {t('appli.fileLine', { version: APPLI_ANDROID.versionName })}
+        </p>
       </Card>
-      <div className="mt-6 space-y-2 text-sm leading-relaxed text-faint">
-        <p>{t('appli.fromComputer')}</p>
-        <p>{t('appli.iphone')}</p>
-      </div>
+
+      <section className="mt-10">
+        <TitreDeSection icon={Smartphone}>{t('appli.installTitle')}</TitreDeSection>
+        <ol className="space-y-4">
+          {etapes.map((etape, index) => (
+            <li key={index} className="flex items-start gap-3">
+              <span
+                className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-surface-strong text-sm font-semibold tabular-nums text-ink"
+                aria-hidden
+              >
+                {index + 1}
+              </span>
+              <p className="pt-0.5 text-[15px] leading-relaxed text-muted">{etape}</p>
+            </li>
+          ))}
+        </ol>
+        <div className="mt-6 space-y-2 text-sm leading-relaxed text-faint">
+          <p>{t('appli.fromComputer')}</p>
+          <p>{t('appli.iphone')}</p>
+        </div>
+      </section>
     </>
   )
 }
@@ -79,10 +107,7 @@ function PlayStore() {
 function TonAppli() {
   const t = useT()
   const appli = useAppliAndroid()
-  const aJour =
-    appli.installee !== null &&
-    !appli.aQuitterLeSite &&
-    appli.installee.code >= APPLI_ANDROID.versionCode
+  const message = messageEtape(t, appli)
 
   return (
     <Card className="p-5">
@@ -93,19 +118,47 @@ function TonAppli() {
             ? t('appli.installedVersion', { version: appli.installee.nom })
             : undefined
         }
-        action={aJour ? <Chip tone="success">{t('appli.upToDate')}</Chip> : null}
+        action={
+          appli.installee && appli.aJour ? <Chip tone="success">{t('appli.upToDate')}</Chip> : null
+        }
       >
         {t('appli.yourApp')}
       </TitreDeSection>
 
-      {appli.aQuitterLeSite ? (
-        <>
-          <p className="text-[15px] font-medium text-ink">{t('appli.leaveSiteTitle')}</p>
-          <p className="mb-4 mt-1 text-sm leading-relaxed text-muted">{t('appli.leaveSiteText')}</p>
-          <BoutonPlayStore />
-        </>
-      ) : (
+      {!appli.aJour && (
+        <div className="mb-4">
+          <p className="text-[15px] font-medium text-ink">
+            {t('appli.newVersion', { version: APPLI_ANDROID.versionName })}
+          </p>
+          {message && (
+            <p className="mt-1 text-sm leading-relaxed text-muted" role="status">
+              {message}
+            </p>
+          )}
+          <Button
+            className="mt-3"
+            variant="primary"
+            icon={<Download size={16} aria-hidden />}
+            disabled={appli.etape === 'telechargement'}
+            onClick={() => void appli.mettreAJour()}
+          >
+            {t('appli.update')}
+          </Button>
+        </div>
+      )}
+
+      {appli.installee?.distribution === 'play' ? (
+        // Le Play Store met l'appli à jour lui-même : rien à régler ici.
         <p className="text-sm leading-relaxed text-muted">{t('appli.updatesByPlay')}</p>
+      ) : (
+        <div className="border-t border-line pt-2">
+          <Toggle
+            checked={appli.miseAJourAuto}
+            onChange={choisirMiseAJourAuto}
+            label={t('appli.auto')}
+            description={t('appli.autoHint')}
+          />
+        </div>
       )}
     </Card>
   )
