@@ -123,8 +123,8 @@ envoyée, la clé de signature d'une appli ne change plus.
   l'accueil).
 - **Ouverture animée** (`Ouverture.java`) : dès la première image, l'écran de
   démarrage natif cède la place à `res/raw/ouverture.webp`, dont la première
-  image lui est identique. La Cavale s'élève, le nom et la frise de damier
-  apparaissent, puis l'animation tient sa dernière image jusqu'à ce que le site
+  image lui est identique. La Cavale grandit en s'élevant, le nom et la frise de damier
+  apparaissent, l'image finale tient une seconde, et plus jusqu'à ce que le site
   soit peint (six secondes au plus). Avant Android 9, l'écran natif reste seul.
   Ses bruitages (`res/raw/son_coup.mp3` et `son_mat.mp3`, copies de
   `apps/web/public/sounds/move.mp3` et `victory.mp3`) se taisent en silencieux
@@ -139,5 +139,6 @@ envoyée, la clé de signature d'une appli ne change plus.
   ffmpeg -framerate 30 -i renders/frames/frame_%06d.png -c:v libwebp_anim -pix_fmt yuva420p -lossless 0 -quality 85 -compression_level 6 -loop 1 ../../mobile/android/app/src/main/res/raw/ouverture.webp
   ```
 
-  La Cavale de l'animation (`assets/cavale.png`) doit rester celle de
-  `splash_cavale.png` : même source, détourée, 504 px de haut (168 dp à 3×).
+  La Cavale de l'animation (`assets/cavale.png`, 840 px de haut) doit rester
+  celle de `splash_cavale.png` : même source, détourée. Elle part à l'échelle
+  0,6, soit 504 px (168 dp à 3×), la taille de l'écran natif.

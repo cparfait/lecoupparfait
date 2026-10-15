@@ -55,27 +55,43 @@ final class Ouverture {
      */
     private static final long PLAFOND_MS = 6000;
 
-    /** Si l'écran natif ne s'est pas montré, l'animation part quand même. */
-    private static final long DEPART_AU_PLUS_TARD_MS = 800;
+    /**
+     * Après le dernier mouvement, l'image finale reste à l'écran le temps de la
+     * regarder et de lire le nom. La tenue est jouée ici et non dans le WebP :
+     * Android déclare l'animation finie dès qu'il en affiche la dernière image,
+     * sans attendre la durée de celle-ci.
+     */
+    private static final long TENUE_MS = 1000;
+
+    /**
+     * Si l'écran natif ne s'est pas montré, l'animation part quand même. Pas
+     * trop tôt : un démarrage lent (la WebView s'initialise) ferait partir
+     * l'animation, et ses sons, sous l'écran natif encore affiché.
+     */
+    private static final long DEPART_AU_PLUS_TARD_MS = 2000;
 
     /*
      * Les instants des bruitages, depuis le début de l'animation
-     * (video/ouverture-appli, une seconde en tout) : la Cavale finit de
-     * s'élever à 0,47 s, « !! » claque à 0,7 s. On retranche le silence qui
-     * ouvre chaque fichier (58 ms pour le coup, 45 ms pour la victoire), pour
-     * que le son tombe sur l'image.
+     * (video/ouverture-appli, 1,9 s) : la Cavale se pose à 0,85 s, « !! »
+     * claque à 1,55 s. On
+     * retranche le silence qui ouvre chaque fichier (58 ms pour le coup,
+     * 45 ms pour la victoire), pour que le son tombe sur l'image.
      */
-    private static final long INSTANT_COUP_MS = 470 - 58;
-    private static final long INSTANT_MAT_MS = 700 - 45;
+    private static final long INSTANT_COUP_MS = 850 - 58;
+    private static final long INSTANT_MAT_MS = 1550 - 45;
     /** Les gains de `apps/web/src/lib/sound.ts` : certains fichiers sont plus forts. */
     private static final float GAIN_COUP = 0.85f;
     private static final float GAIN_MAT = 0.8f;
     /** Le réglage par défaut du site, tant que celui-ci ne l'a pas transmis. */
     private static final float VOLUME_PAR_DEFAUT = 0.55f;
 
-    /** Le canevas de l'animation, en dp : 1080 × 1440 px rendus à 3×. */
+    /**
+     * Le canevas de l'animation, en dp : 1080 × 1920 px rendus à 3×. Plus
+     * étroit que tous les téléphones courants ; sur un écran moins haut, ce
+     * sont ses bords vides qui sont rognés.
+     */
     private static final int LARGEUR_DP = 360;
-    private static final int HAUTEUR_DP = 480;
+    private static final int HAUTEUR_DP = 640;
 
     private final BridgeActivity activite;
     private final Handler fil = new Handler(Looper.getMainLooper());
@@ -170,8 +186,13 @@ final class Ouverture {
             new Animatable2.AnimationCallback() {
                 @Override
                 public void onAnimationEnd(Drawable drawable) {
-                    animationFinie = true;
-                    peutSEffacer();
+                    fil.postDelayed(
+                        () -> {
+                            animationFinie = true;
+                            peutSEffacer();
+                        },
+                        TENUE_MS
+                    );
                 }
             }
         );
@@ -209,7 +230,7 @@ final class Ouverture {
     /**
      * Charge les bruitages, si le joueur et le téléphone veulent du son. Le
      * chargement prend quelques dizaines de millisecondes : il est fini bien
-     * avant le premier son, à 0,4 s.
+     * avant le premier son, à 0,8 s.
      */
     private void preparerSons() {
         SharedPreferences reglages = AppliPlugin.reglages(activite);
@@ -266,10 +287,12 @@ final class Ouverture {
         }
         FrameLayout partant = voile;
         voile = null;
+        // Un fondu sans hâte : l'image finale cède la place au site, elle ne
+        // disparaît pas d'un coup.
         partant
             .animate()
             .alpha(0f)
-            .setDuration(300)
+            .setDuration(500)
             .withEndAction(() -> {
                 ((ViewGroup) partant.getParent()).removeView(partant);
                 animation.stop();
