@@ -30,7 +30,7 @@ import { users, type User } from './schema.ts'
  * aussi ce qui le distingue, pour ne pas lui demander de mot de passe là où il
  * n'en a jamais donné — à la suppression, par exemple.
  */
-const EMPREINTE_GOOGLE = 'google:'
+export const EMPREINTE_GOOGLE = 'google:'
 
 /** Le compte lié à cette identité Google, s'il existe et n'est pas désactivé. */
 export async function compteGoogle(sub: string): Promise<User | null> {

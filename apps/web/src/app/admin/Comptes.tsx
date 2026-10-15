@@ -56,10 +56,12 @@ interface Compte {
   vu: string
   /** D'où est parti le dernier battement ; `null` s'il n'a pas battu depuis que la question existe. */
   appareil: string | null
+  /** `seul` : créé par Google, sans mot de passe. `lie` : mot de passe et Google. */
+  google: 'seul' | 'lie' | null
 }
 
 /*
-  Les six tamis et les trois tris, par clé de dictionnaire.
+  Les sept tamis et les trois tris, par clé de dictionnaire.
 
   Deux constantes de module, donc sans accès à `t()` : leurs intitulés restaient
   en français quelle que soit la langue choisie. Ils sont résolus au rendu, là où
@@ -72,6 +74,7 @@ const FILTRES = [
   { cle: 'desactives', texteKey: 'admin.filterDisabled' },
   { cle: 'inactifs', texteKey: 'admin.filterNeverPlayed' },
   { cle: 'sansAdresse', texteKey: 'admin.filterNoAddress' },
+  { cle: 'google', texteKey: 'admin.filterGoogle' },
 ] as const satisfies ReadonlyArray<{ cle: string; texteKey: TranslationKey }>
 
 const TRIS = [
@@ -374,6 +377,11 @@ function LigneCompte({
               temps, et ne voulait plus rien dire.
             */}
             {compte.enLigne && !compte.disabled && <Chip tone="success">{t('admin.online')}</Chip>}
+            {compte.google && (
+              <Chip title={t(compte.google === 'seul' ? 'admin.googleOnly' : 'admin.googleLinked')}>
+                {t('admin.google')}
+              </Chip>
+            )}
             <PastilleAppareil brut={compte.appareil} />
           </p>
           <p className="mt-0.5 truncate text-[12px] text-faint">

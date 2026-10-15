@@ -43,6 +43,7 @@ import {
   hashPassword,
   validatePassword,
 } from '@coupparfait/db/auth'
+import { EMPREINTE_GOOGLE } from '@coupparfait/db/google'
 import { getAdmin } from '@/lib/server/admin.ts'
 import { journaliser } from '@/lib/server/audit.ts'
 import { tDeLaRequete } from '@/lib/i18n/serveur.ts'
@@ -103,13 +104,14 @@ export async function GET(request: Request) {
     // Chaque filtre décrit une question qu'on se pose vraiment devant une liste
     // de comptes : qui est là en ce moment, qui est bloqué, qui a des droits,
     // qui n'a jamais joué, qui ne pourra pas récupérer son mot de passe faute
-    // d'adresse confirmée.
+    // d'adresse confirmée, qui se connecte avec Google.
     const conditions = [
       recherche ? or(ilike(users.username, motif), ilike(users.email, motif)) : undefined,
       filtre === 'admins' ? eq(users.role, 'admin') : undefined,
       filtre === 'enLigne' ? gt(users.lastSeenAt, new Date(Date.now() - PRESENCE_MS)) : undefined,
       filtre === 'desactives' ? eq(users.disabled, true) : undefined,
       filtre === 'sansAdresse' ? sql`${users.emailVerifiedAt} is null` : undefined,
+      filtre === 'google' ? sql`${users.googleSub} is not null` : undefined,
       filtre === 'inactifs'
         ? sql`not exists (select 1 from ${games}
                            where ${games.whiteId} = ${users.id}
@@ -133,6 +135,17 @@ export async function GET(request: Request) {
           createdAt: users.createdAt,
           lastSeenAt: users.lastSeenAt,
           appareil: users.appareil,
+          // Le lien avec Google, en trois états : aucun ; `lie`, un compte à
+          // mot de passe qui a aussi lié Google ; `seul`, un compte créé par
+          // Google, sans mot de passe — son empreinte commence par
+          // `EMPREINTE_GOOGLE`. C'est la question qu'on se pose quand
+          // quelqu'un dit « je n'ai pas de mot de passe ». L'empreinte, elle,
+          // ne sort pas d'ici.
+          google: sql<'seul' | 'lie' | null>`(
+            case when users.google_sub is null then null
+                 when starts_with(users.password_hash, ${EMPREINTE_GOOGLE}) then 'seul'
+                 else 'lie' end
+          )`,
           // Le nombre de parties dit en un coup d'œil si un compte est vivant ou
           // s'il a été créé puis abandonné — la distinction qu'on cherche quand
           // on regarde une liste de comptes.
@@ -196,6 +209,7 @@ export async function GET(request: Request) {
         vu: ligne.lastSeenAt.toISOString(),
         // Tel que la base le garde ; l'interface le relit avec `lireAppareil`.
         appareil: ligne.appareil,
+        google: ligne.google,
       })),
       // Deux totaux, parce qu'ils répondent à deux questions : « combien pour
       // cette recherche » et « combien en tout ». N'en montrer qu'un laisserait
