@@ -59,6 +59,7 @@ export const fr = {
     installDesktop: 'Installer sur l’ordinateur',
     privacy: 'Confidentialité',
     admin: 'Administration',
+    updatesAvailable: '{n} mise(s) à jour disponible(s)',
 
     // Entrées de section.
     vsComputer: 'Contre l’ordinateur',

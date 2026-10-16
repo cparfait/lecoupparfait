@@ -21,9 +21,15 @@
  * du compte se trouvait au fond d'un menu : rien à l'écran ne disait si l'on
  * était connecté. Il reste visible partout, réduit à sa pastille quand la
  * place manque.
+ *
+ * **Une pastille pour les administrateurs.** Quand une bibliothèque ou un
+ * moteur a une version plus récente publiée, un point s'allume sur l'avatar et
+ * l'entrée « Administration » mène droit à l'onglet Outils. Sans lui, il
+ * fallait penser à aller cliquer « Chercher les mises à jour », et on y
+ * pensait des semaines trop tard.
  */
 
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ChevronDown, LogOut, ShieldCheck, User } from 'lucide-react'
 import clsx from 'clsx'
@@ -36,15 +42,47 @@ import { PAGES_APPLICATION } from '@/lib/navigation.ts'
 const ENTREE =
   'flex w-full items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-left text-sm font-medium transition-colors hover:bg-surface-hover'
 
+/**
+ * Combien d'outils ont une version plus récente publiée, pour un administrateur.
+ *
+ * Demandé une fois par montage de l'en-tête, c'est-à-dire par chargement de
+ * page : le serveur garde son relevé une journée, la requête ne coûte donc
+ * presque rien. Un joueur ne la fait jamais — elle lui répondrait 404.
+ */
+function useMisesAJourDisponibles(estAdmin: boolean): number {
+  const [nombre, setNombre] = useState(0)
+  useEffect(() => {
+    if (!estAdmin) return
+    let actif = true
+    fetch('/api/admin/maj', { cache: 'no-store' })
+      .then((reponse) => (reponse.ok ? reponse.json() : null))
+      .then((donnees: { aMettreAJour?: number } | null) => {
+        if (actif) setNombre(donnees?.aMettreAJour ?? 0)
+      })
+      .catch(() => {})
+    return () => {
+      actif = false
+    }
+  }, [estAdmin])
+  return estAdmin ? nombre : 0
+}
+
 /** Le corps du menu, commun aux deux états. */
-function EntreesDuSite({ estAdmin }: { estAdmin: boolean }) {
+function EntreesDuSite({ estAdmin, misesAJour = 0 }: { estAdmin: boolean; misesAJour?: number }) {
   const t = useT()
   return (
     <>
       {estAdmin && (
-        <Link href="/admin" role="menuitem" className={ENTREE}>
+        <Link href={misesAJour > 0 ? '/admin#outils' : '/admin'} role="menuitem" className={ENTREE}>
           <ShieldCheck size={16} className="shrink-0 text-muted" aria-hidden />
-          {t('nav.admin')}
+          <span className="min-w-0 flex-1">
+            <span className="block">{t('nav.admin')}</span>
+            {misesAJour > 0 && (
+              <span className="block truncate text-[12px] font-normal text-[var(--q-inaccuracy-text)]">
+                {t('nav.updatesAvailable', { n: misesAJour })}
+              </span>
+            )}
+          </span>
         </Link>
       )}
       {PAGES_APPLICATION.map((page) => {
@@ -69,6 +107,7 @@ export function AccountButton() {
   const t = useT()
   const me = useIdentite()
   const estAdmin = useEstAdmin()
+  const misesAJour = useMisesAJourDisponibles(estAdmin)
 
   const seDeconnecter = useCallback(async () => {
     await fetch('/api/auth', {
@@ -130,12 +169,22 @@ export function AccountButton() {
     <Menu
       align="right"
       largeur="w-60"
-      label={t('nav.account')}
+      label={
+        misesAJour > 0
+          ? `${t('nav.account')} — ${t('nav.updatesAvailable', { n: misesAJour })}`
+          : t('nav.account')
+      }
       boutonClassName="inline-flex h-9 items-center gap-2 rounded-full px-1.5 text-[14px] font-semibold text-ink transition-colors hover:bg-surface-hover sm:px-2 cible-doigt"
       declencheur={(ouvert) => (
         <>
-          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-surface-strong text-sm">
+          <span className="relative grid h-6 w-6 shrink-0 place-items-center rounded-full bg-surface-strong text-sm">
             <span aria-hidden>{me.avatar ?? '♟️'}</span>
+            {misesAJour > 0 && (
+              <span
+                className="absolute -end-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[var(--q-inaccuracy)] ring-2 ring-[var(--flottant)]"
+                aria-hidden
+              />
+            )}
           </span>
           {/* Le pseudo saute le premier quand la place manque : la pastille
               répond déjà à « suis-je connecté ? », qui est la question. */}
@@ -156,7 +205,7 @@ export function AccountButton() {
         </span>
       </Link>
       <span className="my-1 block h-px bg-line/60" aria-hidden />
-      <EntreesDuSite estAdmin={estAdmin} />
+      <EntreesDuSite estAdmin={estAdmin} misesAJour={misesAJour} />
       <span className="my-1 block h-px bg-line/60" aria-hidden />
       <button type="button" role="menuitem" onClick={seDeconnecter} className={ENTREE}>
         <LogOut size={16} className="shrink-0 text-muted" aria-hidden />

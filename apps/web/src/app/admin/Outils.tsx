@@ -10,9 +10,9 @@
  *
  * Les deux premières se répondent sans réseau, en confrontant le catalogue aux
  * `package.json` du dépôt. La troisième demande d'aller voir dehors — registre
- * npm et étiquettes GitHub — et ne part donc qu'au clic, jamais au chargement :
- * le projet ne fait aucune requête vers un tiers, et cette exception doit rester
- * un geste volontaire d'administrateur.
+ * npm et étiquettes GitHub. Le serveur le fait seul au plus une fois par jour,
+ * pour allumer la pastille du compte, et l'onglet montre ce relevé dès son
+ * ouverture ; le bouton en force un neuf.
  *
  * Ce n'est pas un tableau de bord de sécurité. Il ne dit pas si une version
  * porte une faille — c'est le travail de `npm audit`, qui a son propre langage —
@@ -26,6 +26,7 @@ import clsx from 'clsx'
 import { Button, Card, Chip, SectionTitle, Skeleton } from '@/components/ui/index.tsx'
 import { toast } from '@/components/ui/Toast.tsx'
 import { TITRES_CATEGORIE, type CategorieCredit } from '@/lib/credits/catalogue.ts'
+import { comparerVersions } from '@/lib/credits/versions.ts'
 import { useT } from '@/lib/i18n/index.tsx'
 import { Mesure } from './graphiques.tsx'
 
@@ -67,25 +68,6 @@ interface Reponse {
 
 const ORDRE: CategorieCredit[] = ['moteur', 'donnees', 'ressources', 'bibliotheque']
 
-/**
- * Deux versions désignent-elles la même chose ?
- *
- * Les étiquettes ne s'écrivent pas partout pareil : Stockfish publie `sf_19`
- * quand le catalogue dit « 19 », Lc0 publie `v0.32.1`. On normalise le peu
- * qu'il faut, et l'on préfère répondre « à vérifier » plutôt que d'affirmer
- * « obsolète » sur une différence de préfixe.
- */
-function normaliser(version: string): string {
-  return version.trim().toLowerCase().replace(/^sf_/, '').replace(/^v/, '')
-}
-
-type Etat = 'ajour' | 'plusrecent' | 'inconnue'
-
-function comparer(actuelle: string | null, derniere: string | null): Etat {
-  if (!actuelle || !derniere) return 'inconnue'
-  return normaliser(actuelle) === normaliser(derniere) ? 'ajour' : 'plusrecent'
-}
-
 export function Outils() {
   const t = useT()
   const [donnees, setDonnees] = useState<Reponse | null>(null)
@@ -119,7 +101,8 @@ export function Outils() {
   if (!donnees) return <Skeleton className="h-64 w-full" />
 
   const aMettreAJour = donnees.outils.filter(
-    (outil) => comparer(outil.installee ?? outil.versionCatalogue, outil.derniere) === 'plusrecent',
+    (outil) =>
+      comparerVersions(outil.installee ?? outil.versionCatalogue, outil.derniere) === 'plusrecent',
   )
   const alertes =
     donnees.nonCredites.length + donnees.orphelins.length + donnees.versionsDivergentes.length
@@ -289,7 +272,7 @@ function Anomalie({
 function Ligne({ outil }: { outil: Outil }) {
   const t = useT()
   const actuelle = outil.installee ?? outil.versionCatalogue
-  const etat = comparer(actuelle, outil.derniere)
+  const etat = comparerVersions(actuelle, outil.derniere)
   /* Le catalogue peut se tromper de licence : le paquet la déclare lui-même. */
   const licenceDiverge =
     outil.licenceReelle !== null &&

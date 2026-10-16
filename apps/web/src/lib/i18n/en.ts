@@ -61,6 +61,7 @@ export const en: Dictionary = {
     installDesktop: 'Install on your computer',
     privacy: 'Privacy',
     admin: 'Administration',
+    updatesAvailable: '{n} update(s) available',
 
     vsComputer: 'Against the computer',
     vsFriend: 'Against someone',

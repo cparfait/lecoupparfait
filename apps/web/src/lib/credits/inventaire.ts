@@ -11,8 +11,8 @@
  *    que le script d'installation va chercher `sf_20`.
  *
  * Lu par `/api/admin/outils` et par `scripts/check-credits.mjs`. Rien ici ne
- * touche au réseau : la recherche de mises à jour est le travail de la route,
- * et elle ne se fait qu'à la demande.
+ * touche au réseau : la recherche de mises à jour est le travail de
+ * `lib/server/misesAJour.ts`.
  *
  * ── Pourquoi ça lit des fichiers, et ce que ça donne en production ────────
  *
